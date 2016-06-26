@@ -96,7 +96,7 @@ public:
     LUnits my_distance_to_top_of_system(int iSystem, bool fFirstInPage) {
         return distance_to_top_of_system(iSystem, fFirstInPage);
     }
-    bool my_enough_space_in_page() { return enough_space_in_page(); }
+    bool my_enough_space_in_page() { return enough_space_for_empty_system(); }
     ScoreMeter* my_get_score_meter() { return m_pScoreMeter; }
     GmoBoxSystem* my_get_current_system_box() { return m_pCurBoxSystem; }
     ColumnsBuilder* my_get_columns_builder() { return m_pColsBuilder; }

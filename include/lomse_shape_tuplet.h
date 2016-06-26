@@ -86,6 +86,7 @@ protected:
     void draw_horizontal_line(Drawer* pDrawer);
     void draw_vertical_borders(Drawer* pDrawer);
     void compute_bounds();
+    void make_points_relative_to_origin();
 
     //reference positions
     LUnits m_uxStart, m_uyStart;

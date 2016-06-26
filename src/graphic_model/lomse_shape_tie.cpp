@@ -58,26 +58,27 @@ const int m_nNumVertices = sizeof(m_cmd)/sizeof(Vertex);
 
 
 //=======================================================================================
-// GmoShapeTie implementation
+// GmoShapeSlurTie implementation
 //=======================================================================================
-GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnits tickness,
-                         Color color)
-    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_tie, idx, color)
-    , VoiceRelatedShape()
-    , m_thickness(tickness)
+GmoShapeSlurTie::GmoShapeSlurTie(ImoObj* pCreatorImo, int objtype, ShapeId idx,
+                                 UPoint* points, LUnits thickness, Color color)
+    : GmoSimpleShape(pCreatorImo, objtype, idx, color)
+    , VertexSource()
+    , m_thickness(thickness)
 {
     save_points(points);
     compute_vertices();
     compute_bounds();
+    make_points_and_vertices_relative_to_origin();
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeTie::~GmoShapeTie()
+GmoShapeSlurTie::~GmoShapeSlurTie()
 {
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void GmoShapeSlurTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
@@ -87,36 +88,17 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
-
-    //Test code, just to see where the points are located
-#if (0)
-    pDrawer->begin_path();
-    pDrawer->fill(Color(0,0,0,0));          //transparent white
-    pDrawer->stroke(Color(255,0,0));
-    LUnits uWidth = 20.0f;
-    pDrawer->stroke_width(uWidth);
-    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x
-                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_start].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x
-                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol1].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x
-                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol2].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x
-                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_end].y);
-    pDrawer->end_path();
-    pDrawer->render();
-#endif
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::save_points(UPoint* points)
+void GmoShapeSlurTie::save_points(UPoint* points)
 {
     for (int i=0; i < 4; i++)
         m_points[i] = *(points+i);
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::compute_vertices()
+void GmoShapeSlurTie::compute_vertices()
 {
     LUnits t = m_thickness / 2.0f;
     m_vertices[0] = m_points[ImoBezierInfo::k_start];
@@ -133,15 +115,11 @@ void GmoShapeTie::compute_vertices()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::compute_bounds()
+void GmoShapeSlurTie::compute_bounds()
 {
     //TODO: Improve bounds computation.
     //For now, I just take a rectangle based on control points
 
-//    m_origin.x = m_points[ImoBezierInfo::k_start].x;
-//    m_origin.y = min(m_points[ImoBezierInfo::k_ctrol1].y, m_points[ImoBezierInfo::k_start].y);
-//    m_size.width = fabs(m_points[ImoBezierInfo::k_end].x - m_points[ImoBezierInfo::k_start].x);
-//    m_size.height = fabs(m_points[ImoBezierInfo::k_start].y - m_points[ImoBezierInfo::k_ctrol1].y);
     m_origin.x = m_points[ImoBezierInfo::k_start].x;
     m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol1].x);
     m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol2].x);
@@ -167,15 +145,25 @@ void GmoShapeTie::compute_bounds()
 }
 
 //---------------------------------------------------------------------------------------
-unsigned GmoShapeTie::vertex(double* px, double* py)
+void GmoShapeSlurTie::make_points_and_vertices_relative_to_origin()
+{
+    for (int i=0; i < 7; ++i)
+        m_vertices[i] -= m_origin;
+
+    for (int i=0; i < 4; i++)
+        m_points[i] -= m_origin;
+}
+
+//---------------------------------------------------------------------------------------
+unsigned GmoShapeSlurTie::vertex(double* px, double* py)
 {
 	if(m_nCurVertex >= m_nNumVertices)
 		return agg::path_cmd_stop;
 
     if (m_nCurVertex < 7)
     {
-	    *px = m_vertices[m_nCurVertex].x;   //.ux_coord;
-	    *py = m_vertices[m_nCurVertex].y;   //.uy_coord;
+	    *px = m_vertices[m_nCurVertex].x + m_origin.x;
+	    *py = m_vertices[m_nCurVertex].y + m_origin.y;
     }
     else
     {
@@ -187,147 +175,52 @@ unsigned GmoShapeTie::vertex(double* px, double* py)
 }
 
 //---------------------------------------------------------------------------------------
-int GmoShapeTie::get_num_handlers()
+int GmoShapeSlurTie::get_num_handlers()
 {
     return 4;
 }
 
 //---------------------------------------------------------------------------------------
-UPoint GmoShapeTie::get_handler_point(int i)
+UPoint GmoShapeSlurTie::get_handler_point(int i)
 {
-    return m_points[i];
+    return m_points[i] + m_origin;
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::on_handler_dragged(int iHandler, UPoint newPos)
+void GmoShapeSlurTie::on_handler_dragged(int iHandler, UPoint newPos)
 {
     m_points[iHandler] = newPos;
     compute_vertices();
     compute_bounds();
+    make_points_and_vertices_relative_to_origin();
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeTie::on_end_of_handler_drag(int UNUSED(iHandler), UPoint UNUSED(newPos))
+void GmoShapeSlurTie::on_end_of_handler_drag(int UNUSED(iHandler), UPoint UNUSED(newPos))
 {
     //TODO
 }
 
 
 //=======================================================================================
+// GmoShapeTie implementation
+//=======================================================================================
+GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points,
+                         LUnits thickness, Color color)
+    : GmoShapeSlurTie(pCreatorImo, GmoObj::k_shape_tie, idx, points, thickness, color)
+    , VoiceRelatedShape()
+{
+}
+
+
+//=======================================================================================
 // GmoShapeSlur implementation
 //=======================================================================================
-GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnits tickness,
-                         Color color)
-    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_slur, idx, color)
-    , m_thickness(tickness)
-{
-    save_points(points);
-    compute_vertices();
-}
-
-//---------------------------------------------------------------------------------------
-GmoShapeSlur::~GmoShapeSlur()
+GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint* points,
+                           LUnits thickness, Color color)
+    : GmoShapeSlurTie(pCreatorImo, GmoObj::k_shape_slur, idx, points, thickness, color)
 {
 }
 
-//---------------------------------------------------------------------------------------
-void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
-{
-    Color color = determine_color_to_use(opt);
-    pDrawer->begin_path();
-    pDrawer->fill(color);
-    pDrawer->add_path(*this);
-    pDrawer->end_path();
-    pDrawer->render();
-
-    GmoSimpleShape::on_draw(pDrawer, opt);
-
-////    //Test code, just to see where the points are located
-//    pDrawer->begin_path();
-//    pDrawer->fill(Color(0,0,0,0));          //transparent white
-//    pDrawer->stroke(Color(255,0,0));
-//    LUnits uWidth = 20.0f;
-//    pDrawer->stroke_width(uWidth);
-//    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_start].y);
-//    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol1].y);
-//    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol2].y);
-//    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_end].y);
-//    pDrawer->end_path();
-//    pDrawer->render();
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShapeSlur::save_points(UPoint* points)
-{
-    for (int i=0; i < 4; i++)
-        m_points[i] = *(points+i);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShapeSlur::compute_vertices()
-{
-    LUnits t = m_thickness / 2.0f;
-    m_vertices[0] = m_points[ImoBezierInfo::k_start];
-    m_vertices[1].x = m_points[ImoBezierInfo::k_ctrol1].x;
-    m_vertices[1].y = m_points[ImoBezierInfo::k_ctrol1].y - t;
-    m_vertices[2].x = m_points[ImoBezierInfo::k_ctrol2].x;
-    m_vertices[2].y = m_points[ImoBezierInfo::k_ctrol2].y - t;
-    m_vertices[3] = m_points[ImoBezierInfo::k_end];
-    m_vertices[4].x = m_points[ImoBezierInfo::k_ctrol2].x - t;
-    m_vertices[4].y = m_points[ImoBezierInfo::k_ctrol2].y + t;
-    m_vertices[5].x = m_points[ImoBezierInfo::k_ctrol1].x + t;
-    m_vertices[5].y = m_points[ImoBezierInfo::k_ctrol1].y + t;
-    m_vertices[6] = m_points[ImoBezierInfo::k_start];
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShapeSlur::compute_bounds()
-{
-    //TODO: Improve bounds computation.
-    //For now, I just take a rectangle based on control points
-
-    m_origin.x = m_points[ImoBezierInfo::k_start].x;
-    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol1].x);
-    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol2].x);
-    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_end].x);
-
-    m_origin.y = m_points[ImoBezierInfo::k_start].y;
-    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol1].y);
-    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol2].y);
-    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_end].y);
-
-    LUnits max_x = m_points[ImoBezierInfo::k_end].x;
-    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol1].x);
-    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol2].x);
-    max_x = max(max_x, m_points[ImoBezierInfo::k_end].x);
-
-    LUnits max_y = m_points[ImoBezierInfo::k_start].y;
-    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol1].y);
-    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol2].y);
-    max_y = max(max_y, m_points[ImoBezierInfo::k_end].y);
-
-    m_size.width = max_x - m_origin.x;
-    m_size.height = max_y - m_origin.y;
-}
-
-//---------------------------------------------------------------------------------------
-unsigned GmoShapeSlur::vertex(double* px, double* py)
-{
-	if(m_nCurVertex >= m_nNumVertices)
-		return agg::path_cmd_stop;
-
-    if (m_nCurVertex < 7)
-    {
-	    *px = m_vertices[m_nCurVertex].x;   //.ux_coord;
-	    *py = m_vertices[m_nCurVertex].y;   //.uy_coord;
-    }
-    else
-    {
-	    *px = 0.0;
-	    *py = 0.0;
-    }
-
-	return m_cmd[m_nCurVertex++].cmd;
-}
 
 }  //namespace lomse

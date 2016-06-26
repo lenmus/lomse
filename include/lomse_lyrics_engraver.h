@@ -61,7 +61,7 @@ protected:
     ImoLyrics* m_pLyrics;
     list< pair<ImoNote*, GmoShape*> > m_notes;
     vector<ShapeBoxInfo*> m_shapesInfo;
-    vector<LUnits> m_staffTops;
+    vector<LUnits> m_staffTops;     //relative to StaffObj shape
     UPoint m_origin;
     USize m_size;
     bool m_fLyricsAbove;

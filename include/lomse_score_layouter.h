@@ -121,6 +121,8 @@ protected:
     //temporary data about current system being laid out
     int m_iCurSystem;   //[0..n-1] Current system (-1 if no system yet created!)
     SystemLayouter* m_pCurSysLyt;
+    int m_iSysPage;     //value of m_iCurPage when system was engraved
+    UPoint m_sysCursor; //value of m_cursor when system was engraved
 
     int m_iCurColumn;   //[0..n-1] current column. (-1 if no column yet created!)
 
@@ -189,7 +191,7 @@ protected:
     void split_content_in_columns();
     void create_stub();
     void add_score_titles();
-    bool enough_space_in_page();
+    bool enough_space_for_empty_system();
     void create_system();
     void add_system_to_page();
     void decide_line_breaks();
@@ -197,6 +199,7 @@ protected:
     void decide_line_sizes();
     void fill_page_with_empty_systems_if_required();
     bool score_page_is_the_only_content_of_parent_box();
+    void remove_unused_space();
 
     void delete_system_layouters();
     void get_score_renderization_options();
@@ -204,6 +207,10 @@ protected:
     bool m_fFirstSystemInPage;
     inline void is_first_system_in_page(bool value) { m_fFirstSystemInPage = value; }
     inline bool is_first_system_in_page() { return m_fFirstSystemInPage; }
+
+    bool system_created();
+    bool enough_space_in_page_for_system();
+    void delete_system();
 
     //---------------------------------------------------------------
     void move_cursor_to_top_left_corner();
@@ -215,7 +222,8 @@ protected:
     void create_empty_system();
     void engrave_empty_system();
 
-    void advance_paper_cursor_to_bottom_of_added_system();
+    void reposition_system_if_page_has_changed();
+    void move_paper_cursor_to_bottom_of_added_system();
     LUnits get_first_system_staves_size();
     LUnits get_other_systems_staves_size();
 

@@ -49,7 +49,7 @@ class ImoObj;
 
 
 //---------------------------------------------------------------------------------------
-class GmoShapeTie : public GmoSimpleShape, public VertexSource, public VoiceRelatedShape
+class GmoShapeSlurTie : public GmoSimpleShape, public VertexSource
 {
 protected:
     LUnits m_thickness;
@@ -60,9 +60,9 @@ protected:
     int m_nContour;                 //current countour
 
 public:
-    GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits tickness,
-                Color color = Color(0,0,0));
-    ~GmoShapeTie();
+    GmoShapeSlurTie(ImoObj* pCreatorImo, int objtype, ShapeId idx, UPoint points[],
+                    LUnits tickness, Color color);
+    virtual ~GmoShapeSlurTie();
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
@@ -80,34 +80,27 @@ protected:
     void save_points(UPoint* points);
     void compute_vertices();
     void compute_bounds();
+    void make_points_and_vertices_relative_to_origin();
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class GmoShapeTie : public GmoShapeSlurTie, public VoiceRelatedShape
+{
+public:
+    GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
+                Color color = Color(0,0,0));
+    virtual ~GmoShapeTie() {}
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeSlur : public GmoSimpleShape, public VertexSource
+class GmoShapeSlur : public GmoShapeSlurTie
 {
-protected:
-    LUnits m_thickness;
-    UPoint m_points[4];
-
-    UPoint m_vertices[7];
-    int m_nCurVertex;               //index to current vertex
-    int m_nContour;                 //current countour
-
 public:
-    GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits tickness,
-                Color color = Color(0,0,0));
-    ~GmoShapeSlur();
-
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-
-    //VertexSource
-    void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; }
-    unsigned vertex(double* px, double* py);
-
-protected:
-    void save_points(UPoint* points);
-    void compute_vertices();
-    void compute_bounds();
+    GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
+                 Color color = Color(0,0,0));
+    virtual ~GmoShapeSlur() {}
 };
 
 

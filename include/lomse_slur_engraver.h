@@ -51,8 +51,8 @@ class SlurEngraver : public RelAuxObjEngraver
 {
 protected:
     InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTopStart;    //top line of start system
-    LUnits m_uStaffTopEnd;      //top line of end system
+    LUnits m_uStaffTopStart;    //top line of start system, relative to start note top
+    LUnits m_uStaffTopEnd;      //top line of end system, relative to end note top
 
     int m_numShapes;
     ImoSlur* m_pSlur;

@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- Improve score layout algorithm to deal with systems with variable height.
 - Names and brackets/braces for groups of instruments now supported and rendered.
 - Barlines for groups now can be joined. Also mensurstrich layout is supported.
 - Added support for groups in LDP, including exporter.

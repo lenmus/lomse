@@ -157,15 +157,20 @@ void ScoreLayouter::layout_in_box()
     }
 
 
-    if (!enough_space_in_page())
+    //loop for creating and adding systems
+    bool fSystemsAdded = false;
+    while(m_iCurColumn < get_num_columns() || system_created())
     {
-        // AWARE: For documents containing not only a single score but texts, paragraphs, etc.,
-        // ScorePage is like a paragraph: a portion of parent box. When having to render a
-        // score and current parent box (probably a DocPageContent box) is nearly full,
-        // ScorePage will have insufficient height. Before assuming that paper height is smaller
-        // that system height, it is then necessary to ask parent layouter for allocating
-        // a empty page.
-        if (score_page_is_the_only_content_of_parent_box())
+        if (!system_created())
+            create_system();
+
+        if (enough_space_in_page_for_system())
+        {
+            add_system_to_page();
+            fSystemsAdded = true;
+        }
+
+        else if (!fSystemsAdded && score_page_is_the_only_content_of_parent_box())
         {
             //TODO: ScoreLayouter::layout_in_box()
             //  If paper height is smaller than system height it is impossible to fit
@@ -178,6 +183,7 @@ void ScoreLayouter::layout_in_box()
                 << " instruments.";
             add_error_message(msg.str());
             set_layout_is_finished(true);
+            delete_system();
             return;
         }
         else
@@ -188,32 +194,17 @@ void ScoreLayouter::layout_in_box()
         }
     }
 
-    while(enough_space_in_page() && m_iCurColumn < get_num_columns())
-    {
-        create_system();
-        add_system_to_page();
-    }
 
+    //add empty systems to fill the page, if option enabled, and
+    //remove unused space
     bool fMoreColumns = m_iCurColumn < get_num_columns();
     if (!fMoreColumns)
+    {
         fill_page_with_empty_systems_if_required();
+        remove_unused_space();
+    }
 
     set_layout_is_finished( !fMoreColumns );
-
-    //if layout finished adjust height of last page (remove unused space)
-    if (!fMoreColumns)
-    {
-        LUnits yBottom = m_pCurSysLyt->get_y_max();
-        ImoStyle* pStyle = m_pScore->get_style();
-        if (pStyle)
-        {
-            yBottom += pStyle->margin_bottom();
-            yBottom += pStyle->border_width_bottom();
-            yBottom += pStyle->padding_bottom();
-        }
-        m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
-        m_cursor.y = m_pCurBoxPage->get_bottom();
-    }
     m_pageCursor = m_cursor;
 }
 
@@ -257,6 +248,43 @@ void ScoreLayouter::create_system()
 }
 
 //---------------------------------------------------------------------------------------
+void ScoreLayouter::remove_unused_space()
+{
+    //adjust height of last page (remove unused space)
+
+    LUnits yBottom = m_pCurSysLyt->get_y_max();
+    ImoStyle* pStyle = m_pScore->get_style();
+    if (pStyle)
+    {
+        yBottom += pStyle->margin_bottom();
+        yBottom += pStyle->border_width_bottom();
+        yBottom += pStyle->padding_bottom();
+    }
+    m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
+    m_cursor.y = m_pCurBoxPage->get_bottom();
+}
+
+//---------------------------------------------------------------------------------------
+bool ScoreLayouter::system_created()
+{
+    return m_pCurBoxSystem != NULL;
+}
+
+//---------------------------------------------------------------------------------------
+bool ScoreLayouter::enough_space_in_page_for_system()
+{
+    LUnits height = m_pCurBoxSystem->get_height();
+    return remaining_height() >= height;
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::delete_system()
+{
+    delete m_pCurBoxSystem;
+    m_pCurBoxSystem = NULL;
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::create_system_layouter()
 {
     m_pCurSysLyt = LOMSE_NEW SystemLayouter(this, m_libraryScope, m_pScoreMeter,
@@ -293,6 +321,10 @@ void ScoreLayouter::create_system_box()
                  + distance_to_top_of_system(m_iCurSystem, m_fFirstSystemInPage);
     LUnits left = m_cursor.x;
 
+    //save info for repositioning system if necessary
+    m_iSysPage = m_iCurPage;
+    m_sysCursor = m_cursor;
+
     ImoSystemInfo* pInfo = m_pScore->get_other_system_info();
 
     LUnits height = determine_system_top_margin();      //top margin
@@ -305,15 +337,34 @@ void ScoreLayouter::create_system_box()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::add_system_to_page()
 {
+    reposition_system_if_page_has_changed();
+
     m_pCurBoxPage->add_system(m_pCurBoxSystem, m_iCurSystem);
     m_pCurBoxSystem->add_shapes_to_tables();
 
-    advance_paper_cursor_to_bottom_of_added_system();
+    move_paper_cursor_to_bottom_of_added_system();
     is_first_system_in_page(false);
+    m_pCurBoxSystem = NULL;
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreLayouter::advance_paper_cursor_to_bottom_of_added_system()
+void ScoreLayouter::reposition_system_if_page_has_changed()
+{
+    //if the parent box used when engraving the system has changed (because not
+    //enough space in parent box to add the system and a new page has been added)
+    //it is necessary to reposition all content of the engraved system.
+
+    if (m_iSysPage != m_iCurPage)
+    {
+        USize shift(m_cursor.x - m_sysCursor.x,
+                    m_cursor.y - m_sysCursor.y );
+        m_pCurBoxSystem->shift_origin_and_content(shift);
+        m_pCurSysLyt->on_origin_shift(shift.height);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::move_paper_cursor_to_bottom_of_added_system()
 {
     m_cursor.x = m_pCurBoxPage->get_left();
     m_cursor.y = m_pCurBoxSystem->get_bottom();
@@ -381,7 +432,7 @@ void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width
 }
 
 //---------------------------------------------------------------------------------------
-bool ScoreLayouter::enough_space_in_page()
+bool ScoreLayouter::enough_space_for_empty_system()
 {
     LUnits height = m_pColsBuilder->get_staves_height();
     height += distance_to_top_of_system(m_iCurSystem+1, m_fFirstSystemInPage);
@@ -620,7 +671,7 @@ void ScoreLayouter::fill_page_with_empty_systems_if_required()
         bool fFillPage = pOpt->get_bool_value();
         if (fFillPage)
         {
-            while(enough_space_in_page())
+            while(enough_space_for_empty_system())
             {
                 create_empty_system();
                 add_system_to_page();

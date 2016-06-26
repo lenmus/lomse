@@ -577,7 +577,7 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::shift_origin(const USize& shift)
+void GmoBox::shift_origin_and_content(const USize& shift)
 {
     if (shift.width == 0.0f && shift.height == 0.0f) return;
 
@@ -587,7 +587,7 @@ void GmoBox::shift_origin(const USize& shift)
     //shift contained boxes
     std::vector<GmoBox*>::iterator itB;
     for (itB=m_childBoxes.begin(); itB != m_childBoxes.end(); ++itB)
-        (*itB)->shift_origin(shift);
+        (*itB)->shift_origin_and_content(shift);
 
     //shift contained shapes
     std::list<GmoShape*>::iterator itS;

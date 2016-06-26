@@ -991,6 +991,13 @@ void SystemLayouter::reposition_staves(LUnits indent)
 }
 
 //---------------------------------------------------------------------------------------
+void SystemLayouter::on_origin_shift(LUnits yShift)
+{
+    m_yMax += yShift;
+    m_yMin += yShift;
+}
+
+//---------------------------------------------------------------------------------------
 void SystemLayouter::fill_current_system_with_columns()
 {
     m_pScoreLyt->m_iCurColumn = 0;

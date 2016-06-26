@@ -383,13 +383,16 @@ void BeamEngraver::compute_beam_segments()
             }
         }
 
-        // displace y coordinate for next beamline
+        // displace y coordinate for next beam line
         uyShift += (m_fBeamAbove ? uBeamSpacing : - uBeamSpacing);
     }
 
-    //take beam thickness into accoun for boundaries
+    //take beam thickness into account for boundaries
     m_origin.y -= uHalfBeam;
     m_size.height += m_uBeamThickness;
+
+    //adjust segments to make them relative to m_origin
+    make_segments_relative();
 }
 
 //---------------------------------------------------------------------------------------
@@ -415,6 +418,23 @@ void BeamEngraver::update_bounds(LUnits uxStart, LUnits uyStart,
 
     m_size.width = max(m_size.width, right - m_origin.x);
     m_size.height = max(m_size.height, bottom - m_origin.y);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::make_segments_relative()
+{
+    list<LUnits>::iterator it = m_segments.begin();
+    while (it != m_segments.end())
+    {
+        *it -= m_origin.x;
+        ++it;
+        *it -= m_origin.y;
+        ++it;
+        *it -= m_origin.x;
+        ++it;
+        *it -= m_origin.y;
+        ++it;
+    }
 }
 
 //---------------------------------------------------------------------------------------

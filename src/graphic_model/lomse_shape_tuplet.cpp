@@ -80,6 +80,7 @@ void GmoShapeTuplet::set_layout_data(bool fAbove, bool fDrawBracket, LUnits ySta
 
     compute_position();
     compute_bounds();
+    make_points_relative_to_origin();
 }
 
 //---------------------------------------------------------------------------------------
@@ -175,6 +176,23 @@ void GmoShapeTuplet::compute_bounds()
 }
 
 //---------------------------------------------------------------------------------------
+void GmoShapeTuplet::make_points_relative_to_origin()
+{
+    //reference positions
+    m_uxStart -= m_origin.x;
+    m_uyStart -= m_origin.y;
+    m_uxEnd -= m_origin.x;
+    m_uyEnd -= m_origin.y;
+
+	m_yLineStart -= m_origin.y;
+    m_yLineEnd -= m_origin.y;
+    m_yStartBorder -= m_origin.y;
+    m_yEndBorder -= m_origin.y;
+    m_xNumber -= m_origin.x;
+    m_yNumber -= m_origin.y;
+}
+
+//---------------------------------------------------------------------------------------
 void GmoShapeTuplet::compute_horizontal_position()
 {
     bool fUp = true;
@@ -216,17 +234,23 @@ void GmoShapeTuplet::draw_horizontal_line(Drawer* pDrawer)
         {
             //broken line
             float rTanAlpha = (m_yLineEnd - m_yLineStart) / (m_uxEnd - m_uxStart);
-            LUnits x1 = m_xNumber - m_uSpaceToNumber;
-            LUnits y1 = m_yLineStart + (x1 - m_uxStart) * rTanAlpha;
-            LUnits x2 = m_xNumber + m_uNumberWidth + m_uSpaceToNumber;
-            LUnits y2 = m_yLineStart + (x2 - m_uxStart) * rTanAlpha;
-            pDrawer->line(m_uxStart, m_yLineStart, x1, y1, m_uLineThick, k_edge_vertical);
-            pDrawer->line(x2, y2, m_uxEnd, m_yLineEnd, m_uLineThick, k_edge_vertical);
+            LUnits x1 = m_xNumber + m_origin.x - m_uSpaceToNumber;
+            LUnits y1 = m_yLineStart + m_origin.y
+                        + ((x1 - m_uxStart - m_origin.x) * rTanAlpha);
+            LUnits x2 = m_xNumber + m_origin.x + m_uNumberWidth + m_uSpaceToNumber;
+            LUnits y2 = m_yLineStart + m_origin.y
+                        + ((x2 - m_uxStart - m_origin.x) * rTanAlpha);
+            pDrawer->line(m_uxStart + m_origin.x, m_yLineStart + m_origin.y,
+                          x1, y1, m_uLineThick, k_edge_vertical);
+            pDrawer->line(x2, y2, m_uxEnd + m_origin.x, m_yLineEnd + m_origin.y,
+                          m_uLineThick, k_edge_vertical);
         }
         else
         {
             //full line
-            pDrawer->line(m_uxStart, m_yLineStart, m_uxEnd, m_yLineEnd, m_uLineThick, k_edge_vertical);
+            pDrawer->line(m_uxStart + m_origin.x, m_yLineStart + m_origin.y,
+                          m_uxEnd + m_origin.x, m_yLineEnd + m_origin.y,
+                          m_uLineThick, k_edge_vertical);
         }
         pDrawer->end_path();
     }
@@ -239,10 +263,12 @@ void GmoShapeTuplet::draw_vertical_borders(Drawer* pDrawer)
     {
         pDrawer->begin_path();
         pDrawer->fill(m_color);
-        LUnits x1 = m_uxStart + m_uLineThick / 2;
-        LUnits x2 = m_uxEnd - m_uLineThick / 2;
-        pDrawer->line(x1, m_yLineStart, x1, m_yStartBorder, m_uLineThick, k_edge_horizontal);
-        pDrawer->line(x2, m_yLineEnd, x2, m_yEndBorder, m_uLineThick, k_edge_horizontal);
+        LUnits x1 = m_uxStart + m_origin.x + m_uLineThick / 2;
+        LUnits x2 = m_uxEnd + m_origin.x - m_uLineThick / 2;
+        pDrawer->line(x1, m_yLineStart + m_origin.y, x1, m_yStartBorder + m_origin.y,
+                      m_uLineThick, k_edge_horizontal);
+        pDrawer->line(x2, m_yLineEnd + m_origin.y, x2, m_yEndBorder + m_origin.y,
+                      m_uLineThick, k_edge_horizontal);
         pDrawer->end_path();
     }
 }
