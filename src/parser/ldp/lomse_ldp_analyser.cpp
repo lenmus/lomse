@@ -753,6 +753,23 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    int get_placement(int defValue)
+    {
+        string value = m_pParamToAnalyse->get_value();
+        if (value == "above")
+            return k_placement_above;
+        else if (value == "below")
+            return k_placement_below;
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Unknown value '" + value + "' for <placement>. Replaced by '"
+                + (defValue == k_placement_above ? "above'." : "below'.") );
+            return defValue;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
     void check_visible(ImoInlinesContainer* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
@@ -788,7 +805,7 @@ protected:
         {
             m_pParamToAnalyse = get_param_to_analyse();
             ELdpElement type = m_pParamToAnalyse->get_type();
-            if (is_auxobj(type))
+            if (is_attachment(type))
                 m_pAnalyser->analyse_node(m_pParamToAnalyse, pAnchor);
             else
                 error_invalid_param();
@@ -798,15 +815,13 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    bool is_auxobj(int type)
+    bool is_attachment(int type)
     {
-        return     type == k_beam
-                || type == k_text
+        return     type == k_text
                 || type == k_textbox
                 || type == k_line
                 || type == k_fermata
-                || type == k_tie
-                || type == k_tuplet
+                || type == k_dynamics_mark
                 ;
     }
 
@@ -1796,20 +1811,22 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-// <dynamic> = (dynamic <classid> <param>*)
-// <classid> = (classid <label>)
-// <param> = (param <name><value>)
-// <name> = <label>
-// <value> = <string>
-//
-// Example:
-//  (dynamic
-//      (classid IdfyCadences) width="100%" height="300" border="0">
-//      (param cadences "all")
-//      (param cadence_buttons "terminal,transient")
-//      (param mode "earTraining")
-//  )
-//
+//@ For dynamic content, i.e. exercises
+//@
+//@ <dynamic> = (dynamic <classid> <param>*)
+//@ <classid> = (classid <label>)
+//@ <param> = (param <name><value>)
+//@ <name> = <label>
+//@ <value> = <string>
+//@
+//@ Example:
+//@  (dynamic
+//@      (classid IdfyCadences) width="100%" height="300" border="0">
+//@      (param cadences "all")
+//@      (param cadence_buttons "terminal,transient")
+//@      (param mode "earTraining")
+//@  )
+//@
 
 class DynamicAnalyser : public ElementAnalyser
 {
@@ -1851,7 +1868,45 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <fermata> = (fermata <placement>[<componentOptions>*])
+//@ <dynamics> = (dyn string [<placement>] <printOptions>* )
+//@ <placement> = { above | below }
+
+class DynamicsAnalyser : public ElementAnalyser
+{
+public:
+    DynamicsAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        // <string>
+        if (!get_mandatory(k_string))
+            return;
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(
+                                ImFactory::inject(k_imo_dynamics_mark, pDoc, get_node_id()) );
+        pImo->set_mark_type(get_string_value());
+
+        // [<placement>]
+        if (get_optional(k_label))
+            pImo->set_placement( get_placement(k_placement_above) );
+
+        // [<printOptions>]
+        analyse_scoreobj_options(pImo);
+
+        error_if_more_elements();
+
+        add_to_model(pImo);
+    }
+
+protected:
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <fermata> = (fermata <placement>[<staffObjOptions>*])
 //@ <placement> = { above | below }
 
 class FermataAnalyser : public ElementAnalyser
@@ -1870,9 +1925,9 @@ public:
 
         // <placement>
         if (get_mandatory(k_label))
-            set_placement(pImo);
+            pImo->set_placement( get_placement(k_placement_above) );
 
-        // [<componentOptions>*]
+        // [<staffObjOptions>*]
         analyse_scoreobj_options(pImo);
 
         error_if_more_elements();
@@ -1880,26 +1935,11 @@ public:
         add_to_model(pImo);
     }
 
-    void set_placement(ImoFermata* pImo)
-    {
-        string value = m_pParamToAnalyse->get_value();
-        if (value == "above")
-            pImo->set_placement(k_placement_above);
-        else if (value == "below")
-            pImo->set_placement(k_placement_below);
-        else
-        {
-            report_msg(m_pParamToAnalyse->get_line_number(),
-                "Unknown fermata placement '" + value + "'. Replaced by 'above'.");
-            pImo->set_placement(k_placement_above);
-        }
-    }
-
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <figuredBass> = (figuredBass <figuredBassSymbols>[<parenthesis>][<fbline>]
-//@                              [<componentOptions>*] )
+//@                              [<staffObjOptions>*] )
 //@ <parenthesis> = (parenthesis { yes | no })  default: no
 //@
 //@ <fbline> = (fbline <numLine> start <startPoint><endPoint><width><color>)
@@ -1954,7 +1994,7 @@ public:
             if (get_optional(k_fbline))
             {}
 
-            // [<componentOptions>*]
+            // [<staffObjOptions>*]
             //analyse_scoreobj_options(dto);
 
             error_if_more_elements();
@@ -2240,7 +2280,7 @@ protected:
         // [{ <voice> | <staffNum> }*]
         analyse_options(pImo);
 
-        // [<componentOptions>*]
+        // [<staffObjOptions>*]
         analyse_staffobjs_options(pImo);
 
         pImo->set_staff( m_pAnalyser->get_current_staff() );
@@ -3063,7 +3103,7 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
 //@                            <TicksPerMinute> }
-//@                          [parenthesis][<componentOptions>*] )
+//@                          [parenthesis][<staffObjOptions>*] )
 //@
 //@ examples:
 //@    (metronome q 80)                -->  quarter_note_sign = 80
@@ -3141,7 +3181,7 @@ public:
                 error_invalid_param();
         }
 
-        // [<componentOptions>*]
+        // [<staffObjOptions>*]
         analyse_scoreobj_options(pMtr);
 
         error_if_more_elements();
@@ -3209,11 +3249,16 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ ImoNote, ImoRest StaffObj
-//@ <note> = ({n | na} <pitch><duration> [<noteOptions>*][<noteRestOptions>*]
-//@             [<componentOptions>*][<attachments>*])
-//@ <rest> = (r <duration> [<noteRestOptions>*][<componentOptions>*][<attachments>*])
+//@ <note> = ({n | na} <pitch><duration> <abbreviatedElements>* <noteOptions>*
+//@                    <noteRestOptions>* <staffObjOptions>* <attachments>* )
+//@ <rest> = (r <duration> <abbreviatedElements>* <noteRestOptions>*
+//@             <staffObjOptions>* <attachments>* )
+//@ <abbreviatedElements> = tie (l), beam (g), staffNum (p), tuplet' (t) and voice (v)
 //@ <noteOptions> = { <tie> | <stem> | <slur> }
-//@ <noteRestOptions> = { <beam> | <tuplet> | <voice> | <staffNum> | <fermata> }
+//@ <noteRestOptions> = { <beam> | <tuplet> | <voice> }
+//@ <staffObjOptions> = { <staffNum> | <printOptions> }
+//@ <printOptions> = { [<visible>] [<location>] [<color>] }
+//@ <attachments> = { <text> | <textbox> | <line> | <fermata> | <dynamics> }
 //@ <pitch> = label
 //@ <duration> = label
 //@ <stem> = (stem { up | down })
@@ -3282,8 +3327,8 @@ public:
         if (get_mandatory(k_label))
             set_duration(pNR);
 
-        //compatibility 1.5
-        //after duration we can find old abbreviated items (l, g, p, v) in any order
+        //abbreviatedElements
+        //after duration we can find abbreviated items (l, g, p, v) in any order
         bool fStartOldTie = false;
         bool fAddOldBeam = false;
         bool fAddOldTuplet = false;
@@ -3332,7 +3377,7 @@ public:
         // [<noteRestOptions>*]
         analyse_note_rest_options(pNR);
 
-        // [<componentOptions>*]
+        // [<staffObjOptions>*]
         analyse_staffobjs_options(pNR);
 
         add_to_model(pNR);
@@ -3423,7 +3468,7 @@ protected:
 
     void analyse_note_rest_options(ImoNoteRest* pNR)
     {
-        // { <beam> | <tuplet> | <timeModification> | <voice> | <staffNum> | <fermata> }
+        // { <beam> | <tuplet> | <timeModification> | <voice> }
 
         while( more_params_to_analyse() )
         {
@@ -3439,11 +3484,11 @@ protected:
                 m_pTimeModifDto = static_cast<ImoTimeModificationDto*>(
                         m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
-            else if (type == k_fermata)
-            {
-                m_pFermata = static_cast<ImoFermata*>(
-                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
-            }
+//            else if (type == k_fermata)
+//            {
+//                m_pFermata = static_cast<ImoFermata*>(
+//                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+//            }
             else if (type == k_beam)
             {
                 m_pBeamInfo = static_cast<ImoBeamDto*>(
@@ -3453,18 +3498,18 @@ protected:
             {
                 set_voice_element(pNR);
             }
-            else if (type == k_staffNum)
-            {
-                set_staff_num_element(pNR);
-            }
-            else if (type == k_label)   //possible staffNum as 'p1'
-            {
-                char first = (m_pParamToAnalyse->get_value())[0];
-                if (first == 'p')
-                    get_num_staff();
-                else
-                    error_invalid_param();
-            }
+//            else if (type == k_staffNum)
+//            {
+//                set_staff_num_element(pNR);
+//            }
+//            else if (type == k_label)   //possible staffNum as 'p1'
+//            {
+//                char first = (m_pParamToAnalyse->get_value())[0];
+//                if (first == 'p')
+//                    get_num_staff();
+//                else
+//                    error_invalid_param();
+//            }
             else
                 break;
 
@@ -5786,7 +5831,7 @@ void ElementAnalyser::error_if_more_elements()
 void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 {
     //@----------------------------------------------------------------------------
-    //@ <staffobjOptions> = { <staffNum> | <componentOptions> }
+    //@ <staffobjOptions> = { <staffNum> | <printOptions> }
     //@ <staffNum> = pn | (staffNum n)
 
     // [p1]
@@ -5817,7 +5862,7 @@ void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 void ElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 {
     //@----------------------------------------------------------------------------
-    //@ <componentOptions> = { <visible> | <location> | <color> }
+    //@ <printOptions> = { <visible> | <location> | <color> }
     //@ <visible> = (visible {yes | no})
     //@ <location> = { (dx num) | (dy num) }    ;num in Tenths
     //@ <color> = value                         ;value in #rrggbb hex format
@@ -6361,6 +6406,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_defineStyle:     return LOMSE_NEW DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_endPoint:        return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_dynamic:         return LOMSE_NEW DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_dynamics_mark:   return LOMSE_NEW DynamicsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_fermata:         return LOMSE_NEW FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_figuredBass:     return LOMSE_NEW FiguredBassAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_font:            return LOMSE_NEW FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);

@@ -275,6 +275,39 @@ SUITE(LdpExporterTest)
         delete pClef;
     }
 
+
+    // DynamicsLdpGenerator -------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, dyn_01)
+    {
+        //@ dynamics marks
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)"
+            "(n g4  q (dyn \"fff\" below))"
+            "(n g4  q (dyn \"ppp\"))"
+            "(n g4  q (dyn \"sfz\" above))"
+            "(n g4  q (dyn \"sfz\" above (dx 50)(dy -70)(color #ff0000)))"
+            ")))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pScore);
+        //cout << "\"" << source << "\"" << endl;
+        string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
+            "(clef G p1 )(key C)"
+            "(n g4 q v1  p1 (dyn \"fff\" below ))"
+            "(n g4 q v1  p1 (dyn \"ppp\"))"
+            "(n g4 q v1  p1 (dyn \"sfz\" above ))"
+            "(n g4 q v1  p1 (dyn \"sfz\" above (color #ff0000ff) (dx 50) (dy -70)))"
+            ")))";
+        CHECK( source == expected );
+    }
+
+
     // BeamLdpGenerator
     // ContentObjLdpGenerator
     // ErrorLdpGenerator

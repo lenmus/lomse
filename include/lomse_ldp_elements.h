@@ -80,6 +80,7 @@ enum ELdpElement
 
     //auxobjs
     k_beam,
+    k_dynamics_mark,
     k_text,
     k_textbox,
     k_line,

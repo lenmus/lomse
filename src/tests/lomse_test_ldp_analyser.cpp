@@ -2134,7 +2134,7 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Unknown fermata placement 'under'. Replaced by 'above'." << endl;
+        expected << "Line 0. Unknown value 'under' for <placement>. Replaced by 'above'." << endl;
         parser.parse_text("(fermata under)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
@@ -2220,6 +2220,143 @@ SUITE(LdpAnalyserTest)
         CHECK( pFerm->get_user_location_y() == 0.0f );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    //@ dynamics ------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_01)
+    {
+        //@ 01. dynamics minimum content ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(dyn \"ppp\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_dynamics_mark() == true );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_mark_type() == "ppp" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_02)
+    {
+        //@ 02. id in dynamics
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(dyn#30 \"ppp\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_mark_type() == "ppp" );
+        CHECK( pImo->get_id() == 30L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_03)
+    {
+        //@ 03. dynamics with placement
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(dyn \"sf\" above)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_above );
+        CHECK( pImo->get_mark_type() == "sf" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_04)
+    {
+        //@ 04. dynamics with location
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(dyn \"sf\" above (dx 70))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_above );
+        CHECK( pImo->get_mark_type() == "sf" );
+        CHECK( pImo->get_user_location_x() == 70.0f );
+        CHECK( pImo->get_user_location_y() == 0.0f );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_05)
+    {
+        //@ 05. Note with attached dynamics
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(n c4 e (stem up)(dyn \"sf\" above (dx 70)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != NULL );
+        CHECK( pNote->is_stem_up() == true );
+        CHECK( pNote->get_num_attachments() == 1 );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pNote->get_attachment(0) );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_above );
+        CHECK( pImo->get_mark_type() == "sf" );
+        CHECK( pImo->get_user_location_x() == 70.0f );
+        CHECK( pImo->get_user_location_y() == 0.0f );
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
@@ -4943,8 +5080,8 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
-        string src = "(musicData (n c4 e. (stem up) p1 (beam 14 +))"
-            "(n d4 s (stem up) p1 (beam 14 -b)))";
+        string src = "(musicData (n c4 e. p1 (stem up) (beam 14 +))"
+            "(n d4 s p1 (stem up) (beam 14 -b)))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);

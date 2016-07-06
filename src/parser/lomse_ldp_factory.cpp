@@ -105,6 +105,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_dx] = "dx";
     m_TypeToName[k_dy] = "dy";
     m_TypeToName[k_dynamic] = "dynamic";
+    m_TypeToName[k_dynamics_mark] = "k_dynamics_mark";
     m_TypeToName[k_end] = "end";
     m_TypeToName[k_end_x] = "end-x";
     m_TypeToName[k_end_y] = "end-y";
@@ -285,6 +286,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["displayNumber"] = LOMSE_NEW LdpElementFunctor<k_displayNumber>;
     m_NameToFunctor["dx"] = LOMSE_NEW LdpElementFunctor<k_dx>;
     m_NameToFunctor["dy"] = LOMSE_NEW LdpElementFunctor<k_dy>;
+    m_NameToFunctor["dyn"] = LOMSE_NEW LdpElementFunctor<k_dynamics_mark>;
     m_NameToFunctor["dynamic"] = LOMSE_NEW LdpElementFunctor<k_dynamic>;
     m_NameToFunctor["end"] = LOMSE_NEW LdpElementFunctor<k_end>;
     m_NameToFunctor["end-x"] = LOMSE_NEW LdpElementFunctor<k_end_x>;
