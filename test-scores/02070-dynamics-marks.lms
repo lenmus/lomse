@@ -1,0 +1,9 @@
+(score (vers 2.0)
+ (instrument
+  (musicData (clef G)(key C)
+    (n g4  q (dyn "fff" below))
+    (n g4  q (dyn "ppp"))
+    (n g4  q (dyn "sfz" above))
+    (n g4  q (dyn "sfffz" above (dx 50)(dy -70)(color #ff0000)))
+    (barline end)
+)))

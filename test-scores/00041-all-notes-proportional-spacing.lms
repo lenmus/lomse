@@ -1,7 +1,6 @@
 (score
    (vers 2.0)
-   (opt Render.SpacingMethod fixed)
-   (opt Render.SpacingValue 40)
+   (opt Render.SpacingMethod 2)
    (instrument
       (musicData
          (clef G)

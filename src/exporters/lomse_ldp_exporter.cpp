@@ -636,6 +636,45 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class DynamicsLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoDynamicsMark* m_pObj;
+
+public:
+    DynamicsLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoDynamicsMark*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        start_element("dyn", m_pObj->get_id());
+        add_dynamics_string();
+        add_placement();
+        source_for_base_scoreobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+    void add_placement()
+    {
+        int placement = m_pObj->get_placement();
+        if (placement == k_placement_above)
+            m_source << " above ";
+        else if (placement == k_placement_below)
+            m_source << " below ";
+    }
+
+    void add_dynamics_string()
+    {
+        m_source << "\"" << m_pObj->get_mark_type() << "\"";
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class ErrorLdpGenerator : public LdpGenerator
 {
 protected:
@@ -2644,6 +2683,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 //        case k_imo_option:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_system_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_document:        return LOMSE_NEW LenmusdocLdpGenerator(pImo, this);
+        case k_imo_dynamics_mark:   return LOMSE_NEW DynamicsLdpGenerator(pImo, this);
         case k_imo_fermata:         return LOMSE_NEW FermataLdpGenerator(pImo, this);
 //        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_go_back_fwd:     return LOMSE_NEW GoBackFwdLdpGenerator(pImo, this);
