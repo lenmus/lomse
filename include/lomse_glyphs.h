@@ -128,14 +128,27 @@ enum EGlyphIndex
     //Holds and pauses (U+E4C0 - U+E4DF)
     k_glyph_fermata_above,
     k_glyph_fermata_below,
+    k_glyph_fermata_very_short_above,
+    k_glyph_fermata_very_short_below,
     k_glyph_fermata_above_angle,
     k_glyph_fermata_below_angle,
     k_glyph_fermata_above_square,
     k_glyph_fermata_below_square,
-    k_glyph_breath_mark_comma,  //breath-mark (comma)
-	k_glyph_breath_mark_tick,   //breath-mark (tick)
-	k_glyph_breath_mark_v,      //breath-mark (V)
-	k_glyph_caesura,
+    k_glyph_fermata_very_long_above,
+    k_glyph_fermata_very_long_below,
+    k_glyph_fermata_long_above,
+    k_glyph_fermata_long_below,
+    k_glyph_fermata_short_above,
+    k_glyph_fermata_short_below,
+    k_glyph_breath_mark_comma,      //breath-mark (comma)
+    k_glyph_breath_mark_tick,       //breath-mark (tick)
+    k_glyph_breath_mark_v,          //breath-mark (V)
+    k_glyph_caesura,
+    k_glyph_caesura_thick,
+    k_glyph_caesura_short,
+    k_glyph_caesura_curved,
+    k_glyph_breath_mark_salzedo,    //breath-mark (salcedo)
+    k_glyph_curlew_mark,            //curlew mark
 
     //Rests
     k_glyph_longa_rest,       //longa

@@ -67,6 +67,7 @@ LdpFactory::LdpFactory()
     //composite elements
     m_TypeToName[k_abbrev] = "abbrev";
     m_TypeToName[k_above] = "above";
+    m_TypeToName[k_accent] = "accent";
     m_TypeToName[k_anchorLine] = "anchorLine";
     m_TypeToName[k_background_color] = "background-color";
     m_TypeToName[k_barline] = "barline";
@@ -84,6 +85,8 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_brace] = "brace";
     m_TypeToName[k_bracket] = "bracket";
     m_TypeToName[k_bracketType] = "bracketType";
+    m_TypeToName[k_breath_mark] = "breathMark";
+    m_TypeToName[k_caesura] = "caesura";
     m_TypeToName[k_center] = "center";
     m_TypeToName[k_chord] = "chord";
     m_TypeToName[k_classid] = "classid";
@@ -98,6 +101,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_ctrol2_y] = "ctrol2-y";
     m_TypeToName[k_cursor] = "cursor";
     m_TypeToName[k_defineStyle] = "defineStyle";
+    m_TypeToName[k_doit] = "doit";
     m_TypeToName[k_down] = "down";
     m_TypeToName[k_displayBracket] = "displayBracket";
     m_TypeToName[k_displayNumber] = "displayNumber";
@@ -110,6 +114,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_end_x] = "end-x";
     m_TypeToName[k_end_y] = "end-y";
     m_TypeToName[k_endPoint] = "endPoint";
+    m_TypeToName[k_falloff] = "falloff";
     m_TypeToName[k_fbline] = "fbline";
     m_TypeToName[k_fermata] = "fermata";
     m_TypeToName[k_figuredBass] = "figuredBass";
@@ -138,6 +143,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_landscape] = "landscape";
     m_TypeToName[k_language] = "language";
     m_TypeToName[k_left] = "left";
+    m_TypeToName[k_legato_duro] = "legato-duro";
     m_TypeToName[k_lenmusdoc] = "lenmusdoc";
     m_TypeToName[k_link] = "link";
     m_TypeToName[k_line] = "line";
@@ -147,6 +153,10 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_lineThickness] = "lineThickness";
     m_TypeToName[k_line_height] = "line-height";
     m_TypeToName[k_listitem] = "listitem";
+    m_TypeToName[k_marccato] = "marccato";
+    m_TypeToName[k_marccato_legato] = "marccato-legato";
+    m_TypeToName[k_marccato_staccato] = "marccato-staccato";
+    m_TypeToName[k_marccato_staccatissimo] = "marccato-staccatissimo";
     m_TypeToName[k_margin] = "margin";
     m_TypeToName[k_margin_top] = "margin-top";
     m_TypeToName[k_margin_right] = "margin-right";
@@ -156,6 +166,8 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_max_width] = "max-width";
     m_TypeToName[k_meta] = "meta";
     m_TypeToName[k_metronome] = "metronome";
+    m_TypeToName[k_mezzo_staccato] = "mezzo-staccato";
+    m_TypeToName[k_mezzo_staccatissimo] = "mezzo-staccatissimo";
     m_TypeToName[k_min_height] = "min-height";
     m_TypeToName[k_min_width] = "min-width";
     m_TypeToName[k_mm] = "mm";
@@ -182,10 +194,12 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_parts] = "parts";
     m_TypeToName[k_pitch] = "pitch";
     m_TypeToName[k_playLabel] = "playLabel";
+    m_TypeToName[k_plop] = "plop";
     m_TypeToName[k_portrait] = "portrait";
     m_TypeToName[k_rest] = "r";   //rest
     m_TypeToName[k_right] = "right";
     m_TypeToName[k_rowspan] = "rowspan";
+    m_TypeToName[k_scoop] = "scoop";
     m_TypeToName[k_score] = "score";
     m_TypeToName[k_score_player] = "scorePlayer";
     m_TypeToName[k_settings] = "settings";
@@ -193,6 +207,10 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_size] = "size";
     m_TypeToName[k_spacer] = "spacer";
     m_TypeToName[k_split] = "split";
+    m_TypeToName[k_staccato] = "staccato";
+    m_TypeToName[k_staccato_duro] = "staccato-duro";
+    m_TypeToName[k_staccatissimo] = "staccatissimo";
+    m_TypeToName[k_staccatissimo_duro] = "staccatissimo-duro";
     m_TypeToName[k_staff] = "staff";
     m_TypeToName[k_staffDistance] = "staffDistance";
     m_TypeToName[k_staffLines] = "staffLines";
@@ -206,6 +224,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_staves] = "staves";
     m_TypeToName[k_stem] = "stem";
     m_TypeToName[k_stopLabel] = "stopLabel";
+    m_TypeToName[k_stress] = "stress";
     m_TypeToName[k_style] = "style";
     m_TypeToName[k_styles] = "styles";
     m_TypeToName[k_symbol] = "symbol";
@@ -219,6 +238,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_table_body] = "tableBody";
     m_TypeToName[k_table_head] = "tableHead";
     m_TypeToName[k_table_row] = "tableRow";
+    m_TypeToName[k_tenuto] = "tenuto";
     m_TypeToName[k_text] = "text";
     m_TypeToName[k_textbox] = "textbox";
     m_TypeToName[k_text_align] = "text-align";
@@ -233,6 +253,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_undoData] = "undoData";
     m_TypeToName[k_up] = "up";
     m_TypeToName[k_url] = "url";
+    m_TypeToName[k_unstress] = "unstress";
     m_TypeToName[k_value] = "value";
     m_TypeToName[k_vers] = "vers";
     m_TypeToName[k_vertical_align] = "vertical-align";
@@ -249,6 +270,7 @@ LdpFactory::LdpFactory()
 
     m_NameToFunctor["abbrev"] = LOMSE_NEW LdpElementFunctor<k_abbrev>;
     m_NameToFunctor["above"] = LOMSE_NEW LdpElementFunctor<k_above>;
+    m_NameToFunctor["accent"] = LOMSE_NEW LdpElementFunctor<k_accent>;
     m_NameToFunctor["anchorLine"] = LOMSE_NEW LdpElementFunctor<k_anchorLine>;
     m_NameToFunctor["background-color"] = LOMSE_NEW LdpElementFunctor<k_background_color>;
     m_NameToFunctor["barline"] = LOMSE_NEW LdpElementFunctor<k_barline>;
@@ -266,6 +288,8 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["brace"] = LOMSE_NEW LdpElementFunctor<k_brace>;
     m_NameToFunctor["bracket"] = LOMSE_NEW LdpElementFunctor<k_bracket>;
     m_NameToFunctor["bracketType"] = LOMSE_NEW LdpElementFunctor<k_bracketType>;
+    m_NameToFunctor["breathMark"] = LOMSE_NEW LdpElementFunctor<k_breath_mark>;
+    m_NameToFunctor["caesura"] = LOMSE_NEW LdpElementFunctor<k_caesura>;
     m_NameToFunctor["center"] = LOMSE_NEW LdpElementFunctor<k_center>;
     m_NameToFunctor["chord"] = LOMSE_NEW LdpElementFunctor<k_chord>;
     m_NameToFunctor["classid"] = LOMSE_NEW LdpElementFunctor<k_classid>;
@@ -280,6 +304,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["ctrol2-y"] = LOMSE_NEW LdpElementFunctor<k_ctrol2_y>;
     m_NameToFunctor["cursor"] = LOMSE_NEW LdpElementFunctor<k_cursor>;
     m_NameToFunctor["defineStyle"] = LOMSE_NEW LdpElementFunctor<k_defineStyle>;
+    m_NameToFunctor["doit"] = LOMSE_NEW LdpElementFunctor<k_doit>;
     m_NameToFunctor["down"] = LOMSE_NEW LdpElementFunctor<k_down>;
     m_NameToFunctor["duration"] = LOMSE_NEW LdpElementFunctor<k_duration>;
     m_NameToFunctor["displayBracket"] = LOMSE_NEW LdpElementFunctor<k_displayBracket>;
@@ -292,6 +317,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["end-x"] = LOMSE_NEW LdpElementFunctor<k_end_x>;
     m_NameToFunctor["end-y"] = LOMSE_NEW LdpElementFunctor<k_end_y>;
     m_NameToFunctor["endPoint"] = LOMSE_NEW LdpElementFunctor<k_endPoint>;
+    m_NameToFunctor["falloff"] = LOMSE_NEW LdpElementFunctor<k_falloff>;
     m_NameToFunctor["fbline"] = LOMSE_NEW LdpElementFunctor<k_fbline>;
     m_NameToFunctor["fermata"] = LOMSE_NEW LdpElementFunctor<k_fermata>;
     m_NameToFunctor["figuredBass"] = LOMSE_NEW LdpElementFunctor<k_figuredBass>;
@@ -320,6 +346,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["landscape"] = LOMSE_NEW LdpElementFunctor<k_landscape>;
     m_NameToFunctor["language"] = LOMSE_NEW LdpElementFunctor<k_language>;
     m_NameToFunctor["left"] = LOMSE_NEW LdpElementFunctor<k_left>;
+    m_NameToFunctor["legato-duro"] = LOMSE_NEW LdpElementFunctor<k_legato_duro>;
     m_NameToFunctor["lenmusdoc"] = LOMSE_NEW LdpElementFunctor<k_lenmusdoc>;
     m_NameToFunctor["link"] = LOMSE_NEW LdpElementFunctor<k_link>;
     m_NameToFunctor["line"] = LOMSE_NEW LdpElementFunctor<k_line>;
@@ -329,6 +356,10 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["lineThickness"] = LOMSE_NEW LdpElementFunctor<k_lineThickness>;
     m_NameToFunctor["line-height"] = LOMSE_NEW LdpElementFunctor<k_line_height>;
     m_NameToFunctor["listitem"] = LOMSE_NEW LdpElementFunctor<k_listitem>;
+    m_NameToFunctor["marccato"] = LOMSE_NEW LdpElementFunctor<k_marccato>;
+    m_NameToFunctor["marccato-legato"] = LOMSE_NEW LdpElementFunctor<k_marccato_legato>;
+    m_NameToFunctor["marccato-staccato"] = LOMSE_NEW LdpElementFunctor<k_marccato_staccato>;
+    m_NameToFunctor["marccato-staccatissimo"] = LOMSE_NEW LdpElementFunctor<k_marccato_staccatissimo>;
     m_NameToFunctor["margin"] = LOMSE_NEW LdpElementFunctor<k_margin>;
     m_NameToFunctor["margin-top"] = LOMSE_NEW LdpElementFunctor<k_margin_top>;
     m_NameToFunctor["margin-right"] = LOMSE_NEW LdpElementFunctor<k_margin_right>;
@@ -338,6 +369,8 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["max-width"] = LOMSE_NEW LdpElementFunctor<k_max_width>;
     m_NameToFunctor["meta"] = LOMSE_NEW LdpElementFunctor<k_meta>;
     m_NameToFunctor["metronome"] = LOMSE_NEW LdpElementFunctor<k_metronome>;
+    m_NameToFunctor["mezzo-staccato"] = LOMSE_NEW LdpElementFunctor<k_mezzo_staccato>;
+    m_NameToFunctor["mezzo-staccatissimo"] = LOMSE_NEW LdpElementFunctor<k_mezzo_staccatissimo>;
     m_NameToFunctor["min-height"] = LOMSE_NEW LdpElementFunctor<k_min_height>;
     m_NameToFunctor["min-width"] = LOMSE_NEW LdpElementFunctor<k_min_width>;
     m_NameToFunctor["mm"] = LOMSE_NEW LdpElementFunctor<k_mm>;
@@ -364,10 +397,12 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["parts"] = LOMSE_NEW LdpElementFunctor<k_parts>;
     m_NameToFunctor["pitch"] = LOMSE_NEW LdpElementFunctor<k_pitch>;
     m_NameToFunctor["playLabel"] = LOMSE_NEW LdpElementFunctor<k_playLabel>;
+    m_NameToFunctor["plop"] = LOMSE_NEW LdpElementFunctor<k_plop>;
     m_NameToFunctor["portrait"] = LOMSE_NEW LdpElementFunctor<k_portrait>;
     m_NameToFunctor["r"] = LOMSE_NEW LdpElementFunctor<k_rest>;   //rest
     m_NameToFunctor["right"] = LOMSE_NEW LdpElementFunctor<k_right>;
     m_NameToFunctor["rowspan"] = LOMSE_NEW LdpElementFunctor<k_rowspan>;
+    m_NameToFunctor["scoop"] = LOMSE_NEW LdpElementFunctor<k_scoop>;
     m_NameToFunctor["score"] = LOMSE_NEW LdpElementFunctor<k_score>;
     m_NameToFunctor["scorePlayer"] = LOMSE_NEW LdpElementFunctor<k_score_player>;
     m_NameToFunctor["settings"] = LOMSE_NEW LdpElementFunctor<k_settings>;
@@ -375,6 +410,10 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["slur"] = LOMSE_NEW LdpElementFunctor<k_slur>;
     m_NameToFunctor["spacer"] = LOMSE_NEW LdpElementFunctor<k_spacer>;
     m_NameToFunctor["split"] = LOMSE_NEW LdpElementFunctor<k_split>;
+    m_NameToFunctor["staccato"] = LOMSE_NEW LdpElementFunctor<k_staccato>;
+    m_NameToFunctor["staccato-duro"] = LOMSE_NEW LdpElementFunctor<k_staccato_duro>;
+    m_NameToFunctor["staccatissimo"] = LOMSE_NEW LdpElementFunctor<k_staccatissimo>;
+    m_NameToFunctor["staccatissimo-duro"] = LOMSE_NEW LdpElementFunctor<k_staccatissimo_duro>;
     m_NameToFunctor["staff"] = LOMSE_NEW LdpElementFunctor<k_staff>;
     m_NameToFunctor["staffDistance"] = LOMSE_NEW LdpElementFunctor<k_staffDistance>;
     m_NameToFunctor["staffLines"] = LOMSE_NEW LdpElementFunctor<k_staffLines>;
@@ -388,6 +427,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["staves"] = LOMSE_NEW LdpElementFunctor<k_staves>;
     m_NameToFunctor["stem"] = LOMSE_NEW LdpElementFunctor<k_stem>;
     m_NameToFunctor["stopLabel"] = LOMSE_NEW LdpElementFunctor<k_stopLabel>;
+    m_NameToFunctor["stress"] = LOMSE_NEW LdpElementFunctor<k_stress>;
     m_NameToFunctor["style"] = LOMSE_NEW LdpElementFunctor<k_style>;
     m_NameToFunctor["styles"] = LOMSE_NEW LdpElementFunctor<k_styles>;
     m_NameToFunctor["symbol"] = LOMSE_NEW LdpElementFunctor<k_symbol>;
@@ -402,6 +442,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["tableBody"] = LOMSE_NEW LdpElementFunctor<k_table_body>;
     m_NameToFunctor["tableHead"] = LOMSE_NEW LdpElementFunctor<k_table_head>;
     m_NameToFunctor["tableRow"] = LOMSE_NEW LdpElementFunctor<k_table_row>;
+    m_NameToFunctor["tenuto"] = LOMSE_NEW LdpElementFunctor<k_tenuto>;
     m_NameToFunctor["text"] = LOMSE_NEW LdpElementFunctor<k_text>;
     m_NameToFunctor["textbox"] = LOMSE_NEW LdpElementFunctor<k_textbox>;
     m_NameToFunctor["text-align"] = LOMSE_NEW LdpElementFunctor<k_text_align>;
@@ -413,6 +454,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["txt"] = LOMSE_NEW LdpElementFunctor<k_txt>;
     m_NameToFunctor["undefined"] = LOMSE_NEW LdpElementFunctor<k_undefined>;
     m_NameToFunctor["undoData"] = LOMSE_NEW LdpElementFunctor<k_undoData>;
+    m_NameToFunctor["unstress"] = LOMSE_NEW LdpElementFunctor<k_unstress>;
     m_NameToFunctor["up"] = LOMSE_NEW LdpElementFunctor<k_up>;
     m_NameToFunctor["url"] = LOMSE_NEW LdpElementFunctor<k_url>;
     m_NameToFunctor["value"] = LOMSE_NEW LdpElementFunctor<k_value>;

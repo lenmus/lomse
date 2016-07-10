@@ -169,13 +169,29 @@ int FermataEngraver::find_glyph()
 {
     switch( m_pFermata->get_symbol())
     {
-        case ImoFermata::k_angled:
+        case ImoFermata::k_short:
             return (m_fAbove ? k_glyph_fermata_above_angle
                              : k_glyph_fermata_below_angle);
 
-        case ImoFermata::k_square:
+        case ImoFermata::k_long:
             return (m_fAbove ? k_glyph_fermata_above_square
                              : k_glyph_fermata_below_square);
+
+        case ImoFermata::k_henze_short:
+            return (m_fAbove ? k_glyph_fermata_short_above
+                             : k_glyph_fermata_short_below);
+
+        case ImoFermata::k_henze_long:
+            return (m_fAbove ? k_glyph_fermata_long_above
+                             : k_glyph_fermata_long_below);
+
+        case ImoFermata::k_very_short:
+            return (m_fAbove ? k_glyph_fermata_very_short_above
+                             : k_glyph_fermata_very_short_below);
+
+        case ImoFermata::k_very_long:
+            return (m_fAbove ? k_glyph_fermata_very_long_above
+                             : k_glyph_fermata_very_long_below);
 
         case ImoFermata::k_normal:
         default:

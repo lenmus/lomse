@@ -226,7 +226,11 @@ int DynamicsMarkEngraver::find_glyph()
     else if (type == "rfz")
         return k_glyph_dynamic_rfz;        //Rinforzando2
 
-    return k_glyph_dynamic_p;       //TODO: what to do if none of these?
+    stringstream s;
+    s << "Dynamics string '" << type
+      << "' not supported. Replaced by 'p'." << endl;
+    LOMSE_LOG_ERROR(s.str());
+    return k_glyph_dynamic_p;       //TODO: composite shape?
 }
 
 

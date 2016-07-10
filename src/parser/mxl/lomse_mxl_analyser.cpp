@@ -1313,7 +1313,7 @@ public:
             }
             else if (m_childToAnalyse.name() == "detached-legato")
             {
-                get_articulation_symbol(pNR, k_articulation_detached_legato);
+                get_articulation_symbol(pNR, k_articulation_mezzo_staccato);
             }
             else if (m_childToAnalyse.name() == "staccatissimo")
             {
@@ -1394,7 +1394,7 @@ protected:
     void get_articulation_strong_accent(ImoNoteRest* pNR)
     {
         ImoArticulationSymbol* pImo =
-            get_articulation_symbol(pNR, k_articulation_strong_accent);
+            get_articulation_symbol(pNR, k_articulation_marccato);
 
         // [atrrib]: type (up | down)
         if (has_attribute(&m_childToAnalyse, "type"))
@@ -1472,9 +1472,9 @@ protected:
 
         string value = m_analysedNode.value();
         if (value == "comma")
-            pImo->set_symbol(ImoArticulationSymbol::k_comma);
+            pImo->set_symbol(ImoArticulationSymbol::k_breath_comma);
         else if (value == "tick")
-            pImo->set_symbol(ImoArticulationSymbol::k_tick);
+            pImo->set_symbol(ImoArticulationSymbol::k_breath_tick);
         else
             pImo->set_symbol(ImoArticulationSymbol::k_default);
     }
@@ -2217,9 +2217,9 @@ protected:
 
         string shape = m_analysedNode.value();
         if (shape == "angled")
-            pImo->set_symbol(ImoFermata::k_angled);
+            pImo->set_symbol(ImoFermata::k_short);
         else if (shape == "square")
-            pImo->set_symbol(ImoFermata::k_square);
+            pImo->set_symbol(ImoFermata::k_long);
         else
             pImo->set_symbol(ImoFermata::k_normal);
     }

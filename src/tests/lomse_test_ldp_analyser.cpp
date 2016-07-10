@@ -99,7 +99,7 @@ public:
 SUITE(LdpAnalyserTest)
 {
 
-    // score ----------------------------------------------------------------------------
+    //@ score ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserMissingMandatoryElementNoElements)
     {
@@ -275,7 +275,144 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // barline --------------------------------------------------------------------------
+    //@ articulation ------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_01)
+    {
+        //@ 01. articulation minimum content ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(tenuto)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_articulation() == true );
+        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_articulation_type() == k_articulation_tenuto );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+//    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_02)
+//    {
+//        //@ 02. id in articulation
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+//        stringstream expected;
+//        //expected << "" << endl;
+//        parser.parse_text("(dyn#30 \"ppp\")");
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->get_placement() == k_placement_default );
+//        CHECK( pImo->get_mark_type() == "ppp" );
+//        CHECK( pImo->get_id() == 30L );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
+//
+//    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_03)
+//    {
+//        //@ 03. articulation with placement
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+//        stringstream expected;
+//        //expected << "" << endl;
+//        parser.parse_text("(dyn \"sf\" above)");
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->get_placement() == k_placement_above );
+//        CHECK( pImo->get_mark_type() == "sf" );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
+//
+//    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_04)
+//    {
+//        //@ 04. articulation with location
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+//        stringstream expected;
+//        //expected << "" << endl;
+//        parser.parse_text("(dyn \"sf\" above (dx 70))");
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->get_placement() == k_placement_above );
+//        CHECK( pImo->get_mark_type() == "sf" );
+//        CHECK( pImo->get_user_location_x() == 70.0f );
+//        CHECK( pImo->get_user_location_y() == 0.0f );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
+//
+//    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_05)
+//    {
+//        //@ 05. Note with attached articulation
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+//        stringstream expected;
+//        //expected << "" << endl;
+//        parser.parse_text("(n c4 e (stem up)(dyn \"sf\" above (dx 70)))");
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+//        CHECK( pNote != NULL );
+//        CHECK( pNote->is_stem_up() == true );
+//        CHECK( pNote->get_num_attachments() == 1 );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pNote->get_attachment(0) );
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->get_placement() == k_placement_above );
+//        CHECK( pImo->get_mark_type() == "sf" );
+//        CHECK( pImo->get_user_location_x() == 70.0f );
+//        CHECK( pImo->get_user_location_y() == 0.0f );
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
+
+    //@ barline --------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_OptionalElementMissing)
     {
@@ -701,7 +838,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // note -----------------------------------------------------------------------------
+    //@ note -----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note)
     {
@@ -1116,7 +1253,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // stem
+    //@ stem
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StemUp)
     {
@@ -1254,7 +1391,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // tie (old syntax) -----------------------------------------------------------------
+    //@ tie (old syntax) -----------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TieOld)
     {
@@ -1471,7 +1608,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // tie ------------------------------------------------------------------------------
+    //@ tie ------------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tie_ParsedStop)
     {
@@ -1604,7 +1741,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // bezier ---------------------------------------------------------------------------
+    //@ bezier ---------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Bezier_Ok)
     {
@@ -2081,16 +2218,18 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // fermata --------------------------------------------------------------------------
+    //@ fermata -------------------------------------------------------------------------
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Fermata)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_01)
     {
+        //@ 01. fermata minimum ok
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(fermata below)");
+        parser.parse_text("(fermata)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2100,20 +2239,22 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_fermata() == true );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == k_placement_below );
+        CHECK( pFerm->get_placement() == k_placement_default );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_fermata)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_02)
     {
+        //@ 02. id_in_fermata
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(fermata#10 below)");
+        parser.parse_text("(fermata#10)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2128,35 +2269,116 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Fermata_ErrorPlacement)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_03)
     {
+        //@ 03. fermata: placement ok
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Unknown value 'under' for <placement>. Replaced by 'above'." << endl;
-        parser.parse_text("(fermata under)");
+        //expected << "" << endl;
+        parser.parse_text("(fermata below)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_fermata() == true );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == k_placement_above );
+        CHECK( pFerm->get_placement() == k_placement_below );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Fermata_Location)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_04)
     {
+        //@ 04. fermata: symbol ok
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
+        //expected << "" << endl;
+        parser.parse_text("(fermata angled)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pFerm != NULL );
+        CHECK( pFerm->get_placement() == k_placement_default );
+        CHECK( pFerm->get_symbol() == ImoFermata::k_angled );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_05)
+    {
+        //@ 05. fermata: placement & symbol ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(fermata angled)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pFerm != NULL );
+        CHECK( pFerm->get_placement() == k_placement_default );
+        CHECK( pFerm->get_symbol() == ImoFermata::k_angled );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_06)
+    {
+        //@ fermata: symbol & placement error
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Parameter 'under' not supported. Ignored." << endl;
+        parser.parse_text("(fermata under)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pFerm != NULL );
+        CHECK( pFerm->get_placement() == k_placement_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_07)
+    {
+        //@ 07. fermata: location
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
         parser.parse_text("(fermata above (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
@@ -2174,8 +2396,10 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Fermata_ErrorMore)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_08)
     {
+        //@ 08. fermata: error more elements
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
@@ -2198,8 +2422,10 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Fermata)
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_09)
     {
+        //@ 09. fermata attached to note
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
