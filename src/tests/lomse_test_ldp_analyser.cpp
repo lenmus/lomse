@@ -2303,7 +2303,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(fermata angled)");
+        parser.parse_text("(fermata short)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2314,7 +2314,7 @@ SUITE(LdpAnalyserTest)
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
         CHECK( pFerm->get_placement() == k_placement_default );
-        CHECK( pFerm->get_symbol() == ImoFermata::k_angled );
+        CHECK( pFerm->get_symbol() == ImoFermata::k_short );
 
         delete tree->get_root();
         delete pIModel;
@@ -2329,7 +2329,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(fermata angled)");
+        parser.parse_text("(fermata long)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2340,7 +2340,7 @@ SUITE(LdpAnalyserTest)
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
         CHECK( pFerm->get_placement() == k_placement_default );
-        CHECK( pFerm->get_symbol() == ImoFermata::k_angled );
+        CHECK( pFerm->get_symbol() == ImoFermata::k_long );
 
         delete tree->get_root();
         delete pIModel;

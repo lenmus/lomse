@@ -10,11 +10,13 @@
 
 ##### COMPATIBLE CHANGES
 
-- Add support in LDP for dynamics marks (analyser and exporter)
+- Added more symbols for fermata.
+- Added support in LDP for articulations (accents & stress marks).
+- Added support in LDP for dynamics marks.
 - Improve score layout algorithm to deal with systems with variable height.
 - Names and brackets/braces for groups of instruments now supported and rendered.
 - Barlines for groups now can be joined. Also mensurstrich layout is supported.
-- Added support for groups in LDP, including exporter.
+- Added support in LDP for groups.
 - Left barline at start of sytems now also drawn in empty scores
 - Whitespace in text now proprely managed in LMD files (issue #42).
 - Default styles added to headings, paragraps and tables (issue #43).
