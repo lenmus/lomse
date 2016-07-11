@@ -1,0 +1,84 @@
+(score (vers 2.0) (instrument (musicData
+    (clef G)
+    (n e4 q (accent) (text "accent" (dy -30)))
+    (n c5 q (accent))
+    (barline)
+
+    (n e4 q (tenuto) (text "tenuto" (dx -20)(dy -30)))
+    (n c5 q (tenuto))
+    (barline)
+
+    (n e4 q (staccato) (text "staccato" (dx -20)(dy -30)))
+    (n c5 q (staccato))
+    (barline)
+
+    (n e4 q (staccatissimo) (text "staccatissimo" (dx -30)(dy -30)))
+    (n c5 q (staccatissimo))
+    (barline)
+
+    (n e4 q (marccato) (text "marccato" (dx -10)(dy -30)))
+    (n c5 q (marccato))
+    (barline)
+
+    (n e4 q (marccato-legato)
+        (text "marccato" (dx -10)(dy -50))
+        (text "legato" (dx 5)(dy -30)) )
+    (n c5 q (marccato-legato))
+    (barline)
+
+    (n e4 q (marccato-staccato)
+        (text "marccato" (dx -10)(dy -50))
+        (text "staccato" (dx -5)(dy -30)) )
+    (n c5 q (marccato-staccato))
+    (barline)
+
+//    (n e4 q (marccato-staccatissimo)
+//        (text "marccato" (dx 0)(dy -50))
+//        (text "staccatissimo" (dx -20)(dy -30)) )
+//    (n c5 q (marccato-staccatissimo))
+//    (barline)
+
+    (n e4 q (legato-duro)
+        (text "legato" (dx -20)(dy -50))
+        (text "duro" (dx -15)(dy -30)) )
+    (n c5 q (legato-duro))
+    (barline)
+
+    (n e4 q (staccato-duro)
+        (text "staccato" (dx -20)(dy -50))
+        (text "duro" (dx -5)(dy -30)) )
+    (n c5 q (staccato-duro))
+    (barline)
+
+//    (n e4 q (staccatissimo-duro)
+//        (text "staccatissimo" (dx -30)(dy -50))
+//        (text "duro" (dx 10)(dy -30)) )
+//    (n c5 q (staccatissimo-duro))
+//    (barline)
+
+    (n e4 q (mezzo-staccato)
+        (text "mezzo" (dx 5)(dy -50))
+        (text "staccato" (dy -30)) )
+    (n c5 q (mezzo-staccato))
+    (barline)
+
+//    (n e4 q (mezzo-staccatissimo)
+//        (text "mezzo" (dx 5)(dy -50))
+//        (text "staccatissimo" (dx -20)(dy -30)) )
+//    (n c5 q (mezzo-staccatissimo))
+//    (barline)
+
+    /* Stress marks */
+
+    (n e4 q (stress)
+        (text "stress" (dx 0)(dy -30)) )
+    (n c5 q (stress))
+    (barline)
+
+    (n e4 q (unstress)
+        (text "unstress" (dx 0)(dy -30)) )
+    (n c5 q (unstress))
+    (barline)
+
+)))
+

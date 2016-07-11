@@ -84,9 +84,34 @@ enum ELdpElement
     k_text,
     k_textbox,
     k_line,
-    k_fermata,
     k_tie,
     k_tuplet,
+    //pauses and breath marks
+    k_fermata,
+    k_breath_mark,
+    k_caesura,
+    //accents
+    k_accent,
+    k_legato_duro,
+    k_marccato,
+    k_marccato_legato,
+    k_marccato_staccato,
+    k_marccato_staccatissimo,
+    k_mezzo_staccato,
+    k_mezzo_staccatissimo,
+    k_staccato,
+    k_staccato_duro,
+    k_staccatissimo_duro,
+    k_staccatissimo,
+    k_tenuto,
+    //stress articulations
+    k_stress,
+    k_unstress,
+    //jazz pitch articulations
+    k_scoop,
+    k_plop,
+    k_doit,
+    k_falloff,
 
     //doc_only objs
     k_dynamic,

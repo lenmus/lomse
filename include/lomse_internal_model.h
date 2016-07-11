@@ -330,24 +330,40 @@ class ImoWrapperBox;
 
     //-----------------------------------------------------------------------------
     //Articulations
+    //
+    //AWARE: when adding / removing / renaming /reordering, you must review
+    //  methods in ImoArticulationSymbol for determining the kind of articulation
     enum EArticulations
     {
         k_articulation_unknown = -1,
+
+        //accents
         k_articulation_accent,
-        k_articulation_strong_accent,
+        k_articulation_legato_duro,
+        k_articulation_marccato,
+        k_articulation_marccato_legato,
+        k_articulation_marccato_staccato,
+        k_articulation_marccato_staccatissimo,
+        k_articulation_mezzo_staccato,
+        k_articulation_mezzo_staccatissimo,
         k_articulation_staccato,
-        k_articulation_tenuto,
-        k_articulation_detached_legato,
+        k_articulation_staccato_duro,
+        k_articulation_staccatissimo_duro,
         k_articulation_staccatissimo,
-        k_articulation_spiccato,
+        k_articulation_tenuto,
+        //jazz pitch articulations
         k_articulation_scoop,
         k_articulation_plop,
         k_articulation_doit,
         k_articulation_falloff,
-        k_articulation_breath_mark,
-        k_articulation_caesura,
+        //stress articulations
         k_articulation_stress,
         k_articulation_unstress,
+        //other in MusicXML
+        k_articulation_spiccato,
+        //breath marks
+        k_articulation_breath_mark,
+        k_articulation_caesura,
 
         k_max_articulation,
     };
@@ -2745,7 +2761,8 @@ protected:
 public:
     virtual ~ImoFermata() {}
 
-    enum { k_normal, k_angled, k_square, };     //symbol
+    enum { k_normal, k_short, k_long, k_henze_short, k_henze_long,
+           k_very_short, k_very_long, };
 
     //getters
     inline int get_placement() { return m_placement; }
@@ -2790,7 +2807,7 @@ public:
 class ImoArticulationSymbol : public ImoArticulation
 {
 protected:
-    bool m_fUp;     //only for k_articulation_strong_accent
+    bool m_fUp;     //only for k_articulation_marccato
     int m_symbol;   //symbol to use when alternatives. For now only for breath_mark
 
     friend class ImFactory;
@@ -2804,7 +2821,11 @@ protected:
 public:
     virtual ~ImoArticulationSymbol() {}
 
-    enum { k_default=0, k_comma, k_tick, k_upbow};
+    enum {
+        k_default=0,
+        k_breath_comma, k_breath_tick, k_breath_v, k_breath_salzedo,
+        k_caesura_normal, k_caesura_thick, k_caesura_short, k_caesura_curved,
+    };
 
     //getters
     inline bool is_up() { return m_fUp; }
@@ -2813,6 +2834,16 @@ public:
     //setters
     inline void set_up(bool value) { m_fUp = value; }
     inline void set_symbol(int value) { m_symbol = value; }
+
+    //info
+    inline bool is_accent() { return m_articulationType >= k_articulation_accent
+                                     && m_articulationType <= k_articulation_tenuto; }
+    inline bool is_stress() { return m_articulationType >= k_articulation_stress
+                                     && m_articulationType <= k_articulation_unstress; }
+    inline bool is_breath_mark() { return m_articulationType >= k_articulation_breath_mark
+                                     && m_articulationType <= k_articulation_caesura; }
+    inline bool is_jazz_pitch() { return m_articulationType >= k_articulation_scoop
+                                     && m_articulationType <= k_articulation_falloff; }
 
 };
 

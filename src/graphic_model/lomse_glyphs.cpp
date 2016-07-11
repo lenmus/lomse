@@ -105,14 +105,27 @@ const GlyphData m_glyphs_smufl[] =
 //Holds and pauses (U+E4C0 - U+E4DF)
     GlyphData(0xE4C0),  // Fermata above (arch)
     GlyphData(0xE4C1),  // Fermata below (arch)
+    GlyphData(0xE4C2),  // Very short fermata above
+    GlyphData(0xE4C3),  // Very short fermata below
     GlyphData(0xE4C4),  // Fermata above (angled)
     GlyphData(0xE4C5),  // Fermata below (angled)
-    GlyphData(0xE4C6),  // Fermata above (quare)
-    GlyphData(0xE4C7),  // Fermata below (quare)
+    GlyphData(0xE4C6),  // Fermata above (square)
+    GlyphData(0xE4C7),  // Fermata below (square)
+    GlyphData(0xE4C8),  // Very long fermata above
+    GlyphData(0xE4C9),  // Very long fermata below
+    GlyphData(0xE4CA),  // Long fermata (Henze) above
+    GlyphData(0xE4CB),  // Long fermata (Henze) below
+    GlyphData(0xE4CC),  // Short fermata (Henze) above
+    GlyphData(0xE4CD),  // Short fermata (Henze) below
     GlyphData(0xE4CE),  // breath-mark (comma)
     GlyphData(0xE4CF),  // breath-mark (tick)
     GlyphData(0xE4D0),  // breath-mark (V)
     GlyphData(0xE4D1),  // caesura
+    GlyphData(0xE4D2),  // Thick caesura
+    GlyphData(0xE4D3),  // Short caesura
+    GlyphData(0xE4D4),  // Curved caesura
+    GlyphData(0xE4D5),  // Breath mark (Salzedo)
+    GlyphData(0xE4D6),  // Curlew (Britten)
 
 //Rests (U+E4E0 - U+E4FF)
     GlyphData(0xE4E1),  // Longa rest     //larga

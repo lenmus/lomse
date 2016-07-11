@@ -1,0 +1,16 @@
+(score (vers 2.0) (instrument (musicData
+    (clef G)(key C)
+
+    (n c4 q (caesura))
+    (n f4 q (caesura thick))
+    (n g4 q (caesura short))
+    (n c4 q (caesura curved))
+    (barline)
+
+    (n g4  q (breathMark comma))
+    (n g4  q (breathMark tick))
+    (n g4  q (breathMark V))
+    (n g4  q (breathMark salzedo))
+    (barline end)
+)))
+

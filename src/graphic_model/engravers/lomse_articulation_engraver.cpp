@@ -70,7 +70,9 @@ GmoShapeArticulation* ArticulationEngraver::create_shape(ImoArticulation* pArtic
     add_voice();
 
     if (m_pArticulation->is_articulation_symbol()
-        && m_pArticulation->get_articulation_type() != k_articulation_breath_mark)
+        && m_pArticulation->get_articulation_type() != k_articulation_breath_mark
+        && m_pArticulation->get_articulation_type() != k_articulation_caesura
+       )
     {
         center_on_parent();
     }
@@ -88,8 +90,19 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
 
     if (type == k_articulation_breath_mark)
     {
+        //breath mark is displayed over staff before the note to which it is attached
+        //(G.Read p.105)
+        pos.x = m_pParentShape->get_right() - tenths_to_logical(25.0f);
+        pos.y += tenths_to_logical(-2.0f);
+        //TODO: positioning at left of notehead could cause overlaps with other shapes
+    }
+
+    else if (type == k_articulation_caesura)
+    {
+        //breath mark is displayed over staff, on line 4th, after the note to which
+        //it is attached(G.Read p.295, G.Read p.105)
         pos.x = m_pParentShape->get_right() + tenths_to_logical(10.0f);
-        pos.y += tenths_to_logical(5.0f);
+        pos.y += tenths_to_logical(10.0f);
         //TODO: positioning at right of notehead could cause overlaps with other shapes
     }
 
@@ -224,23 +237,56 @@ bool ArticulationEngraver::determine_if_above()
 //---------------------------------------------------------------------------------------
 int ArticulationEngraver::find_glyph()
 {
-    switch( m_pArticulation->get_articulation_type() )
+    int type = m_pArticulation->get_articulation_type();
+    switch( type )
     {
+
+        //accents
         case k_articulation_accent:
             return (m_fAbove ? k_glyph_accent_above : k_glyph_accent_below);
-        case k_articulation_strong_accent:
+        case k_articulation_marccato:
             return (m_fAbove ? k_glyph_marcato_above : k_glyph_marcato_below);
         case k_articulation_staccato:
             return (m_fAbove ? k_glyph_staccato_above : k_glyph_staccato_below);
         case k_articulation_tenuto:
             return (m_fAbove ? k_glyph_tenuto_above : k_glyph_tenuto_below);
-        case k_articulation_detached_legato:
+        case k_articulation_mezzo_staccato:
             return (m_fAbove ? k_glyph_tenuto_staccato_above : k_glyph_tenuto_staccato_below);
         case k_articulation_staccatissimo:
             return (m_fAbove ? k_glyph_staccatissimo_above : k_glyph_staccatissimo_below);
-        case k_articulation_spiccato:
-            //The dot is an alternate sign for spiccato
-            return (m_fAbove ? k_glyph_staccato_above : k_glyph_staccato_below);
+
+        case k_articulation_legato_duro:
+            return (m_fAbove ? k_glyph_marcato_tenuto_above : k_glyph_marcato_tenuto_below);
+        case k_articulation_marccato_legato:
+            return (m_fAbove ? k_glyph_tenuto_accent_above : k_glyph_tenuto_accent_below);
+        case k_articulation_marccato_staccato:
+            return (m_fAbove ? k_glyph_accent_staccato_above : k_glyph_accent_staccato_below);
+        case k_articulation_staccato_duro:
+            return (m_fAbove ? k_glyph_marcato_staccato_above : k_glyph_marcato_staccato_below);
+
+        //TODO: No glyphs for these
+        case k_articulation_marccato_staccatissimo:
+            // symbol > with black triangle under it
+        case k_articulation_mezzo_staccatissimo:
+            // symbol - with black triangle under it
+        case k_articulation_staccatissimo_duro:
+            // symbol ^ with black triangle under it
+        {
+            stringstream s;
+            s << "Incomplete code: No glyph for articulation " << type
+              << " in ArticulationEngraver." << endl;
+            LOMSE_LOG_ERROR(s.str());
+            return (m_fAbove ? k_glyph_accent_above : k_glyph_accent_below);
+        }
+
+        //TODO: There are more glyphs for articulations:
+//            return (m_fAbove ? k_glyph_staccatissimo_wedge_above : k_glyph_staccatissimo_wedge_below);
+//            return (m_fAbove ? k_glyph_staccatissimo_stroke_above : k_glyph_staccatissimo_stroke_below);
+//            return (m_fAbove ? k_glyph_stress_above : k_glyph_stress_below);
+//            return (m_fAbove ? k_glyph_unstress_above : k_glyph_unstress_below);
+//            return (m_fAbove ? k_glyph_laissez_vibrer_above : k_glyph_laissez_vibrer_below);
+
+        //jazz pitch articulations
         case k_articulation_scoop:
             return k_glyph_scoop;
         case k_articulation_plop:
@@ -250,43 +296,56 @@ int ArticulationEngraver::find_glyph()
         case k_articulation_falloff:
             return k_glyph_lip_fall_medium;
 
+        //breath marks
         case k_articulation_breath_mark:
             switch (static_cast<ImoArticulationSymbol*>(m_pArticulation)->get_symbol())
             {
-                case ImoArticulationSymbol::k_tick:
+                case ImoArticulationSymbol::k_breath_tick:
                     return k_glyph_breath_mark_tick;
-                case ImoArticulationSymbol::k_comma:
+                case ImoArticulationSymbol::k_breath_comma:
                     return k_glyph_breath_mark_comma;
-                case ImoArticulationSymbol::k_upbow:
+                case ImoArticulationSymbol::k_breath_v:
                     return k_glyph_breath_mark_v;
+                case ImoArticulationSymbol::k_breath_salzedo:
+                    return k_glyph_breath_mark_salzedo;
                 default:
                     return k_glyph_breath_mark_comma;
             }
 
         case k_articulation_caesura:
-            return k_glyph_caesura;
+            switch (static_cast<ImoArticulationSymbol*>(m_pArticulation)->get_symbol())
+            {
+                case ImoArticulationSymbol::k_caesura_normal:
+                    return k_glyph_caesura;
+                case ImoArticulationSymbol::k_caesura_thick:
+                    return k_glyph_caesura_thick;
+                case ImoArticulationSymbol::k_caesura_short:
+                    return k_glyph_caesura_short;
+                case ImoArticulationSymbol::k_caesura_curved:
+                    return k_glyph_caesura_curved;
+                default:
+                    return k_glyph_caesura;
+            }
+
+        //stress accents
         case k_articulation_stress:
             return (m_fAbove ? k_glyph_stress_above : k_glyph_stress_below);
         case k_articulation_unstress:
             return (m_fAbove ? k_glyph_unstress_above : k_glyph_unstress_below);
+
+        //other in MusicXML
+        case k_articulation_spiccato:
+            //The dot is an alternate sign for spiccato
+            return (m_fAbove ? k_glyph_staccato_above : k_glyph_staccato_below);
+
+        //unexpected types: code maintenance problem
         default:
+            stringstream s;
+            s << "Code incoherence: articulation " << type
+              << " not expected in ArticulationEngraver." << endl;
+            LOMSE_LOG_ERROR(s.str());
             return (m_fAbove ? k_glyph_accent_above : k_glyph_accent_below);
     }
-        //TODO: There are more glyphs for articulations. When are they used?
-        //    k_glyph_staccatissimo_wedge_above,
-        //    k_glyph_staccatissimo_wedge_below,
-        //    k_glyph_staccatissimo_stroke_above,
-        //    k_glyph_staccatissimo_stroke_below,
-        //    k_glyph_marcato_staccato_above,
-        //    k_glyph_marcato_staccato_below,
-        //    k_glyph_accent_staccato_above,
-        //    k_glyph_accent_staccato_below,
-        //    k_glyph_tenuto_accent_above,
-        //    k_glyph_tenuto_accent_below,
-        //    k_glyph_laissez_vibrer_above,
-        //    k_glyph_laissez_vibrer_below,
-        //    k_glyph_marcato_tenuto_above,
-        //    k_glyph_marcato_tenuto_below,
 }
 
 //---------------------------------------------------------------------------------------
@@ -301,7 +360,7 @@ bool ArticulationEngraver::must_be_placed_outside_staff()
         //strong tenuto
         //accented tenuto (but the tenuto line is over the notehead)
         case k_articulation_unstress:
-        case k_articulation_strong_accent:
+        case k_articulation_marccato:
         case k_articulation_breath_mark:
         case k_articulation_caesura:
             return true;
@@ -313,7 +372,7 @@ bool ArticulationEngraver::must_be_placed_outside_staff()
         //non legato
         case k_articulation_staccatissimo:
         case k_articulation_tenuto:
-        case k_articulation_detached_legato:
+        case k_articulation_mezzo_staccato:
         case k_articulation_stress:
             return true;    //TODO
 

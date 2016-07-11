@@ -822,6 +822,31 @@ protected:
                 || type == k_line
                 || type == k_fermata
                 || type == k_dynamics_mark
+                //accents
+                || type == k_accent
+                || type == k_legato_duro
+                || type == k_marccato
+                || type == k_marccato_legato
+                || type == k_marccato_staccato
+                || type == k_marccato_staccatissimo
+                || type == k_mezzo_staccato
+                || type == k_mezzo_staccatissimo
+                || type == k_staccato
+                || type == k_staccato_duro
+                || type == k_staccatissimo_duro
+                || type == k_staccatissimo
+                || type == k_tenuto
+                //stress articulations
+                || type == k_stress
+                || type == k_unstress
+                //jazz pitch articulations
+                || type == k_scoop
+                || type == k_plop
+                || type == k_doit
+                || type == k_falloff
+                //breath marks
+                || type == k_breath_mark
+                || type == k_caesura
                 ;
     }
 
@@ -982,7 +1007,82 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ ImoBarline StaffObj
+//@ <accentMark> = (<accentType> [<placement>] <printOptions>* )
+//@ <accentType> = { accent | legato-duro | marccato | marccato-legato |
+//@                  marccato-staccato | mezzo-staccato | staccato |
+//@                  staccato-duro | staccatissimo | tenuto }
+//@ <stressMark> : (<stressType>` [<placement>] <printOptions>* )
+//@ <stressType> : { stress | unstress }
+//@
+//@ supported but no glyphs. Therefore removed in LDP documentation:
+//@     marccato_staccatissimo:    symbol > with black triangle under it
+//@     mezzo_staccatissimo:       symbol - with black triangle under it
+//@     staccatissimo_duro:        symbol ^ with black triangle under it
+//@
+//@ <placement> = { above | below }
+
+class AccentAnalyser : public ElementAnalyser
+{
+public:
+    AccentAnalyser(LdpAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoArticulationSymbol* pImo = static_cast<ImoArticulationSymbol*>(
+            ImFactory::inject(k_imo_articulation_symbol, pDoc, get_node_id()) );
+
+        pImo->set_articulation_type( get_accent_type() );
+
+        // <placement>
+        if (get_optional(k_label))
+            pImo->set_placement( get_placement(k_placement_above) );
+
+        // [<printOptions>*]
+        analyse_scoreobj_options(pImo);
+
+        error_if_more_elements();
+
+        add_to_model(pImo);
+    }
+
+protected:
+
+    int get_accent_type()
+    {
+        switch (m_pAnalysedNode->get_type())
+        {
+            //accents
+            case k_accent:                  return k_articulation_accent;
+            case k_legato_duro:             return k_articulation_legato_duro;
+            case k_marccato:                return k_articulation_marccato;
+            case k_marccato_legato:         return k_articulation_marccato_legato;
+            case k_marccato_staccato:       return k_articulation_marccato_staccato;
+            case k_marccato_staccatissimo:  return k_articulation_marccato_staccatissimo;
+            case k_mezzo_staccato:          return k_articulation_mezzo_staccato;
+            case k_mezzo_staccatissimo:     return k_articulation_mezzo_staccatissimo;
+            case k_staccato:                return k_articulation_staccato;
+            case k_staccato_duro:           return k_articulation_staccato_duro;
+            case k_staccatissimo_duro:      return k_articulation_staccatissimo_duro;
+            case k_staccatissimo:           return k_articulation_staccatissimo;
+            case k_tenuto:                  return k_articulation_tenuto;
+            //stress
+            case k_stress:                  return k_articulation_stress;
+            case k_unstress:                return k_articulation_unstress;
+            default:
+                stringstream s;
+                s << "Lomse code error: element '" << m_pAnalysedNode->get_name()
+                  << "' is not supported in AccentAnalyser." << endl;
+                LOMSE_LOG_ERROR(s.str());
+                return k_articulation_accent;
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <barline> = (barline) | (barline <type>[middle][<visible>][<location>])
 //@ <type> = label: { start | end | double | simple | startRepetition |
 //@                   endRepetition | doubleRepetition }
@@ -1242,6 +1342,94 @@ protected:
             }
         }
 
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <breathMark> and <caesura> elements:
+//@
+//@ <breathMark> = (breathMark [<breathSymbol>] <printOptions>* )
+//@ <caesura> = (caesura [<caesuraSymbol>] <printOptions>* )
+//@ <breathSymbol> = { comma | tick | V | salzedo }     default 'comma'
+//@ <caesuraSymbol> = { normal | thick | short | curved }     default 'normal'
+
+class BreathMarkAnalyser : public ElementAnalyser
+{
+public:
+    BreathMarkAnalyser(LdpAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoArticulationSymbol* pImo = static_cast<ImoArticulationSymbol*>(
+            ImFactory::inject(k_imo_articulation_symbol, pDoc, get_node_id()) );
+
+        pImo->set_articulation_type( get_breath_type() );
+
+        // <symbol>
+        if (get_optional(k_label))
+            pImo->set_symbol( get_symbol() );
+
+        // [<printOptions>*]
+        analyse_scoreobj_options(pImo);
+
+        error_if_more_elements();
+
+        add_to_model(pImo);
+    }
+
+protected:
+
+    int get_breath_type()
+    {
+        switch (m_pAnalysedNode->get_type())
+        {
+            case k_breath_mark:     return k_articulation_breath_mark;
+            case k_caesura:         return k_articulation_caesura;
+            default:
+                stringstream s;
+                s << "Lomse code error: element '" << m_pAnalysedNode->get_name()
+                  << "' is not supported in BreathMarkAnalyser." << endl;
+                LOMSE_LOG_ERROR(s.str());
+                return k_articulation_accent;
+        }
+    }
+
+    int get_symbol()
+    {
+        string value = m_pParamToAnalyse->get_value();
+        int element = m_pAnalysedNode->get_type();
+
+        if (element == k_breath_mark)
+        {
+            if (value == "comma")
+                return ImoArticulationSymbol::k_breath_comma;
+            else if (value == "tick")
+                return ImoArticulationSymbol::k_breath_tick;
+            else if (value == "V")
+                return ImoArticulationSymbol::k_breath_v;
+            else if (value == "salzedo")
+                return ImoArticulationSymbol::k_breath_salzedo;
+        }
+
+        else if (element == k_caesura)
+        {
+            if (value == "normal")
+                return ImoArticulationSymbol::k_caesura_normal;
+            else if (value == "thick")
+                return ImoArticulationSymbol::k_caesura_thick;
+            else if (value == "short")
+                return ImoArticulationSymbol::k_caesura_short;
+            else if (value == "curved")
+                return ImoArticulationSymbol::k_caesura_curved;
+        }
+
+        stringstream s;
+        s << "Symbol '" << value << "' not supported. Ignored." << endl;
+        error_msg(s.str());
+        return ImoArticulationSymbol::k_default;
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -1884,10 +2072,14 @@ public:
         if (!get_mandatory(k_string))
             return;
 
+        string type = get_string_value();
+        if (!is_valid_dynamics(type))
+            return;
+
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(
                                 ImFactory::inject(k_imo_dynamics_mark, pDoc, get_node_id()) );
-        pImo->set_mark_type(get_string_value());
+        pImo->set_mark_type(type);
 
         // [<placement>]
         if (get_optional(k_label))
@@ -1903,10 +2095,53 @@ public:
 
 protected:
 
+    bool is_valid_dynamics(const string& type)
+    {
+        if (type == "p")            return true;
+        else if (type == "m")       return true;
+        else if (type == "f")       return true;
+        else if (type == "r")       return true;
+        else if (type == "s")       return true;
+        else if (type == "z")       return true;
+        else if (type == "n")       return true;
+        else if (type == "pppppp")  return true;
+        else if (type == "ppppp")   return true;
+        else if (type == "pppp")    return true;
+        else if (type == "ppp")     return true;
+        else if (type == "pp")      return true;
+        else if (type == "mp")      return true;
+        else if (type == "mf")      return true;
+        else if (type == "pf")      return true;
+        else if (type == "ff")      return true;
+        else if (type == "fff")     return true;
+        else if (type == "ffff")    return true;
+        else if (type == "fffff")   return true;
+        else if (type == "ffffff")  return true;
+        else if (type == "fp")      return true;
+        else if (type == "fz")      return true;
+        else if (type == "sf")      return true;
+        else if (type == "sfp")     return true;
+        else if (type == "sfpp")    return true;
+        else if (type == "sfz")     return true;
+        else if (type == "sfzp")    return true;
+        else if (type == "sffz")    return true;
+        else if (type == "rf")      return true;
+        else if (type == "rfz")     return true;
+
+        stringstream s;
+        s << "Dynamics string '" << type
+          << "' not supported. <dyn> ignored." << endl;
+        error_msg(s.str());
+
+        return false;
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <fermata> = (fermata <placement>[<staffObjOptions>*])
+//@ <fermata> = (fermata [<fermataSymbol>] [<placement>] <printOptions>* )
+//@ <fermataSymbol> = { normal | short | long | very-short | very-long |
+//@                     henze-short | henze-long }     default 'normal'
 //@ <placement> = { above | below }
 
 class FermataAnalyser : public ElementAnalyser
@@ -1922,17 +2157,110 @@ public:
         ImoFermata* pImo = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, pDoc, get_node_id()) );
 
+        // [<fermataSymbol>] [<placement>]
+        if (get_optional(k_label))
+        {
+            string label = m_pParamToAnalyse->get_value();
+            int symbol;
+            int placement;
+            if (get_symbol(label, &symbol))
+            {
+                pImo->set_symbol(symbol);
 
-        // <placement>
-        if (get_mandatory(k_label))
-            pImo->set_placement( get_placement(k_placement_above) );
+                // [<placement>]
+                if (get_optional(k_label))
+                    pImo->set_placement(
+                            ElementAnalyser::get_placement(k_placement_above) );
+            }
+            else if (get_placement(label, &placement))
+            {
+                pImo->set_placement(placement);
+            }
+            else
+            {
+                stringstream s;
 
-        // [<staffObjOptions>*]
+                //try [<placement>] after invalid symbol
+                if (get_optional(k_label))
+                {
+                    pImo->set_placement(
+                            ElementAnalyser::get_placement(k_placement_above) );
+
+                    //report invalid symbol
+                    s << "Symbol '" << label << "' not supported. Ignored.";
+                }
+                else
+                {
+                    //report invalid parameter
+                    s << "Parameter '" << label << "' not supported. Ignored.";
+                }
+                error_msg(s.str());
+            }
+        }
+
+        // [<printOptions>*]
         analyse_scoreobj_options(pImo);
 
         error_if_more_elements();
 
         add_to_model(pImo);
+    }
+
+protected:
+
+    bool get_symbol(const string& value, int* symbol)
+    {
+        if (value == "short")
+        {
+            *symbol = ImoFermata::k_short;
+            return true;
+        }
+        else if (value == "long")
+        {
+            *symbol = ImoFermata::k_long;
+            return true;
+        }
+        else if (value == "henze-short")
+        {
+            *symbol = ImoFermata::k_henze_short;
+            return true;
+        }
+        else if (value == "henze-long")
+        {
+            *symbol = ImoFermata::k_henze_long;
+            return true;
+        }
+        else if (value == "very-short")
+        {
+            *symbol = ImoFermata::k_very_short;
+            return true;
+        }
+        else if (value == "very-long")
+        {
+            *symbol = ImoFermata::k_very_long;
+            return true;
+        }
+        else if (value == "normal")
+        {
+            *symbol = ImoFermata::k_normal;
+            return true;
+        }
+        return false;
+    }
+
+    bool get_placement(const string& value, int* placement)
+    {
+        if (value == "above")
+        {
+            *placement = k_placement_above;
+            return true;
+        }
+        else if (value == "below")
+        {
+            *placement = k_placement_below;
+            return true;
+        }
+        return false;
     }
 
 };
@@ -6393,6 +6721,39 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
     {
         case k_abbrev:          return LOMSE_NEW InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_anchorLine:      return LOMSE_NEW AnchorLineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+
+        //accents
+        case k_accent:
+        case k_legato_duro:
+        case k_marccato:
+        case k_marccato_legato:
+        case k_marccato_staccato:
+        case k_marccato_staccatissimo:
+        case k_mezzo_staccato:
+        case k_mezzo_staccatissimo:
+        case k_staccato:
+        case k_staccato_duro:
+        case k_staccatissimo_duro:
+        case k_staccatissimo:
+        case k_tenuto:
+        //stress articulations
+        case k_stress:
+        case k_unstress:
+                                return LOMSE_NEW AccentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+
+        //jazz pitch articulations
+        case k_scoop:
+        case k_plop:
+        case k_doit:
+        case k_falloff:
+                                return LOMSE_NEW AccentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        //breath marks
+        case k_breath_mark:
+        case k_caesura:         return LOMSE_NEW BreathMarkAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+
+
+        //all other elements, in alphabetical order:
+
         case k_barline:         return LOMSE_NEW BarlineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_beam:            return LOMSE_NEW BeamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_bezier:          return LOMSE_NEW BezierAnalyser(this, m_reporter, m_libraryScope, pAnchor);

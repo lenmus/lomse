@@ -1,0 +1,31 @@
+(score (vers 2.0) (instrument (musicData
+    (clef G)(key C)
+
+    (n e4 q (fermata) (text "normal" (dy -40)))
+    (n c5 q (fermata))
+    (barline)
+
+    (n e4 q (fermata short) (text "short" (dy -40)))
+    (n c5 q (fermata short))
+    (barline)
+
+    (n e4 q (fermata long) (text "long" (dy -40)))
+    (n c5 q (fermata long))
+    (barline)
+
+    (n e4 q (fermata very-short) (text "very-short" (dx -20)(dy -40)))
+    (n c5 q (fermata very-short))
+    (barline)
+
+    (n e4 q (fermata very-long) (text "very-long" (dx -20)(dy -40)))
+    (n c5 q (fermata very-long))
+    (barline)
+
+    (n e4 q (fermata henze-short) (text "henze-short" (dx -20)(dy -40)))
+    (n c5 q (fermata henze-short))
+    (barline)
+
+    (n e4 q (fermata henze-long) (text "henze-long" (dx -10)(dy -40)))
+    (n c5 q (fermata henze-long))
+    (barline)
+)))

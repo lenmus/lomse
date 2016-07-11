@@ -76,7 +76,7 @@ void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 //---------------------------------------------------------------------------------------
 void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr,
-                                    int iStaff, int iSystem, int iCol,
+                                    int UNUSED(iStaff), int iSystem, int iCol,
                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
                                     LUnits yTop)
 {

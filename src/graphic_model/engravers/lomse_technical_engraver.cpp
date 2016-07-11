@@ -310,7 +310,7 @@ bool TechnicalEngraver::must_be_placed_outside_staff()
 //        case k_technical_staccato:
 //        case k_technical_staccatissimo:
 //        case k_technical_tenuto:
-//        case k_technical_detached_legato:
+//        case k_technical_tenuto_staccato:
 //        case k_technical_stress:
 //            return true;    //TODO
 //

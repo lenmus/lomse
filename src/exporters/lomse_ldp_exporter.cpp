@@ -129,6 +129,193 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class ArticulationSymbolLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoArticulationSymbol* m_pObj;
+
+public:
+    ArticulationSymbolLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoArticulationSymbol*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        start_articulation();
+        if (m_pObj->is_accent() || m_pObj->is_stress())
+            add_placement();
+        source_for_base_scoreobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void start_articulation()
+    {
+        int type = m_pObj->get_articulation_type();
+        switch( type )
+        {
+            //accents
+            case k_articulation_accent:
+                start_element("accent", m_pObj->get_id());
+                return;
+            case k_articulation_marccato:
+                start_element("marccato", m_pObj->get_id());
+                return;
+            case k_articulation_staccato:
+                start_element("staccato", m_pObj->get_id());
+                return;
+            case k_articulation_tenuto:
+                start_element("tenuto", m_pObj->get_id());
+                return;
+            case k_articulation_mezzo_staccato:
+                start_element("mezzo-staccato", m_pObj->get_id());
+                return;
+            case k_articulation_staccatissimo:
+                start_element("staccatissimo", m_pObj->get_id());
+                return;
+            case k_articulation_legato_duro:
+                start_element("legato-duro", m_pObj->get_id());
+                return;
+            case k_articulation_marccato_legato:
+                start_element("marccato-legato", m_pObj->get_id());
+                return;
+            case k_articulation_marccato_staccato:
+                start_element("marccato-staccato", m_pObj->get_id());
+                return;
+            case k_articulation_staccato_duro:
+                start_element("staccato-duro", m_pObj->get_id());
+                return;
+            case k_articulation_marccato_staccatissimo:
+                start_element("marccato-staccatissimo", m_pObj->get_id());
+                return;
+            case k_articulation_mezzo_staccatissimo:
+                start_element("mezzo-staccatissimo", m_pObj->get_id());
+                return;
+            case k_articulation_staccatissimo_duro:
+                start_element("staccatissimo-duro", m_pObj->get_id());
+                return;
+
+            //jazz pitch articulations
+            case k_articulation_scoop:
+                start_element("scoop", m_pObj->get_id());
+                return;
+            case k_articulation_plop:
+                start_element("plop", m_pObj->get_id());
+                return;
+            case k_articulation_doit:
+                start_element("doit", m_pObj->get_id());
+                return;
+            case k_articulation_falloff:
+                start_element("fallOff", m_pObj->get_id());
+                return;
+
+            //breath marks
+            case k_articulation_breath_mark:
+                start_element("breathMark", m_pObj->get_id());
+                switch (m_pObj->get_symbol())
+                {
+                    case ImoArticulationSymbol::k_breath_tick:
+                        m_source << " tick";
+                        return;
+                    case ImoArticulationSymbol::k_breath_v:
+                        m_source << " V";
+                        return;
+                    case ImoArticulationSymbol::k_breath_salzedo:
+                        m_source << " salzedo";
+                        return;
+                    case ImoArticulationSymbol::k_breath_comma:
+                    default:
+                        return;
+                }
+
+            case k_articulation_caesura:
+                start_element("caesura", m_pObj->get_id());
+                switch (m_pObj->get_symbol())
+                {
+                    case ImoArticulationSymbol::k_caesura_thick:
+                        m_source << " thick";
+                        return;
+                    case ImoArticulationSymbol::k_caesura_short:
+                        m_source << " short";
+                        return;
+                    case ImoArticulationSymbol::k_caesura_curved:
+                        m_source << " curved";
+                        return;
+                    case ImoArticulationSymbol::k_caesura_normal:
+                    default:
+                        return;
+                }
+
+            //stress accents
+            case k_articulation_stress:
+                start_element("stress", m_pObj->get_id());
+                return;
+            case k_articulation_unstress:
+                start_element("unstress", m_pObj->get_id());
+                return;
+
+            //other in MusicXML
+            case k_articulation_spiccato:
+                start_element("spicato", m_pObj->get_id());
+                return;
+
+            //unexpected types: code maintenance problem
+            default:
+                stringstream s;
+                s << "Code incoherence: articulation " << type
+                  << " not expected in LDP exporter: ArticulationSymbolLdpGenerator."
+                  << endl;
+                LOMSE_LOG_ERROR(s.str());
+                return;
+        }
+    }
+
+    void add_symbol()
+    {
+        switch(m_pObj->get_symbol())
+        {
+            case ImoFermata::k_short:
+                m_source << "short";
+                break;
+            case ImoFermata::k_long:
+                m_source << "long";
+                break;
+            case ImoFermata::k_henze_short:
+                m_source << "henze-short";
+                break;
+            case ImoFermata::k_henze_long:
+                m_source << "henze-long";
+                break;
+            case ImoFermata::k_very_short:
+                m_source << "very-short";
+                break;
+            case ImoFermata::k_very_long:
+                m_source << "very-long";
+                break;
+
+            case ImoFermata::k_normal:
+            default:
+                return;
+        }
+    }
+
+    void add_placement()
+    {
+        int placement = m_pObj->get_placement();
+        if (placement == k_placement_default)
+            return;
+        else if (placement == k_placement_above)
+            m_source << " above";
+        else
+            m_source << " below";
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class BarlineLdpGenerator : public LdpGenerator
 {
 protected:
@@ -713,6 +900,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("fermata", m_pObj->get_id());
+        add_symbol();
         add_placement();
         source_for_base_scoreobj(m_pObj);
         end_element(k_in_same_line);
@@ -720,11 +908,40 @@ public:
     }
 
 protected:
+    void add_symbol()
+    {
+        switch(m_pObj->get_symbol())
+        {
+            case ImoFermata::k_short:
+                m_source << " short";
+                break;
+            case ImoFermata::k_long:
+                m_source << " long";
+                break;
+            case ImoFermata::k_henze_short:
+                m_source << " henze-short";
+                break;
+            case ImoFermata::k_henze_long:
+                m_source << " henze-long";
+                break;
+            case ImoFermata::k_very_short:
+                m_source << " very-short";
+                break;
+            case ImoFermata::k_very_long:
+                m_source << " very-long";
+                break;
+
+            case ImoFermata::k_normal:
+            default:
+                return;
+        }
+    }
+
     void add_placement()
     {
         int placement = m_pObj->get_placement();
         if (placement == k_placement_default)
-            m_source << ")";
+            return;
         else if (placement == k_placement_above)
             m_source << " above";
         else
@@ -2676,6 +2893,8 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 
     switch(pImo->get_obj_type())
     {
+        case k_imo_articulation_symbol:
+                                    return LOMSE_NEW ArticulationSymbolLdpGenerator(pImo, this);
         case k_imo_barline:         return LOMSE_NEW BarlineLdpGenerator(pImo, this);
         case k_imo_beam:            return LOMSE_NEW BeamLdpGenerator(pImo, this);
         case k_imo_clef:            return LOMSE_NEW ClefLdpGenerator(pImo, this);
