@@ -237,12 +237,6 @@ enum EGlyphIndex
     //Octaves (U+E510 - U+E51F)
     k_glyph_octava,
 
-    //Brass techniques (U+E5D0 - U+E5EF)
-    k_glyph_scoop,
-    k_glyph_doit_medium,
-    k_glyph_lip_fall_medium,
-    k_glyph_plop,
-
     //Figured bass. Numbers and other symbols
     k_glyph_figured_bass_0,                   //number 0
     k_glyph_figured_bass_1,                   //number 1
@@ -326,17 +320,66 @@ enum EGlyphIndex
     k_glyph_tremolo_4,     // Combining tremolo 4
     k_glyph_tremolo_5,     // Combining tremolo 5
 
-    //Wind techniques (U+E5F0 - U+E60F)
-    k_glyph_double_tongue_above,            // Double-tongue above
-    k_glyph_double_tongue_below,            // Double-tongue below
-    k_glyph_triple_tongue_above,            // Triple-tongue above
-    k_glyph_triple_tongue_below,            // Triple-tongue below
-    k_glyph_wind_closed_hole,               // Closed hole
-    k_glyph_wind_three_quarters_close_hole, // Three-quarters closed hole
-    k_glyph_wind_half_closed_hole,          // Half-closed hole
-    k_glyph_wind_half_closed_hole_2,        // Half-closed hole 2
-    k_glyph_wind_half_open_hole,            // Half-open hole
-    k_glyph_wind_open_hole,                 // Open hole
+    //Brass techniques (U+E5D0 –U+E5EF)
+    k_glyph_brass_scoop,                        //Scoop
+    k_glyph_brass_lift_short,                   //Lift, short
+    k_glyph_brass_lift_medium,                  //Lift, medium
+    k_glyph_brass_lift_long,                    //Lift, long
+    k_glyph_brass_doit_short,                   //Doit, short
+    k_glyph_brass_doit_medium,                  //Doit, medium
+    k_glyph_brass_doit_long,                    //Doit, long
+    k_glyph_brass_fall_lip_short,               //Lip fall, short
+    k_glyph_brass_fall_lip_medium,              //Lip fall, medium
+    k_glyph_brass_fall_lip_long,                //Lip fall, long
+    k_glyph_brass_fall_smooth_short,            //Smooth fall, short
+    k_glyph_brass_fall_smooth_medium,           //Smooth fall, medium
+    k_glyph_brass_fall_smooth_long,             //Smooth fall, long
+    k_glyph_brass_fall_rough_short,             //Rough fall, short
+    k_glyph_brass_fall_rough_medium,            //Rough fall, medium
+    k_glyph_brass_fall_rough_long,              //Rough fall, long
+    k_glyph_brass_plop,                         //Plop
+    k_glyph_brass_flip,                         //Flip
+    k_glyph_brass_smear,                        //Smear
+    k_glyph_brass_bend,                         //Bend
+    k_glyph_brass_jazz_turn,                    //Jazz turn
+    k_glyph_brass_mute_closed,                  //Muted (closed)
+    k_glyph_brass_mute_half_closed,             //Half-muted (half-closed)
+    k_glyph_brass_mute_open,                    //Open
+    k_glyph_brass_harmon_mute_closed,           //Harmon mute, stem in
+    k_glyph_brass_harmon_mute_stem_half_left,   //Harmon mute, stem extended, left
+    k_glyph_brass_harmon_mute_stem_half_right,  //Harmon mute, stem extended, right
+    k_glyph_brass_harmon_mute_stem_open,        //Harmon mute, stem out
+    k_glyph_brass_lift_smooth_short,            //Smooth lift, short
+    k_glyph_brass_lift_smooth_medium,           //Smooth lift, medium
+    k_glyph_brass_lift_smooth_long,             //Smooth lift, long
+
+    //Wind techniques (U+E5F0 –U+E60F)
+    k_glyph_double_tongue_above,                //Double-tongue above
+    k_glyph_double_tongue_below,                //Double-tongue below
+    k_glyph_triple_tongue_above,                //Triple-tongue above
+    k_glyph_triple_tongue_below,                //Triple-tongue below
+    k_glyph_wind_closed_hole,                   //Closed hole
+    k_glyph_wind_three_quarters_closed_hole,    //Three-quarters closed hole
+    k_glyph_wind_half_closed_hole1,             //Half-closed hole
+    k_glyph_wind_half_closed_hole2,             //Half-closed hole 2
+    k_glyph_wind_half_closed_hole3,             //Half-open hole
+    k_glyph_wind_open_hole,                     //Open hole
+    k_glyph_wind_trill_key,                     //Trill key
+    k_glyph_wind_flat_embouchure,               //Flatter embouchure
+    k_glyph_wind_sharp_embouchure,              //Sharper embouchure
+    k_glyph_wind_relaxed_embouchure,            //Relaxed embouchure
+    k_glyph_wind_less_relaxed_embouchure,       //Somewhat relaxed embouchure
+    k_glyph_wind_tight_embouchure,              //Tight embouchure
+    k_glyph_wind_less_tight_embouchure,         //Somewhat tight embouchure
+    k_glyph_wind_very_tight_embouchure,         //Very tight embouchure
+    k_glyph_wind_weak_air_pressure,             //Very relaxed embouchure / weak air-pressure
+    k_glyph_wind_strong_air_pressure,           //Very tight embouchure / strong air pressure
+    k_glyph_wind_reed_position_normal,          //Normal reed position
+    k_glyph_wind_reed_position_out,             //Very little reed (pull outwards)
+    k_glyph_wind_reed_position_in,              //Much more reed (push inwards)
+    k_glyph_wind_multiphonics_black_stem,       //Combining multiphonics (black) for stem
+    k_glyph_wind_multiphonics_white_stem,       //Combining multiphonics (white) for stem
+    k_glyph_wind_multiphonics_black_white_stem, //Combining multiphonics (black and white) for stem
 
     //String techniques (U+E610 - U+E62F)
     k_glyph_string_down_bow,        // Down bow
