@@ -102,6 +102,7 @@ protected:
     bool m_fDrawAnchors;
     bool m_fReplaceLocalMetronome;
     bool m_fShowShapeBounds;
+    bool m_fUnitTests;
 
 
 public:
@@ -163,6 +164,8 @@ public:
     inline bool draw_anchors() { return m_fDrawAnchors; }
     inline void set_draw_shape_bounds(bool value) { m_fShowShapeBounds = value; }
     inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
+    inline void set_unit_test(bool value) { m_fUnitTests = value; }
+    inline bool is_unit_test() { return m_fUnitTests; }
 };
 
 //---------------------------------------------------------------------------------------

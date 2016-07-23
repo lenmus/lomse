@@ -2549,7 +2549,7 @@ public:
 
         // [extend]
         if (get_optional("extend"))
-            pData->set_extend(true);
+            pData->set_melisma(true);
 
         m_pAnalyser->add_lyrics_data(pNote, pData);
         return pData;

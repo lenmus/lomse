@@ -153,6 +153,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_lineThickness] = "lineThickness";
     m_TypeToName[k_line_height] = "line-height";
     m_TypeToName[k_listitem] = "listitem";
+    m_TypeToName[k_lyric] = "lyric";
     m_TypeToName[k_marccato] = "marccato";
     m_TypeToName[k_marccato_legato] = "marccato-legato";
     m_TypeToName[k_marccato_staccato] = "marccato-staccato";
@@ -164,6 +165,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_margin_left] = "margin-left";
     m_TypeToName[k_max_height] = "max-height";
     m_TypeToName[k_max_width] = "max-width";
+    m_TypeToName[k_melisma] = "melisma";
     m_TypeToName[k_meta] = "meta";
     m_TypeToName[k_metronome] = "metronome";
     m_TypeToName[k_mezzo_staccato] = "mezzo-staccato";
@@ -227,6 +229,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_stress] = "stress";
     m_TypeToName[k_style] = "style";
     m_TypeToName[k_styles] = "styles";
+    m_TypeToName[k_syllable] = "syl";
     m_TypeToName[k_symbol] = "symbol";
     m_TypeToName[k_symbolSize] = "symbolSize";
     m_TypeToName[k_systemLayout] = "systemLayout";
@@ -356,6 +359,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["lineThickness"] = LOMSE_NEW LdpElementFunctor<k_lineThickness>;
     m_NameToFunctor["line-height"] = LOMSE_NEW LdpElementFunctor<k_line_height>;
     m_NameToFunctor["listitem"] = LOMSE_NEW LdpElementFunctor<k_listitem>;
+    m_NameToFunctor["lyric"] = LOMSE_NEW LdpElementFunctor<k_lyric>;
     m_NameToFunctor["marccato"] = LOMSE_NEW LdpElementFunctor<k_marccato>;
     m_NameToFunctor["marccato-legato"] = LOMSE_NEW LdpElementFunctor<k_marccato_legato>;
     m_NameToFunctor["marccato-staccato"] = LOMSE_NEW LdpElementFunctor<k_marccato_staccato>;
@@ -367,6 +371,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["margin-left"] = LOMSE_NEW LdpElementFunctor<k_margin_left>;
     m_NameToFunctor["max-height"] = LOMSE_NEW LdpElementFunctor<k_max_height>;
     m_NameToFunctor["max-width"] = LOMSE_NEW LdpElementFunctor<k_max_width>;
+    m_NameToFunctor["melisma"] = LOMSE_NEW LdpElementFunctor<k_melisma>;
     m_NameToFunctor["meta"] = LOMSE_NEW LdpElementFunctor<k_meta>;
     m_NameToFunctor["metronome"] = LOMSE_NEW LdpElementFunctor<k_metronome>;
     m_NameToFunctor["mezzo-staccato"] = LOMSE_NEW LdpElementFunctor<k_mezzo_staccato>;
@@ -430,6 +435,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["stress"] = LOMSE_NEW LdpElementFunctor<k_stress>;
     m_NameToFunctor["style"] = LOMSE_NEW LdpElementFunctor<k_style>;
     m_NameToFunctor["styles"] = LOMSE_NEW LdpElementFunctor<k_styles>;
+    m_NameToFunctor["syl"] = LOMSE_NEW LdpElementFunctor<k_syllable>;
     m_NameToFunctor["symbol"] = LOMSE_NEW LdpElementFunctor<k_symbol>;
     m_NameToFunctor["symbolSize"] = LOMSE_NEW LdpElementFunctor<k_symbolSize>;
     m_NameToFunctor["systemLayout"] = LOMSE_NEW LdpElementFunctor<k_systemLayout>;

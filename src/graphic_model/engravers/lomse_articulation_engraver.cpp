@@ -288,13 +288,13 @@ int ArticulationEngraver::find_glyph()
 
         //jazz pitch articulations
         case k_articulation_scoop:
-            return k_glyph_scoop;
+            return k_glyph_brass_scoop;
         case k_articulation_plop:
-            return k_glyph_plop;
+            return k_glyph_brass_plop;
         case k_articulation_doit:
-            return k_glyph_doit_medium;
+            return k_glyph_brass_doit_medium;
         case k_articulation_falloff:
-            return k_glyph_lip_fall_medium;
+            return k_glyph_brass_fall_lip_medium;
 
         //breath marks
         case k_articulation_breath_mark:

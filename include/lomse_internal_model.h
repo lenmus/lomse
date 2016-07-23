@@ -93,7 +93,6 @@ class ImoList;
 class ImoListItem;
 class ImoLyrics;
 class ImoLyricsData;
-class ImoLyricsExtendInfo;
 class ImoLyricsTextInfo;
 class ImoMultiColumn;
 class ImoMusicData;
@@ -438,7 +437,6 @@ class ImoWrapperBox;
                 k_imo_instr_group,
                 k_imo_line_style,
                 k_imo_lyrics_text_info,
-                k_imo_lyrics_extend_info,
                 k_imo_midi_info,
                 k_imo_page_info,
                 k_imo_staff_info,
@@ -495,8 +493,10 @@ class ImoWrapperBox;
 
                     // ImoAuxObj (A)
                     k_imo_auxobj,
-                        k_imo_dynamics_mark, k_imo_fermata,
-                        k_imo_ornament, k_imo_technical,
+                        k_imo_dynamics_mark,
+                        k_imo_fermata,
+                        k_imo_ornament,
+                        k_imo_technical,
 
                         // ImoArticulation (A)
                         k_imo_articulation,
@@ -509,6 +509,11 @@ class ImoWrapperBox;
                         k_imo_line,
                         k_imo_score_line,
                         k_imo_text_box,
+
+                        // ImoAuxReloObj (A)
+                        k_imo_auxrelobj,
+                            k_imo_lyric,
+
                     k_imo_auxobj_last,
 
                     // ImoRelObj (A)
@@ -779,6 +784,8 @@ public:
                                   && m_objtype < k_imo_auxobj_last; }
     inline bool is_relobj() { return m_objtype > k_imo_relobj
                                   && m_objtype < k_imo_relobj_last; }
+	inline bool is_auxrelobj() { return m_objtype > k_imo_auxrelobj
+                                     && m_objtype < k_imo_auxobj_last; }
     inline bool is_block_level_obj() { return m_objtype > k_imo_block_level_obj
                                            && m_objtype < k_imo_block_level_obj_last; }
 	inline bool is_blocks_container() { return m_objtype > k_imo_blocks_container
@@ -831,9 +838,9 @@ public:
     inline bool is_link() { return m_objtype == k_imo_link; }
 	inline bool is_list() { return m_objtype == k_imo_list; }
 	inline bool is_listitem() { return m_objtype == k_imo_listitem; }
+	inline bool is_lyric() { return m_objtype == k_imo_lyric; }
 	inline bool is_lyrics() { return m_objtype == k_imo_lyrics; }
 	inline bool is_lyrics_data() { return m_objtype == k_imo_lyrics_data; }
-	inline bool is_lyrics_extend_info() { return m_objtype == k_imo_lyrics_extend_info; }
 	inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
     inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
     inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
@@ -1954,18 +1961,52 @@ public:
 //         directly to an staff. Do not consume time
 class ImoAuxObj : public ImoScoreObj
 {
-protected:
-    ImoAuxObj(int objtype) : ImoScoreObj(objtype) {}
-
 public:
     virtual ~ImoAuxObj() {}
 
 protected:
-    //ImoAuxObj(ImoContentObj* UNUSED(pOwner), ImoId id, int objtype)
+    ImoAuxObj(int objtype) : ImoScoreObj(objtype) {}
     ImoAuxObj(ImoId id, int objtype)
         : ImoScoreObj(id, objtype)
     {
     }
+
+};
+
+//---------------------------------------------------------------------------------------
+// AuxRelObj: a type of AuxObj that is related to other AuxObjs of the same type.
+class ImoAuxRelObj : public ImoAuxObj
+{
+protected:
+    ImoAuxRelObj* m_prevARO;
+    ImoAuxRelObj* m_nextARO;
+
+    ImoAuxRelObj(int objtype)
+        : ImoAuxObj(objtype)
+        , m_prevARO(NULL)
+        , m_nextARO(NULL)
+    {
+    }
+    ImoAuxRelObj(ImoId id, int objtype)
+        : ImoAuxObj(id, objtype)
+        , m_prevARO(NULL)
+        , m_nextARO(NULL)
+    {
+    }
+
+
+public:
+    virtual ~ImoAuxRelObj();
+
+    //information
+    inline bool is_start_of_relation() { return m_prevARO == NULL; }
+    inline bool is_end_of_relation() { return m_nextARO == NULL; }
+
+protected:
+
+    void link_to_next_ARO(ImoAuxRelObj* pNext);
+    void set_prev_ARO(ImoAuxRelObj* pPrev);
+
 
 };
 
@@ -4440,6 +4481,82 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+// ImoLyric represents the lyrics info for one note
+class ImoLyric : public ImoAuxRelObj
+{
+protected:
+    int m_number;
+    int m_placement;
+    int m_numTextItems;
+
+    bool m_fLaughing;
+    bool m_fHumming;
+    bool m_fEndLine;
+    bool m_fEndParagraph;
+    bool m_fMelisma;
+    bool m_fHyphenation;
+
+    //children
+    // ImoLyricsTextInfo[]
+
+	friend class ImFactory;
+    ImoLyric()
+        : ImoAuxRelObj(k_imo_lyric)
+        , m_number(0)
+        , m_placement(k_placement_default)
+        , m_numTextItems(0)
+        , m_fLaughing(false)
+        , m_fHumming(false)
+        , m_fEndLine(false)
+        , m_fEndParagraph(false)
+        , m_fMelisma(false)
+        , m_fHyphenation(false)
+    {
+    }
+
+public:
+    virtual ~ImoLyric();
+
+    //getters
+    inline int get_number() { return m_number; }
+    inline int get_placement() { return m_placement; }
+    inline bool is_laughing() { return m_fLaughing; }
+    inline bool is_humming() { return m_fHumming; }
+    inline bool is_end_line() { return m_fEndLine; }
+    inline bool is_end_paragraph() { return m_fEndParagraph; }
+    inline bool has_hyphenation() { return m_fHyphenation; }
+    inline ImoLyric* get_prev_lyric() { return static_cast<ImoLyric*>(m_prevARO); }
+    inline ImoLyric* get_next_lyric() { return static_cast<ImoLyric*>(m_nextARO); }
+
+    //setters
+    inline void set_number(int number) { m_number = number; }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_laughing(bool value) { m_fLaughing = value; }
+    inline void set_humming(bool value) { m_fHumming = value; }
+    inline void set_end_line(bool value) { m_fEndLine = value; }
+    inline void set_end_paragraph(bool value) { m_fEndParagraph = value; }
+    inline void set_melisma(bool value) { m_fMelisma = value; }
+    inline void set_hyphenation(bool value) { m_fHyphenation = value; }
+
+    //information
+    inline int get_num_text_items() { return m_numTextItems; }
+    inline bool has_melisma() { return m_fMelisma; }
+
+    //data
+    ImoLyricsTextInfo* get_text_item(int i);
+
+protected:
+
+    friend class LyricMxlAnalyser;
+    friend class LyricAnalyser;
+    friend class LdpAnalyser;
+    void add_text_item(ImoLyricsTextInfo* pText);
+    void link_to_next_lyric(ImoLyric* pNext) { link_to_next_ARO(pNext); }
+    void set_prev_lyric(ImoLyric* pPrev) { set_prev_ARO(pPrev); }
+
+};
+
+//---------------------------------------------------------------------------------------
 // ImoLyrics represents the whole lyrics line for one voice.
 class ImoLyrics : public ImoRelObj
 {
@@ -4484,11 +4601,10 @@ protected:
     bool m_fHumming;
     bool m_fEndLine;
     bool m_fEndParagraph;
-    bool m_fExtend;
+    bool m_fMelisma;
 
     //children
     // ImoLyricsTextInfo[]
-    // ImoLyricsExtendInfo
 
 	friend class ImFactory;
     ImoLyricsData()
@@ -4500,7 +4616,7 @@ protected:
         , m_fHumming(false)
         , m_fEndLine(false)
         , m_fEndParagraph(false)
-        , m_fExtend(false)
+        , m_fMelisma(false)
     {
     }
 
@@ -4522,11 +4638,11 @@ public:
     inline void set_humming(bool value) { m_fHumming = value; }
     inline void set_end_line(bool value) { m_fEndLine = value; }
     inline void set_end_paragraph(bool value) { m_fEndParagraph = value; }
-    inline void set_extend(bool value) { m_fExtend = value; }
+    inline void set_melisma(bool value) { m_fMelisma = value; }
 
     //information
     inline int get_num_text_items() { return m_numTextItems; }
-    inline bool has_extend() { return m_fExtend; }
+    inline bool has_extend() { return m_fMelisma; }
 
     //data
     ImoLyricsTextInfo* get_text_item(int i);
@@ -4534,6 +4650,7 @@ public:
 protected:
 
     friend class LyricMxlAnalyser;
+    friend class LyricAnalyser;
     void add_text_item(ImoLyricsTextInfo* pText);
 
 };
@@ -4544,7 +4661,7 @@ class ImoLyricsTextInfo : public ImoSimpleObj
 protected:
     int m_syllableType;
     ImoTextInfo m_text;
-    string m_elision;
+    string m_elision;       //before this syllable
 //    string m_elisionFont;
 //    Color m_elisionColor;
 
@@ -4554,8 +4671,6 @@ protected:
         , m_syllableType(k_single)
     {
     }
-
-    friend class TextMxlAnalyser;
 
 
 public:
@@ -4579,20 +4694,6 @@ public:
     inline void set_syllable_language(const string& language) { m_text.set_language(language); }
     inline void set_elision_text(const string& text) { m_elision = text; }
 
-};
-
-//---------------------------------------------------------------------------------------
-class ImoLyricsExtendInfo : public ImoSimpleObj
-{
-protected:
-//    type %start-stop-continue;
-//    %print-style;
-
-	friend class ImFactory;
-    ImoLyricsExtendInfo() : ImoSimpleObj(k_imo_lyrics_extend_info) {}
-
-public:
-    virtual ~ImoLyricsExtendInfo() {}
 };
 
 

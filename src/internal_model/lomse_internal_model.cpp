@@ -361,7 +361,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
         m_TypeToName[k_imo_line_style] = "line-style";
-        m_TypeToName[k_imo_lyrics_extend_info] = "lyric-extend";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
@@ -415,6 +414,9 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_score_title] = "title";
         m_TypeToName[k_imo_text_box] = "text-box";
 
+        // ImoAuxRelObj (A)
+        m_TypeToName[k_imo_lyric] = "lyric";
+
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
@@ -440,6 +442,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_staffobj] = "non-valid";
         m_TypeToName[k_imo_staffobj_last] = "non-valid";
         m_TypeToName[k_imo_auxobj] = "non-valid";
+        m_TypeToName[k_imo_auxrelobj] = "non-valid";
         m_TypeToName[k_imo_auxobj_last] = "non-valid";
         m_TypeToName[k_imo_relobj] = "non-valid";
         m_TypeToName[k_imo_relobj_last] = "non-valid";
@@ -674,6 +677,33 @@ string ImoObj::to_string(bool fWithIds)
     exporter.set_remove_newlines(true);
     exporter.set_add_id(fWithIds);
     return exporter.get_source(this);
+}
+
+
+//=======================================================================================
+// ImoAuxRelObj implementation
+//=======================================================================================
+ImoAuxRelObj::~ImoAuxRelObj()
+{
+    if (m_nextARO)
+        m_nextARO->set_prev_ARO(m_prevARO);
+
+    if (m_prevARO)
+        m_prevARO->link_to_next_ARO(m_nextARO);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAuxRelObj::link_to_next_ARO(ImoAuxRelObj* pNext)
+{
+    m_nextARO = pNext;
+    if (pNext)
+        pNext->set_prev_ARO(this);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAuxRelObj::set_prev_ARO(ImoAuxRelObj* pPrev)
+{
+    m_prevARO = pPrev;
 }
 
 
@@ -2517,6 +2547,36 @@ ImoListItem::ImoListItem(Document* pDoc)
 //    else if (vObj)
 //        vObj->end_visit(this);
 //}
+
+
+//=======================================================================================
+// ImoLyric implementation
+//=======================================================================================
+ImoLyric::~ImoLyric()
+{
+}
+
+//---------------------------------------------------------------------------------------
+ImoLyricsTextInfo* ImoLyric::get_text_item(int iText)
+{
+    if (iText >= m_numTextItems)
+        return NULL;
+
+    for (int i=0; i < m_numTextItems; ++i)
+    {
+        ImoObj* pChild = get_child(i);
+        if (pChild->is_lyrics_text_info() && i==iText)
+            return static_cast<ImoLyricsTextInfo*>(pChild);
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoLyric::add_text_item(ImoLyricsTextInfo* pText)
+{
+    append_child_imo(pText);
+    m_numTextItems++;
+}
 
 
 //=======================================================================================

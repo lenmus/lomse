@@ -549,9 +549,10 @@ protected:
                                   int iCol, int iLine,
                                   ImoInstrument* pInstr);
 
-    void add_auxobjs_shapes_to_model(ImoObj* pAO, GmoShape* pStaffObjShape, int layer);
-    void add_auxobj_shape_to_model(GmoShape* pShape, int layer, int iSystem, int iCol,
-                                   int iInstr);
+    void add_relobjs_shapes_to_model(ImoObj* pAO, int layer);
+    void add_relauxobjs_shapes_to_model(const string& tag, int layer);
+    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iSystem, int iCol,
+                                int iInstr);
 
     //helpers
     inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }

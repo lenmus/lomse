@@ -50,7 +50,7 @@ namespace lomse
 // TupletEngraver implementation
 //---------------------------------------------------------------------------------------
 TupletEngraver::TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : RelAuxObjEngraver(libraryScope, pScoreMeter)
+    : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pTupletShape(NULL)
     , m_pTuplet(NULL)
 {

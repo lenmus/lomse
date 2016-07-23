@@ -70,6 +70,7 @@ public:
         , m_pDoc(NULL)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        m_libraryScope.set_unit_test(true);
     }
 
     ~LdpAnalyserTestFixture()    //TearDown fixture
@@ -2589,8 +2590,8 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // goFwd ----------------------------------------------------------------------------
-    // goBack ---------------------------------------------------------------------------
+    //@ goFwd ---------------------------------------------------------------------------
+    //@ goBack --------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoBackStart)
     {
@@ -2834,7 +2835,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // goFwd 2.0 ------------------------------------------------------------------------
+    //@ goFwd 2.0 -----------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, fwd_1)
     {
@@ -2863,7 +2864,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // clef -----------------------------------------------------------------------------
+    //@ clef ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef)
     {
@@ -3041,117 +3042,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // key ------------------------------------------------------------------------------
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKey)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(key G)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == k_key_G );
-        CHECK( pKeySignature->get_staff() == 0 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_key)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(key#10 G)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoObj* pImo = pIModel->get_root();
-        CHECK( pImo->get_id() == 10L );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKeyError)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        expected << "Line 0. Unknown key 'Sol'. Assumed 'C'." << endl;
-        parser.parse_text("(key Sol)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == k_key_C );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_LocationX)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(key d (dx 70))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == k_key_d );
-        CHECK( pKeySignature->get_staff() == 0 );
-        CHECK( pKeySignature->is_visible() );
-        CHECK( pKeySignature->get_user_location_x() == 70.0f );
-        CHECK( pKeySignature->get_user_location_y() == 0.0f );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_NoVisible)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(key E- noVisible)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == k_key_Ef );
-        CHECK( pKeySignature->get_user_location_x() == 0.0f );
-        CHECK( pKeySignature->get_user_location_y() == 0.0f );
-        CHECK( pKeySignature->is_visible() == false );
-
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    // instrument -----------------------------------------------------------------------
+    //@ instrument ----------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_Staves)
     {
@@ -3476,7 +3367,581 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // time signature -------------------------------------------------------------------
+    //@ key -----------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKey)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(key G)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        CHECK( pIModel->get_root()->is_key_signature() == true );
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != NULL );
+        CHECK( pKeySignature->get_key_type() == k_key_G );
+        CHECK( pKeySignature->get_staff() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_key)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(key#10 G)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_key_signature() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKeyError)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Unknown key 'Sol'. Assumed 'C'." << endl;
+        parser.parse_text("(key Sol)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != NULL );
+        CHECK( pKeySignature->get_key_type() == k_key_C );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_LocationX)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text("(key d (dx 70))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != NULL );
+        CHECK( pKeySignature->get_key_type() == k_key_d );
+        CHECK( pKeySignature->get_staff() == 0 );
+        CHECK( pKeySignature->is_visible() );
+        CHECK( pKeySignature->get_user_location_x() == 70.0f );
+        CHECK( pKeySignature->get_user_location_y() == 0.0f );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_NoVisible)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text("(key E- noVisible)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != NULL );
+        CHECK( pKeySignature->get_key_type() == k_key_Ef );
+        CHECK( pKeySignature->get_user_location_x() == 0.0f );
+        CHECK( pKeySignature->get_user_location_y() == 0.0f );
+        CHECK( pKeySignature->is_visible() == false );
+
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    //@ lyric ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_01)
+    {
+        //@ 01. lyric minimum content ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lyric \"te\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->is_laughing() == false );
+        CHECK( pImo->is_humming() == false );
+        CHECK( pImo->is_end_line() == false );
+        CHECK( pImo->is_end_paragraph() == false );
+        CHECK( pImo->has_melisma() == false );
+        CHECK( pImo->has_hyphenation() == false );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+        CHECK( pImo->get_num_text_items() == 1 );
+
+        ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "te" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
+
+        pSyl = pImo->get_text_item(1);
+        CHECK( pSyl == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_02)
+    {
+        //@ 02. id in lyric
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lyric#37 \"te\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_id() == 37L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_03)
+    {
+        //@ 03. lyric with two syllables
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lyric \"De\" \"A\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->is_laughing() == false );
+        CHECK( pImo->is_humming() == false );
+        CHECK( pImo->is_end_line() == false );
+        CHECK( pImo->is_end_paragraph() == false );
+        CHECK( pImo->has_hyphenation() == false );
+        CHECK( pImo->has_melisma() == false );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+        CHECK( pImo->get_num_text_items() == 2 );
+
+        ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "De" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
+
+        pSyl = pImo->get_text_item(1);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "A" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == true );
+        CHECK( pSyl->get_elision_text() == "0x203F" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_04)
+    {
+        //@ 04. lyric: error no syllable
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. <lyric>: Missing syllable text. <lyric> ignored." << endl;
+        parser.parse_text("(lyric (melisma))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_05)
+    {
+        //@ 05. lyric with hyphenation
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lyric \"De\" -)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->is_laughing() == false );
+        CHECK( pImo->is_humming() == false );
+        CHECK( pImo->is_end_line() == false );
+        CHECK( pImo->is_end_paragraph() == false );
+        CHECK( pImo->has_hyphenation() == true );
+        CHECK( pImo->has_melisma() == false );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+
+        ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "De" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
+
+        pSyl = pImo->get_text_item(1);
+        CHECK( pSyl == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_06)
+    {
+        //@ 06. lyric: error in hyphenation
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. <lyric>: Unknown parameter 'hyphen'. Ignored." << endl;
+        parser.parse_text("(lyric \"De\" hyphen)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->is_laughing() == false );
+        CHECK( pImo->is_humming() == false );
+        CHECK( pImo->is_end_line() == false );
+        CHECK( pImo->is_end_paragraph() == false );
+        CHECK( pImo->has_hyphenation() == false );
+        CHECK( pImo->has_melisma() == false );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+
+        ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "De" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
+
+        pSyl = pImo->get_text_item(1);
+        CHECK( pSyl == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_07)
+    {
+        //@ 07. lyric with melisma
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lyric \"De\" (melisma))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->is_laughing() == false );
+        CHECK( pImo->is_humming() == false );
+        CHECK( pImo->is_end_line() == false );
+        CHECK( pImo->is_end_paragraph() == false );
+        CHECK( pImo->has_hyphenation() == false );
+        CHECK( pImo->has_melisma() == true );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+
+        ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
+        CHECK( pSyl != NULL );
+        CHECK( pSyl->get_syllable_type() == ImoLyricsTextInfo::k_single );
+        CHECK( pSyl->get_syllable_text() == "De" );
+        CHECK( pSyl->get_syllable_language() == "" );
+        CHECK( pSyl->get_syllable_style() == NULL );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
+
+        pSyl = pImo->get_text_item(1);
+        CHECK( pSyl == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_08)
+    {
+        //@ 08. Note with attached lyric
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(n c4 e (lyric \"De\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_num_attachments() == 1 );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pImo != NULL );
+        CHECK( pImo->get_number() == 1 );
+        CHECK( pImo->get_prev_lyric() == NULL );
+        CHECK( pImo->get_next_lyric() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_09)
+    {
+        //@ 09. lyrics are linked
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric \"Ah\"))"
+            "(n d4 e (lyric \"Be\"))"
+            "(n e4 e (lyric \"Ce\"))"
+            ")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 0 );
+        CHECK( pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric1 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric1 != NULL );
+        CHECK( pLyric1->get_number() == 1 );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 1);
+        CHECK( pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric2 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric2 != NULL );
+        CHECK( pLyric2->get_number() == 1 );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 2);
+        CHECK( pNote->get_num_attachments() == 1 );
+        ImoLyric* pLyric3 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric3 != NULL );
+        CHECK( pLyric3->get_number() == 1 );
+
+        CHECK( pLyric1->get_prev_lyric() == NULL );
+        CHECK( pLyric1->get_next_lyric() == pLyric2 );
+        CHECK( pLyric2->get_prev_lyric() == pLyric1 );
+        CHECK( pLyric2->get_next_lyric() == pLyric3 );
+        CHECK( pLyric3->get_prev_lyric() == pLyric2 );
+        CHECK( pLyric3->get_next_lyric() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_10)
+    {
+        //@ 10. lyrics in different lines are linked by lines
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric 1 \"Ah1\")(lyric 2 \"Ah2\"))"
+            "(n d4 e (lyric 1 \"Be1\")(lyric 2 \"Be2\"))"
+            "(n e4 e (lyric 1 \"Ce1\")(lyric 2 \"Ce2\"))"
+            ")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 0 );
+        CHECK( pNote->get_num_attachments() == 2 );
+        ImoLyric* pLyric11 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric11 != NULL );
+        CHECK( pLyric11->get_number() == 1 );
+        ImoLyric* pLyric12 = dynamic_cast<ImoLyric*>( pNote->get_attachment(1) );
+        CHECK( pLyric12 != NULL );
+        CHECK( pLyric12->get_number() == 2 );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 1);
+        CHECK( pNote->get_num_attachments() == 2 );
+        ImoLyric* pLyric21 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric21 != NULL );
+        CHECK( pLyric21->get_number() == 1 );
+        ImoLyric* pLyric22 = dynamic_cast<ImoLyric*>( pNote->get_attachment(1) );
+        CHECK( pLyric22 != NULL );
+        CHECK( pLyric22->get_number() == 2 );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>(*it);
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == 2);
+        CHECK( pNote->get_num_attachments() == 2 );
+        ImoLyric* pLyric31 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
+        CHECK( pLyric31 != NULL );
+        CHECK( pLyric31->get_number() == 1 );
+        ImoLyric* pLyric32 = dynamic_cast<ImoLyric*>( pNote->get_attachment(1) );
+        CHECK( pLyric32 != NULL );
+        CHECK( pLyric32->get_number() == 2 );
+
+        CHECK( pLyric11->get_prev_lyric() == NULL );
+        CHECK( pLyric11->get_next_lyric() == pLyric21 );
+        CHECK( pLyric21->get_prev_lyric() == pLyric11 );
+        CHECK( pLyric21->get_next_lyric() == pLyric31 );
+        CHECK( pLyric31->get_prev_lyric() == pLyric21 );
+        CHECK( pLyric31->get_next_lyric() == NULL );
+
+        CHECK( pLyric12->get_prev_lyric() == NULL );
+        CHECK( pLyric12->get_next_lyric() == pLyric22 );
+        CHECK( pLyric22->get_prev_lyric() == pLyric12 );
+        CHECK( pLyric22->get_next_lyric() == pLyric32 );
+        CHECK( pLyric32->get_prev_lyric() == pLyric22 );
+        CHECK( pLyric32->get_next_lyric() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    //@ time signature -------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature)
     {
@@ -5072,7 +5537,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // beam -----------------------------------------------------------------------------
+    //@ beam ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Beam_Start)
     {
@@ -5386,7 +5851,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // beam (old syntax) ----------------------------------------------------------------
+    //@ beam (old syntax) ---------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamOld_ErrorInvalidG)
     {
@@ -5517,7 +5982,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // AutoBeamer -----------------------------------------------------------------------
+    //@ AutoBeamer ----------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_AutoBeamer_SE)
     {
@@ -5596,7 +6061,7 @@ SUITE(LdpAnalyserTest)
         delete pNote2;
     }
 
-    // tuplet new syntax ----------------------------------------------------------------
+    //@ tuplet new syntax ---------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_TypeError)
     {
@@ -5870,7 +6335,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // tuplet old full syntax -----------------------------------------------------------
+    //@ tuplet old full syntax ----------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_TypeError)
     {
@@ -6160,7 +6625,7 @@ SUITE(LdpAnalyserTest)
     }
 
 
-    // tuplet (old tn/t- syntax) --------------------------------------------------------
+    //@ tuplet (old tn/t- syntax) -------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ErrorInvalidParameter)
     {
@@ -6304,7 +6769,7 @@ SUITE(LdpAnalyserTest)
     }
 
 
-    // timeModification -----------------------------------------------------------------
+    //@ timeModification ----------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, timeModification_0)
     {
@@ -6344,7 +6809,8 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_time_modification_dto() == true );
-        ImoTimeModificationDto* pInfo = dynamic_cast<ImoTimeModificationDto*>( pIModel->get_root() );
+        ImoTimeModificationDto* pInfo =
+                dynamic_cast<ImoTimeModificationDto*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_top_number() == 2 );
         CHECK( pInfo->get_bottom_number() == 3 );
@@ -6353,7 +6819,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // voice (element) ------------------------------------------------------------------
+    //@ voice (element) -----------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Voice_Ok)
     {
@@ -6399,7 +6865,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // staffNum (element) ---------------------------------------------------------------
+    //@ staffNum (element) --------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StaffNum_Ok)
     {
@@ -6445,7 +6911,7 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-    // rest (full) ----------------------------------------------------------------------
+    //@ rest (full) ---------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_Full)
     {

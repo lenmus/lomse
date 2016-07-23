@@ -45,7 +45,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          LUnits uStaffLeft, LUnits uStaffRight)
-    : RelAuxObjEngraver(libraryScope, pScoreMeter)
+    : RelObjEngraver(libraryScope, pScoreMeter)
     , m_uStaffLeft(uStaffLeft)
     , m_uStaffRight(uStaffRight)
     , m_numShapes(0)

@@ -48,7 +48,7 @@ class GmoShapeNote;
 class GmoShapeAccidentals;
 
 //---------------------------------------------------------------------------------------
-class ChordEngraver : public RelAuxObjEngraver
+class ChordEngraver : public RelObjEngraver
 {
 public:
     //public for unit tests
@@ -85,7 +85,7 @@ public:
     ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes);
     virtual ~ChordEngraver();
 
-    //implementation of virtual methods from RelAuxObjEngraver
+    //implementation of virtual methods from RelObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,

@@ -47,7 +47,7 @@ namespace lomse
 // BeamEngraver implementation
 //---------------------------------------------------------------------------------------
 BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : RelAuxObjEngraver(libraryScope, pScoreMeter)
+    : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pBeamShape(NULL)
 {
 }

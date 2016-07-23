@@ -27,13 +27,15 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_BEAM_ENGRAVER_H__        //to avoid nested includes
-#define __LOMSE_BEAM_ENGRAVER_H__
+#ifndef __LOMSE_LYRIC_ENGRAVER_H__        //to avoid nested includes
+#define __LOMSE_LYRIC_ENGRAVER_H__
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
+
 #include <list>
+#include <vector>
 using namespace std;
 
 namespace lomse
@@ -41,81 +43,64 @@ namespace lomse
 
 //forward declarations
 class ImoObj;
-class GmoShapeBeam;
+class GmoShapeLyrics;
 class ScoreMeter;
-class ImoBeam;
+class ImoLyric;
 class ImoNote;
 class GmoShapeNote;
-class ImoNoteRest;
 class GmoShape;
+class InstrumentEngraver;
 
 
 //---------------------------------------------------------------------------------------
-class BeamEngraver : public RelObjEngraver
+class LyricEngraver : public AuxRelObjEngraver
 {
 protected:
-    GmoShapeBeam* m_pBeamShape;
-    ImoBeam* m_pBeam;
-    std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
-
-    ShapeBoxInfo m_shapesInfo[2];
-    std::list<LUnits> m_segments;
+    GmoShapeLyrics* m_pLyricsShape;
+    InstrumentEngraver* m_pInstrEngrv;
+    list< pair<ImoLyric*, GmoShape*> > m_lyrics;
+    vector<ShapeBoxInfo*> m_shapesInfo;
+    vector<LUnits> m_staffTops;     //relative to StaffObj shape
     UPoint m_origin;
     USize m_size;
-    LUnits m_uBeamThickness;
-    bool m_fBeamAbove;
-	UPoint m_outerLeftPoint;
-    UPoint m_outerRightPoint;
+    bool m_fLyricAbove;
 
 public:
-    BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
-    ~BeamEngraver();
+    LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  InstrumentEngraver* pInstrEngrv);
+    ~LyricEngraver();
 
-    //implementation of virtual methods from RelObjEngraver
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    //implementation of virtual methods from AuxRelObjEngraver
+    void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
                             LUnits xRight, LUnits xLeft, LUnits yTop);
-    void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    void set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
                              LUnits xRight, LUnits xLeft, LUnits yTop);
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
                           LUnits xRight, LUnits xLeft, LUnits yTop);
     int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return 1; }
-    ShapeBoxInfo* get_shape_box_info(int UNUSED(i))
+    int get_num_shapes() { return int(m_shapesInfo.size()); }
+    ShapeBoxInfo* get_shape_box_info(int i)
     {
-        //AWARE: Only one shape. Param i MUST be always 0
-        return &m_shapesInfo[0];
+        return m_shapesInfo[i];
     }
 
 
 protected:
-    void create_shape();
-    void add_shape_to_noterests();
-    void reposition_rests();
-    void decide_on_stems_direction();
-    void decide_beam_position();
-    void change_stems_direction();
-    void adjust_stems_lengths();
-    void compute_beam_segments();
-	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
-    void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
-    void make_segments_relative();
 
-    bool m_fStemForced;     //at least one stem forced
-    bool m_fStemMixed;      //not all stems in the same direction
-    bool m_fStemsDown;      //stems direction down
-    int m_numStemsDown;     //number of noteheads with stem down
-    int m_numNotes;         //total number of notes
-    int m_averagePosOnStaff;
+    void create_shape(int note, GmoShapeNote* pNoteShape, ImoLyric* pLyric,
+                      GmoShapeNote* pNextNoteShape);
+    void decide_placement();
+
 };
 
 
 }   //namespace lomse
 
-#endif    // __LOMSE_BEAM_ENGRAVER_H__
+#endif    // __LOMSE_LYRIC_ENGRAVER_H__
 

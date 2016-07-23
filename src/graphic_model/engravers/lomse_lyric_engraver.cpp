@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_lyrics_engraver.h"
+#include "lomse_lyric_engraver.h"
 
 #include "lomse_glyphs.h"
 #include "lomse_score_meter.h"
@@ -48,34 +48,32 @@ namespace lomse
 {
 
 //=======================================================================================
-// LyricsEngraver implementation
+// LyricEngraver implementation
 //=======================================================================================
-LyricsEngraver::LyricsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                               InstrumentEngraver* pInstrEngrv)
-    : RelObjEngraver(libraryScope, pScoreMeter)
+LyricEngraver::LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                             InstrumentEngraver* pInstrEngrv)
+    : AuxRelObjEngraver(libraryScope, pScoreMeter)
     , m_pLyricsShape(NULL)
     , m_pInstrEngrv(pInstrEngrv)
 {
 }
 
 //---------------------------------------------------------------------------------------
-LyricsEngraver::~LyricsEngraver()
+LyricEngraver::~LyricEngraver()
 {
-    m_notes.clear();
+    m_lyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void LyricsEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                        int iSystem, int iCol, LUnits UNUSED(xRight),
-                                        LUnits UNUSED(xLeft), LUnits yTop)
+void LyricEngraver::set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
+                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                       int iSystem, int iCol, LUnits UNUSED(xRight),
+                                       LUnits UNUSED(xLeft), LUnits yTop)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_pLyrics = dynamic_cast<ImoLyrics*>(pRO);
-
-    ImoNote* pNR = dynamic_cast<ImoNote*>(pSO);
-    m_notes.push_back( make_pair(pNR, pStaffObjShape) );
+    ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
+    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
@@ -83,14 +81,14 @@ void LyricsEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void LyricsEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                         GmoShape* pStaffObjShape, int iInstr,
-                                         int UNUSED(iStaff), int iSystem, int iCol,
-                                         LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                         LUnits yTop)
+void LyricEngraver::set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
+                                        GmoShape* pStaffObjShape, int iInstr,
+                                        int UNUSED(iStaff), int iSystem, int iCol,
+                                        LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                        LUnits yTop)
 {
-    ImoNote* pNR = dynamic_cast<ImoNote*>(pSO);
-    m_notes.push_back( make_pair(pNR, pStaffObjShape) );
+    ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
+    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
@@ -98,14 +96,14 @@ void LyricsEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pS
 }
 
 //---------------------------------------------------------------------------------------
-void LyricsEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int iInstr,
-                                      int UNUSED(iStaff), int iSystem, int iCol,
-                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                      LUnits yTop)
+void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
+                                     GmoShape* pStaffObjShape, int iInstr,
+                                     int UNUSED(iStaff), int iSystem, int iCol,
+                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                     LUnits yTop)
 {
-    ImoNote* pNR = dynamic_cast<ImoNote*>(pSO);
-    m_notes.push_back( make_pair(pNR, pStaffObjShape) );
+    ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
+    m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
@@ -113,32 +111,32 @@ void LyricsEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-int LyricsEngraver::create_shapes(Color color)
+int LyricEngraver::create_shapes(Color color)
 {
     m_color = color;
 
-    list< pair<ImoNote*, GmoShape*> >::iterator it;
+    list< pair<ImoLyric*, GmoShape*> >::iterator it;
     int i = 0;
-    for(it=m_notes.begin(); it != m_notes.end(); ++it, ++i)
+    for(it=m_lyrics.begin(); it != m_lyrics.end(); ++it, ++i)
 	{
-        ImoNote* pNote = dynamic_cast<ImoNote*>(it->first);
+        ImoLyric* pLyric = dynamic_cast<ImoLyric*>(it->first);
         GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(it->second);
 
         GmoShapeNote* pNextNoteShape = NULL;
-        list< pair<ImoNote*, GmoShape*> >::iterator nextIt = it;
+        list< pair<ImoLyric*, GmoShape*> >::iterator nextIt = it;
         ++nextIt;
-        if (nextIt != m_notes.end())
+        if (nextIt != m_lyrics.end())
             pNextNoteShape = dynamic_cast<GmoShapeNote*>(nextIt->second);
 
-        create_shape(i, pNoteShape, pNote, pNextNoteShape);
+        create_shape(i, pNoteShape, pLyric, pNextNoteShape);
     }
-    return int(m_notes.size());
+    return int(m_lyrics.size());
 
 };
 
 //---------------------------------------------------------------------------------------
-void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* pNote,
-                                  GmoShapeNote* pNextNoteShape)
+void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* pLyric,
+                                 GmoShapeNote* pNextNoteShape)
 {
     LUnits x = pNoteShape->get_left();
 
@@ -146,13 +144,12 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
     //      of a fixed amount (60.0f)
     //TODO: line increment should be text shape height + 0.5f instead o a fixed
     //      amount (23.0f)
-    int lineNum = m_pLyrics->get_number();
+    int lineNum = pLyric->get_number();
     int tenths = 60.0f + 23.0f * float(lineNum);
     LUnits y = m_staffTops[iNote] + pNoteShape->get_top() + tenths_to_logical(tenths);
 
     //get text
-    ImoLyricsData* pData = static_cast<ImoLyricsData*>(m_pLyrics->get_data_for(pNote));
-    ImoLyricsTextInfo* pText = pData->get_text_item(0);
+    ImoLyricsTextInfo* pText = pLyric->get_text_item(0);
     const string& text = pText->get_syllable_text();
     const string& language = pText->get_syllable_language();
     ImoStyle* pStyle = pText->get_syllable_style();
@@ -163,11 +160,11 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
 
     //create container shape
     ShapeId idx = 0;
-    m_pLyricsShape = LOMSE_NEW GmoShapeLyrics(m_pLyrics, idx, Color(0,0,0) /*unused*/,
+    m_pLyricsShape = LOMSE_NEW GmoShapeLyrics(pLyric, idx, Color(0,0,0) /*unused*/,
                                               m_libraryScope);
 
     //add shape for text
-    GmoShape* pSyllableShape = LOMSE_NEW GmoShapeText(m_pLyrics, idx, text, pStyle,
+    GmoShape* pSyllableShape = LOMSE_NEW GmoShapeText(pLyric, idx, text, pStyle,
                                                       language, x, y, m_libraryScope);
 
     //center syllable on note head
@@ -180,10 +177,9 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
 
 
     //add shape for hyphenation, if needed
-    if (pText->get_syllable_type() == ImoLyrics::k_begin
-        || pText->get_syllable_type() == ImoLyrics::k_middle)
+    if (pLyric->has_hyphenation() && !pLyric->has_melisma())
     {
-        GmoShape* pShape = LOMSE_NEW GmoShapeText(m_pLyrics, idx, "-", pStyle,
+        GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx, "-", pStyle,
                                                   language, x, y, m_libraryScope);
 
         //shift shape to center between this and next syllable
@@ -198,8 +194,8 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
         x = pShape->get_left() + pShape->get_width();
     }
 
-    //add shape for extend line, if needed
-    if (pData->has_extend())
+    //add shape for melisma line, if needed
+    if (pLyric->has_melisma())
     {
         LUnits xStart = x + tenths_to_logical(3.0f);;
         LUnits xEnd;
@@ -207,14 +203,16 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
         {
             xEnd = pNextNoteShape->get_left() - tenths_to_logical(20.0f);
             if (xEnd < xStart)
-                xEnd = m_pInstrEngrv->get_staves_right();     //TODO
+                //xEnd = m_pInstrEngrv->get_staves_right();     //TODO
+                xEnd = pNextNoteShape->get_left();
         }
         else
+            //TODO: Melisma line must extend until last note in this voice
             xEnd = xStart + tenths_to_logical(60.0f);     //TODO
 
         LUnits width = tenths_to_logical(1.0f);     //TODO engraving option
         LUnits boundsExtraWidth = tenths_to_logical(0.5f);
-        GmoShape* pShape = LOMSE_NEW GmoShapeLine(m_pLyrics, idx, xStart, y, xEnd, y,
+        GmoShape* pShape = LOMSE_NEW GmoShapeLine(pLyric, idx, xStart, y, xEnd, y,
                                         width, boundsExtraWidth, k_line_solid, color,
                                         k_edge_normal, k_cap_none, k_cap_none);
 
@@ -229,7 +227,7 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
 }
 
 //---------------------------------------------------------------------------------------
-void LyricsEngraver::decide_placement()
+void LyricEngraver::decide_placement()
 {
 }
 

@@ -83,6 +83,7 @@ protected:
 
     friend class LineEngraver;
     friend class LyricsEngraver;
+    friend class LyricEngraver;
     GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
                  LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
                  LUnits uWidth, LUnits uBoundsExtraWidth, ELineStyle nStyle,

@@ -41,6 +41,7 @@ class ScoreMeter;
 class GmoShape;
 class ImoRelObj;
 class ImoStaffObj;
+class ImoAuxRelObj;
 
 //---------------------------------------------------------------------------------------
 // base class for all engravers
@@ -89,21 +90,21 @@ struct ShapeBoxInfo
 
 
 //---------------------------------------------------------------------------------------
-// base class for all realtion auxiliary objects' engravers
-class RelAuxObjEngraver : public Engraver
+// base class for all relation objects' engravers
+class RelObjEngraver : public Engraver
 {
 protected:
     GmoShape* m_pShape;
     Color m_color;
 
 public:
-    RelAuxObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+    RelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
         , m_pShape(NULL)
         , m_color( Color(0,0,0) )
     {
     }
-    virtual ~RelAuxObjEngraver() {}
+    virtual ~RelObjEngraver() {}
 
     virtual void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
@@ -116,6 +117,45 @@ public:
                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
                                      LUnits UNUSED(yTop)) {}
     virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                  int iSystem, int iCol,
+                                  LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
+    virtual int create_shapes(Color color=Color(0,0,0)) = 0;
+    virtual int get_num_shapes() = 0;
+    virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
+    virtual void set_prolog_width(LUnits UNUSED(width)) {}
+
+    virtual GmoShape* get_shape() { return m_pShape; }
+};
+
+//---------------------------------------------------------------------------------------
+// base class for all auxiliary relation objects' engravers
+class AuxRelObjEngraver : public Engraver
+{
+protected:
+    GmoShape* m_pShape;
+    Color m_color;
+
+public:
+    AuxRelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+        : Engraver(libraryScope, pScoreMeter)
+        , m_pShape(NULL)
+        , m_color( Color(0,0,0) )
+    {
+    }
+    virtual ~AuxRelObjEngraver() {}
+
+    virtual void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
+                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                    int iSystem, int iCol,
+                                    LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
+    virtual void set_middle_staffobj(ImoAuxRelObj* UNUSED(pARO), ImoStaffObj* UNUSED(pSO),
+                                     GmoShape* UNUSED(pStaffObjShape),
+                                     int UNUSED(iInstr), int UNUSED(iStaff),
+                                     int UNUSED(iSystem), int UNUSED(iCol),
+                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                     LUnits UNUSED(yTop)) {}
+    virtual void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol,
                                   LUnits xRight, LUnits xLeft, LUnits yTop) = 0;

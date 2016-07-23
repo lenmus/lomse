@@ -53,7 +53,7 @@ class InstrumentEngraver;
 
 
 //---------------------------------------------------------------------------------------
-class LyricsEngraver : public RelAuxObjEngraver
+class LyricsEngraver : public RelObjEngraver
 {
 protected:
     GmoShapeLyrics* m_pLyricsShape;
@@ -71,7 +71,7 @@ public:
                    InstrumentEngraver* pInstrEngrv);
     ~LyricsEngraver();
 
-    //implementation of virtual methods from RelAuxObjEngraver
+    //implementation of virtual methods from RelObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,

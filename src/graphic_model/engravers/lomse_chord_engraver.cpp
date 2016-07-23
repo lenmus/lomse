@@ -51,7 +51,7 @@ namespace lomse
 //=======================================================================================
 ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                              int numNotes)
-    : RelAuxObjEngraver(libraryScope, pScoreMeter)
+    : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pBaseNoteData(NULL)
     , m_numNotesMissing(numNotes)
 {
