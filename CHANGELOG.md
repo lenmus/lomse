@@ -10,6 +10,9 @@
 
 ##### COMPATIBLE CHANGES
 
+- The internal model for lyrics has been replaced by a new model, to allow
+  for better layout of lyrics.
+- Added support in LDP for lyrics.
 - Added more symbols for fermata.
 - Added support in LDP for articulations (accents & stress marks).
 - Added support in LDP for dynamics marks.

@@ -68,7 +68,6 @@
 #include "lomse_dynamics_mark_engraver.h"
 #include "lomse_ornament_engraver.h"
 #include "lomse_technical_engraver.h"
-#include "lomse_lyrics_engraver.h"
 #include "lomse_lyric_engraver.h"
 
 
@@ -1536,7 +1535,8 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
 void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                               const string& tag, GmoShape* pStaffObjShape,
                                               int iInstr, int iStaff, int iSystem,
-                                              int iCol, int iLine, ImoInstrument* pInstr)
+                                              int iCol, int UNUSED(iLine),
+                                              ImoInstrument* UNUSED(pInstr))
 {
     //factory method to create the engraver for AuxRelObjs
 
@@ -1570,7 +1570,8 @@ void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* p
 void ShapesCreator::continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                               const string& tag, GmoShape* pStaffObjShape,
                                               int iInstr, int iStaff, int iSystem,
-                                              int iCol, int iLine, ImoInstrument* pInstr)
+                                              int iCol, int UNUSED(iLine),
+                                              ImoInstrument* UNUSED(pInstr))
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1587,8 +1588,9 @@ void ShapesCreator::continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj
 void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                                const string& tag, GmoShape* pStaffObjShape,
                                                int iInstr, int iStaff, int iSystem,
-                                               int iCol, int iLine, LUnits prologWidth,
-                                               ImoInstrument* pInstr)
+                                               int iCol, int UNUSED(iLine),
+                                               LUnits prologWidth,
+                                               ImoInstrument* UNUSED(pInstr))
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
