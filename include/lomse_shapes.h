@@ -202,7 +202,6 @@ class GmoShapeLyrics : public GmoCompositeShape
 protected:
     LibraryScope& m_libraryScope;
 
-    friend class LyricsEngraver;
     friend class LyricEngraver;
     GmoShapeLyrics(ImoObj* pCreatorImo, ShapeId idx, Color color,
                    LibraryScope& libraryScope)

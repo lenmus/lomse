@@ -55,7 +55,6 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class TextEngraver;
-    friend class LyricsEngraver;
     friend class LyricEngraver;
     GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                  ImoStyle* pStyle, const string& language,

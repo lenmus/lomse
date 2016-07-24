@@ -380,7 +380,6 @@ const string& ImoObj::get_name(int type)
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
-        m_TypeToName[k_imo_lyrics_data] = "lyrics-data";
         m_TypeToName[k_imo_slur_data] = "slur-data";
         m_TypeToName[k_imo_tie_data] = "tie-data";
         m_TypeToName[k_imo_tuplet_data] = "tuplet-data";
@@ -420,7 +419,6 @@ const string& ImoObj::get_name(int type)
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
-        m_TypeToName[k_imo_lyrics] = "lyrics";
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
@@ -2573,41 +2571,6 @@ ImoLyricsTextInfo* ImoLyric::get_text_item(int iText)
 
 //---------------------------------------------------------------------------------------
 void ImoLyric::add_text_item(ImoLyricsTextInfo* pText)
-{
-    append_child_imo(pText);
-    m_numTextItems++;
-}
-
-
-//=======================================================================================
-// ImoLyrics implementation
-//=======================================================================================
-void ImoLyrics::reorganize_after_object_deletion()
-{
-    //Nothing to do. The lyrics will be removed when only one note.
-    //TODO: But this is wrong!
-}
-
-
-//=======================================================================================
-// ImoLyricsData implementation
-//=======================================================================================
-ImoLyricsTextInfo* ImoLyricsData::get_text_item(int iText)
-{
-    if (iText >= m_numTextItems)
-        return NULL;
-
-    for (int i=0; i < m_numTextItems; ++i)
-    {
-        ImoObj* pChild = get_child(i);
-        if (pChild->is_lyrics_text_info() && i==iText)
-            return static_cast<ImoLyricsTextInfo*>(pChild);
-    }
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoLyricsData::add_text_item(ImoLyricsTextInfo* pText)
 {
     append_child_imo(pText);
     m_numTextItems++;

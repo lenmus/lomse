@@ -201,10 +201,18 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         LUnits xEnd;
         if (pNextNoteShape)
         {
-            xEnd = pNextNoteShape->get_left() - tenths_to_logical(20.0f);
+            xEnd = pNextNoteShape->get_left();
             if (xEnd < xStart)
-                //xEnd = m_pInstrEngrv->get_staves_right();     //TODO
-                xEnd = pNextNoteShape->get_left();
+            {
+                //note is in next system. Melisma line to end of current system
+                xEnd = m_pInstrEngrv->get_staves_right();
+            }
+            else
+            {
+                xEnd -= tenths_to_logical(20.0f);
+                if (xEnd < xStart)
+                    xEnd = pNextNoteShape->get_left();
+            }
         }
         else
             //TODO: Melisma line must extend until last note in this voice

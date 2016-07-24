@@ -92,7 +92,6 @@ class ImoLink;
 class ImoList;
 class ImoListItem;
 class ImoLyrics;
-class ImoLyricsData;
 class ImoLyricsTextInfo;
 class ImoMultiColumn;
 class ImoMusicData;
@@ -452,7 +451,7 @@ class ImoWrapperBox;
 
                 // ImoRelDataObj (A)
                 k_imo_reldataobj,
-                    k_imo_beam_data, k_imo_lyrics_data, k_imo_slur_data,
+                    k_imo_beam_data, k_imo_slur_data,
                     k_imo_tie_data, k_imo_tuplet_data,
                 k_imo_reldataobj_last,
 
@@ -518,7 +517,7 @@ class ImoWrapperBox;
 
                     // ImoRelObj (A)
                     k_imo_relobj,
-                        k_imo_beam, k_imo_chord, k_imo_lyrics, k_imo_slur, k_imo_tie,
+                        k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
                         k_imo_tuplet,
                     k_imo_relobj_last,
 
@@ -839,8 +838,6 @@ public:
 	inline bool is_list() { return m_objtype == k_imo_list; }
 	inline bool is_listitem() { return m_objtype == k_imo_listitem; }
 	inline bool is_lyric() { return m_objtype == k_imo_lyric; }
-	inline bool is_lyrics() { return m_objtype == k_imo_lyrics; }
-	inline bool is_lyrics_data() { return m_objtype == k_imo_lyrics_data; }
 	inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
     inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
     inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
@@ -4550,108 +4547,10 @@ protected:
     friend class LyricMxlAnalyser;
     friend class LyricAnalyser;
     friend class LdpAnalyser;
+    friend class MxlAnalyser;
     void add_text_item(ImoLyricsTextInfo* pText);
     void link_to_next_lyric(ImoLyric* pNext) { link_to_next_ARO(pNext); }
     void set_prev_lyric(ImoLyric* pPrev) { set_prev_ARO(pPrev); }
-
-};
-
-//---------------------------------------------------------------------------------------
-// ImoLyrics represents the whole lyrics line for one voice.
-class ImoLyrics : public ImoRelObj
-{
-protected:
-    int m_number;
-
-    friend class ImFactory;
-    ImoLyrics() : ImoRelObj(k_imo_lyrics) {}
-
-public:
-    virtual ~ImoLyrics() {}
-
-    //type of syllable
-    enum { k_single, k_begin, k_end, k_middle, };
-
-    //getters
-    inline int get_number() { return m_number; }
-
-    //setters
-    inline void set_number(int number) { m_number = number; }
-
-    //overrides for ImoRelObj
-    void reorganize_after_object_deletion();
-    int get_min_number_for_autodelete() { return 0; }
-};
-
-//---------------------------------------------------------------------------------------
-// Lyrics info for one note
-class ImoLyricsData : public ImoRelDataObj
-{
-protected:
-    int m_number;
-    int m_placement;
-//    string m_name;
-//    %justify;
-//    %position;
-//    %color; <-- in parent ScoreObj
-//    %print-object;
-    int m_numTextItems;
-
-    bool m_fLaughing;
-    bool m_fHumming;
-    bool m_fEndLine;
-    bool m_fEndParagraph;
-    bool m_fMelisma;
-
-    //children
-    // ImoLyricsTextInfo[]
-
-	friend class ImFactory;
-    ImoLyricsData()
-        : ImoRelDataObj(k_imo_lyrics_data)
-        , m_number(0)
-        , m_placement(k_placement_default)
-        , m_numTextItems(0)
-        , m_fLaughing(false)
-        , m_fHumming(false)
-        , m_fEndLine(false)
-        , m_fEndParagraph(false)
-        , m_fMelisma(false)
-    {
-    }
-
-public:
-    virtual ~ImoLyricsData() {}
-
-    //getters
-    inline int get_number() { return m_number; }
-    inline int get_placement() { return m_placement; }
-    inline bool is_laughing() { return m_fLaughing; }
-    inline bool is_humming() { return m_fHumming; }
-    inline bool is_end_line() { return m_fEndLine; }
-    inline bool is_end_paragraph() { return m_fEndParagraph; }
-
-    //setters
-    inline void set_number(int number) { m_number = number; }
-    inline void set_placement(int placement) { m_placement = placement; }
-    inline void set_laughing(bool value) { m_fLaughing = value; }
-    inline void set_humming(bool value) { m_fHumming = value; }
-    inline void set_end_line(bool value) { m_fEndLine = value; }
-    inline void set_end_paragraph(bool value) { m_fEndParagraph = value; }
-    inline void set_melisma(bool value) { m_fMelisma = value; }
-
-    //information
-    inline int get_num_text_items() { return m_numTextItems; }
-    inline bool has_extend() { return m_fMelisma; }
-
-    //data
-    ImoLyricsTextInfo* get_text_item(int i);
-
-protected:
-
-    friend class LyricMxlAnalyser;
-    friend class LyricAnalyser;
-    void add_text_item(ImoLyricsTextInfo* pText);
 
 };
 

@@ -1452,13 +1452,6 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
             break;
         }
 
-        case k_imo_lyrics:
-        {
-            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-            pEngrv = LOMSE_NEW LyricsEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
-            break;
-        }
-
         case k_imo_slur:
         {
             InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
