@@ -51,7 +51,7 @@ class GmoShape;
 
 
 //---------------------------------------------------------------------------------------
-class BeamEngraver : public RelAuxObjEngraver
+class BeamEngraver : public RelObjEngraver
 {
 protected:
     GmoShapeBeam* m_pBeamShape;
@@ -71,7 +71,7 @@ public:
     BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~BeamEngraver();
 
-    //implementation of virtual methods from RelAuxObjEngraver
+    //implementation of virtual methods from RelObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,

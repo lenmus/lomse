@@ -46,7 +46,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            InstrumentEngraver* pInstrEngrv)
-    : RelAuxObjEngraver(libraryScope, pScoreMeter)
+    : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
     , m_numShapes(0)
     , m_uPrologWidth(0.0f)

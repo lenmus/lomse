@@ -2519,8 +2519,8 @@ public:
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLyricsData* pData = static_cast<ImoLyricsData*>(
-                                    ImFactory::inject(k_imo_lyrics_data, pDoc));
+        ImoLyric* pData = static_cast<ImoLyric*>(
+                                    ImFactory::inject(k_imo_lyric, pDoc) );
 
         // atrrib: number
         int num = 1;
@@ -2538,7 +2538,7 @@ public:
 
         // [syllabic]
         if (get_optional("syllabic"))
-            set_syllabic(pText);
+            set_syllabic(pText, pData);
 
         // text
         if (!analyse_mandatory("text", pText))
@@ -2549,16 +2549,18 @@ public:
 
         // [extend]
         if (get_optional("extend"))
-            pData->set_extend(true);
+            pData->set_melisma(true);
 
         m_pAnalyser->add_lyrics_data(pNote, pData);
+        add_to_model(pData);
+
         return pData;
     }
 
 protected:
 
     //-----------------------------------------------------------------------------------
-    void set_placement(ImoLyricsData* pImo)
+    void set_placement(ImoLyric* pImo)
     {
         string type = get_attribute("placement");
         if (type == "above")
@@ -2573,17 +2575,23 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void set_syllabic(ImoLyricsTextInfo* pImo)
+    void set_syllabic(ImoLyricsTextInfo* pImo, ImoLyric* pLyric)
     {
         string value = m_childToAnalyse.value();
         if (value == "single")
             pImo->set_syllable_type(ImoLyricsTextInfo::k_single);
         else if (value == "begin")
+        {
             pImo->set_syllable_type(ImoLyricsTextInfo::k_begin);
+            pLyric->set_hyphenation(true);
+        }
         else if (value == "end")
             pImo->set_syllable_type(ImoLyricsTextInfo::k_end);
         else if (value == "middle")
+        {
             pImo->set_syllable_type(ImoLyricsTextInfo::k_middle);
+            pLyric->set_hyphenation(true);
+        }
         else
         {
             report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
@@ -4859,6 +4867,7 @@ MxlAnalyser::~MxlAnalyser()
     delete_relation_builders();
     m_NameToEnum.clear();
     m_lyrics.clear();
+    m_lyricIndex.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -4942,36 +4951,41 @@ void MxlAnalyser::clear_pending_relations()
 //    m_pTupletsBuilder->clear_pending_items();
 
     m_lyrics.clear();
+    m_lyricIndex.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyricsData* pData)
+void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyric* pLyric)
 {
     //build hash code from number & voice. Instrument is not needed as
     //the lyrics map is cleared when a new instrument is analysed.
     stringstream tag;
-    int num = pData->get_number();
+    int num = pLyric->get_number();
     tag << num << "-" << pNote->get_voice();
+    string id = tag.str();
 
-    //get ImoLyrics for this instr-voice-number. If none, create one
-    ImoLyrics* pLyrics = NULL;
-    Document* pDoc = get_document_being_analysed();
 
-    map<string, ImoLyrics*>::iterator it = m_lyrics.find(tag.str());
-    if (it == m_lyrics.end())
+    //get index for this number-voice. If none, create index
+    int i = 0;
+    map<string, int>::iterator it = m_lyricIndex.find(id);
+    if (it == m_lyricIndex.end())
     {
-        pLyrics = static_cast<ImoLyrics*>(ImFactory::inject(k_imo_lyrics, pDoc));
-        pLyrics->set_number(num);
-        m_lyrics[tag.str()] = pLyrics;
-
+        m_lyrics.push_back(NULL);
+        i = int(m_lyrics.size()) - 1;
+        m_lyricIndex[id] = i;
         //inform Instrument about the new lyrics line
 //    ImoInstrument* pInstr = get_instrument(m_curPartId);
     }
     else
-        pLyrics = it->second;
+        i = it->second;
 
-    //add pData & pNote to the relation
-    pNote->include_in_relation(pDoc, pLyrics, pData);
+    //link new lyric with previous one
+    ImoLyric* pPrev = m_lyrics[i];
+    if (pPrev)
+        pPrev->link_to_next_lyric(pLyric);
+
+    //save current as new previous
+    m_lyrics[i] = pLyric;
 }
 
 //---------------------------------------------------------------------------------------

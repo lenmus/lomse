@@ -1457,9 +1457,9 @@ void SystemLayouter::engrave_system_details(int iSystem)
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainShape,
-                                             int iInstr, int iStaff, int iSystem,
-                                             int iCol, int iLine,
-                                             ImoInstrument* pInstr)
+                                              int iInstr, int iStaff, int iSystem,
+                                              int iCol, int iLine,
+                                              ImoInstrument* pInstr)
 {
     //rel objs
     if (pSO->get_num_relations() > 0)
@@ -1484,7 +1484,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                     m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, prologWidth, pInstr);
-                    add_auxobjs_shapes_to_model(pRO, pMainShape, GmoShape::k_layer_aux_objs);
+                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs);
 		        }
                 else
                     m_pShapesCreator->continue_engraving_relobj(pRO, pSO, pMainShape,
@@ -1502,25 +1502,58 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 	    for (int i=0; i < size; ++i)
 	    {
             ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+            if (pAO->is_lyric())
+            {
+                if (pSO->is_note())
+                {
+                    ImoLyric* pLyric = static_cast<ImoLyric*>(pAO);
+                    ImoNote* pNote = static_cast<ImoNote*>(pSO);
 
-            GmoShape* pAuxShape =
-                        m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
-                                                              pMainShape);
-//            pMainShape->accept_link_from(pAuxShape);
-            add_auxobj_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
-                                        iCol, iInstr);
-            m_yMax = max(m_yMax, pAuxShape->get_bottom());
+                    //build hash code from instrument, number & voice.
+                    stringstream tag;
+                    tag << iInstr << "-" << pLyric->get_number()
+                        << "-" << pNote->get_voice();
+
+                    GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(pMainShape);
+                    if (pLyric->is_start_of_relation())
+                        m_pShapesCreator->start_engraving_auxrelobj(pLyric, pSO, tag.str(),
+                                                    pNoteShape, iInstr, iStaff, iSystem,
+                                                    iCol, iLine, pInstr);
+                    else if (pLyric->is_end_of_relation())
+                    {
+                        SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
+                        LUnits prologWidth( pSysLyt->get_prolog_width() );
+
+                        m_pShapesCreator->finish_engraving_auxrelobj(pLyric, pSO, tag.str(),
+                                                    pNoteShape, iInstr, iStaff, iSystem,
+                                                    iCol, iLine, prologWidth, pInstr);
+                        add_relauxobjs_shapes_to_model(tag.str(), GmoShape::k_layer_aux_objs);
+                    }
+                    else
+                        m_pShapesCreator->continue_engraving_auxrelobj(pLyric, pSO, tag.str(),
+                                                    pNoteShape, iInstr, iStaff, iSystem,
+                                                    iCol, iLine, pInstr);
+                }
+            }
+            else
+            {
+                GmoShape* pAuxShape =
+                            m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
+                                                                  pMainShape);
+    //            pMainShape->accept_link_from(pAuxShape);
+                add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
+                                       iCol, iInstr);
+                m_yMax = max(m_yMax, pAuxShape->get_bottom());
+            }
         }
     }
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO,
-                                                 GmoShape* UNUSED(pStaffObjShape),
-                                                 int layer)
+void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
 {
-    RelAuxObjEngraver* pEngrv
-        = dynamic_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pAO));
+    RelObjEngraver* pEngrv
+        = dynamic_cast<RelObjEngraver*>(m_shapesStorage.get_engraver(pAO));
 
     int numShapes = pEngrv->get_num_shapes();
     for (int i=0; i < numShapes; ++i)
@@ -1533,8 +1566,7 @@ void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO,
             int iCol = pInfo->iCol;
             int iInstr = pInfo->iInstr;
 
-            //pStaffObjShape->accept_link_from(pAuxShape);
-            add_auxobj_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
+            add_aux_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
         }
    }
 
@@ -1543,9 +1575,35 @@ void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO,
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_auxobj_shape_to_model(GmoShape* pShape, int layer,
-                                               int UNUSED(iSystem),
-                                               int iCol, int iInstr)
+void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer)
+{
+    AuxRelObjEngraver* pEngrv
+        = dynamic_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
+
+    int numShapes = pEngrv->get_num_shapes();
+    for (int i=0; i < numShapes; ++i)
+    {
+        ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
+        GmoShape* pAuxShape = pInfo->pShape;
+        if (pAuxShape)
+        {
+            int iSystem = pInfo->iSystem;
+            int iCol = pInfo->iCol;
+            int iInstr = pInfo->iInstr;
+
+            add_aux_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
+        }
+   }
+
+    m_shapesStorage.remove_engraver(tag);
+    delete pEngrv;
+}
+
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::add_aux_shape_to_model(GmoShape* pShape, int layer,
+                                            int UNUSED(iSystem),
+                                            int iCol, int iInstr)
 {
     pShape->set_layer(layer);
     GmoBoxSliceInstr* pBox = m_ColLayouters[iCol]->get_slice_instr(iInstr);

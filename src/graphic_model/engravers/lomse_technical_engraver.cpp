@@ -243,7 +243,7 @@ int TechnicalEngraver::find_glyph()
         case k_technical_handbell:
             return k_glyph_bells_martellato;
         default:
-            return k_glyph_wind_three_quarters_close_hole;    //TODO: what to do if arrives here?
+            return k_glyph_wind_three_quarters_closed_hole;   //TODO: what to do if arrives here?
     }
 
 //    k_glyph_wind_closed_hole,               // Closed hole

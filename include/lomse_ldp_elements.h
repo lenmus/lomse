@@ -84,6 +84,7 @@ enum ELdpElement
     k_text,
     k_textbox,
     k_line,
+    k_lyric,
     k_tie,
     k_tuplet,
     //pauses and breath marks
@@ -197,6 +198,7 @@ enum ELdpElement
     k_margin_left,
     k_max_height,
     k_max_width,
+    k_melisma,
     k_min_height,
     k_min_width,
     k_mm,
@@ -233,6 +235,7 @@ enum ELdpElement
     k_stem,
     k_stopLabel,
     k_style,
+    k_syllable,
     k_symbol,
     k_symbolSize,
     k_systemLayout,

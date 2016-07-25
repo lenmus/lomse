@@ -94,6 +94,7 @@ protected:
     void add_location(TPoint pt);
     void add_width_if_not_default(Tenths width, Tenths def);
     void add_style(ImoStyle* pStyle);
+    void add_placement(int placement);
 
 };
 
@@ -145,7 +146,7 @@ public:
     {
         start_articulation();
         if (m_pObj->is_accent() || m_pObj->is_stress())
-            add_placement();
+            add_placement( m_pObj->get_placement() );
         source_for_base_scoreobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
@@ -303,16 +304,6 @@ protected:
         }
     }
 
-    void add_placement()
-    {
-        int placement = m_pObj->get_placement();
-        if (placement == k_placement_default)
-            return;
-        else if (placement == k_placement_above)
-            m_source << " above";
-        else
-            m_source << " below";
-    }
 };
 
 //---------------------------------------------------------------------------------------
@@ -838,21 +829,13 @@ public:
     {
         start_element("dyn", m_pObj->get_id());
         add_dynamics_string();
-        add_placement();
+        add_placement( m_pObj->get_placement() );
         source_for_base_scoreobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
 
 protected:
-    void add_placement()
-    {
-        int placement = m_pObj->get_placement();
-        if (placement == k_placement_above)
-            m_source << " above ";
-        else if (placement == k_placement_below)
-            m_source << " below ";
-    }
 
     void add_dynamics_string()
     {
@@ -901,7 +884,7 @@ public:
     {
         start_element("fermata", m_pObj->get_id());
         add_symbol();
-        add_placement();
+        add_placement( m_pObj->get_placement() );
         source_for_base_scoreobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
@@ -937,16 +920,6 @@ protected:
         }
     }
 
-    void add_placement()
-    {
-        int placement = m_pObj->get_placement();
-        if (placement == k_placement_default)
-            return;
-        else if (placement == k_placement_above)
-            m_source << " above";
-        else
-            m_source << " below";
-    }
 };
 
 //---------------------------------------------------------------------------------------
@@ -1272,6 +1245,61 @@ protected:
             add_source_for( m_pObj->get_content_item(i) );
         }
         end_element();
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class LyricLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoLyric* m_pObj;
+
+public:
+    LyricLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoLyric*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        start_element("lyric", m_pObj->get_id());
+        add_lyric_number();
+        add_lyric_text();
+        add_style( m_pObj->get_style() );
+        add_placement( m_pObj->get_placement() );
+        source_for_base_scoreobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_lyric_number()
+    {
+        m_source << m_pObj->get_number();
+    }
+
+    void add_lyric_text()
+    {
+        int numItems = m_pObj->get_num_text_items();
+        for (int i=0; i < numItems; ++i)
+        {
+            ImoLyricsTextInfo* pText = m_pObj->get_text_item(i);
+            m_source << " \"" << pText->get_syllable_text() << "\"";
+        }
+
+        if (m_pObj->has_hyphenation())
+            m_source << " -";
+
+        if (m_pObj->has_melisma())
+        {
+            m_source << " ";
+            start_element("melisma", k_no_imoid, k_in_same_line);
+            end_element(k_in_same_line);
+        }
     }
 
 };
@@ -2835,6 +2863,17 @@ void LdpGenerator::add_location(TPoint pt)
 }
 
 //---------------------------------------------------------------------------------------
+void LdpGenerator::add_placement(int placement)
+{
+    if (placement == k_placement_default)
+        return;
+    else if (placement == k_placement_above)
+        m_source << " above";
+    else
+        m_source << " below";
+}
+
+//---------------------------------------------------------------------------------------
 void LdpGenerator::add_style(ImoStyle* pStyle)
 {
     if (pStyle && pStyle->get_name() != "Default style")
@@ -2908,6 +2947,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_go_back_fwd:     return LOMSE_NEW GoBackFwdLdpGenerator(pImo, this);
         case k_imo_instrument:      return LOMSE_NEW InstrumentLdpGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLdpGenerator(pImo, this);
+        case k_imo_lyric:           return LOMSE_NEW LyricLdpGenerator(pImo, this);
         case k_imo_metronome_mark:  return LOMSE_NEW MetronomeLdpGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataLdpGenerator(pImo, this);
         case k_imo_note:            return LOMSE_NEW NoteLdpGenerator(pImo, this);

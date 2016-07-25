@@ -3429,6 +3429,116 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ lyric : (lyric [<lyricId>] <lyricText> [<style>][<placement>] <printOptions>* )
+//@ lyricId : num.  Default 1
+//@ lyricText : string+ [<hyphen>][<melisma>]
+//@ hyphen : "-"
+//@ melisma : (melisma)
+//@ language : (lang string)
+//@
+
+class LyricAnalyser : public ElementAnalyser
+{
+public:
+    LyricAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoNote* pNote = NULL;
+        if (m_pAnchor && m_pAnchor->is_note())
+            pNote = static_cast<ImoNote*>(m_pAnchor);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoLyric* pImo = static_cast<ImoLyric*>(
+                            ImFactory::inject(k_imo_lyric, pDoc, get_node_id()) );
+
+        // [<lyricId>]
+        if (get_optional(k_number))
+            pImo->set_number( get_integer_value(1) );
+        else
+            pImo->set_number(1);
+
+        // <syllable>+
+        if (get_optional(k_string))
+        {
+            add_syllable(pImo, get_string_value());
+
+            while (get_optional(k_string))
+            {
+                ImoLyricsTextInfo* pSyl = add_syllable(pImo, get_string_value());
+                pSyl->set_elision_text("0x203F");    //undertie U+203F
+            }
+        }
+        else
+        {
+            error_msg("<lyric>: Missing syllable text. <lyric> ignored.");
+            delete pImo;
+            return;
+        }
+
+        // [<hyphen>]
+        if (get_optional(k_label))
+            set_hyphenation(pImo);
+
+        // [<melisma>]
+        if (get_optional(k_melisma))
+            pImo->set_melisma(true);
+
+        // [<style>]
+        analyse_optional_style(pImo);
+
+        // [<placement>]
+        if (get_optional(k_label))
+            pImo->set_placement( get_placement(k_placement_above) );
+
+        // <printOptions>*
+        analyse_scoreobj_options(pImo);
+
+        error_if_more_elements();
+
+        if (pNote)
+        {
+            m_pAnalyser->add_lyric(pNote, pImo);
+            add_to_model(pImo);
+        }
+        else if (!m_libraryScope.is_unit_test())
+        {
+            error_msg("<lyric> is not attached to a note. It will be ignored.");
+            delete pImo;
+        }
+        else
+            m_pAnalysedNode->set_imo(pImo);
+    }
+
+protected:
+
+    ImoLyricsTextInfo* add_syllable(ImoLyric* pImo, const string& text)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoLyricsTextInfo* pText = static_cast<ImoLyricsTextInfo*>(
+                                    ImFactory::inject(k_imo_lyrics_text_info, pDoc) );
+        pImo->add_text_item(pText);
+        pText->set_syllable_text(text);
+        return pText;
+    }
+
+    void set_hyphenation(ImoLyric* pImo)
+    {
+        string hyphen = m_pParamToAnalyse->get_value();
+        if (hyphen == "-")
+            pImo->set_hyphenation(true);
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "<lyric>: Unknown parameter '" + hyphen + "'. Ignored.");
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
 //@                            <TicksPerMinute> }
 //@                          [parenthesis][<staffObjOptions>*] )
@@ -3582,7 +3692,7 @@ public:
 //@ <rest> = (r <duration> <abbreviatedElements>* <noteRestOptions>*
 //@             <staffObjOptions>* <attachments>* )
 //@ <abbreviatedElements> = tie (l), beam (g), staffNum (p), tuplet' (t) and voice (v)
-//@ <noteOptions> = { <tie> | <stem> | <slur> }
+//@ <noteOptions> = { <tie> | <stem> | <slur> | <lyric> }
 //@ <noteRestOptions> = { <beam> | <tuplet> | <voice> }
 //@ <staffObjOptions> = { <staffNum> | <printOptions> }
 //@ <printOptions> = { [<visible>] [<location>] [<color>] }
@@ -3688,7 +3798,7 @@ public:
 
         if (!fIsRest)
         {
-            // [<noteOptions>*] = [{ <tie> | <stem> | <slur> }*]
+            // [<noteOptions>*] = [{ <tie> | <stem> | <slur> | <lyric> }*]
             while (more_params_to_analyse())
             {
                 if (get_optional(k_tie))
@@ -3697,6 +3807,8 @@ public:
                     set_stem(pNote);
                 else if (get_optional(k_slur))
                     m_pSlurDto = static_cast<ImoSlurDto*>( proceed(k_slur, NULL) );
+                else if (get_optional(k_lyric))
+                    proceed(k_lyric, pNR);
                 else
                     break;
             }
@@ -6275,6 +6387,8 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 LdpAnalyser::~LdpAnalyser()
 {
     delete_relation_builders();
+    m_lyrics.clear();
+    m_lyricIndex.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -6337,6 +6451,40 @@ ImoObj* LdpAnalyser::analyse_node(LdpElement* pNode, ImoObj* pAnchor)
     a->analyse_node(pNode);
     delete a;
     return pNode->get_imo();
+}
+
+//---------------------------------------------------------------------------------------
+void LdpAnalyser::add_lyric(ImoNote* pNote, ImoLyric* pLyric)
+{
+    //build hash code from number & voice. Instrument is not needed as
+    //the lyrics map is cleared when a new instrument is analysed.
+    stringstream tag;
+    int num = pLyric->get_number();
+    tag << num << "-" << pNote->get_voice();
+    string id = tag.str();
+
+
+    //get index for this number-voice. If none, create index
+    int i = 0;
+    map<string, int>::iterator it = m_lyricIndex.find(id);
+    if (it == m_lyricIndex.end())
+    {
+        m_lyrics.push_back(NULL);
+        i = int(m_lyrics.size()) - 1;
+        m_lyricIndex[id] = i;
+        //inform Instrument about the new lyrics line
+//    ImoInstrument* pInstr = get_instrument(m_curPartId);
+    }
+    else
+        i = it->second;
+
+    //link new lyric with previous one
+    ImoLyric* pPrev = m_lyrics[i];
+    if (pPrev)
+        pPrev->link_to_next_lyric(pLyric);
+
+    //save current as new previous
+    m_lyrics[i] = pLyric;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6432,6 +6580,9 @@ void LdpAnalyser::clear_pending_relations()
     m_pBeamsBuilder->clear_pending_items();
     m_pOldBeamsBuilder->clear_pending_old_beams();
     m_pTupletsBuilder->clear_pending_items();
+
+    m_lyrics.clear();
+    m_lyricIndex.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -6788,6 +6939,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_line:            return LOMSE_NEW LineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_link:            return LOMSE_NEW LinkAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_listitem:        return LOMSE_NEW ListItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_lyric:           return LOMSE_NEW LyricAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_metronome:       return LOMSE_NEW MetronomeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_musicData:       return LOMSE_NEW MusicDataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_na:              return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);

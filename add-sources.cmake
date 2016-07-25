@@ -83,7 +83,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_lyrics_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_lyric_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_metronome_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_ornament_engraver.cpp

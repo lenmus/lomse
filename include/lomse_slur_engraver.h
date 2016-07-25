@@ -47,7 +47,7 @@ class ScoreMeter;
 class InstrumentEngraver;
 
 //---------------------------------------------------------------------------------------
-class SlurEngraver : public RelAuxObjEngraver
+class SlurEngraver : public RelObjEngraver
 {
 protected:
     InstrumentEngraver* m_pInstrEngrv;

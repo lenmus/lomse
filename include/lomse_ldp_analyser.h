@@ -183,6 +183,8 @@ protected:
     OldBeamsBuilder* m_pOldBeamsBuilder;
     TupletsBuilder* m_pTupletsBuilder;
     SlursBuilder*   m_pSlursBuilder;
+    map<string, int> m_lyricIndex;
+    vector<ImoLyric*>  m_lyrics;
     ImoScore*       m_pCurScore;
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
@@ -261,6 +263,9 @@ public:
 
     //interface for TupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
+
+    //interface for building lyric lines
+    void add_lyric(ImoNote* pNote, ImoLyric* pL);
 
 //    //interface for ChordBuilder
 //    void add_chord(ImoChord* pChord);

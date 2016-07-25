@@ -46,7 +46,7 @@ class ScoreMeter;
 class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
-class TieEngraver : public RelAuxObjEngraver
+class TieEngraver : public RelObjEngraver
 {
 protected:
     LUnits m_uStaffLeft;

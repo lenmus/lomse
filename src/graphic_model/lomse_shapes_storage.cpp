@@ -32,6 +32,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_shape_beam.h"
 #include "lomse_engraver.h"
+#include "lomse_internal_model.h"
 
 
 namespace lomse
@@ -66,9 +67,9 @@ void ShapesStorage::delete_ready_shapes()
 }
 
 //---------------------------------------------------------------------------------------
-RelAuxObjEngraver* ShapesStorage::get_engraver(ImoObj* pImo)
+Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
 {
-    map<ImoObj*, RelAuxObjEngraver*>::const_iterator it = m_engravers.find(pImo);
+    map<ImoObj*, Engraver*>::const_iterator it = m_engravers.find(pImo);
     if (it !=  m_engravers.end())
         return it->second;
     else
@@ -76,20 +77,25 @@ RelAuxObjEngraver* ShapesStorage::get_engraver(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-void ShapesStorage::shape_ready_for_gmodel(ImoObj* pImo, int layer)
+Engraver* ShapesStorage::get_engraver(const string& tag)
 {
-    RelAuxObjEngraver* pEngrv = get_engraver(pImo);
-    m_readyShapes.push_back( make_pair(pEngrv->get_shape(), layer) );
-    remove_engraver(pImo);
-    delete pEngrv;
+    map<string, Engraver*>::const_iterator it = m_engravers2.find(tag);
+    if (it !=  m_engravers2.end())
+        return it->second;
+    else
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
 void ShapesStorage::delete_engravers()
 {
-	std::map<ImoObj*, RelAuxObjEngraver*>::const_iterator it;
+	std::map<ImoObj*, Engraver*>::const_iterator it;
     for (it = m_engravers.begin(); it != m_engravers.end(); ++it)
         delete it->second;
+
+	std::map<string, Engraver*>::const_iterator it2;
+    for (it2 = m_engravers2.begin(); it2 != m_engravers2.end(); ++it2)
+        delete it2->second;
 }
 
 

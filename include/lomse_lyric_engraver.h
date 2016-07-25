@@ -27,8 +27,8 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_LYRICS_ENGRAVER_H__        //to avoid nested includes
-#define __LOMSE_LYRICS_ENGRAVER_H__
+#ifndef __LOMSE_LYRIC_ENGRAVER_H__        //to avoid nested includes
+#define __LOMSE_LYRIC_ENGRAVER_H__
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
@@ -45,7 +45,7 @@ namespace lomse
 class ImoObj;
 class GmoShapeLyrics;
 class ScoreMeter;
-class ImoLyrics;
+class ImoLyric;
 class ImoNote;
 class GmoShapeNote;
 class GmoShape;
@@ -53,34 +53,33 @@ class InstrumentEngraver;
 
 
 //---------------------------------------------------------------------------------------
-class LyricsEngraver : public RelAuxObjEngraver
+class LyricEngraver : public AuxRelObjEngraver
 {
 protected:
     GmoShapeLyrics* m_pLyricsShape;
     InstrumentEngraver* m_pInstrEngrv;
-    ImoLyrics* m_pLyrics;
-    list< pair<ImoNote*, GmoShape*> > m_notes;
+    list< pair<ImoLyric*, GmoShape*> > m_lyrics;
     vector<ShapeBoxInfo*> m_shapesInfo;
     vector<LUnits> m_staffTops;     //relative to StaffObj shape
     UPoint m_origin;
     USize m_size;
-    bool m_fLyricsAbove;
+    bool m_fLyricAbove;
 
 public:
-    LyricsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                   InstrumentEngraver* pInstrEngrv);
-    ~LyricsEngraver();
+    LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  InstrumentEngraver* pInstrEngrv);
+    ~LyricEngraver();
 
-    //implementation of virtual methods from RelAuxObjEngraver
-    void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    //implementation of virtual methods from AuxRelObjEngraver
+    void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
                             LUnits xRight, LUnits xLeft, LUnits yTop);
-    void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    void set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
                              LUnits xRight, LUnits xLeft, LUnits yTop);
-    void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
+    void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
                           LUnits xRight, LUnits xLeft, LUnits yTop);
@@ -94,7 +93,7 @@ public:
 
 protected:
 
-    void create_shape(int note, GmoShapeNote* pNoteShape, ImoNote* pNote,
+    void create_shape(int note, GmoShapeNote* pNoteShape, ImoLyric* pLyric,
                       GmoShapeNote* pNextNoteShape);
     void decide_placement();
 
@@ -103,5 +102,5 @@ protected:
 
 }   //namespace lomse
 
-#endif    // __LOMSE_LYRICS_ENGRAVER_H__
+#endif    // __LOMSE_LYRIC_ENGRAVER_H__
 

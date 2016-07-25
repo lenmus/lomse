@@ -212,12 +212,6 @@ const GlyphData m_glyphs_smufl[] =
 //Octaves (U+E510 - U+E51F)
     GlyphData(0xE510),  // Ottava alta sign
 
-//Brass techniques (U+E5D0 - U+E5EF)
-    GlyphData(0xE5D0),  // Scoop
-    GlyphData(0xE5D5),  // Doit, medium
-    GlyphData(0xE5D8),  // Lip fall, medium
-    GlyphData(0xE5E0),  // Plop
-
 //figured bass (U+EA50 - U+EA6F)
     GlyphData(0xEA50),  // Figured bass. Number 0
     GlyphData(0xEA51),  // Figured bass. Number 1
@@ -302,7 +296,40 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE223),  // Combining tremolo 4
     GlyphData(0xE224),  // Combining tremolo 5
 
-//Wind techniques (U+E5F0 - U+E60F)
+//Brass techniques (U+E5D0 - U+E5EF)
+    GlyphData(0xE5D0),  // Scoop
+    GlyphData(0xE5D1),  // Lift, short
+    GlyphData(0xE5D2),  // Lift, medium
+    GlyphData(0xE5D3),  // Lift, long
+    GlyphData(0xE5D4),  // Doit, short
+    GlyphData(0xE5D5),  // Doit, medium
+    GlyphData(0xE5D6),  // Doit, long
+    GlyphData(0xE5D7),  // Lip fall, short
+    GlyphData(0xE5D8),  // Lip fall, medium
+    GlyphData(0xE5D9),  // Lip fall, long
+    GlyphData(0xE5DA),  // Smooth fall, short
+    GlyphData(0xE5DB),  // Smooth fall, medium
+    GlyphData(0xE5DC),  // Smooth fall, long
+    GlyphData(0xE5DD),  // Rough fall, short
+    GlyphData(0xE5DE),  // Rough fall, medium
+    GlyphData(0xE5DF),  // Rough fall, long
+    GlyphData(0xE5E0),  // Plop
+    GlyphData(0xE5E1),  // Flip
+    GlyphData(0xE5E2),  // Smear
+    GlyphData(0xE5E3),  // Bend
+    GlyphData(0xE5E4),  // Jazz turn
+    GlyphData(0xE5E5),  // Muted (closed)
+    GlyphData(0xE5E6),  // Half-muted (half-closed)
+    GlyphData(0xE5E7),  // Open
+    GlyphData(0xE5E8),  // Harmon mute, stem in
+    GlyphData(0xE5E9),  // Harmon mute, stem extended, left
+    GlyphData(0xE5EA),  // Harmon mute, stem extended, right
+    GlyphData(0xE5EB),  // Harmon mute, stem out
+    GlyphData(0xE5EC),  // Smooth lift, short
+    GlyphData(0xE5ED),  // Smooth lift, medium
+    GlyphData(0xE5EE),  // Smooth lift, long
+
+//Wind techniques (U+E5F0 –U+E60F)
     GlyphData(0xE5F0),  // Double-tongue above
     GlyphData(0xE5F1),  // Double-tongue below
     GlyphData(0xE5F2),  // Triple-tongue above
@@ -313,6 +340,22 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE5F7),  // Half-closed hole 2
     GlyphData(0xE5F8),  // Half-open hole
     GlyphData(0xE5F9),  // Open hole
+    GlyphData(0xE5FA),  // Trill key
+    GlyphData(0xE5FB),  // Flatter embouchure
+    GlyphData(0xE5FC),  // Sharper embouchure
+    GlyphData(0xE5FD),  // Relaxed embouchure
+    GlyphData(0xE5FE),  // Somewhat relaxed embouchure
+    GlyphData(0xE5FF),  // Tight embouchure
+    GlyphData(0xE600),  // Somewhat tight embouchure
+    GlyphData(0xE601),  // Very tight embouchure
+    GlyphData(0xE602),  // Very relaxed embouchure / weak air-pressure
+    GlyphData(0xE603),  // Very tight embouchure / strong air pressure
+    GlyphData(0xE604),  // Normal reed position
+    GlyphData(0xE605),  // Very little reed (pull outwards)
+    GlyphData(0xE606),  // Much more reed (push inwards)
+    GlyphData(0xE607),  // Combining multiphonics (black) for stem
+    GlyphData(0xE608),  // Combining multiphonics (white) for stem
+    GlyphData(0xE609),  // Combining multiphonics (black and white) for stem
 
 //String techniques (U+E610 - U+E62F)
     GlyphData(0xE610),  // Down bow

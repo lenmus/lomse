@@ -53,7 +53,7 @@ class ImoStyle;
 
 
 //---------------------------------------------------------------------------------------
-class TupletEngraver : public RelAuxObjEngraver
+class TupletEngraver : public RelObjEngraver
 {
 protected:
     int m_numShapes;
@@ -70,7 +70,7 @@ public:
     TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~TupletEngraver();
 
-    //implementation of virtual methods from RelAuxObjEngraver
+    //implementation of virtual methods from RelObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,

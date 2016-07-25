@@ -361,7 +361,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
         m_TypeToName[k_imo_line_style] = "line-style";
-        m_TypeToName[k_imo_lyrics_extend_info] = "lyric-extend";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
@@ -381,7 +380,6 @@ const string& ImoObj::get_name(int type)
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
-        m_TypeToName[k_imo_lyrics_data] = "lyrics-data";
         m_TypeToName[k_imo_slur_data] = "slur-data";
         m_TypeToName[k_imo_tie_data] = "tie-data";
         m_TypeToName[k_imo_tuplet_data] = "tuplet-data";
@@ -415,10 +413,12 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_score_title] = "title";
         m_TypeToName[k_imo_text_box] = "text-box";
 
+        // ImoAuxRelObj (A)
+        m_TypeToName[k_imo_lyric] = "lyric";
+
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
-        m_TypeToName[k_imo_lyrics] = "lyrics";
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
@@ -440,6 +440,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_staffobj] = "non-valid";
         m_TypeToName[k_imo_staffobj_last] = "non-valid";
         m_TypeToName[k_imo_auxobj] = "non-valid";
+        m_TypeToName[k_imo_auxrelobj] = "non-valid";
         m_TypeToName[k_imo_auxobj_last] = "non-valid";
         m_TypeToName[k_imo_relobj] = "non-valid";
         m_TypeToName[k_imo_relobj_last] = "non-valid";
@@ -674,6 +675,33 @@ string ImoObj::to_string(bool fWithIds)
     exporter.set_remove_newlines(true);
     exporter.set_add_id(fWithIds);
     return exporter.get_source(this);
+}
+
+
+//=======================================================================================
+// ImoAuxRelObj implementation
+//=======================================================================================
+ImoAuxRelObj::~ImoAuxRelObj()
+{
+    if (m_nextARO)
+        m_nextARO->set_prev_ARO(m_prevARO);
+
+    if (m_prevARO)
+        m_prevARO->link_to_next_ARO(m_nextARO);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAuxRelObj::link_to_next_ARO(ImoAuxRelObj* pNext)
+{
+    m_nextARO = pNext;
+    if (pNext)
+        pNext->set_prev_ARO(this);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAuxRelObj::set_prev_ARO(ImoAuxRelObj* pPrev)
+{
+    m_prevARO = pPrev;
 }
 
 
@@ -2520,19 +2548,14 @@ ImoListItem::ImoListItem(Document* pDoc)
 
 
 //=======================================================================================
-// ImoLyrics implementation
+// ImoLyric implementation
 //=======================================================================================
-void ImoLyrics::reorganize_after_object_deletion()
+ImoLyric::~ImoLyric()
 {
-    //Nothing to do. The lyrics will be removed when only one note.
-    //TODO: But this is wrong!
 }
 
-
-//=======================================================================================
-// ImoLyricsData implementation
-//=======================================================================================
-ImoLyricsTextInfo* ImoLyricsData::get_text_item(int iText)
+//---------------------------------------------------------------------------------------
+ImoLyricsTextInfo* ImoLyric::get_text_item(int iText)
 {
     if (iText >= m_numTextItems)
         return NULL;
@@ -2547,7 +2570,7 @@ ImoLyricsTextInfo* ImoLyricsData::get_text_item(int iText)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoLyricsData::add_text_item(ImoLyricsTextInfo* pText)
+void ImoLyric::add_text_item(ImoLyricsTextInfo* pText)
 {
     append_child_imo(pText);
     m_numTextItems++;

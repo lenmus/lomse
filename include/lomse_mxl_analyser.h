@@ -223,7 +223,8 @@ protected:
     MxlBeamsBuilder*   m_pBeamsBuilder;
 //    MxlTupletsBuilder* m_pTupletsBuilder;
     MxlSlursBuilder*   m_pSlursBuilder;
-    map<string, ImoLyrics*> m_lyrics;
+    map<string, int> m_lyricIndex;
+    vector<ImoLyric*>  m_lyrics;
 
     int             m_musicxmlVersion;
     ImoObj*         m_pNodeImo;
@@ -336,7 +337,7 @@ public:
     void clear_pending_relations();
 
     //interface for building lyric lines
-    void add_lyrics_data(ImoNote* pNote, ImoLyricsData* pData);
+    void add_lyrics_data(ImoNote* pNote, ImoLyric* pData);
 
     //interface for building ties
     int new_tie_id(int numTie, FPitch fp);

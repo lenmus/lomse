@@ -299,10 +299,10 @@ SUITE(LdpExporterTest)
         //cout << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
             "(clef G p1 )(key C)"
-            "(n g4 q v1  p1 (dyn \"fff\" below ))"
+            "(n g4 q v1  p1 (dyn \"fff\" below))"
             "(n g4 q v1  p1 (dyn \"ppp\"))"
-            "(n g4 q v1  p1 (dyn \"sfz\" above ))"
-            "(n g4 q v1  p1 (dyn \"sfz\" above (color #ff0000ff) (dx 50) (dy -70)))"
+            "(n g4 q v1  p1 (dyn \"sfz\" above))"
+            "(n g4 q v1  p1 (dyn \"sfz\" above(color #ff0000ff) (dx 50) (dy -70)))"
             ")))";
         CHECK( source == expected );
     }
