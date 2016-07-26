@@ -277,7 +277,7 @@ enum ELdpElement
 //forward declarations
 class LdpElement;
 class ImoObj;
-typedef boost::shared_ptr<LdpElement>    SpLdpElement;
+typedef SharedPtr<LdpElement>    SpLdpElement;
 
 //---------------------------------------------------------------------------------------
 // A generic LDP element representation.
@@ -376,9 +376,9 @@ class LdpObject : public LdpElement
 
 // A tree of LdpElements
 typedef Tree<LdpElement>  LdpTree;
-typedef boost::shared_ptr<LdpTree> SpLdpTree;
+typedef SharedPtr<LdpTree> SpLdpTree;
 typedef TreeNode<LdpElement> LdpNode;
-typedef boost::shared_ptr<LdpNode> SpLdpNode;
+typedef SharedPtr<LdpNode> SpLdpNode;
 
 
 }   //namespace lomse
