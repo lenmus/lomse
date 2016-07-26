@@ -95,7 +95,7 @@ GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoin
 //---------------------------------------------------------------------------------------
 void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
 {
-    SpEventMouse pEv( boost::static_pointer_cast<EventMouse>(pEvent) );
+    SpEventMouse pEv( static_pointer_cast<EventMouse>(pEvent) );
     if (!pEv->is_still_valid())
         return;
 

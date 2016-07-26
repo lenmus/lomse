@@ -88,7 +88,7 @@ protected:
 
 };
 
-typedef boost::shared_ptr<Image>     SpImage;
+typedef SharedPtr<Image>     SpImage;
 
 
 }   //namespace lomse

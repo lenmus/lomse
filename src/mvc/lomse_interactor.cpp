@@ -193,7 +193,7 @@ void Interactor::handle_event(SpEventInfo pEvent)
             //be invoked directly by user application to save time
             LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] Higlight event received");
             SpEventScoreHighlight pEv(
-                boost::static_pointer_cast<EventScoreHighlight>(pEvent) );
+                static_pointer_cast<EventScoreHighlight>(pEvent) );
             on_visual_highlight(pEv);
             break;
         }
@@ -203,7 +203,7 @@ void Interactor::handle_event(SpEventInfo pEvent)
             //AWARE: It could never arrive here as send_end_of_play_event() could
             //be invoked directly by user application
             LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] End of playback event received");
-            SpEventPlayScore pEv( boost::static_pointer_cast<EventPlayScore>(pEvent) );
+            SpEventPlayScore pEv( static_pointer_cast<EventPlayScore>(pEvent) );
             if (is_valid_play_score_event(pEv))
                 send_end_of_play_event(pEv->get_score(), pEv->get_player());
             break;
@@ -423,7 +423,7 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
         if (state.get_parent_level_id() != k_no_imoid)
         {
             SpScoreCursorState pState(
-                boost::static_pointer_cast<ScoreCursorState>(state.get_delegate_state()) );
+                static_pointer_cast<ScoreCursorState>(state.get_delegate_state()) );
             int staff = pState->staff();
             int instr = pState->instrument();
             TimeUnits time = pState->time();
