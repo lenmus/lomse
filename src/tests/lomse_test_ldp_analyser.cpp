@@ -3588,8 +3588,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl->get_syllable_text() == "De" );
         CHECK( pSyl->get_syllable_language() == "" );
         CHECK( pSyl->get_syllable_style() == NULL );
-        CHECK( pSyl->has_elision() == false );
-        CHECK( pSyl->get_elision_text() == "" );
+        CHECK( pSyl->has_elision() == true );
+        CHECK( pSyl->get_elision_text() == "." );
 
         pSyl = pImo->get_text_item(1);
         CHECK( pSyl != NULL );
@@ -3597,8 +3597,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl->get_syllable_text() == "A" );
         CHECK( pSyl->get_syllable_language() == "" );
         CHECK( pSyl->get_syllable_style() == NULL );
-        CHECK( pSyl->has_elision() == true );
-        CHECK( pSyl->get_elision_text() == "0x203F" );
+        CHECK( pSyl->has_elision() == false );
+        CHECK( pSyl->get_elision_text() == "" );
 
         delete tree->get_root();
         delete pIModel;

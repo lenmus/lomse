@@ -3463,12 +3463,16 @@ public:
         // <syllable>+
         if (get_optional(k_string))
         {
-            add_syllable(pImo, get_string_value());
+            ImoLyricsTextInfo* pSyl = add_syllable(pImo, get_string_value());
 
             while (get_optional(k_string))
             {
-                ImoLyricsTextInfo* pSyl = add_syllable(pImo, get_string_value());
-                pSyl->set_elision_text("0x203F");    //undertie U+203F
+                pSyl->set_elision_text(".");    //undertie U+203F
+                //pSyl->set_elision_text("\xE2\x80\xBF");   //undertie U+203F in utf-8
+                //pSyl->set_elision_text("0x203F");         //undertie U+203F
+                //undertie is not supported in LiberationSerif font
+
+                pSyl = add_syllable(pImo, get_string_value());
             }
         }
         else
