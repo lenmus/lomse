@@ -142,12 +142,15 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
     LUnits xCur = xNote;
 
     //TODO: base position should be the maximum notes bottom y + 5.0f instead
-    //      of a fixed amount (60.0f)
+    //      of a fixed amount (70.0f)
     //TODO: line increment should be text shape height + 0.5f instead o a fixed
     //      amount (23.0f)
     int lineNum = pLyric->get_number();
-    int tenths = 60.0f + 23.0f * float(lineNum);
-    LUnits y = m_staffTops[iNote] + pNoteShape->get_top() + tenths_to_logical(tenths);
+    LUnits y = m_staffTops[iNote] + pNoteShape->get_top();
+	if (pLyric->get_placement() == k_placement_above)
+        y -= tenths_to_logical(25.0f + 23.0f * float(lineNum));
+	else
+        y += tenths_to_logical(70.0f + 23.0f * float(lineNum));
 
     //create container shape
     ShapeId idx = 0;

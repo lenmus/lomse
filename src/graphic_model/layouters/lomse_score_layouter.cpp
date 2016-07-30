@@ -419,7 +419,7 @@ void ScoreLayouter::decide_line_breaks()
 
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
-                                       LUnits height)
+                                    LUnits height)
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxScorePage(m_pScore);
     pParentBox->add_child_box(m_pItemMainBox);
@@ -469,7 +469,17 @@ void ScoreLayouter::create_stub()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::add_score_titles()
 {
-    //TODO: ScoreLayouter::add_score_titles
+    list<ImoScoreTitle*>& titles = m_pScore->get_titles();
+    list<ImoScoreTitle*>::iterator it;
+    for (it = titles.begin(); it != titles.end(); ++it)
+    {
+        ImoScoreTitle* pImo = *it;
+        TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
+                           pImo->get_language(), pImo->get_style());
+        GmoShape* pShape = engrv.create_shape(pImo, m_cursor.x, m_cursor.y);
+        m_pCurBoxPage->add_shape(pShape, GmoShape::k_layer_aux_objs);
+        m_cursor.y += pShape->get_height();
+    }
 }
 
 //---------------------------------------------------------------------------------------

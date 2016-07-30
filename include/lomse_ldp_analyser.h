@@ -185,6 +185,7 @@ protected:
     SlursBuilder*   m_pSlursBuilder;
     map<string, int> m_lyricIndex;
     vector<ImoLyric*>  m_lyrics;
+    vector<int>     m_lyricsPlacement;
     ImoScore*       m_pCurScore;
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
@@ -266,6 +267,8 @@ public:
 
     //interface for building lyric lines
     void add_lyric(ImoNote* pNote, ImoLyric* pL);
+    void set_lyrics_placement(int line, int placement);
+    int get_lyrics_placement(int line);
 
 //    //interface for ChordBuilder
 //    void add_chord(ImoChord* pChord);
