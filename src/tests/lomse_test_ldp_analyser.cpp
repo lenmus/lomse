@@ -3499,7 +3499,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
         CHECK( pImo != NULL );
         CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_placement() == k_placement_below );
         CHECK( pImo->is_laughing() == false );
         CHECK( pImo->is_humming() == false );
         CHECK( pImo->is_end_line() == false );
@@ -3571,7 +3571,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
         CHECK( pImo != NULL );
         CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_placement() == k_placement_below );
         CHECK( pImo->is_laughing() == false );
         CHECK( pImo->is_humming() == false );
         CHECK( pImo->is_end_line() == false );
@@ -3646,7 +3646,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
         CHECK( pImo != NULL );
         CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_placement() == k_placement_below );
         CHECK( pImo->is_laughing() == false );
         CHECK( pImo->is_humming() == false );
         CHECK( pImo->is_end_line() == false );
@@ -3692,7 +3692,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
         CHECK( pImo != NULL );
         CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_placement() == k_placement_below );
         CHECK( pImo->is_laughing() == false );
         CHECK( pImo->is_humming() == false );
         CHECK( pImo->is_end_line() == false );
@@ -3738,7 +3738,7 @@ SUITE(LdpAnalyserTest)
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
         CHECK( pImo != NULL );
         CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_default );
+        CHECK( pImo->get_placement() == k_placement_below );
         CHECK( pImo->is_laughing() == false );
         CHECK( pImo->is_humming() == false );
         CHECK( pImo->is_end_line() == false );
@@ -8322,15 +8322,14 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. title: missing mandatory element 'label'." << endl
-                 << "Line 0. title: missing mandatory element 'string'." << endl;
+        expected << "Line 0. title: missing mandatory element 'string'." << endl;
         parser.parse_text("(title)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
@@ -8349,8 +8348,8 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
