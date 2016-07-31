@@ -1876,295 +1876,6 @@ protected:
 
 };
 
-
-//---------------------------------------------------------------------------------------
-class ScoreLdpGenerator : public LdpGenerator
-{
-protected:
-    ImoScore* m_pObj;
-
-public:
-    ScoreLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoScore*>(pImo);
-        pExporter->set_current_score(m_pObj);
-    }
-
-    string generate_source(ImoObj* UNUSED(pParent) =NULL)
-    {
-        //TODO: commented elements
-
-        start_element("score", m_pObj->get_id());
-        add_version();
-        add_style( m_pObj->get_style() );
-        //add_undo_data();
-        //add_creation_mode();
-        add_styles();
-        //add_titles();
-        //add_page_layout();
-        add_system_layout();
-        add_options();
-        add_parts();
-        add_instruments();
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_version()
-    {
-        m_source << "(vers 2.0)";
-    }
-
-    void add_undo_data()
-    {
-    ////ID counter value for undo/redo
-    //if (fUndoData)
-    //    sSource += wxString::Format(_T("   (undoData (idCounter  %d))\n"), m_nCounterID);
-    }
-
-    void add_creation_mode()
-    {
-//    //creation mode
-//    if (!m_sCreationModeName.empty())
-//    {
-//        m_source << _T("   (creationMode ");
-//        m_source << m_sCreationModeName;
-//        m_source << _T(" ");
-//        m_source << m_sCreationModeVers;
-//        m_source << _T(")\n");
-//    }
-    }
-
-    void add_styles()
-    {
-        map<std::string, ImoStyle*>& styles = m_pObj->get_styles();
-        map<std::string, ImoStyle*>::const_iterator it;
-        for (it = styles.begin(); it != styles.end(); ++it)
-        {
-            if (! (it->second)->is_default_style_with_default_values() )
-//            if (!(it->first == "Default style"
-//                  || it->first == "Instrument names"
-//                  || it->first == "Tuplet numbers"
-//                ))
-            {
-                DefineStyleLdpGenerator gen(it->second, m_pExporter);
-                m_source << gen.generate_source();
-            }
-        }
-    }
-
-    void add_titles()
-    {
-//    //titles and other attached auxobjs
-//    if (m_pAuxObjs)
-//    {
-//	    for (int i=0; i < (int)m_pAuxObjs->size(); i++)
-//	    {
-//		    m_source << (*m_pAuxObjs)[i]->SourceLDP(1, fUndoData);
-//	    }
-//    }
-    }
-
-    void add_page_layout()
-    {
-//    //first section layout info
-//    //TODO: sections
-//    //int nSection = 0;
-//    {
-//        //page layout info
-//#if 0
-//		std::list<lmPageInfo*>::iterator it;
-//		for (it = m_PagesInfo.begin(); it != m_PagesInfo.end(); ++it)
-//            m_source << (*it)->SourceLDP(1, fUndoData);
-//#else
-//        lmPageInfo* pPageInfo = m_PagesInfo.front();
-//        m_source << pPageInfo->SourceLDP(1, fUndoData);
-//#endif
-//        //first system and other systems layout info
-//        m_source << m_SystemsInfo.front()->SourceLDP(1, true, fUndoData);
-//        m_source << m_SystemsInfo.back()->SourceLDP(1, false, fUndoData);
-//    }
-    }
-
-    void add_system_layout()
-    {
-        ImoSystemInfo* pInfo = m_pObj->get_first_system_info();
-        if (!m_pObj->has_default_values(pInfo))
-            add_system_info(pInfo);
-
-        pInfo = m_pObj->get_other_system_info();
-        if (!m_pObj->has_default_values(pInfo))
-            add_system_info(pInfo);
-    }
-
-    void add_system_info(ImoSystemInfo* pInfo)
-    {
-        start_element("systemLayout", pInfo->get_id(), k_in_new_line);
-        m_source << (pInfo->is_first() ? "first" : "other") << " ";
-        start_element("systemMargins", k_no_imoid);
-        m_source << pInfo->get_left_margin() << " "
-                 << pInfo->get_right_margin() << " "
-                 << pInfo->get_system_distance() << " "
-                 << pInfo->get_top_system_distance();
-        end_element(k_in_same_line);
-        end_element(k_in_same_line);
-    }
-
-    void add_options()
-    {
-        ImoOptions* pColOpts = m_pObj->get_options();
-        ImoObj::children_iterator it;
-        for (it= pColOpts->begin(); it != pColOpts->end(); ++it)
-        {
-            ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>(*it);
-            if (!m_pObj->has_default_value(pOpt))
-            {
-                start_element("opt", pOpt->get_id(), k_in_new_line);
-                m_source << pOpt->get_name() << " ";
-                if (pOpt->is_bool_option())
-                    m_source << (pOpt->get_bool_value() ? "true" : "false");
-                else if (pOpt->is_long_option())
-                    m_source << pOpt->get_long_value();
-                else if (pOpt->is_float_option())
-                    m_source << pOpt->get_float_value();
-                else
-                    m_source << pOpt->get_string_value();
-                end_element(k_in_same_line);
-            }
-        }
-    }
-
-    void add_parts()
-    {
-        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
-        if (pGroups == NULL)
-            return;
-
-        start_element("parts", k_no_imoid, k_in_new_line);
-        add_instr_ids();
-        add_groups();
-        end_element(k_in_new_line);
-    }
-
-    void add_instr_ids()
-    {
-        start_element("instrIds", k_no_imoid, k_in_new_line);
-        int numInstr = m_pObj->get_num_instruments();
-        for (int i=0; i < numInstr; ++i)
-        {
-            ImoInstrument* pInstr = m_pObj->get_instrument(i);
-            if (i > 0)
-                m_source << " ";
-            m_source << pInstr->get_instr_id();
-        }
-        end_element(k_in_same_line);
-    }
-
-    void add_groups()
-    {
-        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
-        ImoObj::children_iterator it;
-        for (it= pGroups->begin(); it != pGroups->end(); ++it)
-        {
-            start_element("group", k_no_imoid, k_in_new_line);
-
-            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(*it);
-            ImoInstrument* pInstr = pGrp->get_first_instrument();
-            m_source << pInstr->get_instr_id();
-            pInstr = pGrp->get_last_instrument();
-            m_source << " " << pInstr->get_instr_id();
-            bool fAddSpace = true;
-
-            string value = pGrp->get_name_string();
-            if (!value.empty())
-            {
-                if (fAddSpace)
-                {
-                    m_source << " ";
-                    fAddSpace = false;
-                }
-                start_element("name", k_no_imoid, k_in_same_line);
-                m_source << "\"" << value << "\"";
-                end_element(k_in_same_line);
-            }
-
-
-            value = pGrp->get_abbrev_string();
-            if (!value.empty())
-            {
-                if (fAddSpace)
-                {
-                    m_source << " ";
-                    fAddSpace = false;
-                }
-                start_element("abbrev", k_no_imoid, k_in_same_line);
-                m_source << "\"" << value << "\"";
-                end_element(k_in_same_line);
-            }
-
-            if (pGrp->get_symbol() != ImoInstrGroup::k_none)
-            {
-                if (fAddSpace)
-                {
-                    m_source << " ";
-                    fAddSpace = false;
-                }
-                start_element("symbol", k_no_imoid, k_in_same_line);
-                switch (pGrp->get_symbol())
-                {
-                    case ImoInstrGroup::k_bracket:
-                        m_source << "bracket";
-                        break;
-                    case ImoInstrGroup::k_brace:
-                        m_source << "brace";
-                        break;
-                    case ImoInstrGroup::k_line:
-                        m_source << "line";
-                        break;
-                    default:
-                        m_source << "none";
-                }
-                end_element(k_in_same_line);
-            }
-
-            if (pGrp->join_barlines() != ImoInstrGroup::k_no)
-            {
-                if (fAddSpace)
-                {
-                    m_source << " ";
-                    fAddSpace = false;
-                }
-                start_element("joinBarlines", k_no_imoid, k_in_same_line);
-                switch (pGrp->join_barlines())
-                {
-                    case ImoInstrGroup::k_standard:
-                        m_source << "yes";
-                        break;
-                    case ImoInstrGroup::k_mensurstrich:
-                        m_source << "mensurstrich";
-                        break;
-                    default:
-                        m_source << "no";
-                }
-                end_element(k_in_same_line);
-            }
-
-            end_element(k_in_same_line);    //group
-        }
-    }
-
-    void add_instruments()
-    {
-        int numInstr = m_pObj->get_num_instruments();
-        for (int i=0; i < numInstr; ++i)
-            add_source_for( m_pObj->get_instrument(i) );
-    }
-
-
-};
-
 //---------------------------------------------------------------------------------------
 class ScoreLineLdpGenerator : public LdpGenerator
 {
@@ -2564,6 +2275,39 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class TitleLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScoreTitle* m_pObj;
+
+public:
+    TitleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScoreTitle*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        start_element("title", m_pObj->get_id());
+        add_text();
+        add_style( m_pObj->get_style() );
+        add_location_if_not_zero(m_pObj->get_user_location_x(),
+                                 m_pObj->get_user_location_y());
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_text()
+    {
+        m_source << "\"" << m_pObj->get_text() << "\"";
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
 class TupletLdpGenerator : public LdpGenerator
 {
 protected:
@@ -2667,6 +2411,295 @@ protected:
 
         end_element(k_in_same_line);
     }
+
+};
+
+//---------------------------------------------------------------------------------------
+//AWARE: Must be defined after TitleLdpGenerator and DefineStyleLdpGenerator as uses both
+
+class ScoreLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScore* m_pObj;
+
+public:
+    ScoreLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScore*>(pImo);
+        pExporter->set_current_score(m_pObj);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        //TODO: commented elements
+
+        start_element("score", m_pObj->get_id());
+        add_version();
+        add_style( m_pObj->get_style() );
+        //add_undo_data();
+        //add_creation_mode();
+        add_styles();
+        add_titles();
+        //add_page_layout();
+        add_system_layout();
+        add_options();
+        add_parts();
+        add_instruments();
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_version()
+    {
+        m_source << "(vers 2.0)";
+    }
+
+    void add_undo_data()
+    {
+    ////ID counter value for undo/redo
+    //if (fUndoData)
+    //    sSource += wxString::Format(_T("   (undoData (idCounter  %d))\n"), m_nCounterID);
+    }
+
+    void add_creation_mode()
+    {
+//    //creation mode
+//    if (!m_sCreationModeName.empty())
+//    {
+//        m_source << _T("   (creationMode ");
+//        m_source << m_sCreationModeName;
+//        m_source << _T(" ");
+//        m_source << m_sCreationModeVers;
+//        m_source << _T(")\n");
+//    }
+    }
+
+    void add_styles()
+    {
+        map<std::string, ImoStyle*>& styles = m_pObj->get_styles();
+        map<std::string, ImoStyle*>::const_iterator it;
+        for (it = styles.begin(); it != styles.end(); ++it)
+        {
+            if (! (it->second)->is_default_style_with_default_values() )
+//            if (!(it->first == "Default style"
+//                  || it->first == "Instrument names"
+//                  || it->first == "Tuplet numbers"
+//                ))
+            {
+                DefineStyleLdpGenerator gen(it->second, m_pExporter);
+                m_source << gen.generate_source();
+            }
+        }
+    }
+
+    void add_titles()
+    {
+        list<ImoScoreTitle*>& titles = m_pObj->get_titles();
+        list<ImoScoreTitle*>::iterator it;
+        for (it = titles.begin(); it != titles.end(); ++it)
+        {
+            TitleLdpGenerator gen(*it, m_pExporter);
+            m_source << gen.generate_source();
+        }
+    }
+
+    void add_page_layout()
+    {
+//    //first section layout info
+//    //TODO: sections
+//    //int nSection = 0;
+//    {
+//        //page layout info
+//#if 0
+//		std::list<lmPageInfo*>::iterator it;
+//		for (it = m_PagesInfo.begin(); it != m_PagesInfo.end(); ++it)
+//            m_source << (*it)->SourceLDP(1, fUndoData);
+//#else
+//        lmPageInfo* pPageInfo = m_PagesInfo.front();
+//        m_source << pPageInfo->SourceLDP(1, fUndoData);
+//#endif
+//        //first system and other systems layout info
+//        m_source << m_SystemsInfo.front()->SourceLDP(1, true, fUndoData);
+//        m_source << m_SystemsInfo.back()->SourceLDP(1, false, fUndoData);
+//    }
+    }
+
+    void add_system_layout()
+    {
+        ImoSystemInfo* pInfo = m_pObj->get_first_system_info();
+        if (!m_pObj->has_default_values(pInfo))
+            add_system_info(pInfo);
+
+        pInfo = m_pObj->get_other_system_info();
+        if (!m_pObj->has_default_values(pInfo))
+            add_system_info(pInfo);
+    }
+
+    void add_system_info(ImoSystemInfo* pInfo)
+    {
+        start_element("systemLayout", pInfo->get_id(), k_in_new_line);
+        m_source << (pInfo->is_first() ? "first" : "other") << " ";
+        start_element("systemMargins", k_no_imoid);
+        m_source << pInfo->get_left_margin() << " "
+                 << pInfo->get_right_margin() << " "
+                 << pInfo->get_system_distance() << " "
+                 << pInfo->get_top_system_distance();
+        end_element(k_in_same_line);
+        end_element(k_in_same_line);
+    }
+
+    void add_options()
+    {
+        ImoOptions* pColOpts = m_pObj->get_options();
+        ImoObj::children_iterator it;
+        for (it= pColOpts->begin(); it != pColOpts->end(); ++it)
+        {
+            ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>(*it);
+            if (!m_pObj->has_default_value(pOpt))
+            {
+                start_element("opt", pOpt->get_id(), k_in_new_line);
+                m_source << pOpt->get_name() << " ";
+                if (pOpt->is_bool_option())
+                    m_source << (pOpt->get_bool_value() ? "true" : "false");
+                else if (pOpt->is_long_option())
+                    m_source << pOpt->get_long_value();
+                else if (pOpt->is_float_option())
+                    m_source << pOpt->get_float_value();
+                else
+                    m_source << pOpt->get_string_value();
+                end_element(k_in_same_line);
+            }
+        }
+    }
+
+    void add_parts()
+    {
+        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
+        if (pGroups == NULL)
+            return;
+
+        start_element("parts", k_no_imoid, k_in_new_line);
+        add_instr_ids();
+        add_groups();
+        end_element(k_in_new_line);
+    }
+
+    void add_instr_ids()
+    {
+        start_element("instrIds", k_no_imoid, k_in_new_line);
+        int numInstr = m_pObj->get_num_instruments();
+        for (int i=0; i < numInstr; ++i)
+        {
+            ImoInstrument* pInstr = m_pObj->get_instrument(i);
+            if (i > 0)
+                m_source << " ";
+            m_source << pInstr->get_instr_id();
+        }
+        end_element(k_in_same_line);
+    }
+
+    void add_groups()
+    {
+        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
+        ImoObj::children_iterator it;
+        for (it= pGroups->begin(); it != pGroups->end(); ++it)
+        {
+            start_element("group", k_no_imoid, k_in_new_line);
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(*it);
+            ImoInstrument* pInstr = pGrp->get_first_instrument();
+            m_source << pInstr->get_instr_id();
+            pInstr = pGrp->get_last_instrument();
+            m_source << " " << pInstr->get_instr_id();
+            bool fAddSpace = true;
+
+            string value = pGrp->get_name_string();
+            if (!value.empty())
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("name", k_no_imoid, k_in_same_line);
+                m_source << "\"" << value << "\"";
+                end_element(k_in_same_line);
+            }
+
+
+            value = pGrp->get_abbrev_string();
+            if (!value.empty())
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("abbrev", k_no_imoid, k_in_same_line);
+                m_source << "\"" << value << "\"";
+                end_element(k_in_same_line);
+            }
+
+            if (pGrp->get_symbol() != ImoInstrGroup::k_none)
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("symbol", k_no_imoid, k_in_same_line);
+                switch (pGrp->get_symbol())
+                {
+                    case ImoInstrGroup::k_bracket:
+                        m_source << "bracket";
+                        break;
+                    case ImoInstrGroup::k_brace:
+                        m_source << "brace";
+                        break;
+                    case ImoInstrGroup::k_line:
+                        m_source << "line";
+                        break;
+                    default:
+                        m_source << "none";
+                }
+                end_element(k_in_same_line);
+            }
+
+            if (pGrp->join_barlines() != ImoInstrGroup::k_no)
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("joinBarlines", k_no_imoid, k_in_same_line);
+                switch (pGrp->join_barlines())
+                {
+                    case ImoInstrGroup::k_standard:
+                        m_source << "yes";
+                        break;
+                    case ImoInstrGroup::k_mensurstrich:
+                        m_source << "mensurstrich";
+                        break;
+                    default:
+                        m_source << "no";
+                }
+                end_element(k_in_same_line);
+            }
+
+            end_element(k_in_same_line);    //group
+        }
+    }
+
+    void add_instruments()
+    {
+        int numInstr = m_pObj->get_num_instruments();
+        for (int i=0; i < numInstr; ++i)
+            add_source_for( m_pObj->get_instrument(i) );
+    }
+
 
 };
 
@@ -2956,6 +2989,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
         case k_imo_score_text:      return LOMSE_NEW ScoreTextLdpGenerator(pImo, this);
         case k_imo_score_line:      return LOMSE_NEW ScoreLineLdpGenerator(pImo, this);
+        case k_imo_score_title:     return LOMSE_NEW TitleLdpGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);
         case k_imo_tie:             return LOMSE_NEW TieLdpGenerator(pImo, this);

@@ -10,6 +10,9 @@
 
 ##### COMPATIBLE CHANGES
 
+- Render score titles and add suport for titles in LDP exporter.
+- Render additional syllables and elision symbols in lyrics.
+- Fixes for c++11 compilers.
 - The internal model for lyrics has been replaced by a new model, to allow
   for better layout of lyrics.
 - Added support in LDP for lyrics.

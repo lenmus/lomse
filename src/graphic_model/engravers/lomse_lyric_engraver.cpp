@@ -138,66 +138,93 @@ int LyricEngraver::create_shapes(Color color)
 void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* pLyric,
                                  GmoShapeNote* pNextNoteShape)
 {
-    LUnits x = pNoteShape->get_left();
+    LUnits xNote = pNoteShape->get_left();
+    LUnits xCur = xNote;
 
     //TODO: base position should be the maximum notes bottom y + 5.0f instead
-    //      of a fixed amount (60.0f)
+    //      of a fixed amount (70.0f)
     //TODO: line increment should be text shape height + 0.5f instead o a fixed
     //      amount (23.0f)
     int lineNum = pLyric->get_number();
-    int tenths = 60.0f + 23.0f * float(lineNum);
-    LUnits y = m_staffTops[iNote] + pNoteShape->get_top() + tenths_to_logical(tenths);
-
-    //get text
-    ImoLyricsTextInfo* pText = pLyric->get_text_item(0);
-    const string& text = pText->get_syllable_text();
-    const string& language = pText->get_syllable_language();
-    ImoStyle* pStyle = pText->get_syllable_style();
-    if (pStyle == NULL)
-        pStyle = m_pMeter->get_lyrics_style_info();
-    Color color = pStyle->color();
-
+    LUnits y = m_staffTops[iNote] + pNoteShape->get_top();
+	if (pLyric->get_placement() == k_placement_above)
+        y -= tenths_to_logical(25.0f + 23.0f * float(lineNum));
+	else
+        y += tenths_to_logical(70.0f + 23.0f * float(lineNum));
 
     //create container shape
     ShapeId idx = 0;
     m_pLyricsShape = LOMSE_NEW GmoShapeLyrics(pLyric, idx, Color(0,0,0) /*unused*/,
                                               m_libraryScope);
 
-    //add shape for text
-    GmoShape* pSyllableShape = LOMSE_NEW GmoShapeText(pLyric, idx, text, pStyle,
-                                                      language, x, y, m_libraryScope);
+    //create shapes for syllables and elision symbols and compute its total width
+    ImoStyle* pStyle = NULL;
+    Color color;
+    GmoShape* pSyllableShape;
+    LUnits syllablesWidth = 0;
+    int numSyllables = pLyric->get_num_text_items();
+    for (int i=0; i < numSyllables; ++i)
+    {
+        //get text for syllable
+        ImoLyricsTextInfo* pText = pLyric->get_text_item(i);
+        const string& text = pText->get_syllable_text();
+        const string& language = pText->get_syllable_language();
+        pStyle = pText->get_syllable_style();
+        if (pStyle == NULL)
+            pStyle = m_pMeter->get_lyrics_style_info();
+        color = pStyle->color();
 
-    //center syllable on note head
-    LUnits shift = (pNoteShape->get_width() - pSyllableShape->get_width()) / 2.0f;
-    pSyllableShape->shift_origin(shift, 0.0f);
+        //create shape for this syllable
+        pSyllableShape = LOMSE_NEW GmoShapeText(pLyric, idx, text, pStyle,
+                                                language, xCur, y, m_libraryScope);
+        m_pLyricsShape->add(pSyllableShape);
+        xCur = pSyllableShape->get_right();
+
+        //cumulative width
+        syllablesWidth += pSyllableShape->get_width();
+
+        //add elision symbol
+        if (pText->has_elision())
+        {
+            const string& elision = pText->get_elision_text();
+            GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx, elision, pStyle,
+                                                      "en", xCur, y, m_libraryScope);
+            m_pLyricsShape->add(pShape);
+            xCur = pShape->get_right() + tenths_to_logical(2.0);
+            syllablesWidth += pShape->get_width() + tenths_to_logical(2.0);
+        }
+    }
+
+    //compute shift for centering syllables on note head
+    LUnits shift = (pNoteShape->get_width() - syllablesWidth) / 2.0f;
+    xCur += shift;
+
+    //shift syllables for centering on note head
     m_pLyricsShape->shift_origin(USize(shift, 0.0f));
-
-	m_pLyricsShape->add(pSyllableShape);
-    x = pSyllableShape->get_right();
-
+    LUnits syllablesRight = m_pLyricsShape->get_right();
 
     //add shape for hyphenation, if needed
     if (pLyric->has_hyphenation() && !pLyric->has_melisma())
     {
         GmoShape* pShape = LOMSE_NEW GmoShapeText(pLyric, idx, "-", pStyle,
-                                                  language, x, y, m_libraryScope);
+                                                  "en", xCur, y, m_libraryScope);
+        m_pLyricsShape->add(pShape);
 
         //shift shape to center between this and next syllable
         if (pNextNoteShape)
         {
-            LUnits space = pNextNoteShape->get_left() - pSyllableShape->get_right();
+            LUnits space = pNextNoteShape->get_left() - syllablesRight;
             LUnits shift = (space - pShape->get_width()) / 2.0f;
             pShape->shift_origin(shift, 0.0f);
         }
 
-        m_pLyricsShape->add(pShape);
-        x = pShape->get_left() + pShape->get_width();
+        xCur = pShape->get_right();
     }
 
     //add shape for melisma line, if needed
     if (pLyric->has_melisma())
     {
-        LUnits xStart = x + tenths_to_logical(3.0f);;
+        LUnits xStart = xCur + tenths_to_logical(3.0f);;
         LUnits xEnd;
         if (pNextNoteShape)
         {
@@ -223,10 +250,7 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         GmoShape* pShape = LOMSE_NEW GmoShapeLine(pLyric, idx, xStart, y, xEnd, y,
                                         width, boundsExtraWidth, k_line_solid, color,
                                         k_edge_normal, k_cap_none, k_cap_none);
-
         m_pLyricsShape->add(pShape);
-
-        x += pShape->get_width();
     }
 
     m_pShape = m_pLyricsShape;
