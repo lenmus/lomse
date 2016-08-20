@@ -104,6 +104,10 @@ protected:
     bool m_fShowShapeBounds;
     bool m_fUnitTests;
 
+    //spacing algorithm
+    float m_gourlayOptForce;
+    float m_spacingAlpha;
+    float m_spacingDmin;
 
 public:
     LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
@@ -154,6 +158,14 @@ public:
     }
     inline Metronome* get_global_metronome() { return m_pGlobalMetronome; }
     inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
+
+    //Gourlay spacing algorithm parameters
+    inline float get_optimum_force() { return m_gourlayOptForce; }
+    inline void set_optimum_force(float force) { m_gourlayOptForce = force; }
+    inline float get_spacing_alpha() { return m_spacingAlpha; }
+    inline void set_spacing_alpha(float alpha) { m_spacingAlpha = alpha; }
+    inline float get_spacing_dmin() { return m_spacingDmin; }
+    inline void set_spacing_dmin(float dmin) { m_spacingDmin = dmin; }
 
     //global options, mainly for debug
     inline void set_justify_systems(bool value) { m_fJustifySystems = value; }

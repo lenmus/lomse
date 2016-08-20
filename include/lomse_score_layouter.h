@@ -36,6 +36,8 @@
 #include "lomse_score_enums.h"
 #include "lomse_logger.h"
 #include "lomse_shapes_storage.h"
+#include "lomse_spacing_algorithm.h"
+
 #include <vector>
 using namespace std;
 
@@ -63,7 +65,6 @@ class SystemLayouter;
 class StaffObjsCursor;
 class GmoShape;
 class ScoreMeter;
-class ColumnLayouter;
 class ColumnStorage;
 class ColumnsBuilder;
 class ShapesCreator;
@@ -133,16 +134,16 @@ protected:
     LibraryScope&   m_libraryScope;
     ImoScore*       m_pScore;
     ScoreMeter*     m_pScoreMeter;
-    ColumnsBuilder* m_pColsBuilder;
+    SpacingAlgorithm* m_pSpAlgorithm;
     ShapesStorage   m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
     UPoint          m_cursor;
     LUnits          m_startTop;
 
-    std::vector<ColumnLayouter*> m_ColLayouters;
     std::vector<SystemLayouter*> m_sysLayouters;
     std::vector<int> m_breaks;
+
 
     //temporary data about current page being laid out
     int m_iCurPage;     //[0..n-1] current page. (-1 if no page yet created!)
@@ -187,7 +188,6 @@ public:
 
     //support for helper classes
     virtual LUnits get_target_size_for_system(int iSystem);
-    virtual LUnits get_main_width(int iCol);
     virtual LUnits get_trimmed_width(int iCol);
     virtual bool column_has_system_break(int iCol);
     virtual float get_column_penalty(int iCol);
@@ -217,7 +217,6 @@ protected:
     void initialice_score_layouter();
     void create_parts_engraver();
     void decide_systems_indentation();
-    void split_content_in_columns();
     void create_stub();
     void add_score_titles();
     bool enough_space_for_empty_system();
@@ -243,7 +242,6 @@ protected:
 
     //---------------------------------------------------------------
     void move_cursor_to_top_left_corner();
-    void move_cursor_after_headers();
     LUnits remaining_height();
     void create_system_layouter();
     void create_system_box();
@@ -271,85 +269,7 @@ protected:
     //---------------------------------------------------------------
     int get_system_containing_column(int iCol);
 
-    void delete_column_layouters();
-
     bool is_system_empty(int iSystem);
-
-};
-
-
-//---------------------------------------------------------------------------------------
-// ColumnsBuilder: algorithm to build the columns for one score
-class ColumnsBuilder
-{
-protected:
-    LibraryScope&   m_libraryScope;
-    ScoreMeter*     m_pScoreMeter;
-    ScoreLayouter*  m_pScoreLyt;
-    ImoScore*       m_pScore;
-    ShapesStorage&  m_shapesStorage;
-    ShapesCreator*  m_pShapesCreator;
-    PartsEngraver*  m_pPartsEngraver;
-    std::vector<ColumnLayouter*>& m_ColLayouters;   //layouter for each column
-    StaffObjsCursor* m_pSysCursor;  //cursor for traversing the score
-    ColumnBreaker*  m_pBreaker;
-    std::vector<LUnits> m_SliceInstrHeights;
-    LUnits m_stavesHeight;      //system height without top and bottom margins
-    UPoint m_pagePos;           //to track current position
-
-    int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
-
-    int m_iColumnToTrace;   //support for debug and unit test
-    int m_nTraceLevel;
-
-public:
-    ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                   ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                   ShapesStorage& shapesStorage,
-                   ShapesCreator* pShapesCreator,
-                   std::vector<ColumnLayouter*>& colLayouters,
-                   PartsEngraver* pPartsEngraver);
-    ~ColumnsBuilder();
-
-
-    void create_columns();
-    inline LUnits get_staves_height() { return m_stavesHeight; }
-
-    //support for debuggin and unit tests
-    inline void set_debug_options(int iCol, int level) {
-        m_iColumnToTrace = iCol;
-        m_nTraceLevel = level;
-    }
-
-protected:
-    void determine_staves_vertical_position();
-    void create_column();
-
-    void create_column_layouter();
-    void create_column_boxes();
-    void collect_content_for_this_column();
-    void layout_column();
-    void assign_width_to_column();
-
-    GmoBoxSlice* create_slice_box();
-    void find_and_save_context_info_for_this_column();
-
-    void delete_column_storage();
-    LUnits determine_initial_fixed_space();
-
-    void store_info_about_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
-                                  int iInstr, int iStaff, int iCol, int iLine,
-                                  ImoInstrument* pInstr);
-
-    //column creation
-    void start_column_measurements(int iCol, LUnits uxStart, LUnits fixedSpace);
-    void include_object(int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
-                        TimeUnits rTime, int nStaff, GmoShape* pShape, bool fInProlog=false);
-    void finish_column_measurements(int iCol, LUnits xStart);
-    bool determine_if_is_in_prolog(TimeUnits rTime);
-
-    //helpers
-    inline bool is_first_column() { return m_iColumn == 0; }
 
 };
 

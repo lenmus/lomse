@@ -37,9 +37,10 @@
 #include "lomse_box_system.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_slice.h"
-#include "lomse_system_layouter.h"  //TimeGridTable
 #include "lomse_logger.h"
 #include "lomse_graphical_model.h"
+#include "lomse_timegrid_table.h"
+
 
 //other
 #include <sstream>

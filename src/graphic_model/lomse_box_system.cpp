@@ -32,7 +32,7 @@
 #include "lomse_box_slice.h"
 #include "lomse_internal_model.h"
 #include "lomse_shape_staff.h"
-#include "lomse_system_layouter.h"      //TimeGridTable
+#include "lomse_timegrid_table.h"
 #include "lomse_drawer.h"
 
 namespace lomse

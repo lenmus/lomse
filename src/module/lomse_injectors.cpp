@@ -86,6 +86,9 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_fReplaceLocalMetronome(false)
     , m_fShowShapeBounds(false)
     , m_fUnitTests(false)
+    , m_gourlayOptForce(1.0f)
+    , m_spacingAlpha(0.666666667)
+    , m_spacingDmin(16.0f)   //LOMSE_DMIN
 {
     if (!m_pDoorway)
     {

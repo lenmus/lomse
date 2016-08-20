@@ -43,7 +43,8 @@ namespace lomse
 //ScoreMeter implementation
 //=======================================================================================
 ScoreMeter::ScoreMeter(ImoScore* pScore)
-    : m_numInstruments( pScore->get_num_instruments() )
+    : m_maxLineSpace(0.0f)
+    , m_numInstruments( pScore->get_num_instruments() )
     , m_tupletsStyle(NULL)
     , m_metronomeStyle(NULL)
     , m_lyricsStyle(NULL)
@@ -64,6 +65,7 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     , m_rSpacingValue(rSpacingValue)
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
+    , m_maxLineSpace(0.0f)
     , m_tupletsStyle(NULL)
     , m_metronomeStyle(NULL)
     , m_lyricsStyle(NULL)
@@ -76,7 +78,10 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
         m_staffIndex[iInstr] = staves;
         staves += numStaves;
         for (int iStaff=0; iStaff < numStaves; ++iStaff)
+        {
+            m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
             m_lineSpace.push_back(lineSpacing);
+        }
     }
     m_numStaves = numStaves * numInstruments;
 }
@@ -113,7 +118,11 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
         int numStaves = pInstr->get_num_staves();
         staves += numStaves;
         for (int iStaff=0; iStaff < numStaves; ++iStaff)
-            m_lineSpace.push_back( pInstr->get_line_spacing_for_staff(iStaff) );
+        {
+            LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
+            m_lineSpace.push_back(lineSpacing);
+            m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
+        }
     }
     m_numStaves = staves;
 }

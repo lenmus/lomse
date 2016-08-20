@@ -33,7 +33,7 @@
 #include "lomse_graphic_view.h"
 #include "lomse_logger.h"
 #include "lomse_box_system.h"
-#include "lomse_system_layouter.h"      //class TimeGridTable
+#include "lomse_timegrid_table.h"
 
 
 namespace lomse

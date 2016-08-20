@@ -185,12 +185,16 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
             return false;
 
-////        //note/rest can not go before non-timed
-////        else if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-////            return true;
-////        else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
-////            return false;
-////
+//--fix for Gourlay. Remove for TimeposTable
+        //note/rest can not go before non-timed in other instruments
+        else if (a->num_instrument() != b->num_instrument())
+        {
+            if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+                return true;
+            else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
+                return false;
+        }
+//--end fix
 ////        //clef in other staff can not go after key or time signature
 ////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
 ////                 && b->staff() != a->staff())

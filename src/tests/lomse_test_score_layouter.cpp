@@ -46,6 +46,8 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_document_cursor.h"
+#include "lomse_spacing_algorithm_timetable.h"
+#include "lomse_timegrid_table.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -99,9 +101,9 @@ public:
     bool my_enough_space_in_page() { return enough_space_for_empty_system(); }
     ScoreMeter* my_get_score_meter() { return m_pScoreMeter; }
     GmoBoxSystem* my_get_current_system_box() { return m_pCurBoxSystem; }
-    ColumnsBuilder* my_get_columns_builder() { return m_pColsBuilder; }
+//    ColumnsBuilder* my_get_columns_builder() { return m_pColsBuilder; }
     ShapesCreator* my_shapes_creator() { return m_pShapesCreator; }
-    ColumnLayouter* my_get_column_layouter(int iCol) { return m_ColLayouters[iCol]; }
+//    ColumnLayouter* my_get_column_layouter(int iCol) { return m_ColLayouters[iCol]; }
     void my_engrave_system() { engrave_system(); }
 
 //    void my_fill_current_system_with_columns() { fill_current_system_with_columns(); }
@@ -294,22 +296,22 @@ SUITE(ScoreLayouterTest)
     // ScoreLayouter initialization tests
     //===================================================================================
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialize)
-    {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData ))) ))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-        scoreLyt.my_initialice_score_layouter();
-
-        CHECK( scoreLyt.my_get_columns_builder() != NULL);
-        CHECK( scoreLyt.my_shapes_creator() != NULL );
-        std::vector<InstrumentEngraver*>& instrEngravers =
-            scoreLyt.my_get_instrument_engravers();
-        CHECK( instrEngravers.size() == 1 );
-    }
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialize)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData ))) ))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//        scoreLyt.my_initialice_score_layouter();
+//
+//        CHECK( scoreLyt.my_get_columns_builder() != NULL);
+//        CHECK( scoreLyt.my_shapes_creator() != NULL );
+//        std::vector<InstrumentEngraver*>& instrEngravers =
+//            scoreLyt.my_get_instrument_engravers();
+//        CHECK( instrEngravers.size() == 1 );
+//    }
 
     TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_EmptyScoreNoColumnsOneSystem)
     {
@@ -430,282 +432,242 @@ SUITE(ScoreLayouterTest)
 //        scoreLyt.my_delete_all();
 //    }
 
-
-    //===================================================================================
-    // ColumnLayouter / LineSpacer tests
-    //===================================================================================
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_AlignNonTimedAtProlog)
+//COLUMN LAYOUTER COMMENTED OUT FOR ISOLATING SPACING ALGORITHM
+//    //===================================================================================
+//    // ColumnLayouter / LineSpacer tests
+//    //===================================================================================
+//
+////    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_AlignNonTimedAtProlog)
+////    {
+////        // should key signatures be aligned when different clefs? Currently not.
+////
+////        Document doc(m_libraryScope);
+////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+////            "(opt Render.SpacingFactor 0.4)"
+////            "(instrument (staves 2)(musicData "
+////            "(clef G p1)(clef F4 p2)(key E)(time 4 4)"
+////            ")) )))" );
+////        GraphicModel gmodel;
+////        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+////        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+////
+////        scoreLyt.trace_column(0, k_trace_table);
+////        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////
+////        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
+////
+////        scoreLyt.dump_column_data(0);
+//        ////cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        ////cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//        ////cout << "Gross width = " << pColLyt->get_gross_width() << endl;
+////
+////        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+////        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 583.14f) );
+////        CHECK( my_is_equal(pColLyt->get_gross_width(), 1895.14f) );
+////
+////        scoreLyt.my_delete_all();
+////    }
+//
+////    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_AlignTimedAtStart)
+////    {
+////        // triplets introduce truncation errors in time comparisons. If times not
+////        // properly compared, some notes will not get aligned, thus increasing
+////        // column width.
+////
+////        Document doc(m_libraryScope);
+////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+////            "(opt Render.SpacingFactor 0.4)"
+////            "(instrument (staves 2)(musicData "
+////            "(clef G p1)(clef F4 p2)(key E)(time 4 4)"
+////            "(n a3 w p1)(goBack start)"
+////            "(n f2 w p2)(barline)"
+////            "(n a3 q p1)"
+////            "(n a3 e g+ t3)(n c4 e)(n e4 e g- t-)"
+////            "(n a3 h)(goBack start)"
+////            "(n a2 h p2)"
+////            "(n f2 h p2)(barline)"
+////            ")) )))" );
+////        GraphicModel gmodel;
+////        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+////        //pScore->get_staffobjs_table()->dump();
+////        MyScoreLayouter scoreLyt(pScore, &gmodel, m_libraryScope);
+////
+////        int iCol = 2;
+////        //scoreLyt.trace_column(iCol, k_trace_table);
+////        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////
+////        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
+////
+//////        scoreLyt.dump_column_data(iCol);
+//////        cout << "Col width = " << pColLyt->get_gross_width() << endl;
+////
+////        CHECK( my_is_equal(pColLyt->get_gross_width(), 870.14f) );
+////
+////        scoreLyt.my_delete_all();
+////    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaceFirstColumn)
 //    {
-//        // should key signatures be aligned when different clefs? Currently not.
+//        // first column has fixed initial space and ends with a quarter note. Therefore,
+//        // it has variable space at end, but no var space at start
 //
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(opt Render.SpacingFactor 0.4)"
-//            "(instrument (staves 2)(musicData "
-//            "(clef G p1)(clef F4 p2)(key E)(time 4 4)"
+//            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
 //            ")) )))" );
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //
-//        scoreLyt.trace_column(0, k_trace_table);
-//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-//
-//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
-//
-//        scoreLyt.dump_column_data(0);
-        ////cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        ////cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-        ////cout << "Gross width = " << pColLyt->get_gross_width() << endl;
-//
-//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 583.14f) );
-//        CHECK( my_is_equal(pColLyt->get_gross_width(), 1895.14f) );
-//
-//        scoreLyt.my_delete_all();
-//    }
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_AlignTimedAtStart)
-//    {
-//        // triplets introduce truncation errors in time comparisons. If times not
-//        // properly compared, some notes will not get aligned, thus increasing
-//        // column width.
-//
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(opt Render.SpacingFactor 0.4)"
-//            "(instrument (staves 2)(musicData "
-//            "(clef G p1)(clef F4 p2)(key E)(time 4 4)"
-//            "(n a3 w p1)(goBack start)"
-//            "(n f2 w p2)(barline)"
-//            "(n a3 q p1)"
-//            "(n a3 e g+ t3)(n c4 e)(n e4 e g- t-)"
-//            "(n a3 h)(goBack start)"
-//            "(n a2 h p2)"
-//            "(n f2 h p2)(barline)"
-//            ")) )))" );
-//        GraphicModel gmodel;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-//        //pScore->get_staffobjs_table()->dump();
-//        MyScoreLayouter scoreLyt(pScore, &gmodel, m_libraryScope);
-//
-//        int iCol = 2;
+//        int iCol = 0;
 //        //scoreLyt.trace_column(iCol, k_trace_table);
 //        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
 //
 //        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
 //
-////        scoreLyt.dump_column_data(iCol);
-////        cout << "Col width = " << pColLyt->get_gross_width() << endl;
+//        //scoreLyt.dump_column_data(iCol);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
 //
-//        CHECK( my_is_equal(pColLyt->get_gross_width(), 870.14f) );
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
 //
 //        scoreLyt.my_delete_all();
 //    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaceFirstColumn)
-    {
-        // first column has fixed initial space and ends with a quarter note. Therefore,
-        // it has variable space at end, but no var space at start
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
-            ")) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        int iCol = 0;
-        //scoreLyt.trace_column(iCol, k_trace_table);
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
-
-        //scoreLyt.dump_column_data(iCol);
-        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaceAtStart)
-    {
-        // second column doesn't have fixed initial space and ends with a quarter note.
-        // It has variable space at end, but no var space at start
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
-            ")) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(1);
-
-//        scoreLyt.dump_column_data(1);
-        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_StartHookWidth)
-    {
-        // second column doesn't have fixed initial space and ends with a quarter note
-        // with an accidental, that creates variable space at start.
-        // It has variable space at both, start and end
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q)(n -d4 q)"
-            ")) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(1);
-
-        //scoreLyt.dump_column_data(1);
-        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 195.00f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaces)
-    {
-        // first column has fixed initial space and is just a clef.
-        // Therefore, it doesn't have variable space neither at start nor at end.
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)"
-            ")) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
-
-//        scoreLyt.dump_column_data(0);
-        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
-
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 0.0f) );
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_NoVarSpaceFirstColumn)
-    {
-        //Now we combine two lines to test computation of variable space at end.and
-        //of column width
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData "
-            "(clef G p1)(clef F4 p2)(n c4 e p1 g+)(n d4 e p1 g-)(n g4 q)"
-            "(goBack start)(n c3 q p2)(n d3 q)"
-            ")) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
-
-//        scoreLyt.dump_column_data(0);
-        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
-        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 369.425f) );
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_bug80215)
-    {
-        // 80215. First goFwd doesn't work properly. The two initial notes
-        // get positioned at same x pos
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
-            "(goFwd h v2) )) )))" );
-
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        int iCol = 0;
-//        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-//        scoreLyt.dump_column_data(iCol, cout);
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
-        pColLyt->do_spacing();
-
-        DocCursor cursor(&doc);
-        cursor.enter_element();     //enter score. points to clef
-        cursor.move_next();         //points to c4
-        ImoId id1 = (*cursor)->get_id();
-        cursor.move_next();         //points to d4
-        ImoId id2 = (*cursor)->get_id();
-        LineEntry* pEntry1 = pColLyt->get_entry_for(id1);  //first note
-        LineEntry* pEntry2 = pColLyt->get_entry_for(id2);  //second note
-        CHECK( pEntry1 != NULL );
-        CHECK( pEntry2 != NULL );
-        CHECK( pEntry2->get_position() > pEntry1->get_position() );
-//        cout << "id1=" << id1 << ", id2=" << id2
-//             << ", x2=" << pEntry2->get_position()
-//             << ", x1=" << pEntry1->get_position() << endl;
-
-        scoreLyt.my_delete_all();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_space_before_clef_change)
-    {
-        // minimum space before clef change
-
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (musicData (clef G)(n f4 q)(clef F4)"
-            "(n g3 q (stem down))(barline) )) )))" );
-
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        int iCol = 0;
-//        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
-//        scoreLyt.trace_column(1, k_trace_table || k_trace_entries || k_trace_spacing);
-        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-//        scoreLyt.dump_column_data(iCol, cout);
-        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
-        pColLyt->do_spacing();
-//        scoreLyt.dump_column_data(1, cout);
-
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaceAtStart)
+//    {
+//        // second column doesn't have fixed initial space and ends with a quarter note.
+//        // It has variable space at end, but no var space at start
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
+//            ")) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+//
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(1);
+//
+////        scoreLyt.dump_column_data(1);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
+//
+//        scoreLyt.my_delete_all();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_StartHookWidth)
+//    {
+//        // second column doesn't have fixed initial space and ends with a quarter note
+//        // with an accidental, that creates variable space at start.
+//        // It has variable space at both, start and end
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData (clef G)(n c4 q)(n -d4 q)"
+//            ")) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+//
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(1);
+//
+//        //scoreLyt.dump_column_data(1);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 195.00f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
+//
+//        scoreLyt.my_delete_all();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_OneLine_NoVarSpaces)
+//    {
+//        // first column has fixed initial space and is just a clef.
+//        // Therefore, it doesn't have variable space neither at start nor at end.
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData (clef G)"
+//            ")) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+//
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
+//
+////        scoreLyt.dump_column_data(0);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
+//
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 0.0f) );
+//
+//        scoreLyt.my_delete_all();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_NoVarSpaceFirstColumn)
+//    {
+//        //Now we combine two lines to test computation of variable space at end.and
+//        //of column width
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (staves 2)(musicData "
+//            "(clef G p1)(clef F4 p2)(n c4 e p1 g+)(n d4 e p1 g-)(n g4 q)"
+//            "(goBack start)(n c3 q p2)(n d3 q)"
+//            ")) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+//
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
+//
+////        scoreLyt.dump_column_data(0);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 369.425f) );
+//
+//        scoreLyt.my_delete_all();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_bug80215)
+//    {
+//        // 80215. First goFwd doesn't work properly. The two initial notes
+//        // get positioned at same x pos
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
+//            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
+//            "(goFwd h v2) )) )))" );
+//
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        int iCol = 0;
+////        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
+//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////        scoreLyt.dump_column_data(iCol, cout);
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
+//        pColLyt->do_spacing();
+//
 //        DocCursor cursor(&doc);
 //        cursor.enter_element();     //enter score. points to clef
 //        cursor.move_next();         //points to c4
@@ -720,37 +682,31 @@ SUITE(ScoreLayouterTest)
 ////        cout << "id1=" << id1 << ", id2=" << id2
 ////             << ", x2=" << pEntry2->get_position()
 ////             << ", x1=" << pEntry1->get_position() << endl;
-
-        scoreLyt.my_delete_all();
-    }
-
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_example_for_documentation)
+//
+//        scoreLyt.my_delete_all();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_space_before_clef_change)
 //    {
-//        // example for documenting spacing algorithm
+//        // minimum space before clef change
 //
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-//            "(instrument (staves 2) (musicData "
-//            "(clef G p1)(clef F4 p2)(n c4 e v1 p1)(n e4 e p1)(n g4 q p1)"
-//            "(n c3 q v2 p2)(n e3 q p2)(barline) )) )))" );
-//
-////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-////            "(instrument (musicData "
-////            "(clef G)(n +c4 q v1)(barline end) )) )))" );
+//            "(instrument (musicData (clef G)(n f4 q)(clef F4)"
+//            "(n g3 q (stem down))(barline) )) )))" );
 //
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //
-//        int iCol = 1;
-//        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
+//        int iCol = 0;
+////        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
+////        scoreLyt.trace_column(1, k_trace_table || k_trace_entries || k_trace_spacing);
 //        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
-//        //cout << "Num.Columns=" << scoreLyt.get_num_columns() << endl;
-//        //scoreLyt.dump_column_data(iCol, cout);
+////        scoreLyt.dump_column_data(iCol, cout);
 //        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
 //        pColLyt->do_spacing();
-//        scoreLyt.dump_column_data(iCol, cout);
+////        scoreLyt.dump_column_data(1, cout);
 //
 ////        DocCursor cursor(&doc);
 ////        cursor.enter_element();     //enter score. points to clef
@@ -769,30 +725,76 @@ SUITE(ScoreLayouterTest)
 //
 //        scoreLyt.my_delete_all();
 //    }
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_BarlineSizeAccounted)
-//    {
-//        //Barline size is also part of column size (bug)
 //
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q)(barline end)"
-//            ")) )))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //
-//        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_example_for_documentation)
+////    {
+////        // example for documenting spacing algorithm
+////
+////        Document doc(m_libraryScope);
+////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
+////            "(instrument (staves 2) (musicData "
+////            "(clef G p1)(clef F4 p2)(n c4 e v1 p1)(n e4 e p1)(n g4 q p1)"
+////            "(n c3 q v2 p2)(n e3 q p2)(barline) )) )))" );
+////
+//////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
+//////            "(instrument (musicData "
+//////            "(clef G)(n +c4 q v1)(barline end) )) )))" );
+////
+////        GraphicModel gmodel;
+////        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+////        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+////
+////        int iCol = 1;
+////        scoreLyt.trace_column(iCol, k_trace_table || k_trace_entries || k_trace_spacing);
+////        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////        //cout << "Num.Columns=" << scoreLyt.get_num_columns() << endl;
+////        //scoreLyt.dump_column_data(iCol, cout);
+////        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
+////        pColLyt->do_spacing();
+////        scoreLyt.dump_column_data(iCol, cout);
+////
+//////        DocCursor cursor(&doc);
+//////        cursor.enter_element();     //enter score. points to clef
+//////        cursor.move_next();         //points to c4
+//////        ImoId id1 = (*cursor)->get_id();
+//////        cursor.move_next();         //points to d4
+//////        ImoId id2 = (*cursor)->get_id();
+//////        LineEntry* pEntry1 = pColLyt->get_entry_for(id1);  //first note
+//////        LineEntry* pEntry2 = pColLyt->get_entry_for(id2);  //second note
+//////        CHECK( pEntry1 != NULL );
+//////        CHECK( pEntry2 != NULL );
+//////        CHECK( pEntry2->get_position() > pEntry1->get_position() );
+////////        cout << "id1=" << id1 << ", id2=" << id2
+////////             << ", x2=" << pEntry2->get_position()
+////////             << ", x1=" << pEntry1->get_position() << endl;
+////
+////        scoreLyt.my_delete_all();
+////    }
 //
-//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
-//
-////        scoreLyt.dump_column_data(0);
-////        cout << "Col width = " << pColLyt->get_gross_width() << endl;
-//
-//        CHECK( my_is_equal(pColLyt->get_gross_width(), 2102.14f) );
-//
-//        scoreLyt.my_delete_all();
-//    }
+////    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_BarlineSizeAccounted)
+////    {
+////        //Barline size is also part of column size (bug)
+////
+////        Document doc(m_libraryScope);
+////        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+////            "(instrument (musicData (clef G)(n c4 q)(barline end)"
+////            ")) )))" );
+////        GraphicModel gmodel;
+////        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+////        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+////
+////        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+////
+////        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
+////
+//////        scoreLyt.dump_column_data(0);
+//////        cout << "Col width = " << pColLyt->get_gross_width() << endl;
+////
+////        CHECK( my_is_equal(pColLyt->get_gross_width(), 2102.14f) );
+////
+////        scoreLyt.my_delete_all();
+////    }
 
     //===================================================================================
     //

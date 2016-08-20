@@ -7,15 +7,15 @@
    (defineStyle "Instruments" (font "Times New Roman" 14pt bold) (color #000000))
    (defineStyle "Notations" (font "Times New Roman" 10pt bold) (color #000000))
    
-   (title center "Prelude" (style "Title"))
-   (title center "Op. 28, No. 20" (style "Subtitle"))
-   (title right "F. Chopin" (style "Composer"))
+   (title "Prelude" (style "Title")(dx 450))
+   (title "Op. 28, No. 20" (style "Subtitle")(dx 440))
+   (title "F. Chopin" (style "Composer")(dx 910))
 
    (systemLayout first (systemMargins 0 0 3000 2000))
    (systemLayout other (systemMargins 0 0 3000 2000))
 
-   (opt Render.SpacingMethod 1)
-   (opt Render.SpacingValue 30)
+   //(opt Render.SpacingMethod 0)
+   //(opt Render.SpacingValue 30)
    //(opt Render.SpacingFactor 0.65)
 
    (instrument (name "Piano" (style "Instruments"))(staves 2)
@@ -31,7 +31,6 @@
         (chord (n a3 q)(n c4 q)(n e4 q)(n a4 q))
         (chord (n g3 q)(n =b3 q))
         (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q (slur 1 stop)))
-        (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q))
         
         //second voice
         (goFwd h v2)

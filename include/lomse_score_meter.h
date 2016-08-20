@@ -60,6 +60,7 @@ protected:
 
 	std::vector<LUnits> m_lineSpace;    //spacing for each staff
     std::vector<int> m_staffIndex;
+    LUnits m_maxLineSpace;              //spacing for greatest staff
 
     //info about the score
     int m_numInstruments;
@@ -94,6 +95,10 @@ public:
     LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);
     Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
+    inline LUnits tenths_to_logical_max(Tenths value)     //using biggest staff
+    {
+        return (value * m_maxLineSpace) / 10.0f;
+    }
 
     //info about the score
     inline int num_instruments() { return m_numInstruments; }

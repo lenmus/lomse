@@ -40,6 +40,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_document.h"
 #include "lomse_im_factory.h"
+#include "lomse_spacing_algorithm_timetable.h"
 
 #include <cmath>
 
@@ -654,166 +655,54 @@ SUITE(LineSpacerTest)
 };
 
 
-
-//=======================================================================================
-// ColumnLayouter tests
-//=======================================================================================
-
-class MyColumnLayouter2 : public ColumnLayouter
-{
-public:
-    MyColumnLayouter2(LibraryScope& libraryScope, ScoreMeter* pMeter,
-                      ColumnStorage* pStorage)
-        : ColumnLayouter(libraryScope, pMeter, pStorage)
-    {
-    }
-    virtual ~MyColumnLayouter2() {};
-
-    void my_create_line_spacers()
-    {
-        const LinesIterator itEnd = m_pColStorage->end();
-        for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
-	    {
-            MyLineSpacer* pLinSpacer = LOMSE_NEW MyLineSpacer(*it, m_pScoreMeter);
-            m_LineSpacers.push_back(pLinSpacer);
-        }
-    }
-    void my_process_non_timed_at_prolog() { process_non_timed_at_prolog(); }
-    void my_process_timed_at_current_timepos() { process_timed_at_current_timepos(); }
-
-    TimeUnits my_get_current_time() { return m_rCurrentTime; }
-    LUnits my_get_current_pos() { return m_uCurrentPos; }
-
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class ColumnLayouterTestFixture
-{
-public:
-    LibraryScope m_libraryScope;
-    std::string m_scores_path;
-
-    ColumnLayouterTestFixture()   // setUp()
-        : m_libraryScope(cout)
-        , m_scores_path(TESTLIB_SCORES_PATH)
-    {
-    }
-
-    ~ColumnLayouterTestFixture()  // tearDown()
-    {
-    }
-
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
-    //SystemLayouter* create_system_layouter()
-    //{
-    //    m_libraryScope, &meter, colLayouters, instrEngravers
-    //}
-
-};
-
-
-SUITE(ColumnLayouterTest)
-{
-    // ColumnLayoutre. Column spacing tests ---------------------------------------------
-
-    TEST_FIXTURE(ColumnLayouterTestFixture, NonTimedAtProlog_1)
-    {
-        ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
-
-        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
-        //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
-        pLine0->my_add_entry(false, false,  256.00f,  1.00f,     1.00f,   258.00f,   45.00f,   782.85f,   1086.85f);
-
-        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
-        //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
-        pLine1->my_add_entry(false, false,  256.00f, -218.00f,   0.00f,   477.00f,   45.00f,   782.85f,   1304.85f);
-
-        pStorage->my_add_line(pLine0);
-        pStorage->my_add_line(pLine1);
-        MyColumnLayouter2 column(m_libraryScope, &meter, pStorage);
-
-        column.my_create_line_spacers();
-        column.my_process_non_timed_at_prolog();
-
-//        cout << "current time = " << column.my_get_current_time() << endl;
-//        cout << "current pos = " << column.my_get_current_pos() << endl;
-
-        CHECK( is_equal(column.my_get_current_time(), 256.0f) );
-        CHECK( is_equal(column.my_get_current_pos(), 0.0f) );
-    }
-
-    TEST_FIXTURE(ColumnLayouterTestFixture, TimedAtCurrentTimepos_1)
-    {
-        ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
-
-        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
-        //               Barline, Prolog,   rTime,  xAnchor,     xLeft,     uSize,  FixedSp,     VarSp,     xFinal
-        pLine0->my_add_entry(false, false,  256.00f,  0.00f,     0.00f,   260.00f,   40.00f,   700.00f,   1000.00f);
-
-        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
-        //               Barline, Prolog,   rTime,    xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
-        pLine1->my_add_entry(false, false,  256.00f, -220.00f,   0.00f,   480.00f,   40.00f,   700.00f,   1220.00f);
-
-        pStorage->my_add_line(pLine0);
-        pStorage->my_add_line(pLine1);
-        MyColumnLayouter2 column(m_libraryScope, &meter, pStorage);
-        column.my_create_line_spacers();
-        column.my_process_non_timed_at_prolog();
-
-        column.my_process_timed_at_current_timepos();
-
-        //cout << "current time = " << column.my_get_current_time() << endl;
-        //cout << "current pos = " << column.my_get_current_pos() << endl;
-        //cout << "xLeft=" << pLine0->front()->get_position() << endl;
-
-        CHECK( column.my_get_current_time() > 100000.0f );          //LOMSE_NO_TIME
-        CHECK( is_equal(column.my_get_current_pos(), 1440.0f) );    //220+480+40+700
-        CHECK( is_equal(pLine0->front()->get_position(), 220.0f) );
-    }
-
-};
-
-
-
+////COMENTED OUT FOR CHANGING SPACING ALGORITHM
 ////=======================================================================================
-//// LineResizer tests
+//// ColumnLayouter tests
 ////=======================================================================================
 //
-//class MyLineResizer : public LineResizer
+//class MyColumnLayouter2 : public ColumnLayouter
 //{
 //public:
-//    MyLineResizer(MusicLine* pLine, LUnits uOldWidth, LUnits uNewWidth,
-//                  LUnits uNewStart, UPoint sliceOrg)
-//        : LineResizer(pLine, uOldWidth, uNewWidth, uNewStart, sliceOrg)
+//    MyColumnLayouter2(LibraryScope& libraryScope, ScoreMeter* pMeter,
+//                      ColumnStorage* pStorage)
+//        : ColumnLayouter(libraryScope, pMeter, pStorage)
 //    {
 //    }
-//    virtual ~MyLineResizer() {};
+//    virtual ~MyColumnLayouter2() {};
+//
+//    void my_create_line_spacers()
+//    {
+//        const LinesIterator itEnd = m_pColStorage->end();
+//        for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
+//	    {
+//            MyLineSpacer* pLinSpacer = LOMSE_NEW MyLineSpacer(*it, m_pScoreMeter);
+//            m_LineSpacers.push_back(pLinSpacer);
+//        }
+//    }
+//    void my_process_non_timed_at_prolog() { process_non_timed_at_prolog(); }
+//    void my_process_timed_at_current_timepos() { process_timed_at_current_timepos(); }
+//
+//    TimeUnits my_get_current_time() { return m_rCurrentTime; }
+//    LUnits my_get_current_pos() { return m_uCurrentPos; }
+//
 //
 //};
 //
 //
 ////---------------------------------------------------------------------------------------
-//class LineResizerTestFixture
+//class ColumnLayouterTestFixture
 //{
 //public:
 //    LibraryScope m_libraryScope;
 //    std::string m_scores_path;
 //
-//    LineResizerTestFixture()   // setUp()
+//    ColumnLayouterTestFixture()   // setUp()
 //        : m_libraryScope(cout)
 //        , m_scores_path(TESTLIB_SCORES_PATH)
 //    {
 //    }
 //
-//    ~LineResizerTestFixture()  // tearDown()
+//    ~ColumnLayouterTestFixture()  // tearDown()
 //    {
 //    }
 //
@@ -821,15 +710,127 @@ SUITE(ColumnLayouterTest)
 //    {
 //        return (fabs(x - y) < 0.1f);
 //    }
+//
+//    //SystemLayouter* create_system_layouter()
+//    //{
+//    //    m_libraryScope, &meter, colLayouters, instrEngravers
+//    //}
+//
 //};
 //
 //
-//SUITE(LineResizerTest)
+//SUITE(ColumnLayouterTest)
 //{
+//    // ColumnLayoutre. Column spacing tests ---------------------------------------------
 //
-//    TEST_FIXTURE(LineResizerTestFixture, NonTimedAtProlog)
+//    TEST_FIXTURE(ColumnLayouterTestFixture, NonTimedAtProlog_1)
 //    {
-//  RPROBLEM: LineResizer moves shapes. Need to use shapes
+//        ScoreMeter meter(1, 1, 150.0f);
+//        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
+//
+//        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
+//        //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
+//        pLine0->my_add_entry(false, false,  256.00f,  1.00f,     1.00f,   258.00f,   45.00f,   782.85f,   1086.85f);
+//
+//        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
+//        //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
+//        pLine1->my_add_entry(false, false,  256.00f, -218.00f,   0.00f,   477.00f,   45.00f,   782.85f,   1304.85f);
+//
+//        pStorage->my_add_line(pLine0);
+//        pStorage->my_add_line(pLine1);
+//        MyColumnLayouter2 column(m_libraryScope, &meter, pStorage);
+//
+//        column.my_create_line_spacers();
+//        column.my_process_non_timed_at_prolog();
+//
+////        cout << "current time = " << column.my_get_current_time() << endl;
+////        cout << "current pos = " << column.my_get_current_pos() << endl;
+//
+//        CHECK( is_equal(column.my_get_current_time(), 256.0f) );
+//        CHECK( is_equal(column.my_get_current_pos(), 0.0f) );
+//    }
+//
+//    TEST_FIXTURE(ColumnLayouterTestFixture, TimedAtCurrentTimepos_1)
+//    {
+//        ScoreMeter meter(1, 1, 150.0f);
+//        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
+//
+//        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
+//        //               Barline, Prolog,   rTime,  xAnchor,     xLeft,     uSize,  FixedSp,     VarSp,     xFinal
+//        pLine0->my_add_entry(false, false,  256.00f,  0.00f,     0.00f,   260.00f,   40.00f,   700.00f,   1000.00f);
+//
+//        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
+//        //               Barline, Prolog,   rTime,    xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
+//        pLine1->my_add_entry(false, false,  256.00f, -220.00f,   0.00f,   480.00f,   40.00f,   700.00f,   1220.00f);
+//
+//        pStorage->my_add_line(pLine0);
+//        pStorage->my_add_line(pLine1);
+//        MyColumnLayouter2 column(m_libraryScope, &meter, pStorage);
+//        column.my_create_line_spacers();
+//        column.my_process_non_timed_at_prolog();
+//
+//        column.my_process_timed_at_current_timepos();
+//
+//        //cout << "current time = " << column.my_get_current_time() << endl;
+//        //cout << "current pos = " << column.my_get_current_pos() << endl;
+//        //cout << "xLeft=" << pLine0->front()->get_position() << endl;
+//
+//        CHECK( column.my_get_current_time() > 100000.0f );          //LOMSE_NO_TIME
+//        CHECK( is_equal(column.my_get_current_pos(), 1440.0f) );    //220+480+40+700
+//        CHECK( is_equal(pLine0->front()->get_position(), 220.0f) );
 //    }
 //
 //};
+//
+//
+//
+//////=======================================================================================
+////// LineResizer tests
+//////=======================================================================================
+////
+////class MyLineResizer : public LineResizer
+////{
+////public:
+////    MyLineResizer(MusicLine* pLine, LUnits uOldWidth, LUnits uNewWidth,
+////                  LUnits uNewStart, UPoint sliceOrg)
+////        : LineResizer(pLine, uOldWidth, uNewWidth, uNewStart, sliceOrg)
+////    {
+////    }
+////    virtual ~MyLineResizer() {};
+////
+////};
+////
+////
+//////---------------------------------------------------------------------------------------
+////class LineResizerTestFixture
+////{
+////public:
+////    LibraryScope m_libraryScope;
+////    std::string m_scores_path;
+////
+////    LineResizerTestFixture()   // setUp()
+////        : m_libraryScope(cout)
+////        , m_scores_path(TESTLIB_SCORES_PATH)
+////    {
+////    }
+////
+////    ~LineResizerTestFixture()  // tearDown()
+////    {
+////    }
+////
+////    bool is_equal(float x, float y)
+////    {
+////        return (fabs(x - y) < 0.1f);
+////    }
+////};
+////
+////
+////SUITE(LineResizerTest)
+////{
+////
+////    TEST_FIXTURE(LineResizerTestFixture, NonTimedAtProlog)
+////    {
+////  RPROBLEM: LineResizer moves shapes. Need to use shapes
+////    }
+////
+////};

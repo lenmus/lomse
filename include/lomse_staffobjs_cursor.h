@@ -92,6 +92,7 @@ public:
     inline TimeUnits time() { return (*m_scoreIt)->time(); }
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
+    inline ColStaffObjsEntry* cur_entry() { return *m_scoreIt; }
 
     //access next/prev object without moving cursor position
     inline ColStaffObjsEntry* next_entry() { return m_scoreIt.next(); }

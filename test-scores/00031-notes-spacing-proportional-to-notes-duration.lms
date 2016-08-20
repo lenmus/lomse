@@ -1,5 +1,5 @@
 (score
-   (vers 1.5)(language en utf-8)
+   (vers 2.0)
    (instrument (staves 1)
       (musicData
          (clef G)
