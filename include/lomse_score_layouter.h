@@ -190,7 +190,6 @@ public:
     virtual LUnits get_target_size_for_system(int iSystem);
     virtual LUnits get_trimmed_width(int iCol);
     virtual bool column_has_system_break(int iCol);
-    virtual float get_column_penalty(int iCol);
 
     //support for debuggin and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
@@ -364,15 +363,21 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // LinesBreaker: base class for any lines break algorithm
+
+#define LOMSE_INFINITE_PENALTY      10000000000.0f
+
 class LinesBreaker
 {
 protected:
     ScoreLayouter* m_pScoreLyt;
+    SpacingAlgorithm* m_pSpAlgorithm;
     std::vector<int>& m_breaks;
 
 public:
-    LinesBreaker(ScoreLayouter* pScoreLyt, std::vector<int>& breaks)
+    LinesBreaker(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
+                 std::vector<int>& breaks)
         : m_pScoreLyt(pScoreLyt)
+        , m_pSpAlgorithm(pSpAlgorithm)
         , m_breaks(breaks)
     {
     }
@@ -387,7 +392,8 @@ public:
 class LinesBreakerSimple : public LinesBreaker
 {
 public:
-    LinesBreakerSimple(ScoreLayouter* pScoreLyt, std::vector<int>& breaks);
+    LinesBreakerSimple(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
+                       std::vector<int>& breaks);
     virtual ~LinesBreakerSimple() {}
 
     void decide_line_breaks();
@@ -399,7 +405,8 @@ public:
 class LinesBreakerOptimal : public LinesBreaker
 {
 public:
-    LinesBreakerOptimal(ScoreLayouter* pScoreLyt, std::vector<int>& breaks);
+    LinesBreakerOptimal(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
+                        std::vector<int>& breaks);
     virtual ~LinesBreakerOptimal() {}
 
     void decide_line_breaks();
@@ -423,7 +430,8 @@ protected:
     void compute_optimal_break_sequence();
     void retrieve_breaks_sequence();
     float determine_penalty_for_line(int iSystem, int i, int j);
-    bool is_better_option(float totalPenalty, float curPenalty, int i, int j);
+    bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
+                          int i, int j);
 
 };
 

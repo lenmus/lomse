@@ -107,6 +107,11 @@ public:
     ///
     virtual void do_spacing_algorithm() = 0;
 
+    ///Methods for line break
+    virtual float determine_penalty_for_line(int iSystem, int i, int j) = 0;
+    virtual bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
+                                  int i, int j) = 0;
+
     //provide information
 
     ///Return the number of columns in which the content has been split
@@ -124,7 +129,6 @@ public:
 
     //for line break algorithm
     virtual bool is_empty_column(int iCol) = 0;
-    virtual float get_penalty_factor(int iCol) = 0;
 
     //information about a column
     virtual LUnits get_trimmed_width(int iCol) = 0;
@@ -213,7 +217,6 @@ public:
 
     //for line break algorithm
     virtual bool is_empty_column(int iCol) = 0;
-    virtual float get_penalty_factor(int iCol) = 0;
 
     //information about a column
     virtual LUnits get_trimmed_width(int iCol) = 0;
@@ -221,6 +224,11 @@ public:
 
     //methods to compute results
     virtual TimeGridTable* create_time_grid_table_for_column(int iCol) = 0;
+
+    //methods for line break
+    virtual float determine_penalty_for_line(int iSystem, int i, int j) = 0;
+    virtual bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
+                                  int i, int j) = 0;
 
     //debug
     virtual void dump_column_data(int iCol, ostream& outStream) = 0;

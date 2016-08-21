@@ -409,7 +409,7 @@ void ScoreLayouter::decide_line_breaks()
 {
     if (get_num_columns() != 0)
     {
-        LinesBreakerOptimal breaker(this, m_breaks);
+        LinesBreakerOptimal breaker(this, m_pSpAlgorithm, m_breaks);
         breaker.decide_line_breaks();
         //breaker.dump_entries();
     }
@@ -715,12 +715,6 @@ LUnits ScoreLayouter::get_trimmed_width(int iCol)
 bool ScoreLayouter::column_has_system_break(int iCol)
 {
     return m_pSpAlgorithm->has_system_break(iCol);
-}
-
-//---------------------------------------------------------------------------------------
-float ScoreLayouter::get_column_penalty(int iCol)
-{
-    return m_pSpAlgorithm->get_penalty_factor(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1294,8 +1288,10 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
 //=======================================================================================
 // LinesBreakerSimple implementation
 //=======================================================================================
-LinesBreakerSimple::LinesBreakerSimple(ScoreLayouter* pScoreLyt, std::vector<int>& breaks)
-    : LinesBreaker(pScoreLyt, breaks)
+LinesBreakerSimple::LinesBreakerSimple(ScoreLayouter* pScoreLyt,
+                                       SpacingAlgorithm* pSpAlgorithm,
+                                       std::vector<int>& breaks)
+    : LinesBreaker(pScoreLyt, pSpAlgorithm, breaks)
 {
 }
 
@@ -1333,11 +1329,10 @@ void LinesBreakerSimple::decide_line_breaks()
 // LinesBreakerOptimal implementation
 //=======================================================================================
 
-static const float INFINITE = 1000000.0f;
-
 LinesBreakerOptimal::LinesBreakerOptimal(ScoreLayouter* pScoreLyt,
+                                         SpacingAlgorithm* pSpAlgorithm,
                                          std::vector<int>& breaks)
-    : LinesBreaker(pScoreLyt, breaks)
+    : LinesBreaker(pScoreLyt, pSpAlgorithm, breaks)
     , m_numCols(0)
     , m_fJustifyLastLine(false)
 {
@@ -1367,7 +1362,7 @@ void LinesBreakerOptimal::initialize_entries_table()
     m_entries[0].product = 1.0f;
     for (int i=1; i <= m_numCols; ++i)
     {
-        m_entries[i].penalty = INFINITE;
+        m_entries[i].penalty = LOMSE_INFINITE_PENALTY;
         m_entries[i].predecessor = -1;
         m_entries[i].system = 0;
         m_entries[i].product = 1.0f;
@@ -1379,23 +1374,56 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 {
     for (int i=0; i < m_numCols; ++i)
     {
-        if (m_entries[i].penalty < INFINITE)
+
+//        dbgLogger << "Breaks i loop. "
+//                  << "Entry " << i << ": prev = " << m_entries[i].predecessor
+//                  << ", penalty = " << m_entries[i].penalty
+//                  << ", system = " << m_entries[i].system << endl;
+
+        if (m_entries[i].penalty < LOMSE_INFINITE_PENALTY)
         {
             int iSystem = m_entries[i].system;
-            float totalPenalty = m_entries[i].penalty;
+            float prevPenalty = m_entries[i].penalty;
             for (int j=i+1; j <= m_numCols; ++j)
             {
+//                dbgLogger << "Breaks j loop. "
+//                          << "Entry " << j << ": prev = " << m_entries[j].predecessor
+//                          << ", penalty = " << m_entries[j].penalty
+//                          << ", system = " << m_entries[j].system << endl;
+
                 //try system formed by columns {ci,...,cj-1}
-                float curPenalty = determine_penalty_for_line(iSystem, i, j-1);
-                if (is_better_option(totalPenalty, curPenalty, i, j))
+
+                bool fSystemBreak = m_pScoreLyt->column_has_system_break(j-1);
+                float newPenalty;
+                if (fSystemBreak)
                 {
-                    m_entries[j].penalty = curPenalty + totalPenalty;
+                    newPenalty = 0.0f;
+                    prevPenalty = 0.0f;
+                }
+                else
+                    newPenalty = m_pSpAlgorithm->determine_penalty_for_line(iSystem, i, j-1);
+
+//                dbgLogger << "Penalty for (" << i << ", " << j << ")= "
+//                          << (prevPenalty + newPenalty) << ". Current= "
+//                          << m_entries[j].penalty << endl;
+
+                if (fSystemBreak || m_pSpAlgorithm->is_better_option(prevPenalty, newPenalty,
+                                                            m_entries[j].penalty, i, j-1))
+                {
+//                    dbgLogger << (prevPenalty + newPenalty) << " is better option than "
+//                              << m_entries[j].penalty << " for entry " << j << endl;
+
+                    m_entries[j].penalty = newPenalty + prevPenalty;
                     m_entries[j].predecessor = i;
                     m_entries[j].system = iSystem + 1;
-                    m_entries[j].product = m_entries[i].product * (1.0f + curPenalty);
+                    m_entries[j].product = m_entries[i].product * (1.0f + newPenalty);
                 }
+
+                if (fSystemBreak)
+                    break;
+
                 //optimization: if no space for column j do not try column j+1
-                if (curPenalty >= INFINITE)
+                if (newPenalty >= LOMSE_INFINITE_PENALTY)
                     break;
             }
         }
@@ -1403,17 +1431,17 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 }
 
 //---------------------------------------------------------------------------------------
-bool LinesBreakerOptimal::is_better_option(float totalPenalty, float curPenalty,
-                                           int i, int j)
+bool LinesBreakerOptimal::is_better_option(float prevPenalty, float newPenalty,
+                                           float nextPenalty, int i, int j)
 {
-    float newTotal = totalPenalty + curPenalty;
+    float newTotal = prevPenalty + newPenalty;
     float prevTotal = m_entries[j].penalty;
     if ( fabs(newTotal - prevTotal) < 0.1f * prevTotal )
     {
         //select the entry that creates less stretching differences, althougt this
         //could result in a greater total stretching
         float prevProd = m_entries[j].product;
-        float newProd = m_entries[i].product * (1.0f + curPenalty);
+        float newProd = m_entries[i].product * (1.0f + newPenalty);
         return newProd > prevProd;
     }
     else
@@ -1426,47 +1454,37 @@ bool LinesBreakerOptimal::is_better_option(float totalPenalty, float curPenalty,
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::retrieve_breaks_sequence()
 {
-    int numBreaks = m_entries[m_numCols].system;
+    dbgLogger << "Breaks computed. Entries: ************************************" << endl;
+    dump_entries(dbgLogger);
+
+    int i = m_numCols;
+    while (i > 0 && m_entries[i].predecessor <= 0)
+        --i;
+
+    if (i == 0)
+    {
+        //no breaks. Just one single system
+        m_breaks.push_back(0);      //AWARE: breaks size is the number of systems because
+                                    //last break is implicit: last column
+
+        dbgLogger << "Breaks table ************************************" << endl;
+        dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
+        return;
+    }
+
+    int numBreaks = m_entries[i].system;
     m_breaks.reserve(numBreaks);
     m_breaks.assign(numBreaks, 0);
 
-    int i = m_entries[m_numCols].predecessor;
-    m_breaks[--numBreaks] = i;
     while (m_entries[i].predecessor > 0)
     {
         i = m_entries[i].predecessor;
         m_breaks[--numBreaks] = i;
     }
-}
-
-//---------------------------------------------------------------------------------------
-float LinesBreakerOptimal::determine_penalty_for_line(int iSystem, int i, int j)
-{
-    //penalty function PF(i,j) for line {ci, ..., cj}  [0.0,...,1.0 | INFINITE]
-
-    //force new line when so required
-    if (j > i && m_pScoreLyt->column_has_system_break(j-1))
-        return INFINITE;
-
-    LUnits occupied = 0.0f;
-    for (int k=i; k <= j; ++k)
-        occupied += m_pScoreLyt->get_trimmed_width(k);      //+gross
-
-    LUnits line = m_pScoreLyt->get_target_size_for_system(iSystem);
-
-    if (occupied > line)
-        return INFINITE;
-
-    //add penalty for columns not ended in barline
-    occupied *= m_pScoreLyt->get_column_penalty(j);
-
-    LUnits space = line - occupied;
-
-    //no penalty for last line when no justified
-    if (!m_fJustifyLastLine && j == m_numCols-1)
-        return 0.0f;
-
-    return  space/line;
+    dbgLogger << "Breaks table ************************************" << endl;
+    vector<int>::iterator it=m_breaks.begin();
+    for (++it; it != m_breaks.end(); ++it)
+        dbgLogger << "break at column " << *it << endl;
 }
 
 //---------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@
    //(opt Render.SpacingMethod 0)
    //(opt Render.SpacingValue 30)
    //(opt Render.SpacingFactor 0.65)
+   (opt Score.JustifyFinalBarline yes)
 
    (instrument (name "Piano" (style "Instruments"))(staves 2)
       (musicData 

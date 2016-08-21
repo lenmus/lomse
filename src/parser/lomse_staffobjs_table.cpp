@@ -186,8 +186,8 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
             return false;
 
 //--fix for Gourlay. Remove for TimeposTable
-        //note/rest can not go before non-timed in other instruments
-        else if (a->num_instrument() != b->num_instrument())
+        //note/rest can not go before non-timed in other instruments/staves
+        else if (a->line() != b->line())
         {
             if (pA->is_note_rest() && pB->get_duration() == 0.0f)
                 return true;

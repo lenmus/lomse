@@ -94,8 +94,6 @@ protected:
     ColumnDataGourlay*  m_pCurColumn;
     int                 m_numSlices;
     int                 m_iPrevColumn;
-    TimeSlice*  m_pLastPrologSlice;     //last created prolog slice
-    TimeUnits   m_lastPrologTime;       //time for that slice
 
 //    LUnits              m_colWidth;
 
@@ -116,6 +114,11 @@ public:
     //methods in base class SpacingAlgorithm that still need to be created
     //------------------------------------------------------------------------
 
+    //invoked from LinesBreakerOptimal
+    float determine_penalty_for_line(int iSystem, int i, int j);
+    bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
+                          int i, int j);
+
     //invoked from system layouter
     LUnits aditional_space_before_adding_column(int iCol);
     LUnits get_column_width(int iCol, bool fFirstColumnInSystem);
@@ -126,7 +129,6 @@ public:
 
     //for line break algorithm
     bool is_empty_column(int iCol);
-    float get_penalty_factor(int iCol);
 
     //information about a column
     LUnits get_trimmed_width(int iCol);
@@ -181,6 +183,7 @@ public:
     float   m_slope;        //slope of aproximated sff() for this column
     LUnits  m_xFixed;       //fixed spacing for the aproximated sff()
     LUnits  m_colWidth;     //current col. width after having applying force
+    LUnits  m_colMinWidth;  //minimum width (force 0)
 
 
     ColumnDataGourlay(TimeSlice* pSlice);
@@ -189,8 +192,7 @@ public:
     //creation
     void set_num_entries(int numSlices);
     void order_slices();
-//    void determine_xmin();
-//    void compute_slope(float F);
+    void determine_minimum_width();
 
     //spacing
     LUnits determine_extent_for(float force);
@@ -201,6 +203,7 @@ public:
     //access to position and spacing data
     //LUnits get_start_of_column();
     inline LUnits get_column_width() { return m_colWidth; }
+    inline LUnits get_minimum_width() { return m_colMinWidth; }
     LUnits get_y_min() {return 0.0f;}   //TODO
     LUnits get_y_max() {return 0.0f;}   //TODO
 
@@ -251,6 +254,7 @@ class TimeSlice
 protected:
     friend class SpAlgGourlay;
     friend class ColumnDataGourlay;
+    friend class TimeSliceNonTimed;
     ColStaffObjsEntry*  m_firstEntry;
     ColStaffObjsEntry*  m_lastEntry;
     int         m_iFirstData;   //index to first StaffObjData element for this slice
@@ -285,12 +289,9 @@ public:
     enum ESliceType {
         k_undefined = -1,
         k_prolog = 0,
-        k_clef,
-        k_key,
-        k_time,
+        k_non_timed,
         k_noterest,
         k_barline,
-        k_spacer,
     };
 
     //creation
@@ -302,14 +303,22 @@ public:
     inline void set_next(TimeSlice* pSlice) { m_next = pSlice; }
 
     //spacing
-    void compute_spring_data(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin);
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    void compute_spring_data(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin,
+                             bool fProportional, LUnits dsFixed);
+    virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
     void apply_force(float F);
+    inline void increment_xRi(LUnits value) { m_xRi += value; }
+    inline void set_minimum_xi(LUnits value) {
+        if (get_xi() < value)
+            m_xRi = value - m_xLi;
+    }
+
+    //basic information
+    inline int get_type() { return m_type; }
 
     //access to information
     inline LUnits get_xi() { return m_xLi + m_xRi; }
     inline LUnits get_minimum_extent() { return m_xLi + m_xRi + m_xLeft; }
-    inline int get_type() { return m_type; }
     TimeUnits get_timepos();
     inline int get_num_entries() { return m_numEntries; }
     inline ColStaffObjsEntry* get_first_entry() { return m_firstEntry; }
@@ -319,8 +328,8 @@ public:
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
                            vector<StaffObjData*>& data);
     void delete_shapes(vector<StaffObjData*>& data);
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                        LUnits xPos, LUnits yPos);
+    virtual void move_shapes_to_final_positions(vector<StaffObjData*>& data,
+                                                LUnits xPos, LUnits yPos);
     //access to information
     inline LUnits get_width() { return m_width; }
 
@@ -329,10 +338,10 @@ public:
     static void dump_header(ostream& ss);
 
 protected:
-    void compute_spring_duration_ds(TimeUnits nextTime);
     void compute_smallest_duration_di(TimeUnits minNotePrev);
     void find_smallest_note_soundig_at(TimeUnits nextTime);
-    void compute_spring_constant(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin);
+    void compute_spring_constant(LUnits uSmin, float alpha, float log2dmin,
+                                 TimeUnits dmin, bool fProportional, LUnits dsFixed);
     void compute_pre_stretching_force();
     LUnits spacing_function(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin);
     inline TimeUnits get_min_note_still_sounding() { return m_minNoteNext; }
@@ -347,10 +356,41 @@ protected:
 class TimeSliceProlog : public TimeSlice
 {
 protected:
+    LUnits m_clefsWidth;
+    LUnits m_timesWidth;
+    LUnits m_keysWidth;
+    LUnits m_spaceBefore;
 
 public:
     TimeSliceProlog(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
     virtual ~TimeSliceProlog();
+
+    //overrides
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
+                                        LUnits xPos, LUnits yPos);
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// TimeSliceNonTimed
+// An slice for non-timed objects not at prolog
+class TimeSliceNonTimed : public TimeSlice
+{
+protected:
+    int m_numStaves;
+    LUnits m_realWidth;
+    LUnits m_interSpace;
+
+public:
+    TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
+    virtual ~TimeSliceNonTimed();
+
+    //overrides
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
+                                        LUnits xPos, LUnits yPos);
 
 };
 

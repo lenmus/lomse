@@ -86,7 +86,6 @@ protected:
     ScoreMeter* m_pScoreMeter;
     bool m_fHasSystemBreak;
     GmoBoxSlice* m_pBoxSlice;           //box for this column
-    float m_penalty;                    //penalty for ending the system with this column
     SpAlgColumn* m_pSpAlgorithm;
     int m_nTraceLevel;                  //for debugging
 
@@ -114,7 +113,6 @@ public:
     inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
     inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
     inline ColStaffObjsEntry* get_prolog_key(ShapeId idx) { return m_prologKeys[idx]; }
-    inline float get_penalty_factor() { return m_penalty; }
 
     //boxes and shapes
     void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage);
@@ -625,7 +623,6 @@ ColumnData::ColumnData(ScoreMeter* pScoreMeter, SpAlgColumn* pSpAlgorithm)
     : m_pScoreMeter(pScoreMeter)
     , m_fHasSystemBreak(false)
     , m_pBoxSlice(NULL)
-    , m_penalty(1.0f)
     , m_pSpAlgorithm(pSpAlgorithm)
     , m_nTraceLevel(k_trace_off)
 {

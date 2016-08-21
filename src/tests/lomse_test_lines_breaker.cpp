@@ -39,6 +39,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_score_layouter.h"
 #include "lomse_graphical_model.h"
+#include "lomse_spacing_algorithm.h"
 
 #include <vector>
 
@@ -92,8 +93,9 @@ public:
 class MyLinesBreaker : public LinesBreakerOptimal
 {
 public:
-    MyLinesBreaker(ScoreLayouter* pScoreLyt, std::vector<int>& breaks)
-        : LinesBreakerOptimal(pScoreLyt, breaks)
+    MyLinesBreaker(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlg,
+                   std::vector<int>& breaks)
+        : LinesBreakerOptimal(pScoreLyt, pSpAlg, breaks)
     {
     }
     ~MyLinesBreaker() {}
@@ -171,7 +173,7 @@ SUITE(LinesBreakerTest)
         for (int i=0; i < 30; i++)
             m_pLyt->my_create_column(1450.0f);
         std::vector<int> breaks;
-        LinesBreakerSimple breaker(m_pLyt, breaks);
+        LinesBreakerSimple breaker(m_pLyt, NULL, breaks);
 
         breaker.decide_line_breaks();
 
@@ -193,7 +195,7 @@ SUITE(LinesBreakerTest)
             m_pLyt->my_create_column(1450.0f);
         m_pLyt->my_set_has_break(15);
         std::vector<int> breaks;
-        LinesBreakerSimple breaker(m_pLyt, breaks);
+        LinesBreakerSimple breaker(m_pLyt, NULL, breaks);
 
         breaker.decide_line_breaks();
 
@@ -216,7 +218,7 @@ SUITE(LinesBreakerTest)
         for (int i=0; i < 30; i++)
             m_pLyt->my_create_column(1500.0f);
         std::vector<int> breaks;
-        MyLinesBreaker breaker(m_pLyt, breaks);
+        MyLinesBreaker breaker(m_pLyt, NULL, breaks);
 
         float penalty = breaker.my_determine_penalty_for_line(0, 0, 9);
 
@@ -233,7 +235,7 @@ SUITE(LinesBreakerTest)
             m_pLyt->my_create_column(1450.0f);
         m_pLyt->my_set_has_break(5);
         std::vector<int> breaks;
-        MyLinesBreaker breaker(m_pLyt, breaks);
+        MyLinesBreaker breaker(m_pLyt, NULL, breaks);
 
         float penalty = breaker.my_determine_penalty_for_line(0, 0, 6);
 
@@ -250,7 +252,7 @@ SUITE(LinesBreakerTest)
             m_pLyt->my_create_column(1450.0f);
         m_pLyt->my_set_has_break(15);
         std::vector<int> breaks;
-        MyLinesBreaker breaker(m_pLyt, breaks);
+        MyLinesBreaker breaker(m_pLyt, NULL, breaks);
 
         breaker.decide_line_breaks();
 
@@ -271,7 +273,7 @@ SUITE(LinesBreakerTest)
         for (int i=0; i < 30; i++)
             m_pLyt->my_create_column(1450.0f);
         std::vector<int> breaks;
-        MyLinesBreaker breaker(m_pLyt, breaks);
+        MyLinesBreaker breaker(m_pLyt, NULL, breaks);
 
         breaker.decide_line_breaks();
 

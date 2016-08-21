@@ -332,20 +332,28 @@ void SystemLayouter::add_shapes_for_column(int iCol, ShapesStorage* pStorage)
 //---------------------------------------------------------------------------------------
 bool SystemLayouter::system_must_be_justified()
 {
-    //all systems needs justification except:
+    //Force justification if it is the last system and free space is negative
+    if (m_pScoreLyt->is_last_system() && m_uFreeSpace < 0.0f)
+        return true;
+
+    //Otherwise, all systems needs justification except:
 
     //1. unless justification suppressed, for debugging
     if (!m_libraryScope.justify_systems())
         return false;
 
-    //2. it is the last system and flag "JustifyFinalBarline" is not set
-    if (m_pScoreLyt->is_last_system() && !m_pScoreLyt->m_fJustifyFinalBarline)
+    //2. it is the last system and flag "JustifyFinalBarline" is not set,
+    //   unless free space is negative
+    if (m_pScoreLyt->is_last_system() &&
+        (!m_pScoreLyt->m_fJustifyFinalBarline || m_uFreeSpace > 0.0f))
         return false;
 
     //3. it is the last system but there is no final barline
     int iLastCol = m_pScoreLyt->get_num_columns();
     if (m_pScoreLyt->is_last_system() && !m_pSpAlgorithm->column_has_barline(iLastCol))
         return false;
+
+
 
     return true;        //do justification
 }
@@ -361,8 +369,8 @@ void SystemLayouter::reposition_slices_and_staffobjs()
 //---------------------------------------------------------------------------------------
 void SystemLayouter::redistribute_free_space()
 {
-    if (m_uFreeSpace <= 0.0f)
-        return;           //no space to distribute
+//    if (m_uFreeSpace <= 0.0f)
+//        return;           //no space to distribute
 
     m_pSpAlgorithm->justify_system(m_iFirstCol, m_iLastCol, m_uFreeSpace);
 }
