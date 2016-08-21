@@ -341,9 +341,13 @@ bool SystemLayouter::system_must_be_justified()
 
     //2. it is the last system and flag "JustifyFinalBarline" is not set,
     //   unless free space is negative
-    if (m_pScoreLyt->is_last_system() &&
-        (!m_pScoreLyt->m_fJustifyFinalBarline || m_uFreeSpace > 0.0f))
-        return false;
+    if (m_pScoreLyt->is_last_system())
+    {
+        if (m_pScoreLyt->m_fJustifyFinalBarline)
+            return true;
+        else
+            return m_uFreeSpace < 0.0f;
+    }
 
     //3. it is the last system but there is no final barline
     int iLastCol = m_pScoreLyt->get_num_columns();

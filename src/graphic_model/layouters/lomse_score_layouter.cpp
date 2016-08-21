@@ -614,9 +614,6 @@ void ScoreLayouter::get_score_renderization_options()
 {
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.StopAtFinalBarline");
     m_fStopStaffLinesAtFinalBarline = pOpt->get_bool_value();
-
-    pOpt = m_pScore->get_option("Score.JustifyFinalBarline");
-    m_fJustifyFinalBarline = pOpt->get_bool_value();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1423,8 +1420,8 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::retrieve_breaks_sequence()
 {
-    dbgLogger << "Breaks computed. Entries: ************************************" << endl;
-    dump_entries(dbgLogger);
+//    dbgLogger << "Breaks computed. Entries: ************************************" << endl;
+//    dump_entries(dbgLogger);
 
     int i = m_numCols;
     while (i > 0 && m_entries[i].predecessor <= 0)
@@ -1436,8 +1433,8 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         m_breaks.push_back(0);      //AWARE: breaks size is the number of systems because
                                     //last break is implicit: last column
 
-        dbgLogger << "Breaks table ************************************" << endl;
-        dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
+//        dbgLogger << "Breaks table ************************************" << endl;
+//        dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
         return;
     }
 
@@ -1450,10 +1447,10 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         i = m_entries[i].predecessor;
         m_breaks[--numBreaks] = i;
     }
-    dbgLogger << "Breaks table ************************************" << endl;
-    vector<int>::iterator it=m_breaks.begin();
-    for (++it; it != m_breaks.end(); ++it)
-        dbgLogger << "break at column " << *it << endl;
+//    dbgLogger << "Breaks table ************************************" << endl;
+//    vector<int>::iterator it=m_breaks.begin();
+//    for (++it; it != m_breaks.end(); ++it)
+//        dbgLogger << "break at column " << *it << endl;
 }
 
 //---------------------------------------------------------------------------------------

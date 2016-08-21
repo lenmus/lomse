@@ -4220,8 +4220,11 @@ protected:
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
+        m_pAnchor = pScore;
+
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
         set_options();
+
         return pScore;
     }
 
@@ -4233,6 +4236,12 @@ protected:
         pOpt->set_name("Render.SpacingFactor");
         pOpt->set_float_value(0.35f);
         pOpt->set_type(ImoOptionInfo::k_number_float);
+        add_to_model(pOpt);
+
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, pDoc) );
+        pOpt->set_name("Score.JustifyFinalBarline");
+        pOpt->set_bool_value(true);
+        pOpt->set_type(ImoOptionInfo::k_boolean);
         add_to_model(pOpt);
     }
 
