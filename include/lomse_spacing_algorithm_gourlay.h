@@ -360,6 +360,7 @@ protected:
     int m_numStaves;
     LUnits m_realWidth;
     LUnits m_interSpace;
+    vector<LUnits> m_widths;    //total width for objects on each staff
 
 public:
     TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);

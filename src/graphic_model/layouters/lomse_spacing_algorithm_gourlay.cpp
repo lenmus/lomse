@@ -1033,11 +1033,10 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     m_interSpace = pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_SMALL_CLEF);
 
     //vector for widths
-    vector<LUnits> widths;
     int numStaves = pMeter->num_staves();
     m_numStaves = numStaves;
-    widths.reserve(numStaves);
-    widths.assign(numStaves, 0.0f);
+    m_widths.reserve(numStaves);
+    m_widths.assign(numStaves, 0.0f);
 
     //loop for computing widths
     LUnits maxWidth = 0.0f;
@@ -1049,8 +1048,8 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         if (pShape)
         {
             int iStaff = pEntry->staff();
-            widths[iStaff] += m_interSpace + pShape->get_width();
-            maxWidth = max(maxWidth, widths[iStaff]);
+            m_widths[iStaff] += m_interSpace + pShape->get_width();
+            maxWidth = max(maxWidth, m_widths[iStaff]);
         }
     }
     maxWidth += m_interSpace;   //add space before next slice symbol
@@ -1079,7 +1078,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         for (int i=0; i < iMax; ++i, pEntry = pEntry->get_next())
         {
             int iStaff = pEntry->staff();
-            fNoOverlap &= widths[iStaff] == 0.0f;
+            fNoOverlap &= m_widths[iStaff] == 0.0f;
         }
 
         if (fNoOverlap)
@@ -1094,13 +1093,14 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
                                                        LUnits xPos, LUnits yPos,
                                                        LUnits* yMin, LUnits* yMax)
 {
-    //vector for positions on each staff
+    //vector for current position on each staff
     vector<LUnits> positions;
     positions.reserve(m_numStaves);
     positions.assign(m_numStaves, 0.0f);
+    for (int i=0; i < m_numStaves; ++i)
+        positions[i] = xPos - m_widths[i] + m_xLeft;
 
-    //loop for positioning shapes
-    LUnits xStart = xPos - m_realWidth + m_interSpace;
+    //loop for positioning shapes. They must be right aligned
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
     for (int i=m_iFirstData; i < iMax; ++i, pEntry = pEntry->get_next())
@@ -1111,7 +1111,7 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
         {
             //compute left position for this object
             int iStaff = pEntry->staff();
-            LUnits xLeft = xStart + positions[iStaff];
+            LUnits xLeft = positions[iStaff];
 
             //move shape
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,

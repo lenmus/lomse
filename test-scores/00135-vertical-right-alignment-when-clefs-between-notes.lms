@@ -1,5 +1,5 @@
 (score
-   (vers 2.0)
+   (vers 1.6)
    (instrument (staves 2)
       (musicData 
             (clef G p1)
@@ -10,6 +10,7 @@
             (n c4 e)
             
             //second staff
+            (goBack h)
             (n c3 q p2 v2)(n c3 e)
             (clef G p2)
             (clef F4 p2)
