@@ -36,10 +36,6 @@
 #include "lomse_time.h"
 #include "lomse_timegrid_table.h"
 
-////std
-//#include <list>
-//using namespace std;
-
 //For performance measurements (timing)
 #include <ctime>   //clock
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -68,7 +64,7 @@ class StaffObjData;
 
 //---------------------------------------------------------------------------------------
 // SpAlgGourlay
-// Spacing algorithm based on Gourlay's ideas
+// Spacing algorithm based on Gourlay's method
 //
 class SpAlgGourlay : public SpAlgColumn
 {
@@ -81,9 +77,9 @@ protected:
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
 
-    list<TimeSlice*> m_slices;           //list of TimeSlices
-    vector<ColumnDataGourlay*> m_columns;       //columns
-    vector<StaffObjData*> m_data;               //data associated to each staff object
+    list<TimeSlice*> m_slices;              //list of TimeSlices
+    vector<ColumnDataGourlay*> m_columns;   //columns
+    vector<StaffObjData*> m_data;           //data associated to each staff object
 
     //auxiliary temporal variables used while collecting columns' data
     TimeSlice*   m_pCurSlice;
@@ -95,10 +91,7 @@ protected:
     int                 m_numSlices;
     int                 m_iPrevColumn;
 
-//    LUnits              m_colWidth;
-
     //data collected for each slice
-//    LUnits      m_rodWidth;
     TimeUnits   m_maxNoteDur;
     TimeUnits   m_minNoteDur;
 
@@ -111,28 +104,19 @@ public:
     virtual ~SpAlgGourlay();
 
 
-    //methods in base class SpacingAlgorithm that still need to be created
-    //------------------------------------------------------------------------
+    //spacing algorithm main actions
+    void do_spacing(int iCol, bool fTrace=false, int level=k_trace_off);
+    void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement);
 
-    //invoked from LinesBreakerOptimal
+    //for lines break algorithm
     float determine_penalty_for_line(int iSystem, int i, int j);
     bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
                           int i, int j);
 
-    //invoked from system layouter
-    LUnits aditional_space_before_adding_column(int iCol);
-    LUnits get_column_width(int iCol, bool fFirstColumnInSystem);
-    void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-            LUnits yShift,
-            LUnits* yMin, LUnits* yMax);
-    void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement);
-
-    //for line break algorithm
-    bool is_empty_column(int iCol);
-
     //information about a column
-    LUnits get_trimmed_width(int iCol);
-    bool column_has_barline(int iCol);
+    bool is_empty_column(int iCol);
+    LUnits get_column_width(int iCol);
+    bool column_has_barline_at_end(int iCol);
 
     //methods to compute results
     TimeGridTable* create_time_grid_table_for_column(int iCol);
@@ -141,22 +125,18 @@ public:
     void dump_column_data(int iCol, ostream& outStream);
 
     //column creation: collecting content
-    void start_column_measurements(int iCol, LUnits uxStart, LUnits fixedSpace);
+    void start_column_measurements(int iCol);
     void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr,
                         ImoStaffObj* pSO, TimeUnits rTime, int nStaff, GmoShape* pShape,
                         bool fInProlog=false);
-    void finish_column_measurements(int iCol, LUnits xStart);
-
-    //spacing algorithm main actions
-    void do_spacing(int iCol, bool fTrace=false, int level=k_trace_off);
-    void assign_width_to_column(int iCol);
-
-    //get results: info about a column
-    bool column_has_visible_barline(int iCol);
+    void finish_column_measurements(int iCol);
 
     //auxiliary: shapes and boxes
     void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
     void delete_shapes(int iCol);
+    void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
+            LUnits yShift,
+            LUnits* yMin, LUnits* yMax);
 
 protected:
     void new_column(TimeSlice* pSlice);
@@ -180,10 +160,11 @@ public:
     TimeSlice* m_pFirstSlice;            //first slice in natural order
     vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
 
-    float   m_slope;        //slope of aproximated sff() for this column
-    LUnits  m_xFixed;       //fixed spacing for the aproximated sff()
-    LUnits  m_colWidth;     //current col. width after having applying force
-    LUnits  m_colMinWidth;  //minimum width (force 0)
+    float   m_slope;            //slope of aproximated sff() for this column
+    LUnits  m_xFixed;           //fixed spacing for this column
+    LUnits  m_colWidth;         //current col. width after having applying force
+    LUnits  m_colMinWidth;      //minimum width (force 0)
+    bool    m_fBarlineAtEnd;    //true if last slice is barline
 
 
     ColumnDataGourlay(TimeSlice* pSlice);
@@ -201,23 +182,20 @@ public:
     void apply_force(float F);
 
     //access to position and spacing data
-    //LUnits get_start_of_column();
     inline LUnits get_column_width() { return m_colWidth; }
     inline LUnits get_minimum_width() { return m_colMinWidth; }
-    LUnits get_y_min() {return 0.0f;}   //TODO
-    LUnits get_y_max() {return 0.0f;}   //TODO
 
     //other information
     inline int num_slices() { return int(m_orderedSlices.size()); }
     bool is_empty_column();
-    bool has_shapes();
+    inline bool has_barline_at_end() { return m_fBarlineAtEnd; }
 
     //managing shapes
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
                            vector<StaffObjData*>& data);
     void delete_shapes(vector<StaffObjData*>& data);
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                        LUnits xPos, LUnits yPos);
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                        LUnits yPos, LUnits* yMin, LUnits* yMax);
 
     //debug
     void dump(ostream& outStream, bool fOrdered=false);
@@ -328,8 +306,8 @@ public:
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
                            vector<StaffObjData*>& data);
     void delete_shapes(vector<StaffObjData*>& data);
-    virtual void move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                                LUnits xPos, LUnits yPos);
+    virtual void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                                LUnits yPos, LUnits* yMin, LUnits* yMax);
     //access to information
     inline LUnits get_width() { return m_width; }
 
@@ -367,8 +345,8 @@ public:
 
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                        LUnits xPos, LUnits yPos);
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                        LUnits yPos, LUnits* yMin, LUnits* yMax);
 
 };
 
@@ -389,8 +367,8 @@ public:
 
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
-    void move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                        LUnits xPos, LUnits yPos);
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                        LUnits yPos, LUnits* yMin, LUnits* yMax);
 
 };
 

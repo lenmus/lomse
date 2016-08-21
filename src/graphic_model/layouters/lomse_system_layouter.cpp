@@ -228,16 +228,13 @@ void SystemLayouter::add_system_prolog_if_necessary()
 //---------------------------------------------------------------------------------------
 LUnits SystemLayouter::determine_column_start_position(int iCol)
 {
-    if (is_first_column_in_system())
-        return m_pagePos.x;
-    else
-        return m_pagePos.x + m_pSpAlgorithm->aditional_space_before_adding_column(iCol);
+    return m_pagePos.x;
 }
 
 //---------------------------------------------------------------------------------------
 LUnits SystemLayouter::determine_column_size(int iCol)
 {
-      return m_pSpAlgorithm->get_column_width(iCol, is_first_column_in_system());
+      return m_pSpAlgorithm->get_column_width(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -350,7 +347,7 @@ bool SystemLayouter::system_must_be_justified()
 
     //3. it is the last system but there is no final barline
     int iLastCol = m_pScoreLyt->get_num_columns();
-    if (m_pScoreLyt->is_last_system() && !m_pSpAlgorithm->column_has_barline(iLastCol))
+    if (m_pScoreLyt->is_last_system() && !m_pSpAlgorithm->column_has_barline_at_end(iLastCol))
         return false;
 
 
@@ -416,7 +413,7 @@ void SystemLayouter::truncate_current_system(LUnits indent)
     if (m_pScoreMeter->is_empty_score())
         return;
 
-    if (!m_pSpAlgorithm->column_has_barline(m_iLastCol-1))
+    if (!m_pSpAlgorithm->column_has_barline_at_end(m_iLastCol-1))
         return;
 
     GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(m_iLastCol-1);

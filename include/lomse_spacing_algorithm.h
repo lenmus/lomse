@@ -85,7 +85,7 @@ public:
                      PartsEngraver* pPartsEngraver);
     virtual ~SpacingAlgorithm();
 
-    //spacing algorithm
+    //spacing algorithm ---------
 
     ///This is the first method to be invoked. Your implementation must:
     ///
@@ -99,43 +99,35 @@ public:
     ///
     virtual void split_content_in_columns() = 0;
 
-    ///Next, this method will be invoked. Your implementation must:
-    ///
-    ///- apply the spacing algorithm for determining the minimum size of each column.
-    ///
-    ///- assign a penalty factor to each column, for the line break algorithm.
-    ///
+    ///Next, this method will be invoked. Your implementation must apply the
+    /// spacing algorithm for determining the minimum size for each column.
     virtual void do_spacing_algorithm() = 0;
 
-    ///Methods for line break
+    ///Methods for line break will then be invoked
     virtual float determine_penalty_for_line(int iSystem, int i, int j) = 0;
     virtual bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
                                   int i, int j) = 0;
 
-    //provide information
+    ///Finally, if justification is required this method will be invoked
+    virtual void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) = 0;
+
+
+    //provide information -----------
 
     ///Return the number of columns in which the content has been split
     virtual int get_num_columns() = 0;
 
     virtual LUnits get_staves_height() = 0;
 
-    //invoked from system layouter
-    virtual LUnits aditional_space_before_adding_column(int iCol) = 0;
-    virtual LUnits get_column_width(int iCol, bool fFirstColumnInSystem) = 0;
-    virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-            LUnits yShift,
-            LUnits* yMin, LUnits* yMax) = 0;
-    virtual void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) = 0;
-
-    //for line break algorithm
-    virtual bool is_empty_column(int iCol) = 0;
-
     //information about a column
-    virtual LUnits get_trimmed_width(int iCol) = 0;
-    virtual bool column_has_barline(int iCol) = 0;
+    virtual bool is_empty_column(int iCol) = 0;
+    virtual LUnits get_column_width(int iCol) = 0;
+    virtual bool column_has_barline_at_end(int iCol) = 0;
     virtual bool has_system_break(int iCol) = 0;
 
-    //boxes and shapes
+    //boxes and shapes management
+    virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
+                                        LUnits yShift, LUnits* yMin, LUnits* yMax) = 0;
     virtual void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage) = 0;
     virtual void delete_shapes(int iCol) = 0;
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr) = 0;
@@ -207,9 +199,6 @@ public:
     //methods in base class SpacingAlgorithm that still need to be created
     //------------------------------------------------------------------------
 
-    //invoked from system layouter
-    virtual LUnits aditional_space_before_adding_column(int iCol) = 0;
-    virtual LUnits get_column_width(int iCol, bool fFirstColumnInSystem) = 0;
     virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
             LUnits yShift,
             LUnits* yMin, LUnits* yMax) = 0;
@@ -219,8 +208,8 @@ public:
     virtual bool is_empty_column(int iCol) = 0;
 
     //information about a column
-    virtual LUnits get_trimmed_width(int iCol) = 0;
-    virtual bool column_has_barline(int iCol) = 0;
+    virtual LUnits get_column_width(int iCol) = 0;
+    virtual bool column_has_barline_at_end(int iCol) = 0;
 
     //methods to compute results
     virtual TimeGridTable* create_time_grid_table_for_column(int iCol) = 0;
@@ -238,24 +227,18 @@ public:
     //---------------------------------------------------------------------------------
 
     //column creation: collecting content
-    ///start a new column and prepare for receiving information
-    virtual void start_column_measurements(int iCol, LUnits uxStart, LUnits fixedSpace) = 0;
+    ///prepare for receiving information for a new column
+    virtual void start_column_measurements(int iCol) = 0;
     ///save information for staff object in current column
     virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
                                 TimeUnits rTime, int nStaff, GmoShape* pShape,
                                 bool fInProlog=false) = 0;
     ///terminate current column
-    virtual void finish_column_measurements(int iCol, LUnits xStart) = 0;
+    virtual void finish_column_measurements(int iCol) = 0;
 
     //spacing algorithm main actions
     ///apply spacing algorithm to column iCol
     virtual void do_spacing(int iCol, bool fTrace=false, int level=k_trace_off) = 0;
-    ///determine minimum required width for column iCol
-    virtual void assign_width_to_column(int iCol) = 0;
-
-    //get results: info about a column
-    ///the column ends with a visible barline
-    virtual bool column_has_visible_barline(int iCol) = 0;
 
     //auxiliary: shapes and boxes
     ///add shapes for staff objects to graphical model
@@ -265,7 +248,7 @@ public:
     virtual void delete_shapes(int iCol) = 0;
 
 
-    //normally, no need to override
+    //new methods for this class, normally no need to override
     //-------------------------------------------------------------------------
 
     ///Returns the number of columns in which the content has been split
@@ -360,12 +343,9 @@ protected:
     void create_column_boxes();
     void collect_content_for_this_column();
     void layout_column();
-    void assign_width_to_column();
 
     GmoBoxSlice* create_slice_box();
     void find_and_save_context_info_for_this_column();
-
-    LUnits determine_initial_fixed_space();
 
     void store_info_about_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                            int iInstr, int iStaff, int iCol, int iLine,

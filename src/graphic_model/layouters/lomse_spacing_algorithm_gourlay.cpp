@@ -90,10 +90,14 @@ SpAlgGourlay::~SpAlgGourlay()
 //                << "Reserved= " << m_pScoreLyt->get_num_columns()
 //                << ", current= " << m_columns.size() << endl;
 
-    if (int(m_data.size()) != m_pScore->get_staffobjs_table()->num_entries())
-        dbgLogger << "ERROR. In SpAlgGourlay: more data than reserved space. "
-                << "Reserved= " << m_pScore->get_staffobjs_table()->num_entries()
-                << ", current= " << m_data.size() << endl;
+    if (int(m_data.size()) > m_pScore->get_staffobjs_table()->num_entries())
+    {
+        stringstream ss;
+        ss << "Investigate: more data than reserved space. "
+           << "Reserved= " << m_pScore->get_staffobjs_table()->num_entries()
+           << ", current= " << m_data.size();
+        LOMSE_LOG_ERROR(ss.str());
+    }
 
     vector<StaffObjData*>::iterator itD;
     for (itD = m_data.begin(); itD != m_data.end(); ++itD)
@@ -112,8 +116,7 @@ SpAlgGourlay::~SpAlgGourlay()
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::start_column_measurements(int UNUSED(iCol), LUnits UNUSED(uxStart),
-                                             LUnits UNUSED(fixedSpace))
+void SpAlgGourlay::start_column_measurements(int UNUSED(iCol))
 {
     m_numSlices = 0;
 }
@@ -161,7 +164,11 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
                 break;
 
             default:
-                LOMSE_LOG_ERROR("????????????????????????");
+                stringstream ss;
+                ss << "Investigate: un-expected staff object. Type= "
+                   << pSO->get_obj_type();
+                LOMSE_LOG_ERROR(ss.str());
+                curType = TimeSlice::k_non_timed;
         }
     }
 
@@ -254,7 +261,7 @@ void SpAlgGourlay::finish_slice(ColStaffObjsEntry* pLastEntry, int numEntries)
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::finish_column_measurements(int UNUSED(iCol), LUnits UNUSED(xStart))
+void SpAlgGourlay::finish_column_measurements(int UNUSED(iCol))
 {
     //terminate last slice
     finish_slice(m_pLastEntry, m_numEntries);
@@ -327,28 +334,6 @@ void SpAlgGourlay::apply_force(float F)
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::assign_width_to_column(int iCol)
-{
-}
-
-
-//---------------------------------------------------------------------------------------
-LUnits SpAlgGourlay::aditional_space_before_adding_column(int iCol)
-{
-    return 0.0f;
-}
-
-//---------------------------------------------------------------------------------------
-LUnits SpAlgGourlay::get_column_width(int iCol, bool fFirstColumnInSystem)
-{
-    //Returns the width for column iCol. Flag fFirstColumnInSystem could be
-    //used in case the spacing algorithm would like to remove space from start
-    //of column when the column is going to be placed as first column of a system
-
-    return m_columns[iCol]->get_column_width();
-}
-
-//---------------------------------------------------------------------------------------
 void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
                                                    LUnits yShift,
                                                    LUnits* yMin, LUnits* yMax)
@@ -384,14 +369,8 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
         set_slice_final_position(iCol, xLeft, yTop);
 
         //reposition staffobjs
-        m_columns[iCol]->move_shapes_to_final_positions(m_data, xLeft, yTop + yShift);
-
-        //collect information about system vertical limits
-        if (m_columns[iCol]->has_shapes())
-        {
-            *yMin = min(*yMin, m_columns[iCol]->get_y_min());
-            *yMax = max(*yMax, m_columns[iCol]->get_y_max());
-        }
+        m_columns[iCol]->move_shapes_to_final_positions(m_data, xLeft, yTop + yShift,
+                                                        yMin, yMax);
 
         //assign the final width to the boxes
         LUnits colWidth = m_columns[iCol]->get_column_width();
@@ -430,13 +409,13 @@ void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncr
         float F = m_columns[iCol]->determine_force_for(colWidth + extraWidth);
         m_columns[iCol]->apply_force(F);
 
-        dbgLogger << "Justifying system. Col " << iCol
-                  << ": extraWidth= " << extraWidth
-                  << ", stretchableWidth= " << stretchableWidth
-                  << ", Force= " << F
-                  << ", target width= " << (colWidth + extraWidth)
-                  << ", achieved= " << m_columns[iCol]->get_column_width()
-                  << endl;
+//        dbgLogger << "Justifying system. Col " << iCol
+//                  << ": extraWidth= " << extraWidth
+//                  << ", stretchableWidth= " << stretchableWidth
+//                  << ", Force= " << F
+//                  << ", target width= " << (colWidth + extraWidth)
+//                  << ", achieved= " << m_columns[iCol]->get_column_width()
+//                  << endl;
     }
 
 #else
@@ -491,15 +470,15 @@ bool SpAlgGourlay::is_empty_column(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits SpAlgGourlay::get_trimmed_width(int iCol)
+LUnits SpAlgGourlay::get_column_width(int iCol)
 {
     return m_columns[iCol]->get_column_width();
 }
 
 //---------------------------------------------------------------------------------------
-bool SpAlgGourlay::column_has_barline(int iCol)
+bool SpAlgGourlay::column_has_barline_at_end(int iCol)
 {
-    return true;    //TODO
+    return m_columns[iCol]->has_barline_at_end();
 }
 
 //---------------------------------------------------------------------------------------
@@ -512,12 +491,6 @@ TimeGridTable* SpAlgGourlay::create_time_grid_table_for_column(int iCol)
 void SpAlgGourlay::dump_column_data(int iCol, ostream& outStream)
 {
     m_columns[iCol]->dump(outStream);
-}
-
-//---------------------------------------------------------------------------------------
-bool SpAlgGourlay::column_has_visible_barline(int iCol)
-{
-    return true;    //TODO
 }
 
 //---------------------------------------------------------------------------------------
@@ -779,7 +752,9 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
             break;
 
         default:
-            LOMSE_LOG_ERROR("????????????????????????");
+            stringstream ss;
+            ss << "Investigate: un-expected TimeSlice type. Type= " << get_type();
+            LOMSE_LOG_ERROR(ss.str());
     }
 
     //if this is the first slice (the first data element is element 0) add some space
@@ -804,10 +779,6 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
                 xPrev = min(xPrev, xAnchor);
         }
     }
-
-//    //add some extra after space if this is the last slice in the prolog
-//    if (is_last_slice_in_prolog())
-//        m_xRi += pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_PROLOG);
 
     //if previous slice is barline, accidentals and other space at start must not be
     //transferred to previous slice (as right rod space). Instead should be accounted
@@ -906,8 +877,8 @@ void TimeSlice::delete_shapes(vector<StaffObjData*>& data)
 }
 
 //---------------------------------------------------------------------------------------
-void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                                      LUnits xPos, LUnits yPos)
+void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                               LUnits yPos, LUnits* yMin, LUnits* yMax)
 {
     int iMax = m_iFirstData + m_numEntries;
     for (int i=m_iFirstData; i < iMax; ++i)
@@ -921,10 +892,9 @@ void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data,
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
                                                     yPos + pData->m_yUserShift);
 
-//            //get shape limits
-//            m_yMax = max(m_yMax, pShape->get_bottom());
-//            m_yMin = min(m_yMin, pShape->get_top());
-//            m_fHasShapes = true;
+            //update system vertical limits
+            *yMax = max(*yMax, pShape->get_bottom());
+            *yMin = min(*yMin, pShape->get_top());
         }
     }
 }
@@ -995,7 +965,8 @@ void TimeSliceProlog::assign_spacing_values(vector<StaffObjData*>& data,
 
 //---------------------------------------------------------------------------------------
 void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                                     LUnits xPos, LUnits yPos)
+                                                     LUnits xPos, LUnits yPos,
+                                                     LUnits* yMin, LUnits* yMax)
 {
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
@@ -1018,10 +989,9 @@ void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
                                                     yPos + pData->m_yUserShift);
 
-//            //get shape limits
-//            m_yMax = max(m_yMax, pShape->get_bottom());
-//            m_yMin = min(m_yMin, pShape->get_top());
-//            m_fHasShapes = true;
+            //update system vertical limits
+            *yMax = max(*yMax, pShape->get_bottom());
+            *yMin = min(*yMin, pShape->get_top());
         }
     }
 }
@@ -1098,7 +1068,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         m_realWidth = maxWidth;
 
         //Improvement: test 136
-        //Space for these non-timed should not be added as a full rod
+        //Space for non-timed should not be added as a full rod
         //in previous slice when there are no objects for the staves in which these
         //non-timed are placed. Instead, transfer only the minimum required for
         //ensuring that previous xRi rod is at least equal to the required space
@@ -1121,7 +1091,8 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
 
 //---------------------------------------------------------------------------------------
 void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                                       LUnits xPos, LUnits yPos)
+                                                       LUnits xPos, LUnits yPos,
+                                                       LUnits* yMin, LUnits* yMax)
 {
     //vector for positions on each staff
     vector<LUnits> positions;
@@ -1148,10 +1119,9 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
 
             positions[iStaff] += pShape->get_width() + m_interSpace;
 
-//            //get shape limits
-//            m_yMax = max(m_yMax, pShape->get_bottom());
-//            m_yMin = min(m_yMin, pShape->get_top());
-//            m_fHasShapes = true;
+            //update system vertical limits
+            *yMax = max(*yMax, pShape->get_bottom());
+            *yMin = min(*yMin, pShape->get_top());
         }
     }
 }
@@ -1166,6 +1136,7 @@ ColumnDataGourlay::ColumnDataGourlay(TimeSlice* pSlice)
     , m_slope(1.0f)
     , m_xFixed(0.0f)
     , m_colWidth(0.0f)
+    , m_fBarlineAtEnd(true)
 {
 }
 
@@ -1219,17 +1190,19 @@ void ColumnDataGourlay::set_num_entries(int numSlices)
 //---------------------------------------------------------------------------------------
 void ColumnDataGourlay::order_slices()
 {
-    //load vector
+    //load vector and take the opportunity for collecting some data
     TimeSlice* pSlice = m_pFirstSlice;
+    TimeSlice* pLastSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
         m_orderedSlices[i] = pSlice;
+        pLastSlice = pSlice;
         pSlice = pSlice->next();
     }
+    m_fBarlineAtEnd = (pLastSlice->get_type() == TimeSlice::k_barline);
 
     //sort vector by pre-stretching force, so that fi <= fi+1
     //uses bubble algorithm
-
     int j, k;
     int numSlices = num_slices();
     bool fChanges;
@@ -1297,12 +1270,13 @@ void ColumnDataGourlay::delete_shapes(vector<StaffObjData*>& data)
 
 //---------------------------------------------------------------------------------------
 void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& data,
-                                                       LUnits xPos, LUnits yPos)
+                                                       LUnits xPos, LUnits yPos,
+                                                       LUnits* yMin, LUnits* yMax)
 {
     TimeSlice* pSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
-        pSlice->move_shapes_to_final_positions(data, xPos, yPos);
+        pSlice->move_shapes_to_final_positions(data, xPos, yPos, yMin, yMax);
         xPos += pSlice->get_width();
         pSlice = pSlice->next();
     }
@@ -1312,12 +1286,6 @@ void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& da
 bool ColumnDataGourlay::is_empty_column()
 {
     return m_pFirstSlice == NULL;
-}
-
-//---------------------------------------------------------------------------------------
-bool ColumnDataGourlay::has_shapes()
-{
-    return true;    //TODO
 }
 
 //---------------------------------------------------------------------------------------
@@ -1381,10 +1349,8 @@ LUnits ColumnDataGourlay::determine_extent_for(float F)
 //---------------------------------------------------------------------------------------
 float ColumnDataGourlay::determine_force_for(LUnits x)
 {
-    // OK
-    //-----------------------------------------------------------------------------------
     //function sff(x) : Determining the required force for a given extent x
-    //-----------------------------------------------------------------------------------
+    //The result is exact. The returned force achieves the required extent.
 
     //Pre-calculate the minimum extent
     LUnits xmin = 0.0f;
@@ -1490,9 +1456,9 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
     if (m_slope == 0.0f)
         m_slope = 1.0f / m_orderedSlices[0]->m_ci;
 #endif
-    dbgLogger << "Final slope=" << m_slope
-              << ", xFixed=" << m_xFixed
-              << endl;
+//    dbgLogger << "Final slope=" << m_slope
+//              << ", xFixed=" << m_xFixed
+//              << endl;
 }
 
 //=====================================================================================

@@ -69,7 +69,6 @@
 #include "lomse_ornament_engraver.h"
 #include "lomse_technical_engraver.h"
 #include "lomse_lyric_engraver.h"
-#include "lomse_spacing_algorithm_timetable.h"
 #include "lomse_spacing_algorithm_gourlay.h"
 
 namespace lomse
@@ -214,17 +213,11 @@ void ScoreLayouter::initialice_score_layouter()
     create_parts_engraver();
 
     m_pShapesCreator = LOMSE_NEW ShapesCreator(m_libraryScope, m_pScoreMeter,
-                                         m_shapesStorage, m_pPartsEngraver);
+                                               m_shapesStorage, m_pPartsEngraver);
 
-#if (0)
-    m_pSpAlgorithm = LOMSE_NEW SpAlgorithmTimetable(m_libraryScope, m_pScoreMeter,
-                                        this, m_pScore, m_shapesStorage,
-                                        m_pShapesCreator, m_pPartsEngraver);
-#else
     m_pSpAlgorithm = LOMSE_NEW SpAlgGourlay(m_libraryScope, m_pScoreMeter,
-                                        this, m_pScore, m_shapesStorage,
-                                        m_pShapesCreator, m_pPartsEngraver);
-#endif
+                                            this, m_pScore, m_shapesStorage,
+                                            m_pShapesCreator, m_pPartsEngraver);
 
     get_score_renderization_options();
 
@@ -706,9 +699,9 @@ void ScoreLayouter::dump_column_data(int iCol, ostream& outStream)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ScoreLayouter::get_trimmed_width(int iCol)
+LUnits ScoreLayouter::get_column_width(int iCol)
 {
-    return m_pSpAlgorithm->get_trimmed_width(iCol);
+    return m_pSpAlgorithm->get_column_width(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1306,11 +1299,11 @@ void LinesBreakerSimple::decide_line_breaks()
     //start first system
     m_breaks.push_back(0);
     LUnits space = m_pScoreLyt->get_target_size_for_system(0)
-                   - m_pScoreLyt->get_trimmed_width(0);        //+gross
+                   - m_pScoreLyt->get_column_width(0);        //+gross
 
     for (int iCol=1; iCol < numCols; ++iCol)
     {
-        LUnits colSize = m_pScoreLyt->get_trimmed_width(iCol);     //+gross
+        LUnits colSize = m_pScoreLyt->get_column_width(iCol);     //+gross
         if (space >= colSize && !m_pScoreLyt->column_has_system_break(iCol))
             space -= colSize;
         else
@@ -1359,13 +1352,11 @@ void LinesBreakerOptimal::initialize_entries_table()
     m_entries[0].penalty = 0.0f;
     m_entries[0].predecessor = 0;
     m_entries[0].system = 0;
-    m_entries[0].product = 1.0f;
     for (int i=1; i <= m_numCols; ++i)
     {
         m_entries[i].penalty = LOMSE_INFINITE_PENALTY;
         m_entries[i].predecessor = -1;
         m_entries[i].system = 0;
-        m_entries[i].product = 1.0f;
     }
 }
 
@@ -1416,7 +1407,6 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                     m_entries[j].penalty = newPenalty + prevPenalty;
                     m_entries[j].predecessor = i;
                     m_entries[j].system = iSystem + 1;
-                    m_entries[j].product = m_entries[i].product * (1.0f + newPenalty);
                 }
 
                 if (fSystemBreak)
@@ -1427,27 +1417,6 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                     break;
             }
         }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-bool LinesBreakerOptimal::is_better_option(float prevPenalty, float newPenalty,
-                                           float nextPenalty, int i, int j)
-{
-    float newTotal = prevPenalty + newPenalty;
-    float prevTotal = m_entries[j].penalty;
-    if ( fabs(newTotal - prevTotal) < 0.1f * prevTotal )
-    {
-        //select the entry that creates less stretching differences, althougt this
-        //could result in a greater total stretching
-        float prevProd = m_entries[j].product;
-        float newProd = m_entries[i].product * (1.0f + newPenalty);
-        return newProd > prevProd;
-    }
-    else
-    {
-        //select the one that creates less total stretching
-        return newTotal < prevTotal;
     }
 }
 
@@ -1495,7 +1464,6 @@ void LinesBreakerOptimal::dump_entries(ostream& outStream)
     {
         outStream << "Entry " << i << ": prev = " << m_entries[i].predecessor
                   << ", penalty = " << m_entries[i].penalty
-                  << ", product = " << m_entries[i].product
                   << ", system = " << m_entries[i].system << endl;
     }
 }

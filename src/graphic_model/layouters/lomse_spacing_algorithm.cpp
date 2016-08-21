@@ -107,8 +107,7 @@ public:
                       ColStaffObjsEntry* pKeyEntry);
 
     //access to info
-    bool column_has_barline();
-    bool column_has_visible_barline();
+    bool column_has_barline_at_end();
     inline bool has_system_break() { return m_fHasSystemBreak; }
     inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
     inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
@@ -169,7 +168,6 @@ SpAlgColumn::~SpAlgColumn()
 //---------------------------------------------------------------------------------------
 void SpAlgColumn::split_content_in_columns()
 {
-    //m_pColsBuilder->set_debug_options(m_iColumnToTrace, m_nTraceLevel);
     m_pColsBuilder->create_columns();
 }
 
@@ -331,8 +329,6 @@ void ColumnsBuilder::create_columns()
         create_column_boxes();
         find_and_save_context_info_for_this_column();
         collect_content_for_this_column();
-//        layout_column();
-//        assign_width_to_column();
     }
     m_numColumns = m_iColumn;
 }
@@ -341,24 +337,14 @@ void ColumnsBuilder::create_columns()
 void ColumnsBuilder::do_spacing_algorithm()
 {
     for (m_iColumn=0; m_iColumn <= m_numColumns; ++m_iColumn)
-    {
         layout_column();
-        assign_width_to_column();
-    }
 }
 
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::collect_content_for_this_column()
 {
-//    if (m_iColumnToTrace == m_iColumn)
-//        m_pSpAlgorithm->set_trace_level(m_iColumn, m_nTraceLevel);
-
-//	int numInstruments = m_pScoreMeter->num_instruments();
-
     //ask system layouter to prepare for receiving data for objects in this column
-    LUnits uxStart = m_pagePos.x;
-    LUnits fixedSpace = determine_initial_fixed_space();
-    m_pSpAlgorithm->start_column_measurements(m_iColumn, uxStart, fixedSpace);
+    m_pSpAlgorithm->start_column_measurements(m_iColumn);
 
     //loop to process all StaffObjs until this column is completed
     ImoStaffObj* pSO = NULL;
@@ -373,7 +359,6 @@ void ColumnsBuilder::collect_content_for_this_column()
         InstrumentEngraver* pIE = m_pPartsEngraver->get_engraver_for(iInstr);
         m_pagePos.y = pIE->get_top_line_of_staff(iStaff);
         GmoShape* pShape = NULL;
-        //TimeUnits rNextTime = m_pSysCursor->next_staffobj_timepos();
 
         //if feasible column break, exit loop
         if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
@@ -434,7 +419,7 @@ void ColumnsBuilder::collect_content_for_this_column()
         m_pSysCursor->move_next();
     }
 
-    m_pSpAlgorithm->finish_column_measurements(m_iColumn, uxStart);
+    m_pSpAlgorithm->finish_column_measurements(m_iColumn);
 }
 
 //---------------------------------------------------------------------------------------
@@ -471,39 +456,10 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ColumnsBuilder::determine_initial_fixed_space()
-{
-    //AWARE: The initial space is controlled by first staff in system. It cannot
-    //be independent for each staff, because then objects will not be aligned.
-
-    //TODO: Now, we no longer know if it is going to be the first column in a system
-    if (is_first_column())
-    {
-        return m_pScoreMeter->tenths_to_logical(LOMSE_SPACE_BEFORE_PROLOG, 0, 0);
-    }
-    else if (m_pSpAlgorithm->column_has_visible_barline(m_iColumn-1))
-    {
-        return m_pScoreMeter->tenths_to_logical(LOMSE_SPACE_AFTER_BARLINE, 0, 0);
-    }
-    else
-    {
-        return 0.0f;
-    }
-}
-
-//---------------------------------------------------------------------------------------
 void ColumnsBuilder::layout_column()
 {
     bool fTrace = (m_iColumnToTrace == m_iColumn);
-//    if (fTrace)
-//        m_pSpAlgorithm->set_trace_level(m_iColumn, m_nTraceLevel);
     m_pSpAlgorithm->do_spacing(m_iColumn, fTrace, m_nTraceLevel);
-}
-
-//---------------------------------------------------------------------------------------
-void ColumnsBuilder::assign_width_to_column()
-{
-    m_pSpAlgorithm->assign_width_to_column(m_iColumn);
 }
 
 //---------------------------------------------------------------------------------------
@@ -599,6 +555,7 @@ bool ColumnsBuilder::determine_if_is_in_prolog(TimeUnits rTime)
 {
     // only if clef/key/time is at start of score or after a barline. This is equivalent
     // to check that clef/key/time will be placed at timepos 0
+    //TODO: after a barline?
     return is_equal_time(rTime, 0.0);
 }
 
@@ -677,9 +634,7 @@ void ColumnData::delete_shapes(int iCol)
 void ColumnData::delete_box_and_shapes(int iCol)
 {
     delete_shapes(iCol);
-//    pStorage->delete_ready_shapes();
-
-   delete m_pBoxSlice;       //box for this column
+    delete m_pBoxSlice;       //box for this column
 }
 
 //---------------------------------------------------------------------------------------

@@ -188,7 +188,7 @@ public:
 
     //support for helper classes
     virtual LUnits get_target_size_for_system(int iSystem);
-    virtual LUnits get_trimmed_width(int iCol);
+    virtual LUnits get_column_width(int iCol);
     virtual bool column_has_system_break(int iCol);
 
     //support for debuggin and unit tests
@@ -420,7 +420,6 @@ protected:
         float penalty;          //total penalty for the score
         int predecessor;        //previous break point
         int system;             //system [0..n] started by this entry
-        float product;          //total product of not used space
     };
     std::vector<Entry> m_entries;
     int m_numCols;
@@ -429,9 +428,6 @@ protected:
     void initialize_entries_table();
     void compute_optimal_break_sequence();
     void retrieve_breaks_sequence();
-    float determine_penalty_for_line(int iSystem, int i, int j);
-    bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
-                          int i, int j);
 
 };
 
