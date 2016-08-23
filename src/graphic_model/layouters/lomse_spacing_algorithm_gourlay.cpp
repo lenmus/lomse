@@ -38,6 +38,7 @@
 #include "lomse_box_slice.h"
 #include "lomse_score_layouter.h"
 
+#include "lomse_calligrapher.h"
 
 namespace lomse
 {
@@ -273,6 +274,7 @@ void SpAlgGourlay::finish_column_measurements(int UNUSED(iCol))
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
 {
+    determine_spacing_parameters();
     compute_springs();
     order_slices_in_columns();
     m_columns[iCol]->determine_minimum_width();
@@ -285,27 +287,44 @@ void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
     }
 
     //apply optimum force to get an initial estimation for columns width
-    float Fopt = m_libraryScope.get_optimum_force();
-    apply_force(Fopt);
+    apply_force(m_Fopt);
 
     //determine column spacing function slope in the neighborhood of Fopt
-    m_columns[iCol]->determine_approx_sff_for(Fopt);
+    m_columns[iCol]->determine_approx_sff_for(m_Fopt);
+}
+
+//---------------------------------------------------------------------------------------
+void SpAlgGourlay::determine_spacing_parameters()
+{
+	m_uSmin = m_pScoreMeter->tenths_to_logical_max(LOMSE_MIN_SPACE);
+    m_alpha = m_libraryScope.get_spacing_alpha();
+
+	static const float rLog2 = 0.3010299956640f;    //log(2)
+    m_dmin = m_libraryScope.get_spacing_dmin(); //LOMSE_DMIN
+//    m_dmin = m_pScore->get_staffobjs_table()->min_note_duration();
+    m_log2dmin = log(m_dmin) / rLog2;             //compute log2(dmin)
+
+    m_Fopt = m_libraryScope.get_optimum_force();
+
+//    //choose Fopt as a function of Dmin
+//    if (m_dmin <= 8.0f)
+//        m_Fopt *= 0.8f;
+//    else if (m_dmin <= 16.0f)
+//        m_Fopt *= 1.0f;
+//    else if (m_dmin <= 32.0f)
+//        m_Fopt *= 2.0f;
+//    else
+//        m_Fopt *= 3.0f;
 }
 
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::compute_springs()
 {
-    #define LOMSE_MIN_SPACE     10.0f   //Smin: space for Dmin
-	LUnits uSmin = m_pScoreMeter->tenths_to_logical_max(LOMSE_MIN_SPACE);
-    float alpha = m_libraryScope.get_spacing_alpha();
-
-	static const float rLog2 = 0.3010299956640f;    //log(2)
-    float dmin = m_libraryScope.get_spacing_dmin(); //LOMSE_DMIN
-    float log2dmin = log(dmin) / rLog2;             //compute log2(dmin)
+    TextMeter textMeter(m_libraryScope);
 
     list<TimeSlice*>::iterator it;
     for (it = m_slices.begin(); it != m_slices.end(); ++it)
-        (*it)->assign_spacing_values(m_data, m_pScoreMeter);
+        (*it)->assign_spacing_values(m_data, m_pScoreMeter, textMeter);
 
     //AWARE: Can not be included in previous loop because slice i+1 also
     //       sets data for slice i
@@ -313,7 +332,8 @@ void SpAlgGourlay::compute_springs()
                                 m_pScoreMeter->get_spacing_value());
     bool fProportional = m_pScoreMeter->is_proportional_spacing();
     for (it = m_slices.begin(); it != m_slices.end(); ++it)
-        (*it)->compute_spring_data(uSmin, alpha, log2dmin, dmin, fProportional, dsFixed);
+        (*it)->compute_spring_data(m_uSmin, m_alpha, m_log2dmin, m_dmin,
+                                   fProportional, dsFixed);
 }
 
 //---------------------------------------------------------------------------------------
@@ -555,10 +575,7 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
 //              << ", Force= " << F << ", sum= " << sum << ", c= " << c << endl;
 
     //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
-    float Fopt = m_libraryScope.get_optimum_force();
-    float R = fabs(F - Fopt);
-
-    return R;
+    return fabs(F - m_Fopt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -599,6 +616,7 @@ TimeSlice::TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column,
 //---------------------------------------------------------------------------------------
 TimeSlice::~TimeSlice()
 {
+    m_lyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -616,6 +634,8 @@ void TimeSlice::set_final_data(ColStaffObjsEntry* pLastEntry, int numEntries,
     m_ds = maxNextTime;
     m_minNote = minNote;
     m_width = get_xi() + m_xLeft;
+
+    add_lyrics();
 }
 
 //---------------------------------------------------------------------------------------
@@ -726,8 +746,8 @@ LUnits TimeSlice::spacing_function(LUnits uSmin, float alpha, float log2dmin,
 }
 
 //---------------------------------------------------------------------------------------
-void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
-                                             ScoreMeter* pMeter)
+void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                                      TextMeter& textMeter)
 {
 	//assign fixed space at start of this slice and compute pre-stretching
 	//extend (left and right rods)
@@ -757,8 +777,7 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
             LOMSE_LOG_ERROR(ss.str());
     }
 
-    //if this is the first slice (the first data element is element 0) add some space
-    //at start (AWARE: for scores without prolog)
+    //if this is the first slice (scores without prolog) add some space at start
     if (m_iFirstData == 0)
         m_xLeft += pMeter->tenths_to_logical_max(LOMSE_SPACE_BEFORE_PROLOG);
 
@@ -779,6 +798,17 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
                 xPrev = min(xPrev, xAnchor);
         }
     }
+
+    //take lyrics into account
+    vector<ImoLyric*>::iterator it;
+    for (it=m_lyrics.begin(); it != m_lyrics.end(); ++it)
+    {
+        LUnits width = measure_lyric(*it, pMeter, textMeter) / 2.0f;
+        m_xLi = max(m_xLi, width);
+        xPrev = min(xPrev, -width);
+        //TODO: the split must not include the hyphenation
+    }
+
 
     //if previous slice is barline, accidentals and other space at start must not be
     //transferred to previous slice (as right rod space). Instead should be accounted
@@ -808,6 +838,92 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data,
 bool TimeSlice::is_last_slice_in_prolog()
 {
     return m_fInProlog && m_next && !(m_next->m_fInProlog);
+}
+
+//---------------------------------------------------------------------------------------
+void TimeSlice::add_lyrics()
+{
+    if (m_type != TimeSlice::k_noterest)
+        return;
+
+    ColStaffObjsEntry* pEntry = m_firstEntry;
+    for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())
+    {
+        ImoStaffObj* pSO = pEntry->imo_object();
+
+        if (pSO->is_note() && pSO->get_num_attachments() > 0)
+        {
+            ImoAttachments* pAuxObjs = pSO->get_attachments();
+            int size = pAuxObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+                if (pAO->is_lyric())
+                {
+                    ImoLyric* pLyric = static_cast<ImoLyric*>(pAO);
+                    m_lyrics.push_back(pLyric);
+                }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
+                                TextMeter& textMeter)
+{
+    //TODO: Move this method to another object. TimeSlice shoul not have knowledge
+    //about the lyrics GM structure. Move perhaps to engraver?
+
+    //TODO tenths to logical: must use instrument & staff for pSO
+
+    LUnits totalWidth = 0;
+    ImoStyle* pStyle = NULL;
+    int numSyllables = pLyric->get_num_text_items();
+    for (int i=0; i < numSyllables; ++i)
+    {
+        //get text for syllable
+        ImoLyricsTextInfo* pText = pLyric->get_text_item(i);
+        const string& text = pText->get_syllable_text();
+        const string& language = pText->get_syllable_language();
+        pStyle = pText->get_syllable_style();
+        if (pStyle == NULL)
+            pStyle = pMeter->get_lyrics_style_info();
+
+        //measure this syllable
+        totalWidth += measure_text(text, pStyle, language, textMeter)
+                      + pMeter->tenths_to_logical_max(10.0);
+
+        //elision symbol
+        if (pText->has_elision())
+        {
+            const string& elision = pText->get_elision_text();
+            totalWidth += measure_text(elision, pStyle, "en", textMeter)
+                          + pMeter->tenths_to_logical_max(2.0);
+        }
+    }
+
+    //hyphenation, if needed
+    if (pLyric->has_hyphenation() && !pLyric->has_melisma())
+    {
+        totalWidth += measure_text("-", pStyle, "en", textMeter)
+                      + pMeter->tenths_to_logical_max(10.0);
+    }
+
+    return totalWidth;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TimeSlice::measure_text(const string& text, ImoStyle* pStyle,
+                               const string& language, TextMeter& meter)
+{
+    meter.select_font(language,
+                      pStyle->font_file(),
+                      pStyle->font_name(),
+                      pStyle->font_size(),
+                      pStyle->is_bold(),
+                      pStyle->is_italic() );
+    return meter.measure_width(text);
 }
 
 //---------------------------------------------------------------------------------------
@@ -924,7 +1040,8 @@ TimeSliceProlog::~TimeSliceProlog()
 
 //---------------------------------------------------------------------------------------
 void TimeSliceProlog::assign_spacing_values(vector<StaffObjData*>& data,
-                                            ScoreMeter* pMeter)
+                                            ScoreMeter* pMeter,
+                                            TextMeter& UNUSED(textMeter))
 {
 	//compute width for this slice
 
@@ -1021,7 +1138,8 @@ TimeSliceNonTimed::~TimeSliceNonTimed()
 
 //---------------------------------------------------------------------------------------
 void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
-                                              ScoreMeter* pMeter)
+                                              ScoreMeter* pMeter,
+                                              TextMeter& UNUSED(textMeter))
 {
 	//compute width for this slice. As objects in this slice can be for different
 	//instruments/staves we maintain a width value for each staff and transfer to

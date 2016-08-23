@@ -1,7 +1,7 @@
 (score (vers 2.0)(instrument (musicData 
     (clef G)
-    (n c4 e (lyric 1 "Aa1")(lyric 2 "Aa2"))
-    (n d4 e (lyric 1 "Be1")(lyric 2 "Be2"))
+    (n c4 e (lyric 1 "Longggg")(lyric 2 "Aa2"))
+    (n d4 e (lyric 1 "Be1")(lyric 2 "Beeeee"))
     (n e4 e (lyric 1 "Ce1")(lyric 2 "Ce2"))
     (barline)
 )))

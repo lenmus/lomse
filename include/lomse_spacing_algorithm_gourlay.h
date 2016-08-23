@@ -57,10 +57,12 @@ class GmoBoxSlice;
 class ColStaffObjsEntry;
 class TimeGridTable;
 class GmoBoxSliceInstr;
-
+class ImoLyric;
 class ColumnDataGourlay;
 class TimeSlice;
 class StaffObjData;
+class TextMeter;
+class ImoStyle;
 
 //---------------------------------------------------------------------------------------
 // SpAlgGourlay
@@ -95,12 +97,18 @@ protected:
     TimeUnits   m_maxNoteDur;
     TimeUnits   m_minNoteDur;
 
+    //spacing parameters
+	LUnits m_uSmin;     //minimun space between notes
+    float  m_alpha;     //alpha parameter for Gourlay's formula
+    float  m_dmin;      //min note duration for which fixed spacing will be used
+    float  m_log2dmin;  //precomputed value for log2(dmin)
+    float  m_Fopt;      //Optimum force (user defined and dependent on personal taste)
 
 public:
     SpAlgGourlay(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                       ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                       ShapesStorage& shapesStorage, ShapesCreator* pShapesCreator,
-                       PartsEngraver* pPartsEngraver);
+                 ScoreLayouter* pScoreLyt, ImoScore* pScore,
+                 ShapesStorage& shapesStorage, ShapesCreator* pShapesCreator,
+                 PartsEngraver* pPartsEngraver);
     virtual ~SpAlgGourlay();
 
 
@@ -146,6 +154,7 @@ protected:
     void compute_springs();
     void order_slices_in_columns();
     void apply_force(float F);
+    void determine_spacing_parameters();
 
 };
 
@@ -248,6 +257,9 @@ protected:
     int         m_iColumn;      //Column in which this slice is included
     bool        m_fInProlog;    //this slice is part of the score prolog
 
+    //lyrics
+    vector<ImoLyric*> m_lyrics;
+
     //list
     TimeSlice* m_next;
     TimeSlice* m_prev;
@@ -290,7 +302,8 @@ public:
     //spacing
     void compute_spring_data(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin,
                              bool fProportional, LUnits dsFixed);
-    virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                                       TextMeter& textMeter);
     void apply_force(float F);
     inline void increment_xRi(LUnits value) { m_xRi += value; }
     inline void set_minimum_xi(LUnits value) {
@@ -338,6 +351,11 @@ protected:
     inline TimeUnits get_min_note_still_sounding() { return m_minNoteNext; }
     bool is_last_slice_in_prolog();
 
+    void add_lyrics();
+    LUnits measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter, TextMeter& textMeter);
+    LUnits measure_text(const string& text, ImoStyle* pStyle,
+                        const string& language, TextMeter& meter);
+
 };
 
 
@@ -357,7 +375,8 @@ public:
     virtual ~TimeSliceProlog();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                               TextMeter& textMeter);
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax);
 
@@ -380,7 +399,8 @@ public:
     virtual ~TimeSliceNonTimed();
 
     //overrides
-    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter);
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                               TextMeter& textMeter);
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax);
 
