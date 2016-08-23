@@ -105,7 +105,7 @@ public:
 
 
     //spacing algorithm main actions
-    void do_spacing(int iCol, bool fTrace=false, int level=k_trace_off);
+    void do_spacing(int iCol, bool fTrace=false);
     void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement);
 
     //for lines break algorithm
@@ -166,6 +166,9 @@ public:
     LUnits  m_colMinWidth;      //minimum width (force 0)
     bool    m_fBarlineAtEnd;    //true if last slice is barline
 
+    //for creating TimeGridTable
+    LUnits  m_xPos;             //position for this column
+
 
     ColumnDataGourlay(TimeSlice* pSlice);
     ~ColumnDataGourlay();
@@ -180,6 +183,10 @@ public:
     float determine_force_for(LUnits width);
     void determine_approx_sff_for(float force);
     void apply_force(float F);
+
+    //for TimeGridTable
+    TimeGridTable* create_time_grid_table();
+    LUnits get_position() { return m_xPos; }
 
     //access to position and spacing data
     inline LUnits get_column_width() { return m_colWidth; }
@@ -297,6 +304,12 @@ public:
     //access to information
     inline LUnits get_xi() { return m_xLi + m_xRi; }
     inline LUnits get_minimum_extent() { return m_xLi + m_xRi + m_xLeft; }
+    inline LUnits get_left_rod() { return m_xLi; }
+    inline LUnits get_right_rod() { return m_xRi; }
+    inline LUnits get_fixed_extent() { return m_xLeft; }
+    inline float get_pre_stretching_force() { return m_fi; }
+    inline TimeUnits get_spring_duration() { return m_ds; }
+    inline TimeUnits get_shortest_duration() { return m_di; }
     TimeUnits get_timepos();
     inline int get_num_entries() { return m_numEntries; }
     inline ColStaffObjsEntry* get_first_entry() { return m_firstEntry; }

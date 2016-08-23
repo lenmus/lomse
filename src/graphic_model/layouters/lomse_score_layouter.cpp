@@ -614,6 +614,9 @@ void ScoreLayouter::get_score_renderization_options()
 {
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.StopAtFinalBarline");
     m_fStopStaffLinesAtFinalBarline = pOpt->get_bool_value();
+
+    pOpt = m_pScore->get_option("Score.JustifyFinalBarline");
+    m_fJustifyFinalBarline = (pOpt != NULL && pOpt->get_bool_value());
 }
 
 //---------------------------------------------------------------------------------------

@@ -68,6 +68,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_sizers.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_time_grid.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_time_grid_table.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_visual_effect.cpp
     
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_accidentals_engraver.cpp
@@ -102,6 +103,8 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_right_aligner.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_spacing_algorithm.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_spacing_algorithm_gourlay.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_table_layouter.cpp

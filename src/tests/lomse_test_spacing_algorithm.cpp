@@ -97,23 +97,8 @@ public:
     }
     virtual ~MyTimeSlice() {}
 
-//    ColStaffObjsEntry* my_get_first_entry() { return m_firstEntry; }
-//    ColStaffObjsEntry* my_get_last_entry() { return m_lastEntry; }
     inline int my_get_iData() { return m_iFirstData; }
-//    int     m_numEntries;
-//    int     m_type;         //type of slice. Value from enum ESliceType
-//    int     m_iColumn;      //Column in which this slice is included
-//
-//    //list
-//    TimeSlice* m_next;
-//    TimeSlice* m_prev;
-//
-//    //data for spacing
-//    float   m_ci;           //spring constant
-    inline LUnits my_get_xLi() { return m_xLi; }
-    inline float my_get_fi() { return m_fi; }
-    inline TimeUnits my_get_ds() { return m_ds; }
-    inline TimeUnits my_get_di() { return m_di; }
+    inline int my_get_num_entries() { return m_numEntries; }
 
 };
 
@@ -128,9 +113,13 @@ public:
     }
     virtual ~MyColumnDataGourlay() {}
 
-    MyTimeSlice* my_get_ordered_slice(int i)
+    inline MyTimeSlice* my_get_ordered_slice(int i)
     {
         return static_cast<MyTimeSlice*>( m_orderedSlices[i] );
+    }
+
+    inline MyTimeSlice* my_get_first_slice() {
+        return static_cast<MyTimeSlice*>(m_pFirstSlice);
     }
 };
 
@@ -177,6 +166,11 @@ public:
         }
     }
 
+    bool is_equal(float x, float y)
+    {
+        return (fabs(x - y) < 0.1f);
+    }
+
 
 };
 
@@ -214,6 +208,9 @@ SUITE(SpAlgGourlayTest)
         CHECK( data.size() == 4 );
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
+        CHECK( pSlice->my_get_iData() == 0 );
+        ++it;
+        pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( pSlice->my_get_iData() == 1 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
@@ -221,9 +218,6 @@ SUITE(SpAlgGourlayTest)
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
         CHECK( pSlice->my_get_iData() == 3 );
-        ++it;
-        pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( pSlice->my_get_iData() == 4 );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
@@ -264,20 +258,28 @@ SUITE(SpAlgGourlayTest)
         CHECK( slices.size() == 4 );
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_xLi(), 511.0f) );
-        CHECK( pSlice->my_get_iData() == 1 );
+        CHECK( is_equal(pSlice->get_left_rod(), 0.0f) );
+        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal(pSlice->get_fixed_extent(), 1096.0f) );
+        CHECK( pSlice->my_get_iData() == 0 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_xLi(), 219.0f) );
-        CHECK( pSlice->my_get_iData() == 3 );
+        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal(pSlice->get_right_rod(), 212.0f) );
+        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
+        CHECK( pSlice->my_get_iData() == 2 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_xLi(), 431.0f) );
+        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
+        CHECK( pSlice->my_get_iData() == 4 );
+        ++it;
+        pSlice = static_cast<MyTimeSlice*>(*it);
+        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
         CHECK( pSlice->my_get_iData() == 5 );
-        ++it;
-        pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_xLi(), 219.0f) );
-        CHECK( pSlice->my_get_iData() == 6 );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
@@ -317,42 +319,42 @@ SUITE(SpAlgGourlayTest)
         //check di computation
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 0.0f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 0.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 16.0f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 16.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 21.333f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 21.333f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 21.333f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_di(), 64.0f) );
+        CHECK( is_equal(pSlice->get_shortest_duration(), 64.0f) );
 
         //check ds computation
         it = slices.begin();
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 0.0f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 0.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 16.0f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 16.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 5.333f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 5.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 21.333f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 21.333f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal_time(pSlice->my_get_ds(), 64.0f) );
+        CHECK( is_equal(pSlice->get_spring_duration(), 64.0f) );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
@@ -389,7 +391,7 @@ SUITE(SpAlgGourlayTest)
         MyTimeSlice* pTS2 = pCol->my_get_ordered_slice(1);
         for (int i=3; i < 5; ++i)
         {
-            CHECK( pTS1->my_get_fi() <= pTS2->my_get_fi() );
+            CHECK( pTS1->get_pre_stretching_force() <= pTS2->get_pre_stretching_force() );
             pTS1 = pTS2;
             pTS2 = pCol->my_get_ordered_slice(i);
         }
@@ -417,33 +419,27 @@ SUITE(SpAlgGourlayTest)
             "(key a)(time 2 4)"
             "(n g2 s g+ p2)(n d3 s)(n g3 s)(n b3 s g-)"
             "(n d4 s g+ p1)(n g4 s)(n d4 s)(n b3 s g-)"
-            "(barline))) )" );
+            "(barline)"
+            ")) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyScoreLayouter3 scoreLyt(pImoScore, &gmodel, m_libraryScope);
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-//        CHECK( pAlg != NULL );
-//        CHECK( pAlg->get_num_columns() == 2 );
-//
-//        MyColumnDataGourlay* pCol = static_cast<MyColumnDataGourlay*>(pAlg->my_get_column(0));
-//        CHECK( pCol->m_orderedSlices.size() == 5 );
-//
-//        MyTimeSlice* pTS1 = pCol->my_get_ordered_slice(0);
-//        MyTimeSlice* pTS2 = pCol->my_get_ordered_slice(1);
-//        for (int i=3; i < 5; ++i)
-//        {
-//            CHECK( pTS1->my_get_fi() <= pTS2->my_get_fi() );
-//            pTS1 = pTS2;
-//            pTS2 = pCol->my_get_ordered_slice(i);
-//        }
+        CHECK( pAlg != NULL );
+        CHECK( pAlg->get_num_columns() == 1 );  //Shouldn't be 2 ?
 
-        cout << test_name() << endl;
-        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
-        cout << pSOCol->dump() << endl;
-        dump_columns(pAlg, cout);
-        //dump_columns_ordered_segments(pAlg, cout);
+        MyColumnDataGourlay* pCol = static_cast<MyColumnDataGourlay*>(pAlg->my_get_column(0));
+        CHECK( pCol->m_orderedSlices.size() == 10 );  //Shouldn't be 5 ?
+
+        MyTimeSlice* pTS1 = pCol->my_get_first_slice();
+        CHECK( pTS1->my_get_num_entries() == 9 );
+
+//        cout << test_name() << endl;
+//        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();
+//        cout << pSOCol->dump() << endl;
+//        dump_columns(pAlg, cout);
 
         scoreLyt.my_delete_all();
     }

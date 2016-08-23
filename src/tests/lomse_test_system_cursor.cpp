@@ -62,6 +62,11 @@ public:
     ~SystemCursorTestFixture()    //TearDown fixture
     {
     }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
 };
 
 SUITE(SystemCursorTest)
@@ -233,13 +238,14 @@ SUITE(SystemCursorTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
                         "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
-                        "(key D)(time 2 4)(n f4 w p1)(goBack w)(n c3 e g+ p2)"
+                        "(key D)(time 2 4)(n f4 h p1)(goBack h)(n c3 e g+ p2)"
                         "(n c3 e g-)(n d3 q)(barline)))"
                         "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
                         "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        cout << test_name() << endl;
 //        cout << pScore->get_staffobjs_table()->dump();
         StaffObjsCursor cursor(pScore);
 
@@ -248,46 +254,44 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to instr0 staff0   (key D)
         cursor.move_next();     //points to instr0 staff1   [(key D)]
         cursor.move_next();     //points to instr0 staff0   (time 2 4)
-
-        CHECK( cursor.get_applicable_clef_type() == k_clef_G2 );
-
         cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
-        cursor.move_next();     //points to instr0 staff0   (n f4 w p1)
-        cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
-
-        CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
-
         cursor.move_next();     //points to instr1 staff0   (clef G p1)
         cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
         cursor.move_next();     //points to instr1 staff0   (key D)
         cursor.move_next();     //points to instr1 staff1   [(key D)]
         cursor.move_next();     //points to instr1 staff0   (time 2 4)
         cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
-        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
+        cursor.move_next();     //points to instr0 staff0   (n f4 w p1)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_G2 );
 
+        cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
+
+        CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
+
+        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
         cursor.move_next();     //points to instr1 staff1   (n c3 q p2)
+
+        CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
+
         cursor.move_next();     //points to instr0 staff1   (n c3 e g-)
         cursor.move_next();     //points to instr0 staff1   (n d3 q)
         cursor.move_next();     //points to instr1 staff1   (n c3 e)
         cursor.move_next();     //points to instr1 staff0   (clef F4 p1)
-        cursor.move_next();     //points to instr1 staff0   (n a3 e)
         cursor.move_next();     //points to instr1 staff1   (clef G p2)
-
-        CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
-
-        cursor.move_next();     //points to instr1 staff1   (clef F p2)
+        cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_G2 );
 
-        cursor.move_next();     //points to instr1 staff1   (n c3 e)
+        cursor.move_next();     //points to instr1 staff0   (n a3 e)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
 
+        cursor.move_next();     //points to instr1 staff1   (n c3 e)
         cursor.move_next();     //points to instr0 staff0   (barline)
         cursor.move_next();     //points to instr1 staff0   (barline)
 
+//        cout << cursor.cur_entry()->dump() << endl;
         CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
 
     }

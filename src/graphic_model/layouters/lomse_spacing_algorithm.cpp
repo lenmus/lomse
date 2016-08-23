@@ -459,7 +459,7 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
 void ColumnsBuilder::layout_column()
 {
     bool fTrace = (m_iColumnToTrace == m_iColumn);
-    m_pSpAlgorithm->do_spacing(m_iColumn, fTrace, m_nTraceLevel);
+    m_pSpAlgorithm->do_spacing(m_iColumn, fTrace);
 }
 
 //---------------------------------------------------------------------------------------

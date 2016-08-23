@@ -226,7 +226,7 @@ void SystemLayouter::add_system_prolog_if_necessary()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits SystemLayouter::determine_column_start_position(int iCol)
+LUnits SystemLayouter::determine_column_start_position(int UNUSED(iCol))
 {
     return m_pagePos.x;
 }
@@ -329,32 +329,24 @@ void SystemLayouter::add_shapes_for_column(int iCol, ShapesStorage* pStorage)
 //---------------------------------------------------------------------------------------
 bool SystemLayouter::system_must_be_justified()
 {
-    //Force justification if it is the last system and free space is negative
-    if (m_pScoreLyt->is_last_system() && m_uFreeSpace < 0.0f)
-        return true;
-
-    //Otherwise, all systems needs justification except:
-
-    //1. unless justification suppressed, for debugging
+    //if justification suppressed, for debugging, do not justify
     if (!m_libraryScope.justify_systems())
         return false;
 
-    //2. it is the last system and flag "JustifyFinalBarline" is not set,
-    //   unless free space is negative
-    if (m_pScoreLyt->is_last_system())
-    {
-        if (m_pScoreLyt->m_fJustifyFinalBarline)
-            return true;
-        else
-            return m_uFreeSpace < 0.0f;
-    }
+    //if not last system or free space is negative, force justification
+    if (m_uFreeSpace < 0.0f || !m_pScoreLyt->is_last_system())
+        return true;
 
-    //3. it is the last system but there is no final barline
-    int iLastCol = m_pScoreLyt->get_num_columns();
-    if (m_pScoreLyt->is_last_system() && !m_pSpAlgorithm->column_has_barline_at_end(iLastCol))
+    //Otherwise, final system needs justification except:
+
+    //1. when flag "JustifyFinalBarline" is not set
+    if (!m_pScoreLyt->m_fJustifyFinalBarline)
         return false;
 
-
+    //3. flag"JustifyFinalBarline" is set but there is no final barline
+    int iLastCol = m_pScoreLyt->get_num_columns() - 1;
+    if (!m_pSpAlgorithm->column_has_barline_at_end(iLastCol))
+        return false;
 
     return true;        //do justification
 }

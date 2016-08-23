@@ -238,7 +238,7 @@ public:
 
     //spacing algorithm main actions
     ///apply spacing algorithm to column iCol
-    virtual void do_spacing(int iCol, bool fTrace=false, int level=k_trace_off) = 0;
+    virtual void do_spacing(int iCol, bool fTrace=false) = 0;
 
     //auxiliary: shapes and boxes
     ///add shapes for staff objects to graphical model

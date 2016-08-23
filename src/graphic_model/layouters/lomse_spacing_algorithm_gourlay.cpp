@@ -271,7 +271,7 @@ void SpAlgGourlay::finish_column_measurements(int UNUSED(iCol))
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::do_spacing(int iCol, bool fTrace, int level)
+void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
 {
     compute_springs();
     order_slices_in_columns();
@@ -484,7 +484,7 @@ bool SpAlgGourlay::column_has_barline_at_end(int iCol)
 //---------------------------------------------------------------------------------------
 TimeGridTable* SpAlgGourlay::create_time_grid_table_for_column(int iCol)
 {
-    return NULL;    //TODO
+    return m_columns[iCol]->create_time_grid_table();
 }
 
 //---------------------------------------------------------------------------------------
@@ -563,7 +563,7 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
 
 //---------------------------------------------------------------------------------------
 bool SpAlgGourlay::is_better_option(float prevPenalty, float newPenalty,
-                                    float nextPenalty, int i, int j)
+                                    float nextPenalty, int UNUSED(i), int UNUSED(j))
 {
     return (newPenalty + prevPenalty < nextPenalty);
 }
@@ -1137,6 +1137,7 @@ ColumnDataGourlay::ColumnDataGourlay(TimeSlice* pSlice)
     , m_xFixed(0.0f)
     , m_colWidth(0.0f)
     , m_fBarlineAtEnd(true)
+    , m_xPos(0.0f)
 {
 }
 
@@ -1273,6 +1274,8 @@ void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& da
                                                        LUnits xPos, LUnits yPos,
                                                        LUnits* yMin, LUnits* yMax)
 {
+    m_xPos = xPos;
+
     TimeSlice* pSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
@@ -1460,6 +1463,30 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
 //              << ", xFixed=" << m_xFixed
 //              << endl;
 }
+
+//---------------------------------------------------------------------------------------
+TimeGridTable* ColumnDataGourlay::create_time_grid_table()
+{
+
+    TimeGridTable* table = LOMSE_NEW TimeGridTable();
+
+    TimeSlice* pSlice = m_pFirstSlice;
+    LUnits xPos = get_position();
+
+    for (int i=0; i < num_slices(); ++i)
+    {
+        TimeUnits rCurTime = pSlice->get_timepos();
+        TimeUnits rDuration = pSlice->get_spring_duration();
+        TimeGridTableEntry entry = { rCurTime, rDuration, xPos };
+        table->add_entry(entry);
+
+        xPos += pSlice->get_width();
+        pSlice = pSlice->next();
+    }
+
+    return table;
+}
+
 
 //=====================================================================================
 //StaffObjData implementation
