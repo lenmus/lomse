@@ -40,6 +40,10 @@
 
 #include "lomse_calligrapher.h"
 
+#include <vector>
+using namespace std;
+
+
 namespace lomse
 {
 
@@ -277,6 +281,9 @@ void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
     determine_spacing_parameters();
     compute_springs();
     order_slices_in_columns();
+
+    int numInstruments = m_pScoreMeter->num_instruments();
+    m_columns[iCol]->collect_barlines_information(numInstruments);
     m_columns[iCol]->determine_minimum_width();
 
     if (fTrace || m_libraryScope.dump_column_tables())
@@ -496,9 +503,9 @@ LUnits SpAlgGourlay::get_column_width(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
-bool SpAlgGourlay::column_has_barline_at_end(int iCol)
+int SpAlgGourlay::get_column_barlines_information(int iCol)
 {
-    return m_columns[iCol]->has_barline_at_end();
+    return m_columns[iCol]->get_barlines_information();
 }
 
 //---------------------------------------------------------------------------------------
@@ -544,6 +551,11 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     if (m_pScoreLyt->column_has_system_break(iLastCol))
         return 0.0f;
 
+//    //do not justify last system ==> no penalty for any combination for last system
+//    if (iLastCol == m_pScoreLyt->get_num_columns() - 1)
+//        return -1.0f;
+
+
     LUnits lineWidth = m_pScoreLyt->get_target_size_for_system(iSystem);
     if (iSystem > 0)
         lineWidth -= 1000.0f; //m_pScoreLyt->get_prolog_width_for_system(iSystem);
@@ -565,17 +577,42 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
 
     //if minimum width is greater than required width, it is impossible to achieve
     //the requiered width. Return a too high penalty
-    if (minWidth > lineWidth)
+    if (minWidth > lineWidth && iFirstCol != iLastCol)
         return 1000.0f;
 
     //determine force to apply to get desired extent
     float F = (lineWidth - fixed) * c;
 
-//    dbgLogger << "Determine penalty: lineWidth= " << lineWidth
-//              << ", Force= " << F << ", sum= " << sum << ", c= " << c << endl;
+    bool dbgTrace = false;
+    if (dbgTrace)
+    {
+        dbgLogger << "Determine penalty: lineWidth= " << lineWidth
+                  << ", Force= " << F << ", sum= " << sum << ", c= " << c
+                  << ", iSystem" << iSystem
+                  << endl;
+    }
 
     //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
-    return fabs(F - m_Fopt);
+    float R = fabs(F - m_Fopt);
+
+    //increase penalty if requiring high shrink
+    if (F < 0.7f * m_Fopt)
+    {
+        //R *= 1.0f + (5.0f * (0.7f * m_Fopt - F));
+        R *= 2.0f;
+    }
+
+    //increase penalty for columns not ended in barline
+    if (!m_columns[iLastCol]->all_instr_have_barline())
+    {
+        R *= 4.0f;
+        if (!m_columns[iLastCol]->some_instr_have_barline())
+            R *= 4.0f;
+    }
+    //m_penalty = barlines == 0 ? 0.4f : (barlines < lines ? 0.6f : 1.0f);
+
+
+    return R;
 }
 
 //---------------------------------------------------------------------------------------
@@ -841,6 +878,49 @@ bool TimeSlice::is_last_slice_in_prolog()
 }
 
 //---------------------------------------------------------------------------------------
+int TimeSlice::collect_barlines_information(int numInstruments)
+{
+    int info = 0;
+
+    if (m_type != TimeSlice::k_barline)
+        return info;
+
+    //vector: one entry per instrument. Value = barline type or -1 if no barline
+    vector<int> barlines;
+    barlines.reserve(numInstruments);
+
+    ColStaffObjsEntry* pEntry = m_firstEntry;
+    for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())
+    {
+        ImoStaffObj* pSO = pEntry->imo_object();
+        int iInstr = pEntry->num_instrument();
+        if (pSO->is_barline())
+        {
+            ImoBarline* pBarline = static_cast<ImoBarline*>(pSO);
+            barlines[iInstr] = pBarline->get_type();
+        }
+        else
+            barlines[iInstr] = -1;
+    }
+
+    //summarize information
+    info = k_all_instr_have_barline | k_all_instr_have_final_barline;   //assume this
+
+    for (int i=0; i < numInstruments; ++i)
+    {
+        if (barlines[i] == -1)
+            info &= !(k_all_instr_have_barline | k_all_instr_have_final_barline);
+        else
+        {
+            info |= k_some_instr_have_barline;
+            if (!(barlines[i] == k_barline_end || barlines[i] == k_barline_end_repetition))
+                info &= !k_all_instr_have_final_barline;
+        }
+    }
+    return info;
+}
+
+//---------------------------------------------------------------------------------------
 void TimeSlice::add_lyrics()
 {
     if (m_type != TimeSlice::k_noterest)
@@ -891,8 +971,7 @@ LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
             pStyle = pMeter->get_lyrics_style_info();
 
         //measure this syllable
-        totalWidth += measure_text(text, pStyle, language, textMeter)
-                      + pMeter->tenths_to_logical_max(10.0);
+        totalWidth += measure_text(text, pStyle, language, textMeter);
 
         //elision symbol
         if (pText->has_elision())
@@ -902,6 +981,7 @@ LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
                           + pMeter->tenths_to_logical_max(2.0);
         }
     }
+    totalWidth += pMeter->tenths_to_logical_max(10.0);
 
     //hyphenation, if needed
     if (pLyric->has_hyphenation() && !pLyric->has_melisma())
@@ -1254,7 +1334,6 @@ ColumnDataGourlay::ColumnDataGourlay(TimeSlice* pSlice)
     , m_slope(1.0f)
     , m_xFixed(0.0f)
     , m_colWidth(0.0f)
-    , m_fBarlineAtEnd(true)
     , m_xPos(0.0f)
 {
 }
@@ -1311,14 +1390,11 @@ void ColumnDataGourlay::order_slices()
 {
     //load vector and take the opportunity for collecting some data
     TimeSlice* pSlice = m_pFirstSlice;
-    TimeSlice* pLastSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
         m_orderedSlices[i] = pSlice;
-        pLastSlice = pSlice;
         pSlice = pSlice->next();
     }
-    m_fBarlineAtEnd = (pLastSlice->get_type() == TimeSlice::k_barline);
 
     //sort vector by pre-stretching force, so that fi <= fi+1
     //uses bubble algorithm
@@ -1362,6 +1438,18 @@ void ColumnDataGourlay::determine_minimum_width()
     {
         m_colMinWidth += (*it)->get_minimum_extent();
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnDataGourlay::collect_barlines_information(int numInstruments)
+{
+    //get last slice
+    TimeSlice* pSlice = m_pFirstSlice;
+    for (int i=0; i < num_slices() - 1; ++i)
+        pSlice = pSlice->next();
+
+    //and collect info
+    m_barlinesInfo = pSlice->collect_barlines_information(numInstruments);
 }
 
 //---------------------------------------------------------------------------------------

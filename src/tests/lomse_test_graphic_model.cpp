@@ -236,7 +236,7 @@ SUITE(GraphicModelTest)
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( new Document(libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
@@ -251,12 +251,18 @@ SUITE(GraphicModelTest)
         LUnits x = pShape->get_left() + 10000.0f;
         LUnits y = pShape->get_top() + 300.0f;
 
-        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
-        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
-        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
-        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-        //cout << "Staff: " << pShape->get_left() << ", " << pShape->get_top() << endl;
-        //cout << "Finding: " << x << ", " << y << endl;
+//        cout << "Test GraphicModel_StaffAt" << endl;
+//        cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top()
+//             << ", width= " << pPage->get_width() << endl;
+//        cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
+//        cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
+//        cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top()
+//             << ", width= " << pBSys->get_width() << ", height= " << pBSys->get_height()
+//             << endl;
+//        cout << "Staff: " << pShape->get_left() << ", " << pShape->get_top()
+//             << ", width= " << pShape->get_width() << ", height= " << pShape->get_height()
+//             << endl;
+//        cout << "Finding at: " << x << ", " << y << endl;
 
         GmoObj* pHit = pPage->find_shape_at(x, y);
 

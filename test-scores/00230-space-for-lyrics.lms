@@ -1,0 +1,57 @@
+(score (vers 2.0)
+    (parts 
+       (instrIds P1 P2)
+       (group P1 P2 (joinBarlines yes))
+    )
+    (instrument P1
+       (staves 1)
+       (musicData 
+
+          /* measure 1 */
+          (clef F4 p1 )
+          (key F)
+          (time 3 4)
+          (n f4 q v1  p1 (stem down) 
+             (lyric 1 "A" -))
+          (barline simple)
+
+          /* measure 2 */
+          (n f4 e v1  p1 (stem down) 
+             (lyric 1 "ni" -))
+          (n g4 q v1  p1 (stem down) 
+             (lyric 1 "ma"))
+          (n e4 e v1  p1 (stem down) )
+          (n d4 e. v1  p1 (stem down)
+             (lyric 1 "me" ) (beam 79 +))
+          (n c4 s v1  p1 (stem down) (beam 79 -b))
+          (barline simple)
+
+       )
+    )
+    (instrument P2
+       (staves 1)
+       (musicData 
+
+          /* measure 1 */
+          (clef F4 p1 )
+          (key F)
+          (time 3 4)
+          (n f3 q v1  p1 (stem down) 
+             (lyric 1 "A" -))
+          (barline simple)
+
+          /* measure 2 */
+          (n d3 e v1  p1 (stem up)
+             (lyric 1 "ni" -) (beam 291 +))
+          (n c3 e v1  p1 (stem up) (beam 291 -))
+          (n e3 q v1  p1 (stem down) 
+             (lyric 1 "ma"))
+          (n f3 e v1  p1 (stem down)
+             (lyric 1 "me") (beam 305 +))
+          (n g3 e v1  p1 (stem down) (beam 305 -))
+          (barline simple)
+
+       )
+    )
+ )
+

@@ -135,7 +135,8 @@ public:
     enum { k_box = 0,
                 k_box_document=0, k_box_doc_page, k_box_doc_page_content,
                 k_box_inline, k_box_link, k_box_paragraph,
-                k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
+                k_box_score_page, k_box_slice, k_box_slice_instr,
+                k_box_slice_staff, k_box_system,
                 k_box_control, k_box_table, k_box_table_rows,
            k_shape,
                 k_shape_accidentals, k_shape_accidental_sign,
@@ -181,6 +182,7 @@ public:
     inline bool is_box_link() { return m_objtype == k_box_link; }
     inline bool is_box_slice() { return m_objtype == k_box_slice; }
     inline bool is_box_slice_instr() { return m_objtype == k_box_slice_instr; }
+    inline bool is_box_slice_staff() { return m_objtype == k_box_slice_staff; }
     inline bool is_box_system() { return m_objtype == k_box_system; }
     inline bool is_box_table_rows() { return m_objtype == k_box_table_rows; }
 
@@ -402,7 +404,7 @@ public:
 
     //content size
     //old semantic, based on score margins
-    inline LUnits get_content_width_old() { return get_width() - m_uLeftMargin - m_uRightMargin; }
+    inline LUnits get_usable_width() { return get_width() - m_uLeftMargin - m_uRightMargin; }
     //new semantic, based on style
     LUnits get_content_top();
     LUnits get_content_left();

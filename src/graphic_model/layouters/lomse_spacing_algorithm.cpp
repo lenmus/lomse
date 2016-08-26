@@ -46,6 +46,7 @@
 namespace lomse
 {
 
+
 //=====================================================================================
 //SpacingAlgorithm implementation
 //=====================================================================================
@@ -101,13 +102,12 @@ public:
     virtual ~ColumnData();
 
 
-    inline void set_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
+    inline void use_this_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
     inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
     void save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
                       ColStaffObjsEntry* pKeyEntry);
 
     //access to info
-    bool column_has_barline_at_end();
     inline bool has_system_break() { return m_fHasSystemBreak; }
     inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
     inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
@@ -209,15 +209,21 @@ void SpAlgColumn::set_slice_width(int iCol, LUnits width)
 }
 
 //---------------------------------------------------------------------------------------
+void SpAlgColumn::create_boxes_for_column(int iCol, LUnits left, LUnits top)
+{
+    m_pColsBuilder->create_boxes_for_column(iCol, left, top);
+}
+
+//---------------------------------------------------------------------------------------
 void SpAlgColumn::set_slice_final_position(int iCol, LUnits left, LUnits top)
 {
     m_colsData[iCol]->set_slice_final_position(left, top);
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgColumn::set_slice_box(int iCol, GmoBoxSlice* pBoxSlice)
+void SpAlgColumn::use_this_slice_box(int iCol, GmoBoxSlice* pBoxSlice)
 {
-    m_colsData[iCol]->set_slice_box(pBoxSlice);
+    m_colsData[iCol]->use_this_slice_box(pBoxSlice);
 }
 
 //---------------------------------------------------------------------------------------
@@ -326,7 +332,6 @@ void ColumnsBuilder::create_columns()
         m_iColumn++;
         prepare_for_new_column();
         m_colsData.push_back( LOMSE_NEW ColumnData(m_pScoreMeter, m_pSpAlgorithm) );
-        create_column_boxes();
         find_and_save_context_info_for_this_column();
         collect_content_for_this_column();
     }
@@ -493,21 +498,23 @@ void ColumnsBuilder::determine_staves_vertical_position()
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnsBuilder::create_column_boxes()
+void ColumnsBuilder::create_boxes_for_column(int iCol, LUnits xLeft, LUnits yTop)
 {
-    GmoBoxSlice* pSlice = create_slice_box();
+    GmoBoxSlice* pSlice = LOMSE_NEW GmoBoxSlice(iCol, m_pScore);
+    pSlice->set_left(xLeft);
+    pSlice->set_top(yTop);
+
+    m_pSpAlgorithm->use_this_slice_box(iCol, pSlice);
 
     //create instrument slice boxes
     int numInstrs = m_pScore->get_num_instruments();
 
-    LUnits yTop = pSlice->get_top();
+    //LUnits yTop = pSlice->get_top();
     for (int iInstr = 0; iInstr < numInstrs; iInstr++)
     {
-        m_pagePos.x = pSlice->get_left();    //align start of all staves
-
         //create slice instr box
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
-        GmoBoxSliceInstr* pCurBSI = m_pSpAlgorithm->create_slice_instr(m_iColumn, pInstr, yTop);
+        GmoBoxSliceInstr* pCurBSI = m_pSpAlgorithm->create_slice_instr(iCol, pInstr, yTop);
 
         //set box height
         LUnits height = m_SliceInstrHeights[iInstr];
@@ -525,10 +532,9 @@ void ColumnsBuilder::create_column_boxes()
         yTop += height;
         pCurBSI->set_height(height);
     }
-    m_pagePos.y = yTop;
 
     //set slice and system height
-    LUnits uTotalHeight = m_pagePos.y - pSlice->get_top();
+    LUnits uTotalHeight = yTop - pSlice->get_top();
     pSlice->set_height(uTotalHeight);
 }
 
@@ -539,7 +545,7 @@ GmoBoxSlice* ColumnsBuilder::create_slice_box()
     pSlice->set_left(0.0f);
     pSlice->set_top(0.0f);
 
-    m_pSpAlgorithm->set_slice_box(m_iColumn, pSlice);
+    m_pSpAlgorithm->use_this_slice_box(m_iColumn, pSlice);
 
     return pSlice;
 }

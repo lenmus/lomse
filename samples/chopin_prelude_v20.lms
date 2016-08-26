@@ -28,7 +28,6 @@
         (text "Largo" (style "Notations")(dx -20)(dy -45))
         (clef F4 p1)
         (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q (slur 1 start)))  // (bezier (ctrol1-y -50)(ctrol2-x -25)(start-y -20)))))
-        (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q))
         (chord (n a3 q)(n c4 q)(n e4 q)(n a4 q))
         (chord (n g3 q)(n =b3 q))
         (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q (slur 1 stop)))
@@ -136,7 +135,7 @@
         //second voice
         (goFwd h v2)
         (n g4 e. v2 (beam 7 +))(n f4 s v2 (beam 7 -b))
-        
+
         // left hand
         (chord (n e2 q v3 p2)(n e3 q))
         (chord (n f2 q)(n f3 q))

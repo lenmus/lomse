@@ -3789,6 +3789,7 @@ public:
     bool is_bool_option(const string& name)
     {
         return (name == "StaffLines.StopAtFinalBarline")
+            || (name == "StaffLines.StopAtLastObject")
             || (name == "StaffLines.Hide")
             || (name == "Staff.DrawLeftBarline")
             || (name == "Score.FillPageWithEmptyStaves")

@@ -85,6 +85,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_pBoxSystem(NULL)
     , m_yMin(0.0f)
     , m_yMax(0.0f)
+    , m_barlinesInfo(0)
     , m_pSpAlgorithm(pSpAlgorithm)
 {
 }
@@ -121,14 +122,13 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     m_iLastCol = iLastCol;
     m_pagePos = pos;
 
-    reposition_staves(indent);
+    set_position_and_width_for_staves(indent);
     fill_current_system_with_columns();
+    collect_last_column_information();
     justify_current_system();
+    truncate_current_system(indent);
     build_system_timegrid();
     engrave_system_details(m_iSystem);
-
-    if (m_pScoreLyt->is_last_system() && m_pScoreLyt->m_fStopStaffLinesAtFinalBarline)
-        truncate_current_system(indent);
 
     engrave_instrument_details();
     add_instruments_info();
@@ -137,17 +137,18 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::reposition_staves(LUnits indent)
+void SystemLayouter::set_position_and_width_for_staves(LUnits indent)
 {
-    //For engraving staffobjs, staves where at arbitrary positions (0,0). Now, once
-    //the system box is engraved, the good positioning info. is transferred to
-    //instrument engravers, as reference for all coming steps.
+    //For engraving staffobjs it is necessary to know the staves position.
+    //Now, once the system box is created, instrument engravers will compute
+    //staves position, width and vertical distance between staves. The
+    //vertical distance is standard, based only on staves margins.
 
     UPoint org = m_pBoxSystem->get_origin();
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
 
-    m_pPartsEngraver->reposition_staves(indent, org, m_pBoxSystem);
+    m_pPartsEngraver->set_position_and_width_for_staves(indent, org, m_pBoxSystem);
 }
 
 //---------------------------------------------------------------------------------------
@@ -182,6 +183,13 @@ void SystemLayouter::fill_current_system_with_columns()
 }
 
 //---------------------------------------------------------------------------------------
+void SystemLayouter::collect_last_column_information()
+{
+    if (m_iLastCol > 0)
+        m_barlinesInfo = m_pSpAlgorithm->get_column_barlines_information(m_iLastCol - 1);
+}
+
+//---------------------------------------------------------------------------------------
 void SystemLayouter::justify_current_system()
 {
     if (m_pScoreLyt->is_system_empty(m_iSystem))
@@ -194,12 +202,70 @@ void SystemLayouter::justify_current_system()
 }
 
 //---------------------------------------------------------------------------------------
+void SystemLayouter::truncate_current_system(LUnits indent)
+{
+    if (system_must_be_truncated())
+    {
+        GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(m_iLastCol-1);
+        LUnits width = pSlice->get_right() - m_pBoxSystem->get_left();
+        m_pBoxSystem->set_width(width);
+        width -= indent;
+        m_pPartsEngraver->set_staves_width( width );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool SystemLayouter::system_must_be_truncated()
+{
+    //Specifications (do not change):
+    //
+    //Staff lines truncation only occurs when system is not justified
+    //Staff lines always run until right marging unless requesting truncation:
+    //
+    //1. "StaffLines.StopAtFinalBarline = yes" truncates staff lines only
+    //   after final barline (barline of type final). This is the default
+    //   behaviour as it can be useful for score editors: staff lines will run
+    //   always to right margin until a barline of type final is entered.
+    //
+    //2. "StaffLines.StopAtLastObject = yes" truncates staff lines after
+    //   last staff object. Can be useful for creating samples (i.e. for ebooks).
+
+
+    //never truncate empty scores
+    if (m_pScoreMeter->is_empty_score())
+        return false;
+
+    //never truncate justified systems, crazy!
+    if (system_must_be_justified())
+        return false;
+
+    //only last system can be truncated
+    if (!m_pScoreLyt->is_last_system())
+        return false;
+
+    //last system must be truncated only in the following cases:
+
+    //Case 1. StopAtFinalBarline = yes" and system has final barline
+    if (m_pScoreLyt->m_fStopStaffLinesAtFinalBarline
+        && all_instr_have_final_barline())
+        return true;
+
+    //Case 2. StopAtLastObject = yes" and system has content
+    if (m_pScoreLyt->m_fStopStaffLinesAtLastObject
+        && !m_pScoreLyt->is_system_empty(m_iSystem))
+        return true;
+
+    //in other cases do not truncate
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
 void SystemLayouter::add_column_to_system(int iCol)
 {
     m_pagePos.x = determine_column_start_position(iCol);
     LUnits size = determine_column_size(iCol);
 
-    reposition_and_add_slice_box(iCol, m_pagePos.x, size);
+    create_boxes_for_column(iCol, m_pagePos.x, size);
     add_shapes_for_column(iCol, &m_shapesStorage);
 
     m_uFreeSpace -= size;
@@ -238,11 +304,10 @@ LUnits SystemLayouter::determine_column_size(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::reposition_and_add_slice_box(int iCol, LUnits pos,
-                                                  LUnits UNUSED(size))
+void SystemLayouter::create_boxes_for_column(int iCol, LUnits pos, LUnits UNUSED(size))
 {
     LUnits ySystem = m_pBoxSystem->get_top();
-    m_pSpAlgorithm->set_slice_final_position(iCol, pos, ySystem);
+    m_pSpAlgorithm->create_boxes_for_column(iCol, pos, ySystem);
 
     GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(iCol);
     m_pBoxSystem->add_child_box(pSlice);
@@ -329,6 +394,20 @@ void SystemLayouter::add_shapes_for_column(int iCol, ShapesStorage* pStorage)
 //---------------------------------------------------------------------------------------
 bool SystemLayouter::system_must_be_justified()
 {
+    //Specifications (do not change):
+    //
+    //1. Last system is, by default, not justified, and staff lines run
+    //   until right margin
+    //    - This emulates behaviour of writing scores with pen and paper
+    //    - This justifies default value for option "JustifyFinalBarline=no"
+    //
+    //2. Last system in finished scores is normally justified
+    //    - As default option is 'JustifyFinalBarline=no" the user must change
+    //      this option value when the score is finished.
+    //    - But if "JustifyFinalBarline=yes", last system will be justified only
+    //      if ends in barline.
+
+
     //if justification suppressed, for debugging, do not justify
     if (!m_libraryScope.justify_systems())
         return false;
@@ -339,13 +418,12 @@ bool SystemLayouter::system_must_be_justified()
 
     //Otherwise, final system needs justification except:
 
-    //1. when flag "JustifyFinalBarline" is not set
-    if (!m_pScoreLyt->m_fJustifyFinalBarline)
+    //1. flag"JustifyFinalBarline" is set but there is no final barline
+    if (!all_instr_have_final_barline())
         return false;
 
-    //3. flag"JustifyFinalBarline" is set but there is no final barline
-    int iLastCol = m_pScoreLyt->get_num_columns() - 1;
-    if (!m_pSpAlgorithm->column_has_barline_at_end(iLastCol))
+    //2. when flag "JustifyFinalBarline" is not set
+    if (!m_pScoreLyt->m_fJustifyFinalBarline)
         return false;
 
     return true;        //do justification
@@ -401,20 +479,6 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
             engrv.create_system_barline_shape(pCreator, xPos, yTop, yBottom, color);
         m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
 	}
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::truncate_current_system(LUnits indent)
-{
-    if (m_pScoreMeter->is_empty_score())
-        return;
-
-    if (!m_pSpAlgorithm->column_has_barline_at_end(m_iLastCol-1))
-        return;
-
-    GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(m_iLastCol-1);
-    m_pBoxSystem->set_width( pSlice->get_right() - m_pBoxSystem->get_left() );
-    reposition_staves(indent);
 }
 
 //---------------------------------------------------------------------------------------

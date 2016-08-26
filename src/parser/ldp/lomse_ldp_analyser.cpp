@@ -3085,8 +3085,15 @@ public:
             pInstrument = pScore->get_instrument(partId);
             if (pInstrument == NULL)
             {
-                error_msg("'partId' is not defined in <parts> element. Instrument ignored.");
-                return;
+                if (m_pAnalyser->is_instr_id_required())
+                {
+                    error_msg("'partId' is not defined in <parts> element. "
+                              "Instrument ignored.");
+                    return;
+                }
+                else
+                    pInstrument = static_cast<ImoInstrument*>(
+                                ImFactory::inject(k_imo_instrument, pDoc, get_node_id()) );
             }
             pInstrument->set_instr_id(partId);
         }
@@ -3111,6 +3118,14 @@ public:
 
         // [<staff>]*
         while (analyse_optional(k_staff, pInstrument));
+
+        //FIX: For adding space for lyrics
+        m_pAnalyser->m_pCurInstr = pInstrument;
+        if (!m_pAnalyser->is_instr_id_required())
+        {
+            pInstrument->reserve_space_for_lyrics(0, m_pAnalyser->m_extraMarginSpace);
+            m_pAnalyser->m_extraMarginSpace = 0.0f;
+        }
 
         // [<infoMIDI>]
         analyse_optional(k_infoMIDI, pInstrument);
@@ -3564,7 +3579,7 @@ public:
             // [<placement>]
             if (get_optional(k_label))
             {
-                int placement = get_placement(k_placement_above);
+                int placement = get_placement(k_placement_below);
                 m_pAnalyser->set_lyrics_placement(line, placement);
                 pImo->set_placement(placement);
                 fPlacement = true;
@@ -4383,6 +4398,7 @@ public:
     bool is_bool_option(const string& name)
     {
         return (name == "StaffLines.StopAtFinalBarline")
+            || (name == "StaffLines.StopAtLastObject")
             || (name == "StaffLines.Hide")
             || (name == "Staff.DrawLeftBarline")
             || (name == "Score.FillPageWithEmptyStaves")
@@ -6456,6 +6472,7 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(NULL)
     , m_fInstrIdRequired(false)
+    , m_extraMarginSpace(0.0f)
 {
 }
 
@@ -6549,8 +6566,9 @@ void LdpAnalyser::add_lyric(ImoNote* pNote, ImoLyric* pLyric)
         m_lyrics.push_back(NULL);
         i = int(m_lyrics.size()) - 1;
         m_lyricIndex[id] = i;
+
         //inform Instrument about the new lyrics line
-//    ImoInstrument* pInstr = get_instrument(m_curPartId);
+        add_marging_space_for_lyrics(pNote, pLyric);
     }
     else
         i = it->second;
@@ -6562,6 +6580,55 @@ void LdpAnalyser::add_lyric(ImoNote* pNote, ImoLyric* pLyric)
 
     //save current as new previous
     m_lyrics[i] = pLyric;
+}
+
+//---------------------------------------------------------------------------------------
+void LdpAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
+{
+    //inform Instrument about the new lyrics line for reserving space
+
+    int iStaff = pNote->get_staff();
+    bool fAbove = pLyric->get_placement() == k_placement_above;
+    ImoInstrument* pInstr = m_pCurInstr;
+    LUnits space = 400.0f;  //4mm per lyrics line
+    if (fAbove)
+    {
+        pInstr->reserve_space_for_lyrics(iStaff, space);
+        //TODO: Doesnt work for first staff in first instrument
+    }
+    else
+    {
+        //add space to top margin of next staff
+        int staves = pInstr->get_num_staves();
+        if (++iStaff == staves)
+        {
+            //add space to top margin of first staff in next instrument
+            //AWARE: If m_fInstrIdRequired==true all instruments are already created
+            if (m_fInstrIdRequired)
+            {
+                int iInstr = pInstr->get_instrument() + 1;
+                if (iInstr < m_pCurScore->get_num_instruments())
+                {
+                    pInstr = m_pCurScore->get_instrument(iInstr);
+                    pInstr->reserve_space_for_lyrics(0, space);
+                }
+                else
+                {
+                    ;   //TODO: Space for last staff in last instrument
+                }
+            }
+            else
+            {
+                //postpone until next instrument is created
+                m_extraMarginSpace += space;
+            }
+        }
+        else
+        {
+            //add space to top margin of next staff in this instrument
+            pInstr->reserve_space_for_lyrics(iStaff, space);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

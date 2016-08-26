@@ -157,8 +157,9 @@ protected:
     int m_iCurColumn;   //[0..n-1] current column. (-1 if no column yet created!)
 
     //renderization options and parameters
-    bool                m_fStopStaffLinesAtFinalBarline;
-    bool                m_fJustifyFinalBarline;
+    bool    m_fStopStaffLinesAtFinalBarline;
+    bool    m_fStopStaffLinesAtLastObject;
+    bool    m_fJustifyFinalBarline;
 
     //space values to use
     LUnits              m_uFirstSystemIndent;

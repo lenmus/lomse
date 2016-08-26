@@ -512,7 +512,7 @@ LUnits ScoreLayouter::distance_to_top_of_system(int iSystem, bool fFirstInPage)
 void ScoreLayouter::determine_staff_lines_horizontal_position(int iInstr)
 {
     LUnits indent = get_system_indent();
-    LUnits width = m_pCurBoxSystem->get_content_width_old();
+    LUnits width = m_pCurBoxSystem->get_usable_width();
     m_pPartsEngraver->set_staves_horizontal_position(iInstr, m_cursor.x, width, indent);
     m_cursor.x += indent;
 }
@@ -614,6 +614,9 @@ void ScoreLayouter::get_score_renderization_options()
 {
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.StopAtFinalBarline");
     m_fStopStaffLinesAtFinalBarline = pOpt->get_bool_value();
+
+    pOpt = m_pScore->get_option("StaffLines.StopAtLastObject");
+    m_fStopStaffLinesAtLastObject = (pOpt != NULL && pOpt->get_bool_value());
 
     pOpt = m_pScore->get_option("Score.JustifyFinalBarline");
     m_fJustifyFinalBarline = (pOpt != NULL && pOpt->get_bool_value());
@@ -1363,13 +1366,17 @@ void LinesBreakerOptimal::initialize_entries_table()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::compute_optimal_break_sequence()
 {
+    bool dbgTrace = true;
+
     for (int i=0; i < m_numCols; ++i)
     {
-
-//        dbgLogger << "Breaks i loop. "
-//                  << "Entry " << i << ": prev = " << m_entries[i].predecessor
-//                  << ", penalty = " << m_entries[i].penalty
-//                  << ", system = " << m_entries[i].system << endl;
+        if (dbgTrace)
+        {
+            dbgLogger << "Breaks i loop. "
+                      << "Entry " << i << ": prev = " << m_entries[i].predecessor
+                      << ", penalty = " << m_entries[i].penalty
+                      << ", system = " << m_entries[i].system << endl;
+        }
 
         if (m_entries[i].penalty < LOMSE_INFINITE_PENALTY)
         {
@@ -1377,10 +1384,13 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
             float prevPenalty = m_entries[i].penalty;
             for (int j=i+1; j <= m_numCols; ++j)
             {
-//                dbgLogger << "Breaks j loop. "
-//                          << "Entry " << j << ": prev = " << m_entries[j].predecessor
-//                          << ", penalty = " << m_entries[j].penalty
-//                          << ", system = " << m_entries[j].system << endl;
+                if (dbgTrace)
+                {
+                    dbgLogger << "Breaks j loop. "
+                              << "Entry " << j << ": prev = " << m_entries[j].predecessor
+                              << ", penalty = " << m_entries[j].penalty
+                              << ", system = " << m_entries[j].system << endl;
+                }
 
                 //try system formed by columns {ci,...,cj-1}
 
@@ -1392,17 +1402,30 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                     prevPenalty = 0.0f;
                 }
                 else
+                {
                     newPenalty = m_pSpAlgorithm->determine_penalty_for_line(iSystem, i, j-1);
+//                    if (newPenalty < 0.0f)
+//                    {
+//                        newPenalty = 0.0f;
+//                        prevPenalty = 0.0f;
+//                    }
+                }
 
-//                dbgLogger << "Penalty for (" << i << ", " << j << ")= "
-//                          << (prevPenalty + newPenalty) << ". Current= "
-//                          << m_entries[j].penalty << endl;
+                if (dbgTrace)
+                {
+                    dbgLogger << "Penalty for (" << i << ", " << j << ")= "
+                              << (prevPenalty + newPenalty) << ". Current= "
+                              << m_entries[j].penalty << endl;
+                }
 
                 if (fSystemBreak || m_pSpAlgorithm->is_better_option(prevPenalty, newPenalty,
                                                             m_entries[j].penalty, i, j-1))
                 {
-//                    dbgLogger << (prevPenalty + newPenalty) << " is better option than "
-//                              << m_entries[j].penalty << " for entry " << j << endl;
+                    if (dbgTrace)
+                    {
+                        dbgLogger << (prevPenalty + newPenalty) << " is better option than "
+                                  << m_entries[j].penalty << " for entry " << j << endl;
+                    }
 
                     m_entries[j].penalty = newPenalty + prevPenalty;
                     m_entries[j].predecessor = i;
@@ -1423,8 +1446,12 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::retrieve_breaks_sequence()
 {
-//    dbgLogger << "Breaks computed. Entries: ************************************" << endl;
-//    dump_entries(dbgLogger);
+    bool dbgTrace = true;
+    if (dbgTrace)
+    {
+        dbgLogger << "Breaks computed. Entries: ************************************" << endl;
+        dump_entries(dbgLogger);
+    }
 
     int i = m_numCols;
     while (i > 0 && m_entries[i].predecessor <= 0)
@@ -1436,8 +1463,11 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         m_breaks.push_back(0);      //AWARE: breaks size is the number of systems because
                                     //last break is implicit: last column
 
-//        dbgLogger << "Breaks table ************************************" << endl;
-//        dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
+        if (dbgTrace)
+        {
+            dbgLogger << "Breaks table ************************************" << endl;
+            dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
+        }
         return;
     }
 
@@ -1450,10 +1480,13 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         i = m_entries[i].predecessor;
         m_breaks[--numBreaks] = i;
     }
-//    dbgLogger << "Breaks table ************************************" << endl;
-//    vector<int>::iterator it=m_breaks.begin();
-//    for (++it; it != m_breaks.end(); ++it)
-//        dbgLogger << "break at column " << *it << endl;
+    if (dbgTrace)
+    {
+        dbgLogger << "Breaks table ************************************" << endl;
+        vector<int>::iterator it=m_breaks.begin();
+        for (++it; it != m_breaks.end(); ++it)
+            dbgLogger << "break at column " << *it << endl;
+    }
 }
 
 //---------------------------------------------------------------------------------------

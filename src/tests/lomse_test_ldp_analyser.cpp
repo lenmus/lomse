@@ -3773,14 +3773,22 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(n c4 e (lyric \"De\"))");
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric \"De\"))"
+            ")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != NULL );
         CHECK( pNote->get_num_attachments() == 1 );
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );

@@ -35,6 +35,8 @@
 #include "lomse_score_enums.h"
 #include "lomse_logger.h"
 #include "lomse_injectors.h"
+#include "lomse_spacing_algorithm.h"
+
 #include <list>
 #include <vector>
 using namespace std;
@@ -60,20 +62,12 @@ class GmoBoxSliceInstr;
 class GmoBoxSlice;
 class ScoreMeter;
 class ShapesStorage;
-class ColStaffObjsEntry;
 class InstrumentEngraver;
 class ShapesCreator;
 class PartsEngraver;
 class ScoreLayouter;
 class SystemLayouter;
 class ColumnStorage;
-class MusicLine;
-class LineEntry;
-class ColumnResizer;
-class LineResizer;
-class LineSpacer;
-class TimeGridTable;
-class TimeGridLineExplorer;
 class SpacingAlgorithm;
 
 
@@ -103,6 +97,9 @@ protected:
     UPoint m_pagePos;
     bool m_fFirstColumnInSystem;
 
+    //collected information
+    int m_barlinesInfo;     //info about barlines at end of this system
+
     SpacingAlgorithm* m_pSpAlgorithm;
 
 public:
@@ -124,21 +121,30 @@ public:
     inline GmoBoxSystem* get_box_system() { return m_pBoxSystem; }
     inline LUnits get_y_min() { return m_yMin; }
     inline LUnits get_y_max() { return m_yMax; }
+    inline bool all_instr_have_barline() {
+        return m_barlinesInfo & k_all_instr_have_barline;
+    }
+    inline bool some_instr_have_barline() {
+        return m_barlinesInfo & k_some_instr_have_barline;
+    }
+    inline bool all_instr_have_final_barline() {
+        return m_barlinesInfo & k_all_instr_have_final_barline;
+    }
 
 protected:
-    void reposition_staves(LUnits indent);
+    void set_position_and_width_for_staves(LUnits indent);
     void fill_current_system_with_columns();
+    void collect_last_column_information();
     void justify_current_system();
     void build_system_timegrid();
     void engrave_instrument_details();
     void truncate_current_system(LUnits indent);
-
     void add_column_to_system(int iCol);
     void add_shapes_for_column(int iCol, ShapesStorage* pStorage);
     bool system_must_be_justified();
+    bool system_must_be_truncated();
     void add_initial_line_joining_all_staves_in_system();
     void reposition_slices_and_staffobjs();
-//    LUnits redistribute_space(int iCol, LUnits uNewStart);
     void redistribute_free_space();
     void engrave_system_details(int iSystem);
     void add_instruments_info();
@@ -147,7 +153,7 @@ protected:
     LUnits engrave_prolog(int iInstr);
     LUnits determine_column_start_position(int iCol);
     LUnits determine_column_size(int iCol);
-    void reposition_and_add_slice_box(int iCol, LUnits pos, LUnits size);
+    void create_boxes_for_column(int iCol, LUnits pos, LUnits size);
 
     void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                   int iInstr, int iStaff, int iSystem,

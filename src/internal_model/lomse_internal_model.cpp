@@ -2200,6 +2200,13 @@ LUnits ImoInstrument::tenths_to_logical(Tenths value, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::reserve_space_for_lyrics(int iStaff, LUnits space)
+{
+    ImoStaffInfo* pInfo = get_staff(iStaff);
+    pInfo->add_space_for_lyrics(space);
+}
+
+//---------------------------------------------------------------------------------------
 // Instrument API
 //---------------------------------------------------------------------------------------
 ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
@@ -2709,6 +2716,7 @@ static const BoolOption m_BoolOptions[] =
 {
     {"Score.FillPageWithEmptyStaves", false },
     {"StaffLines.StopAtFinalBarline", true },
+    {"StaffLines.StopAtLastObject", false },
     {"Score.JustifyFinalBarline", false },
     {"StaffLines.Hide", false },
     {"Staff.DrawLeftBarline", true },

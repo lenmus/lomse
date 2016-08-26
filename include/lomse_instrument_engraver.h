@@ -104,7 +104,8 @@ public:
 
     //staves position
     void set_staves_horizontal_position(int iInstr, LUnits x, LUnits width, LUnits indent);
-    void reposition_staves(LUnits indent, UPoint org, GmoBoxSystem* pBox);
+    void set_position_and_width_for_staves(LUnits indent, UPoint org, GmoBoxSystem* pBox);
+    void set_staves_width(LUnits width);
 
     //info about instruments
     LUnits get_staff_top_position_for(ImoInstrument* pInstr);
@@ -170,6 +171,7 @@ public:
     void set_staves_horizontal_position(LUnits x, LUnits width, LUnits indent);
     LUnits set_staves_vertical_position(LUnits y);
     inline void set_slice_instr_origin(UPoint org) { m_org = org; }
+    inline void set_staves_width(LUnits width) { m_stavesWidth = width; }
 
     //indents
     void measure_name_and_bracket();

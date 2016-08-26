@@ -205,7 +205,12 @@ protected:
     ImoNote* m_pLastNote;
 
     //other
-    bool        m_fInstrIdRequired;     //Id required in instruments
+    bool    m_fInstrIdRequired;     //Id required in instruments
+
+    //FIX: for lyrics space
+    friend class InstrumentAnalyser;
+    ImoInstrument*  m_pCurInstr;    //current instrument being analysed
+    LUnits  m_extraMarginSpace;     //extra margin for next instrument
 
 public:
     LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc);
@@ -302,10 +307,10 @@ public:
     static bool ldp_pitch_to_components(const string& pitch, int *step, int* octave,
                                         EAccidentals* accidentals);
 
-
 protected:
     ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
     void delete_relation_builders();
+    void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 
     //auxiliary
     bool to_integer(const string& text, int* pResult);

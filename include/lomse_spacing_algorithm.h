@@ -62,6 +62,16 @@ class GmoShape;
 class ColumnData;
 
 //---------------------------------------------------------------------------------------
+// Barlines at the end of a column
+enum EColumnBarlinesInfo
+{
+    k_all_instr_have_barline        = 0x01,
+    k_some_instr_have_barline       = 0x02,
+    k_all_instr_have_final_barline  = 0x04,
+};
+
+
+//---------------------------------------------------------------------------------------
 // SpacingAlgorithm
 // Abstract class providing the public interface for any spacing algorithm.
 // The idea is to facilitate testing different algorithms without having to
@@ -122,8 +132,8 @@ public:
     //information about a column
     virtual bool is_empty_column(int iCol) = 0;
     virtual LUnits get_column_width(int iCol) = 0;
-    virtual bool column_has_barline_at_end(int iCol) = 0;
     virtual bool has_system_break(int iCol) = 0;
+    virtual int get_column_barlines_information(int iCol) = 0;
 
     //boxes and shapes management
     virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
@@ -132,9 +142,10 @@ public:
     virtual void delete_shapes(int iCol) = 0;
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr) = 0;
     virtual void set_slice_final_position(int iCol, LUnits left, LUnits top) = 0;
+    virtual void create_boxes_for_column(int iCol, LUnits left, LUnits top)=0;
     virtual void delete_box_and_shapes(int iCol) = 0;
     ///store slice box for column iCol and access it
-    virtual void set_slice_box(int iCol, GmoBoxSlice* pBoxSlice) = 0;
+    virtual void use_this_slice_box(int iCol, GmoBoxSlice* pBoxSlice) = 0;
     virtual GmoBoxSlice* get_slice_box(int iCol) = 0;
 
     //methods to compute results
@@ -188,9 +199,10 @@ public:
     virtual void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage);
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr);
     virtual void set_slice_final_position(int iCol, LUnits left, LUnits top);
+    virtual void create_boxes_for_column(int iCol, LUnits left, LUnits top);
     LUnits get_staves_height();
     ///store slice box for column iCol and access it
-    virtual void set_slice_box(int iCol, GmoBoxSlice* pBoxSlice);
+    virtual void use_this_slice_box(int iCol, GmoBoxSlice* pBoxSlice);
     virtual GmoBoxSlice* get_slice_box(int iCol);
     virtual bool has_system_break(int iCol);
     virtual void delete_box_and_shapes(int iCol);
@@ -209,7 +221,7 @@ public:
 
     //information about a column
     virtual LUnits get_column_width(int iCol) = 0;
-    virtual bool column_has_barline_at_end(int iCol) = 0;
+    virtual int get_column_barlines_information(int iCol) = 0;
 
     //methods to compute results
     virtual TimeGridTable* create_time_grid_table_for_column(int iCol) = 0;
@@ -334,13 +346,12 @@ public:
     //managing shapes
     void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage);
     void delete_shapes(int iCol);
-
+    void create_boxes_for_column(int iCol, LUnits xLeft, LUnits yTop);
 
 protected:
     void determine_staves_vertical_position();
 
     void prepare_for_new_column();
-    void create_column_boxes();
     void collect_content_for_this_column();
     void layout_column();
 

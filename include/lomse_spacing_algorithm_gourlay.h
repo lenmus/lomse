@@ -124,7 +124,7 @@ public:
     //information about a column
     bool is_empty_column(int iCol);
     LUnits get_column_width(int iCol);
-    bool column_has_barline_at_end(int iCol);
+    virtual int get_column_barlines_information(int iCol);
 
     //methods to compute results
     TimeGridTable* create_time_grid_table_for_column(int iCol);
@@ -169,11 +169,12 @@ public:
     TimeSlice* m_pFirstSlice;            //first slice in natural order
     vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
 
-    float   m_slope;            //slope of aproximated sff() for this column
+    float   m_slope;            //slope of approximated sff() for this column
     LUnits  m_xFixed;           //fixed spacing for this column
     LUnits  m_colWidth;         //current col. width after having applying force
     LUnits  m_colMinWidth;      //minimum width (force 0)
-    bool    m_fBarlineAtEnd;    //true if last slice is barline
+    int     m_barlinesInfo;     //information about barlines in last slice of this column
+
 
     //for creating TimeGridTable
     LUnits  m_xPos;             //position for this column
@@ -204,7 +205,17 @@ public:
     //other information
     inline int num_slices() { return int(m_orderedSlices.size()); }
     bool is_empty_column();
-    inline bool has_barline_at_end() { return m_fBarlineAtEnd; }
+    inline int get_barlines_information() { return m_barlinesInfo; }
+    inline bool all_instr_have_barline() {
+        return m_barlinesInfo & k_all_instr_have_barline;
+    }
+    inline bool some_instr_have_barline() {
+        return m_barlinesInfo & k_some_instr_have_barline;
+    }
+    inline bool all_instr_have_final_barline() {
+        return m_barlinesInfo & k_all_instr_have_final_barline;
+    }
+    void collect_barlines_information(int numInstruments);
 
     //managing shapes
     void add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
@@ -336,6 +347,9 @@ public:
                                                 LUnits yPos, LUnits* yMin, LUnits* yMax);
     //access to information
     inline LUnits get_width() { return m_width; }
+
+    //other information (barline slice)
+    int collect_barlines_information(int numInstruments);
 
     //debug
     void dump(ostream& ss);
