@@ -1,6 +1,7 @@
 (score 
    (vers 2.0) 
-   (opt StaffLines.StopAtFinalBarline false)
+   (opt Score.JustifyLastSystem 0)
+   (opt StaffLines.Truncate 2)
    (instrument
       (musicData
         (clef G p1)
@@ -11,6 +12,7 @@
         (n e4 e. g+)
         (n d4 s g-)
         (n e4 q)
+        (barline)
       )
    )
 )

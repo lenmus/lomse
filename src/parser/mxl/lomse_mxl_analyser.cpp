@@ -4239,9 +4239,9 @@ protected:
         add_to_model(pOpt);
 
         pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, pDoc) );
-        pOpt->set_name("Score.JustifyFinalBarline");
-        pOpt->set_bool_value(true);
-        pOpt->set_type(ImoOptionInfo::k_boolean);
+        pOpt->set_name("Score.JustifyLastSystem");
+        pOpt->set_long_value(3);    //justify it in any case
+        pOpt->set_type(ImoOptionInfo::k_number_long);
         add_to_model(pOpt);
     }
 

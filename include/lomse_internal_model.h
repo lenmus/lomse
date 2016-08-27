@@ -3479,7 +3479,7 @@ protected:
     friend class ImFactory;
     ImoOptionInfo()
         : ImoSimpleObj(k_imo_option), m_type(k_boolean), m_name("")
-        , m_fValue(false) {}
+        , m_fValue(false), m_nValue(0L), m_rValue(0.0f)  {}
 
 public:
     virtual ~ImoOptionInfo() {}

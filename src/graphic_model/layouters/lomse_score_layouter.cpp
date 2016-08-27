@@ -613,14 +613,11 @@ void ScoreLayouter::create_parts_engraver()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::get_score_renderization_options()
 {
-    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.StopAtFinalBarline");
-    m_fStopStaffLinesAtFinalBarline = pOpt->get_bool_value();
+    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Truncate");
+    m_truncateStaffLines = pOpt->get_long_value();
 
-    pOpt = m_pScore->get_option("StaffLines.StopAtLastObject");
-    m_fStopStaffLinesAtLastObject = (pOpt != NULL && pOpt->get_bool_value());
-
-    pOpt = m_pScore->get_option("Score.JustifyFinalBarline");
-    m_fJustifyFinalBarline = (pOpt != NULL && pOpt->get_bool_value());
+    pOpt = m_pScore->get_option("Score.JustifyLastSystem");
+    m_justifyLastSystem = pOpt->get_long_value();
 }
 
 //---------------------------------------------------------------------------------------
@@ -666,7 +663,7 @@ void ScoreLayouter::delete_not_used_objects()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::fill_page_with_empty_systems_if_required()
 {
-    if (!m_fStopStaffLinesAtFinalBarline)
+    if (!m_pCurSysLyt->system_must_be_truncated())
     {
         ImoOptionInfo* pOpt = m_pScore->get_option("Score.FillPageWithEmptyStaves");
         bool fFillPage = pOpt->get_bool_value();
@@ -836,16 +833,16 @@ bool ColumnBreaker::is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime)
         //not suitable if breaks a beam or a tie
         for (int i=0; i < m_numLines; ++i)
         {
-            fBreak &= !m_beamed[i];
-            fBreak &= !m_tied[i];
+            fBreak &= ~m_beamed[i];
+            fBreak &= ~m_tied[i];
         }
 
         //not suitable if is tied to prev note
         if (pSO->is_note())
-            fBreak &= !static_cast<ImoNote*>(pSO)->is_tied_prev();
+            fBreak &= ~static_cast<ImoNote*>(pSO)->is_tied_prev();
 
         //not suitable if next note is within a previous voice duration
-        fBreak &= !is_lower_time(rTime, m_targetBreakTime);
+        fBreak &= ~is_lower_time(rTime, m_targetBreakTime);
 
         return fBreak;
     }

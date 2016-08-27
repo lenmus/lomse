@@ -1,6 +1,7 @@
 (score 
    (vers 2.0) 
-   (opt Score.JustifyFinalBarline true )
+   (opt Score.JustifyLastSystem 0)
+   (opt StaffLines.Truncate 2)
    (instrument
       (musicData
         (clef G p1)

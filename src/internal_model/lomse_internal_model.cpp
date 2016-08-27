@@ -2715,11 +2715,8 @@ LongOption;
 static const BoolOption m_BoolOptions[] =
 {
     {"Score.FillPageWithEmptyStaves", false },
-    {"StaffLines.StopAtFinalBarline", true },
-    {"StaffLines.StopAtLastObject", false },
-    {"Score.JustifyFinalBarline", false },
-    {"StaffLines.Hide", false },
     {"Staff.DrawLeftBarline", true },
+    {"StaffLines.Hide", false },
 };
 
 //static StringOption m_StringOptions[] = {};
@@ -2737,9 +2734,11 @@ static const FloatOption m_FloatOptions[] =
 //---------------------------------------------------------------------------------------
 static const LongOption m_LongOptions[] =
 {
-    {"Staff.UpperLegerLines.Displacement", 0L },
     {"Render.SpacingMethod", long(k_spacing_proportional) },
-    {"Render.SpacingValue", 35L },       // 15 tenths (1.5 lines) [add 20 to desired value]
+    {"Render.SpacingValue", 35L },      //15 tenths (1.5 lines) [add 20 to desired value]
+    {"Score.JustifyLastSystem", 0L},    //never justify last system
+    {"Staff.UpperLegerLines.Displacement", 0L },
+    {"StaffLines.Truncate", 1L},        //only if last object is barline of type final
 };
 
 //---------------------------------------------------------------------------------------

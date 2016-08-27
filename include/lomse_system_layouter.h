@@ -130,6 +130,7 @@ public:
     inline bool all_instr_have_final_barline() {
         return m_barlinesInfo & k_all_instr_have_final_barline;
     }
+    bool system_must_be_truncated();
 
 protected:
     void set_position_and_width_for_staves(LUnits indent);
@@ -142,7 +143,6 @@ protected:
     void add_column_to_system(int iCol);
     void add_shapes_for_column(int iCol, ShapesStorage* pStorage);
     bool system_must_be_justified();
-    bool system_must_be_truncated();
     void add_initial_line_joining_all_staves_in_system();
     void reposition_slices_and_staffobjs();
     void redistribute_free_space();

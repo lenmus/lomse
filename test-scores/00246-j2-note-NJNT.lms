@@ -1,0 +1,16 @@
+(score 
+   (vers 2.0) 
+   (opt Score.JustifyLastSystem 2)
+   (instrument
+      (musicData
+        (clef G p1)
+        (key c)
+        (time 4 4)
+        (n g4 q p1)
+        (n a4 q)
+        (n e4 e. g+)
+        (n d4 s g-)
+        (n e4 q)
+      )
+   )
+)

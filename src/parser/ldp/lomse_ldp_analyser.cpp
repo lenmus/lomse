@@ -4375,6 +4375,7 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
                                         ImFactory::inject(k_imo_option, pDoc) );
+
         pOpt->set_name(name);
 
         bool fOk = false;
@@ -4387,6 +4388,30 @@ public:
         else if (is_string_option(name))
             fOk = set_string_value(pOpt);
 
+        //backwards compatibility for deprecated options
+        if (fOk)
+        {
+            if (name == "Score.JustifyFinalBarline")
+            {
+                pOpt->set_name("Score.JustifyLastSystem");
+                pOpt->set_type(ImoOptionInfo::k_number_long);
+                if (pOpt->get_bool_value())
+                    pOpt->set_long_value(1L);   //yes = 1-only if ends in barline
+                else
+                    pOpt->set_long_value(0L);   //no = 0-never justify last system
+            }
+            else if (name == "StaffLines.StopAtFinalBarline")
+            {
+                pOpt->set_name("StaffLines.Truncate");
+                pOpt->set_type(ImoOptionInfo::k_number_long);
+                if (pOpt->get_bool_value())
+                    pOpt->set_long_value(1L);   //yes = 1-only barline of type final
+                else
+                    pOpt->set_long_value(0L);   //no = 0-never
+            }
+        }
+
+
         if (fOk)
             add_to_model(pOpt);
         else
@@ -4397,19 +4422,20 @@ public:
 
     bool is_bool_option(const string& name)
     {
-        return (name == "StaffLines.StopAtFinalBarline")
-            || (name == "StaffLines.StopAtLastObject")
+        return (name == "Score.FillPageWithEmptyStaves")
+            || (name == "Score.JustifyFinalBarline")
+            || (name == "StaffLines.StopAtFinalBarline")    //deprecated 2.1
             || (name == "StaffLines.Hide")
-            || (name == "Staff.DrawLeftBarline")
-            || (name == "Score.FillPageWithEmptyStaves")
-            || (name == "Score.JustifyFinalBarline");
+            || (name == "Staff.DrawLeftBarline");
     }
 
     bool is_number_long_option(const string& name)
     {
-        return (name == "Staff.UpperLegerLines.Displacement")
-                 || (name == "Render.SpacingMethod")
-                 || (name == "Render.SpacingValue");
+        return (name == "Render.SpacingMethod")
+            || (name == "Render.SpacingValue")
+            || (name == "Score.JustifyLastSystem")
+            || (name == "Staff.UpperLegerLines.Displacement")
+            || (name == "StaffLines.Truncate");
     }
 
     bool is_number_float_option(const string& name)

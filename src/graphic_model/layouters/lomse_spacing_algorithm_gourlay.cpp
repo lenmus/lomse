@@ -935,12 +935,12 @@ int TimeSlice::collect_barlines_information(int numInstruments)
     for (int i=0; i < numInstruments; ++i)
     {
         if (barlines[i] == -1)
-            info &= !(k_all_instr_have_barline | k_all_instr_have_final_barline);
+            info &= ~(k_all_instr_have_barline | k_all_instr_have_final_barline);
         else
         {
             info |= k_some_instr_have_barline;
             if (!(barlines[i] == k_barline_end || barlines[i] == k_barline_end_repetition))
-                info &= !k_all_instr_have_final_barline;
+                info &= ~k_all_instr_have_final_barline;
         }
     }
     return info;

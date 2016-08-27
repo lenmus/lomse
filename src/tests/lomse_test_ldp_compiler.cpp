@@ -78,7 +78,7 @@ SUITE(LdpCompilerTest)
     {
         Document doc(m_libraryScope);
         LdpCompiler compiler(m_libraryScope, &doc);
-        InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))))" );
+        InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData )))))" );
         CHECK( compiler.get_file_locator() == "string:" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
         CHECK( pDoc->get_version() == "0.0" );

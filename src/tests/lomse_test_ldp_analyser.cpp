@@ -4649,7 +4649,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(opt StaffLines.StopAtFinalBarline true)");
+        parser.parse_text("(opt StaffLines.Hide true)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4659,7 +4659,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_option() == true );
         ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "StaffLines.StopAtFinalBarline" );
+        CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 
@@ -4673,8 +4673,8 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Invalid value for option 'StaffLines.StopAtFinalBarline'. Option ignored." << endl;
-        parser.parse_text("(opt StaffLines.StopAtFinalBarline perhaps)");
+        expected << "Line 0. Invalid value for option 'StaffLines.Hide'. Option ignored." << endl;
+        parser.parse_text("(opt StaffLines.Hide perhaps)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4817,7 +4817,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(score (vers 1.6)(opt StaffLines.StopAtFinalBarline true)(instrument (musicData)))");
+        parser.parse_text("(score (vers 1.6)(opt StaffLines.Hide true)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4827,9 +4827,9 @@ SUITE(LdpAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore != NULL );
         CHECK( pScore->has_options() == true );
-        ImoOptionInfo* pOpt = pScore->get_option("StaffLines.StopAtFinalBarline");
+        ImoOptionInfo* pOpt = pScore->get_option("StaffLines.Hide");
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "StaffLines.StopAtFinalBarline" );
+        CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 

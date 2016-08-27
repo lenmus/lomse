@@ -220,15 +220,19 @@ bool SystemLayouter::system_must_be_truncated()
     //Specifications (do not change):
     //
     //Staff lines truncation only can occur when system is not justified.
-    //Staff lines always run until right margin unless requesting truncation:
+    //Staff lines always run until right margin unless requesting truncation.
+    //Option "StaffLines.Truncate" defines the behaviour:
+    //    0 - never truncate. Staff lines will always run to right margin.
+    //    1 - truncate only if last object is barline of type final.
+    //    2 - truncate only if last object is barline (any type).
+    //    3 - truncate always after last object.
     //
-    //1. "StaffLines.StopAtFinalBarline = yes" truncates staff lines only
-    //   after final barline (barline of type final). This is the default
-    //   behaviour as it can be useful for score editors: staff lines will run
-    //   always to right margin until a barline of type final is entered.
+    //Option 1 is the default behaviour and it can be useful for score
+    //editors: staff lines will run always to right margin until a barline
+    //of type final is entered.
     //
-    //2. "StaffLines.StopAtLastObject = yes" truncates staff lines after
-    //   last staff object. Can be useful for creating samples (i.e. for ebooks).
+    //Option 3 truncates staff lines after last staff object. It can be
+    //useful for creating score samples (i.e. for ebooks).
 
 
     //never truncate empty scores
@@ -245,17 +249,19 @@ bool SystemLayouter::system_must_be_truncated()
 
     //last system must be truncated only in the following cases:
 
-    //Case 1. StopAtFinalBarline = yes" and system has final barline
-    if (m_pScoreLyt->m_fStopStaffLinesAtFinalBarline
-        && all_instr_have_final_barline())
-        return true;
+    //Opt 1: truncate only if last object is barline of type final
+    if (m_pScoreLyt->m_truncateStaffLines == 1)
+        return all_instr_have_final_barline();
 
-    //Case 2. StopAtLastObject = yes" and system has content
-    if (m_pScoreLyt->m_fStopStaffLinesAtLastObject
-        && !m_pScoreLyt->is_system_empty(m_iSystem))
-        return true;
+    //Opt 2: truncate only if last object is barline (any type)
+    if (m_pScoreLyt->m_truncateStaffLines == 2)
+        return all_instr_have_barline();
 
-    //in other cases do not truncate
+    //Opt 3: truncate always after last object
+    if (m_pScoreLyt->m_truncateStaffLines == 3)
+        return !m_pScoreLyt->is_system_empty(m_iSystem);
+
+    //in other cases (which ones?) do not truncate
     return false;
 }
 
@@ -396,16 +402,17 @@ bool SystemLayouter::system_must_be_justified()
 {
     //Specifications (do not change):
     //
-    //1. Last system is, by default, not justified, and staff lines run
-    //   until right margin
-    //    - This emulates behaviour of writing scores with pen and paper
-    //    - This justifies default value for option "JustifyFinalBarline=no"
+    //Justification of last system is controlled by option "Score.JustifyLastSystem",
+    //accepting the following values:
+    //    0 - never justify last system
+    //    1 - justify it only if ends in barline of type final
+    //    2 - justify it only if ends in barline of any type
+    //    3 - justify it in any case
     //
-    //2. Last system in finished scores is normally justified
-    //    - As default option is 'JustifyFinalBarline=no" the user must change
-    //      this option value when the score is finished.
-    //    - But if "JustifyFinalBarline=yes", last system will be justified only
-    //      if ends in final barline.
+    //Option 1 is the default value, and is convenient for score editors as
+    //never justifies the last system as it is being written and emulates
+    //the behaviour of writing scores with pen and paper. Once the score
+    //is finished, the user should change to option 3.
 
 
     //if justification suppressed, for debugging, do not justify
@@ -416,17 +423,22 @@ bool SystemLayouter::system_must_be_justified()
     if (m_uFreeSpace < 0.0f || !m_pScoreLyt->is_last_system())
         return true;
 
-    //Otherwise, final system needs justification except:
+    //Otherwise, the decision for final system depends on the justification option:
 
-    //1. flag"JustifyFinalBarline" is set but there is no final barline
-    if (!all_instr_have_final_barline())
+    //Opt. 0: never justify last system
+    if (m_pScoreLyt->m_justifyLastSystem == 0)
         return false;
 
-    //2. when flag "JustifyFinalBarline" is not set
-    if (!m_pScoreLyt->m_fJustifyFinalBarline)
-        return false;
+    //Opt. 1: justify it only if ends in barline of type final
+    if (m_pScoreLyt->m_justifyLastSystem == 1)
+        return all_instr_have_final_barline();
 
-    return true;        //do justification
+    //Opt. 2: justify it only if ends in barline of any type
+    if (m_pScoreLyt->m_justifyLastSystem == 2)
+        return all_instr_have_barline();
+
+    //Opt. 3: justify it in any case
+    return true;
 }
 
 //---------------------------------------------------------------------------------------

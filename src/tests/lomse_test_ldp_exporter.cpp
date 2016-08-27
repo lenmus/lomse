@@ -704,7 +704,7 @@ SUITE(LdpExporterTest)
         //opt
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content (score (vers 1.6)"
-            "(opt Render.SpacingValue 40)(opt StaffLines.StopAtFinalBarline false)"
+            "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument (musicData (clef G))))"
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -716,7 +716,7 @@ SUITE(LdpExporterTest)
         //cout << "\"" << source << "\"" << endl;
         string expected =
             "(score (vers 2.0)"
-            "(opt Render.SpacingValue 40)(opt StaffLines.StopAtFinalBarline false)"
+            "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument (staves 1)(musicData (clef G p1 ))))";
 
         CHECK( source == expected );
