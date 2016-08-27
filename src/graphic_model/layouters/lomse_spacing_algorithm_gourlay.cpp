@@ -547,13 +547,28 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //    line_width   is the desired width of for the line
     //    fopt  is a constant value set by the user (and dependent on personal taste).
 
+    bool fTrace = m_libraryScope.get_trace_level_for_lines_breaker()
+                  & k_trace_breaks_penalties;
+
     //force break when so required
     if (m_pScoreLyt->column_has_system_break(iLastCol))
+    {
+        if (fTrace)
+        {
+            dbgLogger << "Determine penalty: column has break. Penalty= 0" << endl;
+        }
         return 0.0f;
+    }
 
 //    //do not justify last system ==> no penalty for any combination for last system
 //    if (iLastCol == m_pScoreLyt->get_num_columns() - 1)
+//    {
+//        if (fTrace)
+//        {
+//            dbgLogger << "Determine penalty: do not justify last system. Penalty= -1" << endl;
+//        }
 //        return -1.0f;
+//    }
 
 
     LUnits lineWidth = m_pScoreLyt->get_target_size_for_system(iSystem);
@@ -578,13 +593,19 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //if minimum width is greater than required width, it is impossible to achieve
     //the requiered width. Return a too high penalty
     if (minWidth > lineWidth && iFirstCol != iLastCol)
+    {
+        if (fTrace)
+        {
+            dbgLogger << "Determine penalty: minimum width is greater than "
+                      << "required width. Penalty= 1000" << endl;
+        }
         return 1000.0f;
+    }
 
     //determine force to apply to get desired extent
     float F = (lineWidth - fixed) * c;
 
-    bool dbgTrace = false;
-    if (dbgTrace)
+    if (fTrace)
     {
         dbgLogger << "Determine penalty: lineWidth= " << lineWidth
                   << ", Force= " << F << ", sum= " << sum << ", c= " << c
@@ -594,6 +615,10 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
 
     //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
     float R = fabs(F - m_Fopt);
+
+    //do not accept shrinking
+    if (F < m_Fopt)
+        return 1000.0f;
 
     //increase penalty if requiring high shrink
     if (F < 0.7f * m_Fopt)
@@ -707,7 +732,7 @@ void TimeSlice::find_smallest_note_soundig_at(TimeUnits nextTime)
 
     if (m_type == TimeSlice::k_noterest)
     {
-        TimeUnits durLimit = nextTime - get_timepos();
+        TimeUnits durLimit = nextTime - get_timepos() + 0.1f;       //0.1 is margin
         m_minNoteNext = LOMSE_NO_DURATION;      //too high value
         ColStaffObjsEntry* pEntry = m_firstEntry;
         for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())
@@ -802,6 +827,7 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
     {
         case TimeSlice::k_barline:
             m_xLeft = k_EXCEPTIONAL_MIN_SPACE;
+            xPrev -= pMeter->tenths_to_logical_max(LOMSE_MIN_SPACE_BEFORE_BARLINE);
             break;
 
         case TimeSlice::k_noterest:

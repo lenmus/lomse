@@ -80,6 +80,16 @@ class CaretPositioner;
 class MusicGlyphs;
 
 //---------------------------------------------------------------------------------------
+// Trace levels for lines breaker algorithm
+enum ETraceLevelLinesBreaker
+{
+    k_trace_breaks_off          = 0x0001,
+    k_trace_breaks_table        = 0x0002,   //dump of final breaks table
+    k_trace_breaks_computation  = 0x0004,   //trace computation of breaks
+    k_trace_breaks_penalties    = 0x0008,   //trace penalties computation
+};
+
+//---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
 {
 protected:
@@ -97,15 +107,18 @@ protected:
     MusicGlyphs* m_pMusicGlyphs;
 
     //options
-    bool m_fJustifySystems;
-    bool m_fDumpColumnTables;
-    bool m_fDrawAnchors;
     bool m_fReplaceLocalMetronome;
-    bool m_fShowShapeBounds;
-    bool m_fUnitTests;
+
+    //debug options
+    bool m_fJustifySystems;         //if false, prevents systems justification
+    bool m_fDumpColumnTables;       //dump columns and slices data
+    bool m_fDrawAnchors;            //draw anchor objects (i.e. invisible shapes)
+    bool m_fShowShapeBounds;        //draw a box around each shape
+    bool m_fUnitTests;              //library is running for Unit Tests
+    int m_traceLinesBreaker;        //trace level for lines breaker algorithm
 
     //spacing algorithm
-    float m_gourlayOptForce;
+    float m_spacingOptForce;
     float m_spacingAlpha;
     float m_spacingDmin;
 
@@ -160,14 +173,14 @@ public:
     inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
 
     //Gourlay spacing algorithm parameters
-    inline float get_optimum_force() { return m_gourlayOptForce; }
-    inline void set_optimum_force(float force) { m_gourlayOptForce = force; }
+    inline float get_optimum_force() { return m_spacingOptForce; }
+    inline void set_optimum_force(float force) { m_spacingOptForce = force; }
     inline float get_spacing_alpha() { return m_spacingAlpha; }
     inline void set_spacing_alpha(float alpha) { m_spacingAlpha = alpha; }
     inline float get_spacing_dmin() { return m_spacingDmin; }
     inline void set_spacing_dmin(float dmin) { m_spacingDmin = dmin; }
 
-    //global options, mainly for debug
+    //global options, for debug and tests
     inline void set_justify_systems(bool value) { m_fJustifySystems = value; }
     inline bool justify_systems() { return m_fJustifySystems; }
     inline void set_dump_column_tables(bool value) { m_fDumpColumnTables = value; }
@@ -178,6 +191,11 @@ public:
     inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
     inline void set_unit_test(bool value) { m_fUnitTests = value; }
     inline bool is_unit_test() { return m_fUnitTests; }
+    inline void set_trace_level_for_lines_breaker(int level) {
+        m_traceLinesBreaker = level;
+    }
+    inline int get_trace_level_for_lines_breaker() { return m_traceLinesBreaker; }
+
 };
 
 //---------------------------------------------------------------------------------------

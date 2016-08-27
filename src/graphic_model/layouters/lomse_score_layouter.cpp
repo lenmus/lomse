@@ -402,7 +402,8 @@ void ScoreLayouter::decide_line_breaks()
 {
     if (get_num_columns() != 0)
     {
-        LinesBreakerOptimal breaker(this, m_pSpAlgorithm, m_breaks);
+        LinesBreakerOptimal breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
+//        LinesBreakerSimple breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
         breaker.decide_line_breaks();
         //breaker.dump_entries();
     }
@@ -1285,9 +1286,10 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
 // LinesBreakerSimple implementation
 //=======================================================================================
 LinesBreakerSimple::LinesBreakerSimple(ScoreLayouter* pScoreLyt,
+                                       LibraryScope& libScope,
                                        SpacingAlgorithm* pSpAlgorithm,
                                        std::vector<int>& breaks)
-    : LinesBreaker(pScoreLyt, pSpAlgorithm, breaks)
+    : LinesBreaker(pScoreLyt, libScope, pSpAlgorithm, breaks)
 {
 }
 
@@ -1326,9 +1328,10 @@ void LinesBreakerSimple::decide_line_breaks()
 //=======================================================================================
 
 LinesBreakerOptimal::LinesBreakerOptimal(ScoreLayouter* pScoreLyt,
+                                         LibraryScope& libScope,
                                          SpacingAlgorithm* pSpAlgorithm,
                                          std::vector<int>& breaks)
-    : LinesBreaker(pScoreLyt, pSpAlgorithm, breaks)
+    : LinesBreaker(pScoreLyt, libScope, pSpAlgorithm, breaks)
     , m_numCols(0)
     , m_fJustifyLastLine(false)
 {
@@ -1366,11 +1369,12 @@ void LinesBreakerOptimal::initialize_entries_table()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::compute_optimal_break_sequence()
 {
-    bool dbgTrace = true;
+    bool fTrace = m_libraryScope.get_trace_level_for_lines_breaker()
+                  & k_trace_breaks_computation;
 
     for (int i=0; i < m_numCols; ++i)
     {
-        if (dbgTrace)
+        if (fTrace)
         {
             dbgLogger << "Breaks i loop. "
                       << "Entry " << i << ": prev = " << m_entries[i].predecessor
@@ -1384,7 +1388,7 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
             float prevPenalty = m_entries[i].penalty;
             for (int j=i+1; j <= m_numCols; ++j)
             {
-                if (dbgTrace)
+                if (fTrace)
                 {
                     dbgLogger << "Breaks j loop. "
                               << "Entry " << j << ": prev = " << m_entries[j].predecessor
@@ -1404,14 +1408,14 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                 else
                 {
                     newPenalty = m_pSpAlgorithm->determine_penalty_for_line(iSystem, i, j-1);
-//                    if (newPenalty < 0.0f)
-//                    {
-//                        newPenalty = 0.0f;
-//                        prevPenalty = 0.0f;
-//                    }
+                    if (newPenalty < 0.0f)
+                    {
+                        newPenalty = 0.0f;
+                        prevPenalty = 0.0f;
+                    }
                 }
 
-                if (dbgTrace)
+                if (fTrace)
                 {
                     dbgLogger << "Penalty for (" << i << ", " << j << ")= "
                               << (prevPenalty + newPenalty) << ". Current= "
@@ -1421,7 +1425,7 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                 if (fSystemBreak || m_pSpAlgorithm->is_better_option(prevPenalty, newPenalty,
                                                             m_entries[j].penalty, i, j-1))
                 {
-                    if (dbgTrace)
+                    if (fTrace)
                     {
                         dbgLogger << (prevPenalty + newPenalty) << " is better option than "
                                   << m_entries[j].penalty << " for entry " << j << endl;
@@ -1446,8 +1450,9 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::retrieve_breaks_sequence()
 {
-    bool dbgTrace = true;
-    if (dbgTrace)
+    bool fTrace = m_libraryScope.get_trace_level_for_lines_breaker()
+                  & k_trace_breaks_table;
+    if (fTrace)
     {
         dbgLogger << "Breaks computed. Entries: ************************************" << endl;
         dump_entries(dbgLogger);
@@ -1463,10 +1468,11 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         m_breaks.push_back(0);      //AWARE: breaks size is the number of systems because
                                     //last break is implicit: last column
 
-        if (dbgTrace)
+        if (fTrace)
         {
             dbgLogger << "Breaks table ************************************" << endl;
-            dbgLogger << "No breaks, just one single system. breaks size= " << m_breaks.size() << endl;
+            dbgLogger << "No breaks, just one single system. breaks size= "
+                      << m_breaks.size() << endl;
         }
         return;
     }
@@ -1480,7 +1486,8 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
         i = m_entries[i].predecessor;
         m_breaks[--numBreaks] = i;
     }
-    if (dbgTrace)
+
+    if (fTrace)
     {
         dbgLogger << "Breaks table ************************************" << endl;
         vector<int>::iterator it=m_breaks.begin();

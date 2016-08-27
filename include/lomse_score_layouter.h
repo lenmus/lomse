@@ -371,13 +371,15 @@ class LinesBreaker
 {
 protected:
     ScoreLayouter* m_pScoreLyt;
+    LibraryScope& m_libraryScope;
     SpacingAlgorithm* m_pSpAlgorithm;
     std::vector<int>& m_breaks;
 
 public:
-    LinesBreaker(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
-                 std::vector<int>& breaks)
+    LinesBreaker(ScoreLayouter* pScoreLyt, LibraryScope& libScope,
+                 SpacingAlgorithm* pSpAlgorithm, std::vector<int>& breaks)
         : m_pScoreLyt(pScoreLyt)
+        , m_libraryScope(libScope)
         , m_pSpAlgorithm(pSpAlgorithm)
         , m_breaks(breaks)
     {
@@ -393,8 +395,8 @@ public:
 class LinesBreakerSimple : public LinesBreaker
 {
 public:
-    LinesBreakerSimple(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
-                       std::vector<int>& breaks);
+    LinesBreakerSimple(ScoreLayouter* pScoreLyt, LibraryScope& libScope,
+                       SpacingAlgorithm* pSpAlgorithm, std::vector<int>& breaks);
     virtual ~LinesBreakerSimple() {}
 
     void decide_line_breaks();
@@ -406,8 +408,8 @@ public:
 class LinesBreakerOptimal : public LinesBreaker
 {
 public:
-    LinesBreakerOptimal(ScoreLayouter* pScoreLyt, SpacingAlgorithm* pSpAlgorithm,
-                        std::vector<int>& breaks);
+    LinesBreakerOptimal(ScoreLayouter* pScoreLyt, LibraryScope& libScope,
+                        SpacingAlgorithm* pSpAlgorithm, std::vector<int>& breaks);
     virtual ~LinesBreakerOptimal() {}
 
     void decide_line_breaks();

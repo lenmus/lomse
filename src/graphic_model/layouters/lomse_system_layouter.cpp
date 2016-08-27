@@ -219,8 +219,8 @@ bool SystemLayouter::system_must_be_truncated()
 {
     //Specifications (do not change):
     //
-    //Staff lines truncation only occurs when system is not justified
-    //Staff lines always run until right marging unless requesting truncation:
+    //Staff lines truncation only can occur when system is not justified.
+    //Staff lines always run until right margin unless requesting truncation:
     //
     //1. "StaffLines.StopAtFinalBarline = yes" truncates staff lines only
     //   after final barline (barline of type final). This is the default
@@ -405,7 +405,7 @@ bool SystemLayouter::system_must_be_justified()
     //    - As default option is 'JustifyFinalBarline=no" the user must change
     //      this option value when the score is finished.
     //    - But if "JustifyFinalBarline=yes", last system will be justified only
-    //      if ends in barline.
+    //      if ends in final barline.
 
 
     //if justification suppressed, for debugging, do not justify
