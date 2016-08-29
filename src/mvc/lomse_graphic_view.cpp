@@ -429,7 +429,8 @@ void GraphicView::draw_graphic_model()
     m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
-    m_options.draw_anchors = m_libraryScope.draw_anchors();
+    m_options.draw_anchor_objects = m_libraryScope.draw_anchor_objects();
+    m_options.draw_anchor_lines = m_libraryScope.draw_anchor_lines();
     m_options.draw_shape_bounds = m_libraryScope.draw_shape_bounds();
     m_options.read_only_mode =
         m_pInteractor->get_operating_mode() != Interactor::k_mode_edition;

@@ -130,7 +130,8 @@ protected:
     //debug options
     bool m_fJustifySystems;         //if false, prevents systems justification
     bool m_fDumpColumnTables;       //dump columns and slices data
-    bool m_fDrawAnchors;            //draw anchor objects (i.e. invisible shapes)
+    bool m_fDrawAnchorObjects;      //draw anchor objects (i.e. invisible shapes)
+    bool m_fDrawAnchorLines;        //draw a line at anchor positions (spacing algorithm)
     bool m_fShowShapeBounds;        //draw a box around each shape
     bool m_fUnitTests;              //library is running for Unit Tests
     int m_traceLinesBreaker;        //trace level for lines breaker algorithm
@@ -226,8 +227,10 @@ public:
     inline bool justify_systems() { return m_fJustifySystems; }
     inline void set_dump_column_tables(bool value) { m_fDumpColumnTables = value; }
     inline bool dump_column_tables() { return m_fDumpColumnTables; }
-    inline void set_draw_anchors(bool value) { m_fDrawAnchors = value; }
-    inline bool draw_anchors() { return m_fDrawAnchors; }
+    inline void set_draw_anchor_objecs(bool value) { m_fDrawAnchorObjects = value; }
+    inline bool draw_anchor_objects() { return m_fDrawAnchorObjects; }
+    inline void set_draw_anchor_lines(bool value) { m_fDrawAnchorLines = value; }
+    inline bool draw_anchor_lines() { return m_fDrawAnchorLines; }
     inline void set_draw_shape_bounds(bool value) { m_fShowShapeBounds = value; }
     inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
     inline void set_unit_test(bool value) { m_fUnitTests = value; }

@@ -70,14 +70,16 @@ GmoShapeNote::~GmoShapeNote()
 //---------------------------------------------------------------------------------------
 void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    ////DBG: Draw anchor line
-    //pDrawer->begin_path();
-    //pDrawer->fill(Color(0, 0, 0, 0));
-    //pDrawer->stroke(Color(255, 0, 255));
-    //pDrawer->stroke_width(15.0);
-    //pDrawer->move_to(m_origin.x - get_anchor_offset(), m_origin.y);
-    //pDrawer->vline_to(m_origin.y + m_size.height);
-    //pDrawer->end_path();
+    if (opt.draw_anchor_lines)
+    {
+        pDrawer->begin_path();
+        pDrawer->fill(Color(0, 0, 0, 0));
+        pDrawer->stroke(Color(255, 0, 255));
+        pDrawer->stroke_width(15.0);
+        pDrawer->move_to(m_origin.x - get_anchor_offset(), m_origin.y);
+        pDrawer->vline_to(m_origin.y + m_size.height);
+        pDrawer->end_path();
+    }
 
     draw_leger_lines(pDrawer);
     GmoCompositeShape::on_draw(pDrawer, opt);

@@ -227,7 +227,7 @@ GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, ShapeId idx, UPoint uP
 //---------------------------------------------------------------------------------------
 void GmoShapeInvisible::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    if (opt.draw_anchors)
+    if (opt.draw_anchor_objects)
     {
         pDrawer->begin_path();
         pDrawer->fill(Color(255, 0, 0, 32));    //light red, transparent
