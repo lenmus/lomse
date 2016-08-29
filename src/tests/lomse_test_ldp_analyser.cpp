@@ -4712,7 +4712,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(opt Render.SpacingValue 40)");
+        parser.parse_text("(opt StaffLines.Truncate 2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4721,9 +4721,9 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "Render.SpacingValue" );
+        CHECK( pOpt->get_name() == "StaffLines.Truncate" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 40 );
+        CHECK( pOpt->get_long_value() == 2 );
 
         delete tree->get_root();
         delete pIModel;
@@ -4865,8 +4865,8 @@ SUITE(LdpAnalyserTest)
         pOpt = pScore->get_option("Render.SpacingValue");
         CHECK( pOpt != NULL );
         CHECK( pOpt->get_name() == "Render.SpacingValue" );
-        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 30L );
+        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
+        CHECK( pOpt->get_float_value() == 30.0f );
 
         delete tree->get_root();
         delete pIModel;

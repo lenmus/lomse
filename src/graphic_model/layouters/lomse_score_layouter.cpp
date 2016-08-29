@@ -402,10 +402,24 @@ void ScoreLayouter::decide_line_breaks()
 {
     if (get_num_columns() != 0)
     {
-        LinesBreakerOptimal breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
-//        LinesBreakerSimple breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
-        breaker.decide_line_breaks();
-        //breaker.dump_entries();
+        bool fUseSimple;
+        if (m_libraryScope.use_debug_values())
+            fUseSimple = m_libraryScope.get_render_spacing_opts()
+                         & k_render_opt_breaker_simple;
+        else
+            fUseSimple = m_pScoreMeter->get_render_spacing_opts()
+                         & k_render_opt_breaker_simple;
+
+        if (fUseSimple)
+        {
+            LinesBreakerSimple breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
+            breaker.decide_line_breaks();
+        }
+        else
+        {
+            LinesBreakerOptimal breaker(this, m_libraryScope, m_pSpAlgorithm, m_breaks);
+            breaker.decide_line_breaks();
+        }
     }
 }
 

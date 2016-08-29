@@ -90,6 +90,24 @@ enum ETraceLevelLinesBreaker
 };
 
 //---------------------------------------------------------------------------------------
+// Values for render spacing options defined in the score source file
+enum ERenderSpacingOpts
+{
+    //0xx - Predefined sets (for backwards compatibility)
+    k_render_opt_set_none           = 0x0000,   //no predefined set.
+    k_render_opt_set_classic        = 0x0001,   //initial appearance (LDP <= 2.0) for
+                                                //  eBooks backwards compatibility.
+    //1xx - Lines breaker algorithm
+    k_render_opt_breaker_simple     = 0x0100,   //use LinesBreakerSimple.
+    k_render_opt_breaker_optimal    = 0x0101,   //use LinesBreakerOptimal
+    k_render_opt_breaker_no_shrink  = 0x0102,   //do not shrink lines
+
+    //2xx - Spacing algorithm
+    k_render_opt_dmin_fixed         = 0x0200,   //use fixed value for Dmin
+    k_render_opt_dmin_global        = 0x0201,   //use min note in score for Dmin
+};
+
+//---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
 {
 protected:
@@ -118,9 +136,12 @@ protected:
     int m_traceLinesBreaker;        //trace level for lines breaker algorithm
 
     //spacing algorithm
+    float m_fUseDbgValues;          //use values defined here for spacing params.
     float m_spacingOptForce;
     float m_spacingAlpha;
     float m_spacingDmin;
+    Tenths m_spacingSmin;
+    int m_renderSpacingOpts;        //options for spacing and lines breaker algorithm
 
 public:
     LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
@@ -172,13 +193,33 @@ public:
     inline Metronome* get_global_metronome() { return m_pGlobalMetronome; }
     inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
 
-    //Gourlay spacing algorithm parameters
+    //spacing and lines breaker algorithm parameters
+    inline bool use_debug_values() { return m_fUseDbgValues; }
     inline float get_optimum_force() { return m_spacingOptForce; }
-    inline void set_optimum_force(float force) { m_spacingOptForce = force; }
-    inline float get_spacing_alpha() { return m_spacingAlpha; }
-    inline void set_spacing_alpha(float alpha) { m_spacingAlpha = alpha; }
+    inline void set_optimum_force(float force) {
+        m_spacingOptForce = force;
+        m_fUseDbgValues = true;
+    }
+    inline float get_spacing_alpha() {return m_spacingAlpha; }
+    inline void set_spacing_alpha(float alpha) {
+        m_spacingAlpha = alpha;
+        m_fUseDbgValues = true;
+    }
     inline float get_spacing_dmin() { return m_spacingDmin; }
-    inline void set_spacing_dmin(float dmin) { m_spacingDmin = dmin; }
+    inline void set_spacing_dmin(float dmin) {
+        m_spacingDmin = dmin;
+        m_fUseDbgValues = true;
+    }
+    inline Tenths get_spacing_smin() { return m_spacingSmin; }
+    inline void set_spacing_smin(Tenths smin) {
+        m_spacingSmin = smin;
+        m_fUseDbgValues = true;
+    }
+    inline int get_render_spacing_opts() { return m_renderSpacingOpts; }
+    inline void set_render_spacing_opts(float opts) {
+        m_renderSpacingOpts = opts;
+        m_fUseDbgValues = true;
+    }
 
     //global options, for debug and tests
     inline void set_justify_systems(bool value) { m_fJustifySystems = value; }

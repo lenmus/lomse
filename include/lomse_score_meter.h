@@ -51,10 +51,20 @@ class ImoStyle;
 class ScoreMeter
 {
 protected:
-    //layout options
-    float m_rSpacingFactor;             //for proportional spacing of notes
+    //options for spacing and lines breaker algorithm
+    int m_renderSpacingOpts;
+
+    //spacing algorithm params.
+    float m_spacingOptForce;            //Fopt
+    float m_spacingAlpha;               //alpha
+    float m_spacingDmin;                //Dmin
+    LUnits m_spacingSmin;               //Smin
+
     ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
     Tenths m_rSpacingValue;             //space for 'fixed' method
+
+
+    //layout options
     Tenths m_rUpperLegerLinesDisplacement;
     bool m_fDrawLeftBarline;            //draw left barline joining all system staves
 
@@ -82,7 +92,12 @@ public:
                 bool fDrawLeftBarline=true);
 
     //options
-    inline float get_spacing_factor() { return m_rSpacingFactor; }
+    inline float get_spacing_Fopt() { return m_spacingOptForce; }
+    inline float get_spacing_alpha() { return m_spacingAlpha; }
+    inline float get_spacing_dmin() { return m_spacingDmin; }
+    inline float get_spacing_factor() { return m_spacingAlpha; }
+	inline LUnits get_spacing_smin() { return m_spacingSmin; }
+    inline int get_render_spacing_opts() { return m_renderSpacingOpts; }
     inline ESpacingMethod get_spacing_method() { return m_nSpacingMethod; }
     inline Tenths get_spacing_value() { return m_rSpacingValue; }
     inline bool is_proportional_spacing() {

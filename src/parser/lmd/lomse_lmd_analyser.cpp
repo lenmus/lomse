@@ -3821,15 +3821,19 @@ public:
     bool is_number_long_option(const string& name)
     {
         return (name == "Render.SpacingMethod")
-            || (name == "Render.SpacingValue")
+            || (name == "Render.SpacingOptions")
             || (name == "Score.JustifyLastSystem")
             || (name == "Staff.UpperLegerLines.Displacement")
-            || (name == "StaffLines.Truncate");
+            || (name == "StaffLines.Truncate")
+            ;
     }
 
     bool is_number_float_option(const string& name)
     {
-        return (name == "Render.SpacingFactor");
+        return (name == "Render.SpacingFactor")
+            || (name == "Render.SpacingFopt")
+            || (name == "Render.SpacingValue")
+            ;
     }
 
     bool is_string_option(const string& UNUSED(name))

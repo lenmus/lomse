@@ -239,8 +239,10 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
+        CHECK( pScore->get_option("Render.SpacingFopt")->get_float_value() == 1.0f );
+        CHECK( pScore->get_option("Render.SpacingOptions")->get_long_value() == 1L );
         CHECK( pScore->get_option("Score.FillPageWithEmptyStaves")->get_bool_value() == false );
         CHECK( pScore->get_option("StaffLines.Truncate")->get_long_value() == 1L );
         CHECK( pScore->get_option("Score.JustifyLastSystem")->get_long_value() == 0L );
@@ -393,12 +395,12 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
 
         pScore->set_float_option("Render.SpacingFactor", 0.600f);
 
-        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.600f );
 
         delete pScore;
@@ -409,12 +411,12 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == false );
 
         pScore->set_bool_option("StaffLines.Hide", true);
 
-        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == true );
 
         delete pScore;
@@ -482,7 +484,7 @@ SUITE(InternalModelTest)
         pScore->set_bool_option("Staff.Green", true);
 
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_options()->get_num_items() == 12 );
         CHECK( pScore->get_option("Staff.Green")->get_bool_value() == true );
 
         delete pScore;
@@ -496,7 +498,7 @@ SUITE(InternalModelTest)
         pScore->set_long_option("Staff.LongWidth", 700L);
 
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_options()->get_num_items() == 12 );
         CHECK( pScore->get_option("Staff.LongWidth")->get_long_value() == 700L );
 
         delete pScore;
@@ -510,7 +512,7 @@ SUITE(InternalModelTest)
         pScore->set_float_option("Staff.Green", 0.66f);
 
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_options()->get_num_items() == 12 );
         CHECK( pScore->get_option("Staff.Green")->get_float_value() == 0.66f );
 
         delete pScore;

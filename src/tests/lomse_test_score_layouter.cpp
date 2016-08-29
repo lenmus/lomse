@@ -446,8 +446,9 @@ SUITE(ScoreLayouterTest)
 //        cout << "num.systems = " << breaks.size() << endl;
 //        cout << "breaks =" << breaks[0] << ", " << breaks[1] << endl;
         CHECK( scoreLyt.get_num_columns() == 4 );
-        CHECK( breaks.size() == 1 );
+        CHECK( breaks.size() == 2 );
         CHECK( breaks[0] == 0 );
+        CHECK( breaks[1] == 3 );
 
         scoreLyt.my_delete_all();
     }

@@ -303,15 +303,26 @@ void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::determine_spacing_parameters()
 {
-	m_uSmin = m_pScoreMeter->tenths_to_logical_max(LOMSE_MIN_SPACE);
-    m_alpha = m_libraryScope.get_spacing_alpha();
+    if (m_libraryScope.use_debug_values())
+    {
+        m_Fopt = m_libraryScope.get_optimum_force();
+        m_alpha = m_libraryScope.get_spacing_alpha();
+        m_dmin = m_libraryScope.get_spacing_dmin();
+        m_uSmin = m_libraryScope.get_spacing_smin();
+    }
+    else
+    {
+        m_Fopt = m_pScoreMeter->get_spacing_Fopt();
+        m_alpha = m_pScoreMeter->get_spacing_alpha();
+        m_dmin = m_pScoreMeter->get_spacing_dmin();
+        //m_dmin = m_pScore->get_staffobjs_table()->min_note_duration();
+        m_uSmin = m_pScoreMeter->get_spacing_smin();
+    }
 
 	static const float rLog2 = 0.3010299956640f;    //log(2)
-    m_dmin = m_libraryScope.get_spacing_dmin(); //LOMSE_DMIN
-//    m_dmin = m_pScore->get_staffobjs_table()->min_note_duration();
     m_log2dmin = log(m_dmin) / rLog2;             //compute log2(dmin)
 
-    m_Fopt = m_libraryScope.get_optimum_force();
+
 
 //    //choose Fopt as a function of Dmin
 //    if (m_dmin <= 8.0f)
@@ -570,7 +581,6 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
 //        return -1.0f;
 //    }
 
-
     LUnits lineWidth = m_pScoreLyt->get_target_size_for_system(iSystem);
     if (iSystem > 0)
         lineWidth -= 1000.0f; //m_pScoreLyt->get_prolog_width_for_system(iSystem);
@@ -616,9 +626,12 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
     float R = fabs(F - m_Fopt);
 
-    //do not accept shrinking
-    if (F < m_Fopt)
-        return 1000.0f;
+    //do not accept shrinking, if required
+	if (m_pScoreMeter->get_render_spacing_opts() & k_render_opt_breaker_no_shrink)
+    {
+        if (F < m_Fopt)
+            return 1000.0f;
+    }
 
     //increase penalty if requiring high shrink
     if (F < 0.7f * m_Fopt)
@@ -732,7 +745,7 @@ void TimeSlice::find_smallest_note_soundig_at(TimeUnits nextTime)
 
     if (m_type == TimeSlice::k_noterest)
     {
-        TimeUnits durLimit = nextTime - get_timepos() + 0.1f;       //0.1 is margin
+        TimeUnits durLimit = nextTime - get_timepos() + 0.1f * k_duration_256th;
         m_minNoteNext = LOMSE_NO_DURATION;      //too high value
         ColStaffObjsEntry* pEntry = m_firstEntry;
         for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())

@@ -4432,15 +4432,19 @@ public:
     bool is_number_long_option(const string& name)
     {
         return (name == "Render.SpacingMethod")
-            || (name == "Render.SpacingValue")
+            || (name == "Render.SpacingOptions")
             || (name == "Score.JustifyLastSystem")
             || (name == "Staff.UpperLegerLines.Displacement")
-            || (name == "StaffLines.Truncate");
+            || (name == "StaffLines.Truncate")
+            ;
     }
 
     bool is_number_float_option(const string& name)
     {
-        return (name == "Render.SpacingFactor");
+        return (name == "Render.SpacingFactor")
+            || (name == "Render.SpacingFopt")
+            || (name == "Render.SpacingValue")
+            ;
     }
 
     bool is_string_option(const string& UNUSED(name))
@@ -4901,33 +4905,6 @@ protected:
     {
         return m_pParamToAnalyse->get_parameter(1)->get_value();
     }
-
-//bool lmLDPParser::AnalyzeCreationMode(lmLDPNode* pNode, ImoScore* pScore)
-//{
-//    // <creationMode> = (creationMode <modeName><modeVersion>)
-//
-//    //Returns true if success.
-//
-//    wxASSERT(GetNodeName(pNode) == "creationMode");
-//
-//    //check that two parameters are specified
-//    if(GetNodeNumParms(pNode) != 2) {
-//        AnalysisError(
-//            pNode,
-//            "Element '%s' has less parameters than the minimum required. Element ignored.",
-//            GetNodeName(pNode).c_str() );
-//        return false;
-//    }
-//
-//    //get the mode info
-//    std::string sModeName = GetNodeName(pNode->GetParameter(1));
-//    std::string sModeVers = GetNodeName(pNode->GetParameter(2));
-//
-//    //transfer to the score
-//    pScore->SetCreationMode(sModeName, sModeVers);
-//
-//    return true;
-//}
 
 };
 

@@ -2729,12 +2729,14 @@ static const FloatOption m_FloatOptions[] =
         // As the duration of quarter note is 64 (time units), I am
         // going to map it to 35 tenths. This gives a conversion factor
         // of 35/64 = 0.547
+    {"Render.SpacingFopt", 1.0f },
 };
 
 //---------------------------------------------------------------------------------------
 static const LongOption m_LongOptions[] =
 {
     {"Render.SpacingMethod", long(k_spacing_proportional) },
+    {"Render.SpacingOptions", 1L},      //'classic' appearance (LDP <= 2.0)
     {"Render.SpacingValue", 35L },      //15 tenths (1.5 lines) [add 20 to desired value]
     {"Score.JustifyLastSystem", 0L},    //never justify last system
     {"Staff.UpperLegerLines.Displacement", 0L },
