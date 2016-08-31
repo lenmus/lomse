@@ -4223,26 +4223,22 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
-        set_options();
+        set_options(pScore);
 
         return pScore;
     }
 
-    void set_options()
+    void set_options(ImoScore* pScore)
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                        ImFactory::inject(k_imo_option, pDoc) );
-        pOpt->set_name("Render.SpacingFactor");
+        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
         pOpt->set_float_value(0.35f);
-        pOpt->set_type(ImoOptionInfo::k_number_float);
-        add_to_model(pOpt);
 
-        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, pDoc) );
-        pOpt->set_name("Score.JustifyLastSystem");
+        pOpt = pScore->get_option("Score.JustifyLastSystem");
         pOpt->set_long_value(3);    //justify it in any case
-        pOpt->set_type(ImoOptionInfo::k_number_long);
-        add_to_model(pOpt);
+
+        pOpt = pScore->get_option("Render.SpacingOptions");
+        pOpt->set_long_value(k_render_opt_breaker_optimal
+                             | k_render_opt_dmin_global);
     }
 
     void remove_score(ImoDocument* pImoDoc, ImoScore* pScore)

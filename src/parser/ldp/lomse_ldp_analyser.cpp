@@ -4828,17 +4828,13 @@ public:
         ImoScore* pScore = static_cast<ImoScore*>(
                               ImFactory::inject(k_imo_score, pDoc, get_node_id()) );
         m_pAnalyser->score_analysis_begin(pScore);
+        add_to_model(pScore);
 
         // <vers>
         if (get_mandatory(k_vers))
-        {
-            string version = get_version();
-            int vers = m_pAnalyser->set_score_version(version);
-            pScore->set_version(vers);
-            if (vers == 0)
-            {
-            }
-        }
+            set_version(pScore);
+
+        set_defaults_for_this_score_version(pScore);
 
         // [<language>]
         analyse_optional(k_language);
@@ -4895,15 +4891,54 @@ public:
 
         error_if_more_elements();
 
-        add_to_model(pScore);
         m_pAnalyser->score_analysis_end();
     }
 
 protected:
 
-    string get_version()
+    void set_version(ImoScore* pScore)
     {
-        return m_pParamToAnalyse->get_parameter(1)->get_value();
+        string vers = m_pParamToAnalyse->get_parameter(1)->get_value();
+
+        //check that version is valid
+        if (vers == "1.5" || vers == "1.6" || vers == "1.7" || vers == "2.0")
+        {
+            //1.5 -
+            //1.6 -
+            //1.7 - transitional to 2.0. Was not published
+            //2.0
+        }
+        else if (vers == "2.1")
+        {
+            //2.1 - sep/2006
+        }
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Invalid score version '" + vers + "'. Version 1.6 assumed.");
+            vers = "1.6";
+        }
+        int numvers = m_pAnalyser->set_score_version(vers);
+        pScore->set_version(numvers);
+    }
+
+    void set_defaults_for_this_score_version(ImoScore* pScore)
+    {
+        //set default options for each score version
+        string version = pScore->get_version_string();
+        if (version == "2.1")
+        {
+            ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
+            pOpt->set_float_value(0.35f);
+
+            pOpt = pScore->get_option("Render.SpacingOptions");
+            pOpt->set_long_value(k_render_opt_breaker_optimal
+                                 | k_render_opt_dmin_global);
+        }
+        else
+        {
+            //vers. 1.5, 1.6, 1.7, 2.0. Default values are ok
+        }
     }
 
 };

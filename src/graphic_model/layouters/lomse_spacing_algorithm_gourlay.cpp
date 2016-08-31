@@ -308,14 +308,17 @@ void SpAlgGourlay::determine_spacing_parameters()
         m_Fopt = m_libraryScope.get_optimum_force();
         m_alpha = m_libraryScope.get_spacing_alpha();
         m_dmin = m_libraryScope.get_spacing_dmin();
-        m_uSmin = m_libraryScope.get_spacing_smin();
+        m_uSmin = m_pScoreMeter->tenths_to_logical_max(
+                            m_libraryScope.get_spacing_smin() );
     }
     else
     {
         m_Fopt = m_pScoreMeter->get_spacing_Fopt();
         m_alpha = m_pScoreMeter->get_spacing_alpha();
-        m_dmin = m_pScoreMeter->get_spacing_dmin();
-        //m_dmin = m_pScore->get_staffobjs_table()->min_note_duration();
+        if (m_pScoreMeter->get_render_spacing_opts() & k_render_opt_dmin_global)
+            m_dmin = m_pScore->get_staffobjs_table()->min_note_duration();
+        else //k_render_opt_dmin_fixed
+            m_dmin = m_pScoreMeter->get_spacing_dmin();
         m_uSmin = m_pScoreMeter->get_spacing_smin();
     }
 
