@@ -4220,20 +4220,25 @@ protected:
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
+        m_pAnchor = pScore;
+
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
-        set_options();
+        set_options(pScore);
+
         return pScore;
     }
 
-    void set_options()
+    void set_options(ImoScore* pScore)
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                        ImFactory::inject(k_imo_option, pDoc) );
-        pOpt->set_name("Render.SpacingFactor");
+        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
         pOpt->set_float_value(0.35f);
-        pOpt->set_type(ImoOptionInfo::k_number_float);
-        add_to_model(pOpt);
+
+        pOpt = pScore->get_option("Score.JustifyLastSystem");
+        pOpt->set_long_value(3);    //justify it in any case
+
+        pOpt = pScore->get_option("Render.SpacingOptions");
+        pOpt->set_long_value(k_render_opt_breaker_optimal
+                             | k_render_opt_dmin_global);
     }
 
     void remove_score(ImoDocument* pImoDoc, ImoScore* pScore)
@@ -4973,8 +4978,9 @@ void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyric* pLyric)
         m_lyrics.push_back(NULL);
         i = int(m_lyrics.size()) - 1;
         m_lyricIndex[id] = i;
+
         //inform Instrument about the new lyrics line
-//    ImoInstrument* pInstr = get_instrument(m_curPartId);
+        add_marging_space_for_lyrics(pNote, pLyric);
     }
     else
         i = it->second;
@@ -4986,6 +4992,48 @@ void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyric* pLyric)
 
     //save current as new previous
     m_lyrics[i] = pLyric;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
+{
+    //inform Instrument about the new lyrics line for reserving space
+
+    int iStaff = pNote->get_staff();
+    bool fAbove = pLyric->get_placement() == k_placement_above;
+    LUnits space = 400.0f;  //4mm per lyrics line
+    ImoInstrument* pInstr = get_instrument(m_curPartId);
+
+    if (fAbove)
+    {
+        pInstr->reserve_space_for_lyrics(iStaff, space);
+        //TODO: Doesnt work for first staff in first instrument
+    }
+    else
+    {
+        //add space to top margin of next staff
+        int staves = pInstr->get_num_staves();
+        if (++iStaff == staves)
+        {
+            //add space to top margin of first staff in next instrument
+            //AWARE: All instruments are already created
+            int iInstr = pInstr->get_instrument() + 1;
+            if (iInstr < m_pCurScore->get_num_instruments())
+            {
+                pInstr = m_pCurScore->get_instrument(iInstr);
+                pInstr->reserve_space_for_lyrics(0, space);
+            }
+            else
+            {
+                ;   //TODO: Space for last staff in last instrument
+            }
+        }
+        else
+        {
+            //add space to top margin of next staff in this instrument
+            pInstr->reserve_space_for_lyrics(iStaff, space);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

@@ -386,11 +386,7 @@ public:
 protected:
     MxlElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=NULL);
     void delete_relation_builders();
-
-//    //auxiliary. for ldp notes analysis
-//    static int to_step(const char& letter);
-//    static int to_octave(const char& letter);
-//    static EAccidentals to_accidentals(const std::string& accidentals);
+    void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };
 
 

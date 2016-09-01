@@ -36,7 +36,6 @@ namespace lomse
 {
 
 //forward declarations
-class GmoBoxSlice;
 class ImoInstrument;
 
 
@@ -45,33 +44,22 @@ class ImoInstrument;
 class GmoBoxSliceInstr : public GmoBox
 {
 private:
-//    GmoBoxSlice*     m_pSlice;           //parent slice
-//    ImoInstrument*   m_pInstr;           //instrument to which this slice belongs
 
 public:
     GmoBoxSliceInstr(ImoInstrument* pInstr);
     ~GmoBoxSliceInstr();
+};
 
-//    inline ImoInstrument* GetInstrument() const { return m_pInstr; }
-//    inline int GetNumMeasure() const { return m_pSlice->GetNumMeasure(); }
-//
-//    //implementation of virtual methods from base class
-//	int GetPageNumber() const;
-//
-//	//owners and related
-//	GmoBoxSystem* GetOwnerSystem() { return m_pSlice->GetOwnerSystem(); }
-//    inline GmoBoxScore* GetOwnerBoxScore() { return m_pSlice->GetOwnerBoxScore(); }
-//    inline GmoBoxPage* GetOwnerBoxPage() { return m_pSlice->GetOwnerBoxPage(); }
-//
-//    //other
-//    GmoShapeStaff* GetStaffShape(int nStaff);   //1..n
-//    GmoShapeStaff* GetNearestStaff(lmUPoint& uPoint);
-//    void DrawTimeGrid(lmPaper* pPaper);
-//    void DrawMeasureFrame(lmPaper* pPaper);
-//
 
+//---------------------------------------------------------------------------------------
+// Class GmoBoxSliceStaff represents one staff in a SliceInstr
+class GmoBoxSliceStaff : public GmoBox
+{
 private:
 
+public:
+    GmoBoxSliceStaff(ImoInstrument* pInstr);
+    ~GmoBoxSliceStaff();
 };
 
 

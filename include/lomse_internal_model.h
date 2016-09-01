@@ -3197,7 +3197,6 @@ protected:
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
     ImoMidiInfo     m_midi;
-//    ImoInstrGroup*  m_pGroup;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //enum EBarlineLayout
@@ -3221,8 +3220,6 @@ public:
     inline int get_instrument() { return m_midi.get_instrument(); }
     inline int get_channel() { return m_midi.get_channel(); }
     ImoMusicData* get_musicdata();
-//    inline bool is_in_group() { return m_pGroup != NULL; }
-//    inline ImoInstrGroup* get_group() { return m_pGroup; }
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
     inline const string& get_instr_id() { return m_partId; }
@@ -3237,7 +3234,6 @@ public:
     void set_midi_info(ImoMidiInfo* pInfo);
     void set_midi_instrument(int instr);
     void set_midi_channel(int channel);
-//    inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
@@ -3269,6 +3265,11 @@ public:
                                                ostream& reporter);
 
 protected:
+    //FIX: For lyrics space
+    friend class LdpAnalyser;
+    friend class MxlAnalyser;
+    friend class InstrumentAnalyser;
+    void reserve_space_for_lyrics(int iStaff, LUnits space);
 
 };
 
@@ -3478,7 +3479,7 @@ protected:
     friend class ImFactory;
     ImoOptionInfo()
         : ImoSimpleObj(k_imo_option), m_type(k_boolean), m_name("")
-        , m_fValue(false) {}
+        , m_fValue(false), m_nValue(0L), m_rValue(0.0f)  {}
 
 public:
     virtual ~ImoOptionInfo() {}
@@ -4025,6 +4026,11 @@ public:
     inline void set_line_thickness(LUnits uTickness) { m_uLineThickness = uTickness; }
     inline int get_num_lines() { return m_nNumLines; }
     inline void set_num_lines(int nLines) { m_nNumLines = nLines; }
+
+protected:
+    friend class MxlAnalyser;
+    friend class LdpAnalyser;
+    inline void add_space_for_lyrics(LUnits space) { m_uMarging += space; }
 
 };
 

@@ -80,6 +80,34 @@ class CaretPositioner;
 class MusicGlyphs;
 
 //---------------------------------------------------------------------------------------
+// Trace levels for lines breaker algorithm
+enum ETraceLevelLinesBreaker
+{
+    k_trace_breaks_off          = 0x0001,
+    k_trace_breaks_table        = 0x0002,   //dump of final breaks table
+    k_trace_breaks_computation  = 0x0004,   //trace computation of breaks
+    k_trace_breaks_penalties    = 0x0008,   //trace penalties computation
+};
+
+//---------------------------------------------------------------------------------------
+// Values for render spacing options defined in the score source file
+enum ERenderSpacingOpts
+{
+    //0xx - Predefined sets (for backwards compatibility)
+    k_render_opt_set_none           = 0x0000,   //no predefined set.
+    k_render_opt_set_classic        = 0x0001,   //initial appearance (LDP <= 2.0) for
+                                                //  eBooks backwards compatibility.
+    //1xx - Lines breaker algorithm
+    k_render_opt_breaker_simple     = 0x0100,   //use LinesBreakerSimple.
+    k_render_opt_breaker_optimal    = 0x0101,   //use LinesBreakerOptimal
+    k_render_opt_breaker_no_shrink  = 0x0102,   //do not shrink lines
+
+    //2xx - Spacing algorithm
+    k_render_opt_dmin_fixed         = 0x0200,   //use fixed value for Dmin
+    k_render_opt_dmin_global        = 0x0201,   //use min note in score for Dmin
+};
+
+//---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
 {
 protected:
@@ -97,13 +125,24 @@ protected:
     MusicGlyphs* m_pMusicGlyphs;
 
     //options
-    bool m_fJustifySystems;
-    bool m_fDumpColumnTables;
-    bool m_fDrawAnchors;
     bool m_fReplaceLocalMetronome;
-    bool m_fShowShapeBounds;
-    bool m_fUnitTests;
 
+    //debug options
+    bool m_fJustifySystems;         //if false, prevents systems justification
+    bool m_fDumpColumnTables;       //dump columns and slices data
+    bool m_fDrawAnchorObjects;      //draw anchor objects (i.e. invisible shapes)
+    bool m_fDrawAnchorLines;        //draw a line at anchor positions (spacing algorithm)
+    bool m_fShowShapeBounds;        //draw a box around each shape
+    bool m_fUnitTests;              //library is running for Unit Tests
+    int m_traceLinesBreaker;        //trace level for lines breaker algorithm
+
+    //spacing algorithm
+    float m_fUseDbgValues;          //use values defined here for spacing params.
+    float m_spacingOptForce;
+    float m_spacingAlpha;
+    float m_spacingDmin;
+    Tenths m_spacingSmin;
+    int m_renderSpacingOpts;        //options for spacing and lines breaker algorithm
 
 public:
     LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
@@ -155,17 +194,52 @@ public:
     inline Metronome* get_global_metronome() { return m_pGlobalMetronome; }
     inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
 
-    //global options, mainly for debug
+    //spacing and lines breaker algorithm parameters
+    inline bool use_debug_values() { return m_fUseDbgValues; }
+    inline float get_optimum_force() { return m_spacingOptForce; }
+    inline void set_optimum_force(float force) {
+        m_spacingOptForce = force;
+        m_fUseDbgValues = true;
+    }
+    inline float get_spacing_alpha() {return m_spacingAlpha; }
+    inline void set_spacing_alpha(float alpha) {
+        m_spacingAlpha = alpha;
+        m_fUseDbgValues = true;
+    }
+    inline float get_spacing_dmin() { return m_spacingDmin; }
+    inline void set_spacing_dmin(float dmin) {
+        m_spacingDmin = dmin;
+        m_fUseDbgValues = true;
+    }
+    inline Tenths get_spacing_smin() { return m_spacingSmin; }
+    inline void set_spacing_smin(Tenths smin) {
+        m_spacingSmin = smin;
+        m_fUseDbgValues = true;
+    }
+    inline int get_render_spacing_opts() { return m_renderSpacingOpts; }
+    inline void set_render_spacing_opts(float opts) {
+        m_renderSpacingOpts = opts;
+        m_fUseDbgValues = true;
+    }
+
+    //global options, for debug and tests
     inline void set_justify_systems(bool value) { m_fJustifySystems = value; }
     inline bool justify_systems() { return m_fJustifySystems; }
     inline void set_dump_column_tables(bool value) { m_fDumpColumnTables = value; }
     inline bool dump_column_tables() { return m_fDumpColumnTables; }
-    inline void set_draw_anchors(bool value) { m_fDrawAnchors = value; }
-    inline bool draw_anchors() { return m_fDrawAnchors; }
+    inline void set_draw_anchor_objecs(bool value) { m_fDrawAnchorObjects = value; }
+    inline bool draw_anchor_objects() { return m_fDrawAnchorObjects; }
+    inline void set_draw_anchor_lines(bool value) { m_fDrawAnchorLines = value; }
+    inline bool draw_anchor_lines() { return m_fDrawAnchorLines; }
     inline void set_draw_shape_bounds(bool value) { m_fShowShapeBounds = value; }
     inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
     inline void set_unit_test(bool value) { m_fUnitTests = value; }
     inline bool is_unit_test() { return m_fUnitTests; }
+    inline void set_trace_level_for_lines_breaker(int level) {
+        m_traceLinesBreaker = level;
+    }
+    inline int get_trace_level_for_lines_breaker() { return m_traceLinesBreaker; }
+
 };
 
 //---------------------------------------------------------------------------------------

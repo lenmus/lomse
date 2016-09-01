@@ -2200,6 +2200,13 @@ LUnits ImoInstrument::tenths_to_logical(Tenths value, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::reserve_space_for_lyrics(int iStaff, LUnits space)
+{
+    ImoStaffInfo* pInfo = get_staff(iStaff);
+    pInfo->add_space_for_lyrics(space);
+}
+
+//---------------------------------------------------------------------------------------
 // Instrument API
 //---------------------------------------------------------------------------------------
 ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
@@ -2708,10 +2715,8 @@ LongOption;
 static const BoolOption m_BoolOptions[] =
 {
     {"Score.FillPageWithEmptyStaves", false },
-    {"StaffLines.StopAtFinalBarline", true },
-    {"Score.JustifyFinalBarline", false },
-    {"StaffLines.Hide", false },
     {"Staff.DrawLeftBarline", true },
+    {"StaffLines.Hide", false },
 };
 
 //static StringOption m_StringOptions[] = {};
@@ -2724,14 +2729,18 @@ static const FloatOption m_FloatOptions[] =
         // As the duration of quarter note is 64 (time units), I am
         // going to map it to 35 tenths. This gives a conversion factor
         // of 35/64 = 0.547
+    {"Render.SpacingFopt", 1.0f },
 };
 
 //---------------------------------------------------------------------------------------
 static const LongOption m_LongOptions[] =
 {
-    {"Staff.UpperLegerLines.Displacement", 0L },
     {"Render.SpacingMethod", long(k_spacing_proportional) },
-    {"Render.SpacingValue", 35L },       // 15 tenths (1.5 lines) [add 20 to desired value]
+    {"Render.SpacingOptions", 1L},      //'classic' appearance (LDP <= 2.0)
+    {"Render.SpacingValue", 35L },      //15 tenths (1.5 lines) [add 20 to desired value]
+    {"Score.JustifyLastSystem", 0L},    //never justify last system
+    {"Staff.UpperLegerLines.Displacement", 0L },
+    {"StaffLines.Truncate", 1L},        //only if last object is barline of type final
 };
 
 //---------------------------------------------------------------------------------------

@@ -167,6 +167,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_box_score_page]          = "box-score-page ";
         m_typeToName[k_box_slice]               = "box-slice      ";
         m_typeToName[k_box_slice_instr]         = "box-slice-intr ";
+        m_typeToName[k_box_slice_staff]         = "box-slice-staff";
         m_typeToName[k_box_system]              = "box-system     ";
         m_typeToName[k_box_table]               = "box-table      ";
         m_typeToName[k_box_table_rows]          = "box-table-rows ";

@@ -6,11 +6,12 @@
             (clef F4 p2)
             (key D)
             (time 2 4)
-            (n f4 q. p1)
+            (n f4 q. p1 v1)
             (n c4 e)
             
+            //second staff
             (goBack h)
-            (n c3 q p2)(n c3 e)
+            (n c3 q p2 v2)(n c3 e)
             (clef G p2)
             (clef F4 p2)
             (n a3 e)

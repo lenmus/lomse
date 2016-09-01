@@ -78,6 +78,7 @@ ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
     , m_numEntries(0)
     , m_rMissingTime(0.0)
+    , m_minNoteDuration(0.0f)   //LOMSE_NO_NOTE_DURATION
     , m_pFirst(NULL)
     , m_pLast(NULL)
 {
@@ -185,12 +186,15 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
             return false;
 
-////        //note/rest can not go before non-timed
-////        else if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-////            return true;
-////        else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
-////            return false;
-////
+        //note/rest can not go before non-timed in other instruments/staves
+        else if (a->line() != b->line())
+        {
+            if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+                return true;
+            else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
+                return false;
+        }
+
 ////        //clef in other staff can not go after key or time signature
 ////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
 ////                 && b->staff() != a->staff())
@@ -293,7 +297,9 @@ ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore)
     ColStaffObjsBuilderEngine* builder = create_builder_engine(pScore);
     ColStaffObjs* pColStaffObjs = builder->do_build();
     pScore->set_staffobjs_table(pColStaffObjs);
+
     delete builder;
+
     return pColStaffObjs;
 }
 
@@ -308,7 +314,6 @@ ColStaffObjsBuilderEngine* ColStaffObjsBuilder::create_builder_engine(ImoScore* 
 }
 
 
-
 //=======================================================================================
 // ColStaffObjsBuilderEngine
 //=======================================================================================
@@ -316,6 +321,7 @@ ColStaffObjs* ColStaffObjsBuilderEngine::do_build()
 {
     create_table();
     set_num_lines();
+    set_min_note_duration();
     return m_pColStaffObjs;
 }
 
@@ -403,11 +409,10 @@ void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pI
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine::prepare_for_next_instrument()
+void ColStaffObjsBuilderEngine::set_min_note_duration()
 {
-    m_lines.new_instrument();
+    m_pColStaffObjs->set_min_note(m_minNoteDuration);
 }
-
 
 
 //=======================================================================================
@@ -466,6 +471,7 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
+        m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
     }
     int nLine = get_line_for(nVoice, nStaff);
     m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
@@ -498,8 +504,11 @@ void ColStaffObjsBuilderEngine1x::determine_timepos(ImoStaffObj* pSO)
         if (!pNote->is_in_chord() || pNote->is_end_of_chord())
             m_rCurTime += pSO->get_duration();
     }
+    else if (pSO->is_barline())
+        pSO->set_time(m_rMaxSegmentTime);
     else
         m_rCurTime += pSO->get_duration();
+
     m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
 }
 
@@ -537,6 +546,12 @@ ImoSpacer* ColStaffObjsBuilderEngine1x::anchor_object(ImoAuxObj* pAux)
     return pAnchor;
 }
 
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::prepare_for_next_instrument()
+{
+    m_lines.new_instrument();
+}
+
 
 
 //=======================================================================================
@@ -546,6 +561,7 @@ void ColStaffObjsBuilderEngine2x::initializations()
 {
     m_rCurTime.reserve(k_max_voices);
     m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
+    m_curVoice = 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -585,7 +601,13 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
+        m_curVoice = nVoice;
     }
+    else if (pSO->is_barline())
+        nVoice = 0;
+    else
+        nVoice = m_curVoice;
+
     int nLine = get_line_for(nVoice, nStaff);
     m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
 }
@@ -593,6 +615,7 @@ void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInst
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilderEngine2x::reset_counters()
 {
+    m_curVoice = 0;
     m_nCurMeasure = 0;
     m_rMaxSegmentTime = 0.0;
     m_rStartSegmentTime = 0.0;
@@ -618,10 +641,17 @@ void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
                 duration = 0.0;
         }
         m_rCurTime[voice] += duration;
+
+        if (duration > 0.0)
+            m_minNoteDuration = min(m_minNoteDuration, duration);
+    }
+    else if (pSO->is_barline())
+    {
+        time = m_rMaxSegmentTime;
     }
     else
     {
-        time = m_rMaxSegmentTime;
+        time = m_rCurTime[m_curVoice];
     }
 
     pSO->set_time(time);
@@ -634,6 +664,13 @@ void ColStaffObjsBuilderEngine2x::update_measure()
     ++m_nCurMeasure;
     m_rStartSegmentTime = m_rMaxSegmentTime;
     m_rCurTime.assign(k_max_voices, m_rMaxSegmentTime);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::prepare_for_next_instrument()
+{
+    m_lines.new_instrument();
+    m_curVoice = 0;
 }
 
 

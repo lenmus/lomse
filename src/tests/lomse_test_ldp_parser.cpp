@@ -78,6 +78,7 @@ SUITE(LdpParserTest)
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
 
+        //AWARE: As analysis is not done, opt StopAtFinalBarline is not replaced
         CHECK( score->get_root()->to_string() ==
             "(score (vers 1.6) (systemLayout first (systemMargins 0 0 1500 1500)) "
             "(systemLayout other (systemMargins 0 0 1500 1000)) "

@@ -29,9 +29,11 @@
 
 #include "lomse_score_meter.h"
 
+#include "lomse_injectors.h"
 #include "lomse_internal_model.h"
 #include "lomse_engraving_options.h"
 #include "lomse_staffobjs_table.h"
+
 using namespace std;
 
 
@@ -43,13 +45,14 @@ namespace lomse
 //ScoreMeter implementation
 //=======================================================================================
 ScoreMeter::ScoreMeter(ImoScore* pScore)
-    : m_numInstruments( pScore->get_num_instruments() )
+    : m_maxLineSpace(0.0f)
+    , m_numInstruments( pScore->get_num_instruments() )
     , m_tupletsStyle(NULL)
     , m_metronomeStyle(NULL)
     , m_lyricsStyle(NULL)
 {
-    get_options(pScore);
     get_staff_spacing(pScore);
+    get_options(pScore);
     get_styles(pScore);
 
     m_fScoreIsEmpty = pScore->get_staffobjs_table()->num_entries() == 0;
@@ -59,11 +62,15 @@ ScoreMeter::ScoreMeter(ImoScore* pScore)
 ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
                        float rSpacingFactor, ESpacingMethod nSpacingMethod,
                        Tenths rSpacingValue, bool fDrawLeftBarline)
-    : m_rSpacingFactor(rSpacingFactor)
+    : m_renderSpacingOpts(k_render_opt_set_classic)
+    , m_spacingOptForce(1.4f)
+    , m_spacingAlpha(rSpacingFactor)
+    , m_spacingDmin(16)
     , m_nSpacingMethod(nSpacingMethod)
     , m_rSpacingValue(rSpacingValue)
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
+    , m_maxLineSpace(0.0f)
     , m_tupletsStyle(NULL)
     , m_metronomeStyle(NULL)
     , m_lyricsStyle(NULL)
@@ -76,7 +83,10 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
         m_staffIndex[iInstr] = staves;
         staves += numStaves;
         for (int iStaff=0; iStaff < numStaves; ++iStaff)
+        {
+            m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
             m_lineSpace.push_back(lineSpacing);
+        }
     }
     m_numStaves = numStaves * numInstruments;
 }
@@ -85,7 +95,7 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
 void ScoreMeter::get_options(ImoScore* pScore)
 {
     ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
-    m_rSpacingFactor = pOpt->get_float_value();
+    m_spacingAlpha = pOpt->get_float_value();
 
     pOpt = pScore->get_option("Render.SpacingMethod");
     m_nSpacingMethod = static_cast<ESpacingMethod>( pOpt->get_long_value() );
@@ -98,6 +108,23 @@ void ScoreMeter::get_options(ImoScore* pScore)
 
     pOpt = pScore->get_option("Staff.UpperLegerLines.Displacement");
     m_rUpperLegerLinesDisplacement = static_cast<Tenths>( pOpt->get_long_value() );
+
+    pOpt = pScore->get_option("Render.SpacingOptions");
+    m_renderSpacingOpts = pOpt->get_long_value();
+
+	m_spacingSmin = tenths_to_logical_max(LOMSE_MIN_SPACE);
+
+    //change options if using a predefined set
+    if (m_renderSpacingOpts & k_render_opt_set_classic)
+    {
+        //'classic' appearance (LDP <= 2.0) (eBooks backwards compatibility)
+        m_spacingAlpha = 0.547f;
+        m_spacingOptForce = 1.4f;
+        m_spacingDmin = 16;
+        m_rSpacingValue = 35.0f;
+
+        m_renderSpacingOpts = k_render_opt_breaker_simple;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -113,7 +140,11 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
         int numStaves = pInstr->get_num_staves();
         staves += numStaves;
         for (int iStaff=0; iStaff < numStaves; ++iStaff)
-            m_lineSpace.push_back( pInstr->get_line_spacing_for_staff(iStaff) );
+        {
+            LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
+            m_lineSpace.push_back(lineSpacing);
+            m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
+        }
     }
     m_numStaves = staves;
 }

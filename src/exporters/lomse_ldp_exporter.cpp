@@ -2045,6 +2045,89 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class SlurLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoSlur* m_pObj;
+    ImoNote* m_pNote;
+
+public:
+    SlurLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoSlur*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent =NULL)
+    {
+        m_pNote = static_cast<ImoNote*>( pParent );
+
+        start_element("slur", m_pObj->get_id());
+        add_slur_number();
+
+        bool fStart = (m_pNote == m_pObj->get_start_note());
+        add_slur_type(fStart);
+
+        ImoBezierInfo* pInfo = (fStart ? m_pObj->get_start_bezier()
+                                       : m_pObj->get_stop_bezier() );
+        add_bezier_info(pInfo);
+
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_slur_number()
+    {
+        m_source << m_pObj->get_slur_number();
+    }
+
+    void add_slur_type(bool fStart)
+    {
+        m_source << (fStart ? " start" : " stop");
+    }
+
+    void add_bezier_info(ImoBezierInfo* pInfo)
+    {
+        if (pInfo)
+        {
+            static string sPointNames[4] = { "start", "end", "ctrol1", "ctrol2" };
+
+            bool fElementStarted = false;
+            for (int i=0; i < 4; i++)
+            {
+                TPoint& pt = pInfo->get_point(i);
+
+                if (pt.x != 0.0f || pt.y != 0.0f)
+                {
+                    if (!fElementStarted)
+                    {
+                        start_element("bezier", k_no_imoid);
+                        fElementStarted = true;
+                    }
+
+                    if (pt.x != 0.0f)
+                    {
+                        start_element( sPointNames[i] + "-x", k_no_imoid, k_in_same_line);
+                        m_source << pt.x;
+                        end_element(k_in_same_line);
+                    }
+                    if (pt.y != 0.0f)
+                    {
+                        start_element( sPointNames[i] + "-y", k_no_imoid, k_in_same_line);
+                        m_source << pt.y;
+                        end_element(k_in_same_line);
+                    }
+                }
+            }
+            if (fElementStarted)
+                end_element();
+        }
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class StaffObjLdpGenerator : public LdpGenerator
 {
 protected:
@@ -2990,6 +3073,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_score_text:      return LOMSE_NEW ScoreTextLdpGenerator(pImo, this);
         case k_imo_score_line:      return LOMSE_NEW ScoreLineLdpGenerator(pImo, this);
         case k_imo_score_title:     return LOMSE_NEW TitleLdpGenerator(pImo, this);
+        case k_imo_slur:            return LOMSE_NEW SlurLdpGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);
         case k_imo_tie:             return LOMSE_NEW TieLdpGenerator(pImo, this);

@@ -56,6 +56,7 @@
 #include "lomse_command.h"
 #include "lomse_caret_positioner.h"
 #include "lomse_glyphs.h"
+#include "lomse_engraving_options.h"
 
 #include <sstream>
 using namespace std;
@@ -80,12 +81,20 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_sMusicFontPath(LOMSE_FONTS_PATH)
     , m_sFontsPath(LOMSE_FONTS_PATH)
     , m_pMusicGlyphs(NULL)      //lazzy instantiation. Singleton scope.
+    , m_fReplaceLocalMetronome(false)
     , m_fJustifySystems(true)
     , m_fDumpColumnTables(false)
-    , m_fDrawAnchors(false)
-    , m_fReplaceLocalMetronome(false)
+    , m_fDrawAnchorObjects(false)
+    , m_fDrawAnchorLines(false)
     , m_fShowShapeBounds(false)
     , m_fUnitTests(false)
+    , m_traceLinesBreaker(k_trace_breaks_off)
+    , m_fUseDbgValues(false)
+    , m_spacingOptForce(1.0f)
+    , m_spacingAlpha(0.666666667)
+    , m_spacingDmin(16.0f)
+    , m_spacingSmin(LOMSE_MIN_SPACE)
+    , m_renderSpacingOpts(k_render_opt_breaker_optimal)
 {
     if (!m_pDoorway)
     {

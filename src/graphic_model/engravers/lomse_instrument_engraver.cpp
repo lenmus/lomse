@@ -307,13 +307,15 @@ void PartsEngraver::engrave_names_and_brackets(bool fDrawStafflines, GmoBoxSyste
 }
 
 //---------------------------------------------------------------------------------------
-void PartsEngraver::reposition_staves(LUnits indent, UPoint org, GmoBoxSystem* pBox)
+void PartsEngraver::set_position_and_width_for_staves(LUnits indent, UPoint org,
+                                                      GmoBoxSystem* pBox)
 {
-    //For engraving staffobjs, staves are placed, initially, at arbitrary position (0,0).
-    //Once the system box is engraved, the right position is transferred to group and
-    //instrument engravers, before shapes are engraved.
+    //For engraving staffobjs it is necessary to know the staves position.
+    //Now, once the system box is created, instrument engravers will compute
+    //staves position, width and vertical distance between staves. The
+    //vertical distance is standard, based only on staves margins.
 
-    LUnits width = pBox->get_content_width_old();
+    LUnits width = pBox->get_usable_width();
     LUnits left = pBox->get_left();
 
     std::vector<GroupEngraver*>::iterator itG;
@@ -329,6 +331,17 @@ void PartsEngraver::reposition_staves(LUnits indent, UPoint org, GmoBoxSystem* p
         (*it)->set_slice_instr_origin(org);
     }
 }
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::set_staves_width(LUnits width)
+{
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
+    {
+        (*it)->set_staves_width(width);
+    }
+}
+
 
 //---------------------------------------------------------------------------------------
 // GroupEngraver implementation

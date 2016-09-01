@@ -12,17 +12,18 @@
                     (clef F4 p2)
                     (key D)
                     (time 2 4)
-                    (n f4 w p1)
-                    (goBack w)
+                    (n f4 w p1 v1)
+                    //v2
                     (n c3 e g+ v2 p2)
                     (n c3 e g-)
                     (n d3 q)
                     (barline)
+
                     (n c4 e g+ v1 p1)
                     (n c4 e g-)
                     (n d4 q)
-                    (goBack w)
-                    (n f3 w v2 p2)
+                    //v2
+                    (n f3 q v2 p2)(n f3 q)(n f3 q)(n f3 q)
                     (barline)
                 )
             )
@@ -32,16 +33,17 @@
                     (clef F4 p2)
                     (key D)
                     (time 2 4)
-                    (n f4 w p1)
-                    (goBack w)
+                    (n f4 q v1 p1)(n f4 q p1)(n f4 q p1)(n f4 q p1)
+                    //v2
                     (n c3 e g+ v2 p2)
                     (n c3 e g-)
                     (n d3 q)
                     (barline)
+
                     (n c4 e g+ v1 p1)
                     (n c4 e g-)
                     (n d4 q)
-                    (goBack w)
+                    //v2
                     (n f3 w v2 p2)
                     (barline)
                 )

@@ -3773,14 +3773,22 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(n c4 e (lyric \"De\"))");
+        parser.parse_text("(score (vers 2.0)(instrument (musicData "
+            "(n c4 e (lyric \"De\"))"
+            ")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != NULL );
         CHECK( pNote->get_num_attachments() == 1 );
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
@@ -4641,7 +4649,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(opt StaffLines.StopAtFinalBarline true)");
+        parser.parse_text("(opt StaffLines.Hide true)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4651,7 +4659,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_option() == true );
         ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "StaffLines.StopAtFinalBarline" );
+        CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 
@@ -4665,8 +4673,8 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Invalid value for option 'StaffLines.StopAtFinalBarline'. Option ignored." << endl;
-        parser.parse_text("(opt StaffLines.StopAtFinalBarline perhaps)");
+        expected << "Line 0. Invalid value for option 'StaffLines.Hide'. Option ignored." << endl;
+        parser.parse_text("(opt StaffLines.Hide perhaps)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4704,7 +4712,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(opt Render.SpacingValue 40)");
+        parser.parse_text("(opt StaffLines.Truncate 2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4713,9 +4721,9 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "Render.SpacingValue" );
+        CHECK( pOpt->get_name() == "StaffLines.Truncate" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 40 );
+        CHECK( pOpt->get_long_value() == 2 );
 
         delete tree->get_root();
         delete pIModel;
@@ -4809,7 +4817,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(score (vers 1.6)(opt StaffLines.StopAtFinalBarline true)(instrument (musicData)))");
+        parser.parse_text("(score (vers 1.6)(opt StaffLines.Hide true)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4819,9 +4827,9 @@ SUITE(LdpAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore != NULL );
         CHECK( pScore->has_options() == true );
-        ImoOptionInfo* pOpt = pScore->get_option("StaffLines.StopAtFinalBarline");
+        ImoOptionInfo* pOpt = pScore->get_option("StaffLines.Hide");
         CHECK( pOpt != NULL );
-        CHECK( pOpt->get_name() == "StaffLines.StopAtFinalBarline" );
+        CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 
@@ -4857,8 +4865,8 @@ SUITE(LdpAnalyserTest)
         pOpt = pScore->get_option("Render.SpacingValue");
         CHECK( pOpt != NULL );
         CHECK( pOpt->get_name() == "Render.SpacingValue" );
-        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 30L );
+        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
+        CHECK( pOpt->get_float_value() == 30.0f );
 
         delete tree->get_root();
         delete pIModel;

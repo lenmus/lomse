@@ -6,29 +6,77 @@
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.19.0
 
-- none
+- LibraryScope methods 'set_draw_anchors()' and 'draw_anchors()'
+  have been renamed as 'set_draw_anchor_objects()' and 
+  'draw_anchor_objects()', respectively.
 
 ##### COMPATIBLE CHANGES
 
-- Render score titles and add suport for titles in LDP exporter.
-- Render additional syllables and elision symbols in lyrics.
-- Fixes for c++11 compilers.
-- The internal model for lyrics has been replaced by a new model, to allow
-  for better layout of lyrics.
-- Added support in LDP for lyrics.
-- Added more symbols for fermata.
-- Added support in LDP for articulations (accents & stress marks).
-- Added support in LDP for dynamics marks.
-- Improve score layout algorithm to deal with systems with variable height.
-- Names and brackets/braces for groups of instruments now supported and rendered.
-- Barlines for groups now can be joined. Also mensurstrich layout is supported.
-- Added support in LDP for groups.
-- Left barline at start of sytems now also drawn in empty scores
-- Whitespace in text now proprely managed in LMD files (issue #42).
-- Default styles added to headings, paragraps and tables (issue #43).
-- New system tag now works again (issue #1).
-- MusicXML importer now supports part groups.
-- Added squared bracket for part groups (group symbol == line)
+- The spacing algorithm has been replaced. Previous algorithm was scattered
+  along several objects and was difficult to understand and, therefore, to 
+  modify and to improve. It was first isolated in a single object with a 
+  clear interface, and an abstract class was defined to facilitate 
+  replacement and experimentation with different algorithms in future. Then 
+  a new algorithm, based on Gourlay's approach, was implemented. The new 
+  algorithm is easier to understand and gives more flexibility.
+
+- The lines break algorithm was still valid, but the penalty function has 
+  been changed. This improves layout and gives more control and flexibility. 
+
+- Lyrics are now taken into account for spacing notes, removing the lyrics
+  layout problems that were present in previous version. The internal model
+  for lyrics has been replaced by a new model, to allow for better control
+  of the layout process.
+  Also additional space between staves is added when lyrics are present.
+  The solution for vertical staves spacing is provisional and requires more
+  changes (in study). Nevertheless, in preparation for these changes, the
+  score layout algorithm have been modified for dealing with systems 
+  with variable height.
+
+- Trace and debug options has been added to the library, to facilitate
+  experimentation and debugging of spacing algorithm and lines breaker 
+  algorithm.
+
+- Although in finished scores is normal practice to justify the last system,
+  there are cases were this is not required or even need to be prevented. 
+  Also, truncation of staff lines after last object is a need in some 
+  cases. Therefore, scenarios for justification and truncation of last 
+  system have been analyzed, and specific options for controlling the 
+  behaviour have been added to the library. Now users can fully control 
+  these aspects. LDP options for this have been reviewed and adapted. 
+  As a consequence, two existing options ('Score.JustifyFinalBarline' 
+  and 'StaffLines.StopAtFinalBarline') have been deprecated and replaced
+  by two new options ('Score.JustifyLastSystem' and 'StaffLines.Truncate').
+
+- For backwards compatibility to prevent undesired changes in existing 
+  scores due to the new algorithms (that is, for ensuring that the visual 
+  appearance of existing LDP scores, mainly for LenMus eBooks, is preserved), 
+  the spacing algorithm parameters have been adjusted. New LDP options 
+  ('Render.SpacingOptions' and "Render.SpacingFopt") has been added for 
+  controlling the behaviour of the new spacing algorithm and the lines 
+  breaker algorithm, so that users can have now full control of spacing 
+  and lines breaking algorithm options.
+
+- Renderization is improved in several aspects:
+    - Score titles are now rendered.
+    - Additional syllables and elision symbols in lyrics are now rendered.
+    - Added more symbols for fermata.
+    - Names and brackets/braces for groups of instruments now rendered.
+    - Barlines for groups now can be joined. Also mensurstrich layout is
+      supported.
+    - Left barline at start of systems now also drawn in empty scores.
+
+- Added support, in LDP, for many music notations: lyrics, articulations
+  (accents & stress marks), dynamics marks, groups of instruments and
+  score titles.
+
+- Also several fixes and small changes:
+    - Fixes for avoiding compilation errors with c++11 compilers.
+    - Whitespace in text now properly managed in LMD files (issue #42).
+    - Default styles added to headings, paragraphs and tables (issue #43).
+    - New system tag now works again (issue #1).
+    - MusicXML importer now supports part groups.
+    - Added squared bracket for part groups (group symbol == line)
 
 
 Version [0.19.0] (2/May/2016)

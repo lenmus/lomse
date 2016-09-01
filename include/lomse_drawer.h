@@ -78,7 +78,8 @@ struct RenderOptions
     //for debug: draw a box around boxes of selected types
     bitset<GmoObj::k_max> boxes;
 
-    bool draw_anchors;          //draw anchors, to see them in the score
+    bool draw_anchor_objects;   //draw anchor objs. (i.e. invisible shapes)
+    bool draw_anchor_lines;     //draw anchor lines. (spacing algorithm)
     bool draw_shape_bounds;     //draw bounds around selected shapes
     //bool g_fShowMargins;    //draw margins in scores, so user can change them
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
@@ -115,7 +116,8 @@ struct RenderOptions
 
 
     RenderOptions()
-        : draw_anchors(false)
+        : draw_anchor_objects(false)
+        , draw_anchor_lines(false)
         , draw_shape_bounds(false)
         , scale(1.0)
         , background_color(127, 127, 127)       //grey

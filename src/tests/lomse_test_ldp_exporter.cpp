@@ -74,6 +74,11 @@ public:
         cout << pCol->dump();
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -699,7 +704,7 @@ SUITE(LdpExporterTest)
         //opt
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content (score (vers 1.6)"
-            "(opt Render.SpacingValue 40)(opt StaffLines.StopAtFinalBarline false)"
+            "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument (musicData (clef G))))"
             "))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -711,7 +716,7 @@ SUITE(LdpExporterTest)
         //cout << "\"" << source << "\"" << endl;
         string expected =
             "(score (vers 2.0)"
-            "(opt Render.SpacingValue 40)(opt StaffLines.StopAtFinalBarline false)"
+            "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument (staves 1)(musicData (clef G p1 ))))";
 
         CHECK( source == expected );
@@ -771,6 +776,34 @@ SUITE(LdpExporterTest)
 
         CHECK( source == expected );
     }
+
+    // Slur -----------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, slur_01)
+    {
+        //@ 01
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (n c4 q (slur 1 start))"
+            "(n e4 q (slur 1 stop)) )))"
+            );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+        string expected = "(musicData (n c4 q v1  p1 (slur 1 start))"
+            "(n e4 q v1  p1 (slur 1 stop)))";
+
+//        cout << test_name() << endl;
+//        cout << "\"" << source << "\"" << endl;
+
+        CHECK( source == expected );
+    }
+
 
     // StaffObjLdpGenerator -------------------------------------------------------------
 

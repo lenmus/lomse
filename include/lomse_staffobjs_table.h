@@ -41,6 +41,8 @@ using namespace std;
 namespace lomse
 {
 
+#define LOMSE_NO_NOTE_DURATION  100000000.0f    //any too high value for note/rest
+
 //forward declarations
 class ImoObj;
 class ImoStaffObj;
@@ -125,6 +127,7 @@ protected:
     int m_numLines;
     int m_numEntries;
     TimeUnits m_rMissingTime;
+    TimeUnits m_minNoteDuration;
 
     ColStaffObjsEntry* m_pFirst;
     ColStaffObjsEntry* m_pLast;
@@ -138,14 +141,11 @@ public:
     inline int num_lines() { return m_numLines; }
     inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
     inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
+    inline TimeUnits min_note_duration() { return m_minNoteDuration; }
 
     //table management
     void add_entry(int measure, int instr, int voice, int staff, ImoStaffObj* pImo);
-    inline void set_total_lines(int number) { m_numLines = number; }
-    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
     void delete_entry_for(ImoStaffObj* pSO);
-    void sort_table();
-    static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
 
     //iterator related
     class iterator
@@ -229,6 +229,18 @@ public:
     string dump(bool fWithIds=true);
 
 protected:
+
+    friend class ColStaffObjsBuilder;
+    friend class ColStaffObjsBuilderEngine;
+    friend class ColStaffObjsBuilderEngine1x;
+    friend class ColStaffObjsBuilderEngine2x;
+
+    inline void set_total_lines(int number) { m_numLines = number; }
+    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    void sort_table();
+    static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
+    inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
+
     void add_entry_to_list(ColStaffObjsEntry* pEntry);
     ColStaffObjsEntry* find_entry_for(ImoStaffObj* pSO);
 
@@ -291,9 +303,13 @@ protected:
     int         m_nCurMeasure;
     TimeUnits   m_rMaxSegmentTime;
     TimeUnits   m_rStartSegmentTime;
+    TimeUnits   m_minNoteDuration;
     StaffVoiceLineTable  m_lines;
 
-    ColStaffObjsBuilderEngine(ImoScore* pScore) : m_pImScore(pScore) {}
+    ColStaffObjsBuilderEngine(ImoScore* pScore)
+        : m_pImScore(pScore)
+        , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
+    {}
 
 public:
     virtual ~ColStaffObjsBuilderEngine() {}
@@ -304,19 +320,23 @@ protected:
     virtual void initializations()=0;
     virtual void determine_timepos(ImoStaffObj* pSO)=0;
     virtual void create_entries(int nInstr)=0;
+    virtual void prepare_for_next_instrument()=0;
 
     void create_table();
     void collect_anacrusis_info();
     int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
-    void prepare_for_next_instrument();
+    void set_min_note_duration();
 
 };
 
 
 //---------------------------------------------------------------------------------------
 // ColStaffObjsBuilderEngine1x: algorithm to create a ColStaffObjs table for LDP 1.x
+// Notes/rests for the different voices go intermixed. goBack & goFwd elements exist.
+// No longer needed for LDP but this is the model followed by MusicXML, so must be
+// maintained for importing MusicXML files.
 //---------------------------------------------------------------------------------------
 class ColStaffObjsBuilderEngine1x : public ColStaffObjsBuilderEngine
 {
@@ -338,17 +358,22 @@ private:
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     ImoSpacer* anchor_object(ImoAuxObj* pImo);
     void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
+    void prepare_for_next_instrument();
 
 };
 
 
 //---------------------------------------------------------------------------------------
 // ColStaffObjsBuilderEngine2x: algorithm to create a ColStaffObjs table for LDP 2.x
+// Notes/rests for the different voices DO NOT go intermixed. Instead, voices are
+// defined in sequence. goBack elements do not exist. goFwd elements exist.
+// This is the model for LDP >= 2.0.
 //---------------------------------------------------------------------------------------
 class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
 {
 protected:
     vector<TimeUnits> m_rCurTime;
+    int m_curVoice;
 
 public:
     ColStaffObjsBuilderEngine2x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
@@ -361,6 +386,7 @@ private:
     void determine_timepos(ImoStaffObj* pSO);
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
+    void prepare_for_next_instrument();
 
 };
 

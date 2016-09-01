@@ -3775,6 +3775,29 @@ public:
         else if (is_string_option(name))
             fOk = set_string_value(pOpt);
 
+        //backwards compatibility for deprecated options
+        if (fOk)
+        {
+            if (name == "Score.JustifyFinalBarline")
+            {
+                pOpt->set_name("Score.JustifyLastSystem");
+                pOpt->set_type(ImoOptionInfo::k_number_long);
+                if (pOpt->get_bool_value())
+                    pOpt->set_long_value(1L);   //yes = 1-only if ends in barline
+                else
+                    pOpt->set_long_value(0L);   //no = 0-never justify last system
+            }
+            else if (name == "StaffLines.StopAtFinalBarline")
+            {
+                pOpt->set_name("StaffLines.Truncate");
+                pOpt->set_type(ImoOptionInfo::k_number_long);
+                if (pOpt->get_bool_value())
+                    pOpt->set_long_value(1L);   //yes = 1-only barline of type final
+                else
+                    pOpt->set_long_value(0L);   //no = 0-never
+            }
+        }
+
         if (fOk)
         {
             add_to_model(pOpt);
@@ -3788,23 +3811,29 @@ public:
 
     bool is_bool_option(const string& name)
     {
-        return (name == "StaffLines.StopAtFinalBarline")
+        return (name == "Score.FillPageWithEmptyStaves")
+            || (name == "Score.JustifyFinalBarline")
+            || (name == "StaffLines.StopAtFinalBarline")    //deprecated 2.1
             || (name == "StaffLines.Hide")
-            || (name == "Staff.DrawLeftBarline")
-            || (name == "Score.FillPageWithEmptyStaves")
-            || (name == "Score.JustifyFinalBarline");
+            || (name == "Staff.DrawLeftBarline");
     }
 
     bool is_number_long_option(const string& name)
     {
-        return (name == "Staff.UpperLegerLines.Displacement")
-                 || (name == "Render.SpacingMethod")
-                 || (name == "Render.SpacingValue");
+        return (name == "Render.SpacingMethod")
+            || (name == "Render.SpacingOptions")
+            || (name == "Score.JustifyLastSystem")
+            || (name == "Staff.UpperLegerLines.Displacement")
+            || (name == "StaffLines.Truncate")
+            ;
     }
 
     bool is_number_float_option(const string& name)
     {
-        return (name == "Render.SpacingFactor");
+        return (name == "Render.SpacingFactor")
+            || (name == "Render.SpacingFopt")
+            || (name == "Render.SpacingValue")
+            ;
     }
 
     bool is_string_option(const string& UNUSED(name))
@@ -4309,32 +4338,50 @@ protected:
         return m_childToAnalyse.first_child().value();
     }
 
-//bool lmLDPParser::AnalyzeCreationMode(lmLDPNode* pNode, ImoScore* pScore)
-//{
-//    // <creationMode> = (creationMode <modeName><modeVersion>)
+//    void set_version(ImoScore* pScore)
+//    {
+//        string vers = m_pParamToAnalyse->get_parameter(1)->get_value();
 //
-//    //Returns true if success.
-//
-//    wxASSERT(GetNodeName(pNode) == "creationMode");
-//
-//    //check that two parameters are specified
-//    if(GetNodeNumParms(pNode) != 2) {
-//        AnalysisError(
-//            pNode,
-//            "Element '%s' has less parameters than the minimum required. Element ignored.",
-//            GetNodeName(pNode).c_str() );
-//        return false;
+//        //check that version is valid
+//        if (vers == "1.5" || vers == "1.6" || vers == "1.7" || vers == "2.0")
+//        {
+//            //1.5 -
+//            //1.6 -
+//            //1.7 - transitional to 2.0. Was not published
+//            //2.0
+//        }
+//        else if (vers == "2.1")
+//        {
+//            //2.1 - sep/2006
+//        }
+//        else
+//        {
+//            report_msg(m_pParamToAnalyse->get_line_number(),
+//                "Invalid score version '" + vers + "'. Version 1.6 assumed.");
+//            vers = "1.6";
+//        }
+//        int numvers = m_pAnalyser->set_score_version(vers);
+//        pScore->set_version(numvers);
 //    }
 //
-//    //get the mode info
-//    std::string sModeName = GetNodeName(pNode->GetParameter(1));
-//    std::string sModeVers = GetNodeName(pNode->GetParameter(2));
+//    void set_defaults_for_this_score_version(ImoScore* pScore)
+//    {
+//        //set default options for each score version
+//        string version = pScore->get_version_string();
+//        if (version == "2.1")
+//        {
+//            ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
+//            pOpt->set_float_value(0.35f);
 //
-//    //transfer to the score
-//    pScore->SetCreationMode(sModeName, sModeVers);
-//
-//    return true;
-//}
+//            pOpt = pScore->get_option("Render.SpacingOptions");
+//            pOpt->set_long_value(k_render_opt_breaker_optimal
+//                                 | k_render_opt_dmin_global);
+//        }
+//        else
+//        {
+//            //vers. 1.5, 1.6, 1.7, 2.0. Default values are ok
+//        }
+//    }
 
 };
 
