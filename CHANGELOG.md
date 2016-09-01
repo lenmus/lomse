@@ -1,7 +1,12 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.19.0
+[Since last version] 0.20.0
+=============================
+
+- none
+
+Version [0.20.0] (1/Sep/2016)
 =============================
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.19.0
@@ -454,7 +459,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.19.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.20.0...HEAD
+[0.20.0]: https://github.com/lenmus/lomse/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/lenmus/lomse/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/lenmus/lomse/compare/0.17.20...0.18.0
 [0.17.20]: https://github.com/lenmus/lomse/compare/0.16.1...0.17.20
