@@ -1424,7 +1424,7 @@ void ColumnDataGourlay::dump(ostream& outStream, bool fOrdered)
 void ColumnDataGourlay::set_num_entries(int numSlices)
 {
     m_orderedSlices.reserve(numSlices);
-    m_orderedSlices.assign(numSlices, NULL);
+    m_orderedSlices.assign(numSlices, (TimeSlice*)NULL);   //GCC 4.8.4 complains if NULL not casted
 }
 
 //---------------------------------------------------------------------------------------
