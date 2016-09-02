@@ -6,7 +6,7 @@
 #
 # This script MUST BE RUN from <root>/scripts/ folder
 #
-# usage: ./update-version.sh
+# usage: ./update-version.sh <major.minor.patch>
 #------------------------------------------------------------------------------
 
 
@@ -16,6 +16,14 @@
 E_SUCCESS=0         # success
 E_NOARGS=65         # no arguments
 E_BADPATH=66        # not running from <root>/scripts
+
+
+# check that new version is present
+if [ -z "$1" ]
+then
+    echo "Usage: `basename $0` major.minor.patch"
+    exit $E_NOARGS
+fi
 
 #get current directory and check we are running from <root>/scripts.
 #For this I just check that "src" folder exists
@@ -28,18 +36,22 @@ fi
 
 source ${scripts_path}/helper.sh
 
-# get lomse version from repo tags
-echo "Getting lomse version"
-cd "${lomse_path}"
-
-description="$(git describe --tags --long)"
+description="$1"
 parseDescription "$description"
 
-echo "-- git description = ${description}"
-echo "-- package = ${package}"
-echo "-- major=${major}, minor=${minor}, patch=${patch}, sha1=${sha1}"
+## get lomse version from repo tags
+#echo "Getting lomse version"
+#cd "${lomse_path}"
 
-# update version file from latest tag
+#description="$(git describe --tags --long)"
+#parseDescription "$description"
+#echo "-- git description = ${description}"
+#echo "-- package = ${package}"
+#echo "-- major=${major}, minor=${minor}, patch=${patch}, sha1=${sha1}"
+
+echo "-- major=${major}, minor=${minor}, patch=${patch}"
+
+# update default version for building from cmake
 file="${lomse_path}/build-version.cmake"
 if [ -f $file ]; then
     echo "Updating version in file ${file}"
