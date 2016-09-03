@@ -5823,8 +5823,8 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.7) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
-            "(goBack start)(n c2 w v1  p1 )(goBack 234.667)"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(goBack start)(n c2 w v1 p1)(goBack 234.667)"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -6257,7 +6257,7 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.6) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -6305,7 +6305,7 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.7) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -9186,7 +9186,7 @@ SUITE(LdpAnalyserTest)
         //expected << "" << endl;
         parser.parse_text("(instrument (staves 2)(staff 2 (staffType ossia)"
             "(staffLines 4)(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5))"
-            "(musicData ))");
+            "(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");

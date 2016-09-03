@@ -290,7 +290,7 @@ SUITE(ScoreLayouterTest)
 //    {
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData ))) ))" );
+//            "(instrument (musicData))) ))" );
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -307,7 +307,7 @@ SUITE(ScoreLayouterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData ))) ))" );
+            "(instrument (musicData))) ))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -761,7 +761,7 @@ SUITE(ColumnsBuilderTest)
 //    {
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData ))) ))" );
+//            "(instrument (musicData))) ))" );
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);

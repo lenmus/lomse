@@ -67,8 +67,8 @@ SUITE(ScoreMeterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData ))"
-            "(instrument (staves 3)(musicData ))"
+            "(instrument (staves 2)(musicData))"
+            "(instrument (staves 3)(musicData))"
             ")))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreMeter meter(pScore);

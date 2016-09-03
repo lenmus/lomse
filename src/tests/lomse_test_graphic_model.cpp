@@ -174,7 +174,7 @@ SUITE(GraphicModelTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData )))))" );
+            "(instrument (staves 2)(musicData)))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
@@ -282,7 +282,7 @@ SUITE(GraphicModelTest)
         //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData )))))" );
+            "(instrument (staves 2)(musicData)))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
@@ -317,7 +317,7 @@ SUITE(GraphicModelTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData )))))" );
+            "(instrument (staves 2)(musicData)))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);

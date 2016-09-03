@@ -61,9 +61,14 @@ class LdpGenerator
 protected:
     LdpExporter* m_pExporter;
     stringstream m_source;
+    bool m_fAddSpace;           //add space when opening new element
 
 public:
-    LdpGenerator(LdpExporter* pExporter) : m_pExporter(pExporter) {}
+    LdpGenerator(LdpExporter* pExporter, bool fSpaceNeeded=false)
+        : m_pExporter(pExporter)
+        , m_fAddSpace(fSpaceNeeded)
+    {
+    }
     virtual ~LdpGenerator() {}
 
     virtual string generate_source(ImoObj* pParent=NULL) = 0;
@@ -96,6 +101,13 @@ protected:
     void add_style(ImoStyle* pStyle);
     void add_placement(int placement);
 
+    inline void space_needed() { m_fAddSpace = true; }
+    inline void add_space_if_needed() {
+        if (m_fAddSpace)
+            m_source << " ";
+        m_fAddSpace = false;
+    }
+    inline bool is_space_needed() { return m_fAddSpace; }
 };
 
 const bool k_in_same_line = false;
@@ -280,22 +292,22 @@ protected:
         switch(m_pObj->get_symbol())
         {
             case ImoFermata::k_short:
-                m_source << "short";
+                m_source << " short";
                 break;
             case ImoFermata::k_long:
-                m_source << "long";
+                m_source << " long";
                 break;
             case ImoFermata::k_henze_short:
-                m_source << "henze-short";
+                m_source << " henze-short";
                 break;
             case ImoFermata::k_henze_long:
-                m_source << "henze-long";
+                m_source << " henze-long";
                 break;
             case ImoFermata::k_very_short:
-                m_source << "very-short";
+                m_source << " very-short";
                 break;
             case ImoFermata::k_very_long:
-                m_source << "very-long";
+                m_source << " very-long";
                 break;
 
             case ImoFermata::k_normal:
@@ -335,16 +347,16 @@ protected:
         string name = LdpExporter::barline_type_to_ldp(type);
         if (name == "undefined")
         {
-            m_source << "simple";
+            m_source << " simple";
             stringstream s;
             s << "Invalid barline. Type=" << type;
             LOMSE_LOG_ERROR(s.str());
         }
         else
-            m_source << name;
+            m_source << " " << name;
 
         if (m_pObj->is_middle())
-            m_source << " middle";
+            m_source << "  middle";
     }
 
 };
@@ -409,7 +421,7 @@ protected:
 
     void add_beam_number()
     {
-        m_source << m_pRO->get_id();
+        m_source << " " << m_pRO->get_id();
     }
 
     void add_segments_info()
@@ -460,7 +472,7 @@ protected:
 
     void add_type()
     {
-        m_source << LdpExporter::clef_type_to_ldp( m_pObj->get_clef_type() );
+        m_source << " " << LdpExporter::clef_type_to_ldp( m_pObj->get_clef_type() );
     }
 
 };
@@ -473,7 +485,8 @@ protected:
     ImoContentObj* m_pObj;
 
 public:
-    ContentObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    ContentObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = static_cast<ImoContentObj*>(pImo);
     }
@@ -492,11 +505,17 @@ protected:
     {
         Tenths ux = m_pObj->get_user_location_x();
         if (ux != 0.0f)
-            m_source << " (dx " << LdpExporter::float_to_string(ux) << ")";
+        {
+            add_space_if_needed();
+            m_source << "(dx " << LdpExporter::float_to_string(ux) << ")";
+        }
 
         Tenths uy = m_pObj->get_user_location_y();
         if (uy != 0.0f)
-            m_source << " (dy " << LdpExporter::float_to_string(uy) << ")";
+        {
+            add_space_if_needed();
+            m_source << "(dy " << LdpExporter::float_to_string(uy) << ")";
+        }
     }
 
     void add_attachments()
@@ -542,7 +561,8 @@ protected:
     ImoStyle* m_pObj;
 
 public:
-    DefineStyleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    DefineStyleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = static_cast<ImoStyle*>(pImo);
     }
@@ -560,7 +580,7 @@ protected:
 
     void add_name()
     {
-        m_source << "\"" << m_pObj->get_name() << "\" ";
+        m_source << " \"" << m_pObj->get_name() << "\" ";
     }
 
     void add_properties()
@@ -584,7 +604,7 @@ protected:
         if (m_pObj->get_float_property(ImoStyle::k_font_size, &rValue))
         {
             start_element("font-size", k_no_imoid);
-            m_source << rValue << "pt";
+            m_source << " " << rValue << "pt";
             end_element(k_in_same_line);
         }
 
@@ -689,35 +709,35 @@ protected:
     void create_string_element(const string& tag, const string& value)
     {
         start_element(tag, k_no_imoid);
-        m_source << "\"" << value << "\"";
+        m_source << " \"" << value << "\"";
         end_element(k_in_same_line);
     }
 
     void create_float_element(const string& tag, float value)
     {
         start_element(tag, k_no_imoid);
-        m_source << value;
+        m_source << " " << value;
         end_element(k_in_same_line);
     }
 
     void create_lunits_element(const string& tag, LUnits value)
     {
         start_element(tag, k_no_imoid);
-        m_source << value;
+        m_source << " " << value;
         end_element(k_in_same_line);
     }
 
     void create_int_element(const string& tag, int value)
     {
         start_element(tag, k_no_imoid);
-        m_source << value;
+        m_source << " " << value;
         end_element(k_in_same_line);
     }
 
     void create_color_element(const string& tag, Color color)
     {
         start_element(tag, k_no_imoid);
-        m_source << LdpExporter::color_to_ldp(color);
+        m_source << " " << LdpExporter::color_to_ldp(color);
         end_element(k_in_same_line);
     }
 
@@ -726,11 +746,11 @@ protected:
         start_element("font-style", k_no_imoid);
 
         if (value == ImoStyle::k_font_style_normal)
-            m_source << "normal";
+            m_source << " normal";
         else if (value == ImoStyle::k_font_style_italic)
-            m_source << "italic";
+            m_source << " italic";
         else
-            m_source << "invalid value " << value;
+            m_source << " invalid value " << value;
 
         end_element(k_in_same_line);
     }
@@ -740,11 +760,11 @@ protected:
         start_element("font-weight", k_no_imoid);
 
         if (value == ImoStyle::k_font_weight_normal)
-            m_source << "normal";
+            m_source << " normal";
         else if (value == ImoStyle::k_font_weight_bold)
-            m_source << "bold";
+            m_source << " bold";
         else
-            m_source << "invalid value " << value;
+            m_source << " invalid value " << value;
 
         end_element(k_in_same_line);
     }
@@ -754,15 +774,15 @@ protected:
         start_element("text-decoration", k_no_imoid);
 
         if (value == ImoStyle::k_decoration_none)
-            m_source << "none";
+            m_source << " none";
         else if (value == ImoStyle::k_decoration_underline)
-            m_source << "underline";
+            m_source << " underline";
         else if (value == ImoStyle::k_decoration_overline)
-            m_source << "overline";
+            m_source << " overline";
         else if (value == ImoStyle::k_decoration_line_through)
-            m_source << "line-through";
+            m_source << " line-through";
         else
-            m_source << "invalid value " << value;
+            m_source << " invalid value " << value;
 
         end_element(k_in_same_line);
     }
@@ -772,23 +792,23 @@ protected:
         start_element("vertical-align", k_no_imoid);
 
         if (value == ImoStyle::k_valign_baseline)
-            m_source << "baseline";
+            m_source << " baseline";
         else if (value == ImoStyle::k_valign_sub)
-            m_source << "sub";
+            m_source << " sub";
         else if (value == ImoStyle::k_valign_super)
-            m_source << "super";
+            m_source << " super";
         else if (value == ImoStyle::k_valign_top)
-            m_source << "top";
+            m_source << " top";
         else if (value == ImoStyle::k_valign_text_top)
-            m_source << "text-top";
+            m_source << " text-top";
         else if (value == ImoStyle::k_valign_middle)
-            m_source << "middle";
+            m_source << " middle";
         else if (value == ImoStyle::k_valign_bottom)
-            m_source << "bottom";
+            m_source << " bottom";
         else if (value == ImoStyle::k_valign_text_bottom)
-            m_source << "text-bottom";
+            m_source << " text-bottom";
         else
-            m_source << "invalid value " << value;
+            m_source << " invalid value " << value;
 
         end_element(k_in_same_line);
     }
@@ -798,15 +818,15 @@ protected:
         start_element("text-align", k_no_imoid);
 
         if (value == ImoStyle::k_align_left)
-            m_source << "left";
+            m_source << " left";
         else if (value == ImoStyle::k_align_right)
-            m_source << "right";
+            m_source << " right";
         else if (value == ImoStyle::k_align_center)
-            m_source << "center";
+            m_source << " center";
         else if (value == ImoStyle::k_align_justify)
-            m_source << "justify";
+            m_source << " justify";
         else
-            m_source << "invalid value " << value;
+            m_source << " invalid value " << value;
 
         end_element(k_in_same_line);
     }
@@ -829,6 +849,7 @@ public:
     {
         start_element("dyn", m_pObj->get_id());
         add_dynamics_string();
+        space_needed();
         add_placement( m_pObj->get_placement() );
         source_for_base_scoreobj(m_pObj);
         end_element(k_in_same_line);
@@ -839,7 +860,7 @@ protected:
 
     void add_dynamics_string()
     {
-        m_source << "\"" << m_pObj->get_mark_type() << "\"";
+        m_source << " \"" << m_pObj->get_mark_type() << "\"";
     }
 };
 
@@ -860,7 +881,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("TODO: ", m_pImo->get_id());
-        m_source << "No LdpGenerator for Imo. Imo name=" << m_pImo->get_name()
+        m_source << " No LdpGenerator for Imo. Imo name=" << m_pImo->get_name()
                  << ", Imo type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
@@ -929,7 +950,8 @@ protected:
     ImoObj* m_pObj;
 
 public:
-    ImObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    ImObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = pImo;
     }
@@ -968,15 +990,15 @@ protected:
     void add_time(bool fFwd)
     {
         if (m_pObj->is_to_start())
-            m_source << "start";
+            m_source << " start";
         else if (m_pObj->is_to_end())
-            m_source << "end";
+            m_source << " end";
         else
         {
             if (fFwd)
-                m_source << m_pObj->get_time_shift();
+                m_source << " " <<  m_pObj->get_time_shift();
             else
-                m_source << - m_pObj->get_time_shift();
+                m_source << " " << - m_pObj->get_time_shift();
 
         }
     }
@@ -1012,7 +1034,7 @@ protected:
     {
         start_element("staves", k_no_imoid);
         int staves = m_pObj->get_num_staves();
-        m_source << staves;
+        m_source << " " << staves;
         end_element(k_in_same_line);
 
         for (int i=1; i <= staves; ++i)
@@ -1038,7 +1060,7 @@ protected:
         if (instr != 0 || channel != 0)
         {
             start_element("infoMIDI", k_no_imoid);
-            m_source << instr << " " << channel;
+            m_source << " " << instr << " " << channel;
             end_element(k_in_same_line);
         }
     }
@@ -1047,7 +1069,8 @@ protected:
     {
         string partId = m_pObj->get_instr_id();
         if (!partId.empty())
-            m_source << partId;
+            m_source << " " << partId;
+        space_needed();
     }
 
     void add_name_abbreviation()
@@ -1057,7 +1080,8 @@ protected:
         {
             start_element("name", k_no_imoid);
             ImoScoreText& txt = m_pObj->get_name();
-            m_source << "\"" << txt.get_text() << "\"";
+            m_source << " \"" << txt.get_text() << "\"";
+            space_needed();
             add_style( txt.get_style() );
             end_element(k_in_same_line);
         }
@@ -1065,7 +1089,8 @@ protected:
         {
             start_element("abbrev", k_no_imoid);
             ImoScoreText& txt = m_pObj->get_abbrev();
-            m_source << "\"" << txt.get_text() << "\"";
+            m_source << " \"" << txt.get_text() << "\"";
+            space_needed();
             add_style( txt.get_style() );
             end_element(k_in_same_line);
         }
@@ -1096,13 +1121,13 @@ protected:
         start_element("staffType", k_no_imoid);
         switch (type)
         {
-            case ImoStaffInfo::k_staff_ossia:       m_source << "ossia";        break;
-            case ImoStaffInfo::k_staff_cue:         m_source << "cue";          break;
-            case ImoStaffInfo::k_staff_editorial:   m_source << "editorial";    break;
-            case ImoStaffInfo::k_staff_regular:     m_source << "regular";      break;
-            case ImoStaffInfo::k_staff_alternate:   m_source << "alternate";    break;
+            case ImoStaffInfo::k_staff_ossia:       m_source << " ossia";        break;
+            case ImoStaffInfo::k_staff_cue:         m_source << " cue";          break;
+            case ImoStaffInfo::k_staff_editorial:   m_source << " editorial";    break;
+            case ImoStaffInfo::k_staff_regular:     m_source << " regular";      break;
+            case ImoStaffInfo::k_staff_alternate:   m_source << " alternate";    break;
             default:
-                m_source << "regular";
+                m_source << " regular";
                 stringstream ss;
                 ss << "Invalid staff type " << type;
                 LOMSE_LOG_ERROR(ss.str());
@@ -1113,35 +1138,35 @@ protected:
     void add_staff_lines(ImoStaffInfo* pStaff)
     {
         start_element("staffLines", k_no_imoid);
-        m_source << pStaff->get_num_lines();
+        m_source << " " << pStaff->get_num_lines();
         end_element(k_in_same_line);
     }
 
     void add_staff_spacing(ImoStaffInfo* pStaff)
     {
         start_element("staffSpacing", k_no_imoid);
-        m_source << pStaff->get_line_spacing();
+        m_source << " " << pStaff->get_line_spacing();
         end_element(k_in_same_line);
     }
 
     void add_staff_distance(ImoStaffInfo* pStaff)
     {
         start_element("staffDistance", k_no_imoid);
-        m_source << pStaff->get_staff_margin();
+        m_source << " " << pStaff->get_staff_margin();
         end_element(k_in_same_line);
     }
 
     void add_line_thickness(ImoStaffInfo* pStaff)
     {
         start_element("lineThickness", k_no_imoid);
-        m_source << pStaff->get_line_thickness();
+        m_source << " " << pStaff->get_line_thickness();
         end_element(k_in_same_line);
     }
 
     void open_staff_element(int i)
     {
         start_element("staff", k_no_imoid);
-        m_source << i << " ";
+        m_source << " " << i << " ";
     }
 
     void close_staff_element()
@@ -1178,7 +1203,7 @@ protected:
 
     void add_key_type()
     {
-        m_source << LdpExporter::key_type_to_ldp( m_pObj->get_key_type() );
+        m_source << " " << LdpExporter::key_type_to_ldp( m_pObj->get_key_type() );
     }
 
 };
@@ -1199,6 +1224,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("lenmusdoc", m_pObj->get_id());
+        m_source << " ";
         add_version();
         add_comment();
         add_content();
@@ -1211,7 +1237,7 @@ protected:
     void add_version()
     {
         start_element("vers", k_no_imoid);
-        m_source << m_pObj->get_version();
+        m_source << " " << m_pObj->get_version();
         end_element(k_in_same_line);
     }
 
@@ -1279,7 +1305,7 @@ protected:
 
     void add_lyric_number()
     {
-        m_source << m_pObj->get_number();
+        m_source << " " << m_pObj->get_number();
     }
 
     void add_lyric_text()
@@ -1322,6 +1348,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("musicData", m_pObj->get_id());
+        space_needed();
         add_staffobjs();
         end_element();
         return m_source.str();
@@ -1366,7 +1393,7 @@ protected:
                     int staff = pSO->get_staff() + 1;
 
                     start_element("goFwd", k_no_imoid);
-                    m_source << shift << " v" << voice << " p" << staff;
+                    m_source << " " << shift << " v" << voice << " p" << staff;
                     end_element(k_in_same_line);
 
                     m_rCurTime[voice] = pEntry->time();
@@ -1663,6 +1690,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("metronome", m_pImo->get_id());
+        m_source << " ";
         add_marks();
         source_for_base_staffobj(m_pImo);
         end_element(k_in_same_line);
@@ -1728,10 +1756,12 @@ public:
         if (m_pObj->is_start_of_chord())
         {
             start_element("chord", k_no_imoid);
+            m_source << " ";
             m_pExporter->set_processing_chord(true);
         }
 
         start_element("n", m_pObj->get_id());
+        m_source << " ";
         add_pitch();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         add_voice();
@@ -1759,7 +1789,7 @@ protected:
 
         if (m_pObj->get_step() == k_no_pitch)
         {
-            m_source << "* ";
+            m_source << "*";
             return;
         }
 
@@ -1769,7 +1799,6 @@ protected:
 
         m_source << sNoteName[m_pObj->get_step()];
         m_source << sOctave[m_pObj->get_octave()];
-        m_source << " ";
     }
 
     void add_stem()
@@ -1802,7 +1831,8 @@ protected:
 
     void add_voice()
     {
-        m_source << " v" << m_pObj->get_voice() << " ";
+        m_source << " v" << m_pObj->get_voice();
+        space_needed();
     }
 
     void add_time_modifier()
@@ -1811,8 +1841,8 @@ protected:
             || m_pObj->get_time_modifier_bottom() != 1)
         {
             start_element("tm", k_no_imoid, k_in_same_line);
-            m_source << m_pObj->get_time_modifier_top() << " "
-                     << m_pObj->get_time_modifier_bottom();
+            m_source << " " << m_pObj->get_time_modifier_top()
+                     << " "<< m_pObj->get_time_modifier_bottom();
             end_element(k_in_same_line);
         }
     }
@@ -1853,7 +1883,8 @@ protected:
 
     void add_voice()
     {
-        m_source << " v" << m_pObj->get_voice() << " ";
+        m_source << " v" << m_pObj->get_voice();
+        space_needed();
     }
 
     void generate_rest()
@@ -1870,6 +1901,7 @@ protected:
         start_element("goFwd", m_pObj->get_id());
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         add_voice();
+        add_space_if_needed();
         m_source << "p" << (m_pObj->get_staff() + 1);
         end_element(k_in_same_line);
     }
@@ -1996,8 +2028,8 @@ protected:
     ImoScoreObj* m_pObj;
 
 public:
-    ScoreObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
-        : LdpGenerator(pExporter)
+    ScoreObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
@@ -2039,7 +2071,8 @@ protected:
 
     void add_text()
     {
-        m_source << "\"" << m_pObj->get_text() << "\"";
+        m_source << " \"" << m_pObj->get_text() << "\"";
+        space_needed();
     }
 
 };
@@ -2080,7 +2113,7 @@ protected:
 
     void add_slur_number()
     {
-        m_source << m_pObj->get_slur_number();
+        m_source << " " << m_pObj->get_slur_number();
     }
 
     void add_slur_type(bool fStart)
@@ -2110,13 +2143,13 @@ protected:
                     if (pt.x != 0.0f)
                     {
                         start_element( sPointNames[i] + "-x", k_no_imoid, k_in_same_line);
-                        m_source << pt.x;
+                        m_source << " " << pt.x;
                         end_element(k_in_same_line);
                     }
                     if (pt.y != 0.0f)
                     {
                         start_element( sPointNames[i] + "-y", k_no_imoid, k_in_same_line);
-                        m_source << pt.y;
+                        m_source << " " << pt.y;
                         end_element(k_in_same_line);
                     }
                 }
@@ -2134,7 +2167,8 @@ protected:
     ImoStaffObj* m_pObj;
 
 public:
-    StaffObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    StaffObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
@@ -2157,7 +2191,8 @@ protected:
             && !m_pObj->is_go_back_fwd() )
         {
 #if 1       // 1= px  0- (staffNum x)
-            m_source << " p" << (m_pObj->get_staff() + 1) << " ";
+            m_source << " p" << (m_pObj->get_staff() + 1);
+            space_needed();
 #else
             m_source << " ";
             start_element("staffNum", k_no_imoid, k_in_same_line);
@@ -2234,7 +2269,7 @@ protected:
 
     void add_space_width()
     {
-        m_source << m_pObj->get_width();
+        m_source << " " << m_pObj->get_width();
     }
 
 };
@@ -2269,7 +2304,7 @@ protected:
 
     void add_tie_number()
     {
-        m_source << m_pTie->get_tie_number();
+        m_source << " " << m_pTie->get_tie_number();
     }
 
     void add_tie_type(bool fStart)
@@ -2346,13 +2381,14 @@ protected:
     void add_content()
     {
         if (m_pObj->is_normal())
-            m_source << m_pObj->get_top_number() << " " << m_pObj->get_bottom_number();
+            m_source << " " << m_pObj->get_top_number() << " "
+                     << m_pObj->get_bottom_number();
         else if (m_pObj->is_common())
-            m_source << "common";
+            m_source << " common";
         else if (m_pObj->is_cut())
-            m_source << "cut";
+            m_source << " cut";
         else if (m_pObj->is_single_number())
-            m_source << "single-number " << m_pObj->get_top_number();
+            m_source << " single-number " << m_pObj->get_top_number();
     }
 
 };
@@ -2364,8 +2400,8 @@ protected:
     ImoScoreTitle* m_pObj;
 
 public:
-    TitleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
-        : LdpGenerator(pExporter)
+    TitleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
     {
         m_pObj = static_cast<ImoScoreTitle*>(pImo);
     }
@@ -2440,7 +2476,7 @@ protected:
 
     inline void add_tuplet_type(bool fStart)
     {
-        m_source << (fStart ? "+" : "-");
+        m_source << (fStart ? " +" : " -");
     }
 
     inline void add_actual_notes()
@@ -2468,7 +2504,10 @@ protected:
     {
         int opt = m_pTuplet->get_show_bracket();
         if (opt == k_yesno_no)
+        {
             m_source << " noBracket";
+            space_needed();
+        }
     }
 
     void add_display_number()
@@ -2477,16 +2516,15 @@ protected:
         if (number == ImoTuplet::k_number_actual)
             return;     //default option
 
-        m_source << " ";
         start_element("displayNumber", k_no_imoid, k_in_same_line);
 
         if (number == ImoTuplet::k_number_both)
-            m_source << "both";
+            m_source << " both";
         else if (number == ImoTuplet::k_number_none)
-            m_source << "none";
+            m_source << " none";
         else
         {
-            m_source << "both";
+            m_source << " both";
             stringstream s;
             s << "Invalid option. Value=" << number;
             LOMSE_LOG_ERROR(s.str());
@@ -2536,7 +2574,7 @@ protected:
 
     void add_version()
     {
-        m_source << "(vers 2.0)";
+        m_source << " (vers 2.0)";
     }
 
     void add_undo_data()
@@ -2571,7 +2609,7 @@ protected:
 //                  || it->first == "Tuplet numbers"
 //                ))
             {
-                DefineStyleLdpGenerator gen(it->second, m_pExporter);
+                DefineStyleLdpGenerator gen(it->second, m_pExporter, is_space_needed());
                 m_source << gen.generate_source();
             }
         }
@@ -2583,7 +2621,7 @@ protected:
         list<ImoScoreTitle*>::iterator it;
         for (it = titles.begin(); it != titles.end(); ++it)
         {
-            TitleLdpGenerator gen(*it, m_pExporter);
+            TitleLdpGenerator gen(*it, m_pExporter, is_space_needed());
             m_source << gen.generate_source();
         }
     }
@@ -2623,9 +2661,9 @@ protected:
     void add_system_info(ImoSystemInfo* pInfo)
     {
         start_element("systemLayout", pInfo->get_id(), k_in_new_line);
-        m_source << (pInfo->is_first() ? "first" : "other") << " ";
+        m_source << (pInfo->is_first() ? " first" : " other") << " ";
         start_element("systemMargins", k_no_imoid);
-        m_source << pInfo->get_left_margin() << " "
+        m_source << " " << pInfo->get_left_margin() << " "
                  << pInfo->get_right_margin() << " "
                  << pInfo->get_system_distance() << " "
                  << pInfo->get_top_system_distance();
@@ -2643,7 +2681,7 @@ protected:
             if (!m_pObj->has_default_value(pOpt))
             {
                 start_element("opt", pOpt->get_id(), k_in_new_line);
-                m_source << pOpt->get_name() << " ";
+                m_source << " " << pOpt->get_name() << " ";
                 if (pOpt->is_bool_option())
                     m_source << (pOpt->get_bool_value() ? "true" : "false");
                 else if (pOpt->is_long_option())
@@ -2761,13 +2799,13 @@ protected:
                 switch (pGrp->join_barlines())
                 {
                     case ImoInstrGroup::k_standard:
-                        m_source << "yes";
+                        m_source << " yes";
                         break;
                     case ImoInstrGroup::k_mensurstrich:
-                        m_source << "mensurstrich";
+                        m_source << " mensurstrich";
                         break;
                     default:
-                        m_source << "no";
+                        m_source << " no";
                 }
                 end_element(k_in_same_line);
             }
@@ -2795,11 +2833,13 @@ void LdpGenerator::start_element(const string& name, ImoId id, bool fInNewLine)
     if (fInNewLine)
         new_line_and_indent_spaces();
 
+    if (m_fAddSpace)
+        m_source << " ";
     m_source << "(" << name;
     if (m_pExporter->get_add_id() && id != k_no_imoid)
         m_source << "#" << std::dec << id;
-    m_source << " ";
     increment_indent();
+    m_fAddSpace = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2809,6 +2849,7 @@ void LdpGenerator::end_element(bool fStartLine)
     if (fStartLine)
         new_line_and_indent_spaces(fStartLine);
     m_source << ")";
+    m_fAddSpace = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2858,27 +2899,28 @@ void LdpGenerator::new_line()
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_source_for(ImoObj* pImo)
 {
+    add_space_if_needed();
     m_source << m_pExporter->get_source(pImo);
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_staffobj(ImoObj* pImo)
 {
-    StaffObjLdpGenerator gen(pImo, m_pExporter);
+    StaffObjLdpGenerator gen(pImo, m_pExporter, is_space_needed());
     m_source << gen.generate_source();
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_scoreobj(ImoObj* pImo)
 {
-    ScoreObjLdpGenerator gen(pImo, m_pExporter);
+    ScoreObjLdpGenerator gen(pImo, m_pExporter, is_space_needed());
     m_source << gen.generate_source();
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_contentobj(ImoObj* pImo)
 {
-    ContentObjLdpGenerator gen(pImo, m_pExporter);
+    ContentObjLdpGenerator gen(pImo, m_pExporter, is_space_needed());
     m_source << gen.generate_source();
 }
 
@@ -2886,7 +2928,7 @@ void LdpGenerator::source_for_base_contentobj(ImoObj* pImo)
 void LdpGenerator::source_for_base_imobj(ImoObj* pImo)
 {
     increment_indent();
-    ImObjLdpGenerator gen(pImo, m_pExporter);
+    ImObjLdpGenerator gen(pImo, m_pExporter, is_space_needed());
     m_source << gen.generate_source();
     decrement_indent();
 }
@@ -2894,13 +2936,23 @@ void LdpGenerator::source_for_base_imobj(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_auxobj(ImoObj* pImo)
 {
-    m_source <<  m_pExporter->get_source(pImo);
+    string src = m_pExporter->get_source(pImo);
+    if (!src.empty())
+    {
+        add_space_if_needed();
+        m_source << src;
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_relobj(ImoObj* pRO, ImoObj* pParent)
 {
-    m_source <<  m_pExporter->get_source(pRO, pParent);
+    string src = m_pExporter->get_source(pRO, pParent);
+    if (!src.empty())
+    {
+        add_space_if_needed();
+        m_source << src;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -2918,21 +2970,27 @@ void LdpGenerator::decrement_indent()
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_duration(stringstream& source, int noteType, int dots)
 {
-    source << LdpExporter::notetype_to_string(noteType, dots);
+    source << " " << LdpExporter::notetype_to_string(noteType, dots);
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_visible(bool fVisible)
 {
     if (!fVisible)
-        m_source << " (visible no)";
+    {
+        add_space_if_needed();
+        m_source << "(visible no)";
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_color_if_not_black(Color color)
 {
     if (color.r != 0 || color.g != 0  || color.b != 0 || color.a != 255)
+    {
+        add_space_if_needed();
         m_source << "(color " << LdpExporter::color_to_ldp(color) << ")";
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -2941,7 +2999,7 @@ void LdpGenerator::add_width_if_not_default(Tenths width, Tenths def)
     if (width != def)
     {
         start_element("width", k_no_imoid, k_in_same_line);
-        m_source << width;
+        m_source << " " << width;
         end_element(k_in_same_line);
     }
 }
@@ -2954,13 +3012,13 @@ void LdpGenerator::add_location_if_not_zero(Tenths x, Tenths y)
         if (x != 0.0f)
         {
             start_element("dx", k_no_imoid, k_in_same_line);
-            m_source << x;
+            m_source << " " << x;
             end_element(k_in_same_line);
         }
         if (y != 0.0f)
         {
             start_element("dy", k_no_imoid, k_in_same_line);
-            m_source << y;
+            m_source << " " << y;
             end_element(k_in_same_line);
         }
     }
@@ -2970,11 +3028,11 @@ void LdpGenerator::add_location_if_not_zero(Tenths x, Tenths y)
 void LdpGenerator::add_location(TPoint pt)
 {
     start_element("dx", k_no_imoid, k_in_same_line);
-    m_source << pt.x;
+    m_source << " " << pt.x;
     end_element(k_in_same_line);
 
     start_element("dy", k_no_imoid, k_in_same_line);
-    m_source << pt.y;
+    m_source << " " << pt.y;
     end_element(k_in_same_line);
 }
 
@@ -2994,9 +3052,8 @@ void LdpGenerator::add_style(ImoStyle* pStyle)
 {
     if (pStyle && pStyle->get_name() != "Default style")
     {
-        m_source << " ";
         start_element("style", k_no_imoid);
-        m_source << "\"" << pStyle->get_name() << "\"";
+        m_source << " \"" << pStyle->get_name() << "\"";
         end_element(k_in_same_line);
     }
 }
@@ -3072,7 +3129,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
         case k_imo_score_text:      return LOMSE_NEW ScoreTextLdpGenerator(pImo, this);
         case k_imo_score_line:      return LOMSE_NEW ScoreLineLdpGenerator(pImo, this);
-        case k_imo_score_title:     return LOMSE_NEW TitleLdpGenerator(pImo, this);
+//        case k_imo_score_title:     return LOMSE_NEW TitleLdpGenerator(pImo, this);
         case k_imo_slur:            return LOMSE_NEW SlurLdpGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);

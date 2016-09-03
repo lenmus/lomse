@@ -196,11 +196,11 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1 p1)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
@@ -223,11 +223,11 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0, 288,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
@@ -252,16 +252,16 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0, 288,     0, "(barline simple)" );
-        CHECK_ENTRY0(it, 0,    0,      1, 288,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      1, 288,     1, "(n c5 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      1, 320,     1, "(n e5 w v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      1, 352,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1, 288,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1, 288,     1, "(n c5 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1, 320,     1, "(n e5 w v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1, 352,     0, "(n e4 e v1 p1)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
@@ -284,8 +284,8 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
@@ -313,16 +313,16 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
         CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(time 2 4)" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(chord (n c3 w v1  p2 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n g3 w v1  p2 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 w v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 w v1  p1 ))" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(chord (n c3 w v1 p2)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n g3 w v1 p2)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 w v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 w v1 p1))" );
         CHECK_ENTRY0(it, 0,    0,      0, 256,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 256.0 );
     }
@@ -346,9 +346,9 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(spacer 0 p1 (text \"Hello world\"))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 64.0 );
@@ -374,12 +374,12 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 3 4)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
-        CHECK_ENTRY0(it, 0,    0,      1,  64,     0, "(n d4 e. v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      1, 112,     0, "(n d4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1,  64,     0, "(n d4 e. v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1, 112,     0, "(n d4 s v1 p1)" );
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 
@@ -402,10 +402,10 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(goFwd e v1 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1 p1)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
@@ -429,11 +429,11 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef F4 p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e3 e v1  p1 (beam 25 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c2 w v3  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g3 e v1  p1 (beam 25 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c4 e v1  p1 (beam 25 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef F4 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e3 e v1 p1 (beam 25 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c2 w v3 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g3 e v1 p1 (beam 25 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c4 e v1 p1 (beam 25 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 256,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
@@ -458,13 +458,13 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n c3 e v2  p2 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,  32,     1, "(clef G p2 )" );
-        CHECK_ENTRY0(it, 0,    1,      0,  32,     1, "(n c4 e v2  p2 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n c3 e v2 p2)" );
+        CHECK_ENTRY0(it, 0,    1,      0,  32,     1, "(clef G p2)" );
+        CHECK_ENTRY0(it, 0,    1,      0,  32,     1, "(n c4 e v2 p2)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1 p1)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
@@ -498,30 +498,30 @@ SUITE(ColStaffObjsBuilderTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(clef F4 p2)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(key D)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(key D)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(time 2 4)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(time 2 4)" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(clef G p1 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(clef F4 p2)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(key D)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(key D)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(time 2 4)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(time 2 4)" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1  p1 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2  p2 (beam 28 +))" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1  p1 )" );  // line 4 !
-        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2  p2 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2  p2 (beam 28 -))" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2  p2 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2  p2 )" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1 )" );  // line 4 !
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef G p2 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef F4 p2 )" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(n a3 e v1  p1 )" );  // line 4 !
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(n c3 e v2  p2 )" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 28 +))" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1 p1)" );  // line 4 !
+        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2 p2)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 28 -))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2 p2)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2 p2)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1)" );  // line 4 !
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef G p2)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef F4 p2)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(n a3 e v1 p1)" );  // line 4 !
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(n c3 e v2 p2)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	128,	0,	"(barline simple)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	128,	2,	"(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );
@@ -1448,30 +1448,30 @@ SUITE(ColStaffObjsBuilderTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(clef F4 p2)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(key D)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(key D)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(time 2 4)" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(time 2 4)" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(clef G p1 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(clef F4 p2)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(key D)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(key D)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(time 2 4)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(time 2 4)" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1  p1 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2  p2 (beam 29 +))" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1  p1 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2  p2 )" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2  p2 (beam 29 -))" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2  p2 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2  p2 )" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef G p2 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef F4 p2 )" );
-        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(n a3 e v1  p1 )" );
-        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(n c3 e v2  p2 )" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1 p1)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 29 +))" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1 p1)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2 p2)" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 29 -))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2 p2)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2 p2)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef G p2)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(clef F4 p2)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(n a3 e v1 p1)" );
+        CHECK_ENTRY0(it, 1,	    1,	    0,	96,	    3,	"(n c3 e v2 p2)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	128,	0,	"(barline simple)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	128,	2,	"(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );

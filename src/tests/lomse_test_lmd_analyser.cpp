@@ -6899,7 +6899,7 @@ SUITE(LmdAnalyserTest)
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (staves 2)(staff 2 (staffType ossia)"
 //            "(staffLines 4)(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5))"
-//            "(musicData ))");
+//            "(musicData))");
 //        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
