@@ -263,13 +263,13 @@ public:
     {
         //score with one staff and two voices
         //(score#4 (vers 2.0)(instrument##101L (musicData#22L
-        //(clef#103L G p1 )(key#104L F)(time#105L 4 4)
-        //(n#106L c5 q v1  (stem up) p1 )(n#110L g4 e v2  (stem down) p1 )
-        //(n#111L a4 q v2  (stem down) p1 )(goFwd#107L q v1 p1)
-        //(n#112L f4 e v2  (stem down) p1 )(n#108L d5 q v1  (stem up) p1 )
-        //(n#113L e4 e v2  (stem down) p1 )(r#114L e v2 p1)
-        //(goFwd#109L e v1 p1)(n#115L d4 q v2  (stem down) p1 )
-        //(n#109L e5 e v1  (stem up) p1 )(barline#116L simple)
+        //(clef#103L G p1)(key#104L F)(time#105L 4 4)
+        //(n#106L c5 q v1  (stem up) p1)(n#110L g4 e v2  (stem down) p1)
+        //(n#111L a4 q v2  (stem down) p1)(goFwd#107L q v1 p1)
+        //(n#112L f4 e v2  (stem down) p1)(n#108L d5 q v1  (stem up) p1)
+        //(n#113L e4 e v2  (stem down) p1)(r#114L e v2 p1)
+        //(goFwd#109L e v1 p1)(n#115L d4 q v2  (stem down) p1)
+        //(n#109L e5 e v1  (stem up) p1)(barline#116L simple)
         //(n#117L c5 e v1 (stem up))
         //(n#118L g4 q v2 (stem down))(n#119L a4 e v2 (stem down))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
@@ -290,7 +290,7 @@ public:
     {
         //two staves, only clef, key and time signature
         //(score#5L (vers 2.0)(instrument#21L (musicData#22L
-        //(clef#103L G p1 )(clef#104L F4 p2 )(key#105L D)(time#106L 4 4)
+        //(clef#103L G p1)(clef#104L F4 p2)(key#105L D)(time#106L 4 4)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string(
             "(score (vers 2.0)(instrument#101L (staves 2)(musicData "

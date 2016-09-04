@@ -146,7 +146,7 @@ SUITE(PresenterTest)
     //    CHECK( pPresenter != NULL );
     //    Document* pDoc = pPresenter->get_document();
     //    //cout << pDoc->to_string() << endl;
-    //    CHECK( pDoc->to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData )))))" );
+    //    CHECK( pDoc->to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
     //    CHECK( pPresenter->get_command_executer() != NULL );
 
     //    delete pPresenter;

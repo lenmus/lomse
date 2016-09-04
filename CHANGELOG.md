@@ -4,7 +4,17 @@
 [Since last version] 0.20.0
 =============================
 
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.20.0
+
 - none
+
+##### COMPATIBLE CHANGES
+
+- Blank space in LDP exporter has been normalized.
+- LDP exporter reviewed for following the same syntax rules than LDP 
+  Analyser, thus ensuring a round trip in LDP export-import.
+- Some fixes in LDP exporter.
+
 
 Version [0.20.0] (1/Sep/2016)
 =============================

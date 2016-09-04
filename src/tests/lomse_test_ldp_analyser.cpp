@@ -94,6 +94,11 @@ public:
         }
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
 };
 
 
@@ -3949,6 +3954,40 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    //@ metronome -----------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_0)
+    {
+        //@00. metronome, note value
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0) (instrument#100"
+                "(musicData (metronome q 55) )))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(*it);
+        CHECK( pImo->get_ticks_per_minute() == 55 );
+        CHECK( pImo->get_mark_type() == ImoMetronomeMark::k_note_value );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     //@ time signature -------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature)
@@ -4136,6 +4175,31 @@ SUITE(LdpAnalyserTest)
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
         CHECK( pTimeSignature->is_normal() );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, timeSignature_10)
+    {
+        //@10. time signature. single number
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(time single-number 10)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pTimeSignature != NULL );
+        CHECK( pTimeSignature->is_single_number() );
+        CHECK( pTimeSignature->get_top_number() == 10 );
 
         delete tree->get_root();
         delete pIModel;
@@ -5823,8 +5887,8 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.7) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
-            "(goBack start)(n c2 w v1  p1 )(goBack 234.667)"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(goBack start)(n c2 w v1 p1)(goBack 234.667)"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -6257,7 +6321,7 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.6) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -6305,7 +6369,7 @@ SUITE(LdpAnalyserTest)
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         string src =
             "(score (vers 1.7) (instrument (musicData "
-            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(clef F4 p1)(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
             "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
@@ -9186,7 +9250,7 @@ SUITE(LdpAnalyserTest)
         //expected << "" << endl;
         parser.parse_text("(instrument (staves 2)(staff 2 (staffType ossia)"
             "(staffLines 4)(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5))"
-            "(musicData ))");
+            "(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");

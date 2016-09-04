@@ -103,7 +103,7 @@ SUITE(LmdCompilerTest)
     //{
     //    Document doc(m_libraryScope);
     //    LmdCompiler compiler(m_libraryScope, &doc);
-    //    InternalModel* pIModel = compiler.compile_string("(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData )))" );
+    //    InternalModel* pIModel = compiler.compile_string("(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))" );
     //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
     //    CHECK( pDoc->get_version() == "0.0" );
     //    CHECK( pDoc->get_num_content_items() == 1 );

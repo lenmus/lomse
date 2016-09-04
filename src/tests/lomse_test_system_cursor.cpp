@@ -300,7 +300,7 @@ SUITE(SystemCursorTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData ) )) "
+            "(instrument (musicData) )) "
             "))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);

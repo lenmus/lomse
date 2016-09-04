@@ -127,6 +127,11 @@ public:
         m_pDoc->clear_dirty();
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
     LibraryScope m_libraryScope;
     std::string m_scores_path;
     Document* m_pDoc;
@@ -176,7 +181,7 @@ SUITE(DocCommandTest)
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0101_ur)
@@ -215,7 +220,7 @@ SUITE(DocCommandTest)
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0201)
@@ -255,13 +260,13 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 e v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 32.0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0201_ur)
@@ -295,12 +300,12 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 e v1 p1)" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e v1 p1)" );
     }
 
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0202)
@@ -341,17 +346,17 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n f4 q v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n f4 q v1 p1)" );
 //        CHECK( is_equal_time(pSC->time(), 64.0) );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 5 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 s v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 s v1 p1)" );
 //
 //        cursor.move_prev();         //prev note is the original one, shortened
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n e4 e. v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n e4 e. v1 p1)" );
 //    }
 //
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0202_ur)
@@ -385,16 +390,16 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n f4 q v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n f4 q v1 p1)" );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 5 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 s v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 s v1 p1)" );
 //
 //        cursor.move_prev();         //prev note is the original one, shortened
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n e4 e. v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n e4 e. v1 p1)" );
 //    }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0203)
@@ -435,13 +440,13 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e. v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n e4 e. v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 16.0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 5 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 s v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0203_ur)
@@ -476,12 +481,12 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e. v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n e4 e. v1 p1)" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 5 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 s v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0204)
@@ -522,13 +527,13 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 s v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 48.0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e. v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e. v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0204_ur)
@@ -563,12 +568,12 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 s v1 p1)" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 
         cursor.move_prev();         //prev note is the inserted one
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n a4 e. v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n a4 e. v1 p1)" );
     }
 
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0205)
@@ -608,17 +613,17 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n b4 e. v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n b4 e. v1 p1)" );
 //        CHECK( is_equal_time(pSC->time(), 144.0) );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 h v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 h v1 p1)" );
 //
 //        cursor.move_prev();         //prev note is the original one, shortened
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //    }
 //
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0205_ur)
@@ -651,16 +656,16 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n b4 e. v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n b4 e. v1 p1)" );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 h v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 h v1 p1)" );
 //
 //        cursor.move_prev();         //prev note is the original one, shortened
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //    }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0301)
@@ -702,19 +707,19 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(goFwd e v2 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n a4 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n a4 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1 p1)" );
         //cout << pTable->dump() << endl;
 
         CHECK( pCmd->get_name() == "Add note" );
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( pSC->is_at_empty_place() == false );
-        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1  p1 )" );
+        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 64.0) );
     }
 
@@ -751,19 +756,19 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(goFwd e v2 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n a4 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n a4 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1 p1)" );
         //cout << pTable->dump() << endl;
 
         CHECK( pCmd->get_name() == "Add note" );
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( pSC->is_at_empty_place() == false );
-        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1  p1 )" );
+        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 64.0) );
     }
 
@@ -807,13 +812,13 @@ SUITE(DocCommandTest)
 //
 //        ColStaffObjsIterator it = pTable->begin();
 //        //              instr, staff, meas. time, line, scr
-//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
 //        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2 p1)" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
 //        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(goFwd q v2 p1)" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1  p1 )" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  64,     1, "(n g4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1 p1)" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  64,     1, "(n g4 e v1 p1)" );
 //        cout << pTable->dump() << endl;
 //
 //
@@ -825,7 +830,7 @@ SUITE(DocCommandTest)
 //
 //        cursor.move_prev();
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n g4 e v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n g4 e v1 p1)" );
 //    }
 //
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0302_ur)
@@ -859,13 +864,13 @@ SUITE(DocCommandTest)
 //
 //        ColStaffObjsIterator it = pTable->begin();
 //        //              instr, staff, meas. time, line, scr
-//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+//        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
 //        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2 p1)" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
 //        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(goFwd e v2 p1)" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  64,     1, "(n a4 e v2  p1 )" );
-//        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1  p1 )" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  64,     1, "(n a4 e v2 p1)" );
+//        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 e v1 p1)" );
 //        cout << pTable->dump() << endl;
 //
 //
@@ -875,7 +880,7 @@ SUITE(DocCommandTest)
 //
 //        cursor.move_prev();
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n g4 e v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n g4 e v1 p1)" );
 //    }
 //
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0303)
@@ -918,15 +923,15 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 ////        CHECK( (*cursor)->is_note() == true );
-////        CHECK( (*cursor)->to_string() == "(n g4 e v1  p1 )" );
+////        CHECK( (*cursor)->to_string() == "(n g4 e v1 p1)" );
 //        CHECK( pSC->is_at_empty_place() == true );
-//        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1  p1 )" );
+//        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1 p1)" );
 //        CHECK( is_equal_time(pSC->time(), 128.0) );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 7 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 e v2  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 e v2 p1)" );
 //
 //        cursor.move_prev();         //prev note is the goFwd
 //        CHECK( (*cursor)->is_gap() == true );
@@ -966,12 +971,12 @@ SUITE(DocCommandTest)
 //        CHECK( doc.is_dirty() == true );
 //        //cursor points after inserted note
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n g4 e v1  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n g4 e v1 p1)" );
 //        CHECK( pScore->get_staffobjs_table()->num_entries() == 7 );
 //
 //        cursor.move_prev();         //prev note is the inserted one
 //        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->to_string() == "(n a4 e v2  p1 )" );
+//        CHECK( (*cursor)->to_string() == "(n a4 e v2 p1)" );
 //
 //        cursor.move_prev();         //prev note is the goFwd
 //        CHECK( (*cursor)->is_gap() == true );
@@ -1011,15 +1016,15 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1  p1 (beam 150 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1  p1 (beam 150 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 150 -))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 139 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 139 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 139 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1 p1 (beam 150 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1 p1 (beam 150 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 150 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1 p1 (beam 139 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1 p1 (beam 139 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 139 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1056,12 +1061,12 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 130 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e5 e v1  p1 (beam 130 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 130 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e5 e v1 p1 (beam 130 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1098,14 +1103,14 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 139 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 139 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 139 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1 p1 (beam 139 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1 p1 (beam 139 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 139 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1143,15 +1148,15 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 (beam 129 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1  p1 (beam 129 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 129 -))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1  p1 (beam 150 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1  p1 (beam 150 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 150 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1 (beam 129 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1 p1 (beam 129 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 129 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1 p1 (beam 150 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1 p1 (beam 150 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 150 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -2306,11 +2311,11 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 q v1 p1)" );
 
         //cursor pointing to right place
-        CHECK( (*cursor)->to_string() == "(n g4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n g4 q v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, delete_selection_1902)
@@ -2346,11 +2351,11 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   32,     0, "(n g4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   32,     0, "(n g4 q v1 p1)" );
 
         //cursor pointing to right place
-        CHECK( (*cursor)->to_string() == "(n f4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 e v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, delete_selection_1903)
@@ -2385,11 +2390,11 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         ImoStaffObj* pSO = (*it)->imo_object();     //it points to next: n e4
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 q v1 p1)" );
 
         CHECK( static_cast<ImoStaffObj*>(*cursor) == pSO );    //cursor points to n g4
 
@@ -2429,11 +2434,11 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         ImoStaffObj* pSO = (*it)->imo_object();     //it points to next: n e4
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n g4 q v1 p1)" );
 
         CHECK( static_cast<ImoStaffObj*>(*cursor) == pSO );    //cursor points to n e4
 
@@ -2515,7 +2520,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n e4 e v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2530,8 +2535,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2558,7 +2563,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 e v1  p1 (beam 126 +))" );
+        CHECK( (*cursor)->to_string() == "(n c4 e v1 p1 (beam 126 +))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2573,9 +2578,9 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 (beam 126 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n e4 e v1  p1 (beam 126 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1 p1 (beam 126 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n e4 e v1 p1 (beam 126 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2601,7 +2606,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f5 s v1  p1 (beam 127 +f))" );
+        CHECK( (*cursor)->to_string() == "(n f5 s v1 p1 (beam 127 +f))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2616,9 +2621,9 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f5 s v1  p1 (beam 127 +f))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n g5 e v1  p1 (beam 127 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f5 s v1 p1 (beam 127 +f))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n g5 e v1 p1 (beam 127 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2645,7 +2650,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n g5 s v1  p1 (beam 127 ++))" );
+        CHECK( (*cursor)->to_string() == "(n g5 s v1 p1 (beam 127 ++))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2660,10 +2665,10 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g5 s v1  p1 (beam 127 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n f5 s v1  p1 (beam 127 =-))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g5 e v1  p1 (beam 127 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g5 s v1 p1 (beam 127 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n f5 s v1 p1 (beam 127 =-))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g5 e v1 p1 (beam 127 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2689,7 +2694,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(chord (n e4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(chord (n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2704,9 +2709,9 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(chord (n e4 s v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 ))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(chord (n e4 s v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1 p1))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2732,7 +2737,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n g4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n g4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_in_chord() == false );
@@ -2749,8 +2754,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2776,7 +2781,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n g4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n g4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == false );
@@ -2794,8 +2799,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2823,7 +2828,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_in_tuplet() == false );
@@ -2840,8 +2845,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2875,7 +2880,7 @@ SUITE(DocCommandTest)
         cursor.move_prev();         //points to n e4 s
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_in_tuplet() == false );
@@ -2888,8 +2893,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2919,11 +2924,11 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   32,     0, "(n g4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   32,     0, "(n g4 q v1 p1)" );
 
         //cursor pointing to right place
-        CHECK( (*cursor)->to_string() == "(n f4 e v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n f4 e v1 p1)" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2013)
@@ -3095,7 +3100,7 @@ SUITE(DocCommandTest)
     {
         //objects inserted and cursor updated
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
@@ -3119,7 +3124,9 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_staff() == true );
         CHECK( pSC->time() == 64 );
 
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 127 +))(n c4 e v1  p1 (beam 127 -)))))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
+              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 127 +))"
+              "(n c4 e v1 p1 (beam 127 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3130,7 +3137,7 @@ SUITE(DocCommandTest)
     {
         //undo insertion
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
@@ -3148,7 +3155,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
 
         CHECK( doc.is_dirty() == true );
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData )))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (staves 1)(musicData)))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
 //        cout << doc.to_string() << endl;
@@ -3159,7 +3166,7 @@ SUITE(DocCommandTest)
     {
         //redo insertion
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
@@ -3180,7 +3187,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_empty_score() == false );
         CHECK( pSC->is_at_end_of_staff() == true );
 
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 136 +))(n c4 e v1  p1 (beam 136 -)))))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 136 +))(n c4 e v1 p1 (beam 136 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3191,7 +3198,7 @@ SUITE(DocCommandTest)
     {
         //undo/redo when cursor repositioned
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
@@ -3237,7 +3244,7 @@ SUITE(DocCommandTest)
     {
         //clef inserted and cursor updated
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
@@ -3268,7 +3275,7 @@ SUITE(DocCommandTest)
     {
         //undo insertion
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
@@ -3282,8 +3289,8 @@ SUITE(DocCommandTest)
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
         CHECK( doc.is_dirty() == true );
-        string expected = "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)"
-            "(instrument (staves 1)(musicData )))))";
+        string expected = "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
+            "(instrument (staves 1)(musicData)))))";
         CHECK( doc.to_string() == expected );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
@@ -3295,7 +3302,7 @@ SUITE(DocCommandTest)
     {
         //source code validated
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clof G)");
@@ -3316,7 +3323,7 @@ SUITE(DocCommandTest)
     {
         //undo/redo with cursor changes
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
@@ -3356,7 +3363,7 @@ SUITE(DocCommandTest)
     {
         //validate source code: start/end parenthesis
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
@@ -3375,7 +3382,7 @@ SUITE(DocCommandTest)
     {
         //validate source code: more than one LDP elements
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
@@ -3394,7 +3401,7 @@ SUITE(DocCommandTest)
     {
         //validate source code: parenthesis mismatch
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument#121 (musicData )))");
+        doc.from_string("(score (vers 1.6)(instrument#121 (musicData)))");
         doc.clear_dirty();
         DocCommandExecuter executer(&doc);
         DocCursor cursor(&doc);
@@ -3433,7 +3440,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -3448,9 +3455,9 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -3475,7 +3482,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -3490,8 +3497,8 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -3518,7 +3525,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -3533,9 +3540,9 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1 p1)" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -3556,7 +3563,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
 
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
@@ -3565,19 +3572,19 @@ SUITE(DocCommandTest)
 
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1 p1)" );
         //Fcout << pTable->dump();
 
         executer.undo(&cursor, &sel);    //remove note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
 
         executer.redo(&cursor, &sel);    //add note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
     }

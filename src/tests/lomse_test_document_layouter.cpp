@@ -299,7 +299,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (musicData )))))" );
+            "(instrument (musicData)))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
@@ -367,7 +367,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (musicData )) )))" );
+            "(instrument (musicData)) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
@@ -395,7 +395,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData )))))" );
+            "(instrument (staves 2)(musicData)))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
@@ -427,7 +427,7 @@ SUITE(DocLayouterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData )) (instrument (musicData )) )))" );
+            "(instrument (musicData)) (instrument (musicData)) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
