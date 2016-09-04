@@ -82,6 +82,12 @@ protected:
     void new_line_and_indent_spaces(bool fStartLine = true);
     void new_line();
     void add_source_for(ImoObj* pImo);
+    void source_for_abbreviated_elements(ImoNoteRest* pNR);
+    void source_for_noterest_options(ImoNoteRest* pNR);
+    void source_for_staffobj_options(ImoStaffObj* pSO);
+    void source_for_print_options(ImoScoreObj* pSO);
+    void source_for_attachments(ImoContentObj* pSO);
+
     void source_for_base_staffobj(ImoObj* pImo);
     void source_for_base_scoreobj(ImoObj* pImo);
     void source_for_base_contentobj(ImoObj* pImo);
@@ -319,6 +325,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+//@ <barline> = (barline) | (barline <type>[middle]<staffObjOptions>* <attachments>* )
 class BarlineLdpGenerator : public LdpGenerator
 {
 protected:
@@ -333,15 +340,16 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("barline", m_pObj->get_id());
-        add_barline_type();
-        source_for_base_staffobj(m_pObj);
+        add_barline_type_and_middle();
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
 
 protected:
 
-    void add_barline_type()
+    void add_barline_type_and_middle()
     {
         int type = m_pObj->get_type();
         string name = LdpExporter::barline_type_to_ldp(type);
@@ -356,7 +364,9 @@ protected:
             m_source << " " << name;
 
         if (m_pObj->is_middle())
-            m_source << "  middle";
+            m_source << " middle";
+
+        space_needed();
     }
 
 };
@@ -369,7 +379,8 @@ protected:
     ImoNoteRest* m_pNR;
 
 public:
-    BeamLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    BeamLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
     {
         m_pRO = static_cast<ImoRelObj*>(pImo);
     }
@@ -448,6 +459,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+//@ <clef> = (clef <type> [<symbolSize>] <staffObjOptions>* <attachments>* )
 class ClefLdpGenerator : public LdpGenerator
 {
 protected:
@@ -463,7 +475,9 @@ public:
     {
         start_element("clef", m_pObj->get_id());
         add_type();
-        source_for_base_staffobj(m_pObj);
+        add_symbol_size();
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -473,10 +487,26 @@ protected:
     void add_type()
     {
         m_source << " " << LdpExporter::clef_type_to_ldp( m_pObj->get_clef_type() );
+        space_needed();
+    }
+
+    void add_symbol_size()
+    {
+        int size = m_pObj->get_symbol_size();
+        if (size != k_size_default)
+        {
+            start_element("symbolSize", m_pObj->get_id());
+            if (size == k_size_cue)
+                m_source << " cue";
+            else if (size == k_size_full)
+                m_source << " full";
+            else
+                m_source << " large";
+            end_element(k_in_same_line);
+        }
     }
 
 };
-
 
 //---------------------------------------------------------------------------------------
 class ContentObjLdpGenerator : public LdpGenerator
@@ -974,6 +1004,8 @@ public:
         m_pObj = static_cast<ImoGoBackFwd*>(pImo);
     }
 
+    //TODO: This exporter must generate 2.0 code. Therefore, it is invalid to generate
+    // goBack. Instead must convert it to 2.0
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         empty_line();
@@ -1178,6 +1210,7 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+//@ <key> = (key <type> <staffobjOptions>* <attachments>* )
 class KeySignatureLdpGenerator : public LdpGenerator
 {
 protected:
@@ -1194,7 +1227,8 @@ public:
         start_element("key", m_pObj->get_id());
 
         add_key_type();
-
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -1204,6 +1238,7 @@ protected:
     void add_key_type()
     {
         m_source << " " << LdpExporter::key_type_to_ldp( m_pObj->get_key_type() );
+        space_needed();
     }
 
 };
@@ -1675,6 +1710,9 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+//@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
+//@                            <TicksPerMinute> }
+//@                          [parenthesis][<staffObjOptions>*] )
 class MetronomeLdpGenerator : public LdpGenerator
 {
 protected:
@@ -1690,9 +1728,9 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("metronome", m_pImo->get_id());
-        m_source << " ";
         add_marks();
-        source_for_base_staffobj(m_pImo);
+        add_parenthesis();
+        source_for_staffobj_options(m_pImo);
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -1705,28 +1743,28 @@ protected:
         switch (type)
         {
             case ImoMetronomeMark::k_note_value:
+                add_duration(m_source, m_pImo->get_left_note_type(),
+                             m_pImo->get_left_dots());
+                m_source << " ";
                 m_source << m_pImo->get_ticks_per_minute();
                 break;
             case ImoMetronomeMark::k_note_note:
                 add_duration(m_source, m_pImo->get_left_note_type(),
                              m_pImo->get_left_dots());
-                m_source << " ";
                 add_duration(m_source, m_pImo->get_right_note_type(),
                              m_pImo->get_right_dots());
                 break;
             case ImoMetronomeMark::k_value:
-                add_duration(m_source, m_pImo->get_left_note_type(),
-                             m_pImo->get_left_dots());
-                m_source << " ";
-                m_source <<  m_pImo->get_ticks_per_minute();
+                m_source << " " << m_pImo->get_ticks_per_minute();
                 break;
             default:
             {
-                m_source << "60";
+                m_source << " 60";
                 stringstream s;
                 s << "Invalid type. Value=" << type;
                 LOMSE_LOG_ERROR(s.str());
             }
+            space_needed();
         }
 
     }
@@ -1734,7 +1772,7 @@ protected:
     void add_parenthesis()
     {
         if (m_pImo->has_parenthesis())
-            m_source << " parentheses";
+            m_source << " parenthesis";
     }
 
 };
@@ -1764,10 +1802,12 @@ public:
         m_source << " ";
         add_pitch();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        add_voice();
-        add_stem();
+        source_for_abbreviated_elements(m_pObj);
+        add_note_options();
         add_time_modifier();
-        source_for_base_staffobj(m_pObj);
+        source_for_noterest_options(m_pObj);
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
 
         if (m_pObj->is_end_of_chord())
@@ -1801,6 +1841,14 @@ protected:
         m_source << sOctave[m_pObj->get_octave()];
     }
 
+    void add_note_options()
+    {
+        // <tie> | <stem> | <slur> | <lyric>
+        add_stem();
+        add_tie_and_slurs();
+        add_lyrics();
+    }
+
     void add_stem()
     {
         int stem = m_pObj->get_stem_direction();
@@ -1809,30 +1857,63 @@ protected:
             case k_stem_default:
                 break;
             case k_stem_up:
-                m_source << " (stem up)";
+                add_space_if_needed();
+                m_source << "(stem up)";
                 break;
             case k_stem_down:
-                m_source << " (stem down)";
+                add_space_if_needed();
+                m_source << "(stem down)";
                 break;
             case k_stem_none:
-                m_source << " (stem none)";
+                add_space_if_needed();
+                m_source << "(stem none)";
                 break;
             case k_stem_double:
-                m_source << " (stem double)";
+                add_space_if_needed();
+                m_source << "(stem double)";
                 break;
             default:
             {
                 stringstream s;
-                s << "Invalid stem. Value=" << stem;
+                s << " Invalid stem. Value=" << stem;
                 LOMSE_LOG_ERROR(s.str());
             }
         }
     }
 
-    void add_voice()
+    void add_tie_and_slurs()
     {
-        m_source << " v" << m_pObj->get_voice();
-        space_needed();
+        if (m_pObj->get_num_relations() > 0)
+        {
+            ImoRelations* pRelObjs = m_pObj->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                if (pRO->is_tie() || pRO->is_slur() )
+                {
+                    source_for_relobj(pRO, m_pObj);
+                }
+            }
+        }
+    }
+
+    void add_lyrics()
+    {
+        if (m_pObj->get_num_attachments() > 0)
+        {
+            ImoAttachments* pAuxObjs = m_pObj->get_attachments();
+            int size = pAuxObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+                if (pAO->is_lyric())
+                {
+                    add_space_if_needed();
+                    m_source << m_pExporter->get_source(pAO);
+                }
+            }
+        }
     }
 
     void add_time_modifier()
@@ -1849,6 +1930,47 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+//@ <printOptions> = { [<visible>] [<location>] [<color>] }
+class PrintOptionsLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScoreObj* m_pObj;
+
+public:
+    PrintOptionsLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
+    {
+        m_pObj = static_cast<ImoScoreObj*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        add_user_location();
+        add_visible( m_pObj->is_visible() );
+        add_color_if_not_black( m_pObj->get_color() );
+        return m_source.str();
+    }
+
+protected:
+
+    void add_user_location()
+    {
+        Tenths ux = m_pObj->get_user_location_x();
+        if (ux != 0.0f)
+        {
+            add_space_if_needed();
+            m_source << "(dx " << LdpExporter::float_to_string(ux) << ")";
+        }
+
+        Tenths uy = m_pObj->get_user_location_y();
+        if (uy != 0.0f)
+        {
+            add_space_if_needed();
+            m_source << "(dy " << LdpExporter::float_to_string(uy) << ")";
+        }
+    }
+};
 
 //---------------------------------------------------------------------------------------
 class RestLdpGenerator : public LdpGenerator
@@ -1889,10 +2011,14 @@ protected:
 
     void generate_rest()
     {
+        //@ <rest> = (r <duration> <abbreviatedElements>* <noteRestOptions>*
+        //@             <staffObjOptions>* <attachments>* )
         start_element("r", m_pObj->get_id());
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        add_voice();
-        source_for_base_staffobj(m_pObj);
+        source_for_abbreviated_elements(m_pObj);
+        source_for_noterest_options(m_pObj);
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
     }
 
@@ -1900,9 +2026,7 @@ protected:
     {
         start_element("goFwd", m_pObj->get_id());
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        add_voice();
-        add_space_if_needed();
-        m_source << "p" << (m_pObj->get_staff() + 1);
+        source_for_abbreviated_elements(m_pObj);
         end_element(k_in_same_line);
     }
 
@@ -2188,7 +2312,8 @@ protected:
         if (!m_pObj->is_key_signature()            //KS, TS & barlines are common to all staves.
             && !m_pObj->is_time_signature()
             && !m_pObj->is_barline()
-            && !m_pObj->is_go_back_fwd() )
+            && !m_pObj->is_go_back_fwd()
+            && !m_pObj->is_note_rest() )
         {
 #if 1       // 1= px  0- (staffNum x)
             m_source << " p" << (m_pObj->get_staff() + 1);
@@ -2211,13 +2336,54 @@ protected:
             for (int i=0; i < size; ++i)
             {
                 ImoRelObj* pRO = pRelObjs->get_item(i);
-                if (!pRO->is_chord())
+                if (!(pRO->is_chord() || pRO->is_tie() || pRO->is_slur()
+                      || pRO->is_beam() || pRO->is_tuplet()) )
                 {
-                    //AWARE: chords are excluded because they are generated
-                    //in NoteLdpGenerator
+                    //AWARE: chords, ties, slurs are specific for notes and
+                    //are generated in NoteLdpGenerator
+                    //AWARE: beams and tuplets are specific for notes and rests, and
+                    //are generated in source_for_noterest_options()
                     source_for_relobj(pRO, m_pObj);
                 }
             }
+        }
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+//@ <staffObjOptions> = { <staffNum> | <printOptions> }
+class StaffObjOptionsLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoStaffObj* m_pObj;
+
+public:
+    StaffObjOptionsLdpGenerator(ImoObj* pImo, LdpExporter* pExporter, bool fSpaceNeeded)
+        : LdpGenerator(pExporter, fSpaceNeeded)
+    {
+        m_pObj = static_cast<ImoStaffObj*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =NULL)
+    {
+        add_staff_num();
+        source_for_print_options(m_pObj);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_staff_num()
+    {
+        if (!m_pObj->is_key_signature()            //KS, TS & barlines are common to all staves.
+            && !m_pObj->is_time_signature()
+            && !m_pObj->is_barline()
+            && !m_pObj->is_go_back_fwd()
+            && !m_pObj->is_note_rest() )
+        {
+            m_source << " p" << (m_pObj->get_staff() + 1);
+            space_needed();
         }
     }
 
@@ -2260,7 +2426,8 @@ public:
     {
         start_element("spacer", m_pObj->get_id());
         add_space_width();
-        source_for_base_staffobj(m_pObj);
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -2270,6 +2437,7 @@ protected:
     void add_space_width()
     {
         m_source << " " << m_pObj->get_width();
+        space_needed();
     }
 
 };
@@ -2355,6 +2523,8 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+//@ <timeSignature> = (time [<type>] { (<top><bottom>)+ | "senza-misura" }
+//@                    <staffobjOptions>* <attachments>*)
 class TimeSignatureLdpGenerator : public LdpGenerator
 {
 protected:
@@ -2371,7 +2541,8 @@ public:
     {
         start_element("time", m_pObj->get_id());
         add_content();
-        source_for_base_staffobj(m_pObj);
+        source_for_staffobj_options(m_pObj);
+        source_for_attachments(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
@@ -2389,6 +2560,8 @@ protected:
             m_source << " cut";
         else if (m_pObj->is_single_number())
             m_source << " single-number " << m_pObj->get_top_number();
+
+        space_needed();
     }
 
 };
@@ -2434,7 +2607,8 @@ protected:
     ImoNoteRest* m_pNR;
 
 public:
-    TupletLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    TupletLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
     {
         m_pTuplet = static_cast<ImoTuplet*>(pImo);
     }
@@ -2904,6 +3078,82 @@ void LdpGenerator::add_source_for(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_abbreviated_elements(ImoNoteRest* pNR)
+{
+    //voice
+    m_source << " v" << pNR->get_voice();
+
+    //staffNum
+    m_source << " p" << (pNR->get_staff() + 1);
+    space_needed();
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_noterest_options(ImoNoteRest* pNR)
+{
+    //@ <noteRestOptions> = { <beam> | <tuplet> }
+
+    ImoTuplet* pTuplet = pNR->get_tuplet();
+    if (pTuplet)
+    {
+        TupletLdpGenerator gen(pTuplet, m_pExporter);
+        string src = gen.generate_source(pNR);
+        if (!src.empty())
+        {
+            add_space_if_needed();
+            m_source << src;
+        }
+    }
+
+    ImoBeam* pBeam = pNR->get_beam();
+    if (pBeam)
+    {
+        BeamLdpGenerator gen(pBeam, m_pExporter);
+        string src = gen.generate_source(pNR);
+        if (!src.empty())
+        {
+            add_space_if_needed();
+            m_source << src;
+        }
+    }
+
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_staffobj_options(ImoStaffObj* pSO)
+{
+//@ <staffObjOptions> = { <staffNum> | <printOptions> }
+
+    StaffObjOptionsLdpGenerator gen(pSO, m_pExporter, is_space_needed());
+    m_source << gen.generate_source();
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_print_options(ImoScoreObj* pSO)
+{
+//@ <printOptions> = { [<visible>] [<location>] [<color>] }
+
+    PrintOptionsLdpGenerator gen(pSO, m_pExporter, is_space_needed());
+    m_source << gen.generate_source();
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_attachments(ImoContentObj* pSO)
+{
+    if (pSO->get_num_attachments() > 0)
+    {
+        ImoAttachments* pAuxObjs = pSO->get_attachments();
+        int size = pAuxObjs->get_num_items();
+        for (int i=0; i < size; ++i)
+        {
+            ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+            if (!(pSO->is_note() && pAO->is_lyric()) )
+                source_for_auxobj(pAO);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_staffobj(ImoObj* pImo)
 {
     StaffObjLdpGenerator gen(pImo, m_pExporter, is_space_needed());
@@ -2936,11 +3186,15 @@ void LdpGenerator::source_for_base_imobj(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_auxobj(ImoObj* pImo)
 {
-    string src = m_pExporter->get_source(pImo);
-    if (!src.empty())
+    if (!pImo->is_lyric())
     {
-        add_space_if_needed();
-        m_source << src;
+        //AWARE: Lyrics are generated in note generator
+        string src = m_pExporter->get_source(pImo);
+        if (!src.empty())
+        {
+            add_space_if_needed();
+            m_source << src;
+        }
     }
 }
 
@@ -3108,16 +3362,13 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_articulation_symbol:
                                     return LOMSE_NEW ArticulationSymbolLdpGenerator(pImo, this);
         case k_imo_barline:         return LOMSE_NEW BarlineLdpGenerator(pImo, this);
-        case k_imo_beam:            return LOMSE_NEW BeamLdpGenerator(pImo, this);
         case k_imo_clef:            return LOMSE_NEW ClefLdpGenerator(pImo, this);
-//        case k_imo_instr_group:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_option:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_system_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_document:        return LOMSE_NEW LenmusdocLdpGenerator(pImo, this);
         case k_imo_dynamics_mark:   return LOMSE_NEW DynamicsLdpGenerator(pImo, this);
         case k_imo_fermata:         return LOMSE_NEW FermataLdpGenerator(pImo, this);
 //        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_go_back_fwd:     return LOMSE_NEW GoBackFwdLdpGenerator(pImo, this);
+        //AWARE: goBack is needed for exporting 1.6 to 2.0
         case k_imo_instrument:      return LOMSE_NEW InstrumentLdpGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLdpGenerator(pImo, this);
         case k_imo_lyric:           return LOMSE_NEW LyricLdpGenerator(pImo, this);
@@ -3129,12 +3380,10 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
         case k_imo_score_text:      return LOMSE_NEW ScoreTextLdpGenerator(pImo, this);
         case k_imo_score_line:      return LOMSE_NEW ScoreLineLdpGenerator(pImo, this);
-//        case k_imo_score_title:     return LOMSE_NEW TitleLdpGenerator(pImo, this);
         case k_imo_slur:            return LOMSE_NEW SlurLdpGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);
         case k_imo_tie:             return LOMSE_NEW TieLdpGenerator(pImo, this);
-        case k_imo_tuplet:          return LOMSE_NEW TupletLdpGenerator(pImo, this);
         default:
             return new ErrorLdpGenerator(pImo, this);
     }
@@ -3188,26 +3437,26 @@ string LdpExporter::key_type_to_ldp(int keyType)
         case k_key_A:   return "A";
         case k_key_E:   return "E";
         case k_key_B:   return "B";
-        case k_key_Fs:  return "Fs";
-        case k_key_Cs:  return "Cs";
-        case k_key_Cf:  return "Cf";
-        case k_key_Gf:  return "Gf";
-        case k_key_Df:  return "Df";
-        case k_key_Af:  return "Af";
-        case k_key_Ef:  return "Ef";
-        case k_key_Bf:  return "Bf";
+        case k_key_Fs:  return "F+";
+        case k_key_Cs:  return "C+";
+        case k_key_Cf:  return "C-";
+        case k_key_Gf:  return "G-";
+        case k_key_Df:  return "D-";
+        case k_key_Af:  return "A-";
+        case k_key_Ef:  return "E-";
+        case k_key_Bf:  return "B-";
         case k_key_F:   return "F";
         case k_key_a:   return "a";
         case k_key_e:   return "e";
         case k_key_b:   return "b";
-        case k_key_fs:  return "fs";
-        case k_key_cs:  return "cs";
-        case k_key_gs:  return "gs";
-        case k_key_ds:  return "ds";
-        case k_key_as:  return "as";
-        case k_key_af:  return "af";
-        case k_key_ef:  return "ef";
-        case k_key_bf:  return "bf";
+        case k_key_fs:  return "f+";
+        case k_key_cs:  return "c+";
+        case k_key_gs:  return "g+";
+        case k_key_ds:  return "d+";
+        case k_key_as:  return "a+";
+        case k_key_af:  return "a-";
+        case k_key_ef:  return "e-";
+        case k_key_bf:  return "b-";
         case k_key_f:   return "f";
         case k_key_c:   return "c";
         case k_key_g:   return "g";
