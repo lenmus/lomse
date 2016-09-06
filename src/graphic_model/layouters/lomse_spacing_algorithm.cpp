@@ -385,7 +385,9 @@ void ColumnsBuilder::collect_content_for_this_column()
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                          m_pagePos, clefType, flags);
                 pShape->assign_id_as_main_shape();
-                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
+                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
+                                               iLine, iInstr, pSO, -1.0f, iStaff,
+                                               pShape, fInProlog);
             }
 
             else if (pSO->is_key_signature() || pSO->is_time_signature())
@@ -396,7 +398,9 @@ void ColumnsBuilder::collect_content_for_this_column()
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                          m_pagePos, clefType, flags);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
-                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
+                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
+                                               iLine, iInstr, pSO, -1.0f, iStaff,
+                                               pShape, fInProlog);
             }
 
 //            else if (pSO->is_barline())
@@ -404,7 +408,9 @@ void ColumnsBuilder::collect_content_for_this_column()
 //                int clefType = m_pSysCursor->get_applicable_clef_type();
 //                pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
 //                                                                 m_pagePos, clefType);
-//                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn, iLine, iInstr, pSO, rTime-0.5f, iStaff, pShape);
+//                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
+//                                               iLine, iInstr, pSO, rTime-0.5f, iStaff,
+//                                               pShape);
 //            }
 
             else
@@ -413,7 +419,8 @@ void ColumnsBuilder::collect_content_for_this_column()
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                          m_pagePos, clefType);
                 TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
-                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn, iLine, iInstr, pSO, time, iStaff, pShape);
+                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
+                                               iLine, iInstr, pSO, time, iStaff, pShape);
             }
 
             store_info_about_attached_objects(pSO, pShape, iInstr, iStaff,

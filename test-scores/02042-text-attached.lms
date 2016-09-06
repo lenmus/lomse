@@ -1,0 +1,13 @@
+(score (vers 2.0) (instrument (musicData 
+    (clef G)
+    (key C)
+    (spacer 50
+        (text "spacer" (dy -10)) )
+    (n c4 q
+        (text "note" (dy 80)) )
+    (spacer 50)
+    (barline simple
+        (text "barline" (dx 15)(dy -20)) )
+    (spacer 50)
+    (barline end)
+)))

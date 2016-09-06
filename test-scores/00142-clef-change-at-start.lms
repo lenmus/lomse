@@ -1,0 +1,21 @@
+(score (vers 2.1)
+   (instrument (staves 2)
+      (musicData 
+        (clef G p1)
+        (clef F4 p2)
+        (key c)
+        (time 4 4)
+        (clef F4 p1)
+        (n g3 q p1)
+        (n a3 q)
+        (n g3 q)
+        (n e3 q)
+
+        //left hand
+        (n c2 q v2 p2)
+        (n f1 q)
+        (n g1 q)
+        (n c2 q)
+        (barline)
+)))
+

@@ -90,9 +90,8 @@ public:
 class MyTimeSlice : public TimeSlice
 {
 public:
-    MyTimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iData,
-                bool fInProlog)
-        : TimeSlice(pEntry, entryType, column, iData, fInProlog)
+    MyTimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iData)
+        : TimeSlice(pEntry, entryType, column, iData)
     {
     }
     virtual ~MyTimeSlice() {}
