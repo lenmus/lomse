@@ -10,6 +10,8 @@
 
 ##### COMPATIBLE CHANGES
 
+- Fixed spacing issues, related to clefs and prolog objects, detected 
+  in regression tests.
 - Blank space in LDP exporter has been normalized.
 - LDP exporter reviewed for following the same syntax rules than LDP 
   Analyser, thus ensuring a round trip in LDP export-import.
