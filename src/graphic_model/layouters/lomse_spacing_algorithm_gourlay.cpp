@@ -80,6 +80,8 @@ SpAlgGourlay::SpAlgGourlay(LibraryScope& libraryScope,
     , m_numSlices(0)
     , m_iPrevColumn(-1)
     //
+    , m_lastPrologTime(-1.0f)
+    //
     , m_maxNoteDur(0.0f)
     , m_minNoteDur(LOMSE_NO_DURATION)
 {
@@ -135,7 +137,8 @@ void SpAlgGourlay::new_column(TimeSlice* pSlice)
 
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UNUSED(iLine),
-                                  int UNUSED(iInstr), ImoStaffObj* pSO, TimeUnits rTime,
+                                  int UNUSED(iInstr), ImoStaffObj* pSO,
+                                  TimeUnits UNUSED(rTime),
                                   int UNUSED(nStaff), GmoShape* pShape, bool fInProlog)
 {
     StaffObjData* pData = LOMSE_NEW StaffObjData();
@@ -144,6 +147,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     pData->m_pShape = pShape;
 
     //determine slice type for the new object to include
+    dbgLogger << "StaffObj type= " << pSO->get_obj_type();
     int curType = TimeSlice::k_undefined;
     if (fInProlog)
         curType = TimeSlice::k_prolog;
@@ -177,10 +181,40 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
         }
     }
 
-    //determine if a new slice must be created
-    TimeUnits curTime = rTime;
+    //determine if a new slice should be created
+    TimeUnits curTime = pCurEntry->time();
+    bool fCreateNewSlice = false;
     if (curType != m_prevType || !is_equal(m_prevTime, curTime) )
+        fCreateNewSlice = true;
+
+    //avoid re-using current prolog slice if object is not clef, key or time
+    //signature or already exists for this staff.
+    if (!fCreateNewSlice && curType == TimeSlice::k_prolog && m_pCurSlice)
     {
+        if (!accept_for_prolog_slice(pCurEntry))
+        {
+            fCreateNewSlice = true;
+            curType = TimeSlice::k_non_timed;
+        }
+    }
+
+    //avoid starting a new prolog slice when non-timed after prolog
+    if (fCreateNewSlice && curType == TimeSlice::k_prolog)
+    {
+        if (is_equal(m_lastPrologTime, curTime) && m_prevType == TimeSlice::k_non_timed)
+        {
+            fCreateNewSlice = !m_pCurSlice;
+            curType = TimeSlice::k_non_timed;
+        }
+    }
+    dbgLogger << ", slice type= " << curType;
+
+    //include entry in current or new slice
+    if (fCreateNewSlice)
+    {
+        dbgLogger << ", Start new slice. m_prevType:" << m_prevType
+            << ", m_prevTime:" << m_prevTime << ", curTime:" << curTime
+            << endl;
         //terminate previous slice
         finish_slice(m_pLastEntry, m_numEntries);
 
@@ -214,6 +248,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     }
     else
     {
+        dbgLogger << ", Use previous slice." << endl;
         if (pSO->is_note_rest())
         {
             m_maxNoteDur = max(m_maxNoteDur, pSO->get_duration());
@@ -227,7 +262,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
 
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColumn,
-                             int iData, bool fInProlog)
+                             int iData, bool UNUSED(fInProlog))
 {
     //create the slice object
     TimeSlice* pSlice;
@@ -240,7 +275,7 @@ void SpAlgGourlay::new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColu
             pSlice = LOMSE_NEW TimeSliceNonTimed(pEntry, entryType, iColumn, iData);
             break;
         default:
-            pSlice = LOMSE_NEW TimeSlice(pEntry, entryType, iColumn, iData, fInProlog);
+            pSlice = LOMSE_NEW TimeSlice(pEntry, entryType, iColumn, iData);
     }
 
     //link slices, creating a list
@@ -254,6 +289,56 @@ void SpAlgGourlay::new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColu
     //update variables
     m_pCurSlice = pSlice;
     m_numEntries = 0;
+
+    //if prolog slice, prepare for accounting included objects
+    if (entryType == TimeSlice::k_prolog)
+    {
+        int numStaves = m_pScoreMeter->num_staves();
+        m_prologClefs.clear();
+        m_prologClefs.reserve(numStaves);
+        m_prologClefs.assign(numStaves, false);
+        m_prologKeys.clear();
+        m_prologKeys.reserve(numStaves);
+        m_prologKeys.assign(numStaves, false);
+        m_prologTimes.clear();
+        m_prologTimes.reserve(numStaves);
+        m_prologTimes.assign(numStaves, false);
+
+        m_lastPrologTime = pEntry->time();
+        accept_for_prolog_slice(pEntry);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool SpAlgGourlay::accept_for_prolog_slice(ColStaffObjsEntry* pEntry)
+{
+    //returns true if the entry is acceptable for current prolog slice
+
+    ImoStaffObj* pSO = pEntry->imo_object();
+    int iStaff = m_pScoreMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
+    if (pSO->is_clef())
+    {
+        if (m_prologClefs[iStaff])
+            return false;
+        m_prologClefs[iStaff] = true;
+        return true;
+    }
+    else if (pSO->is_key_signature())
+    {
+        if (m_prologKeys[iStaff])
+            return false;
+        m_prologKeys[iStaff] = true;
+        return true;
+    }
+    else if (pSO->is_time_signature())
+    {
+        if (m_prologTimes[iStaff])
+            return false;
+        m_prologTimes[iStaff] = true;
+        return true;
+    }
+    else
+        return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -411,7 +496,7 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
 
         //reposition staffobjs
         m_columns[iCol]->move_shapes_to_final_positions(m_data, xLeft, yTop + yShift,
-                                                        yMin, yMax);
+                                                        yMin, yMax, m_pScoreMeter);
 
         //assign the final width to the boxes
         LUnits colWidth = m_columns[iCol]->get_column_width();
@@ -667,15 +752,13 @@ bool SpAlgGourlay::is_better_option(float prevPenalty, float newPenalty,
 //=======================================================================================
 // TimeSlice implementation
 //=======================================================================================
-TimeSlice::TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column,
-                                   int iData, bool fInProlog)
+TimeSlice::TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iData)
     : m_firstEntry(pEntry)
     , m_lastEntry(pEntry)
     , m_iFirstData(iData)
     , m_numEntries(1)
     , m_type(entryType)
     , m_iColumn(column)
-    , m_fInProlog(fInProlog)
     , m_next(NULL)
     , m_prev(NULL)
     //
@@ -914,12 +997,6 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
 }
 
 //---------------------------------------------------------------------------------------
-bool TimeSlice::is_last_slice_in_prolog()
-{
-    return m_fInProlog && m_next && !(m_next->m_fInProlog);
-}
-
-//---------------------------------------------------------------------------------------
 int TimeSlice::collect_barlines_information(int numInstruments)
 {
     int info = 0;
@@ -1116,7 +1193,8 @@ void TimeSlice::delete_shapes(vector<StaffObjData*>& data)
 
 //---------------------------------------------------------------------------------------
 void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
-                                               LUnits yPos, LUnits* yMin, LUnits* yMax)
+                                               LUnits yPos, LUnits* yMin, LUnits* yMax,
+                                               ScoreMeter* UNUSED(pMeter))
 {
     int iMax = m_iFirstData + m_numEntries;
     for (int i=m_iFirstData; i < iMax; ++i)
@@ -1145,7 +1223,7 @@ void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUni
 //=====================================================================================
 TimeSliceProlog::TimeSliceProlog(ColStaffObjsEntry* pEntry, int entryType, int column,
                                  int iData)
-    : TimeSlice(pEntry, entryType, column, iData, true)
+    : TimeSlice(pEntry, entryType, column, iData)
     , m_clefsWidth(0.0f)
     , m_timesWidth(0.0f)
     , m_keysWidth(0.0f)
@@ -1205,7 +1283,8 @@ void TimeSliceProlog::assign_spacing_values(vector<StaffObjData*>& data,
 //---------------------------------------------------------------------------------------
 void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                      LUnits xPos, LUnits yPos,
-                                                     LUnits* yMin, LUnits* yMax)
+                                                     LUnits* yMin, LUnits* yMax,
+                                                     ScoreMeter* UNUSED(pMeter))
 {
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
@@ -1235,6 +1314,27 @@ void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data
     }
 }
 
+//---------------------------------------------------------------------------------------
+void TimeSliceProlog::remove_after_space_if_not_full(ScoreMeter* pMeter, int SOtype)
+{
+    //if only one staff and only one object, remove after space unless
+    //next object is of different type than this one.
+    //This is a trick for non-valid scores used as notation examples, such
+    //as an staff with all clef types
+
+    if (m_numEntries == 1)
+    {
+        ImoStaffObj* pSO = m_lastEntry->imo_object();
+        if (SOtype == pSO->get_obj_type())
+        {
+            m_xLeft -= pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_PROLOG);
+            m_xLeft -= pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_SMALL_CLEF);
+            if (!m_prev)
+                m_xLeft -= pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_SMALL_CLEF);
+        }
+    }
+}
+
 
 //=====================================================================================
 //TimeSliceNonTimed implementation
@@ -1247,7 +1347,7 @@ void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data
 //=====================================================================================
 TimeSliceNonTimed::TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int entryType,
                                      int column, int iData)
-    : TimeSlice(pEntry, entryType, column, iData, true)
+    : TimeSlice(pEntry, entryType, column, iData)
 {
 
 }
@@ -1287,7 +1387,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         GmoShape* pShape = data[i]->get_shape();
         if (pShape)
         {
-            int iStaff = pEntry->staff();
+            int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
             m_widths[iStaff] += m_interSpace + pShape->get_width();
             maxWidth = max(maxWidth, m_widths[iStaff]);
         }
@@ -1317,7 +1417,8 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         int iMax = m_prev->m_numEntries;
         for (int i=0; i < iMax; ++i, pEntry = pEntry->get_next())
         {
-            int iStaff = pEntry->staff();
+            //int iStaff = pEntry->staff();
+            int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
             fNoOverlap &= m_widths[iStaff] == 0.0f;
         }
 
@@ -1326,12 +1427,33 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         else
             m_prev->increment_xRi(maxWidth);
     }
+
+    //if only one staff and prev slice is prolog without clef, key and time
+    //remove after space in prev slice
+    if (numStaves == 1 && m_prev && m_prev->get_type() == TimeSlice::k_prolog)
+    {
+        ImoStaffObj* pSO = m_firstEntry->imo_object();
+        int type = pSO->get_obj_type();
+        switch(type)
+        {
+            case k_imo_clef:
+            case k_imo_key_signature:
+            case k_imo_time_signature:
+            {
+                TimeSliceProlog* pSlice = static_cast<TimeSliceProlog*>(m_prev);
+                pSlice->remove_after_space_if_not_full(pMeter, type);
+            }
+            default:
+                break;
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                        LUnits xPos, LUnits yPos,
-                                                       LUnits* yMin, LUnits* yMax)
+                                                       LUnits* yMin, LUnits* yMax,
+                                                       ScoreMeter* pMeter)
 {
     //vector for current position on each staff
     vector<LUnits> positions;
@@ -1350,7 +1472,8 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
         if (pShape)
         {
             //compute left position for this object
-            int iStaff = pEntry->staff();
+            //int iStaff = pEntry->staff();
+            int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
             LUnits xLeft = positions[iStaff];
 
             //move shape
@@ -1520,14 +1643,15 @@ void ColumnDataGourlay::delete_shapes(vector<StaffObjData*>& data)
 //---------------------------------------------------------------------------------------
 void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                        LUnits xPos, LUnits yPos,
-                                                       LUnits* yMin, LUnits* yMax)
+                                                       LUnits* yMin, LUnits* yMax,
+                                                       ScoreMeter* pMeter)
 {
     m_xPos = xPos;
 
     TimeSlice* pSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
-        pSlice->move_shapes_to_final_positions(data, xPos, yPos, yMin, yMax);
+        pSlice->move_shapes_to_final_positions(data, xPos, yPos, yMin, yMax, pMeter);
         xPos += pSlice->get_width();
         pSlice = pSlice->next();
     }
