@@ -180,10 +180,9 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         ImoStaffObj* pA = a->imo_object();
 
         //barline must go before all other objects at same measure
-        //TODO: not asking for measure but for line. Is this correct?
-        if (pB->is_barline() && !pA->is_barline() && b->line() != a->line())
+        if (pB->is_barline() && !pA->is_barline() && b->measure() != a->measure())
             return true;
-        else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
+        else if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
             return false;
 
         //note/rest can not go before non-timed in other instruments/staves
