@@ -10,6 +10,7 @@
    <content> 
       <ldpmusic>
          (score (vers 2.0)
+            (opt Score.JustifyLastSystem 3)  //3 = always
             (instrument 
                (name "Viol.")
                (staves 1)
