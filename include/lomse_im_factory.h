@@ -68,7 +68,6 @@ public:
 
     static ImoBeamData* inject_beam_data(Document* pDoc, ImoBeamDto* pDto);
     static ImoTieData* inject_tie_data(Document* pDoc, ImoTieDto* pDto);
-    static ImoTupletData* inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto);
     static ImoSlurData* inject_slur_data(Document* pDoc, ImoSlurDto* pDto);
     static ImoTuplet* inject_tuplet(Document* pDoc, ImoTupletDto* pDto);
     static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, ImoId id=k_no_imoid);

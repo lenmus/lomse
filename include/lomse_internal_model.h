@@ -127,7 +127,6 @@ class ImoTieData;
 class ImoTieDto;
 class ImoTimeModificationDto;
 class ImoTimeSignature;
-class ImoTupletData;
 class ImoTupletDto;
 class ImoTuplet;
 class ImoWrapperBox;
@@ -4442,18 +4441,6 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// Tuplet info for a note/rest
-class ImoTupletData : public ImoRelDataObj
-{
-protected:
-	friend class ImFactory;
-    ImoTupletData(ImoTupletDto* pDto);
-
-public:
-    virtual ~ImoTupletData() {}
-};
-
-//---------------------------------------------------------------------------------------
 class ImoTuplet : public ImoRelObj
 {
 protected:
@@ -4649,7 +4636,6 @@ typedef Visitor<ImoParagraph> ImParagraphVisitor;
 //typedef Visitor<ImoStyle> ImVisitor;
 //typedef Visitor<ImoTieData> ImVisitor;
 //typedef Visitor<ImoTieDto> ImVisitor;
-//typedef Visitor<ImoTupletData> ImVisitor;
 //typedef Visitor<ImoTupletDto> ImVisitor;
 //typedef Visitor<ImoTuplet> ImVisitor;
 //typedef Visitor<ImoWrapperBox> ImVisitor;

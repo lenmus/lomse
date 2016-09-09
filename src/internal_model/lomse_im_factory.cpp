@@ -167,15 +167,6 @@ ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 }
 
 //---------------------------------------------------------------------------------------
-ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
-{
-    ImoTupletData* pObj = LOMSE_NEW ImoTupletData(pDto);
-    pDoc->assign_id(pObj);
-    pObj->set_owner_document(pDoc);
-    return pObj;
-}
-
-//---------------------------------------------------------------------------------------
 ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 {
     ImoSlurData* pObj = LOMSE_NEW ImoSlurData(pDto);

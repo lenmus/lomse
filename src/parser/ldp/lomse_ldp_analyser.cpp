@@ -1215,8 +1215,9 @@ public:
 
     void do_analysis()
     {
-        ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
-        pInfo->set_id( get_node_id() );
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoBeamDto* pInfo = static_cast<ImoBeamDto*>(
+                ImFactory::inject(k_imo_beam_dto, pDoc, get_node_id()) );
 
         // num
         if (get_optional(k_number))
@@ -7491,12 +7492,10 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
 
     //create tuplet data and add tuplet to start and end note/rest
     ImoNoteRest* pNR = pStartDto->get_note_rest();
-    ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, pStartDto);
-    pNR->include_in_relation(pDoc, pTuplet, pData);
+    pNR->include_in_relation(pDoc, pTuplet, NULL);
 
     pNR = pEndDto->get_note_rest();
-    pData = ImFactory::inject_tuplet_data(pDoc, pEndDto);
-    pNR->include_in_relation(pDoc, pTuplet, pData);
+    pNR->include_in_relation(pDoc, pTuplet, NULL);
 }
 
 

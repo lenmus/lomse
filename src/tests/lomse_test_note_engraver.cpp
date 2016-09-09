@@ -61,9 +61,6 @@ public:
         , m_pMeter(NULL)
         , m_pEngrv(NULL)
         , m_pTuplet(NULL)
-        , m_pTupletData1(NULL)
-        , m_pTupletData2(NULL)
-        , m_pTupletData3(NULL)
         , m_pNote1(NULL)
         , m_pNote2(NULL)
         , m_pNote3(NULL)
@@ -94,9 +91,8 @@ public:
 
         ImoTupletDto dto1;
         dto1.set_tuplet_type(ImoTupletDto::k_start);
-        m_pTupletData1 = ImFactory::inject_tuplet_data(&doc, &dto1);
 
-        m_pNote1->include_in_relation(&doc, m_pTuplet, m_pTupletData1);
+        m_pNote1->include_in_relation(&doc, m_pTuplet, NULL);
         m_pNote1->set_step(2);
 
         m_pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
@@ -104,16 +100,14 @@ public:
 
         ImoTupletDto dto2;
         dto2.set_tuplet_type(ImoTupletDto::k_continue);
-        m_pTupletData2 = ImFactory::inject_tuplet_data(&doc, &dto2);
 
-        m_pNote2->include_in_relation(&doc, m_pTuplet, m_pTupletData2);
+        m_pNote2->include_in_relation(&doc, m_pTuplet, NULL);
 
         m_pNote3 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
 
         ImoTupletDto dto3;
         dto3.set_tuplet_type(ImoTupletDto::k_stop);
-        m_pTupletData3 = ImFactory::inject_tuplet_data(&doc, &dto3);
-        m_pNote3->include_in_relation(&doc, m_pTuplet, m_pTupletData3);
+        m_pNote3->include_in_relation(&doc, m_pTuplet, NULL);
 
         m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
@@ -130,10 +124,6 @@ public:
     {
         delete m_pMeter;
         delete m_pEngrv;
-//        delete m_pTuplet;
-//        delete m_pTupletData1;
-//        delete m_pTupletData2;
-//        delete m_pTupletData3;
         delete m_pNote1;
         delete m_pNote2;
         delete m_pNote3;
@@ -146,9 +136,6 @@ public:
     ScoreMeter* m_pMeter;
     NoteEngraver* m_pEngrv;
     ImoTuplet* m_pTuplet;
-    ImoTupletData* m_pTupletData1;
-    ImoTupletData* m_pTupletData2;
-    ImoTupletData* m_pTupletData3;
     ImoNote* m_pNote1;
     ImoNote* m_pNote2;
     ImoNote* m_pNote3;
