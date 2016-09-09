@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- MusicXML importer now supports tuplets
 - Fixed spacing issues, related to clefs and prolog objects, detected 
   in regression tests.
 - Blank space in LDP exporter has been normalized.

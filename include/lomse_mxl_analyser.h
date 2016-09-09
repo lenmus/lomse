@@ -98,47 +98,18 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
+// helper class to save tuplet info items, match them and build the tuplets
+class MxlTupletsBuilder : public RelationBuilder<ImoTupletDto, MxlAnalyser>
+{
+public:
+    MxlTupletsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
+    virtual ~MxlTupletsBuilder() {}
 
-////---------------------------------------------------------------------------------------
-//// helper class to save beam info items, match them and build the beams
-//// For old g+/g- syntax
-//class OldMxlBeamsBuilder
-//{
-//protected:
-//    ostream& m_reporter;
-//    MxlAnalyser* m_pAnalyser;
-//    std::list<ImoBeamDto*> m_pendingOldBeams;
-//
-//public:
-//    OldMxlBeamsBuilder(ostream& reporter, MxlAnalyser* pAnalyser);
-//    ~OldMxlBeamsBuilder();
-//
-//    void add_old_beam(ImoBeamDto* pInfo);
-//    bool is_old_beam_open();
-//    void close_old_beam(ImoBeamDto* pInfo);
-//    void clear_pending_old_beams();
-//
-//protected:
-//    void do_create_old_beam();
-//
-//    //errors
-//    void error_no_end_old_beam(ImoBeamDto* pInfo);
-//
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//// helper class to save tuplet info items, match them and build the tuplets
-//class MxlTupletsBuilder : public RelationBuilder<ImoTupletDto, MxlAnalyser>
-//{
-//public:
-//    MxlTupletsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
-//        : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
-//    virtual ~MxlTupletsBuilder() {}
-//
-//    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
-//    inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
-//};
+    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
+    inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
+};
 
 //---------------------------------------------------------------------------------------
 // helper class to save part-list info
@@ -221,7 +192,7 @@ protected:
     LdpFactory*     m_pLdpFactory;
     MxlTiesBuilder*    m_pTiesBuilder;
     MxlBeamsBuilder*   m_pBeamsBuilder;
-//    MxlTupletsBuilder* m_pTupletsBuilder;
+    MxlTupletsBuilder* m_pTupletsBuilder;
     MxlSlursBuilder*   m_pSlursBuilder;
     map<string, int> m_lyricIndex;
     vector<ImoLyric*>  m_lyrics;
@@ -349,8 +320,8 @@ public:
     int get_slur_id(int numSlur);
     int get_slur_id_and_close(int numSlur);
 
-//    //interface for MxlTupletsBuilder
-//    inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
+    //interface for MxlTupletsBuilder
+    inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
 
 //    //interface for ChordBuilder
 //    void add_chord(ImoChord* pChord);

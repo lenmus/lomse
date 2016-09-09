@@ -273,6 +273,8 @@ enum EMxlTag
     k_mxl_tag_text,
     k_mxl_tag_tied,
     k_mxl_tag_time,
+    k_mxl_tag_time_modification,
+    k_mxl_tag_tuplet,
 };
 
 
@@ -309,7 +311,7 @@ protected:
     bool error_missing_element(const string& tag);
     void report_msg(int numLine, const std::string& msg);
     void report_msg(int numLine, const std::stringstream& msg);
-    void error_if_more_elements();
+    bool error_if_more_elements();
     void error_invalid_child();
     void error_msg(const string& msg);
     void error_msg2(const string& msg);
@@ -1141,7 +1143,7 @@ void MxlElementAnalyser::error_msg2(const string& msg)
 }
 
 //---------------------------------------------------------------------------------------
-void MxlElementAnalyser::error_if_more_elements()
+bool MxlElementAnalyser::error_if_more_elements()
 {
     if (more_children_to_analyse())
     {
@@ -1154,7 +1156,9 @@ void MxlElementAnalyser::error_if_more_elements()
                 + ">: too many children. Elements after <"
                 + name + "> have been ignored. First ignored: <"
                 + next + ">.");
+        return true;
     }
+    return false;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -2893,9 +2897,7 @@ public:
             set_notated_accidentals(pNote);
 
         // [<time-modification>]
-        if (get_optional("time-modification"))
-        {
-        }
+        analyse_optional("time-modification", pNR);
 
         // [<stem>]
         if (!fIsRest && get_optional("stem"))
@@ -4534,70 +4536,6 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <!ELEMENT time ((beats, beat-type)+ | senza-misura)>
-//@ <!ATTLIST time
-//@         symbol (common | cut | single-number | normal) #IMPLIED
-//@ >
-//@ <!ELEMENT beats (#PCDATA)>
-//@ <!ELEMENT beat-type (#PCDATA)>
-//@ <!ELEMENT senza-misura EMPTY>
-
-class TimeMxlAnalyser : public MxlElementAnalyser
-{
-public:
-    TimeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
-        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-
-    ImoObj* do_analysis()
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
-                                    ImFactory::inject(k_imo_time_signature, pDoc) );
-
-        // atrrib: symbol (common | cut | single-number | normal)
-        if (has_attribute("symbol"))
-            set_symbol(pTime);
-
-        // <beats> (num)
-        if (get_mandatory("beats"))
-            pTime->set_top_number( get_integer_value(2) );
-
-        // <beat-type> (num)
-        if (pTime->get_type() != ImoTimeSignature::k_single_number
-             && get_mandatory("beat-type"))
-            pTime->set_bottom_number( get_integer_value(4) );
-
-        add_to_model(pTime);
-        return pTime;
-    }
-
-protected:
-
-    //-----------------------------------------------------------------------------------
-    void set_symbol(ImoTimeSignature* pImo)
-    {
-        // atrrib: symbol (common | cut | single-number | normal)
-
-        string value = get_attribute("symbol");
-        if (value == "common")
-            pImo->set_type(ImoTimeSignature::k_common);
-        else if (value == "cut")
-            pImo->set_type(ImoTimeSignature::k_cut);
-        else if (value == "single-number")
-            pImo->set_type(ImoTimeSignature::k_single_number);
-        else if (value == "normal")
-            pImo->set_type(ImoTimeSignature::k_normal);
-        else
-        {
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                "Unknown time signature type '" + value + "'. Ignored.");
-        }
-    }
-};
-
-//@--------------------------------------------------------------------------------------
 //<!ELEMENT text (#PCDATA)>
 //<!ATTLIST text
 //    %font;
@@ -4801,6 +4739,336 @@ protected:
 
 };
 
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT time ((beats, beat-type)+ | senza-misura)>
+//@ <!ATTLIST time
+//@         symbol (common | cut | single-number | normal) #IMPLIED
+//@ >
+//@ <!ELEMENT beats (#PCDATA)>
+//@ <!ELEMENT beat-type (#PCDATA)>
+//@ <!ELEMENT senza-misura EMPTY>
+
+class TimeMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    TimeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
+                                    ImFactory::inject(k_imo_time_signature, pDoc) );
+
+        // atrrib: symbol (common | cut | single-number | normal)
+        if (has_attribute("symbol"))
+            set_symbol(pTime);
+
+        // <beats> (num)
+        if (get_mandatory("beats"))
+            pTime->set_top_number( get_integer_value(2) );
+
+        // <beat-type> (num)
+        if (pTime->get_type() != ImoTimeSignature::k_single_number
+             && get_mandatory("beat-type"))
+            pTime->set_bottom_number( get_integer_value(4) );
+
+        add_to_model(pTime);
+        return pTime;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_symbol(ImoTimeSignature* pImo)
+    {
+        // atrrib: symbol (common | cut | single-number | normal)
+
+        string value = get_attribute("symbol");
+        if (value == "common")
+            pImo->set_type(ImoTimeSignature::k_common);
+        else if (value == "cut")
+            pImo->set_type(ImoTimeSignature::k_cut);
+        else if (value == "single-number")
+            pImo->set_type(ImoTimeSignature::k_single_number);
+        else if (value == "normal")
+            pImo->set_type(ImoTimeSignature::k_normal);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Unknown time signature type '" + value + "'. Ignored.");
+        }
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT time-modification
+//@    (actual-notes, normal-notes, (normal-type, normal-dot*)?)>
+//@
+class TimeModificationXmlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoNoteRest* m_pNR;
+    int m_actual;
+    int m_normal;
+
+public:
+    TimeModificationXmlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                                LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        {
+        }
+
+    ImoObj* do_analysis()
+    {
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            m_pNR = static_cast<ImoNote*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is not note/rest");
+            return NULL;
+        }
+
+        bool fError = false;
+
+        // actual-notes
+        if (get_mandatory("actual-notes"))
+            fError |= set_actual_notes();
+        else
+            fError = true;
+
+        // normal-notes
+        if (get_mandatory("normal-notes"))
+            fError |= set_normal_notes();
+        else
+            fError = true;
+
+        //TODO: They are useless in IM. Confirm this.
+        // (normal-type, normal-dot*)?
+        get_optional("normal-type");
+        while (get_optional("normal-dots"));
+
+        fError |= error_if_more_elements();
+
+        if (!fError)
+            m_pNR->set_time_modification(m_normal, m_actual);
+
+        return NULL;
+    }
+
+protected:
+
+    bool set_actual_notes()
+    {
+        //returns true is error
+
+        string actual = m_childToAnalyse.value();
+        if (m_pAnalyser->to_integer(actual, &m_actual))
+        {
+            error_msg2(
+                "Invalid actual-notes number '" + actual +
+                "'. time-modification ignored.");
+            return true;
+        }
+        return false;
+    }
+
+    bool set_normal_notes()
+    {
+        //returns true is error
+
+        string normal = m_childToAnalyse.value();
+        if (m_pAnalyser->to_integer(normal, &m_normal))
+        {
+            error_msg2(
+                "Invalid normal-notes number '" + normal +
+                "'. time-modification ignored.");
+            return true;
+        }
+        return false;
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
+//@ <!ELEMENT tuplet (tuplet-actual?, tuplet-normal?)>
+//@ <!ATTLIST tuplet
+//@     type %start-stop; #REQUIRED
+//@     number %number-level; #IMPLIED
+//@     bracket %yes-no; #IMPLIED
+//@     show-number (actual | both | none) #IMPLIED
+//@     show-type (actual | both | none) #IMPLIED
+//@     %line-shape;
+//@     %position;
+//@     %placement;
+//@ >
+//@
+class TupletMxlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoTupletDto* m_pInfo;
+
+public:
+    TupletMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                      LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        {
+        }
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNote*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is not note/rest");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo = static_cast<ImoTupletDto*>(
+                                ImFactory::inject(k_imo_tuplet_dto, pDoc));
+        set_default_values(m_pInfo);
+
+        // atrib: type %start-stop; #REQUIRED
+        const string& type = get_mandatory_string_attribute("type", "", "tuplet");
+        if (type.empty() || !set_tuplet_type(type))
+        {
+            error_msg("Missing or invalid tuplet type. Tuplet ignored.");
+            delete m_pInfo;
+            return NULL;
+        }
+
+        // attrib: number %number-level; #IMPLIED
+        string snum = get_optional_string_attribute("number", "");
+        set_tuplet_id(snum);
+
+        // attrib: bracket %yes-no; #IMPLIED
+        string value = get_optional_string_attribute("bracket", "");
+        set_bracket(value);
+
+        // attrib: show-number (actual | both | none) #IMPLIED
+        value = get_optional_string_attribute("show-number", "");
+        set_show_number(value);
+
+        // attrib: show-type (actual | both | none) #IMPLIED
+        value = get_optional_string_attribute("show-type", "");
+        set_show_type(value);
+
+        //TODO
+        //%line-shape;
+        //%position;
+        //%placement;
+
+        //TODO: (tuplet-actual?, tuplet-normal?)
+        get_optional("tuplet-actual");
+        get_optional("tuplet-normal");
+
+        if (m_pInfo->is_start_of_tuplet())
+        {
+            m_pInfo->set_actual_number( pNR->get_time_modifier_bottom() );
+            m_pInfo->set_normal_number( pNR->get_time_modifier_top() );
+        }
+
+        m_pInfo->set_note_rest(pNR);
+        m_pAnalyser->add_relation_info(m_pInfo);
+
+        return m_pInfo;
+    }
+
+protected:
+
+    void set_default_values(ImoTupletDto* pInfo)
+    {
+        //pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
+        pInfo->set_placement(k_placement_default);
+        pInfo->set_only_graphical(true);
+    }
+
+    void set_tuplet_id(const string& snum)
+    {
+        if (snum.empty())
+        {
+            error_msg("Invalid tuplet number. Number ignored.");
+            return;
+        }
+
+        ////c++11
+        //long num = std::stol(snum);
+        //c++98
+        char* pEnd;
+        long num = std::strtol(snum.c_str(), &pEnd, 10);
+        m_pInfo->set_id(num);
+        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
+        //      tuplets it will have any use.
+    }
+
+    bool set_tuplet_type(const string& value)
+    {
+        if (value == "start")
+            m_pInfo->set_tuplet_type(ImoTupletDto::k_start);
+        else if (value == "stop")
+            m_pInfo->set_tuplet_type(ImoTupletDto::k_stop);
+        else
+            return false;   //error
+        return true;    //ok
+    }
+
+    void set_bracket(const string& value)
+    {
+        if (value.empty())
+            m_pInfo->set_show_bracket(k_yesno_default);
+        else if (value == "yes")
+            m_pInfo->set_show_bracket(k_yesno_yes);
+        else if (value == "no")
+            m_pInfo->set_show_bracket(k_yesno_no);
+        else
+        {
+            error_msg("Invalid value '" + value +
+                      "' for yes-no bracket attribute. 'no' assumed.");
+            m_pInfo->set_show_bracket(k_yesno_no);
+        }
+    }
+
+    void set_show_number(const string& value)
+    {
+        //The show-number attribute is used to display either the
+        //number of actual notes, the number of both actual and
+        //normal notes, or neither. It is actual by default.
+
+        if (value.empty())
+            m_pInfo->set_show_number(ImoTuplet::k_number_actual);
+        else if (value == "none")
+            m_pInfo->set_show_number(ImoTuplet::k_number_none);
+        else if (value == "actual")
+            m_pInfo->set_show_number(ImoTuplet::k_number_actual);
+        else if (value == "both")
+            m_pInfo->set_show_number(ImoTuplet::k_number_both);
+        else
+        {
+            error_msg("Invalid value '" + value +
+                      "' for show-number attribute. 'actual' assumed.");
+            m_pInfo->set_show_number(ImoTuplet::k_number_actual);
+        }
+        //m_pAnalyser->set_current_show_tuplet_number(nShowNumber);
+    }
+
+    void set_show_type(const string& UNUSED(value))
+    {
+        //The show-type attribute is used to display either the actual
+        //type, both the actual and normal types, or neither. It is
+        //none by default.
+
+        //TODO Clarify this and how to manage in IM
+
+    }
+
+};
+
+
 
 
 //=======================================================================================
@@ -4816,7 +5084,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pLdpFactory(libraryScope.ldp_factory())
     , m_pTiesBuilder(NULL)
     , m_pBeamsBuilder(NULL)
-//    , m_pTupletsBuilder(NULL)
+    , m_pTupletsBuilder(NULL)
     , m_pSlursBuilder(NULL)
     , m_musicxmlVersion(0)
     , m_pNodeImo(NULL)
@@ -4864,6 +5132,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["text"] = k_mxl_tag_text;
     m_NameToEnum["tied"] = k_mxl_tag_tied;
     m_NameToEnum["time"] = k_mxl_tag_time;
+    m_NameToEnum["time-modification"] = k_mxl_tag_time_modification;
+    m_NameToEnum["tuplet"] = k_mxl_tag_tuplet;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4880,7 +5150,7 @@ void MxlAnalyser::delete_relation_builders()
 {
     delete m_pTiesBuilder;
     delete m_pBeamsBuilder;
-//    delete m_pTupletsBuilder;
+    delete m_pTupletsBuilder;
     delete m_pSlursBuilder;
 }
 
@@ -4890,7 +5160,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     delete_relation_builders();
     m_pTiesBuilder = LOMSE_NEW MxlTiesBuilder(m_reporter, this);
     m_pBeamsBuilder = LOMSE_NEW MxlBeamsBuilder(m_reporter, this);
-//    m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
+    m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
     m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
 
     m_pTree = root;
@@ -4943,8 +5213,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
     else if (pDto->is_slur_dto())
         m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
-//    else if (pDto->is_tuplet_dto())
-//        m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
+    else if (pDto->is_tuplet_dto())
+        m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -4953,7 +5223,7 @@ void MxlAnalyser::clear_pending_relations()
     m_pTiesBuilder->clear_pending_items();
     m_pSlursBuilder->clear_pending_items();
     m_pBeamsBuilder->clear_pending_items();
-//    m_pTupletsBuilder->clear_pending_items();
+    m_pTupletsBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -5472,7 +5742,8 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_text:                 return LOMSE_NEW TextMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tied:                 return LOMSE_NEW TiedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_time:                 return LOMSE_NEW TimeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-
+        case k_mxl_tag_time_modification:    return LOMSE_NEW TimeModificationXmlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_tuplet:               return LOMSE_NEW TupletMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         default:
             return LOMSE_NEW NullMxlAnalyser(this, m_reporter, m_libraryScope, name);
     }
@@ -5601,99 +5872,26 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 }
 
 
-////=======================================================================================
-//// OldMxlBeamsBuilder implementation
-////=======================================================================================
-//OldMxlBeamsBuilder::OldMxlBeamsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
-//    : m_reporter(reporter)
-//    , m_pAnalyser(pAnalyser)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//OldMxlBeamsBuilder::~OldMxlBeamsBuilder()
-//{
-//    clear_pending_old_beams();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void OldMxlBeamsBuilder::add_old_beam(ImoBeamDto* pInfo)
-//{
-//    m_pendingOldBeams.push_back(pInfo);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void OldMxlBeamsBuilder::clear_pending_old_beams()
-//{
-//    std::list<ImoBeamDto*>::iterator it;
-//    for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
-//    {
-//        error_no_end_old_beam(*it);
-//        delete *it;
-//    }
-//    m_pendingOldBeams.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool OldMxlBeamsBuilder::is_old_beam_open()
-//{
-//    return m_pendingOldBeams.size() > 0;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void OldMxlBeamsBuilder::error_no_end_old_beam(ImoBeamDto* pInfo)
-//{
-//    m_reporter << "Line " << pInfo->get_line_number()
-//               << ". No matching 'g-' element for 'g+'. Beam ignored." << endl;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void OldMxlBeamsBuilder::close_old_beam(ImoBeamDto* pInfo)
-//{
-//    add_old_beam(pInfo);
-//    do_create_old_beam();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void OldMxlBeamsBuilder::do_create_old_beam()
-//{
-//    Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//    ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
-//    std::list<ImoBeamDto*>::iterator it;
-//    for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
-//    {
-//        ImoNoteRest* pNR = (*it)->get_note_rest();
-//        ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
-//        pNR->include_in_relation(pDoc, pBeam, pData);
-//        delete *it;
-//    }
-//    m_pendingOldBeams.clear();
-//
-//    MxlAutoBeamer autobeamer(pBeam);
-//    autobeamer.do_autobeam();
-//}
-//
-//
-//
-////=======================================================================================
-//// MxlTupletsBuilder implementation
-////=======================================================================================
-//void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
-//{
-//    m_matches.push_back(pEndDto);
-//    Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//
-//    ImoTupletDto* pStartDto = m_matches.front();
-//    ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
-//
-//    std::list<ImoTupletDto*>::iterator it;
-//    for (it = m_matches.begin(); it != m_matches.end(); ++it)
-//    {
-//        ImoNoteRest* pNR = (*it)->get_note_rest();
-//        ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, *it);
-//        pNR->include_in_relation(pDoc, pTuplet, pData);
-//    }
-//}
+
+//=======================================================================================
+// MxlTupletsBuilder implementation
+//=======================================================================================
+void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
+{
+    m_matches.push_back(pEndDto);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+    ImoTupletDto* pStartDto = m_matches.front();
+    ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
+
+    std::list<ImoTupletDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoNoteRest* pNR = (*it)->get_note_rest();
+        ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, *it);
+        pNR->include_in_relation(pDoc, pTuplet, pData);
+    }
+}
 
 //=======================================================================================
 //// MxlAutoBeamer implementation

@@ -107,6 +107,11 @@ public:
         }
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
 };
 
 
@@ -129,7 +134,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -156,7 +161,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
@@ -180,7 +185,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -208,7 +213,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -245,7 +250,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -281,7 +286,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -311,7 +316,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -344,7 +349,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -382,7 +387,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -426,7 +431,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -471,7 +476,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -521,7 +526,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -564,7 +569,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -607,7 +612,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -650,7 +655,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -693,7 +698,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -738,7 +743,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -791,7 +796,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -844,7 +849,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -898,7 +903,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -953,7 +958,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1008,7 +1013,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1057,7 +1062,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1085,7 +1090,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1111,7 +1116,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1140,7 +1145,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1150,7 +1155,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTimeSignature != NULL );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
-//        cout << UnitTest::CurrentTest::Details()->testName
+//        cout << test_name()
 //             << ": top number=" << pTimeSignature->get_top_number()
 //             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
 
@@ -1171,7 +1176,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1202,7 +1207,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1229,7 +1234,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1272,7 +1277,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1317,7 +1322,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1347,7 +1352,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "divisons:" << a.current_divisions() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -1374,7 +1379,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1411,7 +1416,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1447,7 +1452,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1483,7 +1488,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1521,7 +1526,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1559,7 +1564,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1598,7 +1603,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1642,7 +1647,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1698,7 +1703,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1750,7 +1755,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1798,7 +1803,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-////        cout << UnitTest::CurrentTest::Details()->testName << endl;
+////        cout << test_name() << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1889,7 +1894,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1909,7 +1914,6 @@ SUITE(MxlAnalyserTest)
 
     //@ barline --------------------------------------------------------------------------
 
-
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_400)
     {
         //@00400 barline minimal content
@@ -1922,7 +1926,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1954,7 +1958,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1966,6 +1970,389 @@ SUITE(MxlAnalyserTest)
 //        a.do_not_delete_instruments_in_destructor();
 //        delete pIModel;
 //    }
+
+
+    //@ time-modification ---------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, time_modification_0)
+    {
+        //@0. time-modification
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<note><pitch><step>C</step><octave>5</octave></pitch>"
+            "<duration>136</duration><voice>1</voice><type>eighth</type>"
+            "<time-modification><actual-notes>3</actual-notes>"
+            "<normal-notes>2</normal-notes>"
+            "</time-modification>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_dots() == 0 );
+        CHECK( pNote->get_note_type() == k_eighth );
+        CHECK( pNote->get_octave() == 5 );
+        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote->get_time_modifier_top() == 2 );
+        CHECK( pNote->get_time_modifier_bottom() == 3 );
+//        cout << "time_modifier_top= " << pNote->get_time_modifier_top()
+//             << ", time_modifier_bottom= " << pNote->get_time_modifier_bottom() << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    //@ tuplet --------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_01)
+    {
+        //@01. tuplet
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>G</step><alter>-1</alter>"
+                "<octave>5</octave></pitch><duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='start' number='137' /></notations>"
+            "</note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><chord/><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='stop' number='137' /></notations>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 4 );
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        ImoTuplet* pTuplet = pNote->get_tuplet();
+        CHECK( pTuplet != NULL );
+        CHECK( pTuplet->get_actual_number() == 1 );
+        CHECK( pTuplet->get_normal_number() == 1 );
+        CHECK( pTuplet->get_show_bracket() == k_yesno_default );
+        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_id() == 137L );
+
+        ++it;
+        ++it;
+        pNote = dynamic_cast<ImoNote*>( *it );
+        ImoTuplet* pTuplet2 = pNote->get_tuplet();
+        CHECK( pTuplet2 == pTuplet );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_02)
+    {
+        //@02. tuplet. bracket
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>G</step><alter>-1</alter>"
+                "<octave>5</octave></pitch><duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='start' number='141' bracket='yes'/></notations>"
+            "</note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><chord/><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='stop' number='141' /></notations>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 4 );
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        ImoTuplet* pTuplet = pNote->get_tuplet();
+        CHECK( pTuplet != NULL );
+        CHECK( pTuplet->get_actual_number() == 1 );
+        CHECK( pTuplet->get_normal_number() == 1 );
+        CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
+        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_id() == 141L );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_03)
+    {
+        //@03. tuplet. data from time modification
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>G</step><alter>-1</alter>"
+                "<octave>5</octave></pitch><duration>4</duration><type>16th</type>"
+                "<time-modification><actual-notes>3</actual-notes>"
+                "<normal-notes>2</normal-notes>"
+                "</time-modification>"
+                "<notations><tuplet type='start' number='141' bracket='yes'/></notations>"
+            "</note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><chord/><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='stop' number='141' /></notations>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 4 );
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        ImoTuplet* pTuplet = pNote->get_tuplet();
+        CHECK( pTuplet != NULL );
+        CHECK( pTuplet->get_actual_number() == 3 );
+        CHECK( pTuplet->get_normal_number() == 2 );
+        CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
+        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_id() == 141L );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ActualNotes)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        //expected << "Line 0. " << endl;
+////        parser.parse_text("(t + 3)");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+////        //cout << "[" << errormsg.str() << "]" << endl;
+////        //cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        CHECK( pIModel->get_root()->is_tuplet_dto() == true );
+////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+////        CHECK( pInfo != NULL );
+////        CHECK( pInfo->is_start_of_tuplet() == true );
+////        CHECK( pInfo->get_actual_number() == 3 );
+////        CHECK( pInfo->get_normal_number() == 2 );
+////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
+////
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ErrorNormalNumRequired)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
+////        parser.parse_text("(t 4 + 7)");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+////        //cout << "[" << errormsg.str() << "]" << endl;
+////        //cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        CHECK( pIModel->get_root() == NULL );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
+////
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_TupletNormalNotes)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        //expected << "Line 0. " << endl;
+////        parser.parse_text("(t 2 + 7 4)");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+////        //cout << "[" << errormsg.str() << "]" << endl;
+////        //cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+////        CHECK( pInfo != NULL );
+////        CHECK( pInfo->is_start_of_tuplet() == true );
+////        CHECK( pInfo->get_actual_number() == 7 );
+////        CHECK( pInfo->get_normal_number() == 4 );
+////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
+////
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_NoBracket)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        //expected << "Line 0. " << endl;
+////        parser.parse_text("(t 2 + 3 2 (displayBracket no))");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+////        //cout << "[" << errormsg.str() << "]" << endl;
+////        //cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+////        CHECK( pInfo != NULL );
+////        CHECK( pInfo->is_start_of_tuplet() == true );
+////        CHECK( pInfo->get_actual_number() == 3 );
+////        CHECK( pInfo->get_normal_number() == 2 );
+////        CHECK( pInfo->get_show_bracket() == k_yesno_no );
+////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
+////
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_DisplayNormalNum)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        //expected << "Line 0. " << endl;
+////        parser.parse_text("(t 1 + 3 2 (displayNumber none))");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+////        //cout << "[" << errormsg.str() << "]" << endl;
+////        //cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+////        CHECK( pInfo != NULL );
+////        CHECK( pInfo->is_start_of_tuplet() == true );
+////        CHECK( pInfo->get_actual_number() == 3 );
+////        CHECK( pInfo->get_normal_number() == 2 );
+////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_none );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
+////
+////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ErrorLabelParameter)
+////    {
+////        stringstream errormsg;
+////        Document doc(m_libraryScope);
+////        XmlParser parser;
+////        stringstream expected;
+////        expected << "Line 0. Invalid yes/no value 'false'. Replaced by default." << endl;
+////        parser.parse_text("(t 1 + 3 2 (displayBracket false))");
+////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+////
+//////        cout << "[" << errormsg.str() << "]" << endl;
+//////        cout << "[" << expected.str() << "]" << endl;
+////        CHECK( errormsg.str() == expected.str() );
+////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+////        CHECK( pInfo != NULL );
+////        CHECK( pInfo->is_start_of_tuplet() == true );
+////        CHECK( pInfo->get_actual_number() == 3 );
+////        CHECK( pInfo->get_normal_number() == 2 );
+////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+////
+////        delete tree->get_root();
+////        delete pIModel;
+////    }
 
     //@ Hello World -------------------------------------------------------------
 
@@ -1995,7 +2382,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -5052,177 +5439,6 @@ SUITE(MxlAnalyserTest)
 ////
 ////        delete pNote1;
 ////        delete pNote2;
-////    }
-////
-////    // tuplet new syntax ----------------------------------------------------------------
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_TypeError)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
-////        parser.parse_text("(t 5 start 3)");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        CHECK( pIModel->get_root() == NULL );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ActualNotes)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        //expected << "Line 0. " << endl;
-////        parser.parse_text("(t + 3)");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        CHECK( pIModel->get_root()->is_tuplet_dto() == true );
-////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
-////        CHECK( pInfo != NULL );
-////        CHECK( pInfo->is_start_of_tuplet() == true );
-////        CHECK( pInfo->get_actual_number() == 3 );
-////        CHECK( pInfo->get_normal_number() == 2 );
-////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ErrorNormalNumRequired)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
-////        parser.parse_text("(t 4 + 7)");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        CHECK( pIModel->get_root() == NULL );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_TupletNormalNotes)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        //expected << "Line 0. " << endl;
-////        parser.parse_text("(t 2 + 7 4)");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
-////        CHECK( pInfo != NULL );
-////        CHECK( pInfo->is_start_of_tuplet() == true );
-////        CHECK( pInfo->get_actual_number() == 7 );
-////        CHECK( pInfo->get_normal_number() == 4 );
-////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_NoBracket)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        //expected << "Line 0. " << endl;
-////        parser.parse_text("(t 2 + 3 2 (displayBracket no))");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
-////        CHECK( pInfo != NULL );
-////        CHECK( pInfo->is_start_of_tuplet() == true );
-////        CHECK( pInfo->get_actual_number() == 3 );
-////        CHECK( pInfo->get_normal_number() == 2 );
-////        CHECK( pInfo->get_show_bracket() == k_yesno_no );
-////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_DisplayNormalNum)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        //expected << "Line 0. " << endl;
-////        parser.parse_text("(t 1 + 3 2 (displayNumber none))");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-////        //cout << "[" << errormsg.str() << "]" << endl;
-////        //cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
-////        CHECK( pInfo != NULL );
-////        CHECK( pInfo->is_start_of_tuplet() == true );
-////        CHECK( pInfo->get_actual_number() == 3 );
-////        CHECK( pInfo->get_normal_number() == 2 );
-////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-////        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_none );
-////
-////        delete tree->get_root();
-////        delete pIModel;
-////    }
-////
-////    TEST_FIXTURE(MxlAnalyserTestFixture, Analyser_Tuplet_ErrorLabelParameter)
-////    {
-////        stringstream errormsg;
-////        Document doc(m_libraryScope);
-////        XmlParser parser;
-////        stringstream expected;
-////        expected << "Line 0. Invalid yes/no value 'false'. Replaced by default." << endl;
-////        parser.parse_text("(t 1 + 3 2 (displayBracket false))");
-////        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-////        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-////
-//////        cout << "[" << errormsg.str() << "]" << endl;
-//////        cout << "[" << expected.str() << "]" << endl;
-////        CHECK( errormsg.str() == expected.str() );
-////        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
-////        CHECK( pInfo != NULL );
-////        CHECK( pInfo->is_start_of_tuplet() == true );
-////        CHECK( pInfo->get_actual_number() == 3 );
-////        CHECK( pInfo->get_normal_number() == 2 );
-////        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-////
-////        delete tree->get_root();
-////        delete pIModel;
 ////    }
 ////
 ////    // tuplet old full syntax -----------------------------------------------------------
