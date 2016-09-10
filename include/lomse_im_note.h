@@ -109,7 +109,7 @@ public:
 
     //tuplets
     bool is_in_tuplet();
-    ImoTuplet* get_tuplet();
+    ImoTuplet* get_first_tuplet();
 
     //edition support
     virtual void set_int_attribute(TIntAttribute attrib, int value);

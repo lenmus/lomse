@@ -1972,7 +1972,7 @@ SUITE(DocCommandTest)
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
-        ImoTuplet* pTuplet = pNote1->get_tuplet();
+        ImoTuplet* pTuplet = pNote1->get_first_tuplet();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
 
         MySelectionSet sel(&doc);
@@ -2252,7 +2252,7 @@ SUITE(DocCommandTest)
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n e4 e
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
-        ImoTuplet* pTuplet = pNote1->get_tuplet();
+        ImoTuplet* pTuplet = pNote1->get_first_tuplet();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(k_imo_tuplet);
 
         MySelectionSet sel(&doc);

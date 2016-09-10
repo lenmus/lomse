@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- Remove incompatibilities to support nested tuplets
 - MusicXML importer now supports tuplets
 - Fixed spacing issues, related to clefs and prolog objects, detected 
   in regression tests.

@@ -156,13 +156,22 @@ protected:
 // helper class to save tuplet info items, match them and build the tuplets
 class TupletsBuilder : public RelationBuilder<ImoTupletDto, LdpAnalyser>
 {
+private:
+    ImoTuplet* m_pTuplet;
+
 public:
     TupletsBuilder(ostream& reporter, LdpAnalyser* pAnalyser)
-        : RelationBuilder<ImoTupletDto, LdpAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
+        : RelationBuilder<ImoTupletDto, LdpAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet")
+        , m_pTuplet(NULL)
+    {
+    }
     virtual ~TupletsBuilder() {}
 
     void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
+
+    inline ImoTuplet* get_last_created_tuplet() { return m_pTuplet; }
+
 };
 
 
@@ -269,6 +278,9 @@ public:
 
     //interface for TupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
+    inline ImoTuplet* get_last_created_tuplet() {
+         return m_pTupletsBuilder->get_last_created_tuplet();
+    }
 
     //interface for building lyric lines
     void add_lyric(ImoNote* pNote, ImoLyric* pL);

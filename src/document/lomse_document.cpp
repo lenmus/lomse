@@ -460,11 +460,11 @@ ImoTuplet* Document::add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
                 ImoTupletDto* pTupletEnd = LOMSE_NEW ImoTupletDto();
                 pTupletEnd->set_tuplet_type(ImoTupletDto::k_stop);
                 pTupletEnd->set_note_rest(pEndNR);
+                pTupletEnd->set_tuplet_number( pTupletStart->get_item_number() );
                 a.add_relation_info(pTupletEnd);
 
                 //get the tuplet
-                ImoTuplet* pTuplet = pStartNR->get_tuplet();
-                return pTuplet;
+                return a.get_last_created_tuplet();
             }
         }
     }

@@ -3851,7 +3851,7 @@ public:
             set_duration(pNR);
 
         //abbreviatedElements
-        //after duration we can find abbreviated items (l, g, p, v) in any order
+        //after duration we can find abbreviated items (l, g, p, v, t) in any order
         bool fStartOldTie = false;
         bool fAddOldBeam = false;
         bool fAddOldTuplet = false;
@@ -3925,7 +3925,10 @@ public:
         //tuplet
         if (fAddOldTuplet)
             set_old_tuplet(pNR);
-        else if (m_pTupletInfo==NULL && m_pAnalyser->is_tuplet_open())
+        else if (m_pTupletInfo==NULL
+                 && m_pAnalyser->is_tuplet_open()
+                 && m_pAnalyser->get_score_version() <= 107
+                )
             add_to_current_tuplet(pNR);
 
         add_tuplet_info(pNR);
@@ -4009,11 +4012,6 @@ protected:
                 m_pTimeModifDto = static_cast<ImoTimeModificationDto*>(
                         m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
-//            else if (type == k_fermata)
-//            {
-//                m_pFermata = static_cast<ImoFermata*>(
-//                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
-//            }
             else if (type == k_beam)
             {
                 m_pBeamInfo = static_cast<ImoBeamDto*>(
@@ -4023,18 +4021,6 @@ protected:
             {
                 set_voice_element(pNR);
             }
-//            else if (type == k_staffNum)
-//            {
-//                set_staff_num_element(pNR);
-//            }
-//            else if (type == k_label)   //possible staffNum as 'p1'
-//            {
-//                char first = (m_pParamToAnalyse->get_value())[0];
-//                if (first == 'p')
-//                    get_num_staff();
-//                else
-//                    error_invalid_param();
-//            }
             else
                 break;
 
@@ -6091,7 +6077,7 @@ public:
         pInfo->set_id( get_node_id() );
         set_default_values(pInfo);
 
-        // [<tupletID>]     //optional for 1.5 compatibility.
+        // [<tupletID>]     //optional. Only required for nested tuplets
         if (get_optional(k_number))
             set_tuplet_id(pInfo);
 
@@ -6137,13 +6123,16 @@ protected:
     {
         pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
         pInfo->set_placement(k_placement_default);
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
     }
 
-    void set_tuplet_id(ImoTupletDto* UNUSED(pInfo))
+    void set_tuplet_id(ImoTupletDto* pInfo)
     {
-        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
-        //      tuplets it will have any use.
-        get_integer_value(0);
+        //AWARE: tuplet number was not used before 2.0, when enabling nested tuplets
+        if (m_pAnalyser->get_score_version() > 107)
+            pInfo->set_tuplet_number( get_integer_value(0) );
+        else
+            pInfo->set_tuplet_number(0);
     }
 
     bool set_tuplet_type(ImoTupletDto* pInfo)
@@ -7476,7 +7465,7 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoTupletDto* pStartDto = m_matches.front();
-    ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
+    m_pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
 
     //if not only graphical (LDP < 2.0) add time modification to all note/rest
     if (!pStartDto->is_only_graphical())
@@ -7485,17 +7474,17 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
         for (it = m_matches.begin(); it != m_matches.end(); ++it)
         {
             ImoNoteRest* pNR = (*it)->get_note_rest();
-            pNR->set_time_modification( pTuplet->get_normal_number(),
-                                        pTuplet->get_actual_number() );
+            pNR->set_time_modification( m_pTuplet->get_normal_number(),
+                                        m_pTuplet->get_actual_number() );
         }
     }
 
     //create tuplet data and add tuplet to start and end note/rest
     ImoNoteRest* pNR = pStartDto->get_note_rest();
-    pNR->include_in_relation(pDoc, pTuplet, NULL);
+    pNR->include_in_relation(pDoc, m_pTuplet, NULL);
 
     pNR = pEndDto->get_note_rest();
-    pNR->include_in_relation(pDoc, pTuplet, NULL);
+    pNR->include_in_relation(pDoc, m_pTuplet, NULL);
 }
 
 

@@ -2754,20 +2754,6 @@ public:
             || analyse_optional("accidental-mark", m_pAnchor)
             || analyse_optional("other-notation", m_pAnchor);
         }
-//        m_childToAnalyse = get_child_to_analyse();
-//        const string& name = m_childToAnalyse.name();
-//        if (name == "tuplet")
-//        {
-//            ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
-//            m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
-//        }
-//            if (name == "tuplet")
-//            {
-//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
-//                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
-//            }
-//            else
-//                break;
 
         return NULL;
     }
@@ -2796,7 +2782,6 @@ protected:
 class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
 protected:
-//    ImoTupletDto* m_pTupletInfo;
     ImoBeamDto* m_pBeamInfo;
 //    ImoSlurDto* m_pSlurDto;
 //    std::string m_srcOldTuplet;
@@ -2805,7 +2790,6 @@ public:
     NoteRestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-//        , m_pTupletInfo(NULL)
         , m_pBeamInfo(NULL)
 //        , m_pSlurDto(NULL)
 //        , m_srcOldTuplet("")
@@ -2936,12 +2920,6 @@ public:
         error_if_more_elements();
 
         add_to_model(pNR);
-
-//        //tuplet
-//        if (m_pTupletInfo==NULL && m_pAnalyser->is_tuplet_open())
-//            add_to_current_tuplet(pNR);
-//
-//        add_tuplet_info(pNR);
 
         //deal with notes in chord
         if (!fIsRest && fInChord)
@@ -3196,27 +3174,6 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-//    void analyse_note_rest_options(ImoNoteRest* pNR)
-//    {
-//        // { <beam> | <tuplet> | }
-//
-//        while( more_children_to_analyse() )
-//        {
-//            m_childToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_childToAnalyse);
-//            if (type == k_tuplet)
-//            {
-//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
-//                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
-//            }
-//            else
-//                break;
-//
-//            move_to_next_child();
-//        }
-//    }
-
-    //----------------------------------------------------------------------------------
     void set_duration(ImoNoteRest* pNR)
     {
         pNR->set_note_type_and_dots(k_whole, 0);
@@ -3285,31 +3242,11 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-//    void add_to_current_tuplet(ImoNoteRest* pNR)
-//    {
-//        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
-//        pInfo->set_note_rest(pNR);
-//        pInfo->set_tuplet_type(ImoTupletDto::k_continue);
-//        m_pAnalyser->add_relation_info(pInfo);
-//    }
-//
-
-    //----------------------------------------------------------------------------------
     void set_voice(ImoNoteRest* pNR, int voice)
     {
         m_pAnalyser->set_current_voice(voice);
         pNR->set_voice(voice);
     }
-
-    //----------------------------------------------------------------------------------
-//    void add_tuplet_info(ImoNoteRest* pNR)
-//    {
-//        if (m_pTupletInfo)
-//        {
-//            m_pTupletInfo->set_note_rest(pNR);
-//            m_pAnalyser->add_relation_info(m_pTupletInfo);
-//        }
-//    }
 
 
 };
@@ -5002,8 +4939,7 @@ protected:
         char* pEnd;
         long num = std::strtol(snum.c_str(), &pEnd, 10);
         m_pInfo->set_id(num);
-        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
-        //      tuplets it will have any use.
+        m_pInfo->set_tuplet_number(num);
     }
 
     bool set_tuplet_type(const string& value)

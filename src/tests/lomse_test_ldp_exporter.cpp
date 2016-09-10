@@ -1306,13 +1306,13 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+//        cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(t + 2 3)(beam 110 +))"
+            "(n c4 e v1 p1 (tm 3 2)(beam 110 +)(t + 2 3))"
             "(n d4 s v1 p1 (tm 3 2)(beam 110 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 110 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(t -)(beam 110 --))"
+            "(n b3 e v1 p1 (tm 3 2)(beam 110 --)(t -))"
             ")";
         CHECK( source == expected );
     }
@@ -1339,10 +1339,10 @@ SUITE(LdpExporterTest)
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(t + 2 3)(beam 110 +))"
+            "(n c4 e v1 p1 (tm 3 2)(beam 110 +)(t + 2 3))"
             "(n d4 s v1 p1 (tm 3 2)(beam 110 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 110 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(t -)(beam 110 --))"
+            "(n b3 e v1 p1 (tm 3 2)(beam 110 --)(t -))"
             ")";
         CHECK( source == expected );
     }

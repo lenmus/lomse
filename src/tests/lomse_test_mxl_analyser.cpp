@@ -2064,7 +2064,7 @@ SUITE(MxlAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
-        ImoTuplet* pTuplet = pNote->get_tuplet();
+        ImoTuplet* pTuplet = pNote->get_first_tuplet();
         CHECK( pTuplet != NULL );
         CHECK( pTuplet->get_actual_number() == 1 );
         CHECK( pTuplet->get_normal_number() == 1 );
@@ -2075,7 +2075,7 @@ SUITE(MxlAnalyserTest)
         ++it;
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
-        ImoTuplet* pTuplet2 = pNote->get_tuplet();
+        ImoTuplet* pTuplet2 = pNote->get_first_tuplet();
         CHECK( pTuplet2 == pTuplet );
 
         a.do_not_delete_instruments_in_destructor();
@@ -2130,7 +2130,7 @@ SUITE(MxlAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
-        ImoTuplet* pTuplet = pNote->get_tuplet();
+        ImoTuplet* pTuplet = pNote->get_first_tuplet();
         CHECK( pTuplet != NULL );
         CHECK( pTuplet->get_actual_number() == 1 );
         CHECK( pTuplet->get_normal_number() == 1 );
@@ -2193,7 +2193,7 @@ SUITE(MxlAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
-        ImoTuplet* pTuplet = pNote->get_tuplet();
+        ImoTuplet* pTuplet = pNote->get_first_tuplet();
         CHECK( pTuplet != NULL );
         CHECK( pTuplet->get_actual_number() == 3 );
         CHECK( pTuplet->get_normal_number() == 2 );

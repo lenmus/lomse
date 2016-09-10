@@ -6407,6 +6407,67 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_3)
+    {
+        //@03. tuplet. Nested tuplets
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        string src =   //test score 01014-nested-tuplets.lms
+            "(score (vers 2.0)(instrument (musicData"
+            "(clef G)(key A)(time 2 4)"
+            "(n b4 e (tm 2 3)(beam 1 +)(t 1 + 3 2))"
+            "(n b4 e (tm 2 3)(beam 1 -))"
+            "(n b4 e (tm 4 15)(beam 2 +)(t 2 + 5 2))"
+            "(n b4 e (tm 4 15)(beam 2 =))"
+            "(n b4 e (tm 4 15)(beam 2 =))"
+            "(n b4 e (tm 4 15)(beam 2 =))"
+            "(n b4 e (tm 4 15)(beam 2 -)(t 2 -))"
+            "(n b4 e (tm 2 3)(beam 3 +))"
+            "(n b4 e (tm 2 3)(beam 3 -)(t 1 -)) )))";
+        parser.parse_text(src);
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        delete pA;
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoObj::children_iterator it = pMusic->begin();
+
+        CHECK( (*it)->is_clef() == true );
+        ++it;
+        CHECK( (*it)->is_key_signature() == true );
+        ++it;
+        CHECK( (*it)->is_time_signature() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        ImoTuplet* pTuplet1 = pNote1->get_first_tuplet();
+        CHECK( pTuplet1->get_actual_number() == 3 );
+        CHECK( pTuplet1->get_normal_number() == 2 );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+        ImoTuplet* pTuplet2 = pNote2->get_first_tuplet();
+        CHECK( pTuplet2->get_actual_number() == 5 );
+        CHECK( pTuplet2->get_normal_number() == 2 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     //@ tuplet old full syntax ----------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_TypeError)

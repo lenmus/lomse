@@ -4727,39 +4727,16 @@ TimeUnits ImoTimeSignature::get_beat_duration()
 ImoTupletDto::ImoTupletDto()
     : ImoSimpleObj(k_imo_tuplet_dto)
     , m_tupletType(ImoTupletDto::k_unknown)
+    , m_tupletNum(0)
     , m_nActualNum(0)
     , m_nNormalNum(0)
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
     , m_nShowNumber(ImoTuplet::k_number_actual)
+    , m_lineNum(0)
     , m_fOnlyGraphical(false)
-    , m_pTupletElm(NULL)
     , m_pNR(NULL)
 {
-}
-
-//---------------------------------------------------------------------------------------
-ImoTupletDto::ImoTupletDto(LdpElement* pTupletElm)
-    : ImoSimpleObj(k_imo_tuplet_dto)
-    , m_tupletType(ImoTupletDto::k_unknown)
-    , m_nActualNum(0)
-    , m_nNormalNum(0)
-    , m_nShowBracket(k_yesno_default)
-    , m_nPlacement(k_placement_default)
-    , m_nShowNumber(ImoTuplet::k_number_actual)
-    , m_fOnlyGraphical(false)
-    , m_pTupletElm(pTupletElm)
-    , m_pNR(NULL)
-{
-}
-
-//---------------------------------------------------------------------------------------
-int ImoTupletDto::get_line_number()
-{
-    if (m_pTupletElm)
-        return m_pTupletElm->get_line_number();
-    else
-        return 0;
 }
 
 

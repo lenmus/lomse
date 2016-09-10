@@ -4394,24 +4394,23 @@ class ImoTupletDto : public ImoSimpleObj
 {
 protected:
     int m_tupletType;
+    int m_tupletNum;
     int m_nActualNum;
     int m_nNormalNum;
     int m_nShowBracket;
     int m_nPlacement;
     int m_nShowNumber;
+    int m_lineNum;
     bool m_fOnlyGraphical;
-    LdpElement* m_pTupletElm;
     ImoNoteRest* m_pNR;
 
 public:
     ImoTupletDto();
-    ImoTupletDto(LdpElement* pBeamElm);
     virtual ~ImoTupletDto() {}
 
     enum { k_unknown = 0, k_start, k_continue, k_stop, };
 
     //getters
-    inline LdpElement* get_tuplet_element() { return m_pTupletElm; }
     inline ImoNoteRest* get_note_rest() { return m_pNR; }
     inline bool is_start_of_tuplet() { return m_tupletType == ImoTupletDto::k_start; }
     inline bool is_end_of_tuplet() { return m_tupletType == ImoTupletDto::k_stop;; }
@@ -4420,22 +4419,23 @@ public:
     inline int get_show_bracket() { return m_nShowBracket; }
     inline int get_show_number() { return m_nShowNumber; }
     inline int get_placement() { return m_nPlacement; }
-    int get_line_number();
+    int get_line_number() { return m_lineNum; };
     inline bool is_only_graphical() { return m_fOnlyGraphical; }
 
     //setters
     inline void set_note_rest(ImoNoteRest* pNR) { m_pNR = pNR; }
-    inline void set_tuplet_element(LdpElement* pElm) { m_pTupletElm = pElm; }
     inline void set_tuplet_type(int value) { m_tupletType = value; }
+    inline void set_tuplet_number(int value) { m_tupletNum = value; }
     inline void set_actual_number(int value) { m_nActualNum = value; }
     inline void set_normal_number(int value) { m_nNormalNum = value; }
     inline void set_show_bracket(int value) { m_nShowBracket = value; }
     inline void set_show_number(int value) { m_nShowNumber = value; }
     inline void set_placement(int value) { m_nPlacement = value; }
     inline void set_only_graphical(bool value) { m_fOnlyGraphical = value; }
+    inline void set_line_number(int value) { m_lineNum = value; }
 
     //required by RelationBuilder
-    int get_item_number() { return 0; }
+    int get_item_number() { return m_tupletNum; }
     bool is_start_of_relation() { return is_start_of_tuplet(); }
     bool is_end_of_relation() { return is_end_of_tuplet(); }
 };

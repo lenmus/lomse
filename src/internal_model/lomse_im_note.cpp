@@ -97,7 +97,7 @@ bool ImoNoteRest::is_in_tuplet()
 }
 
 //---------------------------------------------------------------------------------------
-ImoTuplet* ImoNoteRest::get_tuplet()
+ImoTuplet* ImoNoteRest::get_first_tuplet()
 {
     return static_cast<ImoTuplet*>( find_relation(k_imo_tuplet) );
 }

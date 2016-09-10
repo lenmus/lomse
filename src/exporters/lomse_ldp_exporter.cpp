@@ -3093,30 +3093,36 @@ void LdpGenerator::source_for_noterest_options(ImoNoteRest* pNR)
 {
     //@ <noteRestOptions> = { <beam> | <tuplet> }
 
-    ImoTuplet* pTuplet = pNR->get_tuplet();
-    if (pTuplet)
+    if (pNR->get_num_relations() > 0)
     {
-        TupletLdpGenerator gen(pTuplet, m_pExporter);
-        string src = gen.generate_source(pNR);
-        if (!src.empty())
+        ImoRelations* pRelObjs = pNR->get_relations();
+        int size = pRelObjs->get_num_items();
+        for (int i=0; i < size; ++i)
         {
-            add_space_if_needed();
-            m_source << src;
+            ImoRelObj* pRO = pRelObjs->get_item(i);
+            if (pRO->is_tuplet() )
+            {
+                TupletLdpGenerator gen(pRO, m_pExporter);
+                string src = gen.generate_source(pNR);
+                if (!src.empty())
+                {
+                    add_space_if_needed();
+                    m_source << src;
+                }
+            }
+
+            else if (pRO->is_beam() )
+            {
+                BeamLdpGenerator gen(pRO, m_pExporter);
+                string src = gen.generate_source(pNR);
+                if (!src.empty())
+                {
+                    add_space_if_needed();
+                    m_source << src;
+                }
+            }
         }
     }
-
-    ImoBeam* pBeam = pNR->get_beam();
-    if (pBeam)
-    {
-        BeamLdpGenerator gen(pBeam, m_pExporter);
-        string src = gen.generate_source(pNR);
-        if (!src.empty())
-        {
-            add_space_if_needed();
-            m_source << src;
-        }
-    }
-
 }
 
 //---------------------------------------------------------------------------------------
