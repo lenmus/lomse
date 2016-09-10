@@ -2620,7 +2620,7 @@ public:
         if (m_pNR == m_pTuplet->get_start_object())
         {
             start_element("t", m_pTuplet->get_id());
-            //add_tuplet_number();      //TODO: For now not generated
+            add_tuplet_number();
             add_tuplet_type(true);
             add_actual_notes();
             add_normal_notes();
@@ -2630,7 +2630,7 @@ public:
         else if (m_pNR == m_pTuplet->get_end_object())
         {
             start_element("t", m_pTuplet->get_id(), k_in_same_line);
-            //add_tuplet_number();      //TODO: For now not generated
+            add_tuplet_number();
             add_tuplet_type(false);
             end_element(k_in_same_line);
         }
@@ -2645,7 +2645,8 @@ protected:
 
     inline void add_tuplet_number()
     {
-        m_source << m_pTuplet->get_id();
+        m_source << " " << m_pTuplet->get_id();
+        space_needed();
     }
 
     inline void add_tuplet_type(bool fStart)
