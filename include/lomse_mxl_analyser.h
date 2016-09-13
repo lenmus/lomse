@@ -109,6 +109,7 @@ public:
 
     void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
+    void add_to_open_tuplets(ImoNoteRest* pNR);
 };
 
 //---------------------------------------------------------------------------------------
@@ -322,6 +323,9 @@ public:
 
     //interface for MxlTupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
+    inline void add_to_open_tuplets(ImoNoteRest* pNR) {
+        m_pTupletsBuilder->add_to_open_tuplets(pNR);
+    }
 
 //    //interface for ChordBuilder
 //    void add_chord(ImoChord* pChord);

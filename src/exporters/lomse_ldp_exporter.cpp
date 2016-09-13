@@ -2619,7 +2619,7 @@ public:
 
         if (m_pNR == m_pTuplet->get_start_object())
         {
-            start_element("t", m_pTuplet->get_id());
+            start_element("t", m_pTuplet->get_id(), k_in_same_line);
             add_tuplet_number();
             add_tuplet_type(true);
             add_actual_notes();

@@ -2069,7 +2069,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet->get_actual_number() == 1 );
         CHECK( pTuplet->get_normal_number() == 1 );
         CHECK( pTuplet->get_show_bracket() == k_yesno_default );
-        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_id() == 137L );
 
         ++it;
@@ -2135,7 +2135,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet->get_actual_number() == 1 );
         CHECK( pTuplet->get_normal_number() == 1 );
         CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
-        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_id() == 141L );
 
         a.do_not_delete_instruments_in_destructor();
@@ -2198,7 +2198,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet->get_actual_number() == 3 );
         CHECK( pTuplet->get_normal_number() == 2 );
         CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
-        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_id() == 141L );
 
         a.do_not_delete_instruments_in_destructor();

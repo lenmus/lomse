@@ -65,6 +65,7 @@ protected:
     ShapeBoxInfo m_shapesInfo[1];
     bool m_fDrawBracket;
     bool m_fDrawNumber;
+    bool m_fAbove;
 
 public:
     TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
@@ -107,10 +108,11 @@ protected:
     LUnits m_yStart, m_yEnd;
 
     void decide_if_show_bracket();
-    bool decide_if_tuplet_placement_above();
+    void decide_tuplet_placement();
     void determine_tuplet_text();
     void create_shape();
     void set_shape_details();
+    int count_nested_tuplets();
 
 };
 

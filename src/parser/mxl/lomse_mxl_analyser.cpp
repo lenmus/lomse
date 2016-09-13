@@ -2897,6 +2897,9 @@ public:
         {
         }
 
+        //add note/rest to open tuplets
+        m_pAnalyser->add_to_open_tuplets(pNR);
+
         // [<staff>]
         if (get_optional("staff"))
             set_staff(pNR);
@@ -4906,8 +4909,10 @@ public:
 
         if (m_pInfo->is_start_of_tuplet())
         {
-            m_pInfo->set_actual_number( pNR->get_time_modifier_bottom() );
-            m_pInfo->set_normal_number( pNR->get_time_modifier_top() );
+            int top, bottom;
+            get_factors_for_nested_tuplets(pNR, &top, &bottom);
+            m_pInfo->set_actual_number( pNR->get_time_modifier_bottom() / bottom );
+            m_pInfo->set_normal_number( pNR->get_time_modifier_top() / top );
         }
 
         m_pInfo->set_note_rest(pNR);
@@ -5000,6 +5005,30 @@ protected:
 
         //TODO Clarify this and how to manage in IM
 
+    }
+
+    void get_factors_for_nested_tuplets(ImoNoteRest* pNR, int* pTop, int* pBottom)
+    {
+        *pTop = 1;
+        *pBottom = 1;
+        if (pNR->get_num_relations() > 0)
+        {
+            ImoRelations* pRelObjs = pNR->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                if (pRO->is_tuplet())
+                {
+                    if (pRO->get_start_object() == pNR)
+                    {
+                        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pRO);
+                        *pTop *= pTuplet->get_normal_number();
+                        *pBottom *= pTuplet->get_actual_number();
+                    }
+                }
+            }
+        }
     }
 
 };
@@ -5812,9 +5841,8 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 //=======================================================================================
 // MxlTupletsBuilder implementation
 //=======================================================================================
-void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
+void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* UNUSED(pEndDto))
 {
-    m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoTupletDto* pStartDto = m_matches.front();
@@ -5825,6 +5853,26 @@ void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         pNR->include_in_relation(pDoc, pTuplet, NULL);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MxlTupletsBuilder::add_to_open_tuplets(ImoNoteRest* pNR)
+{
+    if (m_pendingItems.size() > 0)
+    {
+        ListIterator it;
+        for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+        {
+            if ((*it)->is_start_of_relation() )
+            {
+                ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+                pInfo->set_tuplet_number( (*it)->get_item_number() );
+                pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+                pInfo->set_note_rest(pNR);
+                save_item_info(pInfo);
+            }
+        }
     }
 }
 

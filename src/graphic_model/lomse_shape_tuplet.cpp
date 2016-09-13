@@ -110,7 +110,9 @@ void GmoShapeTuplet::compute_position()
     if (m_pShapeText)
     {
         m_uNumberWidth = m_pShapeText->get_width();
-        uNumberHeight = m_pShapeText->get_height();
+        uNumberHeight = 1.33f * m_pShapeText->get_height();
+            //1.33 accounts for the fact that there is some space on top of the
+            //number glyph
     }
 
     //determine number x position
@@ -122,7 +124,7 @@ void GmoShapeTuplet::compute_position()
     yShift += (m_fAbove ? -uNumberHeight : 0.0f);
     m_yNumber += yShift;
 
-    //move nomber shape to its position
+    //move number shape to its position
     if (m_pShapeText)
         m_pShapeText->set_origin(m_xNumber, m_yNumber);
 

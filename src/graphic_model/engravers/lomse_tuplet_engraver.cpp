@@ -105,6 +105,7 @@ void TupletEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 int TupletEngraver::create_shapes(Color color)
 {
     m_color = color;
+    decide_tuplet_placement();
     decide_if_show_bracket();
     determine_tuplet_text();
 
@@ -143,9 +144,7 @@ void TupletEngraver::set_shape_details()
     LUnits uNumberDistance = tenths_to_logical(LOMSE_TUPLET_NUMBER_DISTANCE);
     LUnits uSpaceToNumber = tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
 
-    bool fAbove = decide_if_tuplet_placement_above();
-
-    m_pTupletShape->set_layout_data(fAbove, m_fDrawBracket, m_yStart, m_yEnd,
+    m_pTupletShape->set_layout_data(m_fAbove, m_fDrawBracket, m_yStart, m_yEnd,
                                     uBorderLength, uBracketDistance,
                                     uLineThick, uNumberDistance, uSpaceToNumber,
                                     get_start_noterest_shape(),
@@ -176,13 +175,13 @@ void TupletEngraver::determine_tuplet_text()
 
 
 //---------------------------------------------------------------------------------------
-bool TupletEngraver::decide_if_tuplet_placement_above()
+void TupletEngraver::decide_tuplet_placement()
 {
     GmoShapeNote* pStart = get_first_note();
     bool fNotesUp = (pStart ? pStart->is_up() : true);
     int placement = m_pTuplet->get_placement();
-	return placement == k_placement_above
-           || (placement == k_placement_default && fNotesUp);
+	m_fAbove = placement == k_placement_above
+               || (placement == k_placement_default && fNotesUp);
 }
 
 //---------------------------------------------------------------------------------------
@@ -199,30 +198,97 @@ void TupletEngraver::compute_y_coordinates()
     GmoShapeNote* pStart = get_first_note();
     GmoShapeNote* pEnd = get_last_note();
 
-    //determine y start/end coordinates
-    GmoShapeBeam* pBeamShape = dynamic_cast<GmoShapeBeam*>(
+    GmoShapeBeam* pBeamShapeStart = dynamic_cast<GmoShapeBeam*>(
                                     pStart->find_related_shape(GmoObj::k_shape_beam) );
-    if (pBeamShape)
+    GmoShapeBeam* pBeamShapeEnd = dynamic_cast<GmoShapeBeam*>(
+                                    pEnd->find_related_shape(GmoObj::k_shape_beam) );
+
+    if (pBeamShapeStart && pBeamShapeStart == pBeamShapeEnd)
     {
-        //case a): tuplet encloses a whole beamed group
-        UPoint pos = pBeamShape->get_outer_left_reference_point();
+        //tuplet encloses a whole beamed group. Use the beam as reference
+        UPoint pos = pBeamShapeStart->get_outer_left_reference_point();
         m_yStart = pos.y;
-        pos = pBeamShape->get_outer_right_reference_point();
+        pos = pBeamShapeStart->get_outer_right_reference_point();
         m_yEnd = pos.y;
     }
+
+    else if (pBeamShapeStart && pBeamShapeEnd)
+    {
+        //start and end in beam but different, try to follow beams slant
+        UPoint pos = pBeamShapeStart->get_outer_left_reference_point();
+        m_yStart = pos.y;
+        pos = pBeamShapeStart->get_outer_right_reference_point();
+        m_yEnd = pos.y;
+    }
+
     else
     {
-        //case b): tuplet encloses a whole group but not beamed
-        //case c): tuplet encloses several beamed groups and notes/rests
-        if (pStart->is_up())
+        //otherwise, draw an horizontal tuplet
+        LUnits yMax = m_yStart = pStart->get_top();
+        LUnits yMin = yMax;
+
+        std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+        for (it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
         {
-            m_yStart = pStart->get_top();
-            m_yEnd = pEnd->get_top();
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>((*it).first);
+            if (pNR->is_note())
+            {
+                ImoNote* pNote = static_cast<ImoNote*>(pNR);
+                GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>((*it).second);
+                if (pNote->is_beamed())
+                {
+                    if (pNote->is_end_of_beam())
+                    {
+                        GmoShapeBeam* pBeamShape = dynamic_cast<GmoShapeBeam*>(
+                                          pNoteShape->find_related_shape(GmoObj::k_shape_beam) );
+                        UPoint pos = pBeamShape->get_outer_right_reference_point();
+                        yMax = max(yMax, pos.y);
+                        yMin = min(yMin, pos.y);
+                        pos = pBeamShape->get_outer_left_reference_point();
+                        yMax = max(yMax, pos.y);
+                        yMin = min(yMin, pos.y);
+                    }
+                }
+                else
+                {
+                    //not beamed note
+                    if (m_fAbove)
+                    {
+                        yMax = max(yMax, pNoteShape->get_top());
+                        yMin = min(yMin, pNoteShape->get_top());
+                    }
+                    else
+                    {
+                        yMax = max(yMax, pNoteShape->get_bottom());
+                        yMin = min(yMin, pNoteShape->get_bottom());
+                    }
+                }
+            }
+        }
+
+        //set position for horizontal bracket
+        if (m_fAbove)
+            m_yStart = yMin;
+        else
+            m_yStart = yMax;
+
+        m_yEnd = m_yStart;
+    }
+
+    //add space for nested
+    int nested = count_nested_tuplets();
+    if (nested > 0)
+    {
+        LUnits shift = nested * tenths_to_logical(LOMSE_TUPLET_NESTED_DISTANCE);
+        if (m_fAbove)
+        {
+            m_yStart -= shift;
+            m_yEnd -= shift;
         }
         else
         {
-            m_yStart = pStart->get_bottom();
-            m_yEnd = pEnd->get_bottom();
+            m_yStart += shift;
+            m_yEnd += shift;
         }
     }
 }
@@ -262,6 +328,36 @@ bool TupletEngraver::check_if_single_beamed_group()
             return pStart->get_beam() == pEnd->get_beam();
     }
     return false;
+}
+
+//---------------------------------------------------------------------------------------
+int TupletEngraver::count_nested_tuplets()
+{
+    int maxTuplets = 0;
+    int openTuplets = 0;
+    std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    for (it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>((*it).first);
+        if (pNR->get_num_relations() > 0)
+        {
+            ImoRelations* pRelObjs = pNR->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                if (pRO->is_tuplet())
+                {
+                    if (pRO->get_start_object() == pNR)
+                        openTuplets++;
+                    else if (pRO->get_end_object() == pNR)
+                        openTuplets--;
+                }
+            }
+        }
+        maxTuplets = max(maxTuplets, openTuplets);
+    }
+    return --maxTuplets;
 }
 
 

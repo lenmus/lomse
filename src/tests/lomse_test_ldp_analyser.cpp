@@ -6691,8 +6691,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote != NULL);
         ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_relation(k_imo_tuplet));
         CHECK( pTuplet->is_tuplet() == true );
-        CHECK( pTuplet->get_num_objects() == 2 );
-//        cout << "num.objects = " << pTuplet->get_num_objects() << endl;
+        CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_actual_number() == 3 );
         CHECK( pTuplet->get_normal_number() == 2 );
 
@@ -6700,6 +6699,8 @@ SUITE(LdpAnalyserTest)
             pTuplet->get_related_objects();
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itN = notes.begin();
         ImoNote* pNt1 = dynamic_cast<ImoNote*>( (*itN).first );
+        ++itN;
+        ImoNote* pNt2 = dynamic_cast<ImoNote*>( (*itN).first );
         ++itN;
         ImoNote* pNt3 = dynamic_cast<ImoNote*>( (*itN).first );
 
@@ -6714,7 +6715,8 @@ SUITE(LdpAnalyserTest)
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote2 != NULL );
-        CHECK( pNote2->find_relation(k_imo_tuplet) == NULL );
+        CHECK( pNote2 == pNt2 );
+        CHECK( pNote2->find_relation(k_imo_tuplet) == pTuplet );
 
         ++it;
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
@@ -6873,7 +6875,7 @@ SUITE(LdpAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL);
         ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_relation(k_imo_tuplet));
-        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_actual_number() == 3 );
         CHECK( pTuplet->get_normal_number() == 2 );
 
@@ -6881,6 +6883,8 @@ SUITE(LdpAnalyserTest)
             pTuplet->get_related_objects();
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itN = notes.begin();
         ImoNote* pNt1 = dynamic_cast<ImoNote*>( (*itN).first );
+        ++itN;
+        ImoNote* pNt2 = dynamic_cast<ImoNote*>( (*itN).first );
         ++itN;
         ImoNote* pNt3 = dynamic_cast<ImoNote*>( (*itN).first );
 
@@ -6891,6 +6895,7 @@ SUITE(LdpAnalyserTest)
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote2 != NULL );
+        CHECK( pNote2 == pNt2 );
 
         ++it;
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
@@ -7069,12 +7074,14 @@ SUITE(LdpAnalyserTest)
         ImoRest* pRest = dynamic_cast<ImoRest*>( *it );
         CHECK( pRest != NULL);
         ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pRest->find_relation(k_imo_tuplet));
-        CHECK( pTuplet->get_num_objects() == 2 );
+        CHECK( pTuplet->get_num_objects() == 3 );
 
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes =
             pTuplet->get_related_objects();
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itN = notes.begin();
         ImoRest* pNR1 = dynamic_cast<ImoRest*>( (*itN).first );
+        ++itN;
+        ImoRest* pNR2 = dynamic_cast<ImoRest*>( (*itN).first );
         ++itN;
         ImoRest* pNR3 = dynamic_cast<ImoRest*>( (*itN).first );
 
@@ -7088,6 +7095,7 @@ SUITE(LdpAnalyserTest)
         ++it;
         ImoRest* pRest2 = dynamic_cast<ImoRest*>( *it );
         CHECK( pRest2 != NULL );
+        CHECK( pRest2 == pNR2 );
         CHECK( pRest2->get_voice() == 3 );
         CHECK( pRest2->get_staff() == 1 );
         CHECK( pRest2->has_attachments() == true );

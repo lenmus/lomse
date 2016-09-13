@@ -172,6 +172,8 @@ public:
 
     inline ImoTuplet* get_last_created_tuplet() { return m_pTuplet; }
 
+    void add_to_open_tuplets(ImoNoteRest* pNR);
+
 };
 
 
@@ -280,6 +282,9 @@ public:
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
     inline ImoTuplet* get_last_created_tuplet() {
          return m_pTupletsBuilder->get_last_created_tuplet();
+    }
+    inline void add_to_open_tuplets(ImoNoteRest* pNR) {
+        m_pTupletsBuilder->add_to_open_tuplets(pNR);
     }
 
     //interface for building lyric lines
