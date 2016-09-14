@@ -4933,11 +4933,13 @@ protected:
 
     void set_show_type(const string& UNUSED(value))
     {
-        //The show-type attribute is used to display either the actual
+        //The show-type attribute is used to display either the actual note
         //type, both the actual and normal types, or neither. It is
         //none by default.
 
-        //TODO Clarify this and how to manage in IM
+        //TODO This is for drawing small notes with dots near the numbers
+        //For now not implemented. I never saw this in a real score, so I prefer
+        //to devote my time to more common notation.
 
     }
 
@@ -4979,7 +4981,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        if (m_pAnchor && m_pAnchor->is_tuplet_dto())    //remove is_tuplet_data()
+        if (m_pAnchor && m_pAnchor->is_tuplet_dto())
             m_pInfo = static_cast<ImoTupletDto*>(m_pAnchor);
         else
         {

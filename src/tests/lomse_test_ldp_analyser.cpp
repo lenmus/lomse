@@ -6753,7 +6753,7 @@ SUITE(LdpAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->find_attachment(k_imo_tuplet_data) == NULL );
+        CHECK( pNote->get_first_tuplet() == NULL );
 
         delete tree->get_root();
         delete pIModel;
@@ -6780,7 +6780,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->find_attachment(k_imo_tuplet_data) == NULL );
+        CHECK( pNote->get_first_tuplet() == NULL );
 
         delete tree->get_root();
         delete pIModel;

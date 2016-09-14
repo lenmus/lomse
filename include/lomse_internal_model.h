@@ -450,8 +450,9 @@ class ImoWrapperBox;
 
                 // ImoRelDataObj (A)
                 k_imo_reldataobj,
-                    k_imo_beam_data, k_imo_slur_data,
-                    k_imo_tie_data, k_imo_tuplet_data,
+                    k_imo_beam_data,
+                    k_imo_slur_data,
+                    k_imo_tie_data,
                 k_imo_reldataobj_last,
 
                 //ImoCollection(A)
@@ -886,7 +887,6 @@ public:
     inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
     inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
-    inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
 
     //special checkers
     inline bool is_mouse_over_generator() {

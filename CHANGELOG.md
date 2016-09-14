@@ -10,8 +10,12 @@
 
 ##### COMPATIBLE CHANGES
 
-- MusicXML importer now supports tuplets.
-- Nested tuplets now fully supported in LDP and rendered in Lomse.
+- Improvements in tuplets renderization and support:
+    - Nested tuplets now fully supported.
+    - MusicXML importer now imports tuplets.
+    - Nested tuplets now fully supported in LDP.
+    - Layout of tuplets improved and also nested tuplets are now drawn.
+- Systems justification changed for using approximate sff.
 - Fixed spacing issues, related to clefs and prolog objects, detected 
   in regression tests.
 - Blank space in LDP exporter has been normalized.

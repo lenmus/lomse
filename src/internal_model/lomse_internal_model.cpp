@@ -382,7 +382,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_beam_data] = "beam-data";
         m_TypeToName[k_imo_slur_data] = "slur-data";
         m_TypeToName[k_imo_tie_data] = "tie-data";
-        m_TypeToName[k_imo_tuplet_data] = "tuplet-data";
 //
         //ImoCollection(A)
         m_TypeToName[k_imo_instruments] = "instruments";
