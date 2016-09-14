@@ -3253,7 +3253,7 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Tuplet numbers");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->font_size( 11.0f);
+	    pStyle->font_size( 10.0f);
         pStyle->font_style( ImoStyle::k_font_style_italic);
         pStyle->font_weight( ImoStyle::k_font_weight_normal);
         add_style(pStyle);
@@ -3834,7 +3834,7 @@ bool ImoStyle::is_default_style_with_default_values()
 
     //Tuplets numbers
     if (m_name == "Tuplet numbers")
-        return font_size() == 11.0f
+        return font_size() == 10.0f
             && font_style() == k_font_style_italic
             //inherited defaults:
                //font

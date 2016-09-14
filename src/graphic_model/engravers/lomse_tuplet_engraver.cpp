@@ -141,12 +141,11 @@ void TupletEngraver::set_shape_details()
 	LUnits uBorderLength = tenths_to_logical(LOMSE_TUPLET_BORDER_LENGHT);
     LUnits uBracketDistance = tenths_to_logical(LOMSE_TUPLET_BRACKET_DISTANCE);
     LUnits uLineThick = tenths_to_logical(LOMSE_TUPLET_BRACKET_THICKNESS);
-    LUnits uNumberDistance = tenths_to_logical(LOMSE_TUPLET_NUMBER_DISTANCE);
     LUnits uSpaceToNumber = tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
 
     m_pTupletShape->set_layout_data(m_fAbove, m_fDrawBracket, m_yStart, m_yEnd,
                                     uBorderLength, uBracketDistance,
-                                    uLineThick, uNumberDistance, uSpaceToNumber,
+                                    uLineThick, uSpaceToNumber,
                                     get_start_noterest_shape(),
                                     get_end_noterest_shape());
 }
@@ -167,6 +166,10 @@ void TupletEngraver::determine_tuplet_text()
         m_fDrawNumber = true;
         stringstream label;
         label << m_pTuplet->get_actual_number();
+        if (m_pTuplet->get_show_number() == ImoTuplet::k_number_both)
+        {
+            label << ":" << m_pTuplet->get_normal_number();
+        }
         m_label = label.str();
     }
     else
