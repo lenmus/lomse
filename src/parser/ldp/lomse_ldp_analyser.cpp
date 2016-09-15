@@ -1215,8 +1215,9 @@ public:
 
     void do_analysis()
     {
-        ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
-        pInfo->set_id( get_node_id() );
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoBeamDto* pInfo = static_cast<ImoBeamDto*>(
+                ImFactory::inject(k_imo_beam_dto, pDoc, get_node_id()) );
 
         // num
         if (get_optional(k_number))
@@ -3850,7 +3851,7 @@ public:
             set_duration(pNR);
 
         //abbreviatedElements
-        //after duration we can find abbreviated items (l, g, p, v) in any order
+        //after duration we can find abbreviated items (l, g, p, v, t) in any order
         bool fStartOldTie = false;
         bool fAddOldBeam = false;
         bool fAddOldTuplet = false;
@@ -3924,10 +3925,8 @@ public:
         //tuplet
         if (fAddOldTuplet)
             set_old_tuplet(pNR);
-        else if (m_pTupletInfo==NULL && m_pAnalyser->is_tuplet_open())
-            add_to_current_tuplet(pNR);
-
-        add_tuplet_info(pNR);
+        else
+            add_tuplet_info(pNR);
 
         //time modification
         if (m_pTimeModifDto != NULL)
@@ -3965,22 +3964,6 @@ public:
       //  }
 
             ImoTreeAlgoritms::add_note_to_chord(pStartOfChordNote, pNote, pDoc);
-
-//            ImoChord* pChord;
-//            if (pStartOfChordNote->is_in_chord())
-//            {
-//                //chord already created. just add note to it
-//                pChord = pStartOfChordNote->get_chord();
-//            }
-//            else
-//            {
-//                //previous note is the base note. Create the chord
-//                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-//                pStartOfChordNote->include_in_relation(pDoc, pChord);
-//            }
-//
-//            //add current note to chord
-//            pNote->include_in_relation(pDoc, pChord);
         }
 
         //save this note as last note
@@ -4008,11 +3991,6 @@ protected:
                 m_pTimeModifDto = static_cast<ImoTimeModificationDto*>(
                         m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
-//            else if (type == k_fermata)
-//            {
-//                m_pFermata = static_cast<ImoFermata*>(
-//                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
-//            }
             else if (type == k_beam)
             {
                 m_pBeamInfo = static_cast<ImoBeamDto*>(
@@ -4022,18 +4000,6 @@ protected:
             {
                 set_voice_element(pNR);
             }
-//            else if (type == k_staffNum)
-//            {
-//                set_staff_num_element(pNR);
-//            }
-//            else if (type == k_label)   //possible staffNum as 'p1'
-//            {
-//                char first = (m_pParamToAnalyse->get_value())[0];
-//                if (first == 'p')
-//                    get_num_staff();
-//                else
-//                    error_invalid_param();
-//            }
             else
                 break;
 
@@ -4172,14 +4138,6 @@ protected:
         }
     }
 
-    void add_to_current_tuplet(ImoNoteRest* pNR)
-    {
-        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
-        pInfo->set_note_rest(pNR);
-        pInfo->set_tuplet_type(ImoTupletDto::k_continue);
-        m_pAnalyser->add_relation_info(pInfo);
-    }
-
     void set_old_tuplet(ImoNoteRest* pNR)
     {
         string value = m_srcOldTuplet;
@@ -4225,7 +4183,6 @@ protected:
             {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                     "Requesting to start a tuplet but there is already an open tuplet. Tuplet ignored.");
-                add_to_current_tuplet(pNR);
             }
             else
             {
@@ -4262,6 +4219,7 @@ protected:
             //    pInfo->set_normal_number(0);  //required
         }
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+        pInfo->set_tuplet_type(ImoTupletDto::k_start);
         pInfo->set_note_rest(pNR);
         pInfo->set_actual_number(actual);
         pInfo->set_normal_number(normal);
@@ -4298,9 +4256,17 @@ protected:
     {
         if (m_pTupletInfo)
         {
+            if (m_pTupletInfo->is_start_of_tuplet())
+                m_pAnalyser->add_to_open_tuplets(pNR);
+
             m_pTupletInfo->set_note_rest(pNR);
             m_pAnalyser->add_relation_info(m_pTupletInfo);
+
+            if (m_pTupletInfo->is_end_of_tuplet())
+                m_pAnalyser->add_to_open_tuplets(pNR);
         }
+        else
+            m_pAnalyser->add_to_open_tuplets(pNR);
     }
 
     void add_beam_info(ImoNoteRest* pNR)
@@ -6090,9 +6056,24 @@ public:
         pInfo->set_id( get_node_id() );
         set_default_values(pInfo);
 
-        // [<tupletID>]     //optional for 1.5 compatibility.
-        if (get_optional(k_number))
-            set_tuplet_id(pInfo);
+        // [<tupletID>]     //optional. Only required for nested tuplets
+        // <tupletID>   Mandatory since 2.1, for nested tuplets
+        // if (m_pAnalyser->get_score_version() > 200)
+        //{
+        //    if (get_mandatory(k_number))
+        //        set_tuplet_id(pInfo);
+        //    else
+        //    {
+        //        error_msg("Missing or invalid tuplet number. Tuplet ignored.");
+        //        delete pInfo;
+        //        return;
+        //    }
+        //}
+        //else
+        {
+            if (get_optional(k_number))
+                set_tuplet_id(pInfo);
+        }
 
         // { + | - }
         if (!get_mandatory(k_label) || !set_tuplet_type(pInfo))
@@ -6136,13 +6117,16 @@ protected:
     {
         pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
         pInfo->set_placement(k_placement_default);
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
     }
 
-    void set_tuplet_id(ImoTupletDto* UNUSED(pInfo))
+    void set_tuplet_id(ImoTupletDto* pInfo)
     {
-        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
-        //      tuplets it will have any use.
-        get_integer_value(0);
+        //AWARE: tuplet number was not used before 2.0, when enabling nested tuplets
+        if (m_pAnalyser->get_score_version() > 107)
+            pInfo->set_tuplet_number( get_integer_value(0) );
+        else
+            pInfo->set_tuplet_number(0);
     }
 
     bool set_tuplet_type(ImoTupletDto* pInfo)
@@ -7475,28 +7459,41 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoTupletDto* pStartDto = m_matches.front();
-    ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
+    m_pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
 
-    //if not only graphical (LDP < 2.0) add time modification to all note/rest
-    if (!pStartDto->is_only_graphical())
+    //loop for including the tuplet in all note/rest
+    std::list<ImoTupletDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
-        std::list<ImoTupletDto*>::iterator it;
-        for (it = m_matches.begin(); it != m_matches.end(); ++it)
+        //add tuplet to the note/rest
+        ImoNoteRest* pNR = (*it)->get_note_rest();
+        pNR->include_in_relation(pDoc, m_pTuplet, NULL);
+
+        //if not only graphical (LDP < 2.0) add time modification the note/rest
+        if (!pStartDto->is_only_graphical())
+            pNR->set_time_modification( m_pTuplet->get_normal_number(),
+                                        m_pTuplet->get_actual_number() );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TupletsBuilder::add_to_open_tuplets(ImoNoteRest* pNR)
+{
+    if (m_pendingItems.size() > 0)
+    {
+        ListIterator it;
+        for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
         {
-            ImoNoteRest* pNR = (*it)->get_note_rest();
-            pNR->set_time_modification( pTuplet->get_normal_number(),
-                                        pTuplet->get_actual_number() );
+            if ((*it)->is_start_of_relation() )
+            {
+                ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+                pInfo->set_tuplet_number( (*it)->get_item_number() );
+                pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+                pInfo->set_note_rest(pNR);
+                save_item_info(pInfo);
+            }
         }
     }
-
-    //create tuplet data and add tuplet to start and end note/rest
-    ImoNoteRest* pNR = pStartDto->get_note_rest();
-    ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, pStartDto);
-    pNR->include_in_relation(pDoc, pTuplet, pData);
-
-    pNR = pEndDto->get_note_rest();
-    pData = ImFactory::inject_tuplet_data(pDoc, pEndDto);
-    pNR->include_in_relation(pDoc, pTuplet, pData);
 }
 
 

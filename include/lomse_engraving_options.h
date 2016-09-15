@@ -89,10 +89,10 @@ namespace lomse
 
 //tuplets
 #define LOMSE_TUPLET_BORDER_LENGHT      10.0f
-#define LOMSE_TUPLET_BRACKET_DISTANCE   10.0f
-#define LOMSE_TUPLET_NUMBER_DISTANCE     5.0f
-#define LOMSE_TUPLET_BRACKET_THICKNESS   2.0f
+#define LOMSE_TUPLET_BRACKET_DISTANCE    3.0f
+#define LOMSE_TUPLET_BRACKET_THICKNESS   1.0f
 #define LOMSE_TUPLET_SPACE_TO_NUMBER     3.0f
+#define LOMSE_TUPLET_NESTED_DISTANCE    20.0f
 
 //ties
 #define LOMSE_TIE_VERTICAL_SPACE         3.0f   //vertical distance from notehead

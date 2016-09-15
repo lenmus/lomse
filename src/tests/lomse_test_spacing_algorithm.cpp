@@ -296,7 +296,8 @@ SUITE(SpAlgGourlayTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (staves 2)(musicData "
-            "(clef G p1)(clef F4 p2)(n a4 e p1 g+ t3/2)(n a4 e)(n d4 e g- t-)(n g4 q)"
+            "(clef G p1)(clef F4 p2)(n a4 e p1 g+ (tm 2 3)(t 1 + 3 2))"
+            "(n a4 e (tm 2 3))(n d4 e g- (tm 2 3)(t 1 -))(n g4 q)"
             "(n c3 s p2 g+ v2)(n d3 e. g-)(n e3 q)"
             ")) )))" );
         GraphicModel gmodel;
@@ -371,7 +372,8 @@ SUITE(SpAlgGourlayTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (staves 2)(musicData "
-            "(clef G p1)(clef F4 p2)(n a4 e p1 g+ t3/2)(n a4 e)(n d4 e g- t-)(n g4 q)"
+            "(clef G p1)(clef F4 p2)(n a4 e p1 g+ (tm 2 3)(t 1 + 3 2))"
+            "(n a4 e (tm 2 3))(n d4 e g- (tm 2 3)(t 1 -))(n g4 q)"
             "(n c3 s p2 g+ v2)(n d3 e. g-)(n e3 q)"
             ")) )))" );
         GraphicModel gmodel;

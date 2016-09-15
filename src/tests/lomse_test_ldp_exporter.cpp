@@ -837,7 +837,7 @@ SUITE(LdpExporterTest)
         //tuplet exports also time-modification
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
-            "(score (vers 1.6)(instrument (musicData "
+            "(score (vers 1.6)(instrument#100 (musicData "
             "(clef G)(n c4 e (t + 3 2))(n e4 e)(n g4 e (t -))"
             "))) ))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -848,8 +848,8 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pScore);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
-            "(clef G p1)(n c4 e v1 p1 (tm 2 3)(t + 3 2))(n e4 e v1 p1 (tm 2 3))"
-            "(n g4 e v1 p1 (tm 2 3)(t -))"
+            "(clef G p1)(n c4 e v1 p1 (tm 2 3)(t 106 + 3 2))(n e4 e v1 p1 (tm 2 3))"
+            "(n g4 e v1 p1 (tm 2 3)(t 106 -))"
             ")))";
 
         CHECK( source == expected );
@@ -1293,10 +1293,10 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string(
             "(score (vers 1.6)(instrument#100 (musicData (clef G)"
-            "(n c4 e (t 100 + 2 3)(beam 101 +))"
-            "(n d4 s (beam 101 =+))"
-            "(n c4 s (beam 101 ==))"
-            "(n b3 e (t 100 -)(beam 101 --))"
+            "(n c4 e (t 100 + 2 3)(beam 110 +))"
+            "(n d4 s (beam 110 =+))"
+            "(n c4 s (beam 110 ==))"
+            "(n b3 e (t 100 -)(beam 110 --))"
             ")))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -1309,10 +1309,10 @@ SUITE(LdpExporterTest)
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(t + 2 3)(beam 112 +))"
+            "(n c4 e v1 p1 (tm 3 2)(beam 112 +)(t 107 + 2 3))"
             "(n d4 s v1 p1 (tm 3 2)(beam 112 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(t -)(beam 112 --))"
+            "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
             ")";
         CHECK( source == expected );
     }
@@ -1322,11 +1322,11 @@ SUITE(LdpExporterTest)
         //tuplet v2.0: tm explicit
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument#100 (musicData (clef G)"
-            "(n c4 e (t 100 + 2 3)(tm 3 2)(beam 101 +))"
-            "(n d4 s (beam 101 =+)(tm 3 2))"
-            "(n c4 s (beam 101 ==)(tm 3 2))"
-            "(n b3 e (t 100 -)(tm 3 2)(beam 101 --))"
+            "(score (vers 2.0)(instrument#100 (musicData (clef G)"
+            "(n c4 e (t 100 + 2 3)(tm 3 2)(beam 131 +))"
+            "(n d4 s (beam 131 =+)(tm 3 2))"
+            "(n c4 s (beam 131 ==)(tm 3 2))"
+            "(n b3 e (t 100 -)(tm 3 2)(beam 131 --))"
             ")))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -1339,10 +1339,10 @@ SUITE(LdpExporterTest)
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1)"
-            "(n c4 e v1 p1 (tm 3 2)(t + 2 3)(beam 112 +))"
+            "(n c4 e v1 p1 (tm 3 2)(beam 112 +)(t 107 + 2 3))"
             "(n d4 s v1 p1 (tm 3 2)(beam 112 =+))"
             "(n c4 s v1 p1 (tm 3 2)(beam 112 ==))"
-            "(n b3 e v1 p1 (tm 3 2)(t -)(beam 112 --))"
+            "(n b3 e v1 p1 (tm 3 2)(beam 112 --)(t 107 -))"
             ")";
         CHECK( source == expected );
     }

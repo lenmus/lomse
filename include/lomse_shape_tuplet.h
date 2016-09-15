@@ -62,7 +62,6 @@ protected:
 	LUnits m_uBorderLength;
     LUnits m_uBracketDistance;
     LUnits m_uLineThick;
-    LUnits m_uNumberDistance;
     LUnits m_uSpaceToNumber;
 
 public:
@@ -73,7 +72,7 @@ public:
     void set_layout_data(bool fAbove, bool fDrawBracket, LUnits yStart, LUnits yEnd,
                          LUnits uBorderLength,
                          LUnits uBracketDistance, LUnits uLineThick,
-                         LUnits uNumberDistance, LUnits uSpaceToNumber,
+                         LUnits uSpaceToNumber,
                          GmoShape* pStart, GmoShape* pEnd);
 
     void add_label(GmoShapeText* pShape);

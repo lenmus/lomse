@@ -98,47 +98,21 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
+// helper class to save tuplet info items, match them and build the tuplets
+class MxlTupletsBuilder : public RelationBuilder<ImoTupletDto, MxlAnalyser>
+{
+public:
+    MxlTupletsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
+    virtual ~MxlTupletsBuilder() {}
 
-////---------------------------------------------------------------------------------------
-//// helper class to save beam info items, match them and build the beams
-//// For old g+/g- syntax
-//class OldMxlBeamsBuilder
-//{
-//protected:
-//    ostream& m_reporter;
-//    MxlAnalyser* m_pAnalyser;
-//    std::list<ImoBeamDto*> m_pendingOldBeams;
-//
-//public:
-//    OldMxlBeamsBuilder(ostream& reporter, MxlAnalyser* pAnalyser);
-//    ~OldMxlBeamsBuilder();
-//
-//    void add_old_beam(ImoBeamDto* pInfo);
-//    bool is_old_beam_open();
-//    void close_old_beam(ImoBeamDto* pInfo);
-//    void clear_pending_old_beams();
-//
-//protected:
-//    void do_create_old_beam();
-//
-//    //errors
-//    void error_no_end_old_beam(ImoBeamDto* pInfo);
-//
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//// helper class to save tuplet info items, match them and build the tuplets
-//class MxlTupletsBuilder : public RelationBuilder<ImoTupletDto, MxlAnalyser>
-//{
-//public:
-//    MxlTupletsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
-//        : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
-//    virtual ~MxlTupletsBuilder() {}
-//
-//    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
-//    inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
-//};
+    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
+    inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
+    void add_to_open_tuplets(ImoNoteRest* pNR);
+    void get_factors_from_nested_tuplets(int* pTop, int* pBottom);
+
+};
 
 //---------------------------------------------------------------------------------------
 // helper class to save part-list info
@@ -221,7 +195,7 @@ protected:
     LdpFactory*     m_pLdpFactory;
     MxlTiesBuilder*    m_pTiesBuilder;
     MxlBeamsBuilder*   m_pBeamsBuilder;
-//    MxlTupletsBuilder* m_pTupletsBuilder;
+    MxlTupletsBuilder* m_pTupletsBuilder;
     MxlSlursBuilder*   m_pSlursBuilder;
     map<string, int> m_lyricIndex;
     vector<ImoLyric*>  m_lyrics;
@@ -349,11 +323,15 @@ public:
     int get_slur_id(int numSlur);
     int get_slur_id_and_close(int numSlur);
 
-//    //interface for MxlTupletsBuilder
-//    inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
-
-//    //interface for ChordBuilder
-//    void add_chord(ImoChord* pChord);
+    //interface for MxlTupletsBuilder
+    inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
+    inline void add_to_open_tuplets(ImoNoteRest* pNR) {
+        m_pTupletsBuilder->add_to_open_tuplets(pNR);
+    }
+    inline void get_factors_from_nested_tuplets(int* pTop, int* pBottom)
+    {
+        m_pTupletsBuilder->get_factors_from_nested_tuplets(pTop, pBottom);
+    }
 
     //information for reporting errors
     string get_element_info();
@@ -373,11 +351,6 @@ public:
     inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
     inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
-//    //static methods for general use
-    static int xml_data_to_clef_type(const string& sign, int line, int octaveChange);
-//    static bool ldp_pitch_to_components(const string& pitch, int *step, int* octave,
-//                                        EAccidentals* accidentals);
-
 
     int name_to_enum(const string& name) const;
     bool to_integer(const string& text, int* pResult);
@@ -388,49 +361,6 @@ protected:
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };
-
-
-////---------------------------------------------------------------------------------------
-////Helper, to determine beam types automatically
-//class MxlAutoBeamer
-//{
-//protected:
-//    ImoBeam* m_pBeam;
-//
-//public:
-//    MxlAutoBeamer(ImoBeam* pBeam) : m_pBeam(pBeam) {}
-//    ~MxlAutoBeamer() {}
-//
-//    void do_autobeam();
-//
-//protected:
-//
-//
-//    int get_beaming_level(ImoNote* pNote);
-//    void extract_notes();
-//    void determine_maximum_beam_level_for_current_triad();
-//    void process_notes();
-//    void compute_beam_types_for_current_note();
-//    void get_triad(int iNote);
-//    void compute_beam_type_for_current_note_at_level(int level);
-//
-//    //notes in the beam, after removing rests
-//    std::vector<ImoNote*> m_notes;
-//
-//    //notes will be processed in triads. The triad is the current
-//    //note being processed and the previous and next ones
-//    enum ENotePos { k_first_note=0, k_middle_note, k_last_note, };
-//    ENotePos m_curNotePos;
-//    ImoNote* m_pPrevNote;
-//    ImoNote* m_pCurNote;
-//    ImoNote* m_pNextNote;
-//
-//    //maximum beam level for each triad note
-//    int m_nLevelPrev;
-//    int m_nLevelCur;
-//    int m_nLevelNext;
-//
-//};
 
 
 }   //namespace lomse

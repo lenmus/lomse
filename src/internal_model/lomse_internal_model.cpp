@@ -382,7 +382,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_beam_data] = "beam-data";
         m_TypeToName[k_imo_slur_data] = "slur-data";
         m_TypeToName[k_imo_tie_data] = "tie-data";
-        m_TypeToName[k_imo_tuplet_data] = "tuplet-data";
 //
         //ImoCollection(A)
         m_TypeToName[k_imo_instruments] = "instruments";
@@ -3253,7 +3252,7 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Tuplet numbers");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->font_size( 11.0f);
+	    pStyle->font_size( 10.0f);
         pStyle->font_style( ImoStyle::k_font_style_italic);
         pStyle->font_weight( ImoStyle::k_font_weight_normal);
         add_style(pStyle);
@@ -3834,7 +3833,7 @@ bool ImoStyle::is_default_style_with_default_values()
 
     //Tuplets numbers
     if (m_name == "Tuplet numbers")
-        return font_size() == 11.0f
+        return font_size() == 10.0f
             && font_style() == k_font_style_italic
             //inherited defaults:
                //font
@@ -4721,55 +4720,22 @@ TimeUnits ImoTimeSignature::get_beat_duration()
 }
 
 
-
-//=======================================================================================
-// ImoTupletData implementation
-//=======================================================================================
-ImoTupletData::ImoTupletData(ImoTupletDto* UNUSED(pDto))
-    : ImoRelDataObj(k_imo_tuplet_data)
-{
-}
-
-
 //=======================================================================================
 // ImoTupletDto implementation
 //=======================================================================================
 ImoTupletDto::ImoTupletDto()
     : ImoSimpleObj(k_imo_tuplet_dto)
     , m_tupletType(ImoTupletDto::k_unknown)
+    , m_tupletNum(0)
     , m_nActualNum(0)
     , m_nNormalNum(0)
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
     , m_nShowNumber(ImoTuplet::k_number_actual)
+    , m_lineNum(0)
     , m_fOnlyGraphical(false)
-    , m_pTupletElm(NULL)
     , m_pNR(NULL)
 {
-}
-
-//---------------------------------------------------------------------------------------
-ImoTupletDto::ImoTupletDto(LdpElement* pTupletElm)
-    : ImoSimpleObj(k_imo_tuplet_dto)
-    , m_tupletType(ImoTupletDto::k_unknown)
-    , m_nActualNum(0)
-    , m_nNormalNum(0)
-    , m_nShowBracket(k_yesno_default)
-    , m_nPlacement(k_placement_default)
-    , m_nShowNumber(ImoTuplet::k_number_actual)
-    , m_fOnlyGraphical(false)
-    , m_pTupletElm(pTupletElm)
-    , m_pNR(NULL)
-{
-}
-
-//---------------------------------------------------------------------------------------
-int ImoTupletDto::get_line_number()
-{
-    if (m_pTupletElm)
-        return m_pTupletElm->get_line_number();
-    else
-        return 0;
 }
 
 

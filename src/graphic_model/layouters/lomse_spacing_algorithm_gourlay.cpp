@@ -147,7 +147,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     pData->m_pShape = pShape;
 
     //determine slice type for the new object to include
-    dbgLogger << "StaffObj type= " << pSO->get_obj_type();
+//    dbgLogger << "StaffObj type= " << pSO->get_obj_type();
     int curType = TimeSlice::k_undefined;
     if (fInProlog)
         curType = TimeSlice::k_prolog;
@@ -207,14 +207,14 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
             curType = TimeSlice::k_non_timed;
         }
     }
-    dbgLogger << ", slice type= " << curType;
+//    dbgLogger << ", slice type= " << curType;
 
     //include entry in current or new slice
     if (fCreateNewSlice)
     {
-        dbgLogger << ", Start new slice. m_prevType:" << m_prevType
-            << ", m_prevTime:" << m_prevTime << ", curTime:" << curTime
-            << endl;
+//        dbgLogger << ", Start new slice. m_prevType:" << m_prevType
+//            << ", m_prevTime:" << m_prevTime << ", curTime:" << curTime
+//            << endl;
         //terminate previous slice
         finish_slice(m_pLastEntry, m_numEntries);
 
@@ -248,7 +248,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     }
     else
     {
-        dbgLogger << ", Use previous slice." << endl;
+//        dbgLogger << ", Use previous slice." << endl;
         if (pSO->is_note_rest())
         {
             m_maxNoteDur = max(m_maxNoteDur, pSO->get_duration());
@@ -383,6 +383,12 @@ void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
 
     //determine column spacing function slope in the neighborhood of Fopt
     m_columns[iCol]->determine_approx_sff_for(m_Fopt);
+
+    if (fTrace || m_libraryScope.dump_column_tables())
+    {
+        dbgLogger << "Column " << iCol << ". Slope for Fopt= " << m_Fopt
+                  << " is slope= " << m_columns[iCol]->m_slope << endl;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -509,51 +515,18 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement)
 {
-#if 1
-    //method 2: proportional division of the space and specific force for each column.
-    //          Exact. No approximations used. It woks OK.
+    //Use approximate spacing function sff[cicj] for computing the required force.
+    //If required force is greater than 20% Fopt the errors are noticeable. In this
+    //case, a loop of succesive approximations is started (usually a single
+    //pass is enough).
 
-    vector<LUnits> colWidths;
-    int numCols = iLastCol - iFirstCol;
-    colWidths.reserve(numCols);
-
-    LUnits stretchableWidth = 0.0f;
-    int i=0;
-    for (int iCol = iFirstCol; iCol < iLastCol; ++i, ++iCol)
-    {
-        colWidths[i] = m_columns[iCol]->get_column_width() - m_columns[iCol]->m_xFixed;
-        stretchableWidth += colWidths[i];
-    }
-
-    i=0;
-    for (int iCol = iFirstCol; iCol < iLastCol; ++i, ++iCol)
-    {
-        LUnits extraWidth = stretchableWidth == 0.0f ?
-                uSpaceIncrement / (iLastCol - iFirstCol)
-                : uSpaceIncrement * colWidths[i] / stretchableWidth;
-        LUnits colWidth = m_columns[iCol]->get_column_width();
-        float F = m_columns[iCol]->determine_force_for(colWidth + extraWidth);
-        m_columns[iCol]->apply_force(F);
-
-//        dbgLogger << "Justifying system. Col " << iCol
-//                  << ": extraWidth= " << extraWidth
-//                  << ", stretchableWidth= " << stretchableWidth
-//                  << ", Force= " << F
-//                  << ", target width= " << (colWidth + extraWidth)
-//                  << ", achieved= " << m_columns[iCol]->get_column_width()
-//                  << endl;
-    }
-
-#else
-    //Method 1: use approximate spacing function sff[cicj]
-    //          Not good. Errors are noticeable when required force is > 20% of Fopt
 
     //determine required line width
-    /*dbg*/ LUnits required = uSpaceIncrement;
+    LUnits required = uSpaceIncrement;
     LUnits lineWidth = uSpaceIncrement;
     for (int i = iFirstCol; i < iLastCol; ++i)
     {
-        /*dbg*/ required  += m_columns[i]->get_column_width();
+        required  += m_columns[i]->get_column_width();
         lineWidth += m_columns[i]->get_column_width();
         lineWidth -= m_columns[i]->m_xFixed;
     }
@@ -573,20 +546,52 @@ void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncr
     float F = lineWidth * c;
 
     //apply this force to columns
-    /*dbg*/ LUnits achieved = 0.0f;
+    LUnits achieved = 0.0f;
     for (int i = iFirstCol; i < iLastCol; ++i)
     {
         m_columns[i]->apply_force(F);
-        /*dbg*/ achieved += m_columns[i]->get_column_width();
+        achieved += m_columns[i]->get_column_width();
     }
 
-    dbgLogger << "Justifing system: cols " << iFirstCol << ", " << iLastCol
-              << ", line width " << lineWidth
-              << ", c= " << c << ", new force: " << F
-              << ", required width= " << required
-              << ", achieved= " << achieved
-              << endl;
-#endif
+//    dbgLogger << "Justifing system: cols " << iFirstCol << ", " << iLastCol
+//              << ", line width " << lineWidth
+//              << ", c= " << fixed << setprecision(6) << c << ", new force: " << F
+//              << ", required width= " << setprecision(2) << required
+//              << ", achieved= " << achieved
+//              << endl;
+
+    //Errors are noticeable when required force is > 20% of Fopt.
+    //If error is greater than one tenth of a millimeter, a loop of
+    //succesive approximations is started.
+
+    LUnits uError = required - achieved;
+    int round=0;
+    while (abs(uError) > 10.0f && round < 8)     //10.0f = one tenth of a millimeter
+    {
+//        dbgLogger << "Error = " << uError << ". Correction round "
+//                  << round << ". ";
+        ++round;
+
+        //compute an increment for F
+        float deltaF = F - m_Fopt;
+        LUnits deltaS = uSpaceIncrement - uError;
+        F += (uError/deltaS) * deltaF;
+
+        //apply then new force to columns
+        LUnits achieved = 0.0f;
+        for (int i = iFirstCol; i < iLastCol; ++i)
+        {
+            m_columns[i]->apply_force(F);
+            achieved += m_columns[i]->get_column_width();
+        }
+
+        uError = required - achieved;
+
+//        dbgLogger << "New: F= " << setprecision(6) << F
+//                  << ", achieved= " << setprecision(2) << achieved
+//                  << ", error= " << uError
+//                  << endl;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1773,35 +1778,6 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
 {
     //compute combined spring constant for all springs that will react to F
 
-#if 0
-    //method 2: direct computation of the slope
-    //          produces more or less the same results than method 1 but requires
-    //          more computations.
-
-    // extent1 = apply optimum force fopt to sff  (inverse of Algorithm 1)
-    // extent2 = apply optimum force fopt * 1.15 to sff  (inverse of Algorithm 1)    fopt + 15%
-    // slope = (extent1 - extent2) / (0.15 * fopt)
-
-    LUnits e1 = get_column_width();
-    apply_force(F * 1.15f);
-    LUnits e2 = get_column_width();
-    m_slope = (e2 - e1) / (F * 0.15f);
-
-    m_xFixed = 0.0f;
-    vector<TimeSlice*>::iterator it;
-    for (it = m_orderedSlices.begin(); it != m_orderedSlices.end(); ++it)
-    {
-        m_xFixed += (*it)->m_xLeft;
-
-        //if the force of this spring is bigger than F do not take this spring into
-        //account, only its pre-stretching extent
-        if (F <= (*it)->m_fi)
-            m_xFixed += (*it)->get_xi();
-    }
-
-#else
-    //method 1: compute combined spring for active springs at force F
-
     m_slope = 0.0f;
     m_xFixed = 0.0f;
     vector<TimeSlice*>::iterator it;
@@ -1830,7 +1806,7 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
     //if F is lower than minimum force for all springs, use the first one
     if (m_slope == 0.0f)
         m_slope = 1.0f / m_orderedSlices[0]->m_ci;
-#endif
+
 //    dbgLogger << "Final slope=" << m_slope
 //              << ", xFixed=" << m_xFixed
 //              << endl;

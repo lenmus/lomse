@@ -48,6 +48,7 @@
 #include "lomse_ldp_elements.h"
 #include "lomse_control.h"
 #include "lomse_logger.h"
+#include "lomse_staffobjs_table.h"
 
 #include <sstream>
 using namespace std;
@@ -456,15 +457,35 @@ ImoTuplet* Document::add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
                 a.add_relation_info(pTupletStart);
                 pStartNR->set_dirty(true);
 
+                //add the tuplet to intermediate notes
+                int numTuplet = pTupletStart->get_item_number();
+                ColStaffObjs* pCol = pStartNR->get_score()->get_staffobjs_table();
+                ColStaffObjsIterator it = pCol->find(pStartNR);
+                int line = (*it)->line();
+                ++it;   //skip start note
+                while ((*it)->imo_object() != pEndNR)
+                {
+                    if ((*it)->imo_object()->is_note_rest() && (*it)->line() == line)
+                    {
+                        ImoNoteRest* pNR = static_cast<ImoNoteRest*>((*it)->imo_object());
+                        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+                        pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+                        pInfo->set_note_rest(pNR);
+                        pInfo->set_tuplet_number(numTuplet);
+                        a.add_relation_info(pInfo);
+                    }
+                    ++it;
+                }
+
                 //create end of tuplet and attach it to end note/rest
                 ImoTupletDto* pTupletEnd = LOMSE_NEW ImoTupletDto();
                 pTupletEnd->set_tuplet_type(ImoTupletDto::k_stop);
                 pTupletEnd->set_note_rest(pEndNR);
+                pTupletEnd->set_tuplet_number(numTuplet);
                 a.add_relation_info(pTupletEnd);
 
                 //get the tuplet
-                ImoTuplet* pTuplet = pStartNR->get_tuplet();
-                return pTuplet;
+                return a.get_last_created_tuplet();
             }
         }
     }

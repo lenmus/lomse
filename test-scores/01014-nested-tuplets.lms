@@ -1,0 +1,23 @@
+(score (vers 2.0)
+
+    //As time is 2 4, a triplet of quarter notes takes a full measure. This
+    //is the first triplet. (t 3 2) and therefore (tm 2 3)
+    //Next, each quarter note is replaced by two eighth notes. 
+    //Now the two notes in the middle are replaced by five: this is the second triplet (t 5 2)
+    //tm for these notes is now the composite of (tm 2 3)x(tm 2 5) = (tm 2x2, 3x5) = (tm 4 15)
+
+    (instrument (musicData
+        (clef G)
+        (key A)
+        (time 2 4)
+        (n b4 e (tm 2 3)(beam 1 +)(t 1 + 3 2))
+        (n b4 e (tm 2 3)(beam 1 -))
+        (n b4 e (tm 4 15)(beam 2 +)(t 2 + 5 2 (displayBracket yes)))
+        (n b4 e (tm 4 15)(beam 2 =))
+        (n b4 e (tm 4 15)(beam 2 =))
+        (n b4 e (tm 4 15)(beam 2 =))
+        (n b4 e (tm 4 15)(beam 2 -)(t 2 -))
+        (n b4 e (tm 2 3)(beam 3 +))
+        (n b4 e (tm 2 3)(beam 3 -)(t 1 -))
+    ))
+)

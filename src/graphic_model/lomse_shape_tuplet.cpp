@@ -61,7 +61,7 @@ GmoShapeTuplet::~GmoShapeTuplet()
 void GmoShapeTuplet::set_layout_data(bool fAbove, bool fDrawBracket, LUnits yStart,
                                      LUnits yEnd, LUnits uBorderLength,
                                      LUnits uBracketDistance, LUnits uLineThick,
-                                     LUnits uNumberDistance, LUnits uSpaceToNumber,
+                                     LUnits uSpaceToNumber,
                                      GmoShape* pStart, GmoShape* pEnd)
 {
 	m_fAbove = fAbove;
@@ -69,7 +69,6 @@ void GmoShapeTuplet::set_layout_data(bool fAbove, bool fDrawBracket, LUnits ySta
 	m_uBorderLength = uBorderLength;
     m_uBracketDistance = uBracketDistance;
     m_uLineThick = uLineThick;
-    m_uNumberDistance = uNumberDistance;
     m_uSpaceToNumber = uSpaceToNumber;
 
     m_uyStart = yStart;
@@ -104,33 +103,34 @@ void GmoShapeTuplet::compute_position()
 {
     compute_horizontal_position();
 
-	//measure number
-    m_uNumberWidth = 0.0f;
-    LUnits uNumberHeight = 0.0f;
-    if (m_pShapeText)
-    {
-        m_uNumberWidth = m_pShapeText->get_width();
-        uNumberHeight = m_pShapeText->get_height();
-    }
-
-    //determine number x position
-    m_xNumber = (m_uxStart + m_uxEnd - m_uNumberWidth)/2.0f;
-
-    //determine number y position
-    m_yNumber = (m_uyStart + m_uyEnd) / 2.0f;
+    //determine position for bracket line
     LUnits yShift = (m_fAbove ? -m_uBracketDistance : m_uBracketDistance);
-    yShift += (m_fAbove ? -uNumberHeight : 0.0f);
-    m_yNumber += yShift;
-
-    //move nomber shape to its position
-    if (m_pShapeText)
-        m_pShapeText->set_origin(m_xNumber, m_yNumber);
-
-    //determine y pos for start/end of bracket horizontal line
-    yShift += uNumberHeight / 2.0f;
+    yShift += (m_fAbove ? -m_uBorderLength : m_uBorderLength);
     m_yLineStart = m_uyStart + yShift;
     m_yLineEnd = m_uyEnd + yShift;
 
+	//measure number
+	m_xNumber = 0.0f;
+	m_yNumber = 0.0f;
+	m_uNumberWidth = 0.0f;
+    if (m_pShapeText)
+    {
+        m_uNumberWidth = m_pShapeText->get_width();
+        LUnits uNumberHeight = 1.33f * m_pShapeText->get_height();
+            //1.33 accounts for the fact that there is some space on top of the
+            //number glyph
+
+        //determine number x position
+        m_xNumber = ((m_uxStart + m_uxEnd - m_uNumberWidth) / 2.0f) + m_uSpaceToNumber;
+
+        //determine number y position
+        m_yNumber = (m_yLineStart + m_yLineEnd - uNumberHeight) / 2.0f;
+
+        //move number shape to its position
+        m_pShapeText->set_origin(m_xNumber, m_yNumber);
+    }
+
+    //determine y pos for start/end of bracket vertical lines
     if (m_fAbove)
     {
         m_yStartBorder = m_yLineStart + m_uBorderLength;
@@ -195,31 +195,26 @@ void GmoShapeTuplet::make_points_relative_to_origin()
 //---------------------------------------------------------------------------------------
 void GmoShapeTuplet::compute_horizontal_position()
 {
-    bool fUp = true;
-    if (m_pStartNR->is_shape_note())
-    {
-        GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(m_pStartNR);
-        fUp = pNote->is_up();
-    }
-
     //determine x start/end coordinates
-    if (m_fDrawBracket)
-    {
+
+    //AWARE: It is simpler to do this here than in the tuplets engraver because
+    //when the tuplet is engraved the system is not justified and, therefore,
+    //the notes will be moved.
+
+    if (m_pStartNR->is_shape_rest())
         m_uxStart = m_pStartNR->get_left();
-        m_uxEnd = m_pEndNR->get_right();
-    }
     else
     {
-        if (fUp)
-        {
-            m_uxStart = m_pStartNR->get_right();
-            m_uxEnd = m_pEndNR->get_right();
-        }
-        else
-        {
-            m_uxStart = m_pStartNR->get_left();
-            m_uxEnd = m_pEndNR->get_left();
-        }
+        GmoShapeNote* pStartNote = static_cast<GmoShapeNote*>(m_pStartNR);
+        m_uxStart = pStartNote->get_notehead_left();
+    }
+
+    if (m_pEndNR->is_shape_rest())
+        m_uxEnd = m_pEndNR->get_right();
+    else
+    {
+        GmoShapeNote* pEndNote = static_cast<GmoShapeNote*>(m_pEndNR);
+        m_uxEnd = pEndNote->get_notehead_right();
     }
 }
 

@@ -127,7 +127,6 @@ class ImoTieData;
 class ImoTieDto;
 class ImoTimeModificationDto;
 class ImoTimeSignature;
-class ImoTupletData;
 class ImoTupletDto;
 class ImoTuplet;
 class ImoWrapperBox;
@@ -451,8 +450,9 @@ class ImoWrapperBox;
 
                 // ImoRelDataObj (A)
                 k_imo_reldataobj,
-                    k_imo_beam_data, k_imo_slur_data,
-                    k_imo_tie_data, k_imo_tuplet_data,
+                    k_imo_beam_data,
+                    k_imo_slur_data,
+                    k_imo_tie_data,
                 k_imo_reldataobj_last,
 
                 //ImoCollection(A)
@@ -887,7 +887,6 @@ public:
     inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
     inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
-    inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
 
     //special checkers
     inline bool is_mouse_over_generator() {
@@ -4395,24 +4394,23 @@ class ImoTupletDto : public ImoSimpleObj
 {
 protected:
     int m_tupletType;
+    int m_tupletNum;
     int m_nActualNum;
     int m_nNormalNum;
     int m_nShowBracket;
     int m_nPlacement;
     int m_nShowNumber;
+    int m_lineNum;
     bool m_fOnlyGraphical;
-    LdpElement* m_pTupletElm;
     ImoNoteRest* m_pNR;
 
 public:
     ImoTupletDto();
-    ImoTupletDto(LdpElement* pBeamElm);
     virtual ~ImoTupletDto() {}
 
     enum { k_unknown = 0, k_start, k_continue, k_stop, };
 
     //getters
-    inline LdpElement* get_tuplet_element() { return m_pTupletElm; }
     inline ImoNoteRest* get_note_rest() { return m_pNR; }
     inline bool is_start_of_tuplet() { return m_tupletType == ImoTupletDto::k_start; }
     inline bool is_end_of_tuplet() { return m_tupletType == ImoTupletDto::k_stop;; }
@@ -4421,36 +4419,25 @@ public:
     inline int get_show_bracket() { return m_nShowBracket; }
     inline int get_show_number() { return m_nShowNumber; }
     inline int get_placement() { return m_nPlacement; }
-    int get_line_number();
+    int get_line_number() { return m_lineNum; };
     inline bool is_only_graphical() { return m_fOnlyGraphical; }
 
     //setters
     inline void set_note_rest(ImoNoteRest* pNR) { m_pNR = pNR; }
-    inline void set_tuplet_element(LdpElement* pElm) { m_pTupletElm = pElm; }
     inline void set_tuplet_type(int value) { m_tupletType = value; }
+    inline void set_tuplet_number(int value) { m_tupletNum = value; }
     inline void set_actual_number(int value) { m_nActualNum = value; }
     inline void set_normal_number(int value) { m_nNormalNum = value; }
     inline void set_show_bracket(int value) { m_nShowBracket = value; }
     inline void set_show_number(int value) { m_nShowNumber = value; }
     inline void set_placement(int value) { m_nPlacement = value; }
     inline void set_only_graphical(bool value) { m_fOnlyGraphical = value; }
+    inline void set_line_number(int value) { m_lineNum = value; }
 
     //required by RelationBuilder
-    int get_item_number() { return 0; }
+    int get_item_number() { return m_tupletNum; }
     bool is_start_of_relation() { return is_start_of_tuplet(); }
     bool is_end_of_relation() { return is_end_of_tuplet(); }
-};
-
-//---------------------------------------------------------------------------------------
-// Tuplet info for a note/rest
-class ImoTupletData : public ImoRelDataObj
-{
-protected:
-	friend class ImFactory;
-    ImoTupletData(ImoTupletDto* pDto);
-
-public:
-    virtual ~ImoTupletData() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -4649,7 +4636,6 @@ typedef Visitor<ImoParagraph> ImParagraphVisitor;
 //typedef Visitor<ImoStyle> ImVisitor;
 //typedef Visitor<ImoTieData> ImVisitor;
 //typedef Visitor<ImoTieDto> ImVisitor;
-//typedef Visitor<ImoTupletData> ImVisitor;
 //typedef Visitor<ImoTupletDto> ImVisitor;
 //typedef Visitor<ImoTuplet> ImVisitor;
 //typedef Visitor<ImoWrapperBox> ImVisitor;

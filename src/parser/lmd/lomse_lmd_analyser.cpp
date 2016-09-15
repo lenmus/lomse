@@ -6717,8 +6717,7 @@ void LmdTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pTuplet, pData);
+        pNR->include_in_relation(pDoc, pTuplet, NULL);
     }
 }
 
