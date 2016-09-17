@@ -139,6 +139,8 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE4E9),  // 64th rest     //64th semifusa
     GlyphData(0xE4EA),  // 128th rest    //128th garrapatea
     GlyphData(0xE4EB),  // 256th rest    //256th semigarrapatea
+    GlyphData(0xE4EC),  // 512th rest
+    GlyphData(0xE4ED),  // 1024th rest
 
 //flags for notes (U+E240 - U+E25F)
     GlyphData(0xE241),  // Eight note flag down
@@ -147,12 +149,18 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE247),  // 64th note flag down
     GlyphData(0xE249),  // 128th note flag down
     GlyphData(0xE24B),  // 256th note flag down
+    GlyphData(0xE24D),  // 512th note flag down
+    GlyphData(0xE24F),  // 1024th note flag down
     GlyphData(0xE240),  // Eight note flag up
     GlyphData(0xE242),  // 16th note flag up
     GlyphData(0xE244),  // 32nd note flag up
-    GlyphData(0xE246),  // 64th note flag up)),
+    GlyphData(0xE246),  // 64th note flag up
     GlyphData(0xE248),  // 128th note flag up
-    GlyphData(0xE24A),  // 256th note flag up)),
+    GlyphData(0xE24A),  // 256th note flag up
+    GlyphData(0xE24C),  // 512th note flag up
+    GlyphData(0xE24E),  // 1024th note flag up
+    GlyphData(0xE250),  // flag internal up
+    GlyphData(0xE251),  // flag internal down
 
 //standard accidentals (U+E260 - U+E26F)
     GlyphData(0xE261),  // Natural accidental

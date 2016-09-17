@@ -162,6 +162,8 @@ enum EGlyphIndex
     k_glyph_64th_rest,        //64th, semifusa
     k_glyph_128th_rest,       //128th, garrapatea
     k_glyph_256th_rest,       //256th, semigarrapatea
+    k_glyph_512th_rest,
+    k_glyph_1024th_rest,
 
     //Note flags
     k_glyph_eighth_flag_down,     //eighth, corchea
@@ -170,12 +172,18 @@ enum EGlyphIndex
     k_glyph_64th_flag_down,       //64th, semifusa
     k_glyph_128th_flag_down,      //128th, garrapatea
     k_glyph_256th_flag_down,      //256th, semigarrapatea
+    k_glyph_512th_flag_down,
+    k_glyph_1024th_flag_down,
     k_glyph_eighth_flag_up,
     k_glyph_16th_flag_up,
     k_glyph_32nd_flag_up,
     k_glyph_64th_flag_up,
     k_glyph_128th_flag_up,
     k_glyph_256th_flag_up,
+    k_glyph_512th_flag_up,
+    k_glyph_1024th_flag_up,
+    k_glyph_internal_flag_up,
+    k_glyph_internal_flag_down,
 
     //Accidentals
     k_glyph_natural_accidental,

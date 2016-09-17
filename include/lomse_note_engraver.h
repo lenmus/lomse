@@ -130,6 +130,7 @@ protected:
     int m_noteType;
     bool m_fStemDown;
     bool m_fWithFlag;
+    bool m_fShortFlag;
     LUnits m_uStemLength;
     Color m_color;
     double m_fontSize;
@@ -142,7 +143,7 @@ public:
 
     void add_stem_flag(GmoShapeNote* pNoteShape, GmoShapeNote* pBaseNoteShape,
                        int noteType, bool fStemDown, bool fWithFlag,
-                       LUnits stemLength, Color color);
+                       bool fShortFlag, LUnits stemLength, Color color);
 
 protected:
     void determine_position_and_size_of_stem();
