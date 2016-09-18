@@ -127,8 +127,9 @@ void TimeEngraver::create_digits(int digits, GmoShape* pShape[])
 {
     if (digits > 9)
     {
-        pShape[0] = create_digit(1);
-        pShape[1] = create_digit(digits - 10);
+        int top = digits/10;
+        pShape[0] = create_digit(top);
+        pShape[1] = create_digit(digits - 10*top);
     }
     else
     {
