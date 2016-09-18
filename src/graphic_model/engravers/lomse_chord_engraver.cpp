@@ -501,7 +501,7 @@ void ChordEngraver::add_stem_and_flag()
     //but the stem is added to base note shape
     GmoShapeNote* pBaseNoteShape = m_pBaseNoteData->pNoteShape;
     Tenths length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
-    if (length < 35.0f && m_noteType > k_eighth)
+    if (!is_chord_beamed() && length < 35.0f && m_noteType > k_eighth)
         length = 35.0f;     // 3.5 spaces
     bool fShortFlag = (length < 35.0f);
     LUnits stemLength = tenths_to_logical(length) + uExtraLenght;

@@ -225,7 +225,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
     {
         bool fHasFlag = (!is_beamed() && has_flag());
         Tenths length = get_standard_stem_length(m_nPosOnStaff, m_fStemDown);
-        if (length < 35.0f && m_noteType > k_eighth)
+        if (fHasFlag && length < 35.0f && m_noteType > k_eighth)
             length = 35.0f;     // 3.5 spaces
         LUnits stemLength = tenths_to_logical(length);
         bool fShortFlag = (length < 35.0f);

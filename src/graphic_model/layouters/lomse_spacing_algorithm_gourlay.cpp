@@ -1011,7 +1011,7 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
                 LOMSE_LOG_ERROR("Error in code/logic. No previous slice exists for non-timed slice!");
                 m_xLeft -= xPrev;
             }
-            else
+            else if (prev->get_type() != TimeSlice::k_barline)
                 prev->m_xRi -= xPrev;
         }
         else
