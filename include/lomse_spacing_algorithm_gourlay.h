@@ -177,6 +177,7 @@ public:
     vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
 
     float   m_slope;            //slope of approximated sff() for this column
+    float   m_minFi;            //minimum force at which this column reacts
     LUnits  m_xFixed;           //fixed spacing for this column
     LUnits  m_colWidth;         //current col. width after having applying force
     LUnits  m_colMinWidth;      //minimum width (force 0)

@@ -10,6 +10,9 @@
 
 ##### COMPATIBLE CHANGES
 
+- Fixed issue #10: note flags too long for short stems.
+- Fixed an issue with justification, detected in regression tests. It
+  caused that in some cases the system was not justified.
 - Improvements in tuplets renderization and support:
     - Nested tuplets now fully supported.
     - MusicXML importer now imports tuplets.

@@ -452,9 +452,6 @@ void SystemLayouter::reposition_slices_and_staffobjs()
 //---------------------------------------------------------------------------------------
 void SystemLayouter::redistribute_free_space()
 {
-//    if (m_uFreeSpace <= 0.0f)
-//        return;           //no space to distribute
-
     m_pSpAlgorithm->justify_system(m_iFirstCol, m_iLastCol, m_uFreeSpace);
 }
 
