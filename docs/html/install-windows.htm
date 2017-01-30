@@ -212,6 +212,12 @@ While running CMake, all configure options are saved in file CMakeCache.txt, Bef
 <li><p>Probably my CMake script is a bullshit. But you are a good developer and building Lomse is just compiling the source code, including the headers for the required libraries. Probably you can prepare your own solution and project file for MS Visual Studio. That's what I do for building in Windows (yes, I don't use CMake). Or better, if you are good at MS Windows and CMake, and would like to help me to improve Lomse installation procedures for Windows, you are welcome. Please post a message in the Lomse list. Thank you.
 </p></li>
 
+<li><p>In CMake, experimenting with the generator version can help fix some issues where a compiler is not found</p></li>
+
+<li><p>
+For issues with zlib, in file zconf.h locate the line "#if 1           /* HAVE_UNISTD_H" and replace "1" with "HAVE_UNISTD_H".  This will fix any issues with zlib referencing "unistd" in the error message.  More information on this issue can be found on this <a href="http://stackoverflow.com/questions/22705751/cannot-open-include-file-unistd-h-no-such-file-or-directory">stackoverflow thread</a>
+</p></li>
+
 </ul>
 
 
