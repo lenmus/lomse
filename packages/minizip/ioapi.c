@@ -82,7 +82,7 @@ static int     ZCALLBACK ferror_file_func OF((voidpf opaque, voidpf stream));
 
 static voidpf ZCALLBACK fopen_file_func (voidpf opaque, const char* filename, int mode)
 {
-    (void *)opaque;     //CSG. Fix for warning due to unused param
+    (void)opaque;     //CSG. Fix for warning due to unused param
     FILE* file = NULL;
     const char* mode_fopen = NULL;
     if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER)==ZLIB_FILEFUNC_MODE_READ)
@@ -101,6 +101,8 @@ static voidpf ZCALLBACK fopen_file_func (voidpf opaque, const char* filename, in
 
 static voidpf ZCALLBACK fopen64_file_func (voidpf opaque, const void* filename, int mode)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
+
     FILE* file = NULL;
     const char* mode_fopen = NULL;
     if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER)==ZLIB_FILEFUNC_MODE_READ)
@@ -120,6 +122,7 @@ static voidpf ZCALLBACK fopen64_file_func (voidpf opaque, const void* filename, 
 
 static uLong ZCALLBACK fread_file_func (voidpf opaque, voidpf stream, void* buf, uLong size)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     uLong ret;
     ret = (uLong)fread(buf, 1, (size_t)size, (FILE *)stream);
     return ret;
@@ -127,6 +130,7 @@ static uLong ZCALLBACK fread_file_func (voidpf opaque, voidpf stream, void* buf,
 
 static uLong ZCALLBACK fwrite_file_func (voidpf opaque, voidpf stream, const void* buf, uLong size)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     uLong ret;
     ret = (uLong)fwrite(buf, 1, (size_t)size, (FILE *)stream);
     return ret;
@@ -134,6 +138,7 @@ static uLong ZCALLBACK fwrite_file_func (voidpf opaque, voidpf stream, const voi
 
 static long ZCALLBACK ftell_file_func (voidpf opaque, voidpf stream)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     long ret;
     ret = ftell((FILE *)stream);
     return ret;
@@ -142,6 +147,7 @@ static long ZCALLBACK ftell_file_func (voidpf opaque, voidpf stream)
 
 static ZPOS64_T ZCALLBACK ftell64_file_func (voidpf opaque, voidpf stream)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     ZPOS64_T ret;
     ret = ftello64((FILE *)stream);
     return ret;
@@ -149,6 +155,7 @@ static ZPOS64_T ZCALLBACK ftell64_file_func (voidpf opaque, voidpf stream)
 
 static long ZCALLBACK fseek_file_func (voidpf  opaque, voidpf stream, uLong offset, int origin)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     int fseek_origin=0;
     long ret;
     switch (origin)
@@ -172,6 +179,7 @@ static long ZCALLBACK fseek_file_func (voidpf  opaque, voidpf stream, uLong offs
 
 static long ZCALLBACK fseek64_file_func (voidpf  opaque, voidpf stream, ZPOS64_T offset, int origin)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     int fseek_origin=0;
     long ret;
     switch (origin)
@@ -198,6 +206,7 @@ static long ZCALLBACK fseek64_file_func (voidpf  opaque, voidpf stream, ZPOS64_T
 
 static int ZCALLBACK fclose_file_func (voidpf opaque, voidpf stream)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     int ret;
     ret = fclose((FILE *)stream);
     return ret;
@@ -205,6 +214,7 @@ static int ZCALLBACK fclose_file_func (voidpf opaque, voidpf stream)
 
 static int ZCALLBACK ferror_file_func (voidpf opaque, voidpf stream)
 {
+    (void)opaque;     //CSG. Fix for warning due to unused param
     int ret;
     ret = ferror((FILE *)stream);
     return ret;
