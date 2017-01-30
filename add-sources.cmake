@@ -195,15 +195,9 @@ set(LOMSE_PACKAGES_FILES
     ${LOMSE_PKG_DIR}/pugixml/pugixml.cpp
 )
 
-if(WIN32)
-    set(PLATFORM_FILES
-        ${LOMSE_SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
-    )
-elseif(UNIX)
-    set(PLATFORM_FILES
-        
-    )
-endif()
+set(PLATFORM_FILES
+
+)
 
 set(ALL_LOMSE_SOURCES 
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
