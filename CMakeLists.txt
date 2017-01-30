@@ -82,6 +82,13 @@
 # LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
 #       Enables backwards compatibility for scores in LDP v1.5
 #
+# LOMSE_USE_STATIC_BOOST	(Default value: ON for Windows, OFF for other OS)
+#		When OFF, Lomse will link agains boost dynamic libraries.
+#		When OFF, boost static libraries will be used.
+#
+# LOMSE_USE_MULTITHREADED_BOOST		(Default value: ON)
+#		Can be set to OFF to use the non-multithreaded boost libraries.
+#
 #-------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8)
@@ -152,11 +159,12 @@ set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
     "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0"
     "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0"
     "1.60" "1.60.0" "1.61" "1.61.0" )
-set(Boost_USE_STATIC_LIBS       ON)
-set(Boost_USE_MULTITHREADED     ON)
+set(Boost_USE_STATIC_LIBS       ${LOMSE_USE_STATIC_BOOST})
+set(Boost_USE_MULTITHREADED     ${LOMSE_USE_MULTITHREADED_BOOST})
 set(Boost_USE_STATIC_RUNTIME    OFF)
 #set(Boost_DEBUG                 TRUE)
-
+unset(Boost_INCLUDE_DIR CACHE)
+unset(Boost_LIBRARY_DIRS CACHE)
 find_package(Boost 1.42.0 COMPONENTS date_time thread REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -174,6 +182,21 @@ if(Boost_FOUND)
     message(STATUS "Boost found: include= ${Boost_INCLUDE_DIRS}" )
     message(STATUS "Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
     message(STATUS "Boost dependencies: ${BOOST_DEPENDENCIES}" )
+
+	if ((NOT Boost_USE_STATIC_LIBS) AND WIN32)
+		# Setting Boost_USE_STATIC_LIBS to OFF is NOT enough to get you dynamic
+		# linking when using MSVC & Borland compilers. By default, they use
+		# automatic linking when including things in Boost. So, the following
+		# is necessary. See:
+		# https://stackoverflow.com/questions/6646405/how-do-you-add-boost-libraries-in-cmakelists-txt
+
+	  	# disable autolinking with boost
+	  	add_definitions( -DBOOST_ALL_NO_LIB )
+
+	  	# force all boost libraries to dynamic link.
+	  	add_definitions( -DBOOST_ALL_DYN_LINK )
+	endif()
+
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
@@ -266,26 +289,6 @@ set(CMAKE_CONFIGURATION_TYPES Debug Release)
 if(UNIX)
     add_definitions( -Wall -DGCC -D__UNIX__ )
 endif(UNIX)
-
-# Force to use static libraries in MSVC
-# This doesn't work
-if(0)
-if(MSVC)
-    message("Debug=" ${CMAKE_CXX_FLAGS_DEBUG} )
-    message("Release=" ${CMAKE_CXX_FLAGS_RELEASE} )
-    message("Linker Debug=" ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
-    message("Linker Release=" ${CMAKE_EXE_LINKER_FLAGS_RELEASE} )
-    #set( CMAKE_CXX_FLAGS_RELEASE "/D_DEBUG /MLd /Zi /Ob0 /Od /GZ" ) 
-    #set( CMAKE_CXX_FLAGS_DEBUG "/ML /O2 /Ob2 /D NDEBUG" ) 
-    #set( CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCD" )
-    #set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:LIBCD" )
-    message("Debug=" ${CMAKE_CXX_FLAGS_DEBUG} )
-    message("Release=" ${CMAKE_CXX_FLAGS_RELEASE} )
-    message("Linker Debug=" ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
-    message("Linker Release=" ${CMAKE_EXE_LINKER_FLAGS_RELEASE} )
-endif(MSVC)
-endif(0)
-
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
