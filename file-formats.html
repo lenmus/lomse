@@ -118,7 +118,6 @@ Supported file formats</h1>
 <li><b>LMS: LenMus Score (.lms extension):</b> Plain txt file containing only a music score writen in LDP language. LDP is the acronym for Spanish <em>Lenguaje De Partituras</em> (<em>Language for music scores</em>). It was the initial language which started LenMus project.</li>
 <li><b>LMD: LenMus Document (.lmd extension):</b> Plain XML file containing a full document with headers, paragraphs, images, tables lists, scores, etc. It is similar to an HTML or DocBook file with scores in LDP language (tag &lt;ldpmusic&gt;) or MusicXML (tag &lt;mxlmusic&gt;)</li>
 <li><b>MusicXML: (.xml extension):</b> An XML-based file format for representing Western musical notation, widely used by all music applications as interchange format.</li>
-<li><b>LDP: Lenguaje De Partituras (.ldp extension):</b> Plain txt file with a LISP like syntax, containing only a music score. It was the initial language started with lenMus project.</li>
 </ul>
 <h2><a class="anchor" id="ldp-format"></a>
 LDP format</h2>
@@ -142,21 +141,20 @@ Image: Rendering of the following LDP score.</div></div>
 <div class="line">        )</div>
 <div class="line">    )</div>
 <div class="line">)</div>
-</div><!-- fragment --><p>For more information see the LDP manual at <a href="http://www.lenmus.org/en/paginas/ldp_full">http://www.lenmus.org/en/paginas/ldp_full</a> . </p>
-<dl class="section attention"><dt>Attention</dt><dd>This manual is very old and needs to be updated. Some constructs have been removed and new tags have been added. </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Update LDP manual for 2.0</dd></dl>
+</div><!-- fragment --><p>For more information see the LDP manual at <a href="https://lenmus.github.io/ldp/">https://lenmus.github.io/ldp/</a> .</p>
 <h2><a class="anchor" id="lmd-format"></a>
 LMD format</h2>
-<p>As LenMus project evolved it was necessary a new format for describing not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tgat for each format is created. For instance, tag &lt;ldpmusic&gt; is used to include LDP scores, and tag tag &lt;mxlmusic&gt; is for including MusicXML scores.</p>
+<p>As LenMus project evolved, LDP was insuficient as it was necessary to describe not only music scores but full documents containing scores, headers, paragraphs, lists, tables, images, etc. This was a requirement for writing music eBooks. In those days (2005), in was not easy to mix music scores in HTML documents and the solution was to create an XML format for describing whole documents. The format is similar to that of a HTML or DocBook file. For supporting scores in different formats a tag for each format is created. For instance, tag &lt;ldpmusic&gt; is used to include LDP scores.</p>
 <div class="image">
 <img src="lmd-sample-document.png" alt="lmd-sample-document.png"/>
 <div class="caption">
 Image: Rendering of the following LMD document.</div></div>
 <p> This is an example of an LMD file:</p>
 <div class="fragment"><div class="line">&lt;?xml version=<span class="stringliteral">&quot;1.0&quot;</span> encoding=<span class="stringliteral">&quot;UTF-8&quot;</span>?&gt;</div>
-<div class="line">&lt;lenmusdoc <span class="keywordtype">id</span>=<span class="stringliteral">&quot;0&quot;</span> vers=<span class="stringliteral">&quot;0.0&quot;</span> language=<span class="stringliteral">&quot;en&quot;</span>&gt;</div>
-<div class="line">&lt;?xml version=<span class="stringliteral">&quot;1.0&quot;</span> encoding=<span class="stringliteral">&quot;UTF-8&quot;</span>?&gt;</div>
-<div class="line">&lt;lenmusdoc <span class="keywordtype">id</span>=<span class="stringliteral">&quot;0&quot;</span> vers=<span class="stringliteral">&quot;0.0&quot;</span> language=<span class="stringliteral">&quot;en&quot;</span>&gt;</div>
+<div class="line">&lt;!DOCTYPE lenmusdoc PUBLIC</div>
+<div class="line">    <span class="stringliteral">&quot;-//LenMus//DTD LenMus Document 0.0//EN&quot;</span> </div>
+<div class="line">    <span class="stringliteral">&quot;https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd&quot;</span> &gt;</div>
+<div class="line">&lt;lenmusdoc vers=<span class="stringliteral">&quot;0.0&quot;</span> language=<span class="stringliteral">&quot;en&quot;</span>&gt;</div>
 <div class="line">   &lt;styles&gt;</div>
 <div class="line">      &lt;defineStyle&gt;</div>
 <div class="line">         &lt;name&gt;eBook_para&lt;/name&gt;</div>
@@ -217,8 +215,7 @@ Image: Rendering of the following LMD document.</div></div>
 <div class="line"></div>
 <div class="line">   &lt;/content&gt;</div>
 <div class="line">&lt;/lenmusdoc&gt;</div>
-</div><!-- fragment --><p>For more information see the LMD manual at ???????. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Write LMD manual.</dd></dl>
+</div><!-- fragment --><p>For more information see the DTD for LMD at <a href="https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd">https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd</a>.</p>
 <h2><a class="anchor" id="mxl-format"></a>
 MusicXML format</h2>
 <p>MusicXML is a widely use format for music scores. It was designed for the interchange of scores between different music notation. The following example is a score consisting of a single whole note middle C, with 4/4 time signature, in the key of C major, on the G clef:</p>
@@ -271,7 +268,7 @@ Image: Rendering of the following MusicXML score.</div></div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon May 16 2016 17:22:48 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Feb 5 2017 11:03:58 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
