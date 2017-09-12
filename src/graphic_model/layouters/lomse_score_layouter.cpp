@@ -74,6 +74,8 @@
 namespace lomse
 {
 
+#define LOMSE_NO_TIME       100000000000000.0   //any impossible high value for a timepos
+
 
 //=======================================================================================
 // ScoreLayouter implementation
@@ -751,9 +753,11 @@ void ScoreLayouter::trace_column(int iCol, int level)
 // ColumnBreaker implementation
 //=======================================================================================
 ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
-    : m_numInstruments(numInstruments)
+    : m_breakMode(k_clear_cuts)
+    , m_numInstruments(numInstruments)
     , m_consecutiveBarlines(0)
     , m_numInstrWithTS(0)
+    , m_fWasInBarlinesMode(false)
     , m_targetBreakTime(0.0f)
     , m_lastBarlineTime(0.0f)
     , m_maxMeasureDuration(0.0f)
@@ -766,6 +770,10 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
     m_beamed.assign(m_numLines, false);
     m_tied.reserve(m_numLines);
     m_tied.assign(m_numLines, false);
+
+    determine_measure_mean_time(pSysCursor);
+    determine_initial_break_mode(pSysCursor);
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -773,6 +781,8 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
                                                    int iInstr, int iLine)
 {
     bool fBreak = false;
+
+    //break at common barlines for all instruments
     if (!pSO->is_barline()
         && m_consecutiveBarlines > 0
         && m_consecutiveBarlines >= m_numInstrWithTS
@@ -780,10 +790,20 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
     {
         fBreak = true;
     }
-    else if (pSO->is_note_rest()
+
+    //in barline mode, change to clear cuts mode when duration exceeded
+    //  when accumulated duration > max(mean measure, max duration)
+    else if (m_breakMode == k_barlines
              && rTime > m_lastBreakTime
+             //&& rTime > m_lastBarlineTime + 1.5f * m_measureMeanTime
              && rTime > m_lastBarlineTime + m_maxMeasureDuration
             )
+    {
+        m_breakMode = k_clear_cuts;
+    }
+
+    //in clear-cuts mode, break at suitable note/rests
+    if (!fBreak && m_breakMode == k_clear_cuts && pSO->is_note_rest())
     {
         fBreak = is_suitable_note_rest(pSO, rTime);
     }
@@ -801,9 +821,10 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
 
         TimeUnits rNextTime = rTime + pNR->get_duration();
         m_targetBreakTime = max(m_targetBreakTime, rNextTime);
+        m_consecutiveBarlines = 0;
     }
 
-    if (pSO->is_time_signature())
+    else if (pSO->is_time_signature())
     {
         ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(pSO);
         m_measures[iInstr] = pTS->get_measure_duration();
@@ -814,20 +835,24 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
             m_maxMeasureDuration = max(m_maxMeasureDuration, m_measures[i]);
             m_numInstrWithTS += (m_measures[i] > 0.0f ? 1 : 0);
         }
+        m_breakMode = k_barlines;
+        m_fWasInBarlinesMode = true;
     }
 
-    if (pSO->is_barline())
+    else if (pSO->is_barline())
     {
         if (!static_cast<ImoBarline*>(pSO)->is_middle())
         {
             m_lastBarlineTime = rTime;
             ++m_consecutiveBarlines;
+            if (m_fWasInBarlinesMode)
+                m_breakMode = k_barlines;
         }
     }
     else
         m_consecutiveBarlines = 0;
 
-    //if suitable point, save and clear data
+    //if suitable point, save break time and clear barlines count
     if (fBreak)
     {
         m_lastBreakTime = rTime;
@@ -842,6 +867,10 @@ bool ColumnBreaker::is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime)
 {
     if (pSO->is_note_rest())
     {
+        //not suitable if first note
+        if (is_equal_time(rTime, 0.0f))
+            return false;
+
         bool fBreak = true;      //assume it is a suitable point
 
         //not suitable if breaks a beam or a tie
@@ -863,6 +892,37 @@ bool ColumnBreaker::is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime)
     return false;
 }
 
+//---------------------------------------------------------------------------------------
+void ColumnBreaker::determine_initial_break_mode(StaffObjsCursor* pSysCursor)
+{
+    m_breakMode = k_clear_cuts;
+
+    if (m_numInstruments == 1)
+    {
+        //single instrument
+        int measures = pSysCursor->num_measures();
+
+        if (measures > 0)   // && m_measureMeanTime
+        {
+            m_breakMode = k_barlines;
+            return;
+        }
+    }
+    else
+    {
+        //multi-instrument
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnBreaker::determine_measure_mean_time(StaffObjsCursor* pSysCursor)
+{
+    int measures = pSysCursor->num_measures();
+    if (measures > 0)
+        m_measureMeanTime = pSysCursor->score_total_duration() / measures;
+    else
+        m_measureMeanTime = LOMSE_NO_TIME;
+}
 
 
 //=======================================================================================

@@ -85,6 +85,8 @@ public:
     inline TimeUnits anacrusis_missing_time() {
         return m_pColStaffObjs->anacrusis_missing_time();
     }
+    int num_measures();
+    TimeUnits score_total_duration();
 
     //access to current pointed object
     inline int staff() { return (*m_scoreIt)->staff(); }

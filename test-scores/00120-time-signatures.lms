@@ -6,7 +6,7 @@
          (time 2 4)(n c4 q)(barline)
          (time 6 8)(n c4 q)(barline)
          (time 12 8)(n c4 q)(barline)
-         (time 3 8)(n c4 q)(barline)
+         (time 24 4)(n c4 q)(barline)
          (time common)(n c4 q)(barline)
          (time cut)(n c4 q)(barline)
       )

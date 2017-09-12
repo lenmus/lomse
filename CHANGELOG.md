@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- Line breaker algorithm improved. Now it considers different break modes.
 - Fixed issue #10: note flags too long for short stems.
 - Fixed an issue with justification, detected in regression tests. It
   caused that in some cases the system was not justified.

@@ -365,7 +365,7 @@ void ColumnsBuilder::collect_content_for_this_column()
         m_pagePos.y = pIE->get_top_line_of_staff(iStaff);
         GmoShape* pShape = NULL;
 
-        //if feasible column break, exit loop
+        //if feasible column break, exit loop and finish column
         if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
             break;
 
