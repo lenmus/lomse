@@ -429,10 +429,10 @@ SUITE(SpAlgGourlayTest)
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
         CHECK( pAlg != NULL );
-        CHECK( pAlg->get_num_columns() == 1 );  //Shouldn't be 2 ?
+        CHECK( pAlg->get_num_columns() == 1 );
 
         MyColumnDataGourlay* pCol = static_cast<MyColumnDataGourlay*>(pAlg->my_get_column(0));
-        CHECK( pCol->m_orderedSlices.size() == 10 );  //Shouldn't be 5 ?
+        CHECK( pCol->m_orderedSlices.size() == 10 );
 
         MyTimeSlice* pTS1 = pCol->my_get_first_slice();
         CHECK( pTS1->my_get_num_entries() == 9 );

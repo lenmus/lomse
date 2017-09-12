@@ -278,13 +278,16 @@ protected:
 class ColumnBreaker
 {
 protected:
+    int m_breakMode;
     int m_numInstruments;
     int m_consecutiveBarlines;
     int m_numInstrWithTS;
+    bool m_fWasInBarlinesMode;
     TimeUnits m_targetBreakTime;
     TimeUnits m_lastBarlineTime;
     TimeUnits m_maxMeasureDuration;
     TimeUnits m_lastBreakTime;
+    TimeUnits m_measureMeanTime;
 
     int m_numLines;
     std::vector<TimeUnits> m_measures;
@@ -293,19 +296,28 @@ protected:
 
 public:
     ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor);
-    ~ColumnBreaker() {}
+    virtual ~ColumnBreaker() {}
 
     bool feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
                                         int iInstr, int iLine);
 
 protected:
+
+    enum EBreakModes {
+        k_undefined = -1,
+        k_barlines = 0,         //at common clear barlines
+        k_clear_cuts,           //at common clear cuts
+    };
+
     bool is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime);
+    void determine_initial_break_mode(StaffObjsCursor* pSysCursor);
+    void determine_measure_mean_time(StaffObjsCursor* pSysCursor);
 
 };
 
 
 //---------------------------------------------------------------------------------------
-// ShapesCreator: helper fcatory to create staffobjs shapes
+// ShapesCreator: helper factory to create staffobjs shapes
 class ShapesCreator
 {
 protected:

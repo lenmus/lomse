@@ -266,6 +266,29 @@ TimeUnits StaffObjsCursor::next_staffobj_timepos()
     }
 }
 
+//---------------------------------------------------------------------------------------
+int StaffObjsCursor::num_measures()
+{
+    if (m_fScoreIsEmpty)
+        return 0;
+
+    ColStaffObjsEntry* pLastEntry = m_pColStaffObjs->back();
+    return pLastEntry->measure() + 1;
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits StaffObjsCursor::score_total_duration()
+{
+    if (m_fScoreIsEmpty)
+        return 0.0f;
+
+    ColStaffObjsEntry* pLastEntry = m_pColStaffObjs->back();
+    TimeUnits time = pLastEntry->time();
+    ImoStaffObj* pSO = pLastEntry->imo_object();
+    time += pSO->get_duration();
+    return time;
+}
+
 
 }  //namespace lomse
 
