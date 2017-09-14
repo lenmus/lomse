@@ -1311,7 +1311,11 @@ bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighligh
 
     if (!pScore || !pScore->is_score())
     {
-        LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::discard_score_highlight_event_if_not_valid] Score deleted. All highlight discarded");
+        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
+            "Highlight discarded: score id: %d, pScore? %s")
+             % pEvent->get_score_id()
+             % (pScore ? "not null" : "null") ));
+
         discard_all_highlight();
         return true;
     }
