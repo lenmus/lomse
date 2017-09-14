@@ -42,6 +42,7 @@
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_system.h"
 #include "lomse_box_slice.h"
+#include "lomse_logger.h"
 
 #include <cstdlib>      //abs
 #include <iomanip>
@@ -177,6 +178,9 @@ void GraphicModel::add_to_map_imo_to_box(GmoBox* pBox)
             LOMSE_LOG_ERROR( str( boost::format(
                 "Duplicated Imo id %d. Existing Gmo: %s. Adding Gmo: %s")
                 % id % (it->second)->get_name() % pBox->get_name()) );
+            //TO_INVESTIGATE: This is nor an error. An Imo can create two
+            //boxes (currently DocPage and DocPageContent boxes). Maybe the
+            //error is in the implications if this is accepted.
         }
         //END_DBG --------------------------------------------------------
         m_imoToBox[id] = pBox;
@@ -218,7 +222,11 @@ GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
     if (it != m_imoToMainShape.end())
         return it->second;
     else
+    {
+        LOMSE_LOG_DEBUG(Logger::k_score_player, str(boost::format(
+            "No shape found for Imo id: %d") % id) );
         return NULL;
+    }
 }
 
 //---------------------------------------------------------------------------------------

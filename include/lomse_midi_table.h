@@ -78,7 +78,7 @@ public:
         k_prog_instr = 1,       //program a new instrument
         k_note_off,             //sound off
         k_visual_off,           //remove visual highlight. No effect on sound
-        k_rhythm_change,        //change in rithm (time signature)
+        k_rhythm_change,        //change in rhythm (time signature)
         k_note_on,              //sound on
         k_visual_on,            //add visual highlight. No effect on sound
         k_end_of_score,         //end of table

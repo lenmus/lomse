@@ -629,6 +629,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                                         events[i]->Volume);
                 }
 
+                //generate implicit visual on event
                 if (fVisualTracking && events[i]->pSO->is_visible())
                     pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
 
@@ -652,6 +653,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                         m_pMidi->note_off(events[i]->Channel, events[i]->NotePitch, 127);
                 }
 
+                //generate implicit visual off event
                 if (fVisualTracking && events[i]->pSO->is_visible())
                     pEvent->add_item(k_highlight_off_event, events[i]->pSO->get_id());
             }

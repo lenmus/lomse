@@ -129,18 +129,18 @@ Control* IdAssigner::get_pointer_to_control(ImoId id) const
 string IdAssigner::dump() const
 {
     stringstream data;
-    data << "Imo: ";
+    data << "Imo: " << endl;
 	map<ImoId, ImoObj*>::const_iterator it;
 	for (it = m_idToImo.begin(); it != m_idToImo.end(); ++it)
-		data << it->first << "-" << it->second->get_name() << ", ";
+		data << it->first << "-" << it->second->get_name() << endl;
     data << endl;
 
 	map<ImoId, Control*>::const_iterator itC = m_idToControl.begin();
 	if (itC != m_idToControl.end())
     {
-        data << "Control: ";
+        data << "Control: " << endl;
         for (; itC != m_idToControl.end(); ++itC)
-            data << itC->first << ", ";
+            data << itC->first << endl;
     }
 
     return data.str();

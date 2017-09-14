@@ -5479,7 +5479,7 @@ void MxlTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoTie* pTie = static_cast<ImoTie*>(
-                    ImFactory::inject(k_imo_tie, pDoc, pStartDto->get_tie_number()));
+                    ImFactory::inject(k_imo_tie, pDoc));
     pTie->set_tie_number( pStartDto->get_tie_number() );
     pTie->set_color( pStartDto->get_color() );
     pTie->set_orientation( pStartDto->get_orientation() );
