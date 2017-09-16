@@ -10,9 +10,10 @@
 
 ##### COMPATIBLE CHANGES
 
+- Fixed issue #73: Highlight is not synced. when moving to next page.
 - Fixed issue #70: Score highlight does not work in some scores.
-- Line breaker algorithm improved. Now it considers different break modes.
 - Fixed issue #10: note flags too long for short stems.
+- Line breaker algorithm improved. Now it considers different break modes.
 - Fixed an issue with justification, detected in regression tests. It
   caused that in some cases the system was not justified.
 - Improvements in tuplets renderization and support:
@@ -27,6 +28,7 @@
 - LDP exporter reviewed for following the same syntax rules than LDP 
   Analyser, thus ensuring a round trip in LDP export-import.
 - Some fixes in LDP exporter.
+- Implemented method SimpleView::get_view_size().
 
 
 Version [0.20.0] (1/Sep/2016)

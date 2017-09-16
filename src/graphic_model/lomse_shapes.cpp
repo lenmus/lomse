@@ -60,6 +60,7 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
                          m_libraryScope.get_music_font_name(),
                          m_fontHeight);
     pDrawer->set_text_color( determine_color_to_use(opt) );
+    pDrawer->move_to(m_origin.x, m_origin.y);       //this line fixes issue #73 !!!
     LUnits x = m_shiftToDraw.width + m_origin.x;
     LUnits y = m_shiftToDraw.height + m_origin.y;
     pDrawer->draw_glyph(x, y, m_glyph);
