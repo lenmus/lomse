@@ -43,11 +43,88 @@
 #include "lomse_doorway.h"
 #include "lomse_im_factory.h"
 #include "lomse_time.h"
+#include "lomse_import_options.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
+
+//=======================================================================================
+// ImportOptions tests
+//=======================================================================================
+
+class ImportOptionsTestFixture
+{
+public:
+    LibraryScope m_libraryScope;
+
+    ImportOptionsTestFixture()     //SetUp fixture
+    {
+    }
+
+    ~ImportOptionsTestFixture()    //TearDown fixture
+    {
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+};
+
+
+SUITE(ImportOptionsTest)
+{
+
+    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_1)
+    {
+        //@01. default values are correct
+        ImportOptions opt = ImportOptions::Builder().build();
+
+        CHECK( opt.fix_beams() == false );
+        CHECK( opt.use_default_clefs() == false );
+    }
+
+    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_2)
+    {
+        //@02. fix beams
+        ImportOptions opt = ImportOptions::Builder().fix_beams().build();
+
+        CHECK( opt.fix_beams() == true );
+        CHECK( opt.use_default_clefs() == false );
+    }
+
+    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_3)
+    {
+        //@03. use default clefs
+        ImportOptions opt = ImportOptions::Builder()
+                                .use_default_clefs()
+                                .build();
+
+        CHECK( opt.fix_beams() == false );
+        CHECK( opt.use_default_clefs() == true );
+    }
+
+    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_4)
+    {
+        //@04. two settings
+        ImportOptions opt = ImportOptions::Builder()
+                                .use_default_clefs()
+                                .fix_beams()
+                                .build();
+
+        CHECK( opt.fix_beams() == true );
+        CHECK( opt.use_default_clefs() == true );
+    }
+
+};
+
+
+
+//=======================================================================================
+// MxlAnalyser tests
+//=======================================================================================
 
 //---------------------------------------------------------------------------------------
 // access to protected members
