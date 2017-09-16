@@ -1300,9 +1300,19 @@ void SimpleView::set_viewport_for_page_fit_full(Pixels screenWidth)
 }
 
 //---------------------------------------------------------------------------------------
-void SimpleView::get_view_size(Pixels* UNUSED(xWidth), Pixels* UNUSED(yHeight))
+void SimpleView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 {
-    //TODO: SimpleView::get_view_size
+    *xWidth = 0;
+    *yHeight = 0;
+
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel && pGModel->get_num_pages() > 0)
+    {
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        URect rect = pPage->get_bounds();
+        *xWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+        *yHeight = m_pDrawer->LUnits_to_Pixels(rect.height);
+    }
 }
 
 
