@@ -310,6 +310,9 @@ public:
     void add_relation_info(ImoObj* pDto);
     void clear_pending_relations();
 
+    //interface for building beams
+    inline bool fix_beams() { return m_libraryScope.get_musicxml_options()->fix_beams(); }
+
     //interface for building lyric lines
     void add_lyrics_data(ImoNote* pNote, ImoLyric* pData);
 

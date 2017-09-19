@@ -42,7 +42,7 @@
 #include "lomse_button_ctrl.h"
 #include "lomse_logger.h"
 #include "lomse_ldp_exporter.h"
-#include "lomse_ldp_analyser.h"     //class Autobeamer
+#include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
 
 using namespace std;

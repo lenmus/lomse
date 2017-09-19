@@ -339,49 +339,6 @@ protected:
 };
 
 
-//---------------------------------------------------------------------------------------
-//Helper, to determine beam types automatically
-class AutoBeamer
-{
-protected:
-    ImoBeam* m_pBeam;
-
-public:
-    AutoBeamer(ImoBeam* pBeam) : m_pBeam(pBeam) {}
-    ~AutoBeamer() {}
-
-    void do_autobeam();
-
-protected:
-
-
-    int get_beaming_level(ImoNote* pNote);
-    void extract_notes();
-    void determine_maximum_beam_level_for_current_triad();
-    void process_notes();
-    void compute_beam_types_for_current_note();
-    void get_triad(int iNote);
-    void compute_beam_type_for_current_note_at_level(int level);
-
-    //notes in the beam, after removing rests
-    std::vector<ImoNote*> m_notes;
-
-    //notes will be processed in triads. The triad is the current
-    //note being processed and the previous and next ones
-    enum ENotePos { k_first_note=0, k_middle_note, k_last_note, };
-    ENotePos m_curNotePos;
-    ImoNote* m_pPrevNote;
-    ImoNote* m_pCurNote;
-    ImoNote* m_pNextNote;
-
-    //maximum beam level for each triad note
-    int m_nLevelPrev;
-    int m_nLevelCur;
-    int m_nLevelNext;
-
-};
-
-
 }   //namespace lomse
 
 #endif      //__LOMSE_LDP_ANALYSER_H__

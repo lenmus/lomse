@@ -34,6 +34,7 @@
 #include "lomse_build_options.h"
 #include "lomse_events.h"
 #include "lomse_events_dispatcher.h"    // LOMSE_USE_BOOST_ASIO
+#include "lomse_import_options.h"
 
 
 #include <iostream>
@@ -126,6 +127,7 @@ protected:
 
     //options
     bool m_fReplaceLocalMetronome;
+    MusicXmlOptions m_importOptions;
 
     //debug options
     bool m_fJustifySystems;         //if false, prevents systems justification
@@ -193,6 +195,7 @@ public:
     }
     inline Metronome* get_global_metronome() { return m_pGlobalMetronome; }
     inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
+    inline MusicXmlOptions* get_musicxml_options() { return &m_importOptions; }
 
     //spacing and lines breaker algorithm parameters
     inline bool use_debug_values() { return m_fUseDbgValues; }

@@ -151,6 +151,7 @@ set(MVC_FILES
 
 set(PARSER_FILES
     ${LOMSE_SRC_DIR}/parser/lomse_analyser.cpp
+    ${LOMSE_SRC_DIR}/parser/lomse_autobeamer.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_compiler.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_ldp_elements.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_ldp_factory.cpp
