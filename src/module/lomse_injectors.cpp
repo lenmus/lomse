@@ -82,6 +82,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_sFontsPath(LOMSE_FONTS_PATH)
     , m_pMusicGlyphs(NULL)      //lazzy instantiation. Singleton scope.
     , m_fReplaceLocalMetronome(false)
+    , m_importOptions()
     , m_fJustifySystems(true)
     , m_fDumpColumnTables(false)
     , m_fDrawAnchorObjects(false)

@@ -51,19 +51,20 @@ using namespace lomse;
 
 
 //=======================================================================================
-// ImportOptions tests
+// MusicXmlOptions tests
 //=======================================================================================
 
-class ImportOptionsTestFixture
+class MusicXmlOptionsTestFixture
 {
 public:
     LibraryScope m_libraryScope;
 
-    ImportOptionsTestFixture()     //SetUp fixture
+    MusicXmlOptionsTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
     }
 
-    ~ImportOptionsTestFixture()    //TearDown fixture
+    ~MusicXmlOptionsTestFixture()    //TearDown fixture
     {
     }
 
@@ -74,48 +75,52 @@ public:
 };
 
 
-SUITE(ImportOptionsTest)
+SUITE(MusicXmlOptionsTest)
 {
 
-    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_1)
+    // import options builder -----------------------------------------------------------
+
+    TEST_FIXTURE(MusicXmlOptionsTestFixture, MusicXmlOptions_1)
     {
         //@01. default values are correct
-        ImportOptions opt = ImportOptions::Builder().build();
+        MusicXmlOptions* opt = m_libraryScope.get_musicxml_options();
 
-        CHECK( opt.fix_beams() == false );
-        CHECK( opt.use_default_clefs() == false );
+        CHECK( opt->fix_beams() == true );
+        CHECK( opt->use_default_clefs() == true );
     }
 
-    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_2)
+    TEST_FIXTURE(MusicXmlOptionsTestFixture, MusicXmlOptions_2)
     {
         //@02. fix beams
-        ImportOptions opt = ImportOptions::Builder().fix_beams().build();
+        MusicXmlOptions* opt = m_libraryScope.get_musicxml_options();
+        opt->fix_beams(false);
 
-        CHECK( opt.fix_beams() == true );
-        CHECK( opt.use_default_clefs() == false );
+        MusicXmlOptions* newopt = m_libraryScope.get_musicxml_options();
+        CHECK( newopt->fix_beams() == false );
+        CHECK( newopt->use_default_clefs() == true );
     }
 
-    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_3)
+    TEST_FIXTURE(MusicXmlOptionsTestFixture, MusicXmlOptions_3)
     {
         //@03. use default clefs
-        ImportOptions opt = ImportOptions::Builder()
-                                .use_default_clefs()
-                                .build();
+        MusicXmlOptions* opt = m_libraryScope.get_musicxml_options();
+        opt->use_default_clefs(false);
 
-        CHECK( opt.fix_beams() == false );
-        CHECK( opt.use_default_clefs() == true );
+        MusicXmlOptions* newopt = m_libraryScope.get_musicxml_options();
+        CHECK( newopt->fix_beams() == true );
+        CHECK( newopt->use_default_clefs() == false );
     }
 
-    TEST_FIXTURE(ImportOptionsTestFixture, ImportOptions_4)
+    TEST_FIXTURE(MusicXmlOptionsTestFixture, MusicXmlOptions_4)
     {
         //@04. two settings
-        ImportOptions opt = ImportOptions::Builder()
-                                .use_default_clefs()
-                                .fix_beams()
-                                .build();
+        MusicXmlOptions* opt = m_libraryScope.get_musicxml_options();
+        opt->use_default_clefs(false);
+        opt->fix_beams(false);
 
-        CHECK( opt.fix_beams() == true );
-        CHECK( opt.use_default_clefs() == true );
+        MusicXmlOptions* newopt = m_libraryScope.get_musicxml_options();
+        CHECK( newopt->fix_beams() == false );
+        CHECK( newopt->use_default_clefs() == false );
     }
 
 };
@@ -2430,8 +2435,89 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    //@ Hello World -------------------------------------------------------------
 
+    //@ Options for dealing with malformed MusicXML files -------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_500)
+    {
+        //@500 fix wrong beam
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<note><pitch><step>E</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>16th</type>"
+                    "<beam number='1'>begin</beam>"
+                "</note>"
+                "<note><pitch><step>D</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><voice>1</voice><type>16th</type>"
+                    "<beam number='1'>end</beam>"
+                "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 3 );          //#3 is barline
+
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1 != NULL );
+        ++it;
+        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote2 != NULL );
+
+        CHECK( pNote1->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote1->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pNote1->get_beam_type(2) == ImoBeam::k_none );
+        CHECK( pNote1->get_beam_type(3) == ImoBeam::k_none );
+        CHECK( pNote1->get_beam_type(4) == ImoBeam::k_none );
+        CHECK( pNote1->get_beam_type(5) == ImoBeam::k_none );
+
+        CHECK( pNote2->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote2->get_beam_type(1) == ImoBeam::k_end );
+        CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
+        CHECK( pNote2->get_beam_type(3) == ImoBeam::k_none );
+        CHECK( pNote2->get_beam_type(4) == ImoBeam::k_none );
+        CHECK( pNote2->get_beam_type(5) == ImoBeam::k_none );
+
+//        cout << test_name() << endl;
+//        cout << "errormsg: " << errormsg.str() << endl;
+//        cout << "note 1 beams: " << pNote1->get_beam_type(0)
+//             << ", " << pNote1->get_beam_type(1)
+//             << ", " << pNote1->get_beam_type(2)
+//             << ", " << pNote1->get_beam_type(3)
+//             << ", " << pNote1->get_beam_type(4)
+//             << ", " << pNote1->get_beam_type(5) << endl;
+//        cout << "note 2 beams: " << pNote2->get_beam_type(0)
+//             << ", " << pNote2->get_beam_type(1)
+//             << ", " << pNote2->get_beam_type(2)
+//             << ", " << pNote2->get_beam_type(3)
+//             << ", " << pNote2->get_beam_type(4)
+//             << ", " << pNote2->get_beam_type(5) << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ Hello World -------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_hello_world_99999)
     {

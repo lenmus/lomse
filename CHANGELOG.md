@@ -10,6 +10,9 @@
 
 ##### COMPATIBLE CHANGES
 
+- Added options for controlling behaviour of MusicXML importer when
+  uncomplete or malformed MusicXML files.
+- Fixed issue #69: Fix beams in malformed MusicXML files.
 - Fixed issue #73: Highlight is not synced. when moving to next page.
 - Fixed issue #70: Score highlight does not work in some scores.
 - Fixed issue #10: note flags too long for short stems.

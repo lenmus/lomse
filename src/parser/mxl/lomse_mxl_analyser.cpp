@@ -57,6 +57,7 @@
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_time.h"
+#include "lomse_autobeamer.h"
 
 using namespace std;
 
@@ -5544,17 +5545,42 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 
     ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
 
+    bool fErrors = false;
     std::list<ImoBeamDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoBeamData* pData = ImFactory::inject_beam_data(pDoc, *it);
         pNR->include_in_relation(pDoc, pBeam, pData);
+
+        //check if beam is congruent with note type
+        int level = 0;
+        for (int i=0; i < 6; ++i)
+        {
+            if ((*it)->get_beam_type(i) == ImoBeam::k_none)
+                break;
+            ++level;
+        }
+        int type = pNR->get_note_type();
+        switch(level)
+        {
+            case 0: fErrors = true;                 break;
+            case 1: fErrors |= (type != k_eighth);  break;
+            case 2: fErrors |= (type != k_16th);    break;
+            case 3: fErrors |= (type != k_32nd);    break;
+            case 4: fErrors |= (type != k_64th);    break;
+            case 5: fErrors |= (type != k_128th);   break;
+            case 6: fErrors |= (type != k_256th);   break;
+        }
     }
 
-    //AWARE: MusicXML requires full item description, Autobeamer is not needed
-    //MxlAutoBeamer autobeamer(pBeam);
-    //autobeamer.do_autobeam();
+    //AWARE: MusicXML requires full item description. Autobeamer is only needed
+    //       when the file is malformed and the option 'fix_beams' is enabled
+    if (fErrors && m_pAnalyser->fix_beams())
+    {
+        AutoBeamer autobeamer(pBeam);
+        autobeamer.do_autobeam();
+    }
 }
 
 

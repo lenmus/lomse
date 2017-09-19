@@ -27,62 +27,68 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_IMPORT_OPTIONS_H__        //to avoid nested includes
-#define __LOMSE_IMPORT_OPTIONS_H__
+#ifndef __LOMSE_AUTOBEAMER_H__
+#define __LOMSE_AUTOBEAMER_H__
 
+#include <vector>
+//#include "lomse_ldp_elements.h"
+//#include "lomse_relation_builder.h"
+//#include "lomse_internal_model.h"       //required to define BeamsBuilder, SlursBuilder
+//#include "lomse_im_note.h"              //required for enum EAccidentals
+//#include "lomse_analyser.h"              //required for enum EAccidentals
+
+using namespace std;
 
 namespace lomse
 {
 
+//forward declarations
+class ImoNote;
+class ImoBeam;
+
 //---------------------------------------------------------------------------------------
-// MusicXmlOptions: manages options for dealing and fixing malformed imported files
-//---------------------------------------------------------------------------------------
-class MusicXmlOptions
+//Helper, to determine beam types automatically
+class AutoBeamer
 {
-private:
-
-    class MusicXmlOptionsSettings
-    {
-        private:
-            friend class MusicXmlOptions;
-
-            MusicXmlOptionsSettings()
-                : m_fFixBeams(true)
-                , m_fDefaultClef(true)
-            {
-            }
-
-            bool m_fFixBeams;
-            bool m_fDefaultClef;
-
-    };
-
-    MusicXmlOptionsSettings m_settings;
-
-    //constructors
-    friend class LibraryScope;
-    MusicXmlOptions(MusicXmlOptionsSettings& settings) : m_settings(settings) {}
-    MusicXmlOptions() {}
+protected:
+    ImoBeam* m_pBeam;
 
 public:
+    AutoBeamer(ImoBeam* pBeam) : m_pBeam(pBeam) {}
+    ~AutoBeamer() {}
 
-    //getters
-    inline bool fix_beams() { return m_settings.m_fFixBeams; }
-    inline bool use_default_clefs() { return m_settings.m_fDefaultClef; }
+    void do_autobeam();
 
-    //setters (only for options that can be changed without rebuilding the object)
+protected:
 
-    /// If beam information is not congruent with note type, fix the beam.
-    inline void fix_beams(bool value) { m_settings.m_fFixBeams = value; }
 
-    /// When an score part has pitched notes but clef is missing, assume G or
-    /// F4 clef depending on notes pitch range.
-    inline void use_default_clefs(bool value) { m_settings.m_fDefaultClef = value; }
+    int get_beaming_level(ImoNote* pNote);
+    void extract_notes();
+    void determine_maximum_beam_level_for_current_triad();
+    void process_notes();
+    void compute_beam_types_for_current_note();
+    void get_triad(int iNote);
+    void compute_beam_type_for_current_note_at_level(int level);
+
+    //notes in the beam, after removing rests
+    std::vector<ImoNote*> m_notes;
+
+    //notes will be processed in triads. The triad is the current
+    //note being processed and the previous and next ones
+    enum ENotePos { k_first_note=0, k_middle_note, k_last_note, };
+    ENotePos m_curNotePos;
+    ImoNote* m_pPrevNote;
+    ImoNote* m_pCurNote;
+    ImoNote* m_pNextNote;
+
+    //maximum beam level for each triad note
+    int m_nLevelPrev;
+    int m_nLevelCur;
+    int m_nLevelNext;
 
 };
 
 
 }   //namespace lomse
 
-#endif    // __LOMSE_IMPORT_OPTIONS_H__
-
+#endif      //__LOMSE_AUTOBEAMER_H__

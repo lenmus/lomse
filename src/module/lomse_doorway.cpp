@@ -32,6 +32,7 @@
 
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
+#include "lomse_import_options.h"
 
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
@@ -198,6 +199,12 @@ ScorePlayer* LomseDoorway::create_score_player(MidiServerBase* pSoundServer)
 void LomseDoorway::set_global_metronome_and_replace_local(Metronome* pMtr)
 {
     m_pLibraryScope->set_global_metronome_and_replace_local(pMtr);
+}
+
+//---------------------------------------------------------------------------------------
+MusicXmlOptions* LomseDoorway::get_musicxml_options()
+{
+    return m_pLibraryScope->get_musicxml_options();
 }
 
 

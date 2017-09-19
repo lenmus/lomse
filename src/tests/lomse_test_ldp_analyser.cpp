@@ -46,6 +46,7 @@
 #include "lomse_im_factory.h"
 #include "lomse_time.h"
 #include "lomse_file_system.h"
+#include "lomse_autobeamer.h"
 
 using namespace UnitTest;
 using namespace std;

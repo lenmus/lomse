@@ -35,7 +35,8 @@
 #include "lomse_document_cursor.h"
 #include "lomse_im_factory.h"
 #include "lomse_logger.h"
-#include "lomse_ldp_analyser.h"         //class Autobeamer
+#include "lomse_ldp_analyser.h"         //ldp_pitch_to_components
+#include "lomse_autobeamer.h"
 #include "lomse_model_builder.h"
 #include "lomse_selections.h"
 #include "lomse_score_meter.h"

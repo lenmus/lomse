@@ -55,6 +55,7 @@ class Presenter;
 class ScorePlayer;
 class MidiServerBase;
 class Metronome;
+class MusicXmlOptions;
 
 
 
@@ -113,6 +114,9 @@ public:
     //access to platform info
     inline double get_screen_ppi() { return m_platform.screen_ppi; }
     inline int get_pixel_format() { return m_platform.pixel_format; }
+
+    //options
+    MusicXmlOptions* get_musicxml_options();
 
     //library info
     string get_version_string();
