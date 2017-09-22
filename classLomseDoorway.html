@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.19.0</span>
+   &#160;<span id="projectnumber">0.20.0</span>
    </div>
   </td>
  </tr>
@@ -162,6 +162,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5e9ffe4284808df79d09353e17d56a65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1651657c00515a6f97bf259dd12246de"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">get_pixel_format</a> ()</td></tr>
 <tr class="separator:a1651657c00515a6f97bf259dd12246de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb47985078727df91ae5395c48b86ff8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a> ()</td></tr>
+<tr class="separator:aeb47985078727df91ae5395c48b86ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca4a1ae563c5f278dcc069281afc5541"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541">get_version_string</a> ()</td></tr>
 <tr class="separator:aca4a1ae563c5f278dcc069281afc5541"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaaa2b02ebab2ea3943fd7b3823c634b0"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0">get_version_long_string</a> ()</td></tr>
@@ -297,6 +299,32 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Get the pointer to an object of class LibraryScope. This object gives access to all lomse global functions and information. </p>
+
+</div>
+</div>
+<a class="anchor" id="aeb47985078727df91ae5395c48b86ff8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a>* LomseDoorway::get_musicxml_options </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns the current options object with the settings to use for dealing and fixing errors and malformed MusicXML files. The import options can be changed multiple times, whenever it is needed. For example:</p>
+<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div>
+<div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div>
+<div class="line">opt-&gt;<a class="code" href="classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7">fix_beams</a>(<span class="keyword">true</span>);</div>
+<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(ViewFactory::k_view_vertical_book,</div>
+<div class="line">                                              <span class="stringliteral">&quot;my_score.xml&quot;</span>);</div>
+<div class="line">...</div>
+<div class="line">opt-&gt;fix_beams(<span class="keyword">false</span>);</div>
+<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(ViewFactory::k_view_vertical_book,</div>
+<div class="line">                                              <span class="stringliteral">&quot;other_score.xml&quot;</span>);</div>
+</div><!-- fragment --><dl class="section see"><dt>See Also</dt><dd>class <a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> </dd></dl>
 
 </div>
 </div>
@@ -832,7 +860,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Sun Feb 5 2017 11:03:59 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Sep 22 2017 15:19:09 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

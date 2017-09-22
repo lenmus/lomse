@@ -37,6 +37,7 @@ var hierarchy =
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
+    [ "MusicXmlOptions", "classMusicXmlOptions.html", null ],
     [ "Observable", null, [
       [ "Interactor", "classInteractor.html", null ]
     ] ],

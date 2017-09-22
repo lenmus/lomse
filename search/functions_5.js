@@ -12,6 +12,7 @@ var searchData=
   ['get_5finteractor',['get_interactor',['../classPresenter.html#a3542802890a4615d251a5a786cee62b5',1,'Presenter']]],
   ['get_5finteractor_5fshared_5fptr',['get_interactor_shared_ptr',['../classPresenter.html#ab61977fd47123e876eed8ccb839bf3c8',1,'Presenter']]],
   ['get_5flibrary_5fscope',['get_library_scope',['../classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7',1,'LomseDoorway']]],
+  ['get_5fmusicxml_5foptions',['get_musicxml_options',['../classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8',1,'LomseDoorway']]],
   ['get_5fname',['get_name',['../classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8',1,'DocCommand']]],
   ['get_5fnum_5finteractors',['get_num_interactors',['../classPresenter.html#a8eb9209a170a3d2877d4a1b763236d9d',1,'Presenter']]],
   ['get_5fnum_5fpages',['get_num_pages',['../classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7',1,'Interactor']]],

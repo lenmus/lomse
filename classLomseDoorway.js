@@ -10,6 +10,7 @@ var classLomseDoorway =
     [ "create_score_player", "classLomseDoorway.html#a50dbce970b84945868887966a0708634", null ],
     [ "get_build_date", "classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a", null ],
     [ "get_library_scope", "classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7", null ],
+    [ "get_musicxml_options", "classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8", null ],
     [ "get_pixel_format", "classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de", null ],
     [ "get_screen_ppi", "classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65", null ],
     [ "get_version_long_string", "classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0", null ],

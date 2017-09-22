@@ -25,5 +25,6 @@ var annotated =
     [ "DocCommand", "classDocCommand.html", "classDocCommand" ],
     [ "Interactor", "classInteractor.html", "classInteractor" ],
     [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ],
+    [ "MusicXmlOptions", "classMusicXmlOptions.html", "classMusicXmlOptions" ],
     [ "Presenter", "classPresenter.html", "classPresenter" ]
 ];
