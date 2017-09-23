@@ -243,12 +243,10 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_rhythm_change );
-        CHECK( (*it)->TopNumber == 2 );
         CHECK( (*it)->NumPulses == 2 );
-        CHECK( (*it)->RefNoteDuration == 64 );
-        //cout << "TopNumber = " << (*it)->TopNumber
-        //     << ", NumPulses = " << (*it)->NumPulses
-        //     << ", RefNoteDuration = " << (*it)->RefNoteDuration << endl;
+        CHECK( (*it)->MeasureDuration == 128 );
+        //cout << ", NumPulses = " << (*it)->NumPulses
+        //     << ", MeasureDuration = " << (*it)->MeasureDuration << endl;
     }
 
     TEST_FIXTURE(MidiTableTestFixture, TimeSignatureInfoOk)
@@ -267,12 +265,10 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_rhythm_change );
-        CHECK( (*it)->TopNumber == 6 );
         CHECK( (*it)->NumPulses == 2 );
-        CHECK( (*it)->RefNoteDuration == 32 );
-        //cout << "TopNumber = " << (*it)->TopNumber
-        //     << ", NumPulses = " << (*it)->NumPulses
-        //     << ", RefNoteDuration = " << (*it)->RefNoteDuration << endl;
+        CHECK( (*it)->MeasureDuration == 192 );
+        //cout << ", NumPulses = " << (*it)->NumPulses
+        //     << ", MeasureDuration = " << (*it)->MeasureDuration << endl;
     }
 
     TEST_FIXTURE(MidiTableTestFixture, CloseTableAddsEvent)

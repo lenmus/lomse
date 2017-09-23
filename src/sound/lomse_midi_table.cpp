@@ -249,15 +249,12 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
 void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
                                         ImoTimeSignature* pTS)
 {
-    //TODO Deal with non-standard time signatures
-
     TimeUnits rTime = cursor.time() + cursor.anacrusis_missing_time();
-    int refNoteDuration = int( pTS->get_ref_note_duration() );
-    int topNum = pTS->get_top_number();
+    int measureDuration = int( pTS->get_measure_duration() );
     int numBeats = pTS->get_num_pulses();
 
-    store_event(rTime, SoundEvent::k_rhythm_change, 0, topNum, numBeats,
-                refNoteDuration, pTS, measure);
+    store_event(rTime, SoundEvent::k_rhythm_change, 0, numBeats,
+                measureDuration, 0, pTS, measure);
 }
 
 //---------------------------------------------------------------------------------------
