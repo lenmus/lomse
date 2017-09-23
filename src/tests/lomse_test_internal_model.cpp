@@ -1343,6 +1343,40 @@ SUITE(InternalModelTest)
 //        delete pTechnical;
 //    }
 
+    // ImoTimeSignature -----------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, time_signature_0)
+    {
+        //0. get_num_pulses() and get_measure_duration(), for metronome.
+
+        Document doc(m_libraryScope);
+        ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(
+                            ImFactory::inject(k_imo_time_signature, &doc));
+
+        // 3/4
+        pTS->set_top_number(3);
+        pTS->set_bottom_number(4);
+        CHECK( pTS->get_num_pulses() == 3 );
+        CHECK( is_equal_time(pTS->get_measure_duration(), 192) );
+        //cout << "3/4: measure duration=" << pTS->get_measure_duration() << endl;
+
+        // 3/8
+        pTS->set_top_number(3);
+        pTS->set_bottom_number(8);
+        CHECK( pTS->get_num_pulses() == 1 );
+        CHECK( is_equal_time(pTS->get_measure_duration(), 96) );
+        //cout << "3/8: measure duration=" << pTS->get_measure_duration() << endl;
+
+        // 6/8
+        pTS->set_top_number(6);
+        pTS->set_bottom_number(8);
+        CHECK( pTS->get_num_pulses() == 2 );
+        CHECK( is_equal_time(pTS->get_measure_duration(), 192) );
+        //cout << "6/8: measure duration=" << pTS->get_measure_duration() << endl;
+
+        delete pTS;
+    }
+
     // API ------------------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, API_AddParagraphToDocument)

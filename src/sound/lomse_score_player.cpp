@@ -364,7 +364,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         else if (events[i]->EventType == SoundEvent::k_rhythm_change)
         {
             //set up new beat and metronome information
-            nMeasureDuration = events[i]->RefNoteDuration * events[i]->TopNumber;
+            nMeasureDuration = events[i]->MeasureDuration;
             nMtrNumPulses = events[i]->NumPulses;
             m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;       //a pulse duration, in TU
             nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration (interval to click off), in TU
@@ -679,7 +679,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             else if (events[i]->EventType == SoundEvent::k_rhythm_change)
             {
                 //set up new beat and metronome information
-                nMeasureDuration = events[i]->RefNoteDuration * events[i]->TopNumber;
+                nMeasureDuration = events[i]->MeasureDuration;
                 nMtrNumPulses = events[i]->NumPulses;
                 m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;        //a pulse duration
                 nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click duration (interval to click off)

@@ -88,18 +88,15 @@ public:
     int         EventType;
     int         Channel;
     union {
-        int     NotePitch;      //MIDI pitch
-        int     Instrument;     //MIDI instrument for ProgInstr events
-        int     TopNumber;      //for RhythmChange events
+        int     NotePitch;      //k_note_xxx: MIDI pitch
+        int     Instrument;     //k_prog_instr: MIDI instrument
+        int     NumPulses;      //k_rhythm_change: num. metronome pulses per measure
     };
     union {
-        int     Volume;         //for notes
-        int     NumPulses;      //For time signatures
+        int     Volume;             //k_note_xxx: for notes
+        int     MeasureDuration;    //k_rhythm_change: In LDP duration units
     };
-    union {
-        int     NoteStep;       //Note step 0..6 : 0-Do, 1-Re, ... 6-Si
-        int     RefNoteDuration;   //for RhythmChange events. In LDP duration units
-    };
+    int             NoteStep;   //k_note_xxx: Note step 0..6 : 0-Do, ... 6-Si
     ImoStaffObj*    pSO;        //staffobj who originated the event (for visual highlight)
     int             Measure;    //measure number containing this staffobj
 

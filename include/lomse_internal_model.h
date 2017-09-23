@@ -4372,7 +4372,7 @@ public:
     bool can_generate_secondary_shapes() { return true; }
 
     //other
-    inline bool is_compound_meter() { return (m_top==6 || m_top==9 || m_top==12); }
+    bool is_compound_meter();
     inline bool is_normal() { return m_type == k_normal; }
     inline bool is_senza_misura() { return m_type == k_senza_misura; }
     inline bool is_single_number() { return m_type == k_single_number; }

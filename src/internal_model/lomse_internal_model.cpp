@@ -4678,17 +4678,41 @@ int ImoTieDto::get_line_number()
 //=======================================================================================
 // ImoTimeSignature implementation
 //=======================================================================================
+bool ImoTimeSignature::is_compound_meter()
+{
+    //In compound time signatures, the beat is broken down into three equal parts,
+    //so that a dotted note (half again longer than a regular note) becomes the
+    //beat unit. The top number is always divisible by 3, with the exception
+    //of time signatures where the top number is 3. Common examples of compound
+    //time signatures are 6/8, 12/8, and 9/4.
+
+    return m_top==6 || m_top==9 || m_top==12;
+}
+
+//---------------------------------------------------------------------------------------
 int ImoTimeSignature::get_num_pulses()
 {
-    //returns the number of pulses (metronome pulses) implied by this TS
+    //returns the number of pulses (beats or metronome pulses) implied by this TS
 
-    return (is_compound_meter() ? m_top / 3 : m_top);
+    //In simple time signatures, such as  4/4, 3/4, 2/4, 3/8, and 2/2, the number
+    //of beats is given by the top number, with the exception of 3/8 which is
+    //marked in one beat.
+    //TODO: Any other exception?
+    //In compound time signatures (6/x, 12/x, and 9/x) the number of beats is given
+    //by dividing the top number by three.
+    //TODO: Any exception?
+
+    if (is_compound_meter()
+        || (get_top_number() == 3 && get_bottom_number() == 8))
+        return m_top / 3;
+    else
+        return m_top;
 }
 
 //---------------------------------------------------------------------------------------
 TimeUnits ImoTimeSignature::get_ref_note_duration()
 {
-    // returns beat duration (in LDP time units)
+    // returns duration (in LDP time units) implied by Time Signature bottom number
 
     switch(m_bottom)
     {
@@ -4710,6 +4734,8 @@ TimeUnits ImoTimeSignature::get_ref_note_duration()
 //---------------------------------------------------------------------------------------
 TimeUnits ImoTimeSignature::get_measure_duration()
 {
+    //TODO Deal with non-standard time signatures
+
     return m_top * get_ref_note_duration();
 }
 
