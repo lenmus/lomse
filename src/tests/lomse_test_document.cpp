@@ -336,6 +336,45 @@ SUITE(DocumentTest)
         CHECK( fOk );
     }
 
+    TEST_FIXTURE(DocumentTestFixture, creation_010)
+    {
+        //010. MusicXML without clef is fixed
+        Document doc(m_libraryScope);
+        doc.from_string("<?xml version='1.0' encoding='utf-8'?>"
+            "<!DOCTYPE score-partwise PUBLIC '-//Recordare//DTD MusicXML 3.0 Partwise//EN' "
+                "'http://www.musicxml.org/dtds/partwise.dtd'>"
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<divisions>1</divisions><key><fifths>0</fifths></key>"
+                "<time><beats>4</beats><beat-type>4</beat-type></time>"
+            "</attributes>"
+            "<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>"
+            "</measure>"
+            "</part></score-partwise>"
+            , Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+        ImoObj::children_iterator it = pMD->begin();
+
+        ImoClef* pClef = dynamic_cast<ImoClef*>(*it);
+        CHECK( pClef != NULL );
+        CHECK( pClef->get_clef_type() == k_clef_G2 );
+        CHECK( pClef->get_staff() == 0 );
+
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
+              "(opt Render.SpacingOptions 769)(opt Score.JustifyLastSystem 3)"
+              "(opt Render.SpacingFactor 0.35)(instrument P1 (name \"Music\")"
+              "(staves 1)(musicData (clef G p1)(key C)(time 4 4)(n c4 w v1 p1)"
+              "(barline simple))))))" );
+    }
+
     TEST_FIXTURE(DocumentTestFixture, get_score_100)
     {
         //100. in empty doc returns NULL

@@ -22,6 +22,7 @@
 - Blank space in LDP exporter has been normalized.
 - LDP exporter reviewed for following the same syntax rules than LDP 
   Analyser, thus ensuring a round trip in LDP export-import.
+- Fixed issue #68: Assume some default value for clef in MusicXML importer
 - Fixed issue #69: Playback very slow for 3/8 tempo
 - Fixed issue #67: Fix beams in malformed MusicXML files.
 - Fixed issue #73: Highlight is not synced. when moving to next page.
