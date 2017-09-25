@@ -137,18 +137,22 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 <tr>
 <th>Setting </th><th>Default value </th><th>Description </th></tr>
 <tr>
-<td>fix_beams </td><td>true </td><td><p class="starttd">When true, if beam information is not congruent with note type, the importer will fix the beam.</p>
-<p class="endtd"></p>
-</td></tr>
+<td>fix_beams </td><td>true </td><td>When true, if beam information is not congruent with note type, the importer will fix the beam. </td></tr>
+<tr>
+<td>use_default_clefs </td><td>true </td><td>When true, if an score part has pitched notes but the clef is missing, the importer will assume a G or an F4 clef, depending on notes pitch range. </td></tr>
 </table>
-<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams()</a>, use_default_clefs() </dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams()</a>, <a class="el" href="classMusicXmlOptions.html#ab9a44ce0d15b11be71b15d105e3af214">use_default_clefs()</a> </dd></dl>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7">fix_beams</a> (bool value)</td></tr>
 <tr class="separator:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff534c8238205677ef09280daf98f5d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#aff534c8238205677ef09280daf98f5d9">use_default_clefs</a> (bool value)</td></tr>
+<tr class="separator:aff534c8238205677ef09280daf98f5d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5deb88f8d7aa69a1a658429e54bc9f5d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams</a> ()</td></tr>
 <tr class="separator:a5deb88f8d7aa69a1a658429e54bc9f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9a44ce0d15b11be71b15d105e3af214"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#ab9a44ce0d15b11be71b15d105e3af214">use_default_clefs</a> ()</td></tr>
+<tr class="separator:ab9a44ce0d15b11be71b15d105e3af214"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a619be98a1ead8e0e3a4e4bc2e41882c7"></a>
@@ -180,7 +184,40 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Sets the value for 'use_default_clefs' option. When true, if an score part has pitched notes but the clef is missing, the importer will assume a G or an F4 clef, depending on notes pitch range. Returns current setting for the 'fix_beams' option. </p>
+<p>Returns current setting for the 'fix_beams' option. </p>
+
+</div>
+</div>
+<a class="anchor" id="aff534c8238205677ef09280daf98f5d9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void MusicXmlOptions::use_default_clefs </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>value</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets the value for 'use_default_clefs' option. When true, if an score part has pitched notes but the clef is missing, the importer will assume a G or an F4 clef, depending on notes pitch range. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab9a44ce0d15b11be71b15d105e3af214"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MusicXmlOptions::use_default_clefs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns current setting for the 'use_default_clefs' option. </p>
 
 </div>
 </div>
@@ -190,7 +227,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a></li>
-    <li class="footer">Generated on Fri Sep 22 2017 15:19:09 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Sep 25 2017 11:39:13 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

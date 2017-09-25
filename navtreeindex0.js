@@ -185,6 +185,8 @@ var NAVTREEINDEX0 =
 "classMusicXmlOptions.html":[1,0,25],
 "classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d":[1,0,25,1],
 "classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7":[1,0,25,0],
+"classMusicXmlOptions.html#ab9a44ce0d15b11be71b15d105e3af214":[1,0,25,3],
+"classMusicXmlOptions.html#aff534c8238205677ef09280daf98f5d9":[1,0,25,2],
 "classPresenter.html":[1,0,26],
 "classPresenter.html#a07b9bfdb69702b53e0797001e242fa9f":[1,0,26,0],
 "classPresenter.html#a1d7ee74efa842fc99274ee0f6abb5ba8":[1,0,26,2],
@@ -247,7 +249,5 @@ var NAVTREEINDEX0 =
 "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca8ad4a2c1c1911b1858b4ec9c3556cf1b":[2,0,13,7],
 "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca99d449bb8c1eb6d6763d4e7781cc2bc3":[2,0,13,8],
 "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcaaaef672ec4a7c450a85c1873cb54b9dd":[2,0,13,11],
-"group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcab35c103a5dd42ae503540770c4093211":[2,0,13,4],
-"group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcad2661e3b213c72a225b721a609d4c02a":[2,0,13,3],
-"group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcaf7cbc4b084070d349afd875c6807b6cc":[2,0,13,2]
+"group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcab35c103a5dd42ae503540770c4093211":[2,0,13,4]
 };

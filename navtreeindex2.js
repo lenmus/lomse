@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898a687d9509c5c062fed60cbeae22465e39":[2,0,17,4],
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898a6bc9dbd1200a63f27353713c63a3521d":[2,0,17,3],
 "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a8ca200479e272d6e4841cd01d9cbe657":[2,0,17,13],
 "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a8cba0b3dd934d446f4d3657b4b9b1dc5":[2,0,17,10],
 "group__enumerations.html#ggafb559e26bc610db43ba605230a142898ab4eb18c0b759446fefeafa61d11cfb96":[2,0,17,16],
@@ -15,8 +17,8 @@ var NAVTREEINDEX2 =
 "group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e":[2,1,2],
 "group__typedefs.html#gaa9ebd8fde9709536464d35a96f108cbf":[2,1,1],
 "hierarchy.html":[1,2],
-"index.html":[0],
 "index.html":[],
+"index.html":[0],
 "library-license.html":[5],
 "lomse-callbacks.html":[0,8],
 "lomse-events.html":[0,9],
