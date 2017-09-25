@@ -214,6 +214,7 @@ public:
 protected:
     void initialize();
     Compiler* get_compiler_for_format(int format);
+    void fix_malformed_musicxml();
 
     friend class ImFactory;
     void assign_id(ImoObj* pImo);

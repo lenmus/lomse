@@ -58,18 +58,18 @@ StaffObjsCursor::~StaffObjsCursor()
 void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
 {
     m_staffIndex.reserve(m_numInstruments);
-    int staves = 0;
+    m_numStaves = 0;
     for (int i=0; i < m_numInstruments; ++i)
     {
-        m_staffIndex[i] = staves;
-        staves += pScore->get_instrument(i)->get_num_staves();
+        m_staffIndex[i] = m_numStaves;
+        m_numStaves += pScore->get_instrument(i)->get_num_staves();
     }
 
-    m_clefs.reserve(staves);
-    m_clefs.assign(staves, (ColStaffObjsEntry*)NULL);     //GCC complains if NULL not casted
+    m_clefs.reserve(m_numStaves);
+    m_clefs.assign(m_numStaves, (ColStaffObjsEntry*)NULL);     //GCC complains if NULL not casted
 
-    m_keys.reserve(staves);
-    m_keys.assign(staves, (ColStaffObjsEntry*)NULL);
+    m_keys.reserve(m_numStaves);
+    m_keys.assign(m_numStaves, (ColStaffObjsEntry*)NULL);
 
     m_times.reserve(m_numInstruments);
     m_times.assign(m_numInstruments, (ColStaffObjsEntry*)NULL);
@@ -287,6 +287,28 @@ TimeUnits StaffObjsCursor::score_total_duration()
     ImoStaffObj* pSO = pLastEntry->imo_object();
     time += pSO->get_duration();
     return time;
+}
+
+//---------------------------------------------------------------------------------------
+void StaffObjsCursor::staff_index_to_instr_staff(int idx, int* iInstr, int* iStaff)
+{
+    *iInstr = 0;
+    *iStaff = idx;
+    for (int i=0; i < m_numInstruments; ++i)
+    {
+        if (idx == m_staffIndex[i])
+        {
+            *iInstr = i;
+            *iStaff = 0;
+            return;
+        }
+        else if (idx < m_staffIndex[i])
+        {
+            *iInstr = i - 1;
+            *iStaff = idx - m_staffIndex[i-1];
+            return;
+        }
+    }
 }
 
 

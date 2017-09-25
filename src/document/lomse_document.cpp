@@ -49,6 +49,7 @@
 #include "lomse_control.h"
 #include "lomse_logger.h"
 #include "lomse_staffobjs_table.h"
+#include "lomse_autoclef.h"
 
 #include <sstream>
 using namespace std;
@@ -208,6 +209,9 @@ int Document::from_file(const string& filename, int format)
     else
         create_empty();
 
+    if (m_pImoDoc && format == Document::k_format_mxl)
+        fix_malformed_musicxml();
+
     return numErrors;
 }
 
@@ -233,6 +237,9 @@ int Document::from_string(const string& source, int format)
         m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
     else
         create_empty();
+
+    if (m_pImoDoc && format == Document::k_format_mxl)
+        fix_malformed_musicxml();
 
     return numErrors;
 }
@@ -333,6 +340,20 @@ void Document::end_of_changes()
 {
     ModelBuilder builder;
     builder.build_model(m_pIModel);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::fix_malformed_musicxml()
+{
+    if (m_libraryScope.get_musicxml_options()->use_default_clefs())
+    {
+        ImoScore* pScore = dynamic_cast<ImoScore*>( m_pImoDoc->get_content_item(0) );
+        if (pScore)
+        {
+            AutoClef ac(pScore);
+            ac.do_autoclef();
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

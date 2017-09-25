@@ -61,6 +61,7 @@ private:
     StaffObjsIterator m_savedPos;
     int m_numInstruments;
     int m_numLines;
+    int m_numStaves;
     bool m_fScoreIsEmpty;
     ImoBarline* m_pLastBarline;
     std::vector<int> m_staffIndex;
@@ -80,7 +81,6 @@ public:
     //bool change_of_measure();
 
     //access to info
-    inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
     inline TimeUnits anacrusis_missing_time() {
         return m_pColStaffObjs->anacrusis_missing_time();
@@ -89,12 +89,14 @@ public:
     TimeUnits score_total_duration();
 
     //access to current pointed object
+    inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
     inline int staff() { return (*m_scoreIt)->staff(); }
     inline int line() { return (*m_scoreIt)->line(); }
     inline TimeUnits time() { return (*m_scoreIt)->time(); }
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
     inline ColStaffObjsEntry* cur_entry() { return *m_scoreIt; }
+    int staff_index() { return m_staffIndex[num_instrument()] + staff(); }
 
     //access next/prev object without moving cursor position
     inline ColStaffObjsEntry* next_entry() { return m_scoreIt.next(); }
@@ -104,6 +106,7 @@ public:
     //context
     inline int get_num_instruments() { return m_numInstruments; }
     inline int get_num_lines() { return m_numLines; }
+    inline int get_num_staves() { return m_numStaves; }
     ImoClef* get_clef_for_instr_staff(int iInstr, int iStaff);
     ImoClef* get_applicable_clef();
     ImoKeySignature* get_key_for_instr_staff(int iInstr, int iStaff);
@@ -119,6 +122,9 @@ public:
     ColStaffObjsEntry* get_time_entry_for_instrument(int iInstr);
 
     inline ImoBarline* get_previous_barline() { return m_pLastBarline; }
+
+    //helper
+    void staff_index_to_instr_staff(int idx, int* iInstr, int* iStaff);
 
     //iterators management
     void go_back_to_saved_position();

@@ -1877,9 +1877,48 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_309)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_310)
+    {
+        //@00310 unpitched note
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<note><unpitched/>"
+            "<duration>1</duration><type>half</type>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_actual_accidentals() == k_acc_not_computed );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_dots() == 0 );
+        CHECK( pNote->get_note_type() == k_half );
+        CHECK( pNote->is_pitch_defined() == false );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == k_no_pitch );
+        CHECK( pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote->is_in_chord() == false );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_311)
 //    {
-//        //@00309 timepos is computed right
+//        //@00311 timepos is computed right
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
 //        XmlParser parser;
