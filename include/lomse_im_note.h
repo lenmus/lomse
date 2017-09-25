@@ -155,7 +155,8 @@ protected:
     int     m_step;
     int     m_octave;
     EAccidentals m_notated_acc;
-    float   m_actual_acc;
+    float   m_actual_acc;           //number of semitones (i.e, -1 for flat). Decimal
+                                    //values like 0.5 (quarter tone sharp) are also valid.
     int     m_stemDirection;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;

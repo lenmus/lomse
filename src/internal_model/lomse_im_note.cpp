@@ -291,8 +291,8 @@ MidiPitch ImoNote::get_midi_pitch()
         return k_undefined_midi_pitch;
     else
         return MidiPitch(m_step, m_octave, int(m_actual_acc));
+        //TODO: deal with fractional values used for microtones.
 }
-
 
 //---------------------------------------------------------------------------------------
 int ImoNote::get_midi_bend()

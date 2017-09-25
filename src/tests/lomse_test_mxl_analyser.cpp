@@ -1595,7 +1595,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pIModel->get_root()->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_actual_accidentals() == k_flat );
+        CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
@@ -1862,7 +1862,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pIModel->get_root()->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_actual_accidentals() == k_flat );
+        CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_half );

@@ -3755,11 +3755,11 @@ public:
 
         ImoNote* pNote = dynamic_cast<ImoNote*>(m_pAnchor);
         int nStep = mxl_step_to_step(step);
-        EAccidentals nAcc = mxl_alter_to_accidentals(accidentals);
+        float acc = mxl_alter_to_accidentals(accidentals);
         int nOctave = mxl_octave_to_octave(octave);
         pNote->set_step(nStep);
         pNote->set_octave(nOctave);
-        pNote->set_actual_accidentals(nAcc);
+        pNote->set_actual_accidentals(acc);
         return pNote;
     }
 
@@ -3813,7 +3813,7 @@ protected:
         }
     }
 
-    EAccidentals mxl_alter_to_accidentals(const string& accidentals)
+    float mxl_alter_to_accidentals(const string& accidentals)
     {
         //@ The <alter> element is needed for the sounding pitch, whether the
         //@ accidental is in the key signature or not. If you want to see an
@@ -3826,32 +3826,15 @@ protected:
         //@ AWARE: <alter> is for pitch, not for displayed accidental. The displayed
         //@ accidentals is encoded in an <accidental> element
 
-        //TODO: only integer accidentals -2..+2 supported. Modify for more.
-
-        long nNumber;
+        float number;
         std::istringstream iss(accidentals);
-        if ((iss >> std::dec >> nNumber).fail() || nNumber > 2 || nNumber < -2)
+        if ((iss >> number).fail())
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <alter> value '" + accidentals + "'. Ignored.");
-            return k_no_accidentals;
+            return 0.0f;
         }
-
-        switch(nNumber)
-        {
-            case 0:
-                return k_no_accidentals;
-            case 1:
-                return k_sharp;
-            case 2:
-                return k_double_sharp;
-            case -1:
-                return k_flat;
-            case -2:
-                return k_flat_flat;
-        }
-        return k_no_accidentals;        //should not reach this
+        return number;
     }
 
 };
