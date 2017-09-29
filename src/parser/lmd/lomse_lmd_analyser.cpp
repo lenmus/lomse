@@ -2341,15 +2341,15 @@ public:
                                     ImFactory::inject(k_imo_midi_info, pDoc) );
 
         // num_instr
-        if (!get_optional(k_number) || !set_instrument(pInfo))
+        if (!get_optional(k_number) || !set_midi_instrument(pInfo))
         {
-            error_msg("Missing or invalid MIDI instrument (0..255). MIDI info ignored.");
+            error_msg("Missing or invalid MIDI instrument (0..127). MIDI info ignored.");
             delete pInfo;
             return NULL;
         }
 
         // [num_channel]
-        if (get_optional(k_number) && !set_channel(pInfo))
+        if (get_optional(k_number) && !set_midi_channel(pInfo))
         {
             report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                         "Invalid MIDI channel (0..15). Channel info ignored.");
@@ -2363,23 +2363,23 @@ public:
 
 protected:
 
-    bool set_instrument(ImoMidiInfo* pInfo)
+    bool set_midi_instrument(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
-        if (value < 0 || value > 255)
+        if (value < 0 || value > 127)
             return false;   //error
 
-        pInfo->set_instrument(value);
+        pInfo->set_midi_instrument(value);
         return true;
     }
 
-    bool set_channel(ImoMidiInfo* pInfo)
+    bool set_midi_channel(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
         if (value < 0 || value > 15)
             return false;   //error
 
-        pInfo->set_channel(value);
+        pInfo->set_midi_channel(value);
         return true;
     }
 

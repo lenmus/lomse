@@ -360,6 +360,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_figured_bass_info] = "figured-bass";
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
+        m_TypeToName[k_imo_instr_info] = "instr-info";
         m_TypeToName[k_imo_line_style] = "line-style";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
@@ -2083,7 +2084,7 @@ ImoInstrument::ImoInstrument()
     , m_pScore(NULL)
     , m_name()
     , m_abbrev()
-    , m_midi()
+    , m_sound()
 //    , m_pGroup(NULL)
     , m_partId("")
     , m_barlineLayout(k_isolated)
@@ -2154,22 +2155,30 @@ void ImoInstrument::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::set_instr_info(ImoInstrInfo* pInfo)
+{
+    m_sound = *pInfo;
+    delete pInfo;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::set_midi_info(ImoMidiInfo* pInfo)
 {
-    m_midi = *pInfo;
+    m_sound.set_midi_channel(pInfo->get_midi_channel());
+    m_sound.set_midi_program(pInfo->get_midi_program());
     delete pInfo;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_midi_instrument(int instr)
 {
-    m_midi.set_instrument(instr);
+    m_sound.set_midi_program(instr);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_midi_channel(int channel)
 {
-    m_midi.set_channel(channel);
+    m_sound.set_midi_channel(channel);
 }
 
 //---------------------------------------------------------------------------------------

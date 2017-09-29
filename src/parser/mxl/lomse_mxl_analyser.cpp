@@ -2647,6 +2647,69 @@ protected:
 
 };
 
+//@--------------------------------------------------------------------------------------
+//@ <infoMIDI> = (infoMIDI num_instr [num_channel])
+//@ num_instr = integer: 0..255
+//@ num_channel = integer: 0..15
+
+class MidiInstrumentMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    MidiInstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                              LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//        ImoMidiInfo* pInfo = static_cast<ImoMidiInfo*>(
+//                            ImFactory::inject(k_imo_midi_info, pDoc) );
+//
+//        // num_instr
+//        if (!get_optional(k_number) || !set_midi_instrument(pInfo))
+//        {
+//            error_msg("Missing or invalid MIDI instrument (1..128). MIDI info ignored.");
+//            delete pInfo;
+//            return;
+//        }
+//
+//        // [num_channel]
+//        if (get_optional(k_number) && !set_midi_channel(pInfo))
+//        {
+//            report_msg(m_pAnalysedNode->get_line_number(),
+//                        "Invalid MIDI channel (1..16). Channel info ignored.");
+//        }
+//
+//        error_if_more_elements();
+//
+//        add_to_model(pInfo);
+        return NULL;
+    }
+
+protected:
+
+    bool set_midi_instrument(ImoMidiInfo* pInfo)
+    {
+        int value = get_integer_value(0);
+        if (value < 1 || value > 128)
+            return false;   //error
+
+        pInfo->set_midi_instrument(value-1);
+        return true;
+    }
+
+    bool set_midi_channel(ImoMidiInfo* pInfo)
+    {
+        int value = get_integer_value(1);
+        if (value < 1 || value > 16)
+            return false;   //error
+
+        pInfo->set_midi_channel(value-1);
+        return true;
+    }
+
+};
 
 //@--------------------------------------------------------------------------------------
 //@ <!ELEMENT notations
@@ -3906,27 +3969,13 @@ public:
             ;   //TODO <score-instrument>
 
         // { [<midi-device>][<midi-instrument>] }*
-        while (get_optional("midi-instrument"))
+        while (get_optional("midi-device") || get_optional("midi-instrument") )
         {
-            //TODO: Are these the children? See Saltarello.xml
+            // [<midi-device>]
+            analyse_optional("midi-device", pInstrument);
 
-//            // [<midi-device>]
-//            analyse_optional("midi-device", pInstrument);
-//
-//            // [<midi-instrument>]
-//            analyse_optional("midi-instrument", pInstrument);
-//
-//            // [<midi-channel>]
-//            get_optional("midi-channel");   //TODO <midi-channel>
-//
-//            // [<midi-program>]
-//            get_optional("midi-program");   //TODO <midi-program>
-//
-//            // [<volume>]
-//            get_optional("volume");   //TODO <volume>
-//
-//            // [<pan>]
-//            get_optional("pan");   //TODO <pan>
+            // [<midi-instrument>]
+            analyse_optional("midi-instrument", pInstrument);
         }
 
         error_if_more_elements();
@@ -5216,7 +5265,7 @@ void MxlAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
         {
             //add space to top margin of first staff in next instrument
             //AWARE: All instruments are already created
-            int iInstr = pInstr->get_instrument() + 1;
+            int iInstr = m_pCurScore->get_instr_number_for(pInstr) + 1;
             if (iInstr < m_pCurScore->get_num_instruments())
             {
                 pInstr = m_pCurScore->get_instrument(iInstr);

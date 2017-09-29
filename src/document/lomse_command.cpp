@@ -2527,7 +2527,7 @@ int CmdMoveObjectPoint::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor
         ImoInstrument* pInstr = pNote->get_instrument();
         int iStaff = pNote->get_staff();
         ImoScore* pScore = pInstr->get_score();
-        int iInstr = pInstr->get_instrument();
+        int iInstr = pScore->get_instr_number_for(pInstr);
         ScoreMeter meter(pScore);
         TPoint pos(m_oldPos.x + meter.logical_to_tenths(m_shift.x, iInstr, iStaff),
                    m_oldPos.y + meter.logical_to_tenths(m_shift.y, iInstr, iStaff) );
