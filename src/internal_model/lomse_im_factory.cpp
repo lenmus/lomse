@@ -78,7 +78,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_image:               pObj = LOMSE_NEW ImoImage();              break;
         case k_imo_inline_wrapper:      pObj = LOMSE_NEW ImoInlineWrapper();      break;
         case k_imo_instr_group:         pObj = LOMSE_NEW ImoInstrGroup();         break;
-        case k_imo_instr_info:          pObj = LOMSE_NEW ImoInstrInfo();          break;
+        case k_imo_instr_info:          pObj = LOMSE_NEW ImoSoundInfo();          break;
         case k_imo_instrument:          pObj = LOMSE_NEW ImoInstrument();         break;
         case k_imo_instruments:         pObj = LOMSE_NEW ImoInstruments();        break;
         case k_imo_instrument_groups:   pObj = LOMSE_NEW ImoInstrGroups();        break;

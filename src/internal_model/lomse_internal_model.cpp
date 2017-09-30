@@ -2155,7 +2155,7 @@ void ImoInstrument::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::set_instr_info(ImoInstrInfo* pInfo)
+void ImoInstrument::set_instr_info(ImoSoundInfo* pInfo)
 {
     m_sound = *pInfo;
     delete pInfo;
@@ -2167,18 +2167,6 @@ void ImoInstrument::set_midi_info(ImoMidiInfo* pInfo)
     m_sound.set_midi_channel(pInfo->get_midi_channel());
     m_sound.set_midi_program(pInfo->get_midi_program());
     delete pInfo;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoInstrument::set_midi_instrument(int instr)
-{
-    m_sound.set_midi_program(instr);
-}
-
-//---------------------------------------------------------------------------------------
-void ImoInstrument::set_midi_channel(int channel)
-{
-    m_sound.set_midi_channel(channel);
 }
 
 //---------------------------------------------------------------------------------------

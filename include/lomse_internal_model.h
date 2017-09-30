@@ -86,7 +86,7 @@ class ImoImage;
 class ImoInlineLevelObj;
 class ImoInlineWrapper;
 class ImoInstrument;
-class ImoInstrInfo;
+class ImoSoundInfo;
 class ImoKeySignature;
 class ImoLineStyle;
 class ImoLink;
@@ -2391,7 +2391,7 @@ public:
 //---------------------------------------------------------------------------------------
 //The score-instrument element allows for multiple instruments per
 //score-part. Contains the information for an instrument in an score-part
-class ImoInstrInfo : public ImoSimpleObj
+class ImoSoundInfo : public ImoSimpleObj
 {
 protected:
 	string	m_id;
@@ -2419,6 +2419,7 @@ protected:
 	string	m_midiDeviceId;
 
 	//midi instrument
+	string m_midiName;  //name: ProgramName meta-events
 	int m_bank;			//bank: 0-16383 (MIDI 1-16,384)
     int m_channel;		//channel: 0-15 (MIDI 1-16)
     int m_program;		//patch: 0-127 (MIDI 1-128)
@@ -2437,7 +2438,7 @@ protected:
 
     friend class ImFactory;
     friend class ImoInstrument;
-    ImoInstrInfo()
+    ImoSoundInfo()
 		: ImoSimpleObj(k_imo_instr_info)
 		, m_instrName("")
 		, m_instrAbbrev("")
@@ -2449,6 +2450,7 @@ protected:
 		, m_virtualName("")
 		, m_port(0)
         , m_midiDeviceId("")
+        , m_midiName("")
 		, m_bank(0)
     	, m_channel(0)
     	, m_program(0)
@@ -2460,7 +2462,7 @@ protected:
 	}
 
 public:
-    virtual ~ImoInstrInfo() {}
+    virtual ~ImoSoundInfo() {}
 
     //getters
 	inline string& get_score_instr_id() { return 	m_id; }
@@ -2474,6 +2476,7 @@ public:
 	inline string& get_score_instr_virtual_name() { return m_virtualName; }
     inline int get_midi_port() { return m_port; }
     inline string& get_midi_device_id() { return m_midiDeviceId; }
+    inline string& get_midi_name() { return m_midiName; }
     inline int get_midi_bank() { return m_bank; }
     inline int get_midi_channel() { return m_channel; }
     inline int get_midi_program() { return m_program; }
@@ -2494,6 +2497,7 @@ public:
 	inline void set_score_instr_virtual_name(const string& value) { m_virtualName = value; }
     inline void set_midi_port(int value) { m_port = value; }
     inline void set_midi_device_id(const string& value) { m_midiDeviceId = value; }
+    inline void set_midi_name(const string& value) { m_midiName = value; }
     inline void set_midi_bank(int value) { m_bank = value; }
     inline void set_midi_channel(int value) { m_channel = value; }
     inline void set_midi_program(int value) { m_program = value; }
@@ -3319,7 +3323,7 @@ protected:
     ImoScore*       m_pScore;
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
-	ImoInstrInfo	m_sound;
+	ImoSoundInfo	m_sound;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //enum EBarlineLayout
@@ -3340,8 +3344,7 @@ public:
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
     inline ImoScoreText& get_name() { return m_name; }
     inline ImoScoreText& get_abbrev() { return m_abbrev; }
-    inline int get_midi_program() { return m_sound.get_midi_program(); }
-    inline int get_midi_channel() { return m_sound.get_midi_channel(); }
+    //inline ImoSoundInfo& get_instr_info() { return m_sound; }
     ImoMusicData* get_musicdata();
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
@@ -3355,12 +3358,52 @@ public:
     void set_name(const string& value);
     void set_abbrev(const string& value);
     void set_midi_info(ImoMidiInfo* pInfo);
-    void set_instr_info(ImoInstrInfo* pInfo);
-    void set_midi_instrument(int instr);
-    void set_midi_channel(int channel);
+    void set_instr_info(ImoSoundInfo* pInfo);
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
+
+    //getters for ImoSoundInfo
+	inline string& get_score_instr_id() { return m_sound.get_score_instr_id(); }
+	inline string& get_score_instr_name() { return m_sound.get_score_instr_name(); }
+	inline string& get_score_instr_abbrev() { return m_sound.get_score_instr_abbrev(); }
+	inline string& get_score_instr_sound() { return m_sound.get_score_instr_sound(); }
+	inline bool	get_score_instr_solo() { return m_sound.get_score_instr_solo(); }
+	inline bool	get_score_instr_ensemble() { return m_sound.get_score_instr_ensemble(); }
+	inline int get_score_instr_ensemble_size() { return m_sound.get_score_instr_ensemble_size(); }
+	inline string& get_score_instr_virtual_library() { return m_sound.get_score_instr_virtual_library(); }
+	inline string& get_score_instr_virtual_name() { return m_sound.get_score_instr_virtual_name(); }
+    inline int get_midi_port() { return m_sound.get_midi_port(); }
+    inline string& get_midi_device_id() { return m_sound.get_midi_device_id(); }
+    inline string& get_midi_name() { return m_sound.get_midi_name(); }
+    inline int get_midi_bank() { return m_sound.get_midi_bank(); }
+    inline int get_midi_channel() { return m_sound.get_midi_channel(); }
+    inline int get_midi_program() { return m_sound.get_midi_program(); }
+    inline int get_midi_unpitched() { return m_sound.get_midi_unpitched(); }
+    inline float get_midi_volume() { return m_sound.get_midi_volume(); }
+    inline int get_midi_pan() { return m_sound.get_midi_pan(); }
+    inline int get_midi_elevation() { return m_sound.get_midi_elevation(); }
+
+    //setters for ImoSoundInfo
+    inline void set_score_instr_id(const string& value) { m_sound.set_score_instr_id(value); }
+	inline void set_score_instr_name(const string& value) { m_sound.set_score_instr_name(value); }
+	inline void set_score_instr_abbrev(const string& value) { m_sound.set_score_instr_abbrev(value); }
+	inline void set_score_instr_sound(const string& value) { m_sound.set_score_instr_sound(value); }
+	inline void set_score_instr_solo(bool value) { m_sound.set_score_instr_solo(value); }
+	inline void set_score_instr_ensemble(bool value) { m_sound.set_score_instr_ensemble(value); }
+	inline void set_score_instr_ensemble_size(int value) { m_sound.set_score_instr_ensemble_size(value); }
+	inline void set_score_instr_virtual_library(const string& value) { m_sound.set_score_instr_virtual_library(value); }
+	inline void set_score_instr_virtual_name(const string& value) { m_sound.set_score_instr_virtual_name(value); }
+    inline void set_midi_port(int value) { m_sound.set_midi_port(value); }
+    inline void set_midi_device_id(const string& value) { m_sound.set_midi_device_id(value); }
+    inline void set_midi_name(const string& value) { m_sound.set_midi_name(value); }
+    inline void set_midi_bank(int value) { m_sound.set_midi_bank(value); }
+    inline void set_midi_channel(int value) { m_sound.set_midi_channel(value); }
+    inline void set_midi_program(int value) { m_sound.set_midi_program(value); }
+    inline void set_midi_unpitched(int value) { m_sound.set_midi_unpitched(value); }
+    inline void set_midi_volume(float value) { m_sound.set_midi_volume(value); }
+    inline void set_midi_pan(int value) { m_sound.set_midi_pan(value); }
+    inline void set_midi_elevation(int value) { m_sound.set_midi_elevation(value); }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }

@@ -256,6 +256,8 @@ enum EMxlTag
     k_mxl_tag_key,
     k_mxl_tag_lyric,
     k_mxl_tag_measure,
+    k_mxl_tag_midi_device,
+    k_mxl_tag_midi_instrument,
     k_mxl_tag_notations,
     k_mxl_tag_note,
     k_mxl_tag_ornaments,
@@ -266,6 +268,7 @@ enum EMxlTag
     k_mxl_tag_pitch,
     k_mxl_tag_print,
     k_mxl_tag_rest,
+    k_mxl_tag_score_instrument,
     k_mxl_tag_score_part,
     k_mxl_tag_score_partwise,
     k_mxl_tag_slur,
@@ -337,6 +340,12 @@ protected:
     bool analyse_mandatory(const string& tag, ImoObj* pAnchor=NULL);
 //    bool analyse_optional(EMxlTag type, ImoObj* pAnchor=NULL);
     bool analyse_optional(const string& name, ImoObj* pAnchor=NULL);
+    string analyze_mandatory_child_pcdata(const string& name);
+    string analyze_optional_child_pcdata(const string& name, const string& sDefault);
+    int analyze_optional_child_pcdata_int(const string& name,
+                                          int nMin, int nMax, int nDefault);
+    float analyze_optional_child_pcdata_float(const string& name,
+                                              float rMin, float rMax, float rDefault);
 //    void analyse_one_or_more(EMxlTag* pValid, int nValid);
 //    void analyse_staffobjs_options(ImoStaffObj* pSO);
 //    void analyse_scoreobj_options(ImoScoreObj* pSO);
@@ -1090,6 +1099,101 @@ bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
         return true;
     }
     return false;
+}
+
+//---------------------------------------------------------------------------------------
+string MxlElementAnalyser::analyze_mandatory_child_pcdata(const string& name)
+{
+    if (get_mandatory(name))
+        return m_childToAnalyse.value();
+
+	return "";
+}
+
+//---------------------------------------------------------------------------------------
+string MxlElementAnalyser::analyze_optional_child_pcdata(const string& name,
+                                                         const string& sDefault)
+{
+    if (get_optional(name))
+        return m_childToAnalyse.value();
+
+	return sDefault;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlElementAnalyser::analyze_optional_child_pcdata_int(const string& name,
+                                                          int nMin, int nMax,
+                                                          int nDefault)
+{
+    if (get_optional(name))
+    {
+        bool fError = false;
+        string number = m_childToAnalyse.value();
+        long nNumber;
+        std::istringstream iss(number);
+        if ((iss >> std::dec >> nNumber).fail())
+            fError = true;
+        else
+        {
+            if (nNumber < nMin || nNumber > nMax)
+                fError = true;
+        }
+
+        if (fError)
+        {
+            stringstream range;
+            range << nMin << " to " << nMax;
+            stringstream sDefault;
+            sDefault << nDefault;
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                name + ": invalid value. Must be integer "
+                + range.str() + ". Value " + sDefault.str() + " assumed.");
+            return nDefault;
+
+        }
+        else
+            return nNumber;
+    }
+
+	return nDefault;
+}
+
+//---------------------------------------------------------------------------------------
+float MxlElementAnalyser::analyze_optional_child_pcdata_float(const string& name,
+                                                              float rMin, float rMax,
+                                                              float rDefault)
+{
+    if (get_optional(name))
+    {
+        bool fError = false;
+        string number = m_childToAnalyse.value();
+        long rNumber;
+        std::istringstream iss(number);
+        if ((iss >> rNumber).fail())
+            fError = true;
+        else
+        {
+            if (rNumber < rMin || rNumber > rMax)
+                fError = true;
+        }
+
+        if (fError)
+        {
+            stringstream range;
+            range << rMin << " to " << rMax;
+            stringstream sDefault;
+            sDefault << rDefault;
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                name + ": invalid value. Must be decimal "
+                + range.str() + ". Value " + sDefault.str() + " assumed.");
+            return rDefault;
+
+        }
+        else
+            return rNumber;
+    }
+
+	return rDefault;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -2652,11 +2756,11 @@ protected:
 //@ num_instr = integer: 0..255
 //@ num_channel = integer: 0..15
 
-class MidiInstrumentMxlAnalyser : public MxlElementAnalyser
+class MidiDeviceMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    MidiInstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
-                              LibraryScope& libraryScope, ImoObj* pAnchor)
+    MidiDeviceMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
@@ -2689,24 +2793,102 @@ public:
 
 protected:
 
-    bool set_midi_instrument(ImoMidiInfo* pInfo)
+//    bool set_midi_instrument(ImoMidiInfo* pInfo)
+//    {
+//        int value = get_integer_value(0);
+//        if (value < 1 || value > 128)
+//            return false;   //error
+//
+//        pInfo->set_midi_instrument(value-1);
+//        return true;
+//    }
+//
+//    bool set_midi_channel(ImoMidiInfo* pInfo)
+//    {
+//        int value = get_integer_value(1);
+//        if (value < 1 || value > 16)
+//            return false;   //error
+//
+//        pInfo->set_midi_channel(value-1);
+//        return true;
+//    }
+
+};
+
+
+//@--------------------------------------------------------------------------------------
+//<!ELEMENT midi-instrument
+//    (midi-channel?, midi-name?, midi-bank?, midi-program?,
+//     midi-unpitched?, volume?, pan?, elevation?)>
+//<!ATTLIST midi-instrument
+//    id IDREF #REQUIRED
+//>
+//<!ELEMENT midi-channel (#PCDATA)>		1 to 16
+//<!ELEMENT midi-name (#PCDATA)>
+//<!ELEMENT midi-bank (#PCDATA)>		1 to 16,384
+//<!ELEMENT midi-program (#PCDATA)>		1 to 128
+//<!ELEMENT midi-unpitched (#PCDATA)>	1 to 128
+//<!ELEMENT volume (#PCDATA)>			0 to 100, with decimal values
+//<!ELEMENT pan (#PCDATA)>			    -180 and 180, with decimal values
+//<!ELEMENT elevation (#PCDATA)>		-90 and 90, with decimal values
+//
+class MidiInstrumentMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    MidiInstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                              LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
     {
-        int value = get_integer_value(0);
-        if (value < 1 || value > 128)
-            return false;   //error
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
+        if (!pInstr)
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
+            return NULL;
+        }
 
-        pInfo->set_midi_instrument(value-1);
-        return true;
-    }
+        //attrb: id
+        string id = get_mandatory_string_attribute("id", "", "midi-instrument");
+        if (id.empty())
+            return NULL;
+        //TODO Match id with score-instrument id
 
-    bool set_midi_channel(ImoMidiInfo* pInfo)
-    {
-        int value = get_integer_value(1);
-        if (value < 1 || value > 16)
-            return false;   //error
+        // midi-channel?    1 to 16
+        pInstr->set_midi_channel(
+                    analyze_optional_child_pcdata_int("midi-channel", 1, 16, 0) - 1);
 
-        pInfo->set_midi_channel(value-1);
-        return true;
+        // midi-name?
+        pInstr->set_midi_name(
+                    analyze_optional_child_pcdata("midi-name", "") );
+
+        // midi-bank?   1 to 16,384
+        pInstr->set_midi_bank(
+                    analyze_optional_child_pcdata_int("midi-bank", 1, 16384, 1) - 1);
+
+        // midi-program?    1 to 128
+        pInstr->set_midi_program(
+                    analyze_optional_child_pcdata_int("midi-program", 1, 128, 1) - 1);
+
+        // midi-unpitched?  1 to 128
+        pInstr->set_midi_unpitched(
+                    analyze_optional_child_pcdata_int("midi-unpitched", 1, 128, 1) - 1);
+
+        // volume?  0 to 100, with decimal values
+        pInstr->set_midi_volume(
+                    analyze_optional_child_pcdata_float("volume", 0.0, 100.0, 100.0) );
+
+        // pan?     -180 and 180, with decimal values
+        pInstr->set_midi_pan(
+                    analyze_optional_child_pcdata_float("pan", -180.0, 180.0, 0.0) );
+
+        // elevation?   -90 and 90, with decimal values
+        pInstr->set_midi_elevation(
+                    analyze_optional_child_pcdata_float("elevation", -90.0, 90.0, 0.0) );
+
+        error_if_more_elements();
+
+        return NULL;
     }
 
 };
@@ -3904,14 +4086,12 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ print
-
 class PrintMxlAnalyser : public MxlElementAnalyser
 {
 public:
     PrintMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
 
     ImoObj* do_analysis()
     {
@@ -3922,15 +4102,81 @@ public:
 
 
 //@--------------------------------------------------------------------------------------
-//@ <score-part> = [<identification>]<part-name>[<part-name-display>][<part-abbreviation>]
-//@                [<part-abbreviation-display>]<group>*
-//@                <score-instrument>* { [<midi-device>][<midi-instrument>] }*
-//@ Attrb:  name="id" type="xs:ID" use="required"
-//@ Doc: Each <score-part> defines a MIDI track (one instrument)
-//@      The score-instrument elements are used when there are multiple instruments per track.
-//@      The midi-device element is used to make a MIDI device or port assignment for the
-//@      given track. Initial midi-instrument assignments may be made here as well.
+//@ score-instrument
+//<!ELEMENT score-instrument
+//    (instrument-name, instrument-abbreviation?,
+//     instrument-sound?, (solo | ensemble)?,
+//     virtual-instrument?)>
+//<!ATTLIST score-instrument
+//    id ID #REQUIRED
+//>
+//<!ELEMENT instrument-name (#PCDATA)>
+//<!ELEMENT instrument-abbreviation (#PCDATA)>
+//<!ELEMENT instrument-sound (#PCDATA)>
+//<!ELEMENT solo EMPTY>
+//<!ELEMENT ensemble (#PCDATA)>
+//<!ELEMENT virtual-instrument
+//    (virtual-library?, virtual-name?)>
+//<!ELEMENT virtual-library (#PCDATA)>
+//<!ELEMENT virtual-name (#PCDATA)>
 
+class ScoreInstrumentMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ScoreInstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                               LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
+        if (!pInstr)
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
+            return NULL;
+        }
+
+        //attrb: id
+        string id = get_mandatory_string_attribute("id", "", "score-instrument");
+        if (id.empty())
+            return NULL;
+         pInstr->set_score_instr_id(id);
+
+        // instrument-name
+        pInstr->set_score_instr_name(
+                    analyze_mandatory_child_pcdata("instrument-name") );
+
+        // instrument-abbreviation?
+        pInstr->set_score_instr_abbrev(
+                    analyze_optional_child_pcdata("instrument-abbreviation", "") );
+
+        // instrument-sound?
+        pInstr->set_score_instr_sound(
+                    analyze_optional_child_pcdata("instrument-sound", "") );
+
+        // (solo | ensemble)?
+            //TODO
+
+        // virtual-instrument?
+            //TODO
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
+//<!ELEMENT score-part (identification?,
+//    part-name, part-name-display?,
+//    part-abbreviation?, part-abbreviation-display?,
+//    group*, score-instrument*,
+//    (midi-device?, midi-instrument?)*)>
+//<!ATTLIST score-part
+//    id ID #REQUIRED
+//>
+//
 class ScorePartMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -3946,36 +4192,34 @@ public:
 
         ImoInstrument* pInstrument = create_instrument(id);
 
-        // [<identification>]
+        // identification?
         analyse_optional("identification", pInstrument);
 
-        // [<part-name>]
-        analyse_optional("part-name", pInstrument);
+        // part-name
+        pInstrument->set_name(
+            analyze_mandatory_child_pcdata("part-name") );
 
-        // [<part-name-display>]
+        // part-name-display?
         analyse_optional("part-name-display", pInstrument);
 
-        // [<part-abbreviation>]
-        analyse_optional("part-abbreviation", pInstrument);
+        // part-abbreviation?
+        pInstrument->set_abbrev(
+            analyze_optional_child_pcdata("part-abbreviation", "") );
 
-        // [<part-abbreviation-display>]
+        // part-abbreviation-display?
         analyse_optional("part-abbreviation-display", pInstrument);
 
-        // <group>*
+        // group*
         while (analyse_optional("group", pInstrument));
 
-        // <score-instrument>*
+        // score-instrument*
         while (get_optional("score-instrument"))
-            ;   //TODO <score-instrument>
+            m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
 
-        // { [<midi-device>][<midi-instrument>] }*
+        // (midi-device?, midi-instrument?)*
         while (get_optional("midi-device") || get_optional("midi-instrument") )
         {
-            // [<midi-device>]
-            analyse_optional("midi-device", pInstrument);
-
-            // [<midi-instrument>]
-            analyse_optional("midi-instrument", pInstrument);
+             m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
         }
 
         error_if_more_elements();
@@ -5090,6 +5334,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["key"] = k_mxl_tag_key;
     m_NameToEnum["lyric"] = k_mxl_tag_lyric;
     m_NameToEnum["measure"] = k_mxl_tag_measure;
+    m_NameToEnum["midi-device"] = k_mxl_tag_midi_device;
+    m_NameToEnum["midi-instrument"] = k_mxl_tag_midi_instrument;
     m_NameToEnum["notations"] = k_mxl_tag_notations;
     m_NameToEnum["note"] = k_mxl_tag_note;
     m_NameToEnum["ornaments"] = k_mxl_tag_ornaments;
@@ -5100,6 +5346,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["pitch"] = k_mxl_tag_pitch;
     m_NameToEnum["print"] = k_mxl_tag_print;
     m_NameToEnum["rest"] = k_mxl_tag_rest;
+    m_NameToEnum["score-instrument"] = k_mxl_tag_score_instrument;
     m_NameToEnum["score-part"] = k_mxl_tag_score_part;
     m_NameToEnum["score-partwise"] = k_mxl_tag_score_partwise;
     m_NameToEnum["slur"] = k_mxl_tag_slur;
@@ -5442,6 +5689,8 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_lyric:                return LOMSE_NEW LyricMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_measure:              return LOMSE_NEW MeasureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_midi_device:          return LOMSE_NEW MidiDeviceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_midi_instrument:      return LOMSE_NEW MidiInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_notations:            return LOMSE_NEW NotationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -5451,6 +5700,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_pitch:                return LOMSE_NEW PitchMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_print:                return LOMSE_NEW PrintMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_score_instrument:     return LOMSE_NEW ScoreInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_score_partwise:       return LOMSE_NEW ScorePartwiseMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

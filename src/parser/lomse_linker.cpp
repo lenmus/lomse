@@ -80,7 +80,7 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
             return add_midi_info(static_cast<ImoMidiInfo*>(pChild));
 
         case k_imo_instr_info:
-            return add_instr_info(static_cast<ImoInstrInfo*>(pChild));
+            return add_instr_info(static_cast<ImoSoundInfo*>(pChild));
 
         case k_imo_music_data:
             return add_child(k_imo_instrument, pChild);
@@ -314,7 +314,7 @@ ImoObj* Linker::add_midi_info(ImoMidiInfo* pInfo)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Linker::add_instr_info(ImoInstrInfo* pInfo)
+ImoObj* Linker::add_instr_info(ImoSoundInfo* pInfo)
 {
     if (m_pParent && m_pParent->is_instrument())
     {
