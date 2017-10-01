@@ -2791,7 +2791,7 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <infoMIDI> = (infoMIDI num_instr [num_channel])
-//@ num_instr = integer: 0..255
+//@ num_instr = integer: 0..127
 //@ num_channel = integer: 0..15
 
 class InfoMidiAnalyser : public ElementAnalyser
@@ -2808,15 +2808,15 @@ public:
                             ImFactory::inject(k_imo_midi_info, pDoc, get_node_id()) );
 
         // num_instr
-        if (!get_optional(k_number) || !set_instrument(pInfo))
+        if (!get_optional(k_number) || !set_midi_program(pInfo))
         {
-            error_msg("Missing or invalid MIDI instrument (0..255). MIDI info ignored.");
+            error_msg("Missing or invalid MIDI instrument (0..127). MIDI info ignored.");
             delete pInfo;
             return;
         }
 
         // [num_channel]
-        if (get_optional(k_number) && !set_channel(pInfo))
+        if (get_optional(k_number) && !set_midi_channel(pInfo))
         {
             report_msg(m_pAnalysedNode->get_line_number(),
                         "Invalid MIDI channel (0..15). Channel info ignored.");
@@ -2829,23 +2829,23 @@ public:
 
 protected:
 
-    bool set_instrument(ImoMidiInfo* pInfo)
+    bool set_midi_program(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
-        if (value < 0 || value > 255)
+        if (value < 0 || value > 127)
             return false;   //error
 
-        pInfo->set_instrument(value);
+        pInfo->set_midi_program(value);
         return true;
     }
 
-    bool set_channel(ImoMidiInfo* pInfo)
+    bool set_midi_channel(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
         if (value < 0 || value > 15)
             return false;   //error
 
-        pInfo->set_channel(value);
+        pInfo->set_midi_channel(value);
         return true;
     }
 
@@ -6423,7 +6423,7 @@ void LdpAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
             //AWARE: If m_fInstrIdRequired==true all instruments are already created
             if (m_fInstrIdRequired)
             {
-                int iInstr = pInstr->get_instrument() + 1;
+                int iInstr = m_pCurScore->get_instr_number_for(pInstr) + 1;
                 if (iInstr < m_pCurScore->get_num_instruments())
                 {
                     pInstr = m_pCurScore->get_instrument(iInstr);

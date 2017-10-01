@@ -1087,8 +1087,8 @@ protected:
 
     void add_midi_info()
     {
-        int instr = m_pObj->get_instrument();
-        int channel = m_pObj->get_channel();
+        int instr = m_pObj->get_midi_program();
+        int channel = m_pObj->get_midi_channel();
         if (instr != 0 || channel != 0)
         {
             start_element("infoMIDI", k_no_imoid);

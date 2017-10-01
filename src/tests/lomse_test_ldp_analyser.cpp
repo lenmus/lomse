@@ -3229,7 +3229,7 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
+        expected << "Line 0. Missing or invalid MIDI instrument (0..127). MIDI info ignored." << endl;
         parser.parse_text("(infoMIDI piano 1)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
@@ -3252,7 +3252,7 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
+        expected << "Line 0. Missing or invalid MIDI instrument (0..127). MIDI info ignored." << endl;
         parser.parse_text("(infoMIDI 315 1)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
@@ -3288,8 +3288,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_midi_info() == true );
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_channel() == 0 );
-        CHECK( pInfo->get_instrument() == 56 );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3313,8 +3313,8 @@ SUITE(LdpAnalyserTest)
 
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_channel() == 0 );
-        CHECK( pInfo->get_instrument() == 56 );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3338,8 +3338,8 @@ SUITE(LdpAnalyserTest)
 
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_channel() == 10 );
-        CHECK( pInfo->get_instrument() == 56 );
+        CHECK( pInfo->get_midi_channel() == 10 );
+        CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3366,8 +3366,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
         CHECK( pInstr->get_abbrev().get_text() == "" );
-        CHECK( pInstr->get_channel() == 12 );
-        CHECK( pInstr->get_instrument() == 56 );
+        CHECK( pInstr->get_midi_channel() == 12 );
+        CHECK( pInstr->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
