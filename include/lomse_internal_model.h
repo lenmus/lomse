@@ -2384,7 +2384,7 @@ public:
 
     //setters
     inline void set_midi_channel(int value) { m_channel = value; }
-    inline void set_midi_instrument(int value) { m_program = value; }
+    inline void set_midi_program(int value) { m_program = value; }
 
 };
 
@@ -2416,7 +2416,7 @@ protected:
 
 	//midi device
 	int     m_port;			    //port: 0-15 (MIDI 1-16)
-	string	m_midiDeviceId;
+    string  m_midiDeviceName;   //DeviceName meta event
 
 	//midi instrument
 	string m_midiName;  //name: ProgramName meta-events
@@ -2449,7 +2449,7 @@ protected:
 		, m_virtualLibrary("")
 		, m_virtualName("")
 		, m_port(0)
-        , m_midiDeviceId("")
+        , m_midiDeviceName("")
         , m_midiName("")
 		, m_bank(0)
     	, m_channel(0)
@@ -2475,7 +2475,7 @@ public:
 	inline string& get_score_instr_virtual_library() { return m_virtualLibrary; }
 	inline string& get_score_instr_virtual_name() { return m_virtualName; }
     inline int get_midi_port() { return m_port; }
-    inline string& get_midi_device_id() { return m_midiDeviceId; }
+    inline string& get_midi_device_name() { return m_midiDeviceName; }
     inline string& get_midi_name() { return m_midiName; }
     inline int get_midi_bank() { return m_bank; }
     inline int get_midi_channel() { return m_channel; }
@@ -2496,7 +2496,7 @@ public:
 	inline void set_score_instr_virtual_library(const string& value) { m_virtualLibrary = value; }
 	inline void set_score_instr_virtual_name(const string& value) { m_virtualName = value; }
     inline void set_midi_port(int value) { m_port = value; }
-    inline void set_midi_device_id(const string& value) { m_midiDeviceId = value; }
+    inline void set_midi_device_name(const string& value) { m_midiDeviceName = value; }
     inline void set_midi_name(const string& value) { m_midiName = value; }
     inline void set_midi_bank(int value) { m_bank = value; }
     inline void set_midi_channel(int value) { m_channel = value; }
@@ -3374,7 +3374,7 @@ public:
 	inline string& get_score_instr_virtual_library() { return m_sound.get_score_instr_virtual_library(); }
 	inline string& get_score_instr_virtual_name() { return m_sound.get_score_instr_virtual_name(); }
     inline int get_midi_port() { return m_sound.get_midi_port(); }
-    inline string& get_midi_device_id() { return m_sound.get_midi_device_id(); }
+    inline string& get_midi_device_name() { return m_sound.get_midi_device_name(); }
     inline string& get_midi_name() { return m_sound.get_midi_name(); }
     inline int get_midi_bank() { return m_sound.get_midi_bank(); }
     inline int get_midi_channel() { return m_sound.get_midi_channel(); }
@@ -3395,7 +3395,7 @@ public:
 	inline void set_score_instr_virtual_library(const string& value) { m_sound.set_score_instr_virtual_library(value); }
 	inline void set_score_instr_virtual_name(const string& value) { m_sound.set_score_instr_virtual_name(value); }
     inline void set_midi_port(int value) { m_sound.set_midi_port(value); }
-    inline void set_midi_device_id(const string& value) { m_sound.set_midi_device_id(value); }
+    inline void set_midi_device_name(const string& value) { m_sound.set_midi_device_name(value); }
     inline void set_midi_name(const string& value) { m_sound.set_midi_name(value); }
     inline void set_midi_bank(int value) { m_sound.set_midi_bank(value); }
     inline void set_midi_channel(int value) { m_sound.set_midi_channel(value); }

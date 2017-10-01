@@ -2808,7 +2808,7 @@ public:
                             ImFactory::inject(k_imo_midi_info, pDoc, get_node_id()) );
 
         // num_instr
-        if (!get_optional(k_number) || !set_midi_instrument(pInfo))
+        if (!get_optional(k_number) || !set_midi_program(pInfo))
         {
             error_msg("Missing or invalid MIDI instrument (0..127). MIDI info ignored.");
             delete pInfo;
@@ -2829,13 +2829,13 @@ public:
 
 protected:
 
-    bool set_midi_instrument(ImoMidiInfo* pInfo)
+    bool set_midi_program(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
         if (value < 0 || value > 127)
             return false;   //error
 
-        pInfo->set_midi_instrument(value);
+        pInfo->set_midi_program(value);
         return true;
     }
 

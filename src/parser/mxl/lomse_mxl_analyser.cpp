@@ -280,7 +280,8 @@ enum EMxlTag
     k_mxl_tag_time_modification,
     k_mxl_tag_tuplet,
     k_mxl_tag_tuplet_actual,
-    k_mxl_tag_tuplet_normal
+    k_mxl_tag_tuplet_normal,
+    k_mxl_tag_virtual_instr
 };
 
 
@@ -359,7 +360,11 @@ protected:
     string get_optional_string_attribute(const string& name, const string& sDefault);
     int get_mandatory_integer_attribute(const string& name, int nDefault,
                                         const string& element);
-    int get_optional_integer_attribute(const string& name, int nDefault);
+    int get_optional_int_attribute(const string& name, int nDefault);
+
+    //methods to get value of current node
+    int get_cur_node_value_as_integer(int nDefault);
+
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -1018,7 +1023,7 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 }
 
 //---------------------------------------------------------------------------------------
-int MxlElementAnalyser::get_optional_integer_attribute(const string& name,
+int MxlElementAnalyser::get_optional_int_attribute(const string& name,
                                                        int nDefault)
 {
     if (has_attribute(&m_analysedNode, name))
@@ -1146,7 +1151,7 @@ int MxlElementAnalyser::analyze_optional_child_pcdata_int(const string& name,
             stringstream sDefault;
             sDefault << nDefault;
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                name + ": invalid value. Must be integer "
+                name + ": invalid value " + number + ". Must be integer in range "
                 + range.str() + ". Value " + sDefault.str() + " assumed.");
             return nDefault;
 
@@ -1184,7 +1189,7 @@ float MxlElementAnalyser::analyze_optional_child_pcdata_float(const string& name
             stringstream sDefault;
             sDefault << rDefault;
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                name + ": invalid value. Must be decimal "
+                name + ": invalid value " + number + ". Must be decimal in range "
                 + range.str() + ". Value " + sDefault.str() + " assumed.");
             return rDefault;
 
@@ -1194,6 +1199,18 @@ float MxlElementAnalyser::analyze_optional_child_pcdata_float(const string& name
     }
 
 	return rDefault;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlElementAnalyser::get_cur_node_value_as_integer(int nDefault)
+{
+    string number = m_analysedNode.value();
+    long nNumber;
+    std::istringstream iss(number);
+    if ((iss >> std::dec >> nNumber).fail())
+        return nDefault;
+    else
+        return nNumber;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -1928,7 +1945,7 @@ public:
         //attributes:
 
         // staff number
-        int nStaffNum = get_optional_integer_attribute("number", 1);
+        int nStaffNum = get_optional_int_attribute("number", 1);
         pClef->set_staff(nStaffNum - 1);
 
         //content:
@@ -2752,10 +2769,12 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <infoMIDI> = (infoMIDI num_instr [num_channel])
-//@ num_instr = integer: 0..255
-//@ num_channel = integer: 0..15
-
+//<!ELEMENT midi-device (#PCDATA)>
+//<!ATTLIST midi-device
+//    port CDATA #IMPLIED
+//    id IDREF #IMPLIED
+//>
+//
 class MidiDeviceMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -2766,52 +2785,25 @@ public:
 
     ImoObj* do_analysis()
     {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoMidiInfo* pInfo = static_cast<ImoMidiInfo*>(
-//                            ImFactory::inject(k_imo_midi_info, pDoc) );
-//
-//        // num_instr
-//        if (!get_optional(k_number) || !set_midi_instrument(pInfo))
-//        {
-//            error_msg("Missing or invalid MIDI instrument (1..128). MIDI info ignored.");
-//            delete pInfo;
-//            return;
-//        }
-//
-//        // [num_channel]
-//        if (get_optional(k_number) && !set_midi_channel(pInfo))
-//        {
-//            report_msg(m_pAnalysedNode->get_line_number(),
-//                        "Invalid MIDI channel (1..16). Channel info ignored.");
-//        }
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInfo);
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
+        if (!pInstr)
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
+            return NULL;
+        }
+
+        //attrb: id
+        string id = get_optional_string_attribute("id", "");
+        //TODO Match id with score-instrument id or to all score-instrument if empty
+
+        // attrb: port
+        pInstr->set_midi_port( get_optional_int_attribute("port", 1) - 1);
+
+        // midi-device name
+        pInstr->set_midi_device_name( m_analysedNode.value() );
+
         return NULL;
     }
-
-protected:
-
-//    bool set_midi_instrument(ImoMidiInfo* pInfo)
-//    {
-//        int value = get_integer_value(0);
-//        if (value < 1 || value > 128)
-//            return false;   //error
-//
-//        pInfo->set_midi_instrument(value-1);
-//        return true;
-//    }
-//
-//    bool set_midi_channel(ImoMidiInfo* pInfo)
-//    {
-//        int value = get_integer_value(1);
-//        if (value < 1 || value > 16)
-//            return false;   //error
-//
-//        pInfo->set_midi_channel(value-1);
-//        return true;
-//    }
 
 };
 
@@ -2876,7 +2868,7 @@ public:
 
         // volume?  0 to 100, with decimal values
         pInstr->set_midi_volume(
-                    analyze_optional_child_pcdata_float("volume", 0.0, 100.0, 100.0) );
+            analyze_optional_child_pcdata_float("volume", 0.0, 100.0, 100.0) / 100.0f );
 
         // pan?     -180 and 180, with decimal values
         pInstr->set_midi_pan(
@@ -4155,10 +4147,23 @@ public:
                     analyze_optional_child_pcdata("instrument-sound", "") );
 
         // (solo | ensemble)?
-            //TODO
+        bool fSolo = get_optional("solo");
+        pInstr->set_score_instr_solo(true);
+
+        if (get_optional("ensemble"))
+        {
+            if (fSolo)
+                error_msg("'ensemble' element ignored. Element 'solo' is also specified.");
+            else
+            {
+                pInstr->set_score_instr_ensemble(true);
+                pInstr->set_score_instr_ensemble_size(
+                    analyze_optional_child_pcdata_int("ensemble", 1, 100000, 0) );
+            }
+        }
 
         // virtual-instrument?
-            //TODO
+        analyse_optional("virtual-instrument", pInstr);
 
         error_if_more_elements();
 
@@ -4196,8 +4201,7 @@ public:
         analyse_optional("identification", pInstrument);
 
         // part-name
-        pInstrument->set_name(
-            analyze_mandatory_child_pcdata("part-name") );
+        analyse_optional("part-name", pInstrument);
 
         // part-name-display?
         analyse_optional("part-name-display", pInstrument);
@@ -4205,6 +4209,7 @@ public:
         // part-abbreviation?
         pInstrument->set_abbrev(
             analyze_optional_child_pcdata("part-abbreviation", "") );
+        //TODO: full analysis. class PartAbbrevMxlAnalyser
 
         // part-abbreviation-display?
         analyse_optional("part-abbreviation-display", pInstrument);
@@ -4576,7 +4581,7 @@ public:
         const string& type = get_mandatory_string_attribute("type", "", "slur");
 
         // attrib: number %number-level; #IMPLIED
-        int num = get_optional_integer_attribute("number", 0);
+        int num = get_optional_int_attribute("number", 0);
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
@@ -4794,7 +4799,7 @@ public:
         const string& type = get_mandatory_string_attribute("type", "", "tied");
 
         // attrib: number %number-level; #IMPLIED
-        int num = get_optional_integer_attribute("number", 0);
+        int num = get_optional_int_attribute("number", 0);
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
@@ -5290,6 +5295,43 @@ public:
     }
 };
 
+//@--------------------------------------------------------------------------------------
+//@ virtual-instrument
+//<!ELEMENT virtual-instrument
+//    (virtual-library?, virtual-name?)>
+//<!ELEMENT virtual-library (#PCDATA)>
+//<!ELEMENT virtual-name (#PCDATA)>
+//
+class VirtualInstrumentMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    VirtualInstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                                 LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
+        if (!pInstr)
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
+            return NULL;
+        }
+
+        // virtual-library?
+        pInstr->set_score_instr_virtual_library(
+                    analyze_optional_child_pcdata("virtual-library", "") );
+
+        // virtual-name?
+        pInstr->set_score_instr_virtual_name(
+                    analyze_optional_child_pcdata("virtual-name", "") );
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+};
+
 
 //=======================================================================================
 // MxlAnalyser implementation
@@ -5359,6 +5401,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["tuplet"] = k_mxl_tag_tuplet;
     m_NameToEnum["tuplet-actual"] = k_mxl_tag_tuplet_actual;
     m_NameToEnum["tuplet-normal"] = k_mxl_tag_tuplet_normal;
+    m_NameToEnum["virtual-instrument"] = k_mxl_tag_virtual_instr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -5713,6 +5756,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_tuplet:               return LOMSE_NEW TupletMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_actual:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_normal:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_virtual_instr:        return LOMSE_NEW VirtualInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         default:
             return LOMSE_NEW NullMxlAnalyser(this, m_reporter, m_libraryScope, name);
     }

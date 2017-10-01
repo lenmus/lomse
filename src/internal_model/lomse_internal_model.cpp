@@ -2145,12 +2145,24 @@ void ImoInstrument::set_abbrev(ImoScoreText* pText)
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_name(const string& value)
 {
+    if (!m_name.get_document())
+    {
+        Document* pDoc = get_the_document();
+        m_name.set_owner_document(pDoc);
+    }
+
     m_name.set_text(value);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoInstrument::set_abbrev(const string& value)
 {
+    if (!m_abbrev.get_document())
+    {
+        Document* pDoc = get_the_document();
+        m_abbrev.set_owner_document(pDoc);
+    }
+
     m_abbrev.set_text(value);
 }
 

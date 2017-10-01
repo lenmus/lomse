@@ -2454,6 +2454,77 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
+    //@ midi-device -----------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_30)
+    {
+        //@30. midi-device
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
+                "<part-name>Music</part-name>"
+                "<score-instrument id='P1-I1'>"
+                    "<instrument-name>Marimba</instrument-name>"
+                "</score-instrument>"
+                "<midi-device>Bank 1</midi-device>"
+            "</score-part></part-list><part id='P1'></part></score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_score_instr_id() == "P1-I1" );
+        CHECK( pInstr->get_score_instr_name() == "Marimba" );
+        CHECK( pInstr->get_midi_port() == 0 );
+        CHECK( pInstr->get_midi_device_name() == "Bank 1" );
+        CHECK( pInstr->get_midi_name() == "" );
+        CHECK( pInstr->get_midi_bank() == 0 );
+        CHECK( pInstr->get_midi_channel() == 0 );
+        CHECK( pInstr->get_midi_program() == 0 );
+        CHECK( pInstr->get_midi_unpitched() == -1 );
+        CHECK( is_equal(pInstr->get_midi_volume(), 1.0f) );
+        CHECK( pInstr->get_midi_pan() == 0.0 );
+        CHECK( pInstr->get_midi_elevation() == 0.0 );
+//        cout << test_name() << endl;
+//        cout << "instr.name= " << pInstr->get_name().get_text() << endl
+//             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
+//             << "id= " << pInstr->get_score_instr_id() << endl
+//             << "name= " << pInstr->get_score_instr_name() << endl
+//             << "abbrev= " << pInstr->get_score_instr_abbrev() << endl
+//             << "sound= " << pInstr->get_score_instr_sound() << endl
+//             << "virt.library= " << pInstr->get_score_instr_virtual_library() << endl
+//             << "virt.name= " << pInstr->get_score_instr_virtual_name() << endl
+//             << "port= " << pInstr->get_midi_port() << endl
+//             << "device name= " << pInstr->get_midi_device_name() << endl
+//             << "midi name= " << pInstr->get_midi_name() << endl
+//             << "bank= " << pInstr->get_midi_bank() << endl
+//             << "channel= " << pInstr->get_midi_channel() << endl
+//             << "program= " << pInstr->get_midi_program() << endl
+//             << "unpitched= " << pInstr->get_midi_unpitched() << endl
+//             << "volume= " << pInstr->get_midi_volume() << endl
+//             << "pan= " << pInstr->get_midi_pan() << endl
+//             << "elevation= " << pInstr->get_midi_elevation() << endl;
+
+        delete pIModel;
+    }
+
     //@ midi-instrument -----------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_40)
@@ -2500,6 +2571,7 @@ SUITE(MxlAnalyserTest)
 
         delete pIModel;
     }
+
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_41)
     {
         //@41. midi instrument. full information
@@ -2517,10 +2589,10 @@ SUITE(MxlAnalyserTest)
                     "<instrument-name>ARIA Player</instrument-name>"
                     "<instrument-abbreviation>ARIA</instrument-abbreviation>"
                     "<instrument-sound>wind.flutes.flute</instrument-sound>"
-//                    "<virtual-instrument>"
-//                        "<virtual-library>Garritan Instruments for Finale</virtual-library>"
-//                        "<virtual-name>001. Woodwinds/1. Flutes/Flute Plr1</virtual-name>"
-//                    "</virtual-instrument>"
+                    "<virtual-instrument>"
+                        "<virtual-library>Garritan Instruments for Finale</virtual-library>"
+                        "<virtual-name>001. Woodwinds/1. Flutes/Flute Plr1</virtual-name>"
+                    "</virtual-instrument>"
                 "</score-instrument>"
                 "<midi-device>Bank 1</midi-device>"
                 "<midi-instrument id='P1-I1'>"
@@ -2534,9 +2606,9 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        cout << test_name() << endl;
-        cout << "[" << errormsg.str() << "]" << endl;
-        cout << "[" << expected.str() << "]" << endl;
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != NULL);
         CHECK( pIModel->get_root()->is_document() == true );
@@ -2554,37 +2626,37 @@ SUITE(MxlAnalyserTest)
         CHECK( pInstr->get_score_instr_name() == "ARIA Player" );
         CHECK( pInstr->get_score_instr_abbrev() == "ARIA" );
         CHECK( pInstr->get_score_instr_sound() == "wind.flutes.flute" );
-//        CHECK( pInstr->get_score_instr_virtual_library() == "Garritan Instruments for Finale" );
-//	    CHECK( pInstr->get_score_instr_virtual_name() == "001. Woodwinds/1. Flutes/Flute Plr1" );
+        CHECK( pInstr->get_score_instr_virtual_library() == "Garritan Instruments for Finale" );
+	    CHECK( pInstr->get_score_instr_virtual_name() == "001. Woodwinds/1. Flutes/Flute Plr1" );
         CHECK( pInstr->get_midi_port() == 0 );
-        //CHECK( pInstr->get_midi_device_id() == "Bank 1" );
+        CHECK( pInstr->get_midi_device_name() == "Bank 1" );
         CHECK( pInstr->get_midi_name() == "" );
         CHECK( pInstr->get_midi_bank() == 0 );
         CHECK( pInstr->get_midi_channel() == 0 );
         CHECK( pInstr->get_midi_program() == 0 );
         CHECK( pInstr->get_midi_unpitched() == 0 );
-        CHECK( pInstr->get_midi_volume() == 80.0 );
+        CHECK( is_equal(pInstr->get_midi_volume(), 0.8f) );
         CHECK( pInstr->get_midi_pan() == -70.0 );
         CHECK( pInstr->get_midi_elevation() == 0.0 );
-        cout << test_name() << endl;
-        cout << "instr.name= " << pInstr->get_name().get_text() << endl
-             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
-             << "id= " << pInstr->get_score_instr_id() << endl
-             << "name= " << pInstr->get_score_instr_name() << endl
-             << "abbrev= " << pInstr->get_score_instr_abbrev() << endl
-             << "sound= " << pInstr->get_score_instr_sound() << endl
-             << "virt.library= " << pInstr->get_score_instr_virtual_library() << endl
-             << "virt.name= " << pInstr->get_score_instr_virtual_name() << endl
-             << "port= " << pInstr->get_midi_port() << endl
-             << "device id= " << pInstr->get_midi_device_id() << endl
-             << "midi name= " << pInstr->get_midi_name() << endl
-             << "bank= " << pInstr->get_midi_bank() << endl
-             << "channel= " << pInstr->get_midi_channel() << endl
-             << "program= " << pInstr->get_midi_program() << endl
-             << "unpitched= " << pInstr->get_midi_unpitched() << endl
-             << "volume= " << pInstr->get_midi_volume() << endl
-             << "pan= " << pInstr->get_midi_pan() << endl
-             << "elevation= " << pInstr->get_midi_elevation() << endl;
+//        cout << test_name() << endl;
+//        cout << "instr.name= " << pInstr->get_name().get_text() << endl
+//             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
+//             << "id= " << pInstr->get_score_instr_id() << endl
+//             << "name= " << pInstr->get_score_instr_name() << endl
+//             << "abbrev= " << pInstr->get_score_instr_abbrev() << endl
+//             << "sound= " << pInstr->get_score_instr_sound() << endl
+//             << "virt.library= " << pInstr->get_score_instr_virtual_library() << endl
+//             << "virt.name= " << pInstr->get_score_instr_virtual_name() << endl
+//             << "port= " << pInstr->get_midi_port() << endl
+//             << "device name= " << pInstr->get_midi_device_name() << endl
+//             << "midi name= " << pInstr->get_midi_name() << endl
+//             << "bank= " << pInstr->get_midi_bank() << endl
+//             << "channel= " << pInstr->get_midi_channel() << endl
+//             << "program= " << pInstr->get_midi_program() << endl
+//             << "unpitched= " << pInstr->get_midi_unpitched() << endl
+//             << "volume= " << pInstr->get_midi_volume() << endl
+//             << "pan= " << pInstr->get_midi_pan() << endl
+//             << "elevation= " << pInstr->get_midi_elevation() << endl;
 
         delete pIModel;
     }
