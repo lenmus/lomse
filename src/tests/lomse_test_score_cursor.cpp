@@ -227,14 +227,14 @@ public:
         //(barline#133L) ))
         //
         //(instrument (staves 2)(musicData
-        //(clef#136L G p1)(clef#137L F4 p2)(key#138L D)(time#139L 2 4)
-        //(n#140L f4 q v1 p1)
-        //(n#141L c3 s g+ v2 p2)(n#142L d3 s v2 p2)(n#143L e3 s v2 p2)(n#144L f3 s g- v2 p2)
-        //(n#154L g3 e g+ v2 p2)(n#155L d3 e g- v2 p2)
-        //(barline#161L)
-        //(n#82L a4 e. v1 p1)
-        //(n#163L c3 q v2 p2)(n#164L g3 q v2 p2)
-        //(barline#165L) ))
+        //(clef#138L G p1)(clef#139L F4 p2)(key#140L D)(time#141L 2 4)
+        //(n#142L f4 q v1 p1)
+        //(n#143L c3 s g+ v2 p2)(n#144L d3 s v2 p2)(n#145L e3 s v2 p2)(n#146L f3 s g- v2 p2)
+        //(n#156L g3 e g+ v2 p2)(n#157L d3 e g- v2 p2)
+        //(barline#163L)
+        //(n#164L a4 e. v1 p1)
+        //(n#165L c3 q v2 p2)(n#166L g3 q v2 p2)
+        //(barline#167L) ))
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string(
             "(score (vers 2.0)"
@@ -257,6 +257,8 @@ public:
             "            (barline)"
             "    )))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        cout << test_name() << endl;
+//        cout << m_pDoc->to_string(true) << endl;
     }
 
     void create_document_8()
@@ -314,6 +316,11 @@ public:
     {
         ColStaffObjs* pCol = m_pScore->get_staffobjs_table();
         cout << pCol->dump();
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
     }
 
     LibraryScope m_libraryScope;
@@ -777,7 +784,7 @@ SUITE(ScoreCursorTest)
 
         cursor.move_next();     //to clef F4 on instr 2, staff 1
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 136L, 136L);
+        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 138L, 138L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_176)
@@ -787,7 +794,7 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
-        cursor.point_to(164L);   //to last note instr 2, staff 2
+        cursor.point_to(166L);   //to last note instr 2, staff 2
         cursor.move_next();     //to barline 164L
 
         cursor.move_next();     //to end of score
@@ -811,37 +818,37 @@ SUITE(ScoreCursorTest)
 //        cout << m_pDoc->to_string(true) << endl;
 //        dump_col_staff_objs();
 
-        cursor.point_to(141L);   //first note in instr 2, staff 2
+        cursor.point_to(143L);   //first note in instr 2, staff 2
         cursor.set_current_voice(2);
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 0.0, 141L, 141L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 0.0, 143L, 143L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 16.0, 142L, 142L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 16.0, 144L, 144L);
 //        cout << cursor.dump_cursor();
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 32.0, 143L, 143L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 32.0, 145L, 145L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 48.0, 144L, 144L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 48.0, 146L, 146L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 64.0, 154L, 154L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 64.0, 156L, 156L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 96.0, 155L, 155L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 96.0, 157L, 157L);
 
         cursor.move_next();     //to barline 80L
-        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 128.0, 161L, 161L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 0, 128.0, 163L, 163L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 163L, 163L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 165L, 165L);
 
         cursor.move_next();
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 192.0, 164L, 164L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 192.0, 166L, 166L);
 
         cursor.move_next();     //to barline 164L
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 256.0, 165L, 165L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 256.0, 167L, 167L);
 
         cursor.move_next();     //to end of score
         CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 1, 1, 2, 256.0f);
@@ -1381,8 +1388,8 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         //cout << m_pDoc->to_string(true) << endl;
         //dump_col_staff_objs();
-        cursor.point_to(136L);   //clef instr 2, staff 1
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 136L, 136L);
+        cursor.point_to(138L);   //clef instr 2, staff 1
+        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 138L, 138L);
 
         cursor.move_prev();
 
@@ -1453,8 +1460,8 @@ SUITE(ScoreCursorTest)
         //235. from start of staff -> to end of prev staff -> to barline
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(136L);   //start of instr 2, staff 1
-        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 136L, 136L);
+        cursor.point_to(138L);   //start of instr 2, staff 1
+        CHECK_CURRENT_STATE(cursor, 1, 0, 0, 0.0, 138L, 138L);
 
         cursor.move_prev();     //end of instr 1, staff 2
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 2, 256.0f);
@@ -1589,7 +1596,7 @@ SUITE(ScoreCursorTest)
 
         cursor.to_measure(1, 1, 1);
 
-        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 163L, 163L);
+        CHECK_CURRENT_STATE(cursor, 1, 1, 1, 128.0, 165L, 165L);
         //cout << cursor.dump_cursor();
     }
 
@@ -1922,7 +1929,7 @@ SUITE(ScoreCursorTest)
         //408. bug1. restore end of staff state: bad instrument
         create_document_7();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(136L);   //start of instr 2, staff 1
+        cursor.point_to(138L);   //start of instr 2, staff 1
         cursor.move_prev();     //end of instr 1, staff 2
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 2, 256.0f);
         SpElementCursorState spState = cursor.get_state();

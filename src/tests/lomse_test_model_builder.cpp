@@ -42,6 +42,8 @@
 #include "lomse_im_factory.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_staffobjs_cursor.h"
+#include "lomse_xml_parser.h"
+#include "lomse_mxl_analyser.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -73,7 +75,8 @@ SUITE(ModelBuilderTest)
     TEST_FIXTURE(ModelBuilderTestFixture, ModelBuilderScore)
     {
         //This just checks that compiler creates a model builder and it
-        //structurizes the score (creates the associated ColStaffObjs)
+        //structurizes the score (creates the associated ColStaffObjs
+        // and the JumpsTable objects)
 
         Document doc(m_libraryScope);
         //ModelBuilder* builder = Injector::inject_ModelBuilder(doc.get_scope());
@@ -86,6 +89,7 @@ SUITE(ModelBuilderTest)
         CHECK( pScore != NULL );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != NULL );
+//        CHECK( pScore->get_jumps_table() != NULL );
 
         delete pIModel;
     }
@@ -93,7 +97,7 @@ SUITE(ModelBuilderTest)
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 class PitchAssignerTestFixture
 {
 public:
@@ -249,7 +253,425 @@ SUITE(PitchAssignerTest)
         CHECK( pNote3->get_fpitch() == k_undefined_fpitch );
     }
 
-}
+};
+
+
+//=======================================================================================
+// MidiAssigner tests
+//=======================================================================================
+
+//---------------------------------------------------------------------------------------
+//Derived class to access protected members
+class MyMidiAssigner : public MidiAssigner
+{
+protected:
+
+public:
+    MyMidiAssigner()
+        : MidiAssigner()
+    {
+    }
+    virtual ~MyMidiAssigner() {}
+
+    //access to protected member methods
+    void my_collect_sounds_info(ImoScore* pScore) { collect_sounds_info(pScore); }
+    void my_assign_score_instr_id() { assign_score_instr_id(); }
+    int my_num_sounds() { return int(m_sounds.size()); }
+    list<ImoSoundInfo*>& get_sounds() { return m_sounds; }
+};
+
+//---------------------------------------------------------------------------------------
+// MidiAssigner test fixture
+//---------------------------------------------------------------------------------------
+class MidiAssignerTestFixture
+{
+public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
+
+    MidiAssignerTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
+    {
+        m_scores_path = TESTLIB_SCORES_PATH;
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+    }
+
+    ~MidiAssignerTestFixture()    //TearDown fixture
+    {
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+};
+
+SUITE(MidiAssignerTest)
+{
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_01)
+    {
+        //@01. collect_sound_info() adds sound info when missing
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list>"
+                "<score-part id='P1'>"
+                    "<part-name>Music</part-name>"
+                "</score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "</score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 0 );
+
+        MyMidiAssigner assigner;
+        assigner.my_collect_sounds_info(pScore);
+        assigner.my_assign_score_instr_id();
+
+        CHECK( assigner.my_num_sounds() == 1 );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+    }
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_02)
+    {
+        //@02. collect_sound_info() adds sound info when missing. Many instruments
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list>"
+                "<score-part id='P1'>"
+                    "<part-name>Music</part-name>"
+                "</score-part>"
+                "<score-part id='P2'>"
+                "</score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 0 );
+
+        MyMidiAssigner assigner;
+        assigner.my_collect_sounds_info(pScore);
+        assigner.my_assign_score_instr_id();
+
+        CHECK( assigner.my_num_sounds() == 2 );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+        pInstr = pScore->get_instrument(1);
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-2" );
+        list<ImoSoundInfo*>& sounds = assigner.get_sounds();
+        list<ImoSoundInfo*>::iterator it = sounds.begin();
+        CHECK( (*it)->get_score_instr_id() == "SOUND-1" );
+        ++it;
+        CHECK( (*it)->get_score_instr_id() == "SOUND-2" );
+    }
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_03)
+    {
+        //@03. collect_sound_info() collects all sound info elements and
+        //@    adds sound info when missing.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list>"
+                "<score-part id='P1'>"
+                    "<part-name>Music</part-name>"
+                    "<score-instrument id='P1-I1'>"
+                        "<instrument-name>Marimba</instrument-name>"
+                    "</score-instrument>"
+                    "<midi-instrument id='P1-I1'>"
+                        "<midi-channel>1</midi-channel>"
+                    "</midi-instrument>"
+                "</score-part>"
+                "<score-part id='P2'>"
+                "</score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        pInstr = pScore->get_instrument(1);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 0 );
+
+        MyMidiAssigner assigner;
+        assigner.my_collect_sounds_info(pScore);
+        assigner.my_assign_score_instr_id();
+
+        CHECK( assigner.my_num_sounds() == 2 );
+        pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        pInstr = pScore->get_instrument(1);
+        CHECK( pInstr->get_num_sounds() == 1 );
+        CHECK( pInfo != NULL );
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+        list<ImoSoundInfo*>& sounds = assigner.get_sounds();
+        list<ImoSoundInfo*>::iterator it = sounds.begin();
+        CHECK( (*it)->get_score_instr_id() == "P1-I1" );
+        ++it;
+        CHECK( (*it)->get_score_instr_id() == "SOUND-1" );
+    }
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_04)
+    {
+        //@04. channel not modified when port missing
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0) (instrument (infoMIDI 56 2)"
+            "(musicData (metronome q 55) )))" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "" );
+        CHECK( pInfo->get_midi_channel() == 2 );
+        CHECK( pInfo->get_midi_port() == -1 );
+
+        MyMidiAssigner assigner;
+        assigner.assign_midi_data(pScore);
+
+        CHECK( pInstr->get_num_sounds() == 1 );
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_midi_channel() == 2 );
+        CHECK( pInfo->get_midi_port() == 0 );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+    }
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_05)
+    {
+        //@05. assign channel and port
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0)"
+            "(instrument (infoMIDI 56 0)(musicData))"
+            "(instrument (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo->get_score_instr_id() == "" );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_port() == -1 );
+        pInstr = pScore->get_instrument(1);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 1 );
+
+        MyMidiAssigner assigner;
+        assigner.assign_midi_data(pScore);
+
+        CHECK( assigner.my_num_sounds() == 2 );
+
+        pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_num_sounds() == 1 );
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_port() == 0 );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+
+        pInstr = pScore->get_instrument(1);
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-2" );
+        CHECK( pInfo->get_midi_channel() == 1 );
+        CHECK( pInfo->get_midi_port() == 0 );
+    }
+
+    TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_06)
+    {
+        //@06. assign channel when port specified
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+                "<part-list>"
+                    "<score-part id='P1'>"
+                        "<part-name>Music</part-name>"
+                        "<score-instrument id='P1-I1'>"
+                            "<instrument-name>Marimba</instrument-name>"
+                        "</score-instrument>"
+                        "<midi-device id='P1-I1' port='3'>SoundCard</midi-device>"
+                    "</score-part>"
+                    "<score-part id='P2'>"
+                    "</score-part>"
+                "</part-list>"
+                "<part id='P1'></part>"
+                "<part id='P2'></part>"
+            "</score-partwise>"
+        );
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_midi_channel() == -1 );
+        CHECK( pInfo->get_midi_port() == 2 );
+
+        pInstr = pScore->get_instrument(1);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_num_sounds() == 0 );
+
+        MyMidiAssigner assigner;
+        assigner.assign_midi_data(pScore);
+
+        CHECK( assigner.my_num_sounds() == 2 );
+
+        pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_num_sounds() == 1 );
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_port() == 2 );
+
+        pInstr = pScore->get_instrument(1);
+        pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
+        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_port() == 0 );
+    }
+
+//"<part-list>"
+//	"<score-part id='P1'>"
+//		"<part-name>Drums</part-name>"
+//		"<score-instrument id='P1-X4'>"
+//			"<instrument-name>Snare Drum</instrument-name>"
+//		"</score-instrument>"
+//		"<score-instrument id='P1-X2'>"
+//			"<instrument-name>Kick Drum</instrument-name>"
+//		"</score-instrument>"
+//		"<score-instrument id='P1-X13'>"
+//			"<instrument-name>Crash Cymbal</instrument-name>"
+//		"</score-instrument>"
+//		"<score-instrument id='P1-X6'>"
+//			"<instrument-name>Hi-Hat%g Closed</instrument-name>"
+//		"</score-instrument>"
+//		"<midi-instrument id='P1-X4'>"
+//			"<midi-channel>10</midi-channel>"
+//			"<midi-program>1</midi-program>"
+//			"<midi-unpitched>39</midi-unpitched>"
+//		"</midi-instrument>"
+//		"<midi-instrument id='P1-X2'>"
+//			"<midi-channel>10</midi-channel>"
+//			"<midi-program>1</midi-program>"
+//			"<midi-unpitched>37</midi-unpitched>"
+//		"</midi-instrument>"
+//		"<midi-instrument id='P1-X13'>"
+//			"<midi-channel>10</midi-channel>"
+//			"<midi-program>1</midi-program>"
+//			"<midi-unpitched>50</midi-unpitched>"
+//		"</midi-instrument>"
+//		"<midi-instrument id='P1-X6'>"
+//			"<midi-channel>10</midi-channel>"
+//			"<midi-program>1</midi-program>"
+//			"<midi-unpitched>43</midi-unpitched>"
+//		"</midi-instrument>"
+//	"</score-part>"
+//	"<score-part id='P2'>"
+//		"<part-name>Cowbell</part-name>"
+//		"<score-instrument id='P2-X1'>"
+//			"<instrument-name>Cowbell</instrument-name>"
+//		"</score-instrument>"
+//		"<midi-instrument id='P2-X1'>"
+//			"<midi-channel>10</midi-channel>"
+//			"<midi-program>1</midi-program>"
+//			"<midi-unpitched>57</midi-unpitched>"
+//		"</midi-instrument>"
+//	"</score-part>"
+//"</part-list>"
+
+};
+
 
 
 

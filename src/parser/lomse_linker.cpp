@@ -76,12 +76,6 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case k_imo_listitem:
             return add_listitem(static_cast<ImoListItem*>(pChild));
 
-        case k_imo_midi_info:
-            return add_midi_info(static_cast<ImoMidiInfo*>(pChild));
-
-        case k_imo_instr_info:
-            return add_instr_info(static_cast<ImoSoundInfo*>(pChild));
-
         case k_imo_music_data:
             return add_child(k_imo_instrument, pChild);
 
@@ -99,6 +93,9 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 
         case k_imo_score_title:
             return add_title(static_cast<ImoScoreTitle*>(pChild));
+
+        case k_imo_sound_info:
+            return add_sound_info(static_cast<ImoSoundInfo*>(pChild));
 
         case k_imo_staff_info:
             return add_staff_info(static_cast<ImoStaffInfo*>(pChild));
@@ -302,24 +299,12 @@ ImoObj* Linker::add_listitem(ImoListItem* pItem)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Linker::add_midi_info(ImoMidiInfo* pInfo)
+ImoObj* Linker::add_sound_info(ImoSoundInfo* pInfo)
 {
     if (m_pParent && m_pParent->is_instrument())
     {
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pParent);
-        pInstr->set_midi_info(pInfo);
-        return NULL;
-    }
-    return pInfo;
-}
-
-//---------------------------------------------------------------------------------------
-ImoObj* Linker::add_instr_info(ImoSoundInfo* pInfo)
-{
-    if (m_pParent && m_pParent->is_instrument())
-    {
-        ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pParent);
-        pInstr->set_instr_info(pInfo);
+        pInstr->add_sound_info(pInfo);
         return NULL;
     }
     return pInfo;

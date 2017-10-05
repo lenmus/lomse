@@ -78,7 +78,6 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_image:               pObj = LOMSE_NEW ImoImage();              break;
         case k_imo_inline_wrapper:      pObj = LOMSE_NEW ImoInlineWrapper();      break;
         case k_imo_instr_group:         pObj = LOMSE_NEW ImoInstrGroup();         break;
-        case k_imo_instr_info:          pObj = LOMSE_NEW ImoSoundInfo();          break;
         case k_imo_instrument:          pObj = LOMSE_NEW ImoInstrument();         break;
         case k_imo_instruments:         pObj = LOMSE_NEW ImoInstruments();        break;
         case k_imo_instrument_groups:   pObj = LOMSE_NEW ImoInstrGroups();        break;
@@ -91,7 +90,6 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_lyric:               pObj = LOMSE_NEW ImoLyric();              break;
         case k_imo_lyrics_text_info:    pObj = LOMSE_NEW ImoLyricsTextInfo();     break;
         case k_imo_metronome_mark:      pObj = LOMSE_NEW ImoMetronomeMark();      break;
-        case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();           break;
         case k_imo_multicolumn:         pObj = LOMSE_NEW ImoMultiColumn(pDoc);    break;
         case k_imo_music_data:          pObj = LOMSE_NEW ImoMusicData();          break;
         case k_imo_note:                pObj = LOMSE_NEW ImoNote();               break;
@@ -110,6 +108,8 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_score_title:         pObj = LOMSE_NEW ImoScoreTitle();         break;
         case k_imo_slur:                pObj = LOMSE_NEW ImoSlur();               break;
         case k_imo_slur_dto:            pObj = LOMSE_NEW ImoSlurDto();            break;
+        case k_imo_sound_info:          pObj = LOMSE_NEW ImoSoundInfo();          break;
+        case k_imo_sounds:              pObj = LOMSE_NEW ImoSounds();             break;
         case k_imo_spacer:              pObj = LOMSE_NEW ImoSpacer();             break;
         case k_imo_staff_info:          pObj = LOMSE_NEW ImoStaffInfo();          break;
         case k_imo_style:               pObj = LOMSE_NEW ImoStyle();              break;

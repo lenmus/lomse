@@ -361,10 +361,10 @@ protected:
     int get_mandatory_integer_attribute(const string& name, int nDefault,
                                         const string& element);
     int get_optional_int_attribute(const string& name, int nDefault);
+    bool get_optional_yes_no_attribute(const string& name, bool fDefault);
 
     //methods to get value of current node
     int get_cur_node_value_as_integer(int nDefault);
-
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -1049,6 +1049,29 @@ int MxlElementAnalyser::get_mandatory_integer_attribute(const string& name, int 
     }
 
     return attrb;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlElementAnalyser::get_optional_yes_no_attribute(const string& name, bool fDefault)
+{
+    if (has_attribute(&m_analysedNode, name))
+    {
+        string value = m_analysedNode.attribute_value(name);
+        if (value == "yes")
+            return true;
+        else if (value == "no")
+            return false;
+        else
+        {
+
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                m_analysedNode.name() + ": invalid value for yes-no attribute '"
+                + name + "'. Value '" + (fDefault ? "yes" : "no") + "' assumed.");
+            return fDefault;
+        }
+    }
+    else
+        return fDefault;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2794,13 +2817,40 @@ public:
 
         //attrb: id
         string id = get_optional_string_attribute("id", "");
-        //TODO Match id with score-instrument id or to all score-instrument if empty
+        ImoSoundInfo* pInfo = NULL;
+        if (!id.empty())
+        {
+            pInfo = pInstr->get_sound_info(id);
+            if (!pInfo)
+            {
+                error_msg("id '" + id + "' doesn't match any <score-instrument>"
+                           + ". <midi-device> ignored.");
+                return NULL;
+            }
+        }
 
         // attrb: port
-        pInstr->set_midi_port( get_optional_int_attribute("port", 1) - 1);
+        int port = get_optional_int_attribute("port", 1);
 
         // midi-device name
-        pInstr->set_midi_device_name( m_analysedNode.value() );
+        string name = m_analysedNode.value();
+
+
+        if (!id.empty())
+        {
+            pInfo->set_midi_port(port - 1);
+            pInfo->set_midi_device_name(name);
+        }
+        else
+        {
+            int  nSounds = pInstr->get_num_sounds();
+            for (int i=0; i < nSounds; ++i)
+            {
+                ImoSoundInfo* pInfo = pInstr->get_sound_info(i);
+                pInfo->set_midi_port(port - 1);
+                pInfo->set_midi_device_name(name);
+            }
+        }
 
         return NULL;
     }
@@ -2844,38 +2894,44 @@ public:
         string id = get_mandatory_string_attribute("id", "", "midi-instrument");
         if (id.empty())
             return NULL;
-        //TODO Match id with score-instrument id
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(id);
+        if (!pInfo)
+        {
+            error_msg("id '" + id + "' doesn't match any <score-instrument>"
+                       + ". <midi-instrument> ignored.");
+            return NULL;
+        }
 
         // midi-channel?    1 to 16
-        pInstr->set_midi_channel(
+        pInfo->set_midi_channel(
                     analyze_optional_child_pcdata_int("midi-channel", 1, 16, 0) - 1);
 
         // midi-name?
-        pInstr->set_midi_name(
+        pInfo->set_midi_name(
                     analyze_optional_child_pcdata("midi-name", "") );
 
         // midi-bank?   1 to 16,384
-        pInstr->set_midi_bank(
+        pInfo->set_midi_bank(
                     analyze_optional_child_pcdata_int("midi-bank", 1, 16384, 1) - 1);
 
         // midi-program?    1 to 128
-        pInstr->set_midi_program(
+        pInfo->set_midi_program(
                     analyze_optional_child_pcdata_int("midi-program", 1, 128, 1) - 1);
 
         // midi-unpitched?  1 to 128
-        pInstr->set_midi_unpitched(
+        pInfo->set_midi_unpitched(
                     analyze_optional_child_pcdata_int("midi-unpitched", 1, 128, 1) - 1);
 
         // volume?  0 to 100, with decimal values
-        pInstr->set_midi_volume(
+        pInfo->set_midi_volume(
             analyze_optional_child_pcdata_float("volume", 0.0, 100.0, 100.0) / 100.0f );
 
         // pan?     -180 and 180, with decimal values
-        pInstr->set_midi_pan(
+        pInfo->set_midi_pan(
                     analyze_optional_child_pcdata_float("pan", -180.0, 180.0, 0.0) );
 
         // elevation?   -90 and 90, with decimal values
-        pInstr->set_midi_elevation(
+        pInfo->set_midi_elevation(
                     analyze_optional_child_pcdata_float("elevation", -90.0, 90.0, 0.0) );
 
         error_if_more_elements();
@@ -4132,23 +4188,28 @@ public:
         string id = get_mandatory_string_attribute("id", "", "score-instrument");
         if (id.empty())
             return NULL;
-         pInstr->set_score_instr_id(id);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
+                    ImFactory::inject(k_imo_sound_info, pDoc) );
+
+        pInfo->set_score_instr_id(id);
 
         // instrument-name
-        pInstr->set_score_instr_name(
+        pInfo->set_score_instr_name(
                     analyze_mandatory_child_pcdata("instrument-name") );
 
         // instrument-abbreviation?
-        pInstr->set_score_instr_abbrev(
+        pInfo->set_score_instr_abbrev(
                     analyze_optional_child_pcdata("instrument-abbreviation", "") );
 
         // instrument-sound?
-        pInstr->set_score_instr_sound(
+        pInfo->set_score_instr_sound(
                     analyze_optional_child_pcdata("instrument-sound", "") );
 
         // (solo | ensemble)?
         bool fSolo = get_optional("solo");
-        pInstr->set_score_instr_solo(true);
+        pInfo->set_score_instr_solo(true);
 
         if (get_optional("ensemble"))
         {
@@ -4156,17 +4217,18 @@ public:
                 error_msg("'ensemble' element ignored. Element 'solo' is also specified.");
             else
             {
-                pInstr->set_score_instr_ensemble(true);
-                pInstr->set_score_instr_ensemble_size(
+                pInfo->set_score_instr_ensemble(true);
+                pInfo->set_score_instr_ensemble_size(
                     analyze_optional_child_pcdata_int("ensemble", 1, 100000, 0) );
             }
         }
 
         // virtual-instrument?
-        analyse_optional("virtual-instrument", pInstr);
+        analyse_optional("virtual-instrument", pInfo);
 
         error_if_more_elements();
 
+        pInstr->add_sound_info(pInfo);
         return NULL;
     }
 };
@@ -4222,10 +4284,22 @@ public:
             m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
 
         // (midi-device?, midi-instrument?)*
-        while (get_optional("midi-device") || get_optional("midi-instrument") )
+        while (more_children_to_analyse())
         {
-             m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "midi-device"
+                || m_childToAnalyse.name() == "midi-instrument")
+            {
+                move_to_next_child();
+                m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
+            }
+            else
+                break;
         }
+//        while (get_optional("midi-device") || get_optional("midi-instrument") )
+//        {
+//             m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
+//        }
 
         error_if_more_elements();
 
@@ -4673,6 +4747,27 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ sound
+//<!ELEMENT sound ((midi-device?, midi-instrument?, play?)*, offset?)>
+//<!ATTLIST sound
+//    tempo CDATA #IMPLIED
+//    dynamics CDATA #IMPLIED
+//    dacapo %yes-no; #IMPLIED
+//    segno CDATA #IMPLIED
+//    dalsegno CDATA #IMPLIED
+//    coda CDATA #IMPLIED
+//    tocoda CDATA #IMPLIED
+//    divisions CDATA #IMPLIED
+//    forward-repeat %yes-no; #IMPLIED
+//    fine CDATA #IMPLIED
+//    %time-only;
+//    pizzicato %yes-no; #IMPLIED
+//    pan CDATA #IMPLIED                <-- deprecated MusicXML 2.0
+//    elevation CDATA #IMPLIED          <-- deprecated MusicXML 2.0
+//    damper-pedal %yes-no-number; #IMPLIED
+//    soft-pedal %yes-no-number; #IMPLIED
+//    sostenuto-pedal %yes-no-number; #IMPLIED
+//>
+
 
 class SoundMxlAnalyser : public MxlElementAnalyser
 {
@@ -4684,7 +4779,44 @@ public:
 
     ImoObj* do_analysis()
     {
-        //TODO
+//        // attrib: tempo CDATA #IMPLIED - non-negative decimal
+//        // attrib: dynamics CDATA #IMPLIED - non-negative decimal
+//
+//        // attrib: dacapo %yes-no; #IMPLIED
+//        bool dacapo = get_optional_yes_no_attribute("dacapo", false);
+//
+//        // attrib: segno CDATA #IMPLIED - label to reference it
+//
+//        // attrib: dalsegno CDATA #IMPLIED - label to reference it
+//
+//        // attrib: coda CDATA #IMPLIED - label to reference it
+//
+//        // attrib: tocoda CDATA #IMPLIED - label to reference it
+//
+//        // attrib: divisions CDATA #IMPLIED
+//
+////        // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
+////        bool forwardRepeat = get_optional_yes_no_attribute("forward-repeat", false);
+////        if (!forwardRepeat)
+////        {
+////
+////        }
+//
+//        // attrib: fine CDATA #IMPLIED
+//        // attrib: %time-only;
+//
+//        // attrib: pizzicato %yes-no; #IMPLIED
+//        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
+//
+//        // attrib: damper-pedal %yes-no-number; #IMPLIED
+//        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
+//
+//        // attrib: soft-pedal %yes-no-number; #IMPLIED
+//        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
+//
+//        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+//        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
+
         return NULL;
     }
 };
@@ -5311,19 +5443,20 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
-        if (!pInstr)
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>(m_pAnchor);
+        //ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
+        if (!pInfo)
         {
             LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
             return NULL;
         }
 
         // virtual-library?
-        pInstr->set_score_instr_virtual_library(
+        pInfo->set_score_instr_virtual_library(
                     analyze_optional_child_pcdata("virtual-library", "") );
 
         // virtual-name?
-        pInstr->set_score_instr_virtual_name(
+        pInfo->set_score_instr_virtual_name(
                     analyze_optional_child_pcdata("virtual-name", "") );
 
         error_if_more_elements();

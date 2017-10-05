@@ -51,7 +51,7 @@ class ImoInstrGroup;
 class ImoInstrument;
 class ImoSoundInfo;
 class ImoListItem;
-class ImoMidiInfo;
+class ImoSoundInfo;
 class ImoObj;
 class ImoOptionInfo;
 class ImoPageInfo;
@@ -93,8 +93,7 @@ protected:
     ImoObj* add_bezier(ImoBezierInfo* pBezier);
     ImoObj* add_cursor(ImoCursorInfo* pCursor);
     ImoObj* add_listitem(ImoListItem* pItem);
-    ImoObj* add_midi_info(ImoMidiInfo* pInfo);
-    ImoObj* add_instr_info(ImoSoundInfo* pInfo);
+    ImoObj* add_sound_info(ImoSoundInfo* pInfo);
     ImoObj* add_param_info(ImoParamInfo* pParam);
     ImoObj* add_staff_info(ImoStaffInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);

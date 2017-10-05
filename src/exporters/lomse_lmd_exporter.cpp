@@ -756,7 +756,7 @@ public:
         start_element("instrument", m_pObj);
         close_start_tag();
         add_num_staves();
-        add_midi_info();
+        add_sound_info();
         add_name_abbreviation();
         add_music_data();
         end_element();
@@ -774,7 +774,7 @@ protected:
      //       sSource += m_pVStaff->GetStaff(i+1)->SourceLMD(nIndent, fUndoData);
     }
 
-    void add_midi_info()
+    void add_sound_info()
     {
 	    //sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
 	    //sSource += wxString::Format(_T("(infoMIDI %d %d)\n"), m_nMidiInstr, m_nMidiChannel);

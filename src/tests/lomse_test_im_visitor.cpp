@@ -231,7 +231,7 @@ SUITE(ImVisitorTest)
 //             << ", num_in_nodes=" << v.num_in_nodes()
 //             << ", num_out_nodes=" << v.num_out_nodes() << endl;
         CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 103 );
+        CHECK( v.num_in_nodes() == 107 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 

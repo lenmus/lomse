@@ -27,89 +27,42 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_MODEL_BUILDER_H__
-#define __LOMSE_MODEL_BUILDER_H__
+#include "lomse_jumps_table.h"
 
-#include <ostream>
+//#include <algorithm>
+#include "lomse_internal_model.h"
+//#include "lomse_im_note.h"
+//#include "lomse_time.h"
+//#include "lomse_staffobjs_table.h"
+//#include "lomse_staffobjs_cursor.h"
+//#include "lomse_score_utilities.h"
+//
+//#include <boost/format.hpp>
 
-#include <map>
-#include <list>
 using namespace std;
 
 namespace lomse
 {
 
-//forward declarations
-class InternalModel;
-class ImoDocument;
-class ImoKeySignature;
-class ImoNote;
-class ImoObj;
-class ImoScore;
-class ImoSoundInfo;
-
+//=======================================================================================
+// JumpsTable implementation
+//=======================================================================================
+JumpsTable::JumpsTable(ImoScore* pScore)
+    : m_pScore(pScore)
+{
+}
 
 //---------------------------------------------------------------------------------------
-// ModelBuilder. Implements the final step of LDP compiler: code generation.
-// Traverses the parse tree and creates the internal model
-class ModelBuilder
+JumpsTable::~JumpsTable()
 {
-public:
-    ModelBuilder() {}
-    virtual ~ModelBuilder() {}
-
-    ImoDocument* build_model(InternalModel* IModel);
-    void structurize(ImoObj* pImo);
-
-};
+}
 
 //---------------------------------------------------------------------------------------
-// PitchAssigner. Implements the algorithm to traverse the score and assign pitch to
-// notes, based on notated pitch, and taking into account key signature and notated
-// accidentals introduced by previous notes on the same measure.
-class PitchAssigner
+void JumpsTable::create_table()
 {
-protected:
-    int m_accidentals[7];
-
-public:
-    PitchAssigner() {}
-    virtual ~PitchAssigner() {}
-
-    void assign_pitch(ImoScore* pScore);
-
-
-protected:
-    void reset_accidentals(ImoKeySignature* pKey);
-    void update_context_accidentals(ImoNote* pNote);
-    void compute_pitch(ImoNote* pNote);
-
-};
-
-//---------------------------------------------------------------------------------------
-// MidiAssigner. Implements the algorithm to traverse the score instruments and assign
-// midi channel and midi port pitch to
-// notes, based on notated pitch, and taking into account key signature and notated
-// accidentals introduced by previous notes on the same measure.
-class MidiAssigner
-{
-protected:
-    list<ImoSoundInfo*> m_sounds;
-	list<string> m_ids;
-
-public:
-    MidiAssigner();
-    virtual ~MidiAssigner();
-
-	void assign_midi_data(ImoScore* pScore);
-
-protected:
-    void collect_sounds_info(ImoScore* pScore);
-    void assign_score_instr_id();
-    void assign_port_and_channel();
-};
+    m_pScore->set_jumps_table(this);
+}
 
 
 }   //namespace lomse
 
-#endif      //__LOMSE_MODEL_BUILDER_H__
