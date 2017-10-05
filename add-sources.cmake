@@ -126,6 +126,7 @@ set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_jumps_table.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
 )

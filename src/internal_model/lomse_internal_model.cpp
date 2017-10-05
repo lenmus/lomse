@@ -44,6 +44,8 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
+#include "lomse_jumps_table.h"
+
 
 using namespace std;
 
@@ -360,16 +362,15 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_figured_bass_info] = "figured-bass";
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
-        m_TypeToName[k_imo_instr_info] = "instr-info";
         m_TypeToName[k_imo_line_style] = "line-style";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
-        m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";
         m_TypeToName[k_imo_param_info] = "param";
         m_TypeToName[k_imo_point_dto] = "point";
         m_TypeToName[k_imo_size_dto] = "size";
         m_TypeToName[k_imo_slur_dto] = "slur-dto";
+        m_TypeToName[k_imo_sound_info] = "sound-info";
         m_TypeToName[k_imo_staff_info] = "staff-info";
         m_TypeToName[k_imo_style] = "style";
         m_TypeToName[k_imo_system_info] = "system-info";
@@ -390,6 +391,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
         m_TypeToName[k_imo_styles] = "styles";
+        m_TypeToName[k_imo_sounds] = "sounds";
         m_TypeToName[k_imo_table_head] = "table-head";
         m_TypeToName[k_imo_table_body] = "table-body";
 
@@ -2084,8 +2086,6 @@ ImoInstrument::ImoInstrument()
     , m_pScore(NULL)
     , m_name()
     , m_abbrev()
-    , m_sound()
-//    , m_pGroup(NULL)
     , m_partId("")
     , m_barlineLayout(k_isolated)
 {
@@ -2167,18 +2167,59 @@ void ImoInstrument::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::set_instr_info(ImoSoundInfo* pInfo)
+ImoSounds* ImoInstrument::get_sounds()
 {
-    m_sound = *pInfo;
-    delete pInfo;
+    return dynamic_cast<ImoSounds*>( get_child_of_type(k_imo_sounds) );
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::set_midi_info(ImoMidiInfo* pInfo)
+void ImoInstrument::add_sound_info(ImoSoundInfo* pInfo)
 {
-    m_sound.set_midi_channel(pInfo->get_midi_channel());
-    m_sound.set_midi_program(pInfo->get_midi_program());
-    delete pInfo;
+    ImoSounds* pColSounds = get_sounds();
+    if (!pColSounds)
+    {
+        Document* pDoc = get_the_document();
+        pColSounds = static_cast<ImoSounds*>( ImFactory::inject(k_imo_sounds, pDoc) );
+        append_child_imo(pColSounds);
+    }
+    pColSounds->append_child_imo(pInfo);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoInstrument::get_num_sounds()
+{
+    ImoSounds* pColSounds = get_sounds();
+    if (pColSounds)
+        return pColSounds->get_num_children();
+    else
+        return 0;
+}
+
+//---------------------------------------------------------------------------------------
+ImoSoundInfo* ImoInstrument::get_sound_info(const string& soundId)
+{
+    ImoSounds* pColSounds = get_sounds();
+    if (pColSounds)
+    {
+        ImoObj::children_iterator it;
+        for (it= pColSounds->begin(); it != pColSounds->end(); ++it)
+        {
+            ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(*it);
+            if (pInfo->get_score_instr_id() == soundId)
+                return pInfo;
+        }
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoSoundInfo* ImoInstrument::get_sound_info(int iSound)    //iSound = 0..n-1
+{
+    ImoSounds* pColSounds = get_sounds();
+    if (pColSounds)
+        return dynamic_cast<ImoSoundInfo*>( pColSounds->get_child(iSound) );
+    else
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2757,6 +2798,7 @@ ImoScore::ImoScore(Document* pDoc)
     , m_version(0)
     , m_pColStaffObjs(NULL)
     , m_pMidiTable(NULL)
+    , m_pJumpsTable(NULL)
     , m_systemInfoFirst()
     , m_systemInfoOther()
     , m_pageInfo()
@@ -2775,6 +2817,7 @@ ImoScore::~ImoScore()
     delete m_pColStaffObjs;
     delete_text_styles();
     delete m_pMidiTable;
+    delete m_pJumpsTable;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2889,11 +2932,19 @@ void ImoScore::set_defaults_for_options()
         add_option(pOpt);
     }
 }
+
 //---------------------------------------------------------------------------------------
 void ImoScore::set_staffobjs_table(ColStaffObjs* pColStaffObjs)
 {
-    delete m_pColStaffObjs;;
+    delete m_pColStaffObjs;
     m_pColStaffObjs = pColStaffObjs;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::set_jumps_table(JumpsTable* pTable)
+{
+    delete m_pJumpsTable;
+    m_pJumpsTable = pTable;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3033,7 +3084,7 @@ void ImoScore::add_instrument(ImoInstrument* pInstr, const string& partId)
     if (pInstr->get_instr_id() == "")
         pInstr->set_instr_id(partId);
     ImoInstruments* pColInstr = get_instruments();
-    return pColInstr->append_child_imo(pInstr);
+    pColInstr->append_child_imo(pInstr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -3319,11 +3370,18 @@ ImoInstrument* ImoScore::add_instrument()
 {
     ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                 ImFactory::inject(k_imo_instrument, m_pDoc) );
-    add_instrument(pInstr);
+
+    ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
+                                ImFactory::inject(k_imo_sound_info, m_pDoc) );
+    pInstr->add_sound_info(pInfo);
+
     ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, m_pDoc));
     pInstr->append_child_imo(pMD);
+
+    add_instrument(pInstr);
     pInstr->set_owner_score(this);
+
     return pInstr;
 }
 

@@ -36,7 +36,10 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_score_utilities.h"
 #include "lomse_logger.h"
+#include "lomse_jumps_table.h"
+#include "lomse_im_factory.h"
 
+#include <algorithm>
 using namespace std;
 
 namespace lomse
@@ -115,8 +118,16 @@ void ModelBuilder::structurize(ImoObj* pImo)
     if (pImo && pImo->is_score())
     {
         ImoScore* pScore = static_cast<ImoScore*>(pImo);
+
         ColStaffObjsBuilder builder;
         builder.build(pScore);
+
+        MidiAssigner assigner;
+        assigner.assign_midi_data(pScore);
+
+		JumpsTable* playbackTable = LOMSE_NEW JumpsTable(pScore);
+		playbackTable->create_table();
+
         PitchAssigner tuner;
         tuner.assign_pitch(pScore);
     }
@@ -223,6 +234,169 @@ void PitchAssigner::update_context_accidentals(ImoNote* pNote)
             break;
         default:
             ;
+    }
+}
+
+
+//=======================================================================================
+// MidiAssigner implementation
+//=======================================================================================
+MidiAssigner::MidiAssigner()
+{
+}
+
+//---------------------------------------------------------------------------------------
+MidiAssigner::~MidiAssigner()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void MidiAssigner::assign_midi_data(ImoScore* pScore)
+{
+    collect_sounds_info(pScore);
+    assign_score_instr_id();
+    assign_port_and_channel();
+}
+
+//---------------------------------------------------------------------------------------
+void MidiAssigner::collect_sounds_info(ImoScore* pScore)
+{
+    int instruments = pScore->get_num_instruments();
+    for (int iInstr=0; iInstr < instruments; ++iInstr)
+    {
+        ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+        ImoSounds* sounds = pInstr->get_sounds();
+        if (sounds)
+        {
+            ImoObj::children_iterator it;
+            for (it= sounds->begin(); it != sounds->end(); ++it)
+            {
+                ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(*it);
+                m_sounds.push_back(pInfo);
+                if (!pInfo->get_score_instr_id().empty())
+                    m_ids.push_back(pInfo->get_score_instr_id());
+            }
+        }
+        else
+        {
+            Document* pDoc = pInstr->get_the_document();
+            ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
+                                        ImFactory::inject(k_imo_sound_info, pDoc) );
+            pInstr->add_sound_info(pInfo);
+            m_sounds.push_back(pInfo);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MidiAssigner::assign_score_instr_id()
+{
+    int idx = 0;
+    list<ImoSoundInfo*>::iterator it;
+    for (it=m_sounds.begin(); it != m_sounds.end(); ++it)
+    {
+        if ((*it)->get_score_instr_id().empty())
+        {
+            while (true)
+            {
+                ++idx;
+                stringstream id;
+                id << "SOUND-" << idx;
+                if (find(m_ids.begin(), m_ids.end(), id.str()) == m_ids.end())
+                {
+                    (*it)->set_score_instr_id(id.str());
+                    break;
+                }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MidiAssigner::assign_port_and_channel()
+{
+    //Algorithm:
+    //- each port has 16 channels, assume infinite number of ports
+    //- mapping index: p*16+c
+    //- initial default index: idx=0
+    // Rules:
+    //- p,c specified:
+    //      nothing to do. Assign it
+    //- only c specified:
+    //      find first port in which channel c is free, assign it
+    //- only p specified:
+    //      find first free channel in port p, and assign it.
+    //      Exclude channel 9 (MIDI channel 10, percussion).
+    //	    If no channels available, ignore p and assume p&c not specified (next rule)
+    //- p,c not specified:
+    //      iterate idx++ and assign the first free idx:
+
+	map<int, ImoSoundInfo*> m_assigned;
+    int idx = 0;
+    list<ImoSoundInfo*>::iterator it;
+    for (it=m_sounds.begin(); it != m_sounds.end(); ++it)
+    {
+        //assign port and channel
+        int p = (*it)->get_midi_port();
+        int c = (*it)->get_midi_channel();
+
+        // p,c specified
+        if (p != -1 && c != -1)
+            m_assigned[p*16+c] = *it;
+
+        // only c specified
+        else if (p == -1)
+        {
+            int i = c;
+            while(true)
+            {
+                if (m_assigned[i] == NULL)
+                {
+                    (*it)->set_midi_port(i / 16);
+                    m_assigned[i] = *it;
+                    break;
+                }
+                i += 16;
+            }
+        }
+
+        // only p specified
+        else if (c == -1)
+        {
+            bool fAssigned = false;
+            for (int ch=0; ch < 16; ++ch)
+            {
+                if (ch==9) ++ch;
+
+                int i = p*16 + ch;
+                if (m_assigned[i] == NULL)
+                {
+                    (*it)->set_midi_channel(i % 16);
+                    m_assigned[i] = *it;
+                    fAssigned = true;
+                    break;
+                }
+            }
+            if (!fAssigned)
+                p = -1;
+        }
+
+        // none specified
+        if (p == -1 && c == -1)
+        {
+            while(true)
+            {
+                if (m_assigned[idx] == NULL)
+                {
+                    (*it)->set_midi_port(idx / 16);
+                    (*it)->set_midi_channel(idx % 16);
+                    m_assigned[idx] = *it;
+                    ++idx;
+                    break;
+                }
+                ++idx;
+            }
+        }
     }
 }
 

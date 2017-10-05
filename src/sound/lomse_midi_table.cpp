@@ -110,9 +110,15 @@ void SoundEventsTable::program_sounds_for_instruments()
     for (int iInstr = 0; iInstr < numInstruments; iInstr++)
     {
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
-        int channel = pInstr->get_midi_channel();
+        int channel = 0;
+        int instr = 0;
+        if (pInstr->get_num_sounds() > 0)
+        {
+            ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+            channel = pInfo->get_midi_channel();
+            instr = pInfo->get_midi_program();
+        }
         m_channels[iInstr] = channel;
-        int instr = pInstr->get_midi_program();
         store_event(0, SoundEvent::k_prog_instr, channel, instr, 0, 0, NULL, 0);
     }
 }

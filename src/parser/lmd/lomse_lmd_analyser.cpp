@@ -2337,8 +2337,9 @@ public:
     ImoObj* do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoMidiInfo* pInfo = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, pDoc) );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
+                                    ImFactory::inject(k_imo_sound_info, pDoc) );
+
 
         // num_instr
         if (!get_optional(k_number) || !set_midi_program(pInfo))
@@ -2363,7 +2364,7 @@ public:
 
 protected:
 
-    bool set_midi_program(ImoMidiInfo* pInfo)
+    bool set_midi_program(ImoSoundInfo* pInfo)
     {
         int value = get_integer_value(0);
         if (value < 0 || value > 127)
@@ -2373,7 +2374,7 @@ protected:
         return true;
     }
 
-    bool set_midi_channel(ImoMidiInfo* pInfo)
+    bool set_midi_channel(ImoSoundInfo* pInfo)
     {
         int value = get_integer_value(0);
         if (value < 0 || value > 15)
@@ -2459,7 +2460,10 @@ public:
         error_if_more_elements();
 
         if (!m_pAnalyser->is_instr_id_required())
+        {
             add_to_model(pInstrument);
+            add_sound_info_if_needed(pInstrument);
+        }
 
         return pInstrument;
     }
@@ -2501,6 +2505,17 @@ protected:
             return pText;
         }
         return NULL;
+    }
+
+    void add_sound_info_if_needed(ImoInstrument* pInstr)
+    {
+        if (pInstr->get_num_sounds() == 0)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
+                                        ImFactory::inject(k_imo_sound_info, pDoc) );
+            pInstr->add_sound_info(pInfo);
+        }
     }
 
 };

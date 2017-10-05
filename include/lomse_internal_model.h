@@ -62,6 +62,7 @@ class EventHandler;
 class Control;
 class ScorePlayerCtrl;
 class ButtonCtrl;
+class JumpsTable;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -86,7 +87,6 @@ class ImoImage;
 class ImoInlineLevelObj;
 class ImoInlineWrapper;
 class ImoInstrument;
-class ImoSoundInfo;
 class ImoKeySignature;
 class ImoLineStyle;
 class ImoLink;
@@ -111,6 +111,8 @@ class ImoScorePlayer;
 class ImoScoreText;
 class ImoSimpleObj;
 class ImoSlurDto;
+class ImoSoundInfo;
+class ImoSounds;
 class ImoSpacer;
 class ImoStaffInfo;
 class ImoStaffObj;
@@ -434,11 +436,10 @@ class ImoWrapperBox;
                 k_imo_cursor_info,
                 k_imo_figured_bass_info,
                 k_imo_instr_group,
-                k_imo_instr_info,
                 k_imo_line_style,
                 k_imo_lyrics_text_info,
-                k_imo_midi_info,
                 k_imo_page_info,
+                k_imo_sound_info,
                 k_imo_staff_info,
                 k_imo_system_info,
                 k_imo_text_info,
@@ -461,8 +462,12 @@ class ImoWrapperBox;
                 k_imo_collection,
                     k_imo_attachments,
                     k_imo_instruments,
-                    k_imo_instrument_groups, k_imo_music_data, k_imo_options,
-                    k_imo_table_head, k_imo_table_body,
+                    k_imo_instrument_groups,
+                    k_imo_music_data,
+                    k_imo_options,
+                    k_imo_sounds,
+                    k_imo_table_head,
+                    k_imo_table_body,
                 k_imo_collection_last,
 
                 // Special collections
@@ -833,7 +838,6 @@ public:
     inline bool is_inline_wrapper() { return m_objtype == k_imo_inline_wrapper; }
     inline bool is_instrument() { return m_objtype == k_imo_instrument; }
     inline bool is_instr_group() { return m_objtype == k_imo_instr_group; }
-    inline bool is_instr_info() { return m_objtype == k_imo_instr_info; }
     inline bool is_key_signature() { return m_objtype == k_imo_key_signature; }
     inline bool is_line() { return m_objtype == k_imo_line; }
     inline bool is_line_style() { return m_objtype == k_imo_line_style; }
@@ -843,7 +847,6 @@ public:
 	inline bool is_lyric() { return m_objtype == k_imo_lyric; }
 	inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
     inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
-    inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
 	inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
     inline bool is_music_data() { return m_objtype == k_imo_music_data; }
     inline bool is_note() { return m_objtype == k_imo_note; }
@@ -866,6 +869,7 @@ public:
     inline bool is_slur() { return m_objtype == k_imo_slur; }
     inline bool is_slur_data() { return m_objtype == k_imo_slur_data; }
     inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
+    inline bool is_sound_info() { return m_objtype == k_imo_sound_info; }
     inline bool is_spacer() { return m_objtype == k_imo_spacer; }
     inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
     inline bool is_style() { return m_objtype == k_imo_style; }
@@ -2360,35 +2364,6 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoMidiInfo : public ImoSimpleObj
-{
-protected:
-    int m_channel;		//channel: 0-15 (MIDI 1-16)
-    int m_program;		//patch: 0-127 (MIDI 1-128)
-
-    friend class ImFactory;
-    friend class ImoInstrument;
-    ImoMidiInfo()
-		: ImoSimpleObj(k_imo_midi_info)
-    	, m_channel(0)
-    	, m_program(0)
-	{
-	}
-
-public:
-    virtual ~ImoMidiInfo() {}
-
-    //getters
-    inline int get_midi_channel() { return m_channel; }
-    inline int get_midi_program() { return m_program; }
-
-    //setters
-    inline void set_midi_channel(int value) { m_channel = value; }
-    inline void set_midi_program(int value) { m_program = value; }
-
-};
-
-//---------------------------------------------------------------------------------------
 //The score-instrument element allows for multiple instruments per
 //score-part. Contains the information for an instrument in an score-part
 class ImoSoundInfo : public ImoSimpleObj
@@ -2439,7 +2414,7 @@ protected:
     friend class ImFactory;
     friend class ImoInstrument;
     ImoSoundInfo()
-		: ImoSimpleObj(k_imo_instr_info)
+		: ImoSimpleObj(k_imo_sound_info)
 		, m_instrName("")
 		, m_instrAbbrev("")
 		, m_instrSound("")
@@ -2448,11 +2423,11 @@ protected:
 		, m_ensembleSize(0)
 		, m_virtualLibrary("")
 		, m_virtualName("")
-		, m_port(0)
+		, m_port(-1)
         , m_midiDeviceName("")
         , m_midiName("")
 		, m_bank(0)
-    	, m_channel(0)
+    	, m_channel(-1)
     	, m_program(0)
 		, m_unpitched(-1)
 		, m_volume(1.0)
@@ -3323,7 +3298,6 @@ protected:
     ImoScore*       m_pScore;
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
-	ImoSoundInfo	m_sound;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //enum EBarlineLayout
@@ -3340,11 +3314,17 @@ public:
 
     enum EBarlineLayout { k_isolated=0, k_joined, k_mensurstrich, k_nothing, };
 
+	//sounds info
+	ImoSounds* get_sounds();
+	void add_sound_info(ImoSoundInfo* pInfo);
+	int get_num_sounds();
+	ImoSoundInfo* get_sound_info(const string& soundId);
+	ImoSoundInfo* get_sound_info(int iSound);    //iSound = 0..n-1
+
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
     inline ImoScoreText& get_name() { return m_name; }
     inline ImoScoreText& get_abbrev() { return m_abbrev; }
-    //inline ImoSoundInfo& get_instr_info() { return m_sound; }
     ImoMusicData* get_musicdata();
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
@@ -3357,53 +3337,9 @@ public:
     void set_abbrev(ImoScoreText* pText);
     void set_name(const string& value);
     void set_abbrev(const string& value);
-    void set_midi_info(ImoMidiInfo* pInfo);
-    void set_instr_info(ImoSoundInfo* pInfo);
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
-
-    //getters for ImoSoundInfo
-	inline string& get_score_instr_id() { return m_sound.get_score_instr_id(); }
-	inline string& get_score_instr_name() { return m_sound.get_score_instr_name(); }
-	inline string& get_score_instr_abbrev() { return m_sound.get_score_instr_abbrev(); }
-	inline string& get_score_instr_sound() { return m_sound.get_score_instr_sound(); }
-	inline bool	get_score_instr_solo() { return m_sound.get_score_instr_solo(); }
-	inline bool	get_score_instr_ensemble() { return m_sound.get_score_instr_ensemble(); }
-	inline int get_score_instr_ensemble_size() { return m_sound.get_score_instr_ensemble_size(); }
-	inline string& get_score_instr_virtual_library() { return m_sound.get_score_instr_virtual_library(); }
-	inline string& get_score_instr_virtual_name() { return m_sound.get_score_instr_virtual_name(); }
-    inline int get_midi_port() { return m_sound.get_midi_port(); }
-    inline string& get_midi_device_name() { return m_sound.get_midi_device_name(); }
-    inline string& get_midi_name() { return m_sound.get_midi_name(); }
-    inline int get_midi_bank() { return m_sound.get_midi_bank(); }
-    inline int get_midi_channel() { return m_sound.get_midi_channel(); }
-    inline int get_midi_program() { return m_sound.get_midi_program(); }
-    inline int get_midi_unpitched() { return m_sound.get_midi_unpitched(); }
-    inline float get_midi_volume() { return m_sound.get_midi_volume(); }
-    inline int get_midi_pan() { return m_sound.get_midi_pan(); }
-    inline int get_midi_elevation() { return m_sound.get_midi_elevation(); }
-
-    //setters for ImoSoundInfo
-    inline void set_score_instr_id(const string& value) { m_sound.set_score_instr_id(value); }
-	inline void set_score_instr_name(const string& value) { m_sound.set_score_instr_name(value); }
-	inline void set_score_instr_abbrev(const string& value) { m_sound.set_score_instr_abbrev(value); }
-	inline void set_score_instr_sound(const string& value) { m_sound.set_score_instr_sound(value); }
-	inline void set_score_instr_solo(bool value) { m_sound.set_score_instr_solo(value); }
-	inline void set_score_instr_ensemble(bool value) { m_sound.set_score_instr_ensemble(value); }
-	inline void set_score_instr_ensemble_size(int value) { m_sound.set_score_instr_ensemble_size(value); }
-	inline void set_score_instr_virtual_library(const string& value) { m_sound.set_score_instr_virtual_library(value); }
-	inline void set_score_instr_virtual_name(const string& value) { m_sound.set_score_instr_virtual_name(value); }
-    inline void set_midi_port(int value) { m_sound.set_midi_port(value); }
-    inline void set_midi_device_name(const string& value) { m_sound.set_midi_device_name(value); }
-    inline void set_midi_name(const string& value) { m_sound.set_midi_name(value); }
-    inline void set_midi_bank(int value) { m_sound.set_midi_bank(value); }
-    inline void set_midi_channel(int value) { m_sound.set_midi_channel(value); }
-    inline void set_midi_program(int value) { m_sound.set_midi_program(value); }
-    inline void set_midi_unpitched(int value) { m_sound.set_midi_unpitched(value); }
-    inline void set_midi_volume(float value) { m_sound.set_midi_volume(value); }
-    inline void set_midi_pan(int value) { m_sound.set_midi_pan(value); }
-    inline void set_midi_elevation(int value) { m_sound.set_midi_elevation(value); }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -3462,6 +3398,18 @@ protected:
 
 public:
     virtual ~ImoInstrGroups() {}
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoSounds : public ImoCollection
+{
+protected:
+    friend class ImFactory;
+    ImoSounds() : ImoCollection(k_imo_sounds) {}
+
+public:
+    virtual ~ImoSounds() {}
 
 };
 
@@ -3941,6 +3889,7 @@ protected:
     int             m_version;
     ColStaffObjs*   m_pColStaffObjs;
     SoundEventsTable* m_pMidiTable;
+    JumpsTable*     m_pJumpsTable;
     ImoSystemInfo   m_systemInfoFirst;
     ImoSystemInfo   m_systemInfoOther;
     ImoPageInfo     m_pageInfo;
@@ -3964,6 +3913,8 @@ public:
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
+    inline JumpsTable* get_jumps_table() { return m_pJumpsTable; }
+    void set_jumps_table(JumpsTable* pTable);
 
     //required by Visitable parent class
 	void accept_visitor(BaseVisitor& v);

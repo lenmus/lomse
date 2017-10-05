@@ -1054,7 +1054,7 @@ public:
         add_part_id();
         add_name_abbreviation();
         add_staves_info();
-        add_midi_info();
+        add_sound_info();
         add_music_data();
         end_element();
         return m_source.str();
@@ -1085,15 +1085,19 @@ protected:
         }
     }
 
-    void add_midi_info()
+    void add_sound_info()
     {
-        int instr = m_pObj->get_midi_program();
-        int channel = m_pObj->get_midi_channel();
-        if (instr != 0 || channel != 0)
+        if (m_pObj->get_num_sounds() > 0)
         {
-            start_element("infoMIDI", k_no_imoid);
-            m_source << " " << instr << " " << channel;
-            end_element(k_in_same_line);
+            ImoSoundInfo* pInfo = m_pObj->get_sound_info(0);
+            int instr = pInfo->get_midi_program();
+            int channel = pInfo->get_midi_channel();
+            if (instr != 0 || channel != 0)
+            {
+                start_element("infoMIDI", k_no_imoid);
+                m_source << " " << instr << " " << channel;
+                end_element(k_in_same_line);
+            }
         }
     }
 

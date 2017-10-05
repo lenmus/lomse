@@ -3239,7 +3239,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo == NULL );
 
         delete tree->get_root();
@@ -3262,7 +3262,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo == NULL );
 
         delete tree->get_root();
@@ -3285,10 +3285,10 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_midi_info() == true );
-        ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
+        CHECK( pIModel->get_root()->is_sound_info() == true );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_channel() == -1 );
         CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
@@ -3311,9 +3311,9 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_midi_channel() == 0 );
+        CHECK( pInfo->get_midi_channel() == -1 );
         CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
@@ -3336,7 +3336,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_midi_channel() == 10 );
         CHECK( pInfo->get_midi_program() == 56 );
@@ -3366,8 +3366,11 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
         CHECK( pInstr->get_abbrev().get_text() == "" );
-        CHECK( pInstr->get_midi_channel() == 12 );
-        CHECK( pInstr->get_midi_program() == 56 );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_midi_channel() == 12 );
+        CHECK( pInfo->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
