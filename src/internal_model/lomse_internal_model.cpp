@@ -379,6 +379,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
         m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
         m_TypeToName[k_imo_tuplet_dto] = "tuplet-dto";
+        m_TypeToName[k_imo_volta_bracket_dto] = "volta_bracket_dto";
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
@@ -424,6 +425,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
+        m_TypeToName[k_imo_volta_bracket] = "volta-bracket";
 
         //abstract and non-valid objects
         m_TypeToName[k_imo_obj] = "non-valid";
@@ -1007,7 +1009,6 @@ bool ImoBeamData::is_end_of_beam()
 ImoBeamDto::ImoBeamDto()
     : ImoSimpleObj(k_imo_beam_dto)
     , m_beamNum(0)
-    , m_pBeamElm(NULL)
     , m_pNR(NULL)
 {
     for (int level=0; level < 6; level++)
@@ -1015,29 +1016,6 @@ ImoBeamDto::ImoBeamDto()
         m_beamType[level] = ImoBeam::k_none;
         m_repeat[level] = false;
     }
-}
-
-//---------------------------------------------------------------------------------------
-ImoBeamDto::ImoBeamDto(LdpElement* pBeamElm)
-    : ImoSimpleObj(k_imo_beam_dto)
-    , m_beamNum(0)
-    , m_pBeamElm(pBeamElm)
-    , m_pNR(NULL)
-{
-    for (int level=0; level < 6; level++)
-    {
-        m_beamType[level] = ImoBeam::k_none;
-        m_repeat[level] = false;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-int ImoBeamDto::get_line_number()
-{
-    if (m_pBeamElm)
-        return m_pBeamElm->get_line_number();
-    else
-        return 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1517,8 +1495,9 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_beam] = 1;
         priority[k_imo_chord] = 2;
         priority[k_imo_tuplet] = 3;
-        priority[k_imo_slur] = 4;
-        priority[k_imo_fermata] = 5;
+        priority[k_imo_volta_bracket] = 4;
+        priority[k_imo_slur] = 5;
+        priority[k_imo_fermata] = 6;
 
         fMapInitialized = true;
     };
@@ -4732,15 +4711,6 @@ ImoTieDto::~ImoTieDto()
     delete m_pBezier;
 }
 
-//---------------------------------------------------------------------------------------
-int ImoTieDto::get_line_number()
-{
-    if (m_pTieElm)
-        return m_pTieElm->get_line_number();
-    else
-        return 0;
-}
-
 
 //=======================================================================================
 // ImoTimeSignature implementation
@@ -4850,6 +4820,44 @@ void ImoTuplet::reorganize_after_object_deletion()
 {
     //TODO
 }
+
+
+//=======================================================================================
+// ImoVoltaBracket implementation
+//=======================================================================================
+ImoBarline* ImoVoltaBracket::get_start_barline()
+{
+    return static_cast<ImoBarline*>( get_start_object() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoBarline* ImoVoltaBracket::get_stop_barline()
+{
+    return static_cast<ImoBarline*>( get_end_object() );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoVoltaBracket::reorganize_after_object_deletion()
+{
+    //Nothing to do. As a volta bracket involves only two objects, the volta bracket
+    //is automatically removed when one of the barlines is deleted.
+    //Also, in barline destructor, the other barline is informed.
+}
+
+
+////=======================================================================================
+//// ImoVoltaBracketData implementation
+////=======================================================================================
+//ImoVoltaBracketData::ImoVoltaBracketData(ImoVoltaBracketDto* pDto)
+//    : ImoRelDataObj(k_imo_volta_bracket_data)
+//    , m_fStart( pDto->is_start() )
+//{
+//}
+//
+////---------------------------------------------------------------------------------------
+//ImoVoltaBracketData::~ImoVoltaBracketData()
+//{
+//}
 
 
 

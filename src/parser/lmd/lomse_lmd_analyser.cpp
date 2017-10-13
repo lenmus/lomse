@@ -6244,7 +6244,7 @@ int LmdAnalyser::name_to_tag(const string& name) const
 //=======================================================================================
 // LmdTiesBuilder implementation
 //=======================================================================================
-void LmdTiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
+void LmdTiesBuilder::add_relation_to_staffobjs(ImoTieDto* pEndDto)
 {
     ImoTieDto* pStartDto = m_matches.front();
     ImoNote* pStartNote = pStartDto->get_note();
@@ -6398,7 +6398,7 @@ void OldLmdTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 //=======================================================================================
 // LmdSlursBuilder implementation
 //=======================================================================================
-void LmdSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+void LmdSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6418,7 +6418,7 @@ void LmdSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 //=======================================================================================
 // LmdBeamsBuilder implementation
 //=======================================================================================
-void LmdBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
+void LmdBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6515,7 +6515,7 @@ void OldLmdBeamsBuilder::do_create_old_beam()
 //=======================================================================================
 // LmdTupletsBuilder implementation
 //=======================================================================================
-void LmdTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
+void LmdTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
 {
     m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();

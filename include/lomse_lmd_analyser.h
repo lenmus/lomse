@@ -87,7 +87,7 @@ public:
         : RelationBuilder<ImoTieDto, LmdAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
     virtual ~LmdTiesBuilder() {}
 
-    void add_relation_to_notes_rests(ImoTieDto* pEndDto);
+    void add_relation_to_staffobjs(ImoTieDto* pEndDto);
 
 protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
@@ -106,7 +106,7 @@ public:
         : RelationBuilder<ImoBeamDto, LmdAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
     virtual ~LmdBeamsBuilder() {}
 
-    void add_relation_to_notes_rests(ImoBeamDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
 };
 
 
@@ -119,7 +119,7 @@ public:
         : RelationBuilder<ImoSlurDto, LmdAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
     virtual ~LmdSlursBuilder() {}
 
-    void add_relation_to_notes_rests(ImoSlurDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo);
 };
 
 
@@ -161,7 +161,7 @@ public:
         : RelationBuilder<ImoTupletDto, LmdAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
     virtual ~LmdTupletsBuilder() {}
 
-    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo);
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
 };
 

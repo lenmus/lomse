@@ -3496,6 +3496,8 @@ string LdpExporter::barline_type_to_ldp(int barlineType)
             return "start";
         case k_barline_double_repetition:
             return "doubleRepetition";
+        case k_barline_none:
+            return "none";
         default:
             return "undefined";
     }

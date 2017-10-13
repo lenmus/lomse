@@ -1169,6 +1169,12 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
             break;
         }
 
+        case k_imo_volta_bracket:
+        {
+            //pEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pScoreMeter);
+            break;
+        }
+
         default:
             return;
     }

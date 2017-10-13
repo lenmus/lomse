@@ -251,6 +251,7 @@ enum EMxlTag
     k_mxl_tag_clef,
     k_mxl_tag_direction,
     k_mxl_tag_dynamics,
+    k_mxl_tag_ending,
     k_mxl_tag_fermata,
     k_mxl_tag_forward,
     k_mxl_tag_key,
@@ -372,6 +373,11 @@ protected:
     //auxiliary
     inline const string& get_document_locator() {
         return m_pAnalyser->get_document_locator();
+    }
+
+    int get_line_number()
+    {
+        return m_pAnalyser->get_line_number(&m_analysedNode);
     }
 
 
@@ -1705,10 +1711,18 @@ protected:
 
 class BarlineMxlAnalyser : public MxlElementAnalyser
 {
+protected:
+    bool        m_fNewBarline;
+    ImoBarline* m_pBarline;
+
 public:
     BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_fNewBarline(false)
+        , m_pBarline(NULL)
+    {
+    }
 
 
     ImoObj* do_analysis()
@@ -1726,6 +1740,10 @@ public:
         string barStyle = "";
         if (get_optional("bar-style"))
             barStyle = m_childToAnalyse.value();
+        if (barStyle.empty())
+            barStyle = "none";
+
+        create_barline(location);
 
         //TODO
         // %editorial;
@@ -1734,11 +1752,8 @@ public:
         // coda?
         // (fermata, fermata?)?
 
-        //TODO
         // ending?
-        if (get_optional("ending"))
-        {
-        }
+        analyse_optional("ending", m_pBarline);
 
         // repeat?
         string repeat = "";
@@ -1747,48 +1762,49 @@ public:
 
         error_if_more_elements();
 
-        //if no bar-style, do not create a barline.
-        if (barStyle.empty())
-            return NULL;
-
-        ImoBarline* pBarline = NULL;
-        if (location == "left")
-        {
-            //must be combined with previous barline
-            pBarline = m_pAnalyser->get_last_barline();
-        }
-
-        bool fNewBarline = false;
-        if (pBarline == NULL)
-        {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pBarline = static_cast<ImoBarline*>(
-                                ImFactory::inject(k_imo_barline, pDoc) );
-            pBarline->set_type(k_barline_simple);
-            fNewBarline = true;
-        }
-
         EBarline type = find_barline_type(barStyle, repeat);
-        combine_barlines(pBarline, type);
+        combine_barlines(m_pBarline, type);
 
-        if (fNewBarline)
+        if (m_fNewBarline)
         {
             advance_timepos_if_required();
-            add_to_model(pBarline);
-            m_pAnalyser->save_last_barline(pBarline);
+            add_to_model(m_pBarline);
+            m_pAnalyser->save_last_barline(m_pBarline);
         }
 
-        return pBarline;
+        return m_pBarline;
     }
 
 protected:
+
+    void create_barline(const string& location)
+    {
+        m_pBarline = NULL;
+        if (location == "left")
+        {
+            //must be combined with previous barline
+            m_pBarline = m_pAnalyser->get_last_barline();
+        }
+
+        m_fNewBarline = false;
+        if (m_pBarline == NULL)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            m_pBarline = static_cast<ImoBarline*>(
+                                ImFactory::inject(k_imo_barline, pDoc) );
+            m_pBarline->set_type(k_barline_simple);
+            m_fNewBarline = true;
+        }
+    }
 
     EBarline find_barline_type(const string& barType, const string& repeat)
     {
         bool fError = false;
         EBarline type = k_barline_simple;
 
-        if (barType == "regular")
+        if (barType == "none")
+            type = k_barline_none;
+        else if (barType == "regular")
             type = k_barline_simple;
 //        else if (barType == "dotted")
 //            type = ?
@@ -1863,10 +1879,10 @@ protected:
 
         if (leftType == k_barline_simple && rightType == k_barline_simple)
             type = k_barline_double;
+        else if (rightType == k_barline_simple || rightType == k_barline_none)
+            type = leftType;
         else if (leftType == k_barline_simple)
             type = rightType;
-        else if (rightType == k_barline_simple)
-            type = leftType;
         else if (leftType == k_barline_end && rightType == k_barline_start_repetition)
             type = rightType;
         else if (leftType == k_barline_end_repetition &&
@@ -2214,6 +2230,143 @@ protected:
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Unknown placement attrib. '" + value + "'. Ignored.");
         }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//<!ELEMENT ending (#PCDATA)>
+//<!ATTLIST ending
+//    number CDATA #REQUIRED
+//        The number attribute reflects the numeric values of what
+//        is under the ending line. Single endings such as "1" or
+//        comma-separated multiple endings such as "1, 2" may be
+//        used.
+//    type (start | stop | discontinue) #REQUIRED
+//    %print-object;
+//    %print-style;
+//    end-length %tenths; #IMPLIED
+//    text-x %tenths; #IMPLIED
+//    text-y %tenths; #IMPLIED
+//>
+//
+//Examples:
+//
+//    <ending number="1, 2, 3" type="start">1-3.</ending>
+//    <ending number="1" type="start">1.</ending>
+//    <ending number="1" type="start">First time</ending>
+//    <ending number="1" type="start"/>
+
+class EndingMxlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoVoltaBracketDto* m_pVolta;
+
+public:
+    EndingMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                      LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_pVolta(NULL)
+    {
+    }
+
+    ImoObj* do_analysis()
+    {
+        ImoBarline* pBarline = NULL;
+        if (m_pAnchor && m_pAnchor->is_barline())
+            pBarline = static_cast<ImoBarline*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoBarline");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pVolta = static_cast<ImoVoltaBracketDto*>(
+                        ImFactory::inject(k_imo_volta_bracket_dto, pDoc));
+        m_pVolta->set_line_number( get_line_number() );
+
+        // attrib: number CDATA #REQUIRED
+        if (!set_volta_number())
+        {
+            delete m_pVolta;
+            return NULL;
+        }
+
+        // attrib: type (start | stop | discontinue) #REQUIRED
+        if (!set_volta_type())
+        {
+            delete m_pVolta;
+            return NULL;
+        }
+
+        //TODO
+        // attrib: %print-object;
+        // attrib: %print-style;
+        // attrib: end-length %tenths; #IMPLIED
+        // attrib: text-x %tenths; #IMPLIED
+        // attrib: text-y %tenths; #IMPLIED
+
+        // ending (#PCDATA)
+        m_pVolta->set_volta_text( m_analysedNode.value() );
+
+        m_pVolta->set_barline(pBarline);
+        m_pAnalyser->add_relation_info(m_pVolta);
+
+        return m_pVolta;
+    }
+
+protected:
+
+    bool set_volta_number()
+    {
+        //returns false if error
+
+        if (!has_attribute(&m_analysedNode, "number"))
+            return false;   //error
+
+        string num = m_analysedNode.attribute_value("number");
+        if (num.empty())
+            return false;   //error
+
+        //TODO: Check for valid values
+
+        m_pVolta->set_volta_number(num);
+        return true;    //success
+    }
+
+    bool set_volta_type()
+    {
+        //returns false if error
+
+        if (!has_attribute(&m_analysedNode, "type"))
+            return false;   //error
+
+        string value = m_analysedNode.attribute_value("type");
+        if (value == "start")
+        {
+            m_pVolta->set_volta_type(ImoVoltaBracketDto::k_start);
+            m_pVolta->set_volta_id( m_pAnalyser->new_volta_id() );
+        }
+        else if (value == "stop")
+        {
+            m_pVolta->set_volta_type(ImoVoltaBracketDto::k_stop);
+            m_pVolta->set_final_jog(true);
+            m_pVolta->set_volta_id( m_pAnalyser->get_volta_id() );
+        }
+        else if (value == "discontinue")
+        {
+            m_pVolta->set_volta_type(ImoVoltaBracketDto::k_stop);
+            m_pVolta->set_final_jog(false);
+            m_pVolta->set_volta_id( m_pAnalyser->get_volta_id() );
+        }
+        else
+        {
+            error_msg("Missing or invalid type. <ending> ignored.");
+            return false;   //error
+        }
+
+        return true;    //success
     }
 
 };
@@ -4651,7 +4804,7 @@ public:
         m_pInfo1 = static_cast<ImoSlurDto*>(
                                 ImFactory::inject(k_imo_slur_dto, pDoc));
 
-        // arrib: type %start-stop-continue; #REQUIRED
+        // attrib: type %start-stop-continue; #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "slur");
 
         // attrib: number %number-level; #IMPLIED
@@ -4927,7 +5080,7 @@ public:
         m_pInfo1 = static_cast<ImoTieDto*>(
                                 ImFactory::inject(k_imo_tie_dto, pDoc));
 
-        // arrib: type %start-stop-continue; #REQUIRED
+        // attrib: type %start-stop-continue; #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "tied");
 
         // attrib: number %number-level; #IMPLIED
@@ -5481,10 +5634,12 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pBeamsBuilder(NULL)
     , m_pTupletsBuilder(NULL)
     , m_pSlursBuilder(NULL)
+    , m_pVoltasBuilder(NULL)
     , m_musicxmlVersion(0)
     , m_pNodeImo(NULL)
     , m_tieNum(0)
     , m_slurNum(0)
+    , m_voltaNum(0)
     , m_pTree()
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
@@ -5504,6 +5659,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["clef"] = k_mxl_tag_clef;
     m_NameToEnum["direction"] = k_mxl_tag_direction;
     m_NameToEnum["dynamics"] = k_mxl_tag_dynamics;
+    m_NameToEnum["ending"] = k_mxl_tag_ending;
     m_NameToEnum["fermata"] = k_mxl_tag_fermata;
     m_NameToEnum["forward"] = k_mxl_tag_forward;
     m_NameToEnum["key"] = k_mxl_tag_key;
@@ -5553,6 +5709,7 @@ void MxlAnalyser::delete_relation_builders()
     delete m_pBeamsBuilder;
     delete m_pTupletsBuilder;
     delete m_pSlursBuilder;
+    delete m_pVoltasBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -5563,6 +5720,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pBeamsBuilder = LOMSE_NEW MxlBeamsBuilder(m_reporter, this);
     m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
     m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
+    m_pVoltasBuilder = LOMSE_NEW MxlVoltasBuilder(m_reporter, this);
 
     m_pTree = root;
 //    m_curStaff = 0;
@@ -5616,6 +5774,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
     else if (pDto->is_tuplet_dto())
         m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
+    else if (pDto->is_volta_bracket_dto())
+        m_pVoltasBuilder->add_item_info(static_cast<ImoVoltaBracketDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -5625,6 +5785,7 @@ void MxlAnalyser::clear_pending_relations()
     m_pSlursBuilder->clear_pending_items();
     m_pBeamsBuilder->clear_pending_items();
     m_pTupletsBuilder->clear_pending_items();
+    m_pVoltasBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -5780,6 +5941,18 @@ int MxlAnalyser::get_slur_id_and_close(int numSlur)
 }
 
 //---------------------------------------------------------------------------------------
+int MxlAnalyser::new_volta_id()
+{
+    return ++m_voltaNum;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_volta_id()
+{
+    return m_voltaNum;
+}
+
+//---------------------------------------------------------------------------------------
 TimeUnits MxlAnalyser::duration_to_timepos(int duration)
 {
     //AWARE: 'divisions' indicates how many divisions per quarter note
@@ -5860,6 +6033,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_clef:                 return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_direction:            return LOMSE_NEW DirectionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_dynamics:             return LOMSE_NEW DynamicsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_ending:               return LOMSE_NEW EndingMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_fermata:              return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -5910,7 +6084,7 @@ int MxlAnalyser::name_to_enum(const string& name) const
 //=======================================================================================
 // MxlTiesBuilder implementation
 //=======================================================================================
-void MxlTiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
+void MxlTiesBuilder::add_relation_to_staffobjs(ImoTieDto* pEndDto)
 {
     ImoTieDto* pStartDto = m_matches.front();
     ImoNote* pStartNote = pStartDto->get_note();
@@ -5976,7 +6150,7 @@ void MxlTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* p
 //=======================================================================================
 // MxlSlursBuilder implementation
 //=======================================================================================
-void MxlSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+void MxlSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -5997,7 +6171,7 @@ void MxlSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 //=======================================================================================
 // MxlBeamsBuilder implementation
 //=======================================================================================
-void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
+void MxlBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6047,7 +6221,7 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 //=======================================================================================
 // MxlTupletsBuilder implementation
 //=======================================================================================
-void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* UNUSED(pEndDto))
+void MxlTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* UNUSED(pEndDto))
 {
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
@@ -6096,6 +6270,29 @@ void MxlTupletsBuilder::get_factors_from_nested_tuplets(int* pTop, int* pBottom)
             *pTop *= pInfo->get_normal_number();
             *pBottom *= pInfo->get_actual_number();
         }
+    }
+}
+
+
+//=======================================================================================
+// MxlVoltasBuilder implementation
+//=======================================================================================
+void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo)
+{
+    m_matches.push_back(pEndInfo);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+    ImoVoltaBracket* pVB = static_cast<ImoVoltaBracket*>(
+                                ImFactory::inject(k_imo_volta_bracket, pDoc));
+    pVB->set_volta_number( pEndInfo->get_volta_number() );
+    pVB->set_volta_text( pEndInfo->get_volta_text() );
+    pVB->set_final_jog( pEndInfo->get_final_jog() );
+
+    std::list<ImoVoltaBracketDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoBarline* pBarline = (*it)->get_barline();
+        pBarline->include_in_relation(pDoc, pVB, NULL);
     }
 }
 
