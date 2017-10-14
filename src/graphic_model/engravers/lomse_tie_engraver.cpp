@@ -165,7 +165,7 @@ void TieEngraver::compute_start_point()
 	m_points1[ImoBezierInfo::k_start].x = (m_pStartNoteShape->get_notehead_right() +
                           m_pStartNoteShape->get_notehead_left()) / 2.0f;
 
-    //y pos: 5 tenths appart from notehead
+    //y pos: 5 tenths apart from notehead
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
 
     m_points1[ImoBezierInfo::k_start].y = (m_fTieBelowNote ?
@@ -180,7 +180,7 @@ void TieEngraver::compute_end_point(UPoint* point)
 	point->x = (m_pEndNoteShape->get_notehead_right() +
                 m_pEndNoteShape->get_notehead_left()) / 2.0f;
 
-    //y pos: 5 tenths appart from notehead
+    //y pos: 5 tenths apart from notehead
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
 
     point->y = (m_fTieBelowNote ?

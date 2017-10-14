@@ -64,6 +64,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_text.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_tie.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_tuplet.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_volta_bracket.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_sizers.cpp
@@ -95,6 +96,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_tie_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_volta_engraver.cpp
 
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_blocks_container_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
