@@ -125,7 +125,7 @@ int TupletEngraver::create_shapes(Color color)
 //---------------------------------------------------------------------------------------
 void TupletEngraver::create_shape()
 {
-    m_pStyle = m_pMeter->get_tuplets_style_info();
+    m_pStyle = m_pMeter->get_style_info("Tuplet numbers");
 
     m_pTupletShape = LOMSE_NEW GmoShapeTuplet(m_pTuplet, m_color);
     m_pShape = m_pTupletShape;

@@ -46,12 +46,12 @@ namespace lomse
 // VoltaBracketEngraver implementation
 //---------------------------------------------------------------------------------------
 VoltaBracketEngraver::VoltaBracketEngraver(LibraryScope& libraryScope,
-                                           ScoreMeter* pScoreMeter, LUnits uStaffLeft)
+                                           ScoreMeter* pScoreMeter,
+                                           LUnits uStaffLeft, LUnits uStaffRight)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pInstrEngrv(NULL)
     , m_numShapes(0)
-    , m_uPrologWidth(0.0f)
     , m_uStaffLeft(uStaffLeft)
+    , m_uStaffRight(uStaffRight)
 {
 }
 
@@ -59,7 +59,7 @@ VoltaBracketEngraver::VoltaBracketEngraver(LibraryScope& libraryScope,
 void VoltaBracketEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                       int iSystem, int iCol, LUnits UNUSED(xRight),
-                                      LUnits UNUSED(xLeft), LUnits yTop)
+                                      LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -71,8 +71,6 @@ void VoltaBracketEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_shapesInfo[0].iCol = iCol;
     m_shapesInfo[0].iInstr = iInstr;
     m_shapesInfo[0].iSystem = iSystem;
-
-    m_uStaffTopStart = yTop - m_pStartBarlineShape->get_top();     //relative to note top
 }
 
 //---------------------------------------------------------------------------------------
@@ -80,7 +78,7 @@ void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj*
                                     GmoShape* pStaffObjShape, int iInstr,
                                     int UNUSED(iStaff), int iSystem, int iCol,
                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                    LUnits yTop)
+                                    LUnits UNUSED(yTop))
 {
     m_pStopBarline = dynamic_cast<ImoBarline*>(pSO);
     m_pStopBarlineShape = dynamic_cast<GmoShapeBarline*>(pStaffObjShape);
@@ -88,20 +86,18 @@ void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj*
     m_shapesInfo[1].iCol = iCol;
     m_shapesInfo[1].iInstr = iInstr;
     m_shapesInfo[1].iSystem = iSystem;
-
-    m_uStaffTopEnd = yTop - m_pStopBarlineShape->get_top();     //relative to note top;
 }
 
 //---------------------------------------------------------------------------------------
 int VoltaBracketEngraver::create_shapes(Color color)
 {
     m_color = color;
-    m_pStyle = m_pMeter->get_tuplets_style_info();      //TODO
+    m_pStyle = m_pMeter->get_style_info("Volta brackets");
 
-    //decide_if_one_or_two_brackets();
-    //if (two_brackets_needed())
-    //    create_two_shapes();
-    //else
+    decide_if_one_or_two_brackets();
+    if (two_brackets_needed())
+        create_two_shapes();
+    else
         create_one_shape();
 
     return m_numShapes;
@@ -114,6 +110,7 @@ void VoltaBracketEngraver::create_one_shape()
 
     GmoShapeVoltaBracket* pShape = LOMSE_NEW GmoShapeVoltaBracket(m_pVolta, 0, m_color);
     m_shapesInfo[0].pShape = pShape;
+    pShape->enable_final_jog( m_pVolta->has_final_jog() );
 
     //add text
     string text = m_pVolta->get_volta_text();
@@ -123,7 +120,7 @@ void VoltaBracketEngraver::create_one_shape()
     GmoShapeText* pTextShape = engr.create_shape(m_pVolta, 0.0f, 0.0f);
     pShape->add_label(pTextShape);
 
-    set_shape_details(pShape);
+    set_shape_details(pShape, true);
 
 
     m_shapesInfo[1].pShape = NULL;
@@ -136,44 +133,70 @@ void VoltaBracketEngraver::create_two_shapes()
 
     //create first shape
     GmoShapeVoltaBracket* pShape = LOMSE_NEW GmoShapeVoltaBracket(m_pVolta, 0, m_color);
-    set_shape_details(pShape);
     m_shapesInfo[0].pShape = pShape;
+    pShape->enable_final_jog(false);
+        //add text
+    string text = m_pVolta->get_volta_text();
+    if (text.empty())
+        text = m_pVolta->get_volta_number();
+    TextEngraver engr(m_libraryScope, m_pMeter, text, "", m_pStyle);
+    GmoShapeText* pTextShape = engr.create_shape(m_pVolta, 0.0f, 0.0f);
+    pShape->add_label(pTextShape);
+        //terminate first shape
+    set_shape_details(pShape, true);
+    pShape->set_two_brackets();
 
     //create second shape
-    pShape = LOMSE_NEW GmoShapeVoltaBracket(m_pVolta, 0, m_color);
-    set_shape_details(pShape);
+    pShape = LOMSE_NEW GmoShapeVoltaBracket(m_pVolta, 1, m_color);
     m_shapesInfo[1].pShape = pShape;
+    pShape->enable_final_jog( m_pVolta->has_final_jog() );
+        //terminate second shape
+    set_shape_details(pShape, false);
+    pShape->set_two_brackets();
 }
 
 //---------------------------------------------------------------------------------------
-void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape)
+void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
+                                             bool fFirstShape)
 {
-    LUnits uLineThick = tenths_to_logical(LOMSE_TUPLET_BRACKET_THICKNESS);
-    LUnits uSpaceToText = tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
+    //data that will not change at system justification time is set here
+
+    LUnits uDistance = tenths_to_logical(LOMSE_VOLTA_BRACKET_DISTANCE);
+    LUnits uLineThick = tenths_to_logical(LOMSE_VOLTA_BRACKET_THICKNESS);
+    LUnits uLeftSpaceToText = tenths_to_logical(LOMSE_VOLTA_LEFT_SPACE_TO_TEXT);
+    LUnits uJogLength = tenths_to_logical(LOMSE_VOLTA_JOG_LENGHT);
 
     LUnits xStart = m_pStartBarlineShape->get_x_right_line();
     LUnits xEnd = m_pStopBarlineShape->get_x_left_line();
-    LUnits yPos;
-    if (xEnd < xStart)
+    LUnits yPos = m_pStopBarlineShape->get_top() - uDistance;
+    if (m_fTwoBrackets)
+    {
+        if (fFirstShape )
+        {
+            yPos = m_pStartBarlineShape->get_top() - uDistance;
+            xEnd = m_uStaffRight;
+        }
+        else
+        {
+            xStart = m_uStaffLeft;
+        }
+    }
+    else if (xEnd < xStart)
     {
         xStart = m_uStaffLeft;
-        yPos = m_pStopBarlineShape->get_top() +
-                        tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
     }
-    else
-        yPos = m_pStartBarlineShape->get_top() +
-                        tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
 
-    LUnits yJog = 4 * tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
 
-    pShape->set_layout_data(xStart, xEnd, yPos, yJog, uLineThick, uSpaceToText,
-                            m_uStaffLeft, m_pStartBarlineShape, m_pStopBarlineShape);
+
+    pShape->set_layout_data(xStart, xEnd, yPos, uDistance, uJogLength, uLineThick,
+                            uLeftSpaceToText, m_uStaffLeft, m_uStaffRight,
+                            m_pStartBarlineShape, m_pStopBarlineShape);
 }
 
 //---------------------------------------------------------------------------------------
 void VoltaBracketEngraver::decide_if_one_or_two_brackets()
 {
-//    m_fTwoBrackets = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
+    m_fTwoBrackets = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
 }
 
 //---------------------------------------------------------------------------------------

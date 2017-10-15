@@ -56,9 +56,14 @@ class GmoShapeVoltaBracket : public GmoCompositeShape
 protected:
     GmoShapeBarline* m_pStartBarlineShape;
     GmoShapeBarline* m_pStopBarlineShape;
+    GmoShapeText* m_pShapeText;
+    bool m_fTwoBrackets;
+    bool m_fStopJog;
+	LUnits m_uJogLength;
     LUnits m_uLineThick;
     LUnits m_uStaffLeft;
-    GmoShapeText* m_pShapeText;
+    LUnits m_uStaffRight;
+    LUnits m_uBracketDistance;
 
 public:
     GmoShapeVoltaBracket(ImoObj* pCreatorImo, ShapeId idx, Color color);
@@ -67,12 +72,14 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
 
-    void set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos, LUnits yJog,
-                         LUnits uLineThick,LUnits uSpaceToText,
-                         LUnits xStaffLeft, GmoShapeBarline* pStart,
-                         GmoShapeBarline* pEnd);
+    void set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos, LUnits uBracketDistance,
+                         LUnits uJogLength, LUnits uLineThick, LUnits uLeftSpaceToText,
+                         LUnits xStaffLeft, LUnits xStaffRight,
+                         GmoShapeBarline* pStart, GmoShapeBarline* pEnd);
 
     void add_label(GmoShapeText* pShape);
+    inline void enable_final_jog(bool value) { m_fStopJog = value; }
+    inline void set_two_brackets() { m_fTwoBrackets = true; }
 
     //support for handlers
     int get_num_handlers();
@@ -81,15 +88,7 @@ public:
     void on_end_of_handler_drag(int iHandler, UPoint newPos);
 
 protected:
-    void compute_bounds();
-
-    //reference positions for first volta bracket
-    LUnits m_uxStart, m_uxEnd;
-    LUnits m_yPos;
-	LUnits m_yJog;
-    LUnits m_xText;
-    LUnits m_yText;
-    LUnits m_uTextWidth;
+    void compute_bounds(LUnits xStart, LUnits xEnd, LUnits yPos);
 
 };
 

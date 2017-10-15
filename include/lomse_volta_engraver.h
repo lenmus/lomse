@@ -50,15 +50,10 @@ class ImoStyle;
 class VoltaBracketEngraver : public RelObjEngraver
 {
 protected:
-    InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTopStart;    //top line of start system, relative to start note top
-    LUnits m_uStaffTopEnd;      //top line of end system, relative to end note top
-
     int m_numShapes;
     ImoVoltaBracket* m_pVolta;
-    bool m_fSlurBelow;
-    LUnits m_uPrologWidth;
     LUnits m_uStaffLeft;
+    LUnits m_uStaffRight;
     ImoStyle* m_pStyle;
 
     ImoBarline* m_pStartBarline;
@@ -71,7 +66,7 @@ protected:
 
 public:
     VoltaBracketEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                         LUnits uStaffLeft);
+                         LUnits uStaffLeft, LUnits uStaffRight);
     ~VoltaBracketEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
@@ -94,7 +89,7 @@ protected:
     void create_two_shapes();
     void create_one_shape();
 
-    void set_shape_details(GmoShapeVoltaBracket* pShape);
+    void set_shape_details(GmoShapeVoltaBracket* pShape, bool fFirstShape);
 };
 
 

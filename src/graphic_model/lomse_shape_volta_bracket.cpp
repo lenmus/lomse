@@ -47,9 +47,14 @@ GmoShapeVoltaBracket::GmoShapeVoltaBracket(ImoObj* pCreatorImo, ShapeId idx, Col
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_volta_bracket, idx, color)
     , m_pStartBarlineShape(NULL)
     , m_pStopBarlineShape(NULL)
-    , m_uLineThick(0.0f)
-    , m_uStaffLeft(0.0f)
     , m_pShapeText(NULL)
+    , m_fTwoBrackets(false)
+    , m_fStopJog(true)
+    , m_uJogLength(400.0f)
+    , m_uLineThick(4.0f)
+    , m_uStaffLeft(0.0f)
+    , m_uStaffRight(0.0f)
+    , m_uBracketDistance(600.0f)
 {
 }
 
@@ -57,31 +62,6 @@ GmoShapeVoltaBracket::GmoShapeVoltaBracket(ImoObj* pCreatorImo, ShapeId idx, Col
 GmoShapeVoltaBracket::~GmoShapeVoltaBracket()
 {
 }
-
-//void GmoShapeTuplet::compute_horizontal_position()
-//{
-//    //determine x start/end coordinates
-//
-//    //AWARE: It is simpler to do this here than in the tuplets engraver because
-//    //when the tuplet is engraved the system is not justified and, therefore,
-//    //the notes will be moved.
-//
-//    if (m_pStartNR->is_shape_rest())
-//        m_uxStart = m_pStartNR->get_left();
-//    else
-//    {
-//        GmoShapeNote* pStartNote = static_cast<GmoShapeNote*>(m_pStartNR);
-//        m_uxStart = pStartNote->get_notehead_left();
-//    }
-//
-//    if (m_pEndNR->is_shape_rest())
-//        m_uxEnd = m_pEndNR->get_right();
-//    else
-//    {
-//        GmoShapeNote* pEndNote = static_cast<GmoShapeNote*>(m_pEndNR);
-//        m_uxEnd = pEndNote->get_notehead_right();
-//    }
-//}
 
 //---------------------------------------------------------------------------------------
 void GmoShapeVoltaBracket::add_label(GmoShapeText* pShape)
@@ -92,47 +72,26 @@ void GmoShapeVoltaBracket::add_label(GmoShapeText* pShape)
 
 //---------------------------------------------------------------------------------------
 void GmoShapeVoltaBracket::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos,
-                                           LUnits yJog, LUnits uLineThick,
-                                           LUnits uSpaceToText, LUnits xStaffLeft,
+                                           LUnits uBracketDistance, LUnits uJogLength,
+                                           LUnits uLineThick, LUnits uLeftSpaceToText,
+                                           LUnits xStaffLeft, LUnits xStaffRight,
                                            GmoShapeBarline* pStart,
                                            GmoShapeBarline* pEnd)
 {
+    //save data
     m_pStartBarlineShape = pStart;
     m_pStopBarlineShape = pEnd;
-
-    m_uxStart = xStart;
-    m_uxEnd = xEnd;
-    m_yPos = yPos;
-	m_yJog = yPos + yJog;
-    m_xText = xStart + uSpaceToText;
-    m_yText = yPos + uSpaceToText;
+    m_uBracketDistance = uBracketDistance;
+	m_uJogLength = uJogLength;
     m_uLineThick = uLineThick;
     m_uStaffLeft = xStaffLeft;
-    //m_uTextWidth;
+    m_uStaffRight = xStaffRight;
 
-	//text position
-	LUnits xText = 0.0f;
-	LUnits yText = 0.0f;
-	LUnits uTextWidth = 0.0f;
-	LUnits uTextHeight = 0.0f;
+	//move text shape to its position
     if (m_pShapeText)
-    {
-        uTextWidth = m_pShapeText->get_width();
-        uTextHeight = 1.33f * m_pShapeText->get_height();
-            //1.33 accounts for the fact that there is some space on top of the
-            //text glyph
+        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos);
 
-        //determine text x position
-        xText = m_uxStart + 80; //+ m_uSpaceToText;
-
-        //determine text y position
-        yText = m_yPos - 700;
-
-        //move text shape to its position
-        m_pShapeText->set_origin(xText, yText);
-    }
-
-    compute_bounds();
+    compute_bounds(xStart, xEnd, yPos);
 }
 
 //---------------------------------------------------------------------------------------
@@ -140,63 +99,66 @@ void GmoShapeVoltaBracket::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);      //Color(255,0,0);
 
+    //compute horizontal position
+    //AWARE: It is necessary to do this here because when the volta bracket is engraved
+    //the system is not yet justified and, therefore, the barlines will be moved later.
     LUnits xStart = m_pStartBarlineShape->get_x_right_line();
+    if (m_pStartBarlineShape->get_width() < 40.0f)
+        xStart += 30.0f;
     LUnits xEnd = m_pStopBarlineShape->get_x_left_line();
-    LUnits yTop;
+    if (m_pStopBarlineShape->get_width() < 40.0f)
+        xEnd -= 30.0f;
+    LUnits yTop = m_pStopBarlineShape->get_top() - m_uBracketDistance;
     if (xEnd < xStart)
-    {
         xStart = m_uStaffLeft;
-        yTop = m_pStopBarlineShape->get_top() - 600;
-    }
-    else
-        yTop = m_pStartBarlineShape->get_top() - 600;
 
-    LUnits yBottom = yTop + 400;
+    if (m_fTwoBrackets)
+    {
+        if (get_shape_id() == 0)
+        {
+            yTop = m_pStartBarlineShape->get_top() - m_uBracketDistance;
+            xStart = m_pStartBarlineShape->get_x_right_line();
+            xEnd = m_uStaffRight;
+        }
+        else
+        {
+            xStart = m_uStaffLeft;
+        }
+    }
+    LUnits yBottom = yTop + m_uJogLength;
+
+
+    pDrawer->begin_path();
+    pDrawer->fill(color);
 
     //start jog
-    pDrawer->begin_path();
-    pDrawer->fill(color);
-    pDrawer->line(xStart, yBottom, xStart, yTop, m_uLineThick, k_edge_normal);
-    pDrawer->end_path();
+    if (!m_fTwoBrackets || get_shape_id() == 0)
+        pDrawer->line(xStart, yBottom, xStart, yTop, m_uLineThick, k_edge_normal);
 
     //horizontal line
-    pDrawer->begin_path();
-    pDrawer->fill(color);
     pDrawer->line(xStart, yTop, xEnd, yTop, m_uLineThick, k_edge_normal);
-    pDrawer->end_path();
 
     //end jog
-    //if (m_fStopJog)
-        pDrawer->begin_path();
-        pDrawer->fill(color);
+    if (m_fStopJog)
         pDrawer->line(xEnd, yTop, xEnd, yBottom, m_uLineThick, k_edge_normal);
 
-        pDrawer->end_path();
-
+    pDrawer->end_path();
     pDrawer->render();
 
     GmoCompositeShape::on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeVoltaBracket::compute_bounds()
+void GmoShapeVoltaBracket::compute_bounds(LUnits xStart, LUnits xEnd, LUnits yPos)
 {
-    m_origin.x = m_uxStart;
-    m_size.width = abs(m_uxEnd - m_uxStart);
+    m_origin.x = xStart;
+    m_size.width = abs(xEnd - xStart);
+    m_origin.y = yPos;
 
-//    if (m_pShapeText)
-//    {
-//        m_size.height = m_pShapeText->get_height();
-//        if (m_fAbove)
-//            m_origin.y = min(m_uyStart, min(m_uyEnd, m_yNumber));
-//        else
-//            m_origin.y = min(m_yEndBorder, min(m_yStartBorder, m_yNumber));
-//    }
-//    else
-    {
-        m_size.height = 400;
-        m_origin.y = m_yPos - 650;
-    }
+    if (m_pShapeText)
+        m_size.height = max(m_uJogLength, m_pShapeText->get_height());
+    else
+        m_size.height = m_uJogLength;
 }
 
 //---------------------------------------------------------------------------------------
@@ -206,18 +168,16 @@ int GmoShapeVoltaBracket::get_num_handlers()
 }
 
 //---------------------------------------------------------------------------------------
-UPoint GmoShapeVoltaBracket::get_handler_point(int i)
+UPoint GmoShapeVoltaBracket::get_handler_point(int UNUSED(i))
 {
-//    return m_points[i] + m_origin;
+    //TODO
+    return UPoint(0.0f, 0.0f);
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeVoltaBracket::on_handler_dragged(int iHandler, UPoint newPos)
+void GmoShapeVoltaBracket::on_handler_dragged(int UNUSED(iHandler), UPoint UNUSED(newPos))
 {
-//    m_points[iHandler] = newPos;
-//    compute_vertices();
-//    compute_bounds();
-//    make_points_and_vertices_relative_to_origin();
+    //TODO
 }
 
 //---------------------------------------------------------------------------------------

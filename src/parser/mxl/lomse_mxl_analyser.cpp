@@ -6277,16 +6277,21 @@ void MxlTupletsBuilder::get_factors_from_nested_tuplets(int* pTop, int* pBottom)
 //=======================================================================================
 // MxlVoltasBuilder implementation
 //=======================================================================================
-void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo)
+void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
 {
-    m_matches.push_back(pEndInfo);
+    ImoVoltaBracketDto* pStartDto = m_matches.front();
+    m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoVoltaBracket* pVB = static_cast<ImoVoltaBracket*>(
                                 ImFactory::inject(k_imo_volta_bracket, pDoc));
-    pVB->set_volta_number( pEndInfo->get_volta_number() );
-    pVB->set_volta_text( pEndInfo->get_volta_text() );
-    pVB->set_final_jog( pEndInfo->get_final_jog() );
+
+    //set data taken from end dto
+    pVB->set_volta_number( pEndDto->get_volta_number() );
+    pVB->set_final_jog( pEndDto->get_final_jog() );
+
+    //set data taken from start dto
+    pVB->set_volta_text( pStartDto->get_volta_text() );
 
     std::list<ImoVoltaBracketDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)

@@ -47,13 +47,10 @@ namespace lomse
 ScoreMeter::ScoreMeter(ImoScore* pScore)
     : m_maxLineSpace(0.0f)
     , m_numInstruments( pScore->get_num_instruments() )
-    , m_tupletsStyle(NULL)
-    , m_metronomeStyle(NULL)
-    , m_lyricsStyle(NULL)
+    , m_pScore(pScore)
 {
     get_staff_spacing(pScore);
     get_options(pScore);
-    get_styles(pScore);
 
     m_fScoreIsEmpty = pScore->get_staffobjs_table()->num_entries() == 0;
 }
@@ -71,9 +68,6 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
     , m_maxLineSpace(0.0f)
-    , m_tupletsStyle(NULL)
-    , m_metronomeStyle(NULL)
-    , m_lyricsStyle(NULL)
 {
     //constructor for using in unit tests. numStaves is for each instrument
     m_staffIndex.reserve(numInstruments);
@@ -150,11 +144,9 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreMeter::get_styles(ImoScore* pScore)
+ImoStyle* ScoreMeter::get_style_info(const string& name)
 {
-    m_tupletsStyle = pScore->get_style_or_default("Tuplet numbers");
-    m_metronomeStyle = pScore->get_style_or_default("Metronome marks");
-    m_lyricsStyle = pScore->get_style_or_default("Lyrics");
+    return m_pScore->get_style_or_default(name);
 }
 
 //---------------------------------------------------------------------------------------

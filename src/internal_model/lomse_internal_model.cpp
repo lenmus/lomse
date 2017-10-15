@@ -3328,6 +3328,19 @@ void ImoScore::add_required_text_styles()
     }
     //<lyric-font font-family="Times New Roman" font-size="10"/>
 
+    //For volta brackets
+    if (find_style("Volta brackets") == NULL)
+    {
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+        pStyle->set_name("Volta brackets");
+        pStyle->set_parent_style(pDefStyle);
+	    pStyle->font_size( 10.0f);
+        pStyle->font_style( ImoStyle::k_font_style_normal);
+        pStyle->font_weight( ImoStyle::k_font_weight_bold);
+        add_style(pStyle);
+    }
+    //font-family="Liberation Serif" font-size="10" bold
+
 }
 
 
@@ -4038,6 +4051,57 @@ bool ImoStyle::is_default_style_with_default_values()
             //&& font_size() == 12.0f
             && font_style() == k_font_style_normal
             && font_weight() == k_font_weight_normal
+               //text
+            && word_spacing() == k_default_word_spacing
+            && text_decoration() == k_default_text_decoration
+            && vertical_align() == k_default_vertical_align
+            && text_align() == k_default_text_align
+            && text_indent_length() == k_default_text_indent_length
+            && word_spacing_length() == k_default_word_spacing_length   //not applicable
+            && line_height() == k_default_line_height
+               //color and background
+            && is_equal(color(), Color(0,0,0))
+            && is_equal(background_color(), Color(255,255,255))
+               //margin
+            && is_equal( margin_top(), k_default_margin_top )
+            && is_equal( margin_bottom(), k_default_margin_bottom )
+            && is_equal( margin_left(), k_default_margin_left )
+            && is_equal( margin_right(), k_default_margin_right )
+               //padding
+            && is_equal( padding_top(), k_default_padding_top )
+            && is_equal( padding_bottom(), k_default_padding_bottom )
+            && is_equal( padding_left(), k_default_padding_left )
+            && is_equal( padding_right(), k_default_padding_right )
+               ////border
+            //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
+            //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
+            //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
+            //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
+               //border width
+            && is_equal( border_width_top(), k_default_border_width_top )
+            && is_equal( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal( border_width_left(), k_default_border_width_left )
+            && is_equal( border_width_right(), k_default_border_width_right )
+               //size
+            && is_equal( min_height(), k_default_min_height )
+            && is_equal( max_height(), k_default_max_height )
+            && is_equal( height(), k_default_height )
+            && is_equal( min_width(), k_default_min_width )
+            && is_equal( max_width(), k_default_max_width )
+            && is_equal( width(), k_default_width )
+            ;
+
+    //Lyrics
+    if (m_name == "Volta brackets")
+	    return font_size() == 10.0f
+            && font_weight() == k_font_weight_bold
+            //inherited defaults:
+               //font
+            && font_file() == ""
+            && font_name() == "Liberation serif"
+            //&& font_size() == 12.0f
+            && font_style() == k_font_style_normal
+            //&& font_weight() == k_font_weight_normal
                //text
             && word_spacing() == k_default_word_spacing
             && text_decoration() == k_default_text_decoration

@@ -1110,7 +1110,7 @@ LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
         const string& language = pText->get_syllable_language();
         pStyle = pText->get_syllable_style();
         if (pStyle == NULL)
-            pStyle = pMeter->get_lyrics_style_info();
+            pStyle = pMeter->get_style_info("Lyrics");
 
         //measure this syllable
         totalWidth += measure_text(text, pStyle, language, textMeter);

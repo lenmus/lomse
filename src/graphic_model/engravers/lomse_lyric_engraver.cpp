@@ -171,7 +171,7 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         const string& language = pText->get_syllable_language();
         pStyle = pText->get_syllable_style();
         if (pStyle == NULL)
-            pStyle = m_pMeter->get_lyrics_style_info();
+            pStyle = m_pMeter->get_style_info("Lyrics");
         color = pStyle->color();
 
         //create shape for this syllable

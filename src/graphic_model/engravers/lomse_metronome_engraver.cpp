@@ -59,7 +59,7 @@ MetronomeMarkEngraver::MetronomeMarkEngraver(LibraryScope& libraryScope,
 GmoShape* MetronomeMarkEngraver::create_shape(ImoMetronomeMark* pImo, UPoint uPos,
                                               Color color)
 {
-    ImoStyle* pStyle = m_pMeter->get_metronome_style_info();
+    ImoStyle* pStyle = m_pMeter->get_style_info("Metronome marks");
     m_fontSize = pStyle->font_size() * 1.5f;
     m_pCreatorImo = pImo;
     m_uPos = uPos;
@@ -150,7 +150,7 @@ void MetronomeMarkEngraver::create_main_container_shape()
 void MetronomeMarkEngraver::create_text_shape(const string& text)
 {
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(2.0f, m_iInstr, m_iStaff);
-    ImoStyle* pStyle = m_pMeter->get_metronome_style_info();
+    ImoStyle* pStyle = m_pMeter->get_style_info("Metronome marks");
     TextEngraver engr(m_libraryScope, m_pMeter, text, "", pStyle);
     GmoShape* pShape = engr.create_shape(m_pCreatorImo, m_uPos.x, y);
 	m_pMainShape->add(pShape);
