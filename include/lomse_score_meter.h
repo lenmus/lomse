@@ -82,7 +82,7 @@ protected:
 public:
     ScoreMeter(ImoScore* pScore);
     //constructor for unit testing
-    ScoreMeter (int numInstruments, int numStaves, LUnits lineSpacing,
+    ScoreMeter (ImoScore* pScore, int numInstruments, int numStaves, LUnits lineSpacing,
                 float rSpacingFactor=0.547f,
                 ESpacingMethod nSpacingMethod=k_spacing_proportional,
                 Tenths rSpacingValue=35.0f,

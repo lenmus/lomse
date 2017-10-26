@@ -76,7 +76,7 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(0);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
@@ -100,7 +100,7 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(1);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =

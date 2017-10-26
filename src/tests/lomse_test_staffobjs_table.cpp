@@ -413,7 +413,7 @@ SUITE(ColStaffObjsBuilderTest)
     {
         //notes in other voices intermixed in beamed group
         ImoScore* pScore = create_score(
-            "(score (vers 2.0)(instrument (musicData "
+            "(score (vers 2.0)(instrument#100 (musicData "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(n c2 w v3)(barline)"
             ")))"
@@ -430,10 +430,10 @@ SUITE(ColStaffObjsBuilderTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef F4 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e3 e v1 p1 (beam 25 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e3 e v1 p1 (beam 106 +))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c2 w v3 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g3 e v1 p1 (beam 25 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c4 e v1 p1 (beam 25 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g3 e v1 p1 (beam 106 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c4 e v1 p1 (beam 106 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 256,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );
     }
@@ -473,7 +473,7 @@ SUITE(ColStaffObjsBuilderTest)
         //barlines properly ordered and with right time
         ImoScore* pScore = create_score(
             "(score (vers 2.0)"
-            "(instrument (staves 2)"
+            "(instrument#100 (staves 2)"
             "(musicData (clef G p1)(clef F4 p2)"
             "(key D)(time 2 4)(n f4 h p1 v1)"
             "(n c3 e g+ p2 v2)"
@@ -511,10 +511,10 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(time 2 4)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(time 2 4)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1 p1)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 28 +))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 109 +))" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1 p1)" );  // line 4 !
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2 p2)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 28 -))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 109 -))" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2 p2)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2 p2)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1)" );  // line 4 !
@@ -1425,7 +1425,7 @@ SUITE(ColStaffObjsBuilderTest)
         //barlines properly ordered and with right time
         ImoScore* pScore = create_score(
             "(score (vers 1.6)"
-            "(instrument (staves 2)"
+            "(instrument#100 (staves 2)"
             "(musicData (clef G p1)(clef F4 p2)"
             "(key D)(time 2 4)(n f4 h p1 v1)(goBack h)(n c3 e g+ p2 v2)"
             "(n c3 e g-)(n d3 q)(barline)))"
@@ -1461,10 +1461,10 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(time 2 4)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(time 2 4)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n f4 h v1 p1)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 29 +))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	0,	    1,	"(n c3 e v2 p2 (beam 110 +))" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    2,	"(n f4 q. v1 p1)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	0,	    3,	"(n c3 q v2 p2)" );
-        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 29 -))" );
+        CHECK_ENTRY0(it, 0,	    1,	    0,	32,	    1,	"(n c3 e v2 p2 (beam 110 -))" );
         CHECK_ENTRY0(it, 0,	    1,	    0,	64,	    1,	"(n d3 q v2 p2)" );
         CHECK_ENTRY0(it, 1,	    1,	    0,	64,	    3,	"(n c3 e v2 p2)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	96,	    2,	"(clef F4 p1)" );

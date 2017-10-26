@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- MusicXML: Import and render volta brackets.
 - Added options for controlling behaviour of MusicXML importer when
   uncomplete or malformed MusicXML files.
 - Line breaker algorithm improved. Now it considers different break modes.

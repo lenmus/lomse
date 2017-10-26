@@ -56,7 +56,9 @@ ScoreMeter::ScoreMeter(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
-ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
+//constructor ONLY FOR unit tests. numStaves is for each instrument
+ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
+                       LUnits lineSpacing,
                        float rSpacingFactor, ESpacingMethod nSpacingMethod,
                        Tenths rSpacingValue, bool fDrawLeftBarline)
     : m_renderSpacingOpts(k_render_opt_set_classic)
@@ -68,8 +70,8 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
     , m_maxLineSpace(0.0f)
+    , m_pScore(pScore)
 {
-    //constructor for using in unit tests. numStaves is for each instrument
     m_staffIndex.reserve(numInstruments);
     int staves = 0;
     for (int iInstr=0; iInstr < numInstruments; ++iInstr)

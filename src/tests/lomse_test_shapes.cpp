@@ -103,7 +103,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -125,7 +125,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -159,7 +159,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_accidentals(k_flat);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =

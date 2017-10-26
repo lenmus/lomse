@@ -109,7 +109,7 @@ public:
         dto3.set_tuplet_type(ImoTupletDto::k_stop);
         m_pNote3->include_in_relation(&doc, m_pTuplet, NULL);
 
-        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(NULL, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
         m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
@@ -158,7 +158,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -183,7 +183,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_quarter);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -210,7 +210,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -240,7 +240,7 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_whole);
         pNote->set_dots(1);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -268,7 +268,7 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_eighth);
         pNote->set_dots(2);
 
-        ScoreMeter meter(1, 1, 180.0f);
+        ScoreMeter meter(NULL, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =

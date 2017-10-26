@@ -283,7 +283,7 @@ SUITE(AutoClefTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
-           "(instrument (staves 2) (musicData "
+           "(instrument#100 (staves 2) (musicData "
            "(clef G p1)(key C)(time 2 4)"
            "(n e4 e g+ p1 v1)(n g4 e g- v1)"
            "(n c3 e g+ p2 v2)(n e3 e g- v2)(n g3 e g+ v2)(n c4 e g- v2)"
@@ -297,9 +297,9 @@ SUITE(AutoClefTest)
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score "
               "(vers 2.0)(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
-              "(key C)(time 2 4)(n e4 e v1 p1 (beam 38 +))(n c3 e v2 p2 (beam 45 +))"
-              "(n g4 e v1 p1 (beam 38 -))(n e3 e v2 p2 (beam 45 -))(n g3 e v2 p2 "
-              "(beam 52 +))(n c4 e v2 p2 (beam 52 -))(barline simple)(n a3 q v2 p2)"
+              "(key C)(time 2 4)(n e4 e v1 p1 (beam 107 +))(n c3 e v2 p2 (beam 114 +))"
+              "(n g4 e v1 p1 (beam 107 -))(n e3 e v2 p2 (beam 114 -))(n g3 e v2 p2 "
+              "(beam 121 +))(n c4 e v2 p2 (beam 121 -))(barline simple)(n a3 q v2 p2)"
               "(n e3 q v2 p2))))))" );
 //        cout << test_name() << endl;
 //        cout << doc.to_string() << endl;

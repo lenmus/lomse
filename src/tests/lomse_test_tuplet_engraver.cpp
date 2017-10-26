@@ -53,42 +53,22 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-// Access to protected members
-class MyTupletEngraver : public TupletEngraver
-{
-public:
-    MyTupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-        : TupletEngraver(libraryScope, pScoreMeter)
-    {
-    }
-
-    //inline void my_decide_on_stems_direction() { decide_on_stems_direction(); }
-    //inline bool my_stems_forced() { return m_fStemForced; }
-    //inline bool my_stems_mixed() { return m_fStemMixed; }
-    //inline bool my_stems_down() { return m_fStemsDown; }
-    //inline int my_get_num_stems_down() { return m_numStemsDown; }
-    //inline int my_get_num_notes() { return m_numNotes; }
-    //inline int my_get_average_pos_on_staff() { return m_averagePosOnStaff; }
-
-    //ShapeBoxInfo* my_get_shape_box_info() { return get_shape_box_info(0); }
-};
-
-
-//---------------------------------------------------------------------------------------
 class TupletEngraverTestFixture
 {
 public:
     LibraryScope    m_libraryScope;
+    ImoScore*       m_pScore;
     ScoreMeter*     m_pMeter;
     ShapesStorage*  m_pStorage;
     NoteEngraver*   m_pNoteEngrv;
     RestEngraver*   m_pRestEngrv;
-    MyTupletEngraver* m_pTupletEngrv;
+    TupletEngraver* m_pTupletEngrv;
     GmoShapeTuplet*   m_pTupletShape;
     std::vector<GmoShape*> m_shapes;
 
     TupletEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_pScore(NULL)
         , m_pMeter(NULL)
         , m_pStorage(NULL)
         , m_pNoteEngrv(NULL)
@@ -103,15 +83,15 @@ public:
     {
     }
 
-    ImoTuplet* create_tuplet(Document& doc, const string& src)
+    ImoTuplet* create_tuplet(Document* doc, const string& src)
     {
         string ldp = "(score (vers 2.0)(instrument (musicData (clef G)";
         ldp += src;
         ldp += ")))";
 
-        doc.from_string(ldp);
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
+        doc->from_string(ldp);
+        m_pScore = static_cast<ImoScore*>( doc->get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(1) );
         return dynamic_cast<ImoTuplet*>( pNote1->get_relation(0) );
@@ -128,7 +108,7 @@ public:
         int numNotes = int( notes.size() );
 
         m_shapes.reserve(numNotes);
-        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes/rests
@@ -162,7 +142,7 @@ public:
             if (i == 0)
             {
                 //first note
-                m_pTupletEngrv = LOMSE_NEW MyTupletEngraver(m_libraryScope, m_pMeter);
+                m_pTupletEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pMeter);
                 m_pTupletEngrv->set_start_staffobj(pTuplet, pNR, m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol,
                                                  0.0f, 0.0f, 0.0f);
@@ -217,7 +197,7 @@ SUITE(TupletEngraverTest)
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTuplet)
     {
         Document doc(m_libraryScope);
-        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
+        ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         CHECK( pTuplet != NULL );
         CHECK( pTuplet->get_actual_number() == 2 );
         CHECK( pTuplet->get_normal_number() == 3 );
@@ -226,10 +206,10 @@ SUITE(TupletEngraverTest)
     TEST_FIXTURE(TupletEngraverTestFixture, FeedEngraver)
     {
         Document doc(m_libraryScope);
-        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
+        ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         prepare_to_engrave_tuplet(pTuplet);
 
-        MyTupletEngraver* pEngrv = dynamic_cast<MyTupletEngraver*>(m_pStorage->get_engraver(pTuplet));
+        TupletEngraver* pEngrv = dynamic_cast<TupletEngraver*>(m_pStorage->get_engraver(pTuplet));
 
         CHECK( pEngrv != NULL );
         CHECK( pEngrv == m_pTupletEngrv );
@@ -240,7 +220,7 @@ SUITE(TupletEngraverTest)
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTupletShape)
     {
         Document doc(m_libraryScope);
-        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
+        ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         prepare_to_engrave_tuplet(pTuplet);
 
         m_pTupletEngrv->create_shapes();
