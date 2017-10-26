@@ -78,6 +78,7 @@ class BeamEngraverTestFixture
 {
 public:
     LibraryScope    m_libraryScope;
+    ImoScore*       m_pScore;
     ScoreMeter*     m_pMeter;
     ShapesStorage*  m_pStorage;
     NoteEngraver*   m_pNoteEngrv;
@@ -87,6 +88,7 @@ public:
 
     BeamEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_pScore(NULL)
         , m_pMeter(NULL)
         , m_pStorage(NULL)
         , m_pNoteEngrv(NULL)
@@ -107,8 +109,8 @@ public:
         ldp += ")))";
 
         doc.from_string(ldp);
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
+        m_pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(1) );
         return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
@@ -125,7 +127,7 @@ public:
         int numNotes = int( notes.size() );
 
         m_shapes.reserve(numNotes);
-        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes

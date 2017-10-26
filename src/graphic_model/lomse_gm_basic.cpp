@@ -211,6 +211,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_time_signature_glyph]
                                                 = "time-glyph     ";
         m_typeToName[k_shape_tuplet]            = "tuplet         ";
+        m_typeToName[k_shape_volta_bracket]     = "volta-bracket  ";
         m_typeToName[k_shape_word]              = "word           ";
 
         m_fNamesLoaded = true;

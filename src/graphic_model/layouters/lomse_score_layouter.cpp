@@ -70,6 +70,7 @@
 #include "lomse_technical_engraver.h"
 #include "lomse_lyric_engraver.h"
 #include "lomse_spacing_algorithm_gourlay.h"
+#include "lomse_volta_engraver.h"
 
 namespace lomse
 {
@@ -1166,6 +1167,16 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
         case k_imo_tuplet:
         {
             pEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pScoreMeter);
+            break;
+        }
+
+        case k_imo_volta_bracket:
+        {
+            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+            LUnits xRight = pInstrEngrv->get_staves_right();
+            LUnits xLeft = pInstrEngrv->get_staves_left();
+            pEngrv = LOMSE_NEW VoltaBracketEngraver(m_libraryScope, m_pScoreMeter,
+                                                    xLeft, xRight);
             break;
         }
 

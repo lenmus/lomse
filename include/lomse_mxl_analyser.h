@@ -62,7 +62,7 @@ public:
         : RelationBuilder<ImoTieDto, MxlAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
     virtual ~MxlTiesBuilder() {}
 
-    void add_relation_to_notes_rests(ImoTieDto* pEndDto);
+    void add_relation_to_staffobjs(ImoTieDto* pEndDto);
 
 protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
@@ -81,7 +81,7 @@ public:
         : RelationBuilder<ImoBeamDto, MxlAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
     virtual ~MxlBeamsBuilder() {}
 
-    void add_relation_to_notes_rests(ImoBeamDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
 };
 
 
@@ -94,7 +94,7 @@ public:
         : RelationBuilder<ImoSlurDto, MxlAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
     virtual ~MxlSlursBuilder() {}
 
-    void add_relation_to_notes_rests(ImoSlurDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo);
 };
 
 
@@ -107,12 +107,28 @@ public:
         : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
     virtual ~MxlTupletsBuilder() {}
 
-    void add_relation_to_notes_rests(ImoTupletDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo);
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
     void add_to_open_tuplets(ImoNoteRest* pNR);
     void get_factors_from_nested_tuplets(int* pTop, int* pBottom);
 
 };
+
+
+//---------------------------------------------------------------------------------------
+// helper class to save volta bracket dto items, match them and build the volta brackets
+class MxlVoltasBuilder : public RelationBuilder<ImoVoltaBracketDto, MxlAnalyser>
+{
+public:
+    MxlVoltasBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoVoltaBracketDto, MxlAnalyser>(
+                reporter, pAnalyser, "volta bracket", "Volta bracket")
+    {}
+    virtual ~MxlVoltasBuilder() {}
+
+    void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo);
+};
+
 
 //---------------------------------------------------------------------------------------
 // helper class to save part-list info
@@ -188,17 +204,18 @@ class MxlAnalyser : public Analyser
 {
 protected:
     //helpers and collaborators
-    ostream&        m_reporter;
-    LibraryScope&   m_libraryScope;
-    Document*       m_pDoc;
-    XmlParser*      m_pParser;
-    LdpFactory*     m_pLdpFactory;
-    MxlTiesBuilder*    m_pTiesBuilder;
-    MxlBeamsBuilder*   m_pBeamsBuilder;
-    MxlTupletsBuilder* m_pTupletsBuilder;
-    MxlSlursBuilder*   m_pSlursBuilder;
-    map<string, int> m_lyricIndex;
-    vector<ImoLyric*>  m_lyrics;
+    ostream&            m_reporter;
+    LibraryScope&       m_libraryScope;
+    Document*           m_pDoc;
+    XmlParser*          m_pParser;
+    LdpFactory*         m_pLdpFactory;
+    MxlTiesBuilder*     m_pTiesBuilder;
+    MxlBeamsBuilder*    m_pBeamsBuilder;
+    MxlTupletsBuilder*  m_pTupletsBuilder;
+    MxlSlursBuilder*    m_pSlursBuilder;
+    MxlVoltasBuilder*   m_pVoltasBuilder;
+    map<string, int>    m_lyricIndex;
+    vector<ImoLyric*>   m_lyrics;
 
     int             m_musicxmlVersion;
     ImoObj*         m_pNodeImo;
@@ -206,6 +223,7 @@ protected:
     int             m_tieNum;
     map<int, ImoId> m_slurIds;
     int             m_slurNum;
+    int             m_voltaNum;
 
     //analysis input
     XmlNode* m_pTree;
@@ -325,6 +343,10 @@ public:
     int new_slur_id(int numSlur);
     int get_slur_id(int numSlur);
     int get_slur_id_and_close(int numSlur);
+
+    //interface for building volta brackets
+    int new_volta_id();
+    int get_volta_id();
 
     //interface for MxlTupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }

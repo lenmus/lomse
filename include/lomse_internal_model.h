@@ -317,6 +317,7 @@ class ImoWrapperBox;
     enum EBarline
     {
         k_barline_unknown = -1,
+        k_barline_none,
         k_barline_simple,
         k_barline_double,
         k_barline_start,
@@ -426,6 +427,7 @@ class ImoWrapperBox;
                 k_imo_tie_dto,
                 k_imo_time_modification_dto,
                 k_imo_tuplet_dto,
+                k_imo_volta_bracket_dto,
             k_imo_dto_last,
 
             // ImoSimpleObj (A)
@@ -524,8 +526,12 @@ class ImoWrapperBox;
 
                     // ImoRelObj (A)
                     k_imo_relobj,
-                        k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
+                        k_imo_beam,
+                        k_imo_chord,
+                        k_imo_slur,
+                        k_imo_tie,
                         k_imo_tuplet,
+                        k_imo_volta_bracket,
                     k_imo_relobj_last,
 
                 k_imo_scoreobj_last,
@@ -894,6 +900,8 @@ public:
     inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
     inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
+    inline bool is_volta_bracket() { return m_objtype == k_imo_volta_bracket; }
+    inline bool is_volta_bracket_dto() { return m_objtype == k_imo_volta_bracket_dto; }
 
     //special checkers
     inline bool is_mouse_over_generator() {
@@ -2014,7 +2022,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-//An abstract object containing the specifica data for one node in a relation
+//An abstract object containing the specific data for one node in a relation
 class ImoRelDataObj : public ImoSimpleObj
 {
 public:
@@ -2118,21 +2126,18 @@ protected:
 
 public:
     ImoBeamDto();
-    ImoBeamDto(LdpElement* pBeamElm);
     virtual ~ImoBeamDto() {}
 
     //getters
     inline int get_beam_number() { return m_beamNum; }
-    inline LdpElement* get_beam_element() { return m_pBeamElm; }
     inline ImoNoteRest* get_note_rest() { return m_pNR; }
-    int get_line_number();
+    int get_line_number() { return 0; }
     int get_beam_type(int level);
     bool get_repeat(int level);
 
     //setters
     inline void set_beam_number(int num) { m_beamNum = num; }
     inline void set_note_rest(ImoNoteRest* pNR) { m_pNR = pNR; }
-    inline void set_beam_element(LdpElement* pElm) { m_pBeamElm = pElm; }
     void set_beam_type(int level, int type);
     void set_beam_type(string& segments);
     void set_repeat(int level, bool value);
@@ -4403,14 +4408,16 @@ protected:
     int m_orientation;
     ImoNote* m_pNote;
     ImoBezierInfo* m_pBezier;
-    LdpElement* m_pTieElm;
     Color m_color;
 
 public:
-    ImoTieDto() : ImoSimpleObj(k_imo_tie_dto), m_fStart(true)
-                , m_tieNum(0), m_orientation(k_orientation_default)
-                , m_pNote(NULL)
-                , m_pBezier(NULL), m_pTieElm(NULL) {}
+    ImoTieDto()
+        : ImoSimpleObj(k_imo_tie_dto), m_fStart(true)
+        , m_tieNum(0), m_orientation(k_orientation_default)
+        , m_pNote(NULL)
+        , m_pBezier(NULL)
+    {
+    }
     virtual ~ImoTieDto();
 
     //getters
@@ -4419,8 +4426,7 @@ public:
     inline int get_orientation() { return m_orientation; }
     inline ImoNote* get_note() { return m_pNote; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
-    inline LdpElement* get_tie_element() { return m_pTieElm; }
-    int get_line_number();
+    int get_line_number() { return 0; }
     inline Color get_color() { return m_color; }
 
     //setters
@@ -4429,7 +4435,6 @@ public:
     inline void set_orientation(int value) { m_orientation = value; }
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
-    inline void set_tie_element(LdpElement* pElm) { m_pTieElm = pElm; }
     inline void set_color(Color value) { m_color = value; }
 
     //required by RelationBuilder
@@ -4706,6 +4711,103 @@ public:
     inline void set_syllable_language(const string& language) { m_text.set_language(language); }
     inline void set_elision_text(const string& text) { m_elision = text; }
 
+};
+
+
+//---------------------------------------------------------------------------------------
+class ImoVoltaBracket : public ImoRelObj
+{
+protected:
+    bool    m_fStopJog;
+        //False when there is no downward jog, as is typical for
+		//second endings that do not conclude a piece.
+    string  m_voltaNum;
+        //The numeric values of the repetitions for the measure associated to this volta.
+        //Single values such as "1" or comma-separated multiple endings such as "1, 2"
+        //may be used.
+    string  m_voltaText;
+        //If not empty, this text is used to be displayed in the volta bracket instead
+        //the volta numbers, i.e.: "First time" instead of "1".
+
+	friend class ImFactory;
+    ImoVoltaBracket()
+        : ImoRelObj(k_imo_volta_bracket)
+        , m_fStopJog(true)
+        , m_voltaNum()
+        , m_voltaText()
+    {
+    }
+
+public:
+    virtual ~ImoVoltaBracket() {}
+
+    //getters
+    inline bool has_final_jog() { return m_fStopJog; }
+    inline string& get_volta_number() { return m_voltaNum; }
+    inline string& get_volta_text() { return m_voltaText; }
+    ImoBarline* get_start_barline();
+    ImoBarline* get_stop_barline();
+
+    //setters
+    inline void set_final_jog(bool value) { m_fStopJog = value; }
+    inline void set_volta_number(const string& num) { m_voltaNum = num; }
+    inline void set_volta_text(const string& text) { m_voltaText = text; }
+
+    void reorganize_after_object_deletion();
+};
+
+
+//---------------------------------------------------------------------------------------
+// raw info about a volta bracket
+class ImoVoltaBracketDto : public ImoSimpleObj
+{
+protected:
+    int         m_lineNum;
+    int         m_voltaId;
+    bool        m_fStopJog;
+    int         m_type;
+    string      m_voltaNum;
+    string      m_voltaText;
+    ImoBarline* m_pBarline;
+
+public:
+    ImoVoltaBracketDto()
+        : ImoSimpleObj(k_imo_volta_bracket_dto)
+        , m_lineNum(0)
+        , m_voltaId(0)
+        , m_fStopJog(true)
+        , m_type(k_unknown)
+        , m_voltaNum()
+        , m_voltaText()
+        , m_pBarline(NULL)
+    {
+    }
+    virtual ~ImoVoltaBracketDto() {}
+
+    enum { k_unknown = 0, k_start, k_stop, k_discontinue,  };
+
+    //getters
+    inline int get_volta_type() { return m_type; }
+    inline string& get_volta_number() { return m_voltaNum; }
+    inline string& get_volta_text() { return m_voltaText; }
+    inline ImoBarline* get_barline() { return m_pBarline; }
+    inline bool get_final_jog() { return m_fStopJog; }
+    inline int get_volta_id() { return m_voltaId; }
+    int get_line_number() { return m_lineNum; };
+
+    //setters
+    inline void set_volta_type(int value) { m_type = value; }
+    inline void set_volta_number(const string& num) { m_voltaNum = num; }
+    inline void set_volta_text(const string& text) { m_voltaText = text; }
+    inline void set_barline(ImoBarline* pSO) { m_pBarline = pSO; }
+    inline void set_final_jog(bool value) { m_fStopJog = value; }
+    inline void set_volta_id(int value) { m_voltaId = value; }
+    inline void set_line_number(int value) { m_lineNum = value; }
+
+    //required by RelationBuilder
+    int get_item_number() { return get_volta_id(); }
+    bool is_start_of_relation() { return m_type == k_start; }
+    bool is_end_of_relation() { return m_type == k_stop; }
 };
 
 

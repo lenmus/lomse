@@ -379,6 +379,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
         m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
         m_TypeToName[k_imo_tuplet_dto] = "tuplet-dto";
+        m_TypeToName[k_imo_volta_bracket_dto] = "volta_bracket_dto";
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
@@ -424,6 +425,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
+        m_TypeToName[k_imo_volta_bracket] = "volta-bracket";
 
         //abstract and non-valid objects
         m_TypeToName[k_imo_obj] = "non-valid";
@@ -1007,7 +1009,6 @@ bool ImoBeamData::is_end_of_beam()
 ImoBeamDto::ImoBeamDto()
     : ImoSimpleObj(k_imo_beam_dto)
     , m_beamNum(0)
-    , m_pBeamElm(NULL)
     , m_pNR(NULL)
 {
     for (int level=0; level < 6; level++)
@@ -1015,29 +1016,6 @@ ImoBeamDto::ImoBeamDto()
         m_beamType[level] = ImoBeam::k_none;
         m_repeat[level] = false;
     }
-}
-
-//---------------------------------------------------------------------------------------
-ImoBeamDto::ImoBeamDto(LdpElement* pBeamElm)
-    : ImoSimpleObj(k_imo_beam_dto)
-    , m_beamNum(0)
-    , m_pBeamElm(pBeamElm)
-    , m_pNR(NULL)
-{
-    for (int level=0; level < 6; level++)
-    {
-        m_beamType[level] = ImoBeam::k_none;
-        m_repeat[level] = false;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-int ImoBeamDto::get_line_number()
-{
-    if (m_pBeamElm)
-        return m_pBeamElm->get_line_number();
-    else
-        return 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1517,8 +1495,9 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_beam] = 1;
         priority[k_imo_chord] = 2;
         priority[k_imo_tuplet] = 3;
-        priority[k_imo_slur] = 4;
-        priority[k_imo_fermata] = 5;
+        priority[k_imo_volta_bracket] = 4;
+        priority[k_imo_slur] = 5;
+        priority[k_imo_fermata] = 6;
 
         fMapInitialized = true;
     };
@@ -3349,6 +3328,19 @@ void ImoScore::add_required_text_styles()
     }
     //<lyric-font font-family="Times New Roman" font-size="10"/>
 
+    //For volta brackets
+    if (find_style("Volta brackets") == NULL)
+    {
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+        pStyle->set_name("Volta brackets");
+        pStyle->set_parent_style(pDefStyle);
+	    pStyle->font_size( 10.0f);
+        pStyle->font_style( ImoStyle::k_font_style_normal);
+        pStyle->font_weight( ImoStyle::k_font_weight_bold);
+        add_style(pStyle);
+    }
+    //font-family="Liberation Serif" font-size="10" bold
+
 }
 
 
@@ -4099,6 +4091,57 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal( width(), k_default_width )
             ;
 
+    //Lyrics
+    if (m_name == "Volta brackets")
+	    return font_size() == 10.0f
+            && font_weight() == k_font_weight_bold
+            //inherited defaults:
+               //font
+            && font_file() == ""
+            && font_name() == "Liberation serif"
+            //&& font_size() == 12.0f
+            && font_style() == k_font_style_normal
+            //&& font_weight() == k_font_weight_normal
+               //text
+            && word_spacing() == k_default_word_spacing
+            && text_decoration() == k_default_text_decoration
+            && vertical_align() == k_default_vertical_align
+            && text_align() == k_default_text_align
+            && text_indent_length() == k_default_text_indent_length
+            && word_spacing_length() == k_default_word_spacing_length   //not applicable
+            && line_height() == k_default_line_height
+               //color and background
+            && is_equal(color(), Color(0,0,0))
+            && is_equal(background_color(), Color(255,255,255))
+               //margin
+            && is_equal( margin_top(), k_default_margin_top )
+            && is_equal( margin_bottom(), k_default_margin_bottom )
+            && is_equal( margin_left(), k_default_margin_left )
+            && is_equal( margin_right(), k_default_margin_right )
+               //padding
+            && is_equal( padding_top(), k_default_padding_top )
+            && is_equal( padding_bottom(), k_default_padding_bottom )
+            && is_equal( padding_left(), k_default_padding_left )
+            && is_equal( padding_right(), k_default_padding_right )
+               ////border
+            //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
+            //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
+            //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
+            //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
+               //border width
+            && is_equal( border_width_top(), k_default_border_width_top )
+            && is_equal( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal( border_width_left(), k_default_border_width_left )
+            && is_equal( border_width_right(), k_default_border_width_right )
+               //size
+            && is_equal( min_height(), k_default_min_height )
+            && is_equal( max_height(), k_default_max_height )
+            && is_equal( height(), k_default_height )
+            && is_equal( min_width(), k_default_min_width )
+            && is_equal( max_width(), k_default_max_width )
+            && is_equal( width(), k_default_width )
+            ;
+
     return false;
 }
 
@@ -4732,15 +4775,6 @@ ImoTieDto::~ImoTieDto()
     delete m_pBezier;
 }
 
-//---------------------------------------------------------------------------------------
-int ImoTieDto::get_line_number()
-{
-    if (m_pTieElm)
-        return m_pTieElm->get_line_number();
-    else
-        return 0;
-}
-
 
 //=======================================================================================
 // ImoTimeSignature implementation
@@ -4850,6 +4884,44 @@ void ImoTuplet::reorganize_after_object_deletion()
 {
     //TODO
 }
+
+
+//=======================================================================================
+// ImoVoltaBracket implementation
+//=======================================================================================
+ImoBarline* ImoVoltaBracket::get_start_barline()
+{
+    return static_cast<ImoBarline*>( get_start_object() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoBarline* ImoVoltaBracket::get_stop_barline()
+{
+    return static_cast<ImoBarline*>( get_end_object() );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoVoltaBracket::reorganize_after_object_deletion()
+{
+    //Nothing to do. As a volta bracket involves only two objects, the volta bracket
+    //is automatically removed when one of the barlines is deleted.
+    //Also, in barline destructor, the other barline is informed.
+}
+
+
+////=======================================================================================
+//// ImoVoltaBracketData implementation
+////=======================================================================================
+//ImoVoltaBracketData::ImoVoltaBracketData(ImoVoltaBracketDto* pDto)
+//    : ImoRelDataObj(k_imo_volta_bracket_data)
+//    , m_fStart( pDto->is_start() )
+//{
+//}
+//
+////---------------------------------------------------------------------------------------
+//ImoVoltaBracketData::~ImoVoltaBracketData()
+//{
+//}
 
 
 

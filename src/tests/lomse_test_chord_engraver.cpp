@@ -131,7 +131,7 @@ public:
         else
             m_pNote3 = NULL;
 
-        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(NULL, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =

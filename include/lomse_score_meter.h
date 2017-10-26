@@ -76,16 +76,13 @@ protected:
     int m_numInstruments;
     int m_numStaves;
     bool m_fScoreIsEmpty;
+    ImoScore* m_pScore;
 
-    //info about text styles
-    ImoStyle* m_tupletsStyle;
-    ImoStyle* m_metronomeStyle;
-    ImoStyle* m_lyricsStyle;
 
 public:
     ScoreMeter(ImoScore* pScore);
     //constructor for unit testing
-    ScoreMeter (int numInstruments, int numStaves, LUnits lineSpacing,
+    ScoreMeter (ImoScore* pScore, int numInstruments, int numStaves, LUnits lineSpacing,
                 float rSpacingFactor=0.547f,
                 ESpacingMethod nSpacingMethod=k_spacing_proportional,
                 Tenths rSpacingValue=35.0f,
@@ -124,15 +121,12 @@ public:
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
 
     //info about text styles
-    inline ImoStyle* get_tuplets_style_info() { return m_tupletsStyle; }
-    inline ImoStyle* get_metronome_style_info() { return m_metronomeStyle; }
-    inline ImoStyle* get_lyrics_style_info() { return m_lyricsStyle; }
+    ImoStyle* get_style_info(const string& name);
 
 
 protected:
     void get_options(ImoScore* pScore);
     void get_staff_spacing(ImoScore* pScore);
-    void get_styles(ImoScore* pScore);
 
 };
 

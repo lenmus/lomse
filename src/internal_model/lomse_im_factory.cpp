@@ -132,7 +132,8 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_time_signature:      pObj = LOMSE_NEW ImoTimeSignature();      break;
         case k_imo_tuplet:              pObj = LOMSE_NEW ImoTuplet();             break;
         case k_imo_tuplet_dto:          pObj = LOMSE_NEW ImoTupletDto();          break;
-
+        case k_imo_volta_bracket:       pObj = LOMSE_NEW ImoVoltaBracket();       break;
+        case k_imo_volta_bracket_dto:   pObj = LOMSE_NEW ImoVoltaBracketDto();    break;
         default:
         {
             LOMSE_LOG_ERROR("[ImFactory::inject] invalid type.");

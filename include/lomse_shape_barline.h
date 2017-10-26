@@ -50,8 +50,13 @@ protected:
     LUnits  m_uxLeft;
     LUnits  m_uThinLineWidth;
     LUnits  m_uThickLineWidth;
-    LUnits  m_uSpacing;            // between lines and lines-dots
-    LUnits  m_uRadius;             // for dots
+    LUnits  m_uSpacing;             // between lines and lines-dots
+    LUnits  m_uRadius;              // for dots
+
+    //lines position
+    LUnits  m_xRightLine;           //x right of last right line
+    LUnits  m_xLeftLine;            //x left of first left line
+
 
     friend class BarlineEngraver;
     GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineType,
@@ -70,11 +75,13 @@ public:
 	//wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
 
 
-	////access to info
-	//inline LUnits GetXEnd() const { return m_uxPos + m_uWidth; }
+	//access to info
+    inline LUnits get_x_right_line() { return m_xRightLine + m_uxLeft; }
+    inline LUnits get_x_left_line() { return m_xLeftLine + m_uxLeft; }
 
 protected:
     void compute_width();
+    void determine_lines_relative_positions();
     void draw_thin_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop, LUnits uyBottom,
                         Color color);
     void draw_thick_line(Drawer* pDrawer, LUnits uxLeft, LUnits uyTop, LUnits uWidth,

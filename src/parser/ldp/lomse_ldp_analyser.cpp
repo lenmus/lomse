@@ -6987,7 +6987,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
 //=======================================================================================
 // TiesBuilder implementation
 //=======================================================================================
-void TiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
+void TiesBuilder::add_relation_to_staffobjs(ImoTieDto* pEndDto)
 {
     ImoTieDto* pStartDto = m_matches.front();
     ImoNote* pStartNote = pStartDto->get_note();
@@ -7140,7 +7140,7 @@ void OldTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 //=======================================================================================
 // SlursBuilder implementation
 //=======================================================================================
-void SlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+void SlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -7163,7 +7163,7 @@ void SlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 //=======================================================================================
 // BeamsBuilder implementation
 //=======================================================================================
-void BeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
+void BeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -7262,7 +7262,7 @@ void OldBeamsBuilder::do_create_old_beam()
 //=======================================================================================
 // TupletsBuilder implementation
 //=======================================================================================
-void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
+void TupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
 {
     m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();

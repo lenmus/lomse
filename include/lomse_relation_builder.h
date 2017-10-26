@@ -76,7 +76,7 @@ protected:
     void delete_item_element(T* pInfo);
     T* find_matching_start_item(T* pInfo);
 
-    virtual void add_relation_to_notes_rests(T* pInfo) = 0;
+    virtual void add_relation_to_staffobjs(T* pInfo) = 0;
 
     //errors
     void error_no_matching_items(T* pInfo);
@@ -143,7 +143,7 @@ void RelationBuilder<T, A>::create_item(T* pEndInfo)
     int itemNum = pEndInfo->get_item_number();
     if ( find_matching_info_items(itemNum) )
     {
-        add_relation_to_notes_rests(pEndInfo);
+        add_relation_to_staffobjs(pEndInfo);
         delete_consumed_info_items(pEndInfo);
     }
     else

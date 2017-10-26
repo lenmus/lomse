@@ -2961,6 +2961,192 @@ SUITE(MxlAnalyserTest)
     }
 
 
+
+    //@ volta bracket -------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, volta_bracket_01)
+    {
+        //@01. volta bracket is created
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<note><pitch><step>A</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><type>16th</type>"
+                "</note>"
+            "</measure>"
+            "<measure number='2'>"
+                "<barline location='left'>"
+                    "<ending number='1' type='start'/>"
+                "</barline>"
+                "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><type>16th</type>"
+                "</note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<ending number='1' type='stop'/>"
+                    "<repeat direction='backward' winged='none'/>"
+                "</barline>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 4 );
+//        cout << test_name() << endl;
+//        cout << "num.children=" << pMD->get_num_children() << endl;
+//        while (it != pMD->end())
+//        {
+//            cout << (*it)->to_string() << endl;
+//            ++it;
+//        }
+
+        it = pMD->begin();
+        ++it;
+        ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline1 != NULL );
+        CHECK( pBarline1->get_type() == k_barline_simple );
+        CHECK( pBarline1->is_visible() );
+        ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
+                                    pBarline1->find_relation(k_imo_volta_bracket) );
+        CHECK( pVB1 != NULL );
+
+        ++it;
+        ++it;
+        ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline2 != NULL );
+        CHECK( pBarline2->get_type() == k_barline_end_repetition );
+        CHECK( pBarline2->is_visible() );
+
+        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
+                                    pBarline2->find_relation(k_imo_volta_bracket) );
+        CHECK( pVB2 != NULL );
+
+        CHECK( pVB1 == pVB2 );
+        CHECK( pVB1->get_start_barline() == pBarline1 );
+        CHECK( pVB1->get_stop_barline() == pBarline2 );
+        CHECK( pVB1->has_final_jog() == true );
+        CHECK( pVB1->get_volta_number() == "1" );
+        CHECK( pVB1->get_volta_text() == "" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, volta_bracket_02)
+    {
+        //@01. volta bracket: text different from number
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+                "<note><pitch><step>A</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><type>16th</type>"
+                "</note>"
+            "</measure>"
+            "<measure number='2'>"
+                "<barline location='left'>"
+                    "<ending number='1' type='start'>First time</ending>"
+                "</barline>"
+                "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                    "<duration>4</duration><type>16th</type>"
+                "</note>"
+                "<barline location='right'>"
+                    "<bar-style>light-heavy</bar-style>"
+                    "<ending number='1' type='stop'/>"
+                    "<repeat direction='backward' winged='none'/>"
+                "</barline>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 4 );
+//        cout << test_name() << endl;
+//        cout << "num.children=" << pMD->get_num_children() << endl;
+//        while (it != pMD->end())
+//        {
+//            cout << (*it)->to_string() << endl;
+//            ++it;
+//        }
+
+        it = pMD->begin();
+        ++it;
+        ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline1 != NULL );
+        CHECK( pBarline1->get_type() == k_barline_simple );
+        CHECK( pBarline1->is_visible() );
+        ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
+                                    pBarline1->find_relation(k_imo_volta_bracket) );
+        CHECK( pVB1 != NULL );
+
+        ++it;
+        ++it;
+        ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline2 != NULL );
+        CHECK( pBarline2->get_type() == k_barline_end_repetition );
+        CHECK( pBarline2->is_visible() );
+
+        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
+                                    pBarline2->find_relation(k_imo_volta_bracket) );
+        CHECK( pVB2 != NULL );
+
+        CHECK( pVB1 == pVB2 );
+        CHECK( pVB1->get_start_barline() == pBarline1 );
+        CHECK( pVB1->get_stop_barline() == pBarline2 );
+        CHECK( pVB1->has_final_jog() == true );
+        CHECK( pVB1->get_volta_number() == "1" );
+        CHECK( pVB1->get_volta_text() == "First time" );
+//        cout << "Volta number = '" << pVB1->get_volta_number() << "'" << endl;
+//        cout << "Volta text = '" << pVB1->get_volta_text() << "'" << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
     //@ Options for dealing with malformed MusicXML files -------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_500)

@@ -58,6 +58,7 @@ GmoShapeBarline::GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineT
     m_size.height = yBottom - yTop;
     m_size.width = uMinWidth;
     compute_width();
+    determine_lines_relative_positions();
 }
 
 //---------------------------------------------------------------------------------------
@@ -114,6 +115,60 @@ void GmoShapeBarline::shift_origin(const USize& shift)
 {
     GmoObj::shift_origin(shift);
     m_uxLeft += shift.width;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeBarline::determine_lines_relative_positions()
+{
+    LUnits uxPos = 0;
+
+    switch(m_nBarlineType)
+    {
+        case k_barline_double:
+            m_xLeftLine = uxPos;
+            uxPos += m_uThinLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThinLineWidth;
+            break;
+
+        case k_barline_end_repetition:
+            uxPos += m_uRadius * 2.7;   //BUG-BYPASS: Need to shift right the drawing
+            uxPos += m_uRadius + m_uSpacing;
+            m_xLeftLine = uxPos;
+            uxPos += m_uThinLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThickLineWidth;
+            break;
+
+        case k_barline_start_repetition:
+            m_xLeftLine = uxPos;
+            uxPos += m_uThickLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThickLineWidth;
+            break;
+
+        case k_barline_double_repetition:
+            uxPos += m_uRadius;
+            uxPos += m_uSpacing + m_uRadius;
+            m_xLeftLine = uxPos;
+            uxPos += m_uThinLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThinLineWidth;
+            break;
+
+        case k_barline_start:
+            m_xLeftLine = uxPos;
+            uxPos += m_uThickLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThinLineWidth;
+            break;
+
+        case k_barline_end:
+            m_xLeftLine = uxPos;
+            uxPos += m_uThinLineWidth + m_uSpacing;
+            m_xRightLine = uxPos + m_uThickLineWidth;
+            break;
+
+        case k_barline_simple:
+            m_xLeftLine = uxPos;
+            m_xRightLine = uxPos + m_uThinLineWidth;
+            break;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -183,8 +238,8 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeBarline::draw_thin_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop, LUnits uyBottom,
-                             Color color)
+void GmoShapeBarline::draw_thin_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop,
+                                     LUnits uyBottom, Color color)
 {
     pDrawer->begin_path();
     pDrawer->fill(color);
@@ -195,8 +250,8 @@ void GmoShapeBarline::draw_thin_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop, LUnits uWidth,
-                              LUnits uHeight, Color color)
+void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop,
+                                      LUnits uWidth, LUnits uHeight, Color color)
 {
     pDrawer->begin_path();
     pDrawer->fill(color);

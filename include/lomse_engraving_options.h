@@ -98,6 +98,12 @@ namespace lomse
 #define LOMSE_TIE_VERTICAL_SPACE         3.0f   //vertical distance from notehead
 #define LOMSE_TIE_MAX_THICKNESS          4.0f   //tie thickness at center
 
+//volta brackets
+#define LOMSE_VOLTA_JOG_LENGHT         20.0f
+#define LOMSE_VOLTA_BRACKET_DISTANCE   35.0f
+#define LOMSE_VOLTA_BRACKET_THICKNESS   1.0f
+#define LOMSE_VOLTA_LEFT_SPACE_TO_TEXT  6.0f
+
 
 
 
