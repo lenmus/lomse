@@ -121,6 +121,8 @@ if(CMAKE_NO_STD_NAMESPACE)
   message(FATAL_ERROR "The compiler doesn't support namespace std.")
 endif()
 
+# force to use c++11
+add_definitions(-std=c++11)
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )
