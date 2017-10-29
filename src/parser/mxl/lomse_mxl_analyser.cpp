@@ -31,15 +31,6 @@
 
 #include "lomse_xml_parser.h"
 #include "lomse_ldp_exporter.h"
-
-#include <iostream>
-#include <sstream>
-//BUG: In my Ubuntu box next line causes problems since approx. 20/march/2011
-#if (LOMSE_PLATFORM_WIN32 == 1)
-    #include <locale>
-#endif
-#include <vector>
-#include <algorithm>   // for find
 #include "lomse_ldp_factory.h"
 #include "lomse_tree.h"
 #include "lomse_xml_parser.h"
@@ -59,7 +50,18 @@
 #include "lomse_time.h"
 #include "lomse_autobeamer.h"
 
+
+#include <iostream>
+#include <sstream>
+//BUG: In my Ubuntu box next line causes problems since approx. 20/march/2011
+#if (LOMSE_PLATFORM_WIN32 == 1)
+    #include <locale>
+#endif
+#include <vector>
+#include <algorithm>   // for find
+#include <regex>
 using namespace std;
+
 
 namespace lomse
 {
@@ -244,36 +246,55 @@ enum EMxlTag
 {
     k_mxl_tag_undefined = -1,
 
+    k_mxl_tag_accordion_registration,
     k_mxl_tag_articulations,
     k_mxl_tag_attributes,
     k_mxl_tag_backup,
     k_mxl_tag_barline,
+    k_mxl_tag_bracket,
     k_mxl_tag_clef,
+    k_mxl_tag_coda,
+    k_mxl_tag_damp,
+    k_mxl_tag_damp_all,
+    k_mxl_tag_dashes,
     k_mxl_tag_direction,
+    k_mxl_tag_direction_type,
     k_mxl_tag_dynamics,
     k_mxl_tag_ending,
+    k_mxl_tag_eyeglasses,
     k_mxl_tag_fermata,
     k_mxl_tag_forward,
+    k_mxl_tag_harp_pedals,
+    k_mxl_tag_image,
     k_mxl_tag_key,
     k_mxl_tag_lyric,
     k_mxl_tag_measure,
+    k_mxl_tag_metronome,
     k_mxl_tag_midi_device,
     k_mxl_tag_midi_instrument,
     k_mxl_tag_notations,
     k_mxl_tag_note,
+    k_mxl_tag_octave_shift,
     k_mxl_tag_ornaments,
     k_mxl_tag_part,
     k_mxl_tag_part_group,
     k_mxl_tag_part_list,
     k_mxl_tag_part_name,
+    k_mxl_tag_pedal,
+    k_mxl_tag_percussion,
     k_mxl_tag_pitch,
+    k_mxl_tag_principal_voice,
     k_mxl_tag_print,
+    k_mxl_tag_rehearsal,
     k_mxl_tag_rest,
+    k_mxl_tag_scordatura,
     k_mxl_tag_score_instrument,
     k_mxl_tag_score_part,
     k_mxl_tag_score_partwise,
+    k_mxl_tag_segno,
     k_mxl_tag_slur,
     k_mxl_tag_sound,
+    k_mxl_tag_string_mute,
     k_mxl_tag_technical,
     k_mxl_tag_text,
     k_mxl_tag_tied,
@@ -282,7 +303,9 @@ enum EMxlTag
     k_mxl_tag_tuplet,
     k_mxl_tag_tuplet_actual,
     k_mxl_tag_tuplet_normal,
-    k_mxl_tag_virtual_instr
+    k_mxl_tag_virtual_instr,
+    k_mxl_tag_wedge,
+    k_mxl_tag_words,
 };
 
 
@@ -1343,9 +1366,23 @@ public:
 
     ImoObj* do_analysis()
     {
-        cout << "Line " << m_pAnalyser->get_line_number(&m_analysedNode)
-             << ". Missing analyser for element '" << m_tag
-             << "'. Node ignored." << endl;
+        error_msg("Missing analyser for element '" + m_tag + "'. Node ignored.");
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <accordion-registration>
+class AccordionRegistrationMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    AccordionRegistrationMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
         return NULL;
     }
 };
@@ -1470,7 +1507,7 @@ protected:
                                 ImFactory::inject(k_imo_articulation_symbol, pDoc) );
         pImo->set_articulation_type(type);
 
-        // [atrrib]: placement (above | below)
+        // [attrib]: placement (above | below)
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
@@ -1484,7 +1521,7 @@ protected:
         ImoArticulationSymbol* pImo =
             get_articulation_symbol(pNR, k_articulation_marccato);
 
-        // [atrrib]: type (up | down)
+        // [attrib]: type (up | down)
         if (has_attribute(&m_childToAnalyse, "type"))
             set_type(pImo);
     }
@@ -1495,7 +1532,7 @@ protected:
         ImoArticulationSymbol* pImo =
             get_articulation_symbol(pNR, k_articulation_breath_mark);
 
-        // [atrrib]: type (up | down)
+        // [attrib]: type (up | down)
         if (has_attribute(&m_childToAnalyse, "type"))
             set_breath_mark_type(pImo);
     }
@@ -1508,7 +1545,7 @@ protected:
                                 ImFactory::inject(k_imo_articulation_line, pDoc) );
         pImo->set_articulation_type(type);
 
-        // [atrrib]: placement (above | below)
+        // [attrib]: placement (above | below)
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
@@ -1933,6 +1970,22 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <bracket>
+class BracketMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    BracketMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                       LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <clef> = <sign>[<line>][<clef-octave-change>]
 //@ attrb: none is mandatory:
 //    number  	    staff-number  	The optional number attribute refers to staff numbers
@@ -2123,19 +2176,164 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ direction
+//@ <damp>
+class DampMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DampMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <coda>
+class CodaMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    CodaMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <damp-all>
+class DampAllMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DampAllMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <dashes>
+class DashesMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DashesMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ direction
+//<!ELEMENT direction (direction-type+, offset?,
+//    %editorial-voice;, staff?, sound?)>
+//<!ATTLIST direction
+//    %placement;
+//    %directive;
+//>
+//
 class DirectionMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    DirectionMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                         ImoObj* pAnchor)
+    DirectionMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
     ImoObj* do_analysis()
     {
-        //TODO
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, pDoc) );
+
+        // attrib: %placement;
+
+        // attrib: %directive;
+
+        // direction-type+
+        analyse_optional("direction-type", pDirection);
+        while (analyse_optional("direction-type", pDirection));
+
+        // offset?
+
+        // %editorial-voice;
+
+        // staff?
+            //search for 'get_numstaff()' and implement analyse_optional_staff()
+    //virtual void set_staff(int staff) { m_staff = staff; }
+
+        // sound?
+        analyse_optional("sound", pDirection);
+
+        error_if_more_elements();
+
+        add_to_model(pDirection);
+        return pDirection;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <direction-type>
+//<!ELEMENT direction-type (rehearsal+ | segno+ | words+ |
+//    coda+ | wedge | dynamics+ | dashes | bracket | pedal |
+//    metronome | octave-shift | harp-pedals | damp | damp-all |
+//    eyeglasses | string-mute | scordatura | image |
+//    principal-voice | accordion-registration | percussion+ |
+//    other-direction)>
+//
+class DirectionTypeMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DirectionTypeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                             LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+        while (more_children_to_analyse())
+        {
+            analyse_optional("rehearsal", m_pAnchor)
+            || analyse_optional("segno", m_pAnchor)
+            || analyse_optional("words", m_pAnchor)
+            || analyse_optional("coda", m_pAnchor)
+            || analyse_optional("wedge", m_pAnchor)
+            || analyse_optional("dynamics", m_pAnchor)
+            || analyse_optional("dashes", m_pAnchor)
+            || analyse_optional("bracket", m_pAnchor)
+            || analyse_optional("pedal", m_pAnchor)
+            || analyse_optional("metronome", m_pAnchor)
+            || analyse_optional("octave-shift", m_pAnchor)
+            || analyse_optional("harp-pedals", m_pAnchor)
+            || analyse_optional("damp", m_pAnchor)
+            || analyse_optional("damp-all", m_pAnchor)
+            || analyse_optional("eyeglasses", m_pAnchor)
+            || analyse_optional("string-mute", m_pAnchor)
+            || analyse_optional("scordatura", m_pAnchor)
+            || analyse_optional("image", m_pAnchor)
+            || analyse_optional("principal-voice", m_pAnchor)
+            || analyse_optional("accordion-registration", m_pAnchor)
+            || analyse_optional("percussion", m_pAnchor)
+            || analyse_optional("other-direction", m_pAnchor)
+            ;
+        }
+
         return NULL;
     }
 };
@@ -2169,18 +2367,18 @@ public:
 class DynamicsMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    DynamicsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
+    DynamicsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
-        if (m_pAnchor && m_pAnchor->is_note_rest())
-            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        ImoStaffObj* pSO = NULL;
+        if (m_pAnchor && (m_pAnchor->is_note_rest() || m_pAnchor->is_direction()))
+            pSO = static_cast<ImoStaffObj*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            error_msg("pAnchor is NULL or it is neither ImoNoteRest nor ImoDirection.");
             return NULL;
         }
 
@@ -2188,7 +2386,7 @@ public:
         ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(
                                 ImFactory::inject(k_imo_dynamics_mark, pDoc) );
 
-        // atrrib: placement
+        // attrib: placement
         if (has_attribute("placement"))
             set_placement(pImo);
 
@@ -2211,7 +2409,7 @@ public:
 
         error_if_more_elements();
 
-        pNR->add_attachment(pDoc, pImo);
+        pSO->add_attachment(pDoc, pImo);
         return pImo;
     }
 
@@ -2372,6 +2570,22 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <eyeglasses>
+class EyeglassesMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    EyeglassesMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <fermata> = (fermata <placement>[<componentOptions>*])
 //@ <placement> = { above | below }
 //<!--
@@ -2412,7 +2626,7 @@ public:
         ImoFermata* pImo = static_cast<ImoFermata*>(
                                 ImFactory::inject(k_imo_fermata, pDoc) );
 
-        // atrrib: type (upright | inverted) #IMPLIED
+        // attrib: type (upright | inverted) #IMPLIED
         if (has_attribute("type"))
             set_type(pImo);
 
@@ -2532,6 +2746,38 @@ public:
 
 protected:
 
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <harp-pedals>
+class HarpPedalsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    HarpPedalsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <image>
+class ImageMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ImageMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -2755,13 +3001,13 @@ public:
         ImoLyric* pData = static_cast<ImoLyric*>(
                                     ImFactory::inject(k_imo_lyric, pDoc) );
 
-        // atrrib: number
+        // attrib: number
         int num = 1;
         if (has_attribute("number"))
             num = get_attribute_as_integer("number", 1);
         pData->set_number(num);
 
-        // atrrib: type (upright | inverted) #IMPLIED
+        // attrib: type (upright | inverted) #IMPLIED
         if (has_attribute("placement"))
             set_placement(pData);
 
@@ -2942,6 +3188,22 @@ protected:
         add_to_model(pImo);
     }
 
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <metronome>
+class MetronomeMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    MetronomeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3723,6 +3985,22 @@ public:
 
 
 //@--------------------------------------------------------------------------------------
+//@ <octave-shift>
+class OctaveShiftMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    OctaveShiftMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <ornaments> = (ornaments [<ornament> | <accidental-mark>+ ]+ )
 //@ <ornament> = [trill-mark | turn | delayed-turn | inverted-turn |
 //@               delayed-inverted-turn | vertical-turn | shake |
@@ -3841,7 +4119,7 @@ protected:
                                 ImFactory::inject(k_imo_ornament, pDoc) );
         pImo->set_ornament_type(type);
 
-        // [atrrib]: placement (above | below)
+        // [attrib]: placement (above | below)
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
@@ -3855,7 +4133,7 @@ protected:
         //ImoOrnament* pImo =
             get_ornament_symbol(pNR, k_ornament_wavy_line);
 
-//        // [atrrib]: type (up | down)
+//        // [attrib]: type (up | down)
 //        if (has_attribute(&m_childToAnalyse, "type"))
 //            set_type(pImo);
     }
@@ -3866,7 +4144,7 @@ protected:
 //        ImoOrnament* pImo =
 //            get_ornament_symbol(pNR, k_ornament_breath_mark);
 //
-//        // [atrrib]: type (up | down)
+//        // [attrib]: type (up | down)
 //        if (has_attribute(&m_childToAnalyse, "type"))
 //            set_breath_mark_type(pImo);
     }
@@ -4173,6 +4451,38 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <pedal>
+class PedalMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PedalMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <percussion>
+class PercussionMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PercussionMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <pitch> = <step>[<alter>]<octave>
 //@ attrb:   none
 
@@ -4286,6 +4596,22 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <principal-voice>
+class PrincipalVoiceMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PrincipalVoiceMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ print
 class PrintMxlAnalyser : public MxlElementAnalyser
 {
@@ -4297,6 +4623,22 @@ public:
     ImoObj* do_analysis()
     {
         //TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <rehearsal>
+class RehearsalMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    RehearsalMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
         return NULL;
     }
 };
@@ -4642,6 +4984,54 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <scordatura>
+class ScordaturaMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ScordaturaMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <segno>
+class SegnoMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    SegnoMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <string-mute>
+class StringMmuteMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    StringMmuteMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                           LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <technical> = (technical <tech-mark>+)
 //@ <tech-mark> = [ up-bow | down-bow | harmonic | open-string |
 //@                 thumb-position | fingering | pluck | double-tongue |
@@ -4728,7 +5118,7 @@ protected:
                                 ImFactory::inject(k_imo_technical, pDoc) );
         pImo->set_technical_type(type);
 
-        // [atrrib]: placement (above | below)
+        // [attrib]: placement (above | below)
         if (has_attribute(&m_childToAnalyse, "placement"))
             set_placement(pImo);
 
@@ -5201,7 +5591,7 @@ public:
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
                                     ImFactory::inject(k_imo_time_signature, pDoc) );
 
-        // atrrib: symbol (common | cut | single-number | normal)
+        // attrib: symbol (common | cut | single-number | normal)
         if (has_attribute("symbol"))
             set_symbol(pTime);
 
@@ -5223,7 +5613,7 @@ protected:
     //-----------------------------------------------------------------------------------
     void set_symbol(ImoTimeSignature* pImo)
     {
-        // atrrib: symbol (common | cut | single-number | normal)
+        // attrib: symbol (common | cut | single-number | normal)
 
         string value = get_attribute("symbol");
         if (value == "common")
@@ -5581,7 +5971,7 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ virtual-instrument
+//@ <virtual-instrument>
 //<!ELEMENT virtual-instrument
 //    (virtual-library?, virtual-name?)>
 //<!ELEMENT virtual-library (#PCDATA)>
@@ -5615,6 +6005,126 @@ public:
         error_if_more_elements();
 
         return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <wedge>
+class WedgeMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    WedgeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+        return NULL;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <words>
+//<!ELEMENT words (#PCDATA)>
+//<!ATTLIST words
+//    %text-formatting;
+//>
+// Left justification is assumed if not specified.
+// Language is Italian ("it") by default.
+// Enclosure is none by default.
+//
+class WordsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    WordsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+		//TODO
+
+        ImoDirection* pDirection = NULL;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            error_msg("<direction-type> <words> is not child of <direction>. Ignored.");
+            return NULL;
+        }
+
+
+        int repeat = is_repetion_mark();
+        pDirection->set_words_repeat(repeat);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoScoreText* pImo;
+        if (repeat != k_repeat_none)
+        {
+            ImoTextRepetitionMark* pRM = static_cast<ImoTextRepetitionMark*>(
+                                        ImFactory::inject(k_imo_repetition_mark, pDoc) );
+            pRM->set_repeat_mark(repeat);
+            pImo = pRM;
+        }
+        else
+        {
+            pImo = static_cast<ImoScoreText*>(
+                        ImFactory::inject(k_imo_score_text, pDoc) );
+        }
+
+        //set default values
+        pImo->set_language("it");
+            //TODO:
+            //Left justification is assumed if not specified.
+            //Enclosure is none by default.
+
+        // attrib: %text-formatting;
+
+        // words (#PCDATA)
+        pImo->set_text( m_analysedNode.value() );
+
+        pDirection->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+protected:
+
+    int is_repetion_mark()
+    {
+        //get text and use it for deducing if it is a repetition mark
+
+        string text = m_analysedNode.value();
+        std::transform(text.begin(), text.end(), text.begin(), ::tolower);
+
+        std::regex regexDaCapo("d\\.? *c\\.?|da *capo");
+        std::regex regexDaCapoAlFine("d\\.? *c\\.? *al *fine|da *capo *al *fine");
+        std::regex regexDaCapoAlCoda("d\\.? *c\\.? *al *coda|da *capo *al *coda");
+        std::regex regexDalSegno("d\\.? *s\\.?|dal *segno|del *segno");
+        std::regex regexDalSegnoAlFine("d\\.? *s\\.? *al *fine|dal *segno *al *fine|del *segno *al *fine");
+        std::regex regexDalSegnoAlCoda("d\\.? *s\\.? *al *coda|dal *segno *al *coda|del *segno *al *coda");
+        std::regex regexFine("fine");
+        std::regex regexToCoda("to *coda");
+
+        if (std::regex_match(text, regexDaCapo))
+            return k_repeat_da_capo;
+        else if (std::regex_match(text, regexDaCapoAlFine))
+            return k_repeat_da_capo_al_fine;
+        else if (std::regex_match(text, regexDaCapoAlCoda))
+            return k_repeat_da_capo_al_coda;
+        else if (std::regex_match(text, regexDalSegno))
+            return k_repeat_dal_segno;
+        else if (std::regex_match(text, regexDalSegnoAlFine))
+            return k_repeat_dal_segno_al_fine;
+        else if (std::regex_match(text, regexDalSegnoAlCoda))
+            return k_repeat_dal_segno_al_coda;
+        else if (std::regex_match(text, regexFine))
+            return k_repeat_fine;
+        else if (std::regex_match(text, regexToCoda))
+            return k_repeat_to_coda;
+        else
+            return k_repeat_none;
     }
 };
 
@@ -5652,36 +6162,55 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_divisions(1.0f)
 {
     //populate the name to enum conversion map
+    m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
     m_NameToEnum["articulations"] = k_mxl_tag_articulations;
     m_NameToEnum["attributes"] = k_mxl_tag_attributes;
     m_NameToEnum["backup"] = k_mxl_tag_backup;
     m_NameToEnum["barline"] = k_mxl_tag_barline;
+    m_NameToEnum["bracket"] = k_mxl_tag_bracket;
     m_NameToEnum["clef"] = k_mxl_tag_clef;
+    m_NameToEnum["coda"] = k_mxl_tag_coda;
+    m_NameToEnum["damp"] = k_mxl_tag_damp;
+    m_NameToEnum["damp-all"] = k_mxl_tag_damp_all;
+    m_NameToEnum["dashes"] = k_mxl_tag_dashes;
     m_NameToEnum["direction"] = k_mxl_tag_direction;
+    m_NameToEnum["direction-type"] = k_mxl_tag_direction_type;
     m_NameToEnum["dynamics"] = k_mxl_tag_dynamics;
     m_NameToEnum["ending"] = k_mxl_tag_ending;
+    m_NameToEnum["eyeglasses"] = k_mxl_tag_eyeglasses;
     m_NameToEnum["fermata"] = k_mxl_tag_fermata;
     m_NameToEnum["forward"] = k_mxl_tag_forward;
+    m_NameToEnum["harp-pedals"] = k_mxl_tag_harp_pedals;
+    m_NameToEnum["image"] = k_mxl_tag_image;
     m_NameToEnum["key"] = k_mxl_tag_key;
     m_NameToEnum["lyric"] = k_mxl_tag_lyric;
     m_NameToEnum["measure"] = k_mxl_tag_measure;
+    m_NameToEnum["metronome"] = k_mxl_tag_metronome;
     m_NameToEnum["midi-device"] = k_mxl_tag_midi_device;
     m_NameToEnum["midi-instrument"] = k_mxl_tag_midi_instrument;
     m_NameToEnum["notations"] = k_mxl_tag_notations;
     m_NameToEnum["note"] = k_mxl_tag_note;
+    m_NameToEnum["octave-shift"] = k_mxl_tag_octave_shift;
     m_NameToEnum["ornaments"] = k_mxl_tag_ornaments;
     m_NameToEnum["part"] = k_mxl_tag_part;
     m_NameToEnum["part-group"] = k_mxl_tag_part_group;
     m_NameToEnum["part-list"] = k_mxl_tag_part_list;
     m_NameToEnum["part-name"] = k_mxl_tag_part_name;
+    m_NameToEnum["pedal"] = k_mxl_tag_pedal;
+    m_NameToEnum["percussion"] = k_mxl_tag_percussion;
     m_NameToEnum["pitch"] = k_mxl_tag_pitch;
+    m_NameToEnum["principal-voice"] = k_mxl_tag_principal_voice;
     m_NameToEnum["print"] = k_mxl_tag_print;
+    m_NameToEnum["rehearsal"] = k_mxl_tag_rehearsal;
     m_NameToEnum["rest"] = k_mxl_tag_rest;
+    m_NameToEnum["scordatura"] = k_mxl_tag_scordatura;
     m_NameToEnum["score-instrument"] = k_mxl_tag_score_instrument;
     m_NameToEnum["score-part"] = k_mxl_tag_score_part;
     m_NameToEnum["score-partwise"] = k_mxl_tag_score_partwise;
+    m_NameToEnum["segno"] = k_mxl_tag_segno;
     m_NameToEnum["slur"] = k_mxl_tag_slur;
     m_NameToEnum["sound"] = k_mxl_tag_sound;
+    m_NameToEnum["string-mute"] = k_mxl_tag_string_mute;
     m_NameToEnum["technical"] = k_mxl_tag_technical;
     m_NameToEnum["text"] = k_mxl_tag_text;
     m_NameToEnum["tied"] = k_mxl_tag_tied;
@@ -5691,6 +6220,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["tuplet-actual"] = k_mxl_tag_tuplet_actual;
     m_NameToEnum["tuplet-normal"] = k_mxl_tag_tuplet_normal;
     m_NameToEnum["virtual-instrument"] = k_mxl_tag_virtual_instr;
+    m_NameToEnum["wedge"] = k_mxl_tag_wedge;
+    m_NameToEnum["words"] = k_mxl_tag_words;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6026,35 +6557,54 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
 
     switch ( name_to_enum(name) )
     {
+//        case k_mxl_tag_accordion_registration: return LOMSE_NEW AccordionRegistrationMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_articulations:        return LOMSE_NEW ArticulationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_attributes:           return LOMSE_NEW AtribbutesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_backup:               return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_barline:              return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_bracket:              return LOMSE_NEW BracketMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_clef:                 return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_coda:                 return LOMSE_NEW CodaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_damp:                 return LOMSE_NEW DampMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_damp_all:             return LOMSE_NEW DampAllMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_dashes:               return LOMSE_NEW DashesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_direction:            return LOMSE_NEW DirectionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_direction_type:       return LOMSE_NEW DirectionTypeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_dynamics:             return LOMSE_NEW DynamicsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ending:               return LOMSE_NEW EndingMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_eyeglasses:           return LOMSE_NEW EyeglassesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_fermata:              return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_harp_pedals:          return LOMSE_NEW HarpPedalsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_image:                return LOMSE_NEW ImageMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_lyric:                return LOMSE_NEW LyricMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_measure:              return LOMSE_NEW MeasureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_metronome:            return LOMSE_NEW MetronomeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_midi_device:          return LOMSE_NEW MidiDeviceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_midi_instrument:      return LOMSE_NEW MidiInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_notations:            return LOMSE_NEW NotationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_octave_shift:         return LOMSE_NEW OctaveShiftMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_group:           return LOMSE_NEW PartGroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_pedal:                return LOMSE_NEW PedalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_percussion:           return LOMSE_NEW PercussionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_pitch:                return LOMSE_NEW PitchMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_principal_voice:      return LOMSE_NEW PrincipalVoiceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_print:                return LOMSE_NEW PrintMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_rehearsal:            return LOMSE_NEW RehearsalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_scordatura:           return LOMSE_NEW ScordaturaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_instrument:     return LOMSE_NEW ScoreInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_score_partwise:       return LOMSE_NEW ScorePartwiseMxlAnalyser(this, m_reporter, m_libraryScope);
+//        case k_mxl_tag_segno:                return LOMSE_NEW SegnoMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_sound:                return LOMSE_NEW SoundMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMmuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_technical:            return LOMSE_NEW TecnicalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_text:                 return LOMSE_NEW TextMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tied:                 return LOMSE_NEW TiedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6064,6 +6614,8 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_tuplet_actual:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_normal:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_virtual_instr:        return LOMSE_NEW VirtualInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_wedge:                return LOMSE_NEW WedgeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_words:                return LOMSE_NEW WordsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         default:
             return LOMSE_NEW NullMxlAnalyser(this, m_reporter, m_libraryScope, name);
     }

@@ -1042,6 +1042,11 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
                                                             iInstr, iStaff);
             return create_invisible_shape(pSO, iInstr, iStaff, pos, space);
         }
+        case k_imo_direction:
+        {
+            //TODO
+            return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
+        }
         case k_imo_metronome_mark:
         {
             ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pSO);
@@ -1102,6 +1107,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             return engrv.create_shape(pImo, pos);
         }
         case k_imo_score_text:
+        case k_imo_repetition_mark:
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),

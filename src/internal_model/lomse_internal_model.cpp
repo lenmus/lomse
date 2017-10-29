@@ -323,6 +323,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_system_break] = "system-break";
         m_TypeToName[k_imo_spacer] = "spacer";
         m_TypeToName[k_imo_figured_bass] = "figured-bass";
+        m_TypeToName[k_imo_direction] = "direction";
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
@@ -404,16 +405,17 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_instrument] = "instrument";
 
         // ImoAuxObj (A)
-        m_TypeToName[k_imo_fermata] = "fermata";
-        m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
-        m_TypeToName[k_imo_ornament] = "ornament";
-        m_TypeToName[k_imo_technical] = "technical";
-        m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
         m_TypeToName[k_imo_articulation_line] = "articulation-line";
+        m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
+        m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
+        m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
+        m_TypeToName[k_imo_repetition_mark] = "repetition-mark";
         m_TypeToName[k_imo_score_text] = "score-text";
         m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
+        m_TypeToName[k_imo_ornament] = "ornament";
+        m_TypeToName[k_imo_technical] = "technical";
         m_TypeToName[k_imo_text_box] = "text-box";
 
         // ImoAuxRelObj (A)
@@ -1498,6 +1500,7 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_volta_bracket] = 4;
         priority[k_imo_slur] = 5;
         priority[k_imo_fermata] = 6;
+        priority[k_imo_repetition_mark] = 7;
 
         fMapInitialized = true;
     };
