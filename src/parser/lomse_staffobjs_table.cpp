@@ -194,6 +194,27 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
                 return false;
         }
 
+        //direction can not go between clefs/key/time ==>
+        //clef/key/time can not go after direction in other instruments/staves
+        if (pA->is_direction()
+            && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
+        {
+            return (a->line() != b->line());    //move clef/key/time before direction
+        }
+
+        //direction can not got in between chord notes ==>
+        //note in chord, not start of chord, can only go after note in chord ==>
+        //note in chord, not start of chord, must go before any other object except other chord note
+        if (pB->is_note())
+        {
+            ImoNote* pNB = static_cast<ImoNote*>(pB);
+            if (pNB->is_in_chord() && !pNB->is_start_of_chord())
+            {
+                if (!pA->is_note())
+                    return true;        //move before pA object
+            }
+        }
+
 ////        //clef in other staff can not go after key or time signature
 ////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
 ////                 && b->staff() != a->staff())
@@ -531,7 +552,8 @@ void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
         m_rCurTime = m_rMaxSegmentTime;
     else
     {
-        m_rCurTime += pGBF->get_time_shift();
+        TimeUnits time = m_rCurTime + pGBF->get_time_shift();
+        m_rCurTime = (time < m_rStartSegmentTime ? m_rStartSegmentTime : time);
         m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     }
 }
