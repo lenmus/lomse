@@ -387,6 +387,9 @@ protected:
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };
 
+//defined out of WordsMxlAnalyser for unit tests
+extern int type_of_repetion_mark(const string& value);
+
 
 }   //namespace lomse
 

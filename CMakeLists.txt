@@ -122,7 +122,12 @@ if(CMAKE_NO_STD_NAMESPACE)
 endif()
 
 # force to use c++11
-add_definitions(-std=c++11)
+if (CMAKE_VERSION VERSION_LESS "3.1")
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+else ()
+    set(CMAKE_CXX_STANDARD 11)				#require c+11 or greater
+    set(CMAKE_CXX_STANDARD_REQUIRED ON) 	#prevent fallback to any previous standard
+endif ()
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )

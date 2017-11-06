@@ -323,6 +323,7 @@ public:
     virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
                                        TextMeter& textMeter);
     void apply_force(float F);
+    inline void increment_fixed_extent(LUnits value) { m_xLeft += value; }
     inline void increment_xRi(LUnits value) { m_xRi += value; }
     inline void set_minimum_xi(LUnits value) {
         if (get_xi() < value)
@@ -362,6 +363,8 @@ public:
     //debug
     void dump(ostream& ss);
     static void dump_header(ostream& ss);
+    inline int dbg_get_first_data() { return m_iFirstData; }
+
 
 protected:
     void compute_smallest_duration_di(TimeUnits minNotePrev);

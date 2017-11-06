@@ -45,6 +45,8 @@
 #include "lomse_time.h"
 #include "lomse_import_options.h"
 
+#include <regex>
+
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
@@ -3340,12 +3342,102 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-
-    //@ Hello World -------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_hello_world_99999)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_612)
     {
-        //@99999
+        //@00612. regex for 'Da Capo'
+
+        CHECK (type_of_repetion_mark("Da Capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" da capo ") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" DaCapo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("dc") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d.c.") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d. c.") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" d.c. ") == k_repeat_da_capo );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_613)
+    {
+        //@00613. regex for 'Da Capo Al Fine'
+
+        CHECK (type_of_repetion_mark("da capo al fine") == k_repeat_da_capo_al_fine );
+//        CHECK (type_of_repetion_mark("d.c.") == k_repeat_da_capo_al_fine );
+//        CHECK (type_of_repetion_mark("d. c.") == k_repeat_da_capo_al_fine );
+//        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_da_capo_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_614)
+    {
+        //@00614. regex for 'Da Capo Al Coda'
+
+        CHECK (type_of_repetion_mark("da capo al coda") == k_repeat_da_capo_al_coda );
+//        CHECK (type_of_repetion_mark("d.c.") == k_repeat_da_capo_al_coda );
+//        CHECK (type_of_repetion_mark("d. c.") == k_repeat_da_capo_al_coda );
+//        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_da_capo_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_615)
+    {
+        //@00615. regex for 'Dal Segno'
+
+        CHECK (type_of_repetion_mark("dal segno") == k_repeat_dal_segno );
+//        CHECK (type_of_repetion_mark("d.c.") == k_repeat_dal_segno );
+//        CHECK (type_of_repetion_mark("d. c.") == k_repeat_dal_segno );
+//        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_dal_segno );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_616)
+    {
+        //@00616. regex for 'Dal Segno Al Fine'
+
+        CHECK (type_of_repetion_mark("dal segno al fine") == k_repeat_dal_segno_al_fine );
+//        CHECK (type_of_repetion_mark("d.c.") == k_repeat_dal_segno_al_fine );
+//        CHECK (type_of_repetion_mark("d. c.") == k_repeat_dal_segno_al_fine );
+//        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_dal_segno_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_617)
+    {
+        //@00617. regex for 'Dal Segno Al Coda'
+
+        CHECK (type_of_repetion_mark("dal segno al coda") == k_repeat_dal_segno_al_coda );
+//        CHECK (type_of_repetion_mark("d.c.") == k_repeat_dal_segno_al_coda );
+//        CHECK (type_of_repetion_mark("d. c.") == k_repeat_dal_segno_al_coda );
+//        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_dal_segno_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_618)
+    {
+        //@00618. regex for 'Fine'
+
+        CHECK (type_of_repetion_mark("fine") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" fine") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" fine ") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" Fine") == k_repeat_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_619)
+    {
+        //@00619. regex for 'To Coda'
+
+        CHECK (type_of_repetion_mark("to coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("to  coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("to coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to  coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("tocoda") == k_repeat_to_coda );
+    }
+
+
+    //@ miscellaneous -------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_miscellaneous_01)
+    {
+        //@99901 - Hello World
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;

@@ -94,8 +94,10 @@ LUnits TextEngraver::measure_height()
 GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop)
 {
     UPoint pos(xLeft, yTop);
-    if (pCreatorImo && (pCreatorImo->is_score_text() || pCreatorImo->is_score_title()))
-        add_user_shift(static_cast<ImoScoreText*>(pCreatorImo), &pos);
+    if (pCreatorImo && pCreatorImo->is_contentobj())
+        add_user_shift(static_cast<ImoContentObj*>(pCreatorImo), &pos);
+//    if (pCreatorImo && (pCreatorImo->is_score_text() || pCreatorImo->is_score_title()))
+//        add_user_shift(static_cast<ImoScoreText*>(pCreatorImo), &pos);
 
     //TODO-LOG
     //if (valign == k_center)

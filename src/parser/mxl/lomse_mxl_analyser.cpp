@@ -447,23 +447,6 @@ protected:
         prepare_next_one();
     }
 
-//    //-----------------------------------------------------------------------------------
-//    void get_num_staff()
-//    {
-//        string staff = m_childToAnalyse.value();
-//        int nStaff;
-//        //http://www.codeguru.com/forum/showthread.php?t=231054
-//        std::istringstream iss(staff);
-//        if ((iss >> std::dec >> nStaff).fail())
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Invalid staff '" + staff + "'. Replaced by '1'.");
-//            m_pAnalyser->set_current_staff(0);
-//        }
-//        else
-//            m_pAnalyser->set_current_staff(--nStaff);
-//    }
-
     //-----------------------------------------------------------------------------------
     bool is_long_value()
     {
@@ -575,42 +558,50 @@ protected:
         return m_childToAnalyse.value();
     }
 
-//    //-----------------------------------------------------------------------------------
-//    EHAlign get_alignment_value(EHAlign defaultValue)
-//    {
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "left")
-//            return k_halign_left;
-//        else if (value == "right")
-//            return k_halign_right;
-//        else if (value == "center")
-//            return k_halign_center;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                    "Invalid alignment value '" + value + "'. Assumed 'center'.");
-//            return defaultValue;
-//        }
-//    }
 
-//    //-----------------------------------------------------------------------------------
-//    Color get_color_child()
+    //-----------------------------------------------------------------------------------
+    // Analysers for common attributes
+    //-----------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------
+    //@ %placement
+    //@ The placement attribute indicates whether something is
+    //@ above or below another element, such as a note or anotation.
+    //@<!ENTITY % placement
+    //@    "placement %above-below; #IMPLIED">
+    int get_attribute_placement()
+    {
+        if (has_attribute(&m_childToAnalyse, "placement"))
+        {
+            string value = get_attribute(&m_childToAnalyse, "placement");
+            if (value == "above")
+                return k_placement_above;
+            else if (value == "below")
+                return k_placement_below;
+            else
+            {
+                report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                    "Unknown placement attrib. '" + value + "'. Ignored.");
+                return k_placement_default;
+            }
+        }
+        else
+            return k_placement_default;
+    }
+
+    //-----------------------------------------------------------------------------------
+    //@ % color
+    //@ The color entity indicates the color of an element. Color may be represented:
+    //@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
+    //@ - as hexadecimal ARGB tuples (alpha 00 = totally transparent; FF = totally opaque)
+    //@ If RGB is used, the A value is assumed to be FF (i.e. "#40800080" transparent purple)
+    //@<!ENTITY % color
+    //@    "color CDATA #IMPLIED">
+//    int get_attribute_color()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
-//        Color color;
-//        if (pImo->is_color_dto())
+//        if (has_attribute(&m_childToAnalyse, "color"))
 //        {
-//            ImoColorDto* pColor = static_cast<ImoColorDto*>( pImo );
-//            color = pColor->get_color();
-//        }
-//        delete pImo;
-//        return color;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    Color get_color_value()
-//    {
-//        string value = m_childToAnalyse.value();
+//            string value = get_attribute(&m_childToAnalyse, "color");
 //        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
 //        pColor->set_from_string(value);
 //        if (!pColor->is_ok())
@@ -623,7 +614,57 @@ protected:
 //        delete pColor;
 //        return color;
 //    }
-//
+
+
+    //-----------------------------------------------------------------------------------
+    //@ %font
+    //@ - The font-family is a comma-separated list of font names.
+    //@   These can be specific font styles such as Maestro or Opus, or one of several
+    //@   generic font styles: music, engraved, handwritten, text, serif, sans-serif,
+    //@   handwritten, cursive, fantasy, and monospace. The music, engraved, and
+    //@   handwritten values refer to music fonts; the rest refer to text fonts.
+    //@ - The font-style can be normal or italic.
+    //@ - The font-size can be one of the CSS sizes (xx-small, x-small, small, medium,
+    //@   large, x-large, xx-large) or a numeric point size.
+    //@ - The font-weight can be normal or bold.
+    //@
+    //@<!ENTITY % font
+    //@    "font-family  CDATA  #IMPLIED
+    //@     font-style   CDATA  #IMPLIED     can be normal or italic
+    //@     font-size    CDATA  #IMPLIED
+    //@     font-weight  CDATA  #IMPLIED">
+//    ImoStyle* get_attribute_font()
+//    {
+//        ImoStyle* pStyle = NULL;pScore->new_unnamed_style();   //derived from default
+//        if (has_attribute(&m_childToAnalyse, "font-style"))
+//        {
+//            string value = get_attribute(&m_childToAnalyse, "font-style");
+//            if (!pStyle)
+//                pStyle = pScore->new_unnamed_style();   //derived from default
+//        }
+//        if (has_attribute(&m_childToAnalyse, "font-size"))
+//        {
+//            string value = get_attribute(&m_childToAnalyse, "font-size");
+//            if (!pStyle)
+//                pStyle = pScore->new_unnamed_style();   //derived from default
+//        }
+//        if (has_attribute(&m_childToAnalyse, "font-weight"))
+//        {
+//            string value = get_attribute(&m_childToAnalyse, "font-weight");
+//            if (!pStyle)
+//                pStyle = pScore->new_unnamed_style();   //derived from default
+//        }
+//        if (has_attribute(&m_childToAnalyse, "font-family"))
+//        {
+//            string value = get_attribute(&m_childToAnalyse, "font-family");
+//            if (!pStyle)
+//                pStyle = pScore->new_unnamed_style();   //derived from default
+//        }
+//        if (!pStyle)
+//            pStyle = pScore->default();
+//          return pStyle;
+//    }
+
 //    //-----------------------------------------------------------------------------------
 //    float get_font_size_value()
 //    {
@@ -641,6 +682,180 @@ protected:
 //        }
 //        else
 //            return rNumber;
+//    }
+
+
+    //-----------------------------------------------------------------------------------
+    // Analysers for common elements
+    //-----------------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------
+    //@ <staff>
+    //@ Staff assignment is only needed for music notated on
+    //@ multiple staves. Used by both notes and directions. Staff
+    //@ values are numbers, with 1 referring to the top-most staff
+    //@ in a part.
+    //@
+    //@ <!ELEMENT staff (#PCDATA)>
+    //
+    int analyse_optional_staff(int nDefault)
+    {
+        if (get_optional("staff"))
+            return get_integer_value(nDefault);
+        else
+            return nDefault;
+    }
+
+//<!--
+//    The text-decoration entity is based on the similar
+//    feature in XHTML and CSS. It allows for text to
+//    be underlined, overlined, or struck-through. It
+//    extends the CSS version by allow double or
+//    triple lines instead of just being on or off.
+//-->
+//<!ENTITY % text-decoration
+//    "underline  %number-of-lines;  #IMPLIED
+//     overline  %number-of-lines;   #IMPLIED
+//     line-through  %number-of-lines;   #IMPLIED">
+//
+//<!--
+//    The justify entity is used to indicate left, center, or
+//    right justification. The default value varies for different
+//    elements. For elements where the justify attribute is present
+//    but the halign attribute is not, the justify attribute
+//    indicates horizontal alignment as well as justification.
+//-->
+//<!ENTITY % justify
+//    "justify (left | center | right) #IMPLIED">
+//
+//<!--
+//    In cases where text extends over more than one line,
+//    horizontal alignment and justify values can be different.
+//    The most typical case is for credits, such as:
+//
+//        Words and music by
+//          Pat Songwriter
+//
+//    Typically this type of credit is aligned to the right,
+//    so that the position information refers to the right-
+//    most part of the text. But in this example, the text
+//    is center-justified, not right-justified.
+//
+//    The halign attribute is used in these situations. If it
+//    is not present, its value is the same as for the justify
+//    attribute.
+//-->
+//<!ENTITY % halign
+//    "halign (left | center | right) #IMPLIED">
+//
+//<!--
+//    The valign entity is used to indicate vertical
+//    alignment to the top, middle, bottom, or baseline
+//    of the text. Defaults are implementation-dependent.
+//-->
+//<!ENTITY % valign
+//    "valign (top | middle | bottom | baseline) #IMPLIED">
+//
+//<!--
+//    The valign-image entity is used to indicate vertical
+//    alignment for images and graphics, so it removes the
+//    baseline value. Defaults are implementation-dependent.
+//-->
+//<!ENTITY % valign-image
+//    "valign (top | middle | bottom) #IMPLIED">
+//
+//<!--
+//    The letter-spacing entity specifies text tracking.
+//    Values are either "normal" or a number representing
+//    the number of ems to add between each letter. The
+//    number may be negative in order to subtract space.
+//    The default is normal, which allows flexibility of
+//    letter-spacing for purposes of text justification.
+//-->
+//<!ENTITY % letter-spacing
+//    "letter-spacing CDATA #IMPLIED">
+//
+//<!--
+//    The line-height entity specified text leading. Values
+//    are either "normal" or a number representing the
+//    percentage of the current font height  to use for
+//    leading. The default is "normal". The exact normal
+//    value is implementation-dependent, but values
+//    between 100 and 120 are recommended.
+//-->
+//<!ENTITY % line-height
+//    "line-height CDATA #IMPLIED">
+//
+//<!--
+//    The text-direction entity is used to adjust and override
+//    the Unicode bidirectional text algorithm, similar to the
+//    W3C Internationalization Tag Set recommendation. Values
+//    are ltr (left-to-right embed), rtl (right-to-left embed),
+//    lro (left-to-right bidi-override), and rlo (right-to-left
+//    bidi-override). The default value is ltr. This entity
+//    is typically used by applications that store text in
+//    left-to-right visual order rather than logical order.
+//    Such applications can use the lro value to better
+//    communicate with other applications that more fully
+//    support bidirectional text.
+//-->
+//<!ENTITY % text-direction
+//    "dir (ltr | rtl | lro | rlo) #IMPLIED">
+//
+//<!--
+//    The text-rotation entity is used to rotate text
+//    around the alignment point specified by the
+//    halign and valign entities. The value is a number
+//    ranging from -180 to 180. Positive values are
+//    clockwise rotations, while negative values are
+//    counter-clockwise rotations.
+//-->
+//<!ENTITY % text-rotation
+//    "rotation CDATA #IMPLIED">
+//
+//<!--
+//    The enclosure entity is used to specify the
+//    formatting of an enclosure around text or symbols.
+//-->
+//<!ENTITY % enclosure
+//    "enclosure %enclosure-shape; #IMPLIED">
+//
+//<!--
+//    The print-style entity groups together the most popular
+//    combination of printing attributes: position, font, and
+//    color.
+//-->
+//<!ENTITY % print-style
+//    "%position;
+//     %font;
+//     %color;">
+//
+//<!--
+//    The print-style-align entity adds the halign and valign
+//    attributes to the position, font, and color attributes.
+//-->
+//<!ENTITY % print-style-align
+//    "%print-style;
+//     %halign;
+//     %valign;">
+
+
+//    //-----------------------------------------------------------------------------------
+//    EHAlign get_alignment_value(EHAlign defaultValue)
+//    {
+//        const std::string& value = m_childToAnalyse.value();
+//        if (value == "left")
+//            return k_halign_left;
+//        else if (value == "right")
+//            return k_halign_right;
+//        else if (value == "center")
+//            return k_halign_center;
+//        else
+//        {
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+//                    "Invalid alignment value '" + value + "'. Assumed 'center'.");
+//            return defaultValue;
+//        }
 //    }
 //
 //    //-----------------------------------------------------------------------------------
@@ -815,152 +1030,6 @@ protected:
 //        {
 //            error_invalid_child();
 //            pCO->set_visible(true);
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    NoteTypeAndDots get_note_type_and_dots()
-//    {
-//        string duration = m_childToAnalyse.value();
-//        NoteTypeAndDots figdots = ldp_duration_to_components(duration);
-//        if (figdots.noteType == k_unknown_notetype)
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown note/rest duration '" + duration + "'. Replaced by 'q'.");
-//            figdots.noteType = k_quarter;
-//        }
-//        return figdots;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    void analyse_attachments(ImoStaffObj* pAnchor)
-//    {
-//        while( more_children_to_analyse() )
-//        {
-//            m_childToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_childToAnalyse);
-//            if (is_auxobj(type))
-//                m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
-//            else
-//                error_invalid_child();
-//
-//            move_to_next_child();
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    bool is_auxobj(int type)
-//    {
-//        return     type == k_beam
-//                || type == k_text
-//                || type == k_textbox
-//                || type == k_line
-//                || type == k_fermata
-//                || type == k_tie
-//                || type == k_tuplet
-//                ;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ImoInlineLevelObj* analyse_inline_object()
-//    {
-//        // { <inlineWrapper> | <link> | <textItem> | <image> | <button> | <string> }
-//
-//        if(more_children_to_analyse())
-//        {
-//            m_childToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_childToAnalyse);
-//            if (   /*type == k_inlineWrapper
-//                ||*/ type == k_txt
-//                || type == k_image
-//                || type == k_link
-//               )
-//            {
-//                return static_cast<ImoInlineLevelObj*>(
-//                    m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
-//            }
-//            else if (type == k_string)
-//            {
-//                //string: implicit <txt>
-//                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//                ImoTextItem* pText = static_cast<ImoTextItem*>(
-//                                            ImFactory::inject(k_imo_text_item, pDoc) );
-//                pText->set_text( string(m_childToAnalyse.value()) );
-//                return pText;
-//            }
-//            else
-//                error_invalid_child();
-//
-//            move_to_next_child();
-//        }
-//        return NULL;
-//    }
-
-//    //-----------------------------------------------------------------------------------
-//    void analyse_optional_style(ImoContentObj* pParent)
-//    {
-//        // [<style>]
-//        ImoStyle* pStyle = NULL;
-//        if (has_attribute("style"))
-//            pStyle = get_doc_text_style( get_attribute("style") );
-//        pParent->set_style(pStyle);
-//    }
-
-//    //-----------------------------------------------------------------------------------
-//    void analyse_inline_objects(ImoInlinesContainer* pParent)
-//    {
-//        // <inlineObject>*
-//        while( more_children_to_analyse() )
-//        {
-//            ImoInlineLevelObj* pItem = analyse_inline_object();
-//            if (pItem)
-//                pParent->add_item(pItem);
-//
-//            move_to_next_child();
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    void analyse_inline_or_block_objects(ImoBlocksContainer* pParent)
-//    {
-//        // {<inlineObject> | <blockObject>}*
-//        while (more_children_to_analyse())
-//        {
-//            m_childToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_childToAnalyse);
-//
-//            if (
-//               // inline: { <inlineWrapper> | <link> | <textItem> | <image> | <button> }
-//                /*type == k_inlineWrapper
-//                ||*/ type == k_txt
-//                || type == k_image
-//                || type == k_link
-//               // block:  { <list> | <para> | <score> | <table> }
-//                || type == k_itemizedlist
-//                || type == k_orderedlist
-//                || type == k_para
-//                || type == k_table
-//                || type == k_score
-//               )
-//            {
-//                m_pAnalyser->analyse_node(&m_childToAnalyse, pParent);
-//            }
-//            else if (type == k_string)
-//            {
-//                //string: implicit <txt>
-//                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//                ImoTextItem* pText = static_cast<ImoTextItem*>(
-//                                            ImFactory::inject(k_imo_text_item, pDoc) );
-//                pText->set_text( string(m_childToAnalyse.value()) );
-//                ImoObj* pSave = m_pAnchor;
-//                m_pAnchor = pParent;
-//                add_to_model(pText);
-//                m_pAnchor = pSave;
-//            }
-//            else
-//                error_invalid_child();
-//
-//            move_to_next_child();
 //        }
 //    }
 
@@ -2263,29 +2332,40 @@ public:
                                         ImFactory::inject(k_imo_direction, pDoc) );
 
         // attrib: %placement;
+        pDirection->set_placement(get_attribute_placement());
 
         // attrib: %directive;
+        //TODO
 
         // direction-type+
         analyse_optional("direction-type", pDirection);
         while (analyse_optional("direction-type", pDirection));
 
         // offset?
+        //TODO
 
         // %editorial-voice;
+        //TODO
 
         // staff?
-            //search for 'get_numstaff()' and implement analyse_optional_staff()
-    //virtual void set_staff(int staff) { m_staff = staff; }
+        pDirection->set_staff(analyse_optional_staff(1) - 1);
 
         // sound?
         analyse_optional("sound", pDirection);
 
         error_if_more_elements();
 
-        add_to_model(pDirection);
+        if (pDirection->get_num_attachments() > 0)
+            add_to_model(pDirection);
+        else
+        {
+            delete pDirection;
+            pDirection = NULL;
+        }
+
         return pDirection;
     }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3542,7 +3622,7 @@ public:
 
         // [<staff>]
         if (get_optional("staff"))
-            set_staff(pNR);
+            pNR->set_staff(get_integer_value(1) - 1);
 
         // <beam>*
         while (get_optional("beam"))
@@ -3784,13 +3864,6 @@ protected:
                 "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
         }
         pNote->set_notated_accidentals(accidentals);
-    }
-
-    //----------------------------------------------------------------------------------
-    void set_staff(ImoNoteRest* pNR)
-    {
-        int i = get_integer_value(1) - 1;
-        pNR->set_staff(i);
     }
 
     //----------------------------------------------------------------------------------
@@ -6055,8 +6128,8 @@ public:
             return NULL;
         }
 
-
-        int repeat = is_repetion_mark();
+        string text = m_analysedNode.value();
+        int repeat = is_repetion_mark(text);
         pDirection->set_words_repeat(repeat);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6076,6 +6149,7 @@ public:
 
         //set default values
         pImo->set_language("it");
+        pImo->set_user_location_y(-20.0f);
             //TODO:
             //Left justification is assumed if not specified.
             //Enclosure is none by default.
@@ -6083,7 +6157,7 @@ public:
         // attrib: %text-formatting;
 
         // words (#PCDATA)
-        pImo->set_text( m_analysedNode.value() );
+        pImo->set_text(text);
 
         pDirection->add_attachment(pDoc, pImo);
         return pImo;
@@ -6091,42 +6165,52 @@ public:
 
 protected:
 
-    int is_repetion_mark()
+    int is_repetion_mark(const string& value)
     {
-        //get text and use it for deducing if it is a repetition mark
-
-        string text = m_analysedNode.value();
-        std::transform(text.begin(), text.end(), text.begin(), ::tolower);
-
-        std::regex regexDaCapo("d\\.? *c\\.?|da *capo");
-        std::regex regexDaCapoAlFine("d\\.? *c\\.? *al *fine|da *capo *al *fine");
-        std::regex regexDaCapoAlCoda("d\\.? *c\\.? *al *coda|da *capo *al *coda");
-        std::regex regexDalSegno("d\\.? *s\\.?|dal *segno|del *segno");
-        std::regex regexDalSegnoAlFine("d\\.? *s\\.? *al *fine|dal *segno *al *fine|del *segno *al *fine");
-        std::regex regexDalSegnoAlCoda("d\\.? *s\\.? *al *coda|dal *segno *al *coda|del *segno *al *coda");
-        std::regex regexFine("fine");
-        std::regex regexToCoda("to *coda");
-
-        if (std::regex_match(text, regexDaCapo))
-            return k_repeat_da_capo;
-        else if (std::regex_match(text, regexDaCapoAlFine))
-            return k_repeat_da_capo_al_fine;
-        else if (std::regex_match(text, regexDaCapoAlCoda))
-            return k_repeat_da_capo_al_coda;
-        else if (std::regex_match(text, regexDalSegno))
-            return k_repeat_dal_segno;
-        else if (std::regex_match(text, regexDalSegnoAlFine))
-            return k_repeat_dal_segno_al_fine;
-        else if (std::regex_match(text, regexDalSegnoAlCoda))
-            return k_repeat_dal_segno_al_coda;
-        else if (std::regex_match(text, regexFine))
-            return k_repeat_fine;
-        else if (std::regex_match(text, regexToCoda))
-            return k_repeat_to_coda;
-        else
-            return k_repeat_none;
+        return type_of_repetion_mark(value);
     }
+
 };
+
+//defined out of WordsMxlAnalyser for unit tests
+int type_of_repetion_mark(const string& value)
+{
+    //get text and use it for deducing if it is a repetition mark
+
+    string text = value;
+    std::transform(text.begin(), text.end(), text.begin(), ::tolower);
+
+    //by default, regex uses modified ECMAScript syntax
+    //See:  http://www.cplusplus.com/reference/regex/ECMAScript/
+    //See:  http://en.cppreference.com/w/cpp/regex/ecmascript
+    std::regex regexDaCapo(" *(d|d\\.) *(c|c\\.) *| *da *capo *");    //d\\.? *c\\.? Fails!
+    std::regex regexDaCapoAlFine(" *(d|d\\.) *(c|c\\.) *al *fine *| *da *capo *al *fine *");
+    std::regex regexDaCapoAlCoda(" *(d|d\\.) *(c|c\\.) *al *coda *| *da *capo *al *coda *");
+    std::regex regexDalSegno(" *(d|d\\.) *(s|s\\.) *| *dal *segno *| *del *segno *");
+    std::regex regexDalSegnoAlFine(" *(d|d\\.) *(s|s\\.) *al *fine| *dal *segno *al *fine *| *del *segno *al *fine *");
+    std::regex regexDalSegnoAlCoda(" *(d|d\\.) *(s|s\\.) *al *coda| *dal *segno *al *coda *| *del *segno *al *coda *");
+    std::regex regexFine(" *fine *");
+    std::regex regexToCoda(" *to *coda *");
+
+    if (std::regex_match(text, regexDaCapo))
+        return k_repeat_da_capo;
+    else if (std::regex_match(text, regexDaCapoAlFine))
+        return k_repeat_da_capo_al_fine;
+    else if (std::regex_match(text, regexDaCapoAlCoda))
+        return k_repeat_da_capo_al_coda;
+    else if (std::regex_match(text, regexDalSegno))
+        return k_repeat_dal_segno;
+    else if (std::regex_match(text, regexDalSegnoAlFine))
+        return k_repeat_dal_segno_al_fine;
+    else if (std::regex_match(text, regexDalSegnoAlCoda))
+        return k_repeat_dal_segno_al_coda;
+    else if (std::regex_match(text, regexFine))
+        return k_repeat_fine;
+    else if (std::regex_match(text, regexToCoda))
+        return k_repeat_to_coda;
+    else
+        return k_repeat_none;
+}
 
 
 //=======================================================================================

@@ -182,17 +182,12 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         //barline must go before all other objects at same measure
         if (pB->is_barline() && !pA->is_barline() && b->measure() != a->measure())
             return true;
-        else if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
+        if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
             return false;
 
-        //note/rest can not go before non-timed in other instruments/staves
-        else if (a->line() != b->line())
-        {
-            if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-                return true;
-            else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
-                return false;
-        }
+        //note/rest can not go before non-timed at same timepos
+        if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+            return true;
 
         //direction can not go between clefs/key/time ==>
         //clef/key/time can not go after direction in other instruments/staves
@@ -200,19 +195,6 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
             && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
         {
             return (a->line() != b->line());    //move clef/key/time before direction
-        }
-
-        //direction can not got in between chord notes ==>
-        //note in chord, not start of chord, can only go after note in chord ==>
-        //note in chord, not start of chord, must go before any other object except other chord note
-        if (pB->is_note())
-        {
-            ImoNote* pNB = static_cast<ImoNote*>(pB);
-            if (pNB->is_in_chord() && !pNB->is_start_of_chord())
-            {
-                if (!pA->is_note())
-                    return true;        //move before pA object
-            }
         }
 
 ////        //clef in other staff can not go after key or time signature
