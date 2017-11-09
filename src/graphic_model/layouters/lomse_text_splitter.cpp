@@ -130,7 +130,8 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace,
             fSpaces = false;
 
         width += nextWidth;
-        nextWidth = m_glyphWidths[++i];
+        if (++i < m_totalGlyphs)
+            nextWidth = m_glyphWidths[i];
     }
     if (i == m_totalGlyphs || (m_glyphs[i] == L' ' && !fSpaces))
         breakPoint = i;
@@ -195,7 +196,8 @@ Engrouter* ChineseTextSplitter::get_next_text_engrouter(LUnits maxSpace,
     while (i < m_totalGlyphs && width + nextWidth < maxSpace)
     {
         width += nextWidth;
-        nextWidth = m_glyphWidths[++i];
+        if (++i < m_totalGlyphs)
+            nextWidth = m_glyphWidths[i];
     }
     size_t length = i - m_start;
 

@@ -1376,6 +1376,25 @@ Color& ImoColorDto::set_from_rgba_string(const std::string& rgba)
 }
 
 //---------------------------------------------------------------------------------------
+Color& ImoColorDto::set_from_argb_string(const std::string& argb)
+{
+    m_ok = true;
+
+    if (argb[0] == '#')
+    {
+        m_color.a = convert_from_hex( argb.substr(1, 2) );
+        m_color.r = convert_from_hex( argb.substr(3, 2) );
+        m_color.g = convert_from_hex( argb.substr(5, 2) );
+        m_color.b = convert_from_hex( argb.substr(7, 2) );
+    }
+
+    if (!m_ok)
+        m_color = Color(0,0,0,255);
+
+    return m_color;
+}
+
+//---------------------------------------------------------------------------------------
 Color& ImoColorDto::set_from_string(const std::string& hex)
 {
     if (hex.length() == 7)
@@ -1569,6 +1588,8 @@ ImoContentObj::ImoContentObj(int objtype)
     , m_pStyle(NULL)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_txUserRefPoint(0.0f)
+    , m_tyUserRefPoint(0.0f)
     , m_fVisible(true)
 {
 }
@@ -1580,6 +1601,8 @@ ImoContentObj::ImoContentObj(ImoId id, int objtype)
     , m_pStyle(NULL)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_txUserRefPoint(0.0f)
+    , m_tyUserRefPoint(0.0f)
     , m_fVisible(true)
 {
 }

@@ -564,16 +564,44 @@ protected:
     //-----------------------------------------------------------------------------------
 
     //-----------------------------------------------------------------------------------
-    //@ %placement
+    //@ % tenths
+    //@ The tenths entity is a number representing tenths. Both integer and decimal
+    //@ values are allowed, such as 5 for a half space and -2.5
+    //@<!ENTITY % tenths "CDATA">
+    Tenths get_attribute_as_tenths(const string& name, Tenths rDefault)
+    {
+        if (has_attribute(&m_analysedNode, name))
+        {
+            string number = m_analysedNode.attribute_value(name);
+            float rNumber;
+            std::istringstream iss(number);
+            if ((iss >> std::dec >> rNumber).fail())
+            {
+                stringstream replacement;
+                replacement << rDefault;
+                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                    "Invalid real number '" + number + "'. Replaced by '"
+                    + replacement.str() + "'.");
+                return rDefault;
+            }
+            else
+                return rNumber;
+        }
+        else
+            return rDefault;
+    }
+
+    //-----------------------------------------------------------------------------------
+    //@ % placement
     //@ The placement attribute indicates whether something is
     //@ above or below another element, such as a note or anotation.
     //@<!ENTITY % placement
     //@    "placement %above-below; #IMPLIED">
     int get_attribute_placement()
     {
-        if (has_attribute(&m_childToAnalyse, "placement"))
+        if (has_attribute(&m_analysedNode, "placement"))
         {
-            string value = get_attribute(&m_childToAnalyse, "placement");
+            string value = m_analysedNode.attribute_value("placement");
             if (value == "above")
                 return k_placement_above;
             else if (value == "below")
@@ -590,31 +618,115 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    //@ % color
-    //@ The color entity indicates the color of an element. Color may be represented:
-    //@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
-    //@ - as hexadecimal ARGB tuples (alpha 00 = totally transparent; FF = totally opaque)
-    //@ If RGB is used, the A value is assumed to be FF (i.e. "#40800080" transparent purple)
-    //@<!ENTITY % color
-    //@    "color CDATA #IMPLIED">
-//    int get_attribute_color()
-//    {
-//        if (has_attribute(&m_childToAnalyse, "color"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "color");
-//        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
-//        pColor->set_from_string(value);
-//        if (!pColor->is_ok())
-//        {
-//            error_msg("Missing or invalid color value. Must be #rrggbbaa. Color ignored.");
-//            delete pColor;
-//            return Color(0,0,0);
-//        }
-//        Color color = pColor->get_color();
-//        delete pColor;
-//        return color;
-//    }
+    //@ % text-formatting
+    //@ The text-formatting entity contains the common formatting attributes for text
+    //@ elements. Default values may differ across the elements that use this entity.
+    //@
+    //@<!ENTITY % text-formatting
+    //@    "%justify;
+    //@     %print-style-align;   <------------
+    //@     %text-decoration;
+    //@     %text-rotation;
+    //@     %letter-spacing;
+    //@     %line-height;
+    //@     xml:lang NMTOKEN #IMPLIED
+    //@     xml:space (default | preserve) #IMPLIED
+    //@     %text-direction;
+    //@     %enclosure;">
+    //
+    void get_attributes_for_text_formatting(ImoObj* pImo)
+    {
+        //get_attributes_for_justify(pImo);
+        get_attributes_for_print_style_align(pImo);
+        //get_attributes_for_text_decoration(pImo);
+        //get_attributes_for_text_rotation(pImo);
+        //get_attributes_for_letter_spacing(pImo);
+        //get_attributes_for_line_height(pImo);
+        //get_attributes_for_text_direction(pImo);
+        //get_attributes_for_enclosure(pImo);
+        //get_attributes_for_xml_lang(pImo);
+        //get_attributes_for_xml_space(pImo);
+    }
 
+    //-----------------------------------------------------------------------------------
+    //@ % print-style-align
+    //@ The print-style-align entity adds the halign and valign attributes to the
+    //@ position, font, and color attributes.
+    //@
+    //@<!ENTITY % print-style-align
+    //@    "%print-style;
+    //@     %halign;
+    //@     %valign;">
+    //
+    void get_attributes_for_print_style_align(ImoObj* pImo)
+    {
+        get_attributes_for_print_style(pImo);
+        //get_attributes_for_halign(pImo);
+        //get_attributes_for_valign(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    //@ % print-style
+    //@ The print-style entity groups together the most popular combination of
+    //@ printing attributes: position, font, and color.
+    //@
+    //@<!ENTITY % print-style
+    //@    "%position;
+    //@     %font;
+    //@     %color;">
+    //
+    void get_attributes_for_print_style(ImoObj* pImo)
+    {
+        get_attributes_for_position(pImo);
+        //get_attributes_for_font(pImo);
+        get_attribute_color(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    //@ % position
+    //@<!ENTITY % position
+    //@    "default-x     %tenths;    #IMPLIED
+    //@     default-y     %tenths;    #IMPLIED
+    //@     relative-x    %tenths;    #IMPLIED
+    //@     relative-y    %tenths;    #IMPLIED">
+    //@
+    void get_attributes_for_position(ImoObj* pObj)
+    {
+        if (!pObj || !pObj->is_contentobj())
+            return;
+
+        ImoContentObj* pImo = static_cast<ImoContentObj*>(pObj);
+
+        if (has_attribute(&m_analysedNode, "default-x"))
+        {
+            Tenths pos = get_attribute_as_tenths("default-x", 0.0f);
+            if (pos != 0.0f)
+                pImo->set_user_ref_point_x(pos);
+        }
+
+        if (has_attribute(&m_analysedNode, "default-y"))
+        {
+            Tenths pos = get_attribute_as_tenths("default-y", 0.0f);
+            if (pos != 0.0f)
+                //AWARE: positive y is up, negative y is down
+                pImo->set_user_ref_point_y(-pos);
+        }
+
+        if (has_attribute(&m_analysedNode, "relative-x"))
+        {
+            Tenths pos = get_attribute_as_tenths("relative-x", 0.0f);
+            if (pos != 0.0f)
+                pImo->set_user_location_x(pos);
+        }
+
+        if (has_attribute(&m_analysedNode, "relative-y"))
+        {
+            Tenths pos = get_attribute_as_tenths("relative-y", 0.0f);
+            if (pos != 0.0f)
+                //AWARE: positive y is up, negative y is down
+                pImo->set_user_location_y(-pos);
+        }
+    }
 
     //-----------------------------------------------------------------------------------
     //@ %font
@@ -665,6 +777,43 @@ protected:
 //          return pStyle;
 //    }
 
+    //-----------------------------------------------------------------------------------
+    //@ % color
+    //@ The color entity indicates the color of an element. Color may be represented:
+    //@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
+    //@ - as hexadecimal ARGB tuples (i.e. "#40800080" transparent purple).
+    //@   Alpha 00 means 'totally transparent'; FF = 'totally opaque'
+    //@ If RGB is used, the A value is assumed to be FF
+    //@
+    //@<!ENTITY % color
+    //@    "color CDATA #IMPLIED">
+    //
+    void get_attribute_color(ImoObj* pImo)
+    {
+        if (!pImo || !pImo->is_scoreobj())
+            return;
+
+        ImoScoreObj* pObj = static_cast<ImoScoreObj*>(pImo);
+
+        if (has_attribute(&m_analysedNode, "color"))
+        {
+            string value = m_analysedNode.attribute_value("color");
+            bool fError = false;
+            ImoColorDto color;
+            if (value.length() == 7)
+                color.set_from_rgb_string(value);
+            else if (value.length() == 9)
+                color.set_from_argb_string(value);
+            else
+                fError = true;
+
+            if (fError || !color.is_ok())
+                error_msg("Invalid color value. Default color assigned.");
+            else
+                pObj->set_color( color.get_color() );
+        }
+    }
+
 //    //-----------------------------------------------------------------------------------
 //    float get_font_size_value()
 //    {
@@ -683,6 +832,34 @@ protected:
 //        else
 //            return rNumber;
 //    }
+//<!--
+//    In cases where text extends over more than one line,
+//    horizontal alignment and justify values can be different.
+//    The most typical case is for credits, such as:
+//
+//        Words and music by
+//          Pat Songwriter
+//
+//    Typically this type of credit is aligned to the right,
+//    so that the position information refers to the right-
+//    most part of the text. But in this example, the text
+//    is center-justified, not right-justified.
+//
+//    The halign attribute is used in these situations. If it
+//    is not present, its value is the same as for the justify
+//    attribute.
+//-->
+//<!ENTITY % halign
+//    "halign (left | center | right) #IMPLIED">
+//
+//<!--
+//    The valign entity is used to indicate vertical
+//    alignment to the top, middle, bottom, or baseline
+//    of the text. Defaults are implementation-dependent.
+//-->
+//<!ENTITY % valign
+//    "valign (top | middle | bottom | baseline) #IMPLIED">
+//
 
 
     //-----------------------------------------------------------------------------------
@@ -727,34 +904,6 @@ protected:
 //-->
 //<!ENTITY % justify
 //    "justify (left | center | right) #IMPLIED">
-//
-//<!--
-//    In cases where text extends over more than one line,
-//    horizontal alignment and justify values can be different.
-//    The most typical case is for credits, such as:
-//
-//        Words and music by
-//          Pat Songwriter
-//
-//    Typically this type of credit is aligned to the right,
-//    so that the position information refers to the right-
-//    most part of the text. But in this example, the text
-//    is center-justified, not right-justified.
-//
-//    The halign attribute is used in these situations. If it
-//    is not present, its value is the same as for the justify
-//    attribute.
-//-->
-//<!ENTITY % halign
-//    "halign (left | center | right) #IMPLIED">
-//
-//<!--
-//    The valign entity is used to indicate vertical
-//    alignment to the top, middle, bottom, or baseline
-//    of the text. Defaults are implementation-dependent.
-//-->
-//<!ENTITY % valign
-//    "valign (top | middle | bottom | baseline) #IMPLIED">
 //
 //<!--
 //    The valign-image entity is used to indicate vertical
@@ -820,24 +969,6 @@ protected:
 //<!ENTITY % enclosure
 //    "enclosure %enclosure-shape; #IMPLIED">
 //
-//<!--
-//    The print-style entity groups together the most popular
-//    combination of printing attributes: position, font, and
-//    color.
-//-->
-//<!ENTITY % print-style
-//    "%position;
-//     %font;
-//     %color;">
-//
-//<!--
-//    The print-style-align entity adds the halign and valign
-//    attributes to the position, font, and color attributes.
-//-->
-//<!ENTITY % print-style-align
-//    "%print-style;
-//     %halign;
-//     %valign;">
 
 
 //    //-----------------------------------------------------------------------------------
@@ -6116,8 +6247,6 @@ public:
 
     ImoObj* do_analysis()
     {
-		//TODO
-
         ImoDirection* pDirection = NULL;
         if (m_pAnchor && m_pAnchor->is_direction())
             pDirection = static_cast<ImoDirection*>(m_pAnchor);
@@ -6149,12 +6278,13 @@ public:
 
         //set default values
         pImo->set_language("it");
-        pImo->set_user_location_y(-20.0f);
+        //pImo->set_user_location_y(-20.0f);
             //TODO:
             //Left justification is assumed if not specified.
             //Enclosure is none by default.
 
         // attrib: %text-formatting;
+        get_attributes_for_text_formatting(pImo);
 
         // words (#PCDATA)
         pImo->set_text(text);
@@ -6186,9 +6316,9 @@ int type_of_repetion_mark(const string& value)
     std::regex regexDaCapo(" *(d|d\\.) *(c|c\\.) *| *da *capo *");    //d\\.? *c\\.? Fails!
     std::regex regexDaCapoAlFine(" *(d|d\\.) *(c|c\\.) *al *fine *| *da *capo *al *fine *");
     std::regex regexDaCapoAlCoda(" *(d|d\\.) *(c|c\\.) *al *coda *| *da *capo *al *coda *");
-    std::regex regexDalSegno(" *(d|d\\.) *(s|s\\.) *| *dal *segno *| *del *segno *");
-    std::regex regexDalSegnoAlFine(" *(d|d\\.) *(s|s\\.) *al *fine| *dal *segno *al *fine *| *del *segno *al *fine *");
-    std::regex regexDalSegnoAlCoda(" *(d|d\\.) *(s|s\\.) *al *coda| *dal *segno *al *coda *| *del *segno *al *coda *");
+    std::regex regexDalSegno(" *(d|d\\.) *(s|s\\.) *| *d(a|e)l *segno *");
+    std::regex regexDalSegnoAlFine(" *(d|d\\.) *(s|s\\.) *al *fine *| *d(a|e)l *segno *al *fine *");
+    std::regex regexDalSegnoAlCoda(" *(d|d\\.) *(s|s\\.) *al *coda *| *d(a|e)l *segno *al *coda *");
     std::regex regexFine(" *fine *");
     std::regex regexToCoda(" *to *coda *");
 

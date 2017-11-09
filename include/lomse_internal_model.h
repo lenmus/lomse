@@ -986,6 +986,7 @@ public:
 
     Color& set_from_rgb_string(const std::string& rgb);
     Color& set_from_rgba_string(const std::string& rgba);
+    Color& set_from_argb_string(const std::string& argb);
     Color& set_from_string(const std::string& hex);
     inline bool is_ok() { return m_ok; }
 
@@ -1590,6 +1591,8 @@ protected:
     ImoStyle* m_pStyle;
     Tenths m_txUserLocation;
     Tenths m_tyUserLocation;
+    Tenths m_txUserRefPoint;
+    Tenths m_tyUserRefPoint;
     bool m_fVisible;
 
     ImoContentObj(int objtype);
@@ -1601,11 +1604,15 @@ public:
     //getters
     inline Tenths get_user_location_x() { return m_txUserLocation; }
     inline Tenths get_user_location_y() { return m_tyUserLocation; }
+    inline Tenths get_user_ref_point_x() { return m_txUserRefPoint; }
+    inline Tenths get_user_ref_point_y() { return m_tyUserRefPoint; }
     inline bool is_visible() { return m_fVisible; }
 
     //setters
     inline void set_user_location_x(Tenths tx) { m_txUserLocation = tx; }
     inline void set_user_location_y(Tenths ty) { m_tyUserLocation = ty; }
+    inline void set_user_ref_point_x(Tenths tx) { m_txUserRefPoint = tx; }
+    inline void set_user_ref_point_y(Tenths ty) { m_tyUserRefPoint = ty; }
     inline void set_visible(bool visible) { m_fVisible = visible; }
 
     //attachments (first child)
