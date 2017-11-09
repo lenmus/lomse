@@ -119,6 +119,9 @@ InternalModel* LdpCompiler::create_with_empty_score()
 //---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_parsed_tree(LdpTree* tree)
 {
+    if (!tree)
+        return create_empty();
+
     if (tree->get_root()->is_type(k_score))
         tree = wrap_score_in_lenmusdoc(tree);
 

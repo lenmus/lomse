@@ -79,6 +79,7 @@ class ImoControl;
 class ImoChord;
 class ImoContent;
 class ImoContentObj;
+class ImoDirection;
 class ImoDocument;
 class ImoDynamic;
 class ImoFontStyleDto;
@@ -409,6 +410,23 @@ class ImoWrapperBox;
     };
 
     //-----------------------------------------------------------------------------
+    //Repetition marks or sound directions
+    enum ERepeatMark
+	{
+		k_repeat_none,
+		k_repeat_segno,
+		k_repeat_coda,
+		k_repeat_fine,
+		k_repeat_da_capo,
+		k_repeat_da_capo_al_fine,
+		k_repeat_da_capo_al_coda,
+		k_repeat_dal_segno,
+		k_repeat_dal_segno_al_fine,
+		k_repeat_dal_segno_al_coda,
+		k_repeat_to_coda,
+    };
+
+    //-----------------------------------------------------------------------------
     //type for ImoObj objects
     enum EImoObjType
     {
@@ -492,7 +510,8 @@ class ImoWrapperBox;
 
                     // ImoStaffObj (A)
                     k_imo_staffobj,
-                        k_imo_barline, k_imo_clef, k_imo_key_signature,
+                        k_imo_barline, k_imo_clef, k_imo_direction,
+                        k_imo_key_signature,
                         k_imo_time_signature,
                         k_imo_note, k_imo_rest, k_imo_go_back_fwd,
                         k_imo_metronome_mark, k_imo_system_break,
@@ -504,6 +523,7 @@ class ImoWrapperBox;
                         k_imo_dynamics_mark,
                         k_imo_fermata,
                         k_imo_ornament,
+                        k_imo_repetition_mark,
                         k_imo_technical,
 
                         // ImoArticulation (A)
@@ -830,6 +850,7 @@ public:
     inline bool is_control() { return m_objtype >= k_imo_control
                                    && m_objtype < k_imo_control_end; }
     inline bool is_cursor_info() { return m_objtype == k_imo_cursor_info; }
+    inline bool is_direction() { return m_objtype == k_imo_direction; }
     inline bool is_document() { return m_objtype == k_imo_document; }
     inline bool is_dynamic() { return m_objtype == k_imo_dynamic; }
     inline bool is_dynamics_mark() { return m_objtype == k_imo_dynamics_mark; }
@@ -866,6 +887,7 @@ public:
     inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
     inline bool is_relations() { return m_objtype == k_imo_relations; }
+    inline bool is_repetition_mark() { return m_objtype == k_imo_repetition_mark; }
 	inline bool is_score() { return m_objtype == k_imo_score; }
     inline bool is_score_line() { return m_objtype == k_imo_score_line; }
     inline bool is_score_player() { return m_objtype == k_imo_score_player; }
@@ -964,6 +986,7 @@ public:
 
     Color& set_from_rgb_string(const std::string& rgb);
     Color& set_from_rgba_string(const std::string& rgba);
+    Color& set_from_argb_string(const std::string& argb);
     Color& set_from_string(const std::string& hex);
     inline bool is_ok() { return m_ok; }
 
@@ -1568,6 +1591,8 @@ protected:
     ImoStyle* m_pStyle;
     Tenths m_txUserLocation;
     Tenths m_tyUserLocation;
+    Tenths m_txUserRefPoint;
+    Tenths m_tyUserRefPoint;
     bool m_fVisible;
 
     ImoContentObj(int objtype);
@@ -1579,11 +1604,15 @@ public:
     //getters
     inline Tenths get_user_location_x() { return m_txUserLocation; }
     inline Tenths get_user_location_y() { return m_tyUserLocation; }
+    inline Tenths get_user_ref_point_x() { return m_txUserRefPoint; }
+    inline Tenths get_user_ref_point_y() { return m_tyUserRefPoint; }
     inline bool is_visible() { return m_fVisible; }
 
     //setters
     inline void set_user_location_x(Tenths tx) { m_txUserLocation = tx; }
     inline void set_user_location_y(Tenths ty) { m_tyUserLocation = ty; }
+    inline void set_user_ref_point_x(Tenths tx) { m_txUserRefPoint = tx; }
+    inline void set_user_ref_point_y(Tenths ty) { m_tyUserRefPoint = ty; }
     inline void set_visible(bool visible) { m_fVisible = visible; }
 
     //attachments (first child)
@@ -2502,6 +2531,7 @@ protected:
     friend class ImoScoreText;
     friend class ImoTextItem;
     friend class ImoLyricsTextInfo;
+    friend class ImoTextRepetitionMark;
     ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(NULL) {}
 
 public:
@@ -2800,6 +2830,51 @@ public:
     inline int get_num_items() { return get_num_children(); }
     inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
 
+};
+
+//---------------------------------------------------------------------------------------
+class ImoDirection : public ImoStaffObj
+{
+protected:
+    Tenths  m_space;
+    int     m_placement;
+
+    // When the <direction> element contains a <sound> children related to repetition
+    // marks or a <direction-type> children of type <segno>/<coda>, or a <words>
+    // related to repetition marks, these members contains the type of mark.
+    // Otherwise, contains k_repeat_none.
+	int	    m_wordsRepeat;
+	int     m_soundRepeat;
+
+
+    friend class ImFactory;
+    ImoDirection()
+        : ImoStaffObj(k_imo_direction)
+        , m_space(0.0f)
+        , m_placement(k_placement_default)
+        , m_wordsRepeat(k_repeat_none)
+        , m_soundRepeat(k_repeat_none)
+     {
+     }
+
+public:
+    virtual ~ImoDirection() {}
+
+    //getters
+    inline Tenths get_width() { return m_space; }
+    inline int get_placement() { return m_placement; }
+    inline int get_words_repeat() { return m_wordsRepeat; }
+    inline int get_sound_repeat() { return m_soundRepeat; }
+
+    //setters
+    inline void set_width(Tenths space) { m_space = space; }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_words_repeat(int repeat) { m_wordsRepeat = repeat; }
+    inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
+
+    //info
+	inline bool is_words_repeat() { return m_wordsRepeat != k_repeat_none; }
+	inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -3196,6 +3271,29 @@ public:
     inline void set_h_align(int value) { m_hAlign = value; }
 //    inline void set_style(ImoStyle* pStyle) { m_text.set_style(pStyle); }
 //    inline ImoStyle* get_style() { return m_text.get_style(); }
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTextRepetitionMark : public ImoScoreText
+{
+protected:
+    int m_repeatType;
+
+    friend class ImFactory;
+    ImoTextRepetitionMark()
+        : ImoScoreText(k_imo_repetition_mark)
+    {
+    }
+
+public:
+    virtual ~ImoTextRepetitionMark() {}
+
+    //getters
+    inline int get_repeat_mark() { return m_repeatType; }
+
+    //setters
+    inline void set_repeat_mark(int repeat) { m_repeatType = repeat; }
+
 };
 
 //---------------------------------------------------------------------------------------

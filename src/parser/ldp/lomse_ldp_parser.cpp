@@ -169,7 +169,10 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
     if (!m_curNode)
     {
         LOMSE_LOG_ERROR("[LdpParser::do_syntax_analysis] LDP file format error.");
-        throw runtime_error("[LdpParser::do_syntax_analysis] LDP file format error.");
+        report_error("[LdpParser::do_syntax_analysis] LDP file format error.");
+        //throw runtime_error("[LdpParser::do_syntax_analysis] LDP file format error.");
+        m_tree = NULL;
+        return;
     }
 
     m_tree = LOMSE_NEW LdpTree(m_curNode);

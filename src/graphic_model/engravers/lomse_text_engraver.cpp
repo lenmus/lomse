@@ -94,8 +94,15 @@ LUnits TextEngraver::measure_height()
 GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop)
 {
     UPoint pos(xLeft, yTop);
-    if (pCreatorImo && (pCreatorImo->is_score_text() || pCreatorImo->is_score_title()))
-        add_user_shift(static_cast<ImoScoreText*>(pCreatorImo), &pos);
+    if (pCreatorImo && pCreatorImo->is_contentobj())
+    {
+        //TODO: This is a temporal fix for dealing with <words> "default-x, default-y"
+        ImoContentObj* pObj = static_cast<ImoContentObj*>(pCreatorImo);
+        pos.x += tenths_to_logical(pObj->get_user_ref_point_x());
+        pos.y += tenths_to_logical(pObj->get_user_ref_point_y());
+
+        add_user_shift(static_cast<ImoContentObj*>(pCreatorImo), &pos);
+    }
 
     //TODO-LOG
     //if (valign == k_center)

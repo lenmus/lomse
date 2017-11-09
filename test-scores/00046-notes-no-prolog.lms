@@ -1,0 +1,12 @@
+(score
+   (vers 2.0)
+   (instrument
+      (musicData
+         (n f4 w)(n f4 h)(n f4 q)
+         (barline)
+         (n c5 w)(n c5 h)(n c5 q)
+         (barline end)
+      )
+   )
+)
+

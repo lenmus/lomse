@@ -147,7 +147,8 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     pData->m_pShape = pShape;
 
     //determine slice type for the new object to include
-//    dbgLogger << "StaffObj type= " << pSO->get_obj_type();
+//    dbgLogger << "include_object(). StaffObj type = " << pSO->get_name()
+//              << ", id=" << pSO->get_id() << endl;
     int curType = TimeSlice::k_undefined;
     if (fInProlog)
         curType = TimeSlice::k_prolog;
@@ -159,6 +160,8 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
             case k_imo_key_signature:
             case k_imo_time_signature:
             case k_imo_spacer:
+            case k_imo_direction:
+            case k_imo_metronome_mark:
             case k_imo_go_back_fwd:
                 curType = TimeSlice::k_non_timed;
                 break;
@@ -561,7 +564,7 @@ void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncr
     }
 
 //    dbgLogger << "--------------------------------------------------------------" << endl
-//              << "Justifing cols " << iFirstCol << ", " << iLastCol
+//              << "Justifying cols " << iFirstCol << ", " << iLastCol
 //              << ", space incr= " << fixed << setprecision(2) << uSpaceIncrement
 //              << ", line width= " << lineWidth
 //              << ", c= " << fixed << setprecision(6) << c
@@ -962,11 +965,13 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
             LOMSE_LOG_ERROR(ss.str());
     }
 
-    //if this is the first slice (scores without prolog) add some space at start
+    //[SP001] if this is the first slice (scores without prolog) add some space at start
+    //test 00046: some space between start of score and first note
     if (m_iFirstData == 0)
         m_xLeft += pMeter->tenths_to_logical_max(LOMSE_SPACE_BEFORE_PROLOG);
 
-    //if prev slice is a barline slice, add some extra space at start
+    //[SP002] if prev slice is a barline slice, add some extra space at start
+    //test 00136: some space after barline and 1st note in 2nd measure
     if (m_prev && m_prev->get_type() == TimeSlice::k_barline)
         m_xLeft += pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_BARLINE / 2.0f);
 
@@ -984,7 +989,11 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
         }
     }
 
-    //take lyrics into account
+//    //for barlines, nothing else to do
+//    if (get_type() == TimeSlice::k_barline)
+//        return;
+
+    //for notes/rests take lyrics into account
     vector<ImoLyric*>::iterator it;
     for (it=m_lyrics.begin(); it != m_lyrics.end(); ++it)
     {
@@ -995,26 +1004,65 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
     }
 
 
-    //if previous slice is barline, accidentals and other space at start must not be
-    //transferred to previous slice (as right rod space). Instead should be accounted
-    //as fixed space at start of this slice
+    //transfer space at start (accidentals and other space at start) to the previous
+    //note (timed slice) as right rod space. This is necessary for timepos vertical
+    //alignment. Otherwise, accidentals will shift the note to right and will not be
+    //vertically aligned. There are some exceptions to this rule.
+
+
+    //[SP041] test 01a
+    //if previous slice is barline, space must not be transferred to it
+    //because if it is transferred and justification decides to place a new system
+    //after the barline, the barline will not be right justified (there will be some
+    //space after it). Therefore, if previous slice is barline, the space
+    //should be accounted as fixed space at start of this slice
     if (!m_prev || m_prev->get_type() == TimeSlice::k_barline)
         m_xLeft -= xPrev;
     else
     {
+        //[SP??] test 00138 (first staff) - intermediate clef must go near next note
+        //       test 50036 - no space between note and direction (dynamics)
+        //there must not be extra space between previous non-timed slice and this
+        //one. Therefore, transfer of accidentals and other space at start must skip
+        //any previous non-timed (i.e. clef, directions), and the space must be only
+        //transferred to previous one if it is not a barline. Otherwise, the space
+        //must be transferred to the non-timed as left-rod space.
         if (m_prev->get_type() == TimeSlice::k_non_timed)
         {
-            TimeSlice* prev = m_prev->m_prev;
-            //m_prev->m_prev must always exist. Error in code/logic if not!
+            TimeSlice* prev = m_prev->m_prev;   //must always exist. Error in code/logic if not!
             if (prev == NULL)
             {
+                //TODO: check this is true. Score without prolog starting with (space)
                 LOMSE_LOG_ERROR("Error in code/logic. No previous slice exists for non-timed slice!");
                 m_xLeft -= xPrev;
             }
-            else if (prev->get_type() != TimeSlice::k_barline)
-                prev->m_xRi -= xPrev;
+            else
+            {
+                if (prev->get_type() != TimeSlice::k_barline)
+                {
+                    //[SP???] test ??????
+                    //transfer accidentals and other space at start to previous noterest
+                    prev->m_xRi -= xPrev;
+                }
+                else if (prev->get_type() == TimeSlice::k_non_timed)
+                {
+                    //[SP???] test ??????
+                    //add space as left-rod in the previous non-timed slice
+                    //except if prolog slice.
+                    prev->m_xLi += xPrev;
+                }
+                else
+                {
+                    //If it is prolog do nothing for now. Lets assume that after prolog
+                    //space will be enough
+                    //test: 22a first system second page)
+                }
+            }
         }
         else
+            //[SP040] test 00134, 00050
+            //default case: transfer accidentals and other space at start to previous
+            //non-timed slice
             m_prev->m_xRi -= xPrev;
     }
 }
@@ -1402,6 +1450,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     m_widths.assign(numStaves, 0.0f);
 
     //loop for computing widths
+    bool fHasWidth = false;            //true if at least one shape has width
     LUnits maxWidth = 0.0f;
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
@@ -1411,25 +1460,47 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         if (pShape)
         {
             int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
-            m_widths[iStaff] += m_interSpace + pShape->get_width();
+            LUnits width = pShape->get_width();
+            if (width > 0.0f)
+            {
+                m_widths[iStaff] += m_interSpace + width;
+                fHasWidth = true;
+            }
             maxWidth = max(maxWidth, m_widths[iStaff]);
         }
     }
-    maxWidth += m_interSpace;   //add space before next slice symbol
 
-    //if previous slice is barline, space must not be
-    //transferred to previous slice (as right rod space). Instead should be accounted
-    //as fixed space at start of this slice
+    //[SP???] Do not add extra space for zero with slices
+    if (fHasWidth)
+        maxWidth += m_interSpace;   //add space before next slice symbol
+
+
+    //transfer width to previous timed slice
+    //For timepos vertical alignment, all extra space before notes must be
+    //transferred to previous timed object as right rod space.
+
+    //[SP061] test 12a
+    //if previous slice is barline, space must not be transferred to it (as right rod
+    //space) because if it is transferred and justification
+	//decides to place a new system after the barline, the barline will
+	//not be right justified. Therefore, if previous slice is barline, the space
+	//should be accounted as fixed space at start of this slice
     if (!m_prev || m_prev->get_type() == TimeSlice::k_barline)
     {
         m_realWidth = 0.0f;
         m_xLeft = maxWidth;
+
+        //[SP???] test 50035: distance from barline to 1st note in 2nd measure
+        //                    must be equal to that in 3rd measure
+        //if null width add some extra space for separation from barline
+        if (maxWidth == 0.0f)
+            m_xLeft += pMeter->tenths_to_logical_max(LOMSE_SPACE_AFTER_BARLINE / 2.0f);
     }
     else
     {
         m_realWidth = maxWidth;
 
-        //Improvement: test 136
+        //[SP011] test 00136 (intermediate G clef should not take extra space)
         //Space for non-timed should not be added as a full rod
         //in previous slice when there are no objects for the staves in which these
         //non-timed are placed. Instead, transfer only the minimum required for
@@ -1440,7 +1511,6 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         int iMax = m_prev->m_numEntries;
         for (int i=0; i < iMax; ++i, pEntry = pEntry->get_next())
         {
-            //int iStaff = pEntry->staff();
             int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
             fNoOverlap &= m_widths[iStaff] == 0.0f;
         }
@@ -1448,11 +1518,15 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
         if (fNoOverlap)
             m_prev->set_minimum_xi(maxWidth - m_interSpace);
         else
+            //[SP060] test
+            //default case: transfer width to previous slice
             m_prev->increment_xRi(maxWidth);
     }
 
-    //if only one staff and prev slice is prolog without clef, key and time
-    //remove after space in prev slice
+    //Fix for snippet scores (i.e. 00100)
+    //The score has only one staff and starts with non-timed after prolog.
+    //If this initial non-timed is clef, key or time signature and the
+    //the prolog is missing any (clef, key or time) remove afterspace in the prolog.
     if (numStaves == 1 && m_prev && m_prev->get_type() == TimeSlice::k_prolog)
     {
         ImoStaffObj* pSO = m_firstEntry->imo_object();
@@ -1467,7 +1541,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
                 pSlice->remove_after_space_if_not_full(pMeter, type);
             }
             default:
-                break;
+                break;    //break?  what!!!
         }
     }
 }
@@ -1796,6 +1870,8 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
 {
     //compute combined spring constant for all springs that will react to F
 
+    //dbgLogger << "determining approx. sff for column. F=" << F << endl;
+
     m_slope = 0.0f;
     m_xFixed = 0.0f;
     m_minFi = LOMSE_MAX_FORCE;
@@ -1822,9 +1898,14 @@ void ColumnDataGourlay::determine_approx_sff_for(float F)
             m_slope += 1.0f / (*it)->m_ci;
         }
 
-//        dbgLogger << "    determining approx. sff for column. F=" << F
+//        dbgLogger << "    Slice: type="<< (*it)->get_type()
+//                  << ", 1st data=" << (*it)->dbg_get_first_data()
+//                  << ", width=" << (*it)->get_width()
 //                  << ", m_fi= " << (*it)->m_fi
 //                  << ", m_ci=" << (*it)->m_ci
+//                  << ", xi=" << (*it)->get_xi()
+//                  << ", m_xFixed=" << m_xFixed
+//                  << ", m_xLeft=" << (*it)->m_xLeft
 //                  << ", slope=" << m_slope << endl;
     }
 

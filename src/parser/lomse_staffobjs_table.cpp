@@ -182,16 +182,19 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         //barline must go before all other objects at same measure
         if (pB->is_barline() && !pA->is_barline() && b->measure() != a->measure())
             return true;
-        else if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
+        if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
             return false;
 
-        //note/rest can not go before non-timed in other instruments/staves
-        else if (a->line() != b->line())
+        //note/rest can not go before non-timed at same timepos
+        if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+            return true;
+
+        //direction can not go between clefs/key/time ==>
+        //clef/key/time can not go after direction in other instruments/staves
+        if (pA->is_direction()
+            && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
         {
-            if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-                return true;
-            else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
-                return false;
+            return (a->line() != b->line());    //move clef/key/time before direction
         }
 
 ////        //clef in other staff can not go after key or time signature
@@ -531,7 +534,8 @@ void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
         m_rCurTime = m_rMaxSegmentTime;
     else
     {
-        m_rCurTime += pGBF->get_time_shift();
+        TimeUnits time = m_rCurTime + pGBF->get_time_shift();
+        m_rCurTime = (time < m_rStartSegmentTime ? m_rStartSegmentTime : time);
         m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     }
 }

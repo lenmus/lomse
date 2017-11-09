@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,6 +44,8 @@
 #include "lomse_im_factory.h"
 #include "lomse_time.h"
 #include "lomse_import_options.h"
+
+#include <regex>
 
 using namespace UnitTest;
 using namespace std;
@@ -3228,11 +3230,234 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    //@ Hello World -------------------------------------------------------------
+    //@ direction -------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_hello_world_99999)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_600)
     {
-        //@99999
+        //@00600 minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != NULL );
+        CHECK( pSO->get_num_attachments() == 1 );
+        ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+        CHECK( pDM != NULL );
+        CHECK( pDM->get_mark_type() == "fp" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_610)
+    {
+        //@00610  <words> repeat-mark. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><words>To Coda</words></direction-type>"
+            "<sound tocoda='coda'/>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != NULL );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_words_repeat() == k_repeat_to_coda );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != NULL );
+        CHECK( pAO->get_text() == "To Coda" );
+        CHECK( pAO->get_repeat_mark() == k_repeat_to_coda );
+        CHECK( pAO->get_language() == "it" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_611)
+    {
+        //@00611  <words> other. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><words>Andante</words></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != NULL );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_words_repeat() == k_repeat_none );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
+        CHECK( pAO != NULL );
+        CHECK( pAO->get_text() == "Andante" );
+        CHECK( pAO->get_language() == "it" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_612)
+    {
+        //@00612. regex for 'Da Capo'
+
+        CHECK (type_of_repetion_mark("Da Capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" da capo ") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" DaCapo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("dc") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d.c.") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d. c.") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark("d.c. ") == k_repeat_da_capo );
+        CHECK (type_of_repetion_mark(" d.c. ") == k_repeat_da_capo );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_613)
+    {
+        //@00613. regex for 'Da Capo Al Fine'
+
+        CHECK (type_of_repetion_mark("da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("Da Capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("Da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark(" da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark(" da capo  al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark(" DaCapo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("Da capo al fine ") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("dc al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("d.c. al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("d. c. al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark("d.c.  al fine") == k_repeat_da_capo_al_fine );
+        CHECK (type_of_repetion_mark(" d.c. al fine ") == k_repeat_da_capo_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_614)
+    {
+        //@00614. regex for 'Da Capo Al Coda'
+
+        CHECK (type_of_repetion_mark("da capo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark(" da capo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark(" da capo  al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark(" DaCapo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark("Da capo al coda ") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark("dc al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark("d.c. al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark("d. c. al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark("d.c.  al coda") == k_repeat_da_capo_al_coda );
+        CHECK (type_of_repetion_mark(" d.c. al coda ") == k_repeat_da_capo_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_615)
+    {
+        //@00615. regex for 'Dal Segno'
+
+        CHECK (type_of_repetion_mark("dal segno") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark("del segno") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark(" dal  segno ") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark("d.s.") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark(" d.s.") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark("d.s. ") == k_repeat_dal_segno );
+        CHECK (type_of_repetion_mark(" d.s. ") == k_repeat_dal_segno );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_616)
+    {
+        //@00616. regex for 'Dal Segno Al Fine'
+
+        CHECK (type_of_repetion_mark("dal segno al fine") == k_repeat_dal_segno_al_fine );
+        CHECK (type_of_repetion_mark("d.s. al fine") == k_repeat_dal_segno_al_fine );
+        CHECK (type_of_repetion_mark(" dal  segno  al  fine ") == k_repeat_dal_segno_al_fine );
+        CHECK (type_of_repetion_mark(" d.s.  al  fine ") == k_repeat_dal_segno_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_617)
+    {
+        //@00617. regex for 'Dal Segno Al Coda'
+
+        CHECK (type_of_repetion_mark("dal segno al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark("del segno al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark(" dal  segno  al  coda ") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark("d.s. al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark(" d.s. al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark("d.s.  al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (type_of_repetion_mark(" d.s.  al  coda ") == k_repeat_dal_segno_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_618)
+    {
+        //@00618. regex for 'Fine'
+
+        CHECK (type_of_repetion_mark("fine") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" fine") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" fine ") == k_repeat_fine );
+        CHECK (type_of_repetion_mark(" Fine") == k_repeat_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_619)
+    {
+        //@00619. regex for 'To Coda'
+
+        CHECK (type_of_repetion_mark("to coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("to  coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to coda") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("to coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark(" to  coda ") == k_repeat_to_coda );
+        CHECK (type_of_repetion_mark("tocoda") == k_repeat_to_coda );
+    }
+
+
+    //@ miscellaneous -------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_miscellaneous_01)
+    {
+        //@99901 - Hello World
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;

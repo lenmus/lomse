@@ -68,6 +68,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_color_dto:           pObj = LOMSE_NEW ImoColorDto();           break;
         case k_imo_content:             pObj = LOMSE_NEW ImoContent();            break;
         case k_imo_cursor_info:         pObj = LOMSE_NEW ImoCursorInfo();         break;
+        case k_imo_direction:           pObj = LOMSE_NEW ImoDirection();          break;
         case k_imo_document:            pObj = LOMSE_NEW ImoDocument();           break;
         case k_imo_dynamic:             pObj = LOMSE_NEW ImoDynamic();            break;
         case k_imo_dynamics_mark:       pObj = LOMSE_NEW ImoDynamicsMark();       break;
@@ -100,6 +101,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_para:                pObj = LOMSE_NEW ImoParagraph();          break;
         case k_imo_param_info:          pObj = LOMSE_NEW ImoParamInfo();          break;
         case k_imo_relations:           pObj = LOMSE_NEW ImoRelations();          break;
+        case k_imo_repetition_mark:     pObj = LOMSE_NEW ImoTextRepetitionMark(); break;
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
         case k_imo_score_line:          pObj = LOMSE_NEW ImoScoreLine();          break;

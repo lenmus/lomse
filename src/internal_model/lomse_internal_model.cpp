@@ -323,6 +323,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_system_break] = "system-break";
         m_TypeToName[k_imo_spacer] = "spacer";
         m_TypeToName[k_imo_figured_bass] = "figured-bass";
+        m_TypeToName[k_imo_direction] = "direction";
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
@@ -404,16 +405,17 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_instrument] = "instrument";
 
         // ImoAuxObj (A)
-        m_TypeToName[k_imo_fermata] = "fermata";
-        m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
-        m_TypeToName[k_imo_ornament] = "ornament";
-        m_TypeToName[k_imo_technical] = "technical";
-        m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
         m_TypeToName[k_imo_articulation_line] = "articulation-line";
+        m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
+        m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
+        m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
+        m_TypeToName[k_imo_repetition_mark] = "repetition-mark";
         m_TypeToName[k_imo_score_text] = "score-text";
         m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
+        m_TypeToName[k_imo_ornament] = "ornament";
+        m_TypeToName[k_imo_technical] = "technical";
         m_TypeToName[k_imo_text_box] = "text-box";
 
         // ImoAuxRelObj (A)
@@ -1374,6 +1376,25 @@ Color& ImoColorDto::set_from_rgba_string(const std::string& rgba)
 }
 
 //---------------------------------------------------------------------------------------
+Color& ImoColorDto::set_from_argb_string(const std::string& argb)
+{
+    m_ok = true;
+
+    if (argb[0] == '#')
+    {
+        m_color.a = convert_from_hex( argb.substr(1, 2) );
+        m_color.r = convert_from_hex( argb.substr(3, 2) );
+        m_color.g = convert_from_hex( argb.substr(5, 2) );
+        m_color.b = convert_from_hex( argb.substr(7, 2) );
+    }
+
+    if (!m_ok)
+        m_color = Color(0,0,0,255);
+
+    return m_color;
+}
+
+//---------------------------------------------------------------------------------------
 Color& ImoColorDto::set_from_string(const std::string& hex)
 {
     if (hex.length() == 7)
@@ -1498,6 +1519,7 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_volta_bracket] = 4;
         priority[k_imo_slur] = 5;
         priority[k_imo_fermata] = 6;
+        priority[k_imo_repetition_mark] = 7;
 
         fMapInitialized = true;
     };
@@ -1566,6 +1588,8 @@ ImoContentObj::ImoContentObj(int objtype)
     , m_pStyle(NULL)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_txUserRefPoint(0.0f)
+    , m_tyUserRefPoint(0.0f)
     , m_fVisible(true)
 {
 }
@@ -1577,6 +1601,8 @@ ImoContentObj::ImoContentObj(ImoId id, int objtype)
     , m_pStyle(NULL)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_txUserRefPoint(0.0f)
+    , m_tyUserRefPoint(0.0f)
     , m_fVisible(true)
 {
 }
