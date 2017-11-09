@@ -1,46 +1,53 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.20.0
+[Since last version] 0.21.0
 =============================
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.20.0
 
-- none
+- Building Lomse now requires to use c++11 or greater.
 
 ##### COMPATIBLE CHANGES
 
-- MusicXML: Import and render volta brackets.
-- Added options for controlling behaviour of MusicXML importer when
-  uncomplete or malformed MusicXML files.
-- Line breaker algorithm improved. Now it considers different break modes.
+- Many changes for improving support for MusicXML:
+	- Import and render volta brackets.
+	- Import and render 'words'. Detect strings implying repetition
+  	  marks (i.e. "To Coda", "D.C.", ...)
+	- Fix beams in malformed MusicXML files (issue #67).
+	- Assume some default value for clef in MusicXML importer (issue #68)
+	- Added options for controlling behaviour of MusicXML importer when
+  	  uncomplete or malformed MusicXML files.
+	- MusicXML importer now deals with all midi information in score-part
+      (MusicXML 3.0) and is added to the internal model (issue #82).
+	- Fixed error in the MusicXML importer: the pitch for notes with
+  	  accidentals was computed wrong (issue #77).
 - Improvements in tuplets renderization and support:
     - Nested tuplets now fully supported.
     - MusicXML importer now imports tuplets.
     - Nested tuplets now fully supported in LDP.
     - Layout of tuplets improved and also nested tuplets are now drawn.
-- Systems justification changed for using approximate sff.
-- Blank space in LDP exporter has been normalized.
-- LDP exporter reviewed for following the same syntax rules than LDP 
-  Analyser, thus ensuring a round trip in LDP export-import.
+- Improvements in layout:
+	- Systems justification changed for using approximate sff.
+	- Line breaker algorithm improved. Now it considers different break
+	  modes.
+	- Fixed spacing issues, related to clefs and prolog objects, detected 
+  	  in regression tests.
+	- Fixed an issue with justification, detected in regression tests. It
+  	  caused that in some cases the system was not justified.
+- LDP related changes:
+	- Blank space in LDP exporter has been normalized.
+	- LDP exporter reviewed for following the same syntax rules than 
+  	  LDP Analyser, thus ensuring a round trip in LDP export-import.
+	- Some small fixes in LDP exporter.
 - Fixed issue #81. Instead of assigning MIDI channel 0 to any instrument
   without MIDI settings, now a different channel is assigned to each
   instrument.
-- Fixed issue #82. MusicXML importer now deals with all midi information
-  in score-part (MusicXML 3.0) and is added to the internal model.
-- Fixed issue #77: In the MusicXML importer the pitch for notes with
-  accidentals was computed wrong.
-- Fixed issue #68: Assume some default value for clef in MusicXML importer
 - Fixed issue #69: Playback very slow for 3/8 tempo
-- Fixed issue #67: Fix beams in malformed MusicXML files.
 - Fixed issue #73: Highlight is not synced. when moving to next page.
 - Fixed issue #70: Score highlight does not work in some scores.
 - Fixed issue #10: Note flags too long for short stems.
-- Fixed spacing issues, related to clefs and prolog objects, detected 
-  in regression tests.
-- Fixed an issue with justification, detected in regression tests. It
-  caused that in some cases the system was not justified.
-- Some fixes in LDP exporter.
+- Fixed issue #99: small issue that can cause a crash.
 - Implemented method SimpleView::get_view_size() that was empty!
 
 
