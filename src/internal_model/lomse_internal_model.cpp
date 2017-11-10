@@ -410,13 +410,14 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
         m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
-        m_TypeToName[k_imo_repetition_mark] = "repetition-mark";
+        m_TypeToName[k_imo_ornament] = "ornament";
         m_TypeToName[k_imo_score_text] = "score-text";
         m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
-        m_TypeToName[k_imo_ornament] = "ornament";
+        m_TypeToName[k_imo_symbol_repetition_mark] = "symbol-repetition-mark";
         m_TypeToName[k_imo_technical] = "technical";
         m_TypeToName[k_imo_text_box] = "text-box";
+        m_TypeToName[k_imo_text_repetition_mark] = "text-repetition-mark";
 
         // ImoAuxRelObj (A)
         m_TypeToName[k_imo_lyric] = "lyric";
@@ -1519,7 +1520,7 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_volta_bracket] = 4;
         priority[k_imo_slur] = 5;
         priority[k_imo_fermata] = 6;
-        priority[k_imo_repetition_mark] = 7;
+        priority[k_imo_text_repetition_mark] = 7;
 
         fMapInitialized = true;
     };

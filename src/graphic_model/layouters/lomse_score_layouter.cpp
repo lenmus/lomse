@@ -1107,7 +1107,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             return engrv.create_shape(pImo, pos);
         }
         case k_imo_score_text:
-        case k_imo_repetition_mark:
+        case k_imo_text_repetition_mark:
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
@@ -1120,6 +1120,14 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             TechnicalEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
+        }
+        case k_imo_symbol_repetition_mark:
+        {
+//            ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(pAO);
+//            SymbolRepetitionMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+//            Color color = pImo->get_color();
+//            return engrv.create_shape(pImo, pos, color, pParentShape);
+            return create_invisible_shape(pAO, iInstr, iStaff, pos, 0.0f);
         }
         default:
             return create_invisible_shape(pAO, iInstr, iStaff, pos, 0.0f);

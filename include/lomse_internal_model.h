@@ -523,8 +523,9 @@ class ImoWrapperBox;
                         k_imo_dynamics_mark,
                         k_imo_fermata,
                         k_imo_ornament,
-                        k_imo_repetition_mark,
+                        k_imo_symbol_repetition_mark,
                         k_imo_technical,
+                        k_imo_text_repetition_mark,
 
                         // ImoArticulation (A)
                         k_imo_articulation,
@@ -887,7 +888,8 @@ public:
     inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
     inline bool is_relations() { return m_objtype == k_imo_relations; }
-    inline bool is_repetition_mark() { return m_objtype == k_imo_repetition_mark; }
+    inline bool is_repetition_mark() { return m_objtype == k_imo_text_repetition_mark
+                                           || m_objtype == k_imo_symbol_repetition_mark; }
 	inline bool is_score() { return m_objtype == k_imo_score; }
     inline bool is_score_line() { return m_objtype == k_imo_score_line; }
     inline bool is_score_player() { return m_objtype == k_imo_score_player; }
@@ -902,6 +904,7 @@ public:
     inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
     inline bool is_style() { return m_objtype == k_imo_style; }
     inline bool is_styles() { return m_objtype == k_imo_styles; }
+    inline bool is_symbol_repetition_mark() { return m_objtype == k_imo_symbol_repetition_mark; }
     inline bool is_system_break() { return m_objtype == k_imo_system_break; }
     inline bool is_system_info() { return m_objtype == k_imo_system_info; }
     inline bool is_table() { return m_objtype == k_imo_table; }
@@ -915,6 +918,7 @@ public:
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
     inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
     inline bool is_text_box() { return m_objtype == k_imo_text_box; }
+    inline bool is_text_repetition_mark() { return m_objtype == k_imo_text_repetition_mark; }
     inline bool is_tie() { return m_objtype == k_imo_tie; }
     inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
     inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
@@ -2877,6 +2881,58 @@ public:
 	inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
 };
 
+////---------------------------------------------------------------------------------------
+//class ImoDirectionSymbol : public ImoAuxObj
+//{
+//protected:
+//    ImoTextInfo m_text;
+//
+//    friend class ImFactory;
+//    ImoDirectionSymbol() : ImoAuxObj(k_imo_score_text), m_text() {}
+//    ImoDirectionSymbol(int objtype) : ImoAuxObj(objtype), m_text() {}
+//
+//public:
+//    virtual ~ImoDirectionSymbol() {}
+//
+//    //getters
+//    inline string& get_text() { return m_text.get_text(); }
+//
+//    //setters
+//    inline void set_text(const std::string& value) { m_text.set_text(value); }
+//
+//};
+
+//---------------------------------------------------------------------------------------
+class ImoSymbolRepetitionMark : public ImoAuxObj
+{
+protected:
+    int m_symbol;       //a value from enum ESymbolRepetitionMark
+
+    friend class ImFactory;
+    ImoSymbolRepetitionMark()
+        : ImoAuxObj(k_imo_symbol_repetition_mark)
+        , m_symbol(ImoSymbolRepetitionMark::k_undefined)
+    {
+    }
+
+public:
+    virtual ~ImoSymbolRepetitionMark() {}
+
+    enum ESymbolRepetitionMark
+    {
+        k_undefined = 0,
+        k_coda,
+        k_segno,
+    };
+
+    //getters
+    inline int get_symbol() { return m_symbol; }
+
+    //setters
+    inline void set_symbol(int value) { m_symbol = value; }
+
+};
+
 //---------------------------------------------------------------------------------------
 class ImoDynamic : public ImoContent
 {
@@ -3281,7 +3337,7 @@ protected:
 
     friend class ImFactory;
     ImoTextRepetitionMark()
-        : ImoScoreText(k_imo_repetition_mark)
+        : ImoScoreText(k_imo_text_repetition_mark)
     {
     }
 
