@@ -4,6 +4,20 @@
 [Since last version] 0.21.0
 =============================
 
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.21.0
+
+- None.
+
+##### COMPATIBLE CHANGES
+
+- Changes for improving support for MusicXML:
+	- Import and render coda and segno symbols.
+
+
+
+Version [0.21.0] (9/Nov/2017)
+=============================
+
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.20.0
 
 - Building Lomse now requires to use c++11 or greater.
@@ -504,7 +518,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.20.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.21.0...HEAD
+[0.21.0]: https://github.com/lenmus/lomse/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/lenmus/lomse/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/lenmus/lomse/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/lenmus/lomse/compare/0.17.20...0.18.0

@@ -3291,7 +3291,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSO != NULL );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_words_repeat() == k_repeat_to_coda );
+        CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
         CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
         ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
@@ -3330,7 +3330,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSO != NULL );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_words_repeat() == k_repeat_none );
+        CHECK( pSO->get_display_repeat() == k_repeat_none );
         CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
         ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
@@ -3450,6 +3450,80 @@ SUITE(MxlAnalyserTest)
         CHECK (type_of_repetion_mark(" to coda ") == k_repeat_to_coda );
         CHECK (type_of_repetion_mark(" to  coda ") == k_repeat_to_coda );
         CHECK (type_of_repetion_mark("tocoda") == k_repeat_to_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_segno_630)
+    {
+        //@00630  <segno>. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><segno/></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != NULL );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_segno );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != NULL );
+        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_coda_640)
+    {
+        //@00640  <coda>. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><coda/></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != NULL );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_coda );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != NULL );
+        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
     }
 
 

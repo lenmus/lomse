@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -457,7 +457,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    long get_long_value(long nDefault=0L)
+    long get_child_value_long(long nDefault=0L)
     {
         string number = m_childToAnalyse.value();
         long nNumber;
@@ -466,7 +466,7 @@ protected:
         {
             stringstream replacement;
             replacement << nDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid integer number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return nDefault;
@@ -476,9 +476,9 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    int get_integer_value(int nDefault)
+    int get_child_value_integer(int nDefault)
     {
-        return static_cast<int>( get_long_value(static_cast<int>(nDefault)) );
+        return static_cast<int>( get_child_value_long(static_cast<int>(nDefault)) );
     }
 
     //-----------------------------------------------------------------------------------
@@ -491,7 +491,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    float get_float_value(float rDefault=0.0f)
+    float get_child_value_float(float rDefault=0.0f)
     {
         string number = m_childToAnalyse.value();
         float rNumber;
@@ -500,7 +500,7 @@ protected:
         {
             stringstream replacement;
             replacement << rDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid real number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return rDefault;
@@ -518,7 +518,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    bool get_bool_value(bool fDefault=false)
+    bool get_child_value_bool(bool fDefault=false)
     {
         string value = string(m_childToAnalyse.value());
         if (value == "true" || value == "yes")
@@ -529,7 +529,7 @@ protected:
         {
             stringstream replacement;
             replacement << fDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid boolean value '" + value + "'. Replaced by '"
                 + replacement.str() + "'.");
             return fDefault;
@@ -537,7 +537,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    int get_yes_no_value(int nDefault)
+    int get_child_value_yes_no(int nDefault)
     {
         string value = m_childToAnalyse.value();
         if (value == "yes")
@@ -546,14 +546,14 @@ protected:
             return k_yesno_no;
         else
         {
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid yes/no value '" + value + "'. Replaced by default.");
             return nDefault;
         }
     }
 
     //-----------------------------------------------------------------------------------
-    string get_string_value()
+    string get_child_value_string()
     {
         return m_childToAnalyse.value();
     }
@@ -881,7 +881,7 @@ protected:
     int analyse_optional_staff(int nDefault)
     {
         if (get_optional("staff"))
-            return get_integer_value(nDefault);
+            return get_child_value_integer(nDefault);
         else
             return nDefault;
     }
@@ -996,7 +996,7 @@ protected:
 //    ImoStyle* get_text_style_child(const string& defaulName="Default style")
 //    {
 //        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        string styleName = get_string_value();
+//        string styleName = get_child_value_string();
 //        ImoStyle* pStyle = NULL;
 //
 //        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
@@ -1048,123 +1048,6 @@ protected:
 //        }
 //        delete pImo;
 //        return size;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_location_child()
-//    {
-//        return get_float_value(0.0f);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_width_child(float rDefault=1.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_height_child(float rDefault=1.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-
-    //-----------------------------------------------------------------------------------
-    float get_float_child(float rDefault=1.0f)
-    {
-        return get_float_value(rDefault);
-    }
-
-//    //-----------------------------------------------------------------------------------
-//    float get_lenght_child(float rDefault=0.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ImoStyle* get_doc_text_style(const string& styleName)
-//    {
-//        ImoStyle* pStyle = NULL;
-//
-//        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
-//        if (pDoc)
-//        {
-//            pStyle = pDoc->find_style(styleName);
-//            if (!pStyle)
-//            {
-//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Style '" + styleName + "' is not defined. Default style will be used.");
-//                pStyle = pDoc->get_style_or_default(styleName);
-//            }
-//        }
-//
-//        return pStyle;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ELineStyle get_line_style_child()
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "none")
-//            return k_line_none;
-//        else if (value == "dot")
-//            return k_line_dot;
-//        else if (value == "solid")
-//            return k_line_solid;
-//        else if (value == "longDash")
-//            return k_line_long_dash;
-//        else if (value == "shortDash")
-//            return k_line_short_dash;
-//        else if (value == "dotDash")
-//            return k_line_dot_dash;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Element 'lineStyle': Invalid value '" + value
-//                + "'. Replaced by 'solid'." );
-//            return k_line_solid;
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ELineCap get_line_cap_child()
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "none")
-//            return k_cap_none;
-//        else if (value == "arrowhead")
-//            return k_cap_arrowhead;
-//        else if (value == "arrowtail")
-//            return k_cap_arrowtail;
-//        else if (value == "circle")
-//            return k_cap_circle;
-//        else if (value == "square")
-//            return k_cap_square;
-//        else if (value == "diamond")
-//            return k_cap_diamond;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Element 'lineCap': Invalid value '" + value
-//                + "'. Replaced by 'none'." );
-//            return k_cap_none;
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    void check_visible(ImoInlinesContainer* pCO)
-//    {
-//        string value = m_childToAnalyse.value();
-//        if (value == "visible")
-//            pCO->set_visible(true);
-//        else if (value == "noVisible")
-//            pCO->set_visible(false);
-//        else
-//        {
-//            error_invalid_child();
-//            pCO->set_visible(true);
-//        }
 //    }
 
 };
@@ -1859,7 +1742,7 @@ public:
         // staves?
         if (get_optional("staves"))
         {
-            int staves = get_integer_value(1);
+            int staves = get_child_value_integer(1);
             ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
             for(; staves > 1; --staves)
                 pInstr->add_staff();
@@ -1932,7 +1815,7 @@ protected:
         // representation. If maximum compatibility with Standard MIDI 1.0 files is
         // important, do not have the divisions value exceed 16383.
 
-        int divisions = get_integer_value(4);
+        int divisions = get_child_value_integer(4);
         m_pAnalyser->set_current_divisions( float(divisions) );
     }
 
@@ -2250,15 +2133,15 @@ public:
         // sign         <!ELEMENT sign (#PCDATA)>
         //TODO sign is mandatory (? check)
         if (get_optional("sign"))
-            m_sign = get_string_value();
+            m_sign = get_child_value_string();
 
         // line?        <!ELEMENT line (#PCDATA)>
         if (get_optional("line"))
-            m_line = get_integer_value(0);
+            m_line = get_child_value_integer(0);
 
         // clef-octave-change?      <!ELEMENT clef-octave-change (#PCDATA)>
         if (get_optional("clef-octave-change"))
-            m_octaveChange = get_integer_value(0);
+            m_octaveChange = get_child_value_integer(0);
 
         int type = determine_clef_type();
         if (type == k_clef_undefined)
@@ -2420,7 +2303,7 @@ public:
             error_msg("<direction-type> <coda> is not child of <direction>. Ignored.");
             return NULL;
         }
-        pDirection->set_words_repeat(k_repeat_coda);
+        pDirection->set_display_repeat(k_repeat_coda);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(
@@ -2944,18 +2827,18 @@ public:
         // <duration>
         if (!get_mandatory("duration"))
             return NULL;
-        int duration = get_integer_value(0);
+        int duration = get_child_value_integer(0);
         TimeUnits shift = m_pAnalyser->duration_to_timepos(duration);
 
         //<voice>
         if (fFwd && get_optional("voice"))
         {
-            int voice = get_integer_value( m_pAnalyser->get_current_voice() );
+            int voice = get_child_value_integer( m_pAnalyser->get_current_voice() );
 
             // staff?
             int staff = 1;
             if (get_optional("staff"))
-                staff = get_integer_value(1) - 1;
+                staff = get_child_value_integer(1) - 1;
 
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoRest* pImo = static_cast<ImoRest*>(
@@ -3077,11 +2960,11 @@ public:
 
         // <fifths> (num)
         if (get_mandatory("fifths"))
-            fifths = get_integer_value(0);
+            fifths = get_child_value_integer(0);
 
         // <mode>
         if (get_optional("mode"))
-            fMajor = (get_string_value() == "major");
+            fMajor = (get_child_value_string() == "major");
 
 
         error_if_more_elements();
@@ -3721,7 +3604,7 @@ public:
         // <duration>, except for grace notes
         int duration = 0;
         if (!fIsGrace && get_optional("duration"))
-            duration = get_integer_value(0);
+            duration = get_child_value_integer(0);
 
         //tie, except for cue notes
         //AWARE: <tie> is for sound
@@ -3740,7 +3623,7 @@ public:
         // [<voice>]
         int voice = m_pAnalyser->get_current_voice();
         if (get_optional("voice"))
-            voice = get_integer_value( voice );
+            voice = get_child_value_integer( voice );
         set_voice(pNR, voice);
 
         // [<type>]
@@ -3781,7 +3664,7 @@ public:
 
         // [<staff>]
         if (get_optional("staff"))
-            pNR->set_staff(get_integer_value(1) - 1);
+            pNR->set_staff(get_child_value_integer(1) - 1);
 
         // <beam>*
         while (get_optional("beam"))
@@ -3959,7 +3842,7 @@ protected:
         //@           %print-style;
         //@>
         EAccidentals accidentals = k_no_accidentals;
-        string acc = m_childToAnalyse.value();  //get_string_value();
+        string acc = m_childToAnalyse.value();  //get_child_value_string();
         if (acc == "sharp")
             accidentals = k_sharp;
         else if (acc == "natural")
@@ -5260,7 +5143,7 @@ public:
             error_msg("<direction-type> <segno> is not child of <direction>. Ignored.");
             return NULL;
         }
-        pDirection->set_words_repeat(k_repeat_segno);
+        pDirection->set_display_repeat(k_repeat_segno);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(
@@ -5462,19 +5345,19 @@ public:
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %dashed-formatting;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %placement;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
         // attrib: %orientation;
         if (has_attribute("orientation"))
@@ -5738,19 +5621,19 @@ public:
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %dashed-formatting;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %placement;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
         // attrib: %orientation;
         if (has_attribute("orientation"))
@@ -5766,7 +5649,7 @@ public:
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %bezier;
 //        analyse_optional(k_bezier, pInfo);
@@ -5857,12 +5740,12 @@ public:
 
         // <beats> (num)
         if (get_mandatory("beats"))
-            pTime->set_top_number( get_integer_value(2) );
+            pTime->set_top_number( get_child_value_integer(2) );
 
         // <beat-type> (num)
         if (pTime->get_type() != ImoTimeSignature::k_single_number
              && get_mandatory("beat-type"))
-            pTime->set_bottom_number( get_integer_value(4) );
+            pTime->set_bottom_number( get_child_value_integer(4) );
 
         add_to_model(pTime);
         return pTime;
@@ -6317,7 +6200,7 @@ public:
 
         string text = m_analysedNode.value();
         int repeat = is_repetion_mark(text);
-        pDirection->set_words_repeat(repeat);
+        pDirection->set_display_repeat(repeat);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScoreText* pImo;

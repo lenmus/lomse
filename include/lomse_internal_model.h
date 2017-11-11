@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -2847,7 +2847,7 @@ protected:
     // marks or a <direction-type> children of type <segno>/<coda>, or a <words>
     // related to repetition marks, these members contains the type of mark.
     // Otherwise, contains k_repeat_none.
-	int	    m_wordsRepeat;
+	int	    m_displayRepeat;
 	int     m_soundRepeat;
 
 
@@ -2856,7 +2856,7 @@ protected:
         : ImoStaffObj(k_imo_direction)
         , m_space(0.0f)
         , m_placement(k_placement_default)
-        , m_wordsRepeat(k_repeat_none)
+        , m_displayRepeat(k_repeat_none)
         , m_soundRepeat(k_repeat_none)
      {
      }
@@ -2867,17 +2867,17 @@ public:
     //getters
     inline Tenths get_width() { return m_space; }
     inline int get_placement() { return m_placement; }
-    inline int get_words_repeat() { return m_wordsRepeat; }
+    inline int get_display_repeat() { return m_displayRepeat; }
     inline int get_sound_repeat() { return m_soundRepeat; }
 
     //setters
     inline void set_width(Tenths space) { m_space = space; }
     inline void set_placement(int placement) { m_placement = placement; }
-    inline void set_words_repeat(int repeat) { m_wordsRepeat = repeat; }
+    inline void set_display_repeat(int repeat) { m_displayRepeat = repeat; }
     inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
 
     //info
-	inline bool is_words_repeat() { return m_wordsRepeat != k_repeat_none; }
+	inline bool is_display_repeat() { return m_displayRepeat != k_repeat_none; }
 	inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
 };
 

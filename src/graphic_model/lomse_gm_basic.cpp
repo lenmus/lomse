@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -183,6 +183,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_bracket]           = "bracket        ";
         m_typeToName[k_shape_button]            = "button         ";
         m_typeToName[k_shape_clef]              = "clef           ";
+        m_typeToName[k_shape_coda_segno]        = "coda-segno     ";
         m_typeToName[k_shape_dot]               = "dot            ";
         m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark  ";
         m_typeToName[k_shape_fermata]           = "fermata        ";
