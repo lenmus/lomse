@@ -78,6 +78,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_barline_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_chord_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_clef_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_coda_segno_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_dynamics_mark_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engrouters.cpp

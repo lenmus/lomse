@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -71,6 +71,7 @@
 #include "lomse_lyric_engraver.h"
 #include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_volta_engraver.h"
+#include "lomse_coda_segno_engraver.h"
 
 namespace lomse
 {
@@ -1107,7 +1108,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             return engrv.create_shape(pImo, pos);
         }
         case k_imo_score_text:
-        case k_imo_repetition_mark:
+        case k_imo_text_repetition_mark:
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
@@ -1118,6 +1119,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         {
             ImoTechnical* pImo = static_cast<ImoTechnical*>(pAO);
             TechnicalEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color, pParentShape);
+        }
+        case k_imo_symbol_repetition_mark:
+        {
+            ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(pAO);
+            CodaSegnoEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }

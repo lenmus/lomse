@@ -101,7 +101,6 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_para:                pObj = LOMSE_NEW ImoParagraph();          break;
         case k_imo_param_info:          pObj = LOMSE_NEW ImoParamInfo();          break;
         case k_imo_relations:           pObj = LOMSE_NEW ImoRelations();          break;
-        case k_imo_repetition_mark:     pObj = LOMSE_NEW ImoTextRepetitionMark(); break;
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
         case k_imo_score_line:          pObj = LOMSE_NEW ImoScoreLine();          break;
@@ -116,6 +115,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_staff_info:          pObj = LOMSE_NEW ImoStaffInfo();          break;
         case k_imo_style:               pObj = LOMSE_NEW ImoStyle();              break;
         case k_imo_styles:              pObj = LOMSE_NEW ImoStyles(pDoc);         break;
+        case k_imo_symbol_repetition_mark:  pObj = LOMSE_NEW ImoSymbolRepetitionMark();   break;
         case k_imo_system_break:        pObj = LOMSE_NEW ImoSystemBreak();        break;
         case k_imo_system_info:         pObj = LOMSE_NEW ImoSystemInfo();         break;
         case k_imo_table:               pObj = LOMSE_NEW ImoTable();              break;
@@ -128,6 +128,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_text_box:            pObj = LOMSE_NEW ImoTextBox();            break;
         case k_imo_text_info:           pObj = LOMSE_NEW ImoTextInfo();           break;
         case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;
+        case k_imo_text_repetition_mark:   pObj = LOMSE_NEW ImoTextRepetitionMark();   break;
         case k_imo_tie:                 pObj = LOMSE_NEW ImoTie();                break;
         case k_imo_tie_dto:             pObj = LOMSE_NEW ImoTieDto();             break;
         case k_imo_time_modification_dto:  pObj = LOMSE_NEW ImoTimeModificationDto();  break;

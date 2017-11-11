@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -457,7 +457,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    long get_long_value(long nDefault=0L)
+    long get_child_value_long(long nDefault=0L)
     {
         string number = m_childToAnalyse.value();
         long nNumber;
@@ -466,7 +466,7 @@ protected:
         {
             stringstream replacement;
             replacement << nDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid integer number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return nDefault;
@@ -476,9 +476,9 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    int get_integer_value(int nDefault)
+    int get_child_value_integer(int nDefault)
     {
-        return static_cast<int>( get_long_value(static_cast<int>(nDefault)) );
+        return static_cast<int>( get_child_value_long(static_cast<int>(nDefault)) );
     }
 
     //-----------------------------------------------------------------------------------
@@ -491,7 +491,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    float get_float_value(float rDefault=0.0f)
+    float get_child_value_float(float rDefault=0.0f)
     {
         string number = m_childToAnalyse.value();
         float rNumber;
@@ -500,7 +500,7 @@ protected:
         {
             stringstream replacement;
             replacement << rDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid real number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return rDefault;
@@ -518,7 +518,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    bool get_bool_value(bool fDefault=false)
+    bool get_child_value_bool(bool fDefault=false)
     {
         string value = string(m_childToAnalyse.value());
         if (value == "true" || value == "yes")
@@ -529,7 +529,7 @@ protected:
         {
             stringstream replacement;
             replacement << fDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid boolean value '" + value + "'. Replaced by '"
                 + replacement.str() + "'.");
             return fDefault;
@@ -537,7 +537,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    int get_yes_no_value(int nDefault)
+    int get_child_value_yes_no(int nDefault)
     {
         string value = m_childToAnalyse.value();
         if (value == "yes")
@@ -546,14 +546,14 @@ protected:
             return k_yesno_no;
         else
         {
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid yes/no value '" + value + "'. Replaced by default.");
             return nDefault;
         }
     }
 
     //-----------------------------------------------------------------------------------
-    string get_string_value()
+    string get_child_value_string()
     {
         return m_childToAnalyse.value();
     }
@@ -636,6 +636,7 @@ protected:
     //
     void get_attributes_for_text_formatting(ImoObj* pImo)
     {
+        //TODO
         //get_attributes_for_justify(pImo);
         get_attributes_for_print_style_align(pImo);
         //get_attributes_for_text_decoration(pImo);
@@ -661,6 +662,7 @@ protected:
     void get_attributes_for_print_style_align(ImoObj* pImo)
     {
         get_attributes_for_print_style(pImo);
+        //TODO
         //get_attributes_for_halign(pImo);
         //get_attributes_for_valign(pImo);
     }
@@ -678,6 +680,7 @@ protected:
     void get_attributes_for_print_style(ImoObj* pImo)
     {
         get_attributes_for_position(pImo);
+        //TODO
         //get_attributes_for_font(pImo);
         get_attribute_color(pImo);
     }
@@ -878,7 +881,7 @@ protected:
     int analyse_optional_staff(int nDefault)
     {
         if (get_optional("staff"))
-            return get_integer_value(nDefault);
+            return get_child_value_integer(nDefault);
         else
             return nDefault;
     }
@@ -993,7 +996,7 @@ protected:
 //    ImoStyle* get_text_style_child(const string& defaulName="Default style")
 //    {
 //        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        string styleName = get_string_value();
+//        string styleName = get_child_value_string();
 //        ImoStyle* pStyle = NULL;
 //
 //        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
@@ -1045,123 +1048,6 @@ protected:
 //        }
 //        delete pImo;
 //        return size;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_location_child()
-//    {
-//        return get_float_value(0.0f);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_width_child(float rDefault=1.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    float get_height_child(float rDefault=1.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-
-    //-----------------------------------------------------------------------------------
-    float get_float_child(float rDefault=1.0f)
-    {
-        return get_float_value(rDefault);
-    }
-
-//    //-----------------------------------------------------------------------------------
-//    float get_lenght_child(float rDefault=0.0f)
-//    {
-//        return get_float_value(rDefault);
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ImoStyle* get_doc_text_style(const string& styleName)
-//    {
-//        ImoStyle* pStyle = NULL;
-//
-//        ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
-//        if (pDoc)
-//        {
-//            pStyle = pDoc->find_style(styleName);
-//            if (!pStyle)
-//            {
-//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Style '" + styleName + "' is not defined. Default style will be used.");
-//                pStyle = pDoc->get_style_or_default(styleName);
-//            }
-//        }
-//
-//        return pStyle;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ELineStyle get_line_style_child()
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "none")
-//            return k_line_none;
-//        else if (value == "dot")
-//            return k_line_dot;
-//        else if (value == "solid")
-//            return k_line_solid;
-//        else if (value == "longDash")
-//            return k_line_long_dash;
-//        else if (value == "shortDash")
-//            return k_line_short_dash;
-//        else if (value == "dotDash")
-//            return k_line_dot_dash;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Element 'lineStyle': Invalid value '" + value
-//                + "'. Replaced by 'solid'." );
-//            return k_line_solid;
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ELineCap get_line_cap_child()
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "none")
-//            return k_cap_none;
-//        else if (value == "arrowhead")
-//            return k_cap_arrowhead;
-//        else if (value == "arrowtail")
-//            return k_cap_arrowtail;
-//        else if (value == "circle")
-//            return k_cap_circle;
-//        else if (value == "square")
-//            return k_cap_square;
-//        else if (value == "diamond")
-//            return k_cap_diamond;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Element 'lineCap': Invalid value '" + value
-//                + "'. Replaced by 'none'." );
-//            return k_cap_none;
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    void check_visible(ImoInlinesContainer* pCO)
-//    {
-//        string value = m_childToAnalyse.value();
-//        if (value == "visible")
-//            pCO->set_visible(true);
-//        else if (value == "noVisible")
-//            pCO->set_visible(false);
-//        else
-//        {
-//            error_invalid_child();
-//            pCO->set_visible(true);
-//        }
 //    }
 
 };
@@ -1806,14 +1692,17 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <attributes>
+//@
+//@ The attributes element contains musical information that typically changes
+//@ on measure boundaries. This includes key and time signatures, clefs,
+//@ transpositions, and staving.
+//@
 //@ <!ELEMENT attributes (%editorial;, divisions?, key*, time*,
 //@     staves?, part-symbol?, instruments?, clef*, staff-details*,
 //@     transpose*, directive*, measure-style*)>
 //@
-//@ Doc:    The attributes element contains musical information that typically changes
-//@         on measure boundaries. This includes key and time signatures, clefs,
-//@         transpositions, and staving.
-
+//
 class AtribbutesMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -1835,56 +1724,59 @@ public:
         vector<ImoObj*> keys;
         vector<ImoObj*> clefs;
 
-        // [<divisions>]
+        //TODO
+        // %editorial;
+
+        // divisions?
         if (get_optional("divisions"))
             set_divisions();
 
-        // <key>*
+        // key*
         while (get_optional("key"))
             keys.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
-        // <time>*
+        // time*
         while (get_optional("time"))
             times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
-        // [<staves>]
+        // staves?
         if (get_optional("staves"))
         {
-            int staves = get_integer_value(1);
+            int staves = get_child_value_integer(1);
             ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
             for(; staves > 1; --staves)
                 pInstr->add_staff();
         }
 
-        // [<part-symbol>]
+        // part-symbol?
         if (get_optional("part-symbol"))
         {
             //TODO <part-symbol>
         }
 
-        // [<instruments>]
+        // instruments?
         if (get_optional("instruments"))
         {
             //TODO <instruments>
         }
 
-        // <clef>*
+        // clef*
         while (get_optional("clef"))
             clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
-        // <staff-details>*
+        // staff-details*
         while (get_optional("staff-details"))
             ; //TODO <staff-details>
 
-        // <transpose>*
+        // transpose*
         while (get_optional("transpose"))
             ; //TODO <transpose>
 
-        // <directive>*
+        // directive*
         while (get_optional("directive"))
             ; //TODO <directive>
 
-        // <measure-style>*
+        // measure-style*
         while (get_optional("measure-style"))
             ; //TODO <measure-style>
 
@@ -1923,7 +1815,7 @@ protected:
         // representation. If maximum compatibility with Standard MIDI 1.0 files is
         // important, do not have the divisions value exceed 16383.
 
-        int divisions = get_integer_value(4);
+        int divisions = get_child_value_integer(4);
         m_pAnalyser->set_current_divisions( float(divisions) );
     }
 
@@ -2186,34 +2078,17 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <clef> = <sign>[<line>][<clef-octave-change>]
-//@ attrb: none is mandatory:
-//    number  	    staff-number  	The optional number attribute refers to staff numbers
-//                                  within the part. A value of 1 is assumed if not present.
-//    additional  	yes-no  	    Sometimes clefs are added to the staff in non-standard
-//                                  line positions, either to indicate cue passages, or
-//                                  when there are multiple clefs present simultaneously
-//                                  on one staff. In this situation, the additional
-//                                  attribute is set to "yes" and the line value is ignored.
-//    size  	    symbol-size  	The size attribute is used for clefs where the additional
-//                                  attribute is "yes". It is typically used to indicate
-//                                  cue clefs. The after-barline attribute is set to "yes"
-//                                  in this situation. The attribute is ignored for
-//                                  mid-measure clefs.
-//    after-barline yes-no  	    Sometimes clefs at the start of a measure need to
-//                                  appear after the barline rather than before, as for
-//                                  cues or for use after a repeated section.
-//    default-x  	tenths
-//    default-y  	tenths
-//    relative-x  	tenths
-//    relative-y  	tenths
-//    font-family  	comma-separated-text
-//    font-style  	font-style
-//    font-size  	font-size
-//    font-weight  	font-weight
-//    color  	    color
-//    print-object 	yes-no
-
+//@ <clef>
+//@<!ELEMENT clef (sign, line?, clef-octave-change?)>
+//@<!ATTLIST clef
+//@    number CDATA #IMPLIED
+//@    additional %yes-no; #IMPLIED
+//@    size %symbol-size; #IMPLIED
+//@    after-barline %yes-no; #IMPLIED
+//@    %print-style;
+//@    %print-object;
+//@>
+//
 class ClefMxlAnalyser : public MxlElementAnalyser
 {
 protected:
@@ -2234,40 +2109,48 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
 
-        //attributes:
-
-        // staff number
+        // attrib: number CDATA #IMPLIED
         int nStaffNum = get_optional_int_attribute("number", 1);
         pClef->set_staff(nStaffNum - 1);
 
-        //content:
+        // attrib: additional %yes-no; #IMPLIED
+        //TODO
 
-        // <sign>
+        // attrib: size %symbol-size; #IMPLIED
+        //TODO
+
+        // attrib: after-barline %yes-no; #IMPLIED
+        //TODO
+
+        // attrib: %print-style;
+        get_attributes_for_print_style(pClef);
+
+        // attrib: %print-object;
+        //TODO
+
+            //content
+
+        // sign         <!ELEMENT sign (#PCDATA)>
+        //TODO sign is mandatory (? check)
         if (get_optional("sign"))
-            m_sign = get_string_value();    //m_childToAnalyse.value();
+            m_sign = get_child_value_string();
 
+        // line?        <!ELEMENT line (#PCDATA)>
         if (get_optional("line"))
-            m_line = get_integer_value(0);   //(m_childToAnalyse);
+            m_line = get_child_value_integer(0);
 
+        // clef-octave-change?      <!ELEMENT clef-octave-change (#PCDATA)>
         if (get_optional("clef-octave-change"))
-            m_octaveChange = get_integer_value(0);   //(m_childToAnalyse);
+            m_octaveChange = get_child_value_integer(0);
 
         int type = determine_clef_type();
         if (type == k_clef_undefined)
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                     "Unknown clef '" + m_sign + "'. Assumed 'G' in line 2.");
             type = k_clef_G2;
         }
         pClef->set_clef_type(type);
-
-//        // [<symbolSize>]
-//        if (get_optional(k_symbolSize))
-//            set_symbol_size(pClef);
-//
-//        // [<staff>][visible][<location>]
-//        analyse_staffobjs_options(pClef);
 
         error_if_more_elements();
 
@@ -2393,6 +2276,14 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <coda>
+//@ Coda signs can be associated with a measure or a musical direction.
+//@ It is a visual indicator only; a sound element is needed for reliably playback.
+//@
+//@<!ELEMENT coda EMPTY>
+//@<!ATTLIST coda
+//@    %print-style-align;
+//@>
+//
 class CodaMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -2402,8 +2293,28 @@ public:
 
     ImoObj* do_analysis()
     {
-		//TODO
-        return NULL;
+        ImoDirection* pDirection = NULL;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            //TODO: deal with <coda> when child of <measure>
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            error_msg("<direction-type> <coda> is not child of <direction>. Ignored.");
+            return NULL;
+        }
+        pDirection->set_display_repeat(k_repeat_coda);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(
+            ImFactory::inject(k_imo_symbol_repetition_mark, pDoc) );
+        pImo->set_symbol(ImoSymbolRepetitionMark::k_coda);
+
+        // attrib: %print-style-align;
+        get_attributes_for_print_style_align(pImo);
+
+        pDirection->add_attachment(pDoc, pImo);
+        return pImo;
     }
 };
 
@@ -2916,18 +2827,18 @@ public:
         // <duration>
         if (!get_mandatory("duration"))
             return NULL;
-        int duration = get_integer_value(0);
+        int duration = get_child_value_integer(0);
         TimeUnits shift = m_pAnalyser->duration_to_timepos(duration);
 
         //<voice>
         if (fFwd && get_optional("voice"))
         {
-            int voice = get_integer_value( m_pAnalyser->get_current_voice() );
+            int voice = get_child_value_integer( m_pAnalyser->get_current_voice() );
 
             // staff?
             int staff = 1;
             if (get_optional("staff"))
-                staff = get_integer_value(1) - 1;
+                staff = get_child_value_integer(1) - 1;
 
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoRest* pImo = static_cast<ImoRest*>(
@@ -3049,11 +2960,11 @@ public:
 
         // <fifths> (num)
         if (get_mandatory("fifths"))
-            fifths = get_integer_value(0);
+            fifths = get_child_value_integer(0);
 
         // <mode>
         if (get_optional("mode"))
-            fMajor = (get_string_value() == "major");
+            fMajor = (get_child_value_string() == "major");
 
 
         error_if_more_elements();
@@ -3693,7 +3604,7 @@ public:
         // <duration>, except for grace notes
         int duration = 0;
         if (!fIsGrace && get_optional("duration"))
-            duration = get_integer_value(0);
+            duration = get_child_value_integer(0);
 
         //tie, except for cue notes
         //AWARE: <tie> is for sound
@@ -3712,7 +3623,7 @@ public:
         // [<voice>]
         int voice = m_pAnalyser->get_current_voice();
         if (get_optional("voice"))
-            voice = get_integer_value( voice );
+            voice = get_child_value_integer( voice );
         set_voice(pNR, voice);
 
         // [<type>]
@@ -3753,7 +3664,7 @@ public:
 
         // [<staff>]
         if (get_optional("staff"))
-            pNR->set_staff(get_integer_value(1) - 1);
+            pNR->set_staff(get_child_value_integer(1) - 1);
 
         // <beam>*
         while (get_optional("beam"))
@@ -3931,7 +3842,7 @@ protected:
         //@           %print-style;
         //@>
         EAccidentals accidentals = k_no_accidentals;
-        string acc = m_childToAnalyse.value();  //get_string_value();
+        string acc = m_childToAnalyse.value();  //get_child_value_string();
         if (acc == "sharp")
             accidentals = k_sharp;
         else if (acc == "natural")
@@ -5205,6 +5116,14 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <segno>
+//@ Segno signs can be associated with a measure or a musical direction.
+//@ It is a visual indicator only; a sound element is needed for reliably playback.
+//@
+//@<!ELEMENT segno EMPTY>
+//@<!ATTLIST segno
+//@    %print-style-align;
+//@>
+//
 class SegnoMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5214,8 +5133,28 @@ public:
 
     ImoObj* do_analysis()
     {
-		//TODO
-        return NULL;
+        ImoDirection* pDirection = NULL;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            //TODO: deal with <segno> when child of <measure>
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            error_msg("<direction-type> <segno> is not child of <direction>. Ignored.");
+            return NULL;
+        }
+        pDirection->set_display_repeat(k_repeat_segno);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSymbolRepetitionMark* pImo = static_cast<ImoSymbolRepetitionMark*>(
+            ImFactory::inject(k_imo_symbol_repetition_mark, pDoc) );
+        pImo->set_symbol(ImoSymbolRepetitionMark::k_segno);
+
+        // attrib: %print-style-align;
+        get_attributes_for_print_style_align(pImo);
+
+        pDirection->add_attachment(pDoc, pImo);
+        return pImo;
     }
 };
 
@@ -5406,19 +5345,19 @@ public:
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %dashed-formatting;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
 //        // attrib: %placement;
 //        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
+//            pInfo->set_slur_number( get_child_value_integer(0) );
 
         // attrib: %orientation;
         if (has_attribute("orientation"))
@@ -5682,19 +5621,19 @@ public:
 
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %dashed-formatting;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %placement;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
         // attrib: %orientation;
         if (has_attribute("orientation"))
@@ -5710,7 +5649,7 @@ public:
 
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
-//            pInfo->set_tie_number( get_integer_value(0) );
+//            pInfo->set_tie_number( get_child_value_integer(0) );
 
 //        // attrib: %bezier;
 //        analyse_optional(k_bezier, pInfo);
@@ -5801,12 +5740,12 @@ public:
 
         // <beats> (num)
         if (get_mandatory("beats"))
-            pTime->set_top_number( get_integer_value(2) );
+            pTime->set_top_number( get_child_value_integer(2) );
 
         // <beat-type> (num)
         if (pTime->get_type() != ImoTimeSignature::k_single_number
              && get_mandatory("beat-type"))
-            pTime->set_bottom_number( get_integer_value(4) );
+            pTime->set_bottom_number( get_child_value_integer(4) );
 
         add_to_model(pTime);
         return pTime;
@@ -6230,13 +6169,15 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <words>
-//<!ELEMENT words (#PCDATA)>
-//<!ATTLIST words
-//    %text-formatting;
-//>
-// Left justification is assumed if not specified.
-// Language is Italian ("it") by default.
-// Enclosure is none by default.
+//@ The words element specifies a standard text direction.
+//@ Left justification is assumed if not specified.
+//@ Language is Italian ("it") by default.
+//@ Enclosure is none by default.
+//@
+//@<!ELEMENT words (#PCDATA)>
+//@<!ATTLIST words
+//@    %text-formatting;
+//@>
 //
 class WordsMxlAnalyser : public MxlElementAnalyser
 {
@@ -6259,14 +6200,14 @@ public:
 
         string text = m_analysedNode.value();
         int repeat = is_repetion_mark(text);
-        pDirection->set_words_repeat(repeat);
+        pDirection->set_display_repeat(repeat);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScoreText* pImo;
         if (repeat != k_repeat_none)
         {
             ImoTextRepetitionMark* pRM = static_cast<ImoTextRepetitionMark*>(
-                                        ImFactory::inject(k_imo_repetition_mark, pDoc) );
+                    ImFactory::inject(k_imo_text_repetition_mark, pDoc) );
             pRM->set_repeat_mark(repeat);
             pImo = pRM;
         }
@@ -6278,7 +6219,6 @@ public:
 
         //set default values
         pImo->set_language("it");
-        //pImo->set_user_location_y(-20.0f);
             //TODO:
             //Left justification is assumed if not specified.
             //Enclosure is none by default.
@@ -6778,7 +6718,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_barline:              return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_bracket:              return LOMSE_NEW BracketMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_clef:                 return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_coda:                 return LOMSE_NEW CodaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_coda:                 return LOMSE_NEW CodaMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_damp:                 return LOMSE_NEW DampMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_damp_all:             return LOMSE_NEW DampAllMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_dashes:               return LOMSE_NEW DashesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6815,7 +6755,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_score_instrument:     return LOMSE_NEW ScoreInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_score_partwise:       return LOMSE_NEW ScorePartwiseMxlAnalyser(this, m_reporter, m_libraryScope);
-//        case k_mxl_tag_segno:                return LOMSE_NEW SegnoMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_segno:                return LOMSE_NEW SegnoMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_sound:                return LOMSE_NEW SoundMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_mxl_tag_string_mute:          return LOMSE_NEW StringMmuteMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
