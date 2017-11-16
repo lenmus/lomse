@@ -732,7 +732,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    //@ %font
+    //@ % font
     //@ - The font-family is a comma-separated list of font names.
     //@   These can be specific font styles such as Maestro or Opus, or one of several
     //@   generic font styles: music, engraved, handwritten, text, serif, sans-serif,
@@ -5432,29 +5432,32 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ sound
-//<!ELEMENT sound ((midi-device?, midi-instrument?, play?)*, offset?)>
-//<!ATTLIST sound
-//    tempo CDATA #IMPLIED
-//    dynamics CDATA #IMPLIED
-//    dacapo %yes-no; #IMPLIED
-//    segno CDATA #IMPLIED
-//    dalsegno CDATA #IMPLIED
-//    coda CDATA #IMPLIED
-//    tocoda CDATA #IMPLIED
-//    divisions CDATA #IMPLIED
-//    forward-repeat %yes-no; #IMPLIED
-//    fine CDATA #IMPLIED
-//    %time-only;
-//    pizzicato %yes-no; #IMPLIED
-//    pan CDATA #IMPLIED                <-- deprecated MusicXML 2.0
-//    elevation CDATA #IMPLIED          <-- deprecated MusicXML 2.0
-//    damper-pedal %yes-no-number; #IMPLIED
-//    soft-pedal %yes-no-number; #IMPLIED
-//    sostenuto-pedal %yes-no-number; #IMPLIED
-//>
-
-
+//@ <sound>
+//@ A sound element represents a change in playback parameters.
+//@ It can stand alone within a part/measure, or be a
+//@ component element within a direction.
+//@
+//@<!ELEMENT sound ((midi-device?, midi-instrument?, play?)*, offset?)>
+//@<!ATTLIST sound
+//@    tempo CDATA #IMPLIED
+//@    dynamics CDATA #IMPLIED
+//@    dacapo %yes-no; #IMPLIED
+//@    segno CDATA #IMPLIED
+//@    dalsegno CDATA #IMPLIED
+//@    coda CDATA #IMPLIED
+//@    tocoda CDATA #IMPLIED
+//@    divisions CDATA #IMPLIED
+//@    forward-repeat %yes-no; #IMPLIED
+//@    fine CDATA #IMPLIED
+//@    %time-only;
+//@    pizzicato %yes-no; #IMPLIED
+//@    pan CDATA #IMPLIED                <-- deprecated MusicXML 2.0
+//@    elevation CDATA #IMPLIED          <-- deprecated MusicXML 2.0
+//@    damper-pedal %yes-no-number; #IMPLIED
+//@    soft-pedal %yes-no-number; #IMPLIED
+//@    sostenuto-pedal %yes-no-number; #IMPLIED
+//@>
+//
 class SoundMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5465,43 +5468,93 @@ public:
 
     ImoObj* do_analysis()
     {
-//        // attrib: tempo CDATA #IMPLIED - non-negative decimal
-//        // attrib: dynamics CDATA #IMPLIED - non-negative decimal
-//
-//        // attrib: dacapo %yes-no; #IMPLIED
-//        bool dacapo = get_optional_yes_no_attribute("dacapo", false);
-//
-//        // attrib: segno CDATA #IMPLIED - label to reference it
-//
-//        // attrib: dalsegno CDATA #IMPLIED - label to reference it
-//
-//        // attrib: coda CDATA #IMPLIED - label to reference it
-//
-//        // attrib: tocoda CDATA #IMPLIED - label to reference it
-//
-//        // attrib: divisions CDATA #IMPLIED
-//
-////        // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
-////        bool forwardRepeat = get_optional_yes_no_attribute("forward-repeat", false);
-////        if (!forwardRepeat)
-////        {
-////
-////        }
-//
-//        // attrib: fine CDATA #IMPLIED
-//        // attrib: %time-only;
-//
-//        // attrib: pizzicato %yes-no; #IMPLIED
-//        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
-//
-//        // attrib: damper-pedal %yes-no-number; #IMPLIED
-//        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
-//
-//        // attrib: soft-pedal %yes-no-number; #IMPLIED
-//        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
-//
-//        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
-//        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
+        ImoDirection* pParent = NULL;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pParent = static_cast<ImoDirection*>(m_pAnchor);
+        else if (m_pAnchor && m_pAnchor->is_music_data())
+        {
+            //TODO
+        }
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is neither <measure> nor <direction>.");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSoundChange* pImo = static_cast<ImoSoundChange*>(
+                                    ImFactory::inject(k_imo_sound_change, pDoc));
+
+        // attrib: tempo CDATA #IMPLIED - non-negative decimal
+
+        // attrib: dynamics CDATA #IMPLIED - non-negative decimal
+
+        // attrib: dacapo %yes-no; #IMPLIED
+        if (has_attribute("dacapo"))
+        {
+            bool dacapo = get_optional_yes_no_attribute("dacapo", false);
+            pImo->add_attribute(k_mxl_attr_dacapo, dacapo);
+        }
+
+        // attrib: segno CDATA #IMPLIED - label to reference it
+        string segno = get_optional_string_attribute("segno", "");
+
+        // attrib: dalsegno CDATA #IMPLIED - label to reference it
+        string dalsegno = get_optional_string_attribute("dalsegno", "");
+
+        // attrib: coda CDATA #IMPLIED - label to reference it
+        string coda = get_optional_string_attribute("coda", "");
+
+        // attrib: tocoda CDATA #IMPLIED - label to reference it
+        string tocoda = get_optional_string_attribute("tocoda", "");
+
+        // attrib: divisions CDATA #IMPLIED
+
+        // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
+        if (has_attribute("forward-repeat"))
+        {
+            if (get_attribute("forward-repeat") != "yes")
+            {
+                error_msg2("Invalid value for 'forward-repeat' attribute. "
+                           "When used, value must be 'yes'. Ignored.");
+            }
+            else
+                pImo->add_attribute(k_mxl_attr_forward_repeat, true);
+        }
+
+        // attrib: fine CDATA #IMPLIED
+        //The fine attribute follows the final note or rest in a
+        //movement with a da capo or dal segno direction. If numeric,
+        //the value represents the actual duration of the final note or
+        //rest, which can be ambiguous in written notation and
+        //different among parts and voices. The value may also be
+        //"yes" to indicate no change to the final duration.
+
+        // attrib: %time-only;
+        //If the sound element applies only particular times through a
+        //repeat, the time-only attribute indicates which times to apply
+        //the sound element. The value is a comma-separated list of
+        //positive integers arranged in ascending order, indicating
+        //which times through the repeated section that the element
+        //applies.
+
+        // attrib: pizzicato %yes-no; #IMPLIED
+        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
+
+        // attrib: damper-pedal %yes-no-number; #IMPLIED
+        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
+
+        // attrib: soft-pedal %yes-no-number; #IMPLIED
+        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
+
+        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
+
+            // content
+
+        // (midi-device?, midi-instrument?, play?)*
+
+        // offset?
 
         return NULL;
     }

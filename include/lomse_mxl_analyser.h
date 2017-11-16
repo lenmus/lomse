@@ -52,6 +52,15 @@ class InternalModel;
 class ImoNote;
 class ImoRest;
 
+//---------------------------------------------------------------------------------------
+// MusicXML attributes
+enum EMxlAttribute
+{
+    k_mxl_attr_undefined = 0,
+    k_mxl_attr_dacapo,
+    k_mxl_attr_forward_repeat,
+};
+
 
 //---------------------------------------------------------------------------------------
 // helper class to save start of tie info, match them and build the tie

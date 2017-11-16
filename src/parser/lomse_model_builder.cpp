@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,7 +36,6 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_score_utilities.h"
 #include "lomse_logger.h"
-#include "lomse_jumps_table.h"
 #include "lomse_im_factory.h"
 
 #include <algorithm>
@@ -124,9 +123,6 @@ void ModelBuilder::structurize(ImoObj* pImo)
 
         MidiAssigner assigner;
         assigner.assign_midi_data(pScore);
-
-		JumpsTable* playbackTable = LOMSE_NEW JumpsTable(pScore);
-		playbackTable->create_table();
 
         PitchAssigner tuner;
         tuner.assign_pitch(pScore);

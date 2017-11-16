@@ -44,7 +44,6 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
-#include "lomse_jumps_table.h"
 
 
 using namespace std;
@@ -111,6 +110,92 @@ static string m_unknown = "unknown";
 #define k_default_min_width     0.0f
 #define k_default_max_width     0.0f
 #define k_default_width         0.0f
+
+
+//=======================================================================================
+// AuxAttributes implementation
+//=======================================================================================
+AuxAttributes::AuxAttributes()
+    : m_first(nullptr)
+{
+
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttributes::~AuxAttributes()
+{
+    delete_all_attributes();
+}
+
+//---------------------------------------------------------------------------------------
+void AuxAttributes::delete_all_attributes()
+{
+    if (m_first == nullptr)
+        return;
+
+    AuxAttrib* next = m_first->get_next_attrib();
+    delete m_first;
+    while (next != nullptr)
+    {
+        AuxAttrib* prev = next;
+        next = next->get_next_attrib();
+        delete prev;
+    }
+    m_first = nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::get_last_attribute()
+{
+    if (m_first == nullptr)
+        return nullptr;
+
+    AuxAttrib* next = m_first->get_next_attrib();
+    AuxAttrib* prev = m_first;
+    while (next != nullptr)
+    {
+        prev = next;
+        next = next->get_next_attrib();
+    }
+
+    return prev;
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::set_attribute_node(AuxAttrib* newAttr)
+{
+    AuxAttrib* pLast = get_last_attribute();
+    if (pLast)
+        pLast->set_next_attrib(newAttr);
+    else
+        m_first = newAttr;
+
+    return newAttr;
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::add_attribute(int type, int value)
+{
+    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::add_attribute(int type, float value)
+{
+    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::add_attribute(int type, const string& value)
+{
+    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+}
+
+//---------------------------------------------------------------------------------------
+AuxAttrib* AuxAttributes::add_attribute(int type, bool value)
+{
+    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+}
 
 
 //=======================================================================================
@@ -371,6 +456,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_point_dto] = "point";
         m_TypeToName[k_imo_size_dto] = "size";
         m_TypeToName[k_imo_slur_dto] = "slur-dto";
+        m_TypeToName[k_imo_sound_change] = "sound-change";
         m_TypeToName[k_imo_sound_info] = "sound-info";
         m_TypeToName[k_imo_staff_info] = "staff-info";
         m_TypeToName[k_imo_style] = "style";
@@ -2804,7 +2890,6 @@ ImoScore::ImoScore(Document* pDoc)
     , m_version(0)
     , m_pColStaffObjs(NULL)
     , m_pMidiTable(NULL)
-    , m_pJumpsTable(NULL)
     , m_systemInfoFirst()
     , m_systemInfoOther()
     , m_pageInfo()
@@ -2823,7 +2908,6 @@ ImoScore::~ImoScore()
     delete m_pColStaffObjs;
     delete_text_styles();
     delete m_pMidiTable;
-    delete m_pJumpsTable;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2944,13 +3028,6 @@ void ImoScore::set_staffobjs_table(ColStaffObjs* pColStaffObjs)
 {
     delete m_pColStaffObjs;
     m_pColStaffObjs = pColStaffObjs;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoScore::set_jumps_table(JumpsTable* pTable)
-{
-    delete m_pJumpsTable;
-    m_pJumpsTable = pTable;
 }
 
 //---------------------------------------------------------------------------------------

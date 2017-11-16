@@ -80,6 +80,7 @@ SoundEventsTable::~SoundEventsTable()
     delete_events_table();
     m_measures.clear();
     m_channels.clear();
+    m_jumps.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -99,6 +100,7 @@ void SoundEventsTable::create_table()
     sort_by_time();
     close_table();
     create_measures_table();
+    add_events_to_jumps();
 }
 
 //---------------------------------------------------------------------------------------
@@ -129,7 +131,9 @@ void SoundEventsTable::create_events()
     StaffObjsCursor cursor(m_pScore);
     ImoStaffObj* pSO = NULL;
     int measure = 1;        //to count measures (1 based, normal musicians way)
-                            //TODO anacruxis measure is counted as 0
+                            //TODO change so that anacruxis measure is counted as 0
+    int jumpToMeasure = 1;
+    int times = 1;
 
     rAnacrusisMissingTime = cursor.anacrusis_missing_time();
     ImoKeySignature* pKey = NULL;
@@ -147,8 +151,61 @@ void SoundEventsTable::create_events()
         }
         else if (pSO->is_barline())
         {
-            measure++;
             reset_accidentals(pKey);
+
+            ImoBarline* pBar = static_cast<ImoBarline*>(pSO);
+            if (pBar->get_type() == k_barline_start_repetition)
+            {
+                measure++;
+                jumpToMeasure = measure;
+            }
+            else if (pBar->get_type() == k_barline_end_repetition)
+            {
+                JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                add_jump(cursor, measure, pJump);
+                measure++;
+            }
+            else if (pBar->get_type() == k_barline_double_repetition)
+            {
+                JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                add_jump(cursor, measure, pJump);
+                measure++;
+                jumpToMeasure = measure;
+            }
+            else
+                measure++;
+
+            //deal with volta brackets
+            if (pBar->get_num_relations() > 0)
+            {
+                ImoRelations* pRelObjs = pBar->get_relations();
+                int size = pRelObjs->get_num_items();
+                for (int i=0; i < size; ++i)
+                {
+                    ImoRelObj* pRO = pRelObjs->get_item(i);
+                    if (pRO->is_volta_bracket())
+                    {
+                        if (pBar == pRO->get_start_object())
+                        {
+                            //Only first volta generates a jump.
+                            //First always jumps to next measure; number of
+                            //times is number of repetitions of this volta.
+                            //Also jumps to start of each next volta;  number of
+                            //times is number of repetitions of each next volta.
+                            //Other volta numbers do not create jumps
+
+                            JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                            add_jump(cursor, measure, pJump);
+                        }
+                        else if (pBar == pRO->get_end_object())
+                        {
+                            //this serves to determine measures to jump to.
+                        }
+                    }
+                }
+            }
+            //----------------------------
+
         }
         else if (pSO->is_time_signature())
         {
@@ -158,6 +215,12 @@ void SoundEventsTable::create_events()
         {
             pKey = static_cast<ImoKeySignature*>( pSO );
             reset_accidentals(pKey);
+        }
+        else if (pSO->is_direction())
+        {
+//            int iInstr = cursor.num_instrument();
+//            int channel = m_channels[iInstr];
+//            add_noterest_events(cursor, channel, measure);
         }
 
         cursor.move_next();
@@ -170,7 +233,15 @@ void SoundEventsTable::store_event(TimeUnits rTime, int eventType, int channel,
                                    ImoStaffObj* pSO, int measure)
 {
     SoundEvent* pEvent = LOMSE_NEW SoundEvent(rTime, eventType, channel, pitch,
-                                        volume, step, pSO, measure);
+                                              volume, step, pSO, measure);
+    m_events.push_back(pEvent);
+    m_numMeasures = max(m_numMeasures, measure);
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::store_jump_event(TimeUnits rTime, JumpEntry* pJump, int measure)
+{
+    SoundEvent* pEvent = LOMSE_NEW SoundEvent(rTime, SoundEvent::k_jump, pJump, measure);
     m_events.push_back(pEvent);
     m_numMeasures = max(m_numMeasures, measure);
 }
@@ -361,6 +432,7 @@ string SoundEventsTable::dump_events_table()
             msg += str( boost::format("%4d:\t%d\t\t%d\t%d\t") %
                         i % pSE->DeltaTime % pSE->Channel % pSE->Measure );
 
+            bool fAddData = true;
             switch (pSE->EventType)
             {
                 case SoundEvent::k_note_on:
@@ -384,11 +456,17 @@ string SoundEventsTable::dump_events_table()
                 case SoundEvent::k_prog_instr:
                     msg += "PRG INSTR ";
                     break;
+                case SoundEvent::k_jump:
+                    msg += "JUMP      ";
+                    msg += pSE->pJump->dump_entry(this);
+                    fAddData = false;
+                    break;
                 default:
                     msg += str( boost::format("?? %d") % pSE->EventType );
             }
-            msg += str( boost::format("\t%d\t%d\t%d\n") %
-                        pSE->NotePitch % pSE->NoteStep % pSE->Volume );
+            if (fAddData)
+                msg += str( boost::format("\t%d\t%d\t%d\n") %
+                            pSE->NotePitch % pSE->NoteStep % pSE->Volume );
         }
 
     return msg;
@@ -512,6 +590,123 @@ void SoundEventsTable::update_context_accidentals(ImoNote* pNote)
             ;
     }
 }
+
+//---------------------------------------------------------------------------------------
+JumpEntry* SoundEventsTable::get_jump(int i)
+{
+    if (i < int(m_jumps.size()))
+        return m_jumps[i];
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+JumpEntry* SoundEventsTable::create_jump(int jumpTo, int times)
+{
+    JumpEntry* pJump = LOMSE_NEW JumpEntry(jumpTo, times);
+    m_jumps.push_back(pJump);
+    return pJump;
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump)
+{
+    TimeUnits rTime = cursor.time() + cursor.anacrusis_missing_time();
+    store_jump_event(rTime, pJump, measure);
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::add_events_to_jumps()
+{
+    vector<JumpEntry*>::iterator it;
+    for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
+    {
+        for (int i=0; i < (*it)->get_num_jumps(); ++i)
+        {
+            int nEntry = m_measures[(*it)->get_measure(i)];
+            SoundEvent* pSE = m_events[nEntry];
+            (*it)->set_event(i, pSE);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int SoundEventsTable::get_event_index(SoundEvent* pSE)
+{
+    if (!pSE)
+        return -1;
+
+    vector<SoundEvent*>::iterator it = std::find(m_events.begin(), m_events.end(), pSE);
+    if (it != m_events.end())
+        return std::distance(m_events.begin(), it);
+    else
+        return -1;
+}
+
+
+//=======================================================================================
+// JumpEntry implementation
+//=======================================================================================
+JumpEntry::JumpEntry(int jumpTo, int times)
+	: m_fIsActive(true)
+{
+	m_measure.push_back(jumpTo);
+	m_numTimes.push_back(times);
+	m_applied.push_back(0);
+	m_event.push_back(nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+JumpEntry::~JumpEntry()
+{
+}
+
+////---------------------------------------------------------------------------------------
+//void JumpEntry::reset_entry()
+//{
+//    m_fIsActive = true;
+//    //m_applied.assign(m_applied.size(), 0);
+//    std::fill(m_applied.begin(), m_applied.end(), 0);
+//}
+//
+////---------------------------------------------------------------------------------------
+//int JumpEntry::exec_jump()
+//{
+//    //returns number of measure to jump to or -1 if no jump
+//
+//    if (!m_fIsActive)
+//        return -1;
+//
+//    // find first to.x with num-times > 0
+//    size_t i;
+//    for (i = 0; i < m_measure.size(); ++i)
+//    {
+//        if (m_applied[i] < m_numTimes[i])
+//        {
+//            ++m_applied[i];
+//            return m_measure[i];
+//        }
+//    }
+//
+//    m_fIsActive = false;
+//    return -1;
+//}
+
+//---------------------------------------------------------------------------------------
+string JumpEntry::dump_entry(SoundEventsTable* pMidiTable)
+{
+    stringstream s;
+    s << "Active=" << (m_fIsActive ? "yes " : "no  ");
+    for (int i=0; i < get_num_jumps(); ++i)
+    {
+        s << "(m=" << m_measure[i]
+          << ",e=" << pMidiTable->get_event_index(m_event[i])
+          << ",t=" << m_numTimes[i]
+          << ",a=" << m_applied[i] << ") ";
+    }
+    s << endl;
+    return s.str();
+}
+
 
 
 }   //namespace lomse

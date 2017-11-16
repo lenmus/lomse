@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,7 +36,7 @@
 #include "lomse_midi_table.h"
 #include "lomse_document.h"
 #include "lomse_internal_model.h"
-//#include "lomse_barline_engraver.h"
+//#include "lomse_staffobjs_table.h"
 
 
 using namespace UnitTest;
@@ -63,18 +63,134 @@ class MidiTableTestFixture
 {
 public:
     LibraryScope m_libraryScope;
-    std::string m_scores_path;
+    string m_scores_path;
+    Document* m_pDoc;
+    ImoScore* m_pScore;
+    SoundEventsTable* m_pTable;
 
     MidiTableTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_scores_path(TESTLIB_SCORES_PATH)
+        , m_pDoc(nullptr)
     {
         m_scores_path = TESTLIB_SCORES_PATH;
+        m_scores_path += "unit-tests/repeats/";
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~MidiTableTestFixture()    //TearDown fixture
     {
+        delete m_pDoc;
+        m_pDoc = nullptr;
     }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
+    void load_mxl_score_for_test(const std::string& score)
+    {
+        string filename = m_scores_path + score;
+        ifstream score_file(filename.c_str());
+        if (!score_file.good())
+            cout  << test_name() << ". Unit test filename not found: " << filename << endl;
+
+        m_pDoc = LOMSE_NEW Document(m_libraryScope, cout);
+        m_pDoc->from_file(filename, Document::k_format_mxl);
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+
+        m_pTable = m_pScore->get_midi_table();
+    }
+
+    void load_ldp_score_for_test(const std::string& score)
+    {
+        string filename = m_scores_path + score;
+        ifstream score_file(filename.c_str());
+        if (!score_file.good())
+            cout  << test_name() << ". Unit test filename not found: " << filename << endl;
+
+        m_pDoc = LOMSE_NEW Document(m_libraryScope, cout);
+        m_pDoc->from_file(filename, Document::k_format_ldp);
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+
+        m_pTable = m_pScore->get_midi_table();
+    }
+
+    bool is_jump1(int i, int measure, int times)
+    {
+        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
+        if (pEntry->get_measure(0) != measure
+            || pEntry->get_times(0) != times
+            || pEntry->get_applied(0) != 0 )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+        return true;
+    }
+
+    bool is_jump1_event(int i, int measure, int event)
+    {
+        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
+        int eventIndex = m_pTable->get_event_index(pEntry->get_event(0));
+        if (pEntry->get_measure(0) != measure
+            || eventIndex != event )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+        return true;
+    }
+
+    bool is_jump2(int i, int measure1, int times1, int measure2, int times2)
+    {
+        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
+        if (pEntry->get_measure(0) != measure1
+            || pEntry->get_times(0) != times1
+            || pEntry->get_applied(0) != 0 )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+
+        if (pEntry->get_measure(1) != measure2
+            || pEntry->get_times(1) != times2
+            || pEntry->get_applied(1) != 0 )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+        return true;
+    }
+
+    bool is_jump2_event(int i, int measure1, int event1, int measure2, int event2)
+    {
+        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
+        int eventIndex = m_pTable->get_event_index(pEntry->get_event(0));
+        if (pEntry->get_measure(0) != measure1
+            || eventIndex != event1 )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+
+        eventIndex = m_pTable->get_event_index(pEntry->get_event(1));
+        if (pEntry->get_measure(1) != measure2
+            || eventIndex != event2 )
+        {
+            cout << test_name() << ". JumpEntry " << i << ": "
+                 << pEntry->dump_entry(m_pTable);
+            return false;
+        }
+        return true;
+    }
+
 };
 
 SUITE(MidiTableTest)
@@ -343,6 +459,9 @@ SUITE(MidiTableTest)
         CHECK( (*it)->DeltaTime == 64.0f );
     }
 
+
+    //@ Measures table ------------------------------------------------------------------
+
     TEST_FIXTURE(MidiTableTestFixture, MeasuresTable)
     {
         Document doc(m_libraryScope);
@@ -429,6 +548,115 @@ SUITE(MidiTableTest)
         CHECK( events[iEv]->EventType == SoundEvent::k_end_of_score );
 
         CHECK( table.get_num_measures() == 2 );
+    }
+
+
+    //@ Jumps table ------------------------------------------------------------------
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_01)
+    {
+        //@001. empty score creates empty table
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+
+		SoundEventsTable* pTable = pScore->get_midi_table();
+
+        CHECK( pTable->num_jumps() == 0 );
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_02)
+    {
+        //@002. score with no repetitions creates empty table
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q)(n e4 q)(n g4 q) )))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+
+		SoundEventsTable* pTable = pScore->get_midi_table();
+
+        CHECK( pTable->num_jumps() == 0 );
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_03)
+    {
+        //@003. [T1] end-repetition barline creates one repetition
+        //  |    |    |    :|     |     |
+        //  1    2    3     4     5
+        //                 J 2,1
+        load_mxl_score_for_test("01-repeat-end-repetition-barline.xml");
+        CHECK( m_pTable->num_jumps() == 1 );
+        CHECK( is_jump1(0, 1,1) == true );
+        CHECK( is_jump1_event(0, 1,1) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_04)
+    {
+        //@004. [T2] start-end-repetition barlines creates one repetition
+        //  |    |     |:    |    :|     |     |
+        //  1    2     3     4     5     6
+        //                       J 3,1
+        load_mxl_score_for_test("02-repeat-start-end-repetition-barlines.xml");
+        CHECK( m_pTable->num_jumps() == 1 );
+        CHECK( is_jump1(0, 3,1) == true );
+        CHECK( is_jump1_event(0, 3,6) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_05)
+    {
+        //@005. As 004 but with LDP score
+        //  |    |:    |    :|     |     |
+        //  1    2     3     4     5
+        //                 J 2,1
+        Document doc(m_libraryScope, cout);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q)(n e4 q)(barline startRepetition)"
+            "(n c4 q)(n e4 q)(barline)"
+            "(n c4 q)(n e4 q)(barline endRepetition)"
+            "(n c4 q)(n e4 q)(barline)(n c4 q)(n e4 q)(barline) )))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+
+		m_pTable = pScore->get_midi_table();
+
+        CHECK( m_pTable->num_jumps() == 1 );
+        CHECK( is_jump1(0, 2,1) == true );
+        CHECK( is_jump1_event(0, 2,5) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_06)
+    {
+        //@006. [T3] start-end-repetition barlines creates one repetition
+        //  |    |    :|:    |    :|     |     |
+        //  1    2     3     4     5     6
+        //            J 1,1       J 3,1
+        load_mxl_score_for_test("03-repeat-double-end-repetition-barlines.xml");
+        CHECK( m_pTable->num_jumps() == 2 );
+        CHECK( is_jump1(0, 1,1) == true );
+        CHECK( is_jump1_event(0, 1,1) == true );
+        CHECK( is_jump1(1, 3,1) == true );
+        CHECK( is_jump1_event(1, 3,6) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_07)
+    {
+        //@007. [T4] end-repetition barline with volta brackets
+        //                  vt1    vt2
+        //  |    |    |     |     :|     |     |     |
+        //  1    2    3     4      5    6
+        //                 J 4,1  J 1,1
+        //                   5,0
+        load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
+        cout << m_pTable->dump_midi_events() << endl;
+        //cout << m_pScore->get_staffobjs_table()->dump() << endl;
+        CHECK( m_pTable->num_jumps() == 2 );
+        CHECK( is_jump2(0, 4,1, 5,0) == true );
+        CHECK( is_jump2_event(0, 4,9, 5,11) == true );
+        CHECK( is_jump1(1, 1,1) == true );
+        CHECK( is_jump1_event(1, 1,1) == true );
     }
 
 }

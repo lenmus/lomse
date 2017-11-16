@@ -1644,7 +1644,7 @@ SUITE(InternalModelTest)
         CHECK( supported.size() == 6 );
     }
 
-    // ImoBarline -----------------------------------------------------------------------
+    //@ ImoBarline ----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, barline_attributes)
     {
@@ -1658,6 +1658,87 @@ SUITE(InternalModelTest)
 //        CHECK( supported.find(k_attr_barline) == ? );
 
         delete pImo;
+    }
+
+
+    //@ AuxAttrib -----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, aux_attrib_01)
+    {
+        //@01. constructor
+        AuxAttrib a(0, 2);
+        AuxAttrib b(1, std::string("string"));
+        AuxAttrib c(2, 2.7f);
+        AuxAttrib d(3, true);
+
+        CHECK( a.get_int_value() == 2 );
+        CHECK( b.get_string_value() == "string" );
+        CHECK( c.get_float_value() == 2.7f );
+        CHECK( d.get_bool_value() == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, aux_attrib_02)
+    {
+        //@02. set value
+        AuxAttrib a(0);
+        a.set_value(std::string("string"));
+        CHECK( a.get_string_value() == "string" );
+
+        a.set_value(2);
+        CHECK( a.get_int_value() == 2 );
+
+        a.set_value(2.7f);
+        CHECK( a.get_float_value() == 2.7f );
+
+        a.set_value(true);
+        CHECK( a.get_bool_value() == true );
+    }
+
+
+    //@ AuxAttributes -------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, aux_attributes_01)
+    {
+        //@01. constructor. Initially empty list
+        AuxAttributes attribs;
+
+        CHECK( attribs.get_first_attribute() == nullptr );
+        CHECK( attribs.get_last_attribute() == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, aux_attributes_02)
+    {
+        //@02. add attributes
+        AuxAttributes attribs;
+        AuxAttrib* a = LOMSE_NEW AuxAttrib(0, 2.7f);
+
+        attribs.set_attribute_node(a);
+
+        CHECK( attribs.get_last_attribute() == a );
+        CHECK( attribs.get_first_attribute() == a );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, aux_attributes_03)
+    {
+        //@03. get last attribute. Attributes are chained
+        AuxAttributes attribs;
+        AuxAttrib* a = LOMSE_NEW AuxAttrib(0, 2);
+        AuxAttrib* b = LOMSE_NEW AuxAttrib(1, std::string("string"));
+        AuxAttrib* c = LOMSE_NEW AuxAttrib(2, 2.7f);
+        AuxAttrib* d = LOMSE_NEW AuxAttrib(3, true);
+
+        attribs.set_attribute_node(a);
+        attribs.set_attribute_node(b);
+        attribs.set_attribute_node(c);
+        attribs.set_attribute_node(d);
+
+        CHECK( attribs.get_first_attribute() == a );
+        CHECK( attribs.get_last_attribute() == d );
+
+        CHECK ( a->get_next_attrib() == b );
+        CHECK ( b->get_next_attrib() == c );
+        CHECK ( c->get_next_attrib() == d );
+        CHECK ( d->get_next_attrib() == nullptr );
     }
 
 }

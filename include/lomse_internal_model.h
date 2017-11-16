@@ -44,10 +44,13 @@
 #include "lomse_injectors.h"
 #include "lomse_image.h"
 #include "lomse_logger.h"
-//#include "lomse_im_attributes.h"
 typedef int TIntAttribute;
 
 using namespace std;
+
+#include <boost/variant.hpp>
+using namespace boost;
+
 
 namespace lomse
 {
@@ -62,7 +65,6 @@ class EventHandler;
 class Control;
 class ScorePlayerCtrl;
 class ButtonCtrl;
-class JumpsTable;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -510,12 +512,19 @@ class ImoWrapperBox;
 
                     // ImoStaffObj (A)
                     k_imo_staffobj,
-                        k_imo_barline, k_imo_clef, k_imo_direction,
+                        k_imo_barline,
+                        k_imo_clef,
+                        k_imo_direction,
+                        k_imo_figured_bass,
+                        k_imo_go_back_fwd,
                         k_imo_key_signature,
+                        k_imo_metronome_mark,
+                        k_imo_note,
+                        k_imo_rest,
+                        k_imo_sound_change,
+                        k_imo_spacer,
+                        k_imo_system_break,
                         k_imo_time_signature,
-                        k_imo_note, k_imo_rest, k_imo_go_back_fwd,
-                        k_imo_metronome_mark, k_imo_system_break,
-                        k_imo_spacer, k_imo_figured_bass,
                     k_imo_staffobj_last,
 
                     // ImoAuxObj (A)
@@ -663,6 +672,99 @@ public:
 
 private:
     void add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle);
+
+};
+
+//---------------------------------------------------------------------------------------
+// Auxiliary class: An attribute
+
+typedef boost::variant<int, string, bool, float> AttribValue;
+
+class AuxAttrib
+{
+protected:
+	int m_attrbType;
+	AttribValue m_value;
+	AuxAttrib* m_next;
+
+public:
+    AuxAttrib(int type) : m_attrbType(type), m_next(nullptr) {}
+    AuxAttrib(int type, const string& value)
+        : m_attrbType(type)
+        , m_next(nullptr)
+    {
+        set_value(value);
+    }
+    AuxAttrib(int type, int value)
+        : m_attrbType(type)
+        , m_next(nullptr)
+    {
+        set_value(value);
+    }
+    AuxAttrib(int type, float value)
+        : m_attrbType(type)
+        , m_next(nullptr)
+    {
+        set_value(value);
+    }
+    AuxAttrib(int type, bool value)
+        : m_attrbType(type)
+        , m_next(nullptr)
+    {
+        set_value(value);
+    }
+    ~AuxAttrib() {}
+
+    inline AuxAttrib* get_next_attrib() { return m_next; }
+    inline int get_int_value(){ return boost::get<int>(m_value); }
+    inline float get_float_value(){ return boost::get<float>(m_value); }
+    inline string get_string_value(){ return boost::get<string>(m_value); }
+    inline bool get_bool_value(){ return boost::get<bool>(m_value); }
+
+    inline void set_value(const string& value) { m_value = value; }
+    inline void set_value(int value) { m_value = value; }
+    inline void set_value(float value) { m_value = value; }
+    inline void set_value(bool value) { m_value = value; }
+
+protected:
+    friend class AuxAttributes;
+    inline void set_next_attrib(AuxAttrib* next) { m_next = next; }
+
+};
+
+//---------------------------------------------------------------------------------------
+// Auxiliary class: container for attributes
+class AuxAttributes
+{
+protected:
+	AuxAttrib* m_first;
+
+public:
+    AuxAttributes();
+    ~AuxAttributes();
+
+    //basic interface
+	inline AuxAttrib* get_first_attribute() { return m_first; }
+	AuxAttrib* get_last_attribute();
+    AuxAttrib* add_attribute(int type, int value);
+    AuxAttrib* add_attribute(int type, float value);
+    AuxAttrib* add_attribute(int type, const string& value);
+    AuxAttrib* add_attribute(int type, bool value);
+
+//    // DOM Level 1 interface
+//    string& get_attribute(const string& name);
+//    void set_attribute(const string& name, const string& value);
+//    void remove_attribute(const string& name);
+//    AuxAttrib* get_attribute_node(const string& name);
+    AuxAttrib* set_attribute_node(AuxAttrib* newAttr);
+//    AuxAttrib* remove_attribute_node(AuxAttrib* newAttr);
+//    ImoDomNodeList* get_elements_by_tagname(const string& tagname);
+//
+//    // DOM Level 2 interface
+//    bool has_attribute(const string& name);
+
+protected:
+    void delete_all_attributes();
 
 };
 
@@ -899,6 +1001,7 @@ public:
     inline bool is_slur() { return m_objtype == k_imo_slur; }
     inline bool is_slur_data() { return m_objtype == k_imo_slur_data; }
     inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
+    inline bool is_sound_change() { return m_objtype == k_imo_sound_change; }
     inline bool is_sound_info() { return m_objtype == k_imo_sound_info; }
     inline bool is_spacer() { return m_objtype == k_imo_spacer; }
     inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
@@ -3330,6 +3433,98 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class ImoSoundChange : public ImoStaffObj
+{
+protected:
+    AuxAttributes m_attribs;
+
+    float m_tempo;      //quarter notes per minute. 0 = no change
+    float m_dynamics;   //non-negative decimal
+    bool m_dacapo;
+    int m_repetitionMark;
+    string m_repetitionLabel;
+    // attrib: m_divisions CDATA #IMPLIED
+    bool m_forwardRepeat;
+    // attrib: m_fine CDATA #IMPLIED
+    //The fine attribute follows the final note or rest in a
+    //movement with a da capo or dal segno direction. If numeric,
+    //the value represents the actual duration of the final note or
+    //rest, which can be ambiguous in written notation and
+    //different among parts and voices. The value may also be
+    //"yes" to indicate no change to the final duration.
+
+    // attrib: %time-only;
+    //The value is a comma-separated list of
+    //positive integers arranged in ascending order, indicating
+    //which times through the repeated section this element
+    //applies.
+
+    bool m_pizzicato;
+    bool m_damperPedal;
+    bool m_softPedal;
+    bool m_sostenutoPedal;
+        // content
+    // (midi-device?, midi-instrument?, play?)*
+    // offset?
+
+    friend class ImFactory;
+    ImoSoundChange()
+        : ImoStaffObj(k_imo_sound_change)
+    {
+    }
+
+public:
+    virtual ~ImoSoundChange() {}
+
+    //attributes interface
+	inline AuxAttrib* get_first_attribute() { return m_attribs.get_first_attribute(); }
+	inline AuxAttrib* get_last_attribute() { return m_attribs.get_last_attribute(); }
+    inline AuxAttrib* add_attribute(int type, int value) { return m_attribs.add_attribute(type, value); }
+    inline AuxAttrib* add_attribute(int type, float value) { return m_attribs.add_attribute(type, value); }
+    inline AuxAttrib* add_attribute(int type, const string& value) { return m_attribs.add_attribute(type, value); }
+    inline AuxAttrib* add_attribute(int type, bool value) { return m_attribs.add_attribute(type, value); }
+
+    // DOM Level 1 interface
+	inline AuxAttrib* set_attribute_node(AuxAttrib* attrb) { return m_attribs.set_attribute_node(attrb); }
+
+    //getters
+    inline float get_tempo() { return m_tempo; }
+    // attrib: dynamics CDATA #IMPLIED - non-negative decimal
+    inline bool get_dacapo() { return m_dacapo; }
+    inline int get_repetition_mark() { return m_repetitionMark; }
+    inline string& get_repetition_label() { return m_repetitionLabel; }
+    // attrib: divisions CDATA #IMPLIED
+    inline bool get_forward_repeat() { return m_forwardRepeat; }
+    // attrib: fine CDATA #IMPLIED
+    //The fine attribute follows the final note or rest in a
+    //movement with a da capo or dal segno direction. If numeric,
+    //the value represents the actual duration of the final note or
+    //rest, which can be ambiguous in written notation and
+    //different among parts and voices. The value may also be
+    //"yes" to indicate no change to the final duration.
+
+    // attrib: %time-only;
+    //If the sound element applies only particular times through a
+    //repeat, the time-only attribute indicates which times to apply
+    //the sound element. The value is a comma-separated list of
+    //positive integers arranged in ascending order, indicating
+    //which times through the repeated section that the element
+    //applies.
+
+    inline bool get_pizzicato() { return m_pizzicato; }
+    inline bool get_damperPedal() { return m_damperPedal; }
+    inline bool get_soft_pedal() { return m_softPedal; }
+    inline bool get_sostenuto_pedal() { return m_sostenutoPedal; }
+
+        // content
+
+    // (midi-device?, midi-instrument?, play?)*
+
+    // offset?
+
+};
+
+//---------------------------------------------------------------------------------------
 class ImoTextRepetitionMark : public ImoScoreText
 {
 protected:
@@ -4048,7 +4243,6 @@ protected:
     int             m_version;
     ColStaffObjs*   m_pColStaffObjs;
     SoundEventsTable* m_pMidiTable;
-    JumpsTable*     m_pJumpsTable;
     ImoSystemInfo   m_systemInfoFirst;
     ImoSystemInfo   m_systemInfoOther;
     ImoPageInfo     m_pageInfo;
@@ -4072,8 +4266,6 @@ public:
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
-    inline JumpsTable* get_jumps_table() { return m_pJumpsTable; }
-    void set_jumps_table(JumpsTable* pTable);
 
     //required by Visitable parent class
 	void accept_visitor(BaseVisitor& v);
