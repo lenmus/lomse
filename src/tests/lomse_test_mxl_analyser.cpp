@@ -3058,7 +3058,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, volta_bracket_02)
     {
-        //@01. volta bracket: text different from number
+        //@02. volta bracket: text different from number
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -3146,6 +3146,49 @@ SUITE(MxlAnalyserTest)
 
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_volta_bracket_03)
+    {
+        //@03. volta bracket: regex for validating ending
+
+        CHECK (mxl_is_valid_ending_number("2") == true );
+        CHECK (mxl_is_valid_ending_number("01") == false );
+        CHECK (mxl_is_valid_ending_number(" ") == true );
+        CHECK (mxl_is_valid_ending_number("   ") == true );
+        CHECK (mxl_is_valid_ending_number("1, 2") == true );
+        CHECK (mxl_is_valid_ending_number("1, 2, 3") == true );
+        CHECK (mxl_is_valid_ending_number("1, 2, 3 ") == true );    //permissive
+        CHECK (mxl_is_valid_ending_number("1,2") == true );         //permissive
+        CHECK (mxl_is_valid_ending_number("1,2,3") == true );       //permissive
+        CHECK (mxl_is_valid_ending_number("1-3") == false );
+        CHECK (mxl_is_valid_ending_number("to coda") == false );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_volta_bracket_04)
+    {
+        //@04. volta bracket: regex for extracting numbers
+
+        vector<int> reps;
+        mxl_extract_numbers_from_ending("2", &reps);
+        CHECK ( reps.size() == 1 );
+        CHECK ( reps[0] == 2 );
+
+        reps.clear();
+        mxl_extract_numbers_from_ending("1, 2", &reps);
+        CHECK ( reps.size() == 2 );
+        CHECK ( reps[0] == 1 );
+        CHECK ( reps[1] == 2 );
+
+        reps.clear();
+        mxl_extract_numbers_from_ending("1,2", &reps);
+        CHECK ( reps.size() == 2 );
+        CHECK ( reps[0] == 1 );
+        CHECK ( reps[1] == 2 );
+
+        reps.clear();
+        mxl_extract_numbers_from_ending(" ", &reps);
+        CHECK ( reps.size() == 0 );
     }
 
 

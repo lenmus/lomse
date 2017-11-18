@@ -128,11 +128,16 @@ public:
 // helper class to save volta bracket dto items, match them and build the volta brackets
 class MxlVoltasBuilder : public RelationBuilder<ImoVoltaBracketDto, MxlAnalyser>
 {
+protected:
+    ImoVoltaBracket* m_pFirstVB;        //ptr to 1st volta of current repetition set
+
 public:
     MxlVoltasBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
         : RelationBuilder<ImoVoltaBracketDto, MxlAnalyser>(
                 reporter, pAnalyser, "volta bracket", "Volta bracket")
-    {}
+        , m_pFirstVB(nullptr)
+    {
+    }
     virtual ~MxlVoltasBuilder() {}
 
     void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo);
@@ -396,8 +401,12 @@ protected:
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };
 
-//defined out of WordsMxlAnalyser for unit tests
+//defined in WordsMxlAnalyser to simplify unit testing of the regex
 extern int type_of_repetion_mark(const string& value);
+//defined in EndingMxlAnalyser to simplify unit testing of the regex
+extern bool mxl_is_valid_ending_number(const string& num);
+//defined in EndingMxlAnalyser to simplify unit testing of the regex
+extern void mxl_extract_numbers_from_ending(const string& num, vector<int>* repetitions);
 
 
 }   //namespace lomse

@@ -57,11 +57,11 @@ class SoundEventsTable;
 class JumpEntry
 {
 protected:
-	bool m_fIsActive;               //true if this jump is still valid
-	vector<int> m_measure;		    //number of the measure to jump to
-	vector<int> m_numTimes;		    //num.times each jumpTo must be active
-	vector<int> m_applied;		    //num.times each jumpTo has been executed
-	vector<SoundEvent*> m_event;    //ptr to event to jump to
+	bool m_fIsActive;           //true if this jump is still valid
+	int m_measure;		        //number of the measure to jump to
+	int m_numTimes;		        //num.times the jumpTo must be active
+	int m_applied;		        //num.times the jumpTo has been executed
+	SoundEvent* m_event;        //ptr to event to jump to
 
 public:
 
@@ -73,13 +73,14 @@ public:
 
 	inline bool is_active() { return m_fIsActive; }
 
-	inline int get_num_jumps() { return int(m_measure.size()); }
-	inline int get_measure(int i) { return m_measure[i]; }
-	inline int get_times(int i) { return m_numTimes[i]; }
-	inline int get_applied(int i) { return m_applied[i]; }
-	inline SoundEvent* get_event(int i) { return m_event[i]; }
+	inline int get_measure() { return m_measure; }
+	inline int get_times() { return m_numTimes; }
+	inline int get_applied() { return m_applied; }
+	inline SoundEvent* get_event() { return m_event; }
 
-    inline void set_event(int i, SoundEvent* pSE) { m_event[i] = pSE; }
+    inline void set_event(SoundEvent* pSE) { m_event = pSE; }
+    inline void set_measure(int measure) { m_measure = measure; }
+    inline void set_times(int times) { m_numTimes = times; }
 
 
     //debug
@@ -200,6 +201,8 @@ protected:
     void close_table();
     void sort_by_time();
     void create_measures_table();
+    void add_jumps_if_volta_bracket(StaffObjsCursor& cursor, ImoBarline* pBar,
+                                    int measure);
     void add_events_to_jumps();
     void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);

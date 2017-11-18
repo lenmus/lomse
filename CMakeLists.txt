@@ -91,7 +91,7 @@
 #
 #-------------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.10)
 
 # project name
 project(lomse)
@@ -128,6 +128,22 @@ else ()
     set(CMAKE_CXX_STANDARD 11)				#require c+11 or greater
     set(CMAKE_CXX_STANDARD_REQUIRED ON) 	#prevent fallback to any previous standard
 endif ()
+
+#check that the compiler supports std::regex
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # require at least gcc 4.9
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+        message(FATAL_ERROR "GCC version must be at least 4.9!")
+    endif()
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+#    # require at least clang 3.2
+#    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.2)
+#        message(FATAL_ERROR "Clang version must be at least 3.2!")
+#    endif()
+else()
+    message(WARNING "You are using an untested compiler! Compilation has only been tested with GCC.")
+endif()
+
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )

@@ -117,25 +117,13 @@ public:
         m_pTable = m_pScore->get_midi_table();
     }
 
-    bool is_jump1(int i, int measure, int times)
+    bool check_jump(int i, int measure, int times, int event)
     {
         JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
-        if (pEntry->get_measure(0) != measure
-            || pEntry->get_times(0) != times
-            || pEntry->get_applied(0) != 0 )
-        {
-            cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
-            return false;
-        }
-        return true;
-    }
-
-    bool is_jump1_event(int i, int measure, int event)
-    {
-        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
-        int eventIndex = m_pTable->get_event_index(pEntry->get_event(0));
-        if (pEntry->get_measure(0) != measure
+        int eventIndex = m_pTable->get_event_index(pEntry->get_event());
+        if (pEntry->get_measure() != measure
+            || pEntry->get_times() != times
+            || pEntry->get_applied() != 0
             || eventIndex != event )
         {
             cout << test_name() << ". JumpEntry " << i << ": "
@@ -145,44 +133,12 @@ public:
         return true;
     }
 
-    bool is_jump2(int i, int measure1, int times1, int measure2, int times2)
+    bool check_jump(int i, int measure, int times)
     {
         JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
-        if (pEntry->get_measure(0) != measure1
-            || pEntry->get_times(0) != times1
-            || pEntry->get_applied(0) != 0 )
-        {
-            cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
-            return false;
-        }
-
-        if (pEntry->get_measure(1) != measure2
-            || pEntry->get_times(1) != times2
-            || pEntry->get_applied(1) != 0 )
-        {
-            cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
-            return false;
-        }
-        return true;
-    }
-
-    bool is_jump2_event(int i, int measure1, int event1, int measure2, int event2)
-    {
-        JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
-        int eventIndex = m_pTable->get_event_index(pEntry->get_event(0));
-        if (pEntry->get_measure(0) != measure1
-            || eventIndex != event1 )
-        {
-            cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
-            return false;
-        }
-
-        eventIndex = m_pTable->get_event_index(pEntry->get_event(1));
-        if (pEntry->get_measure(1) != measure2
-            || eventIndex != event2 )
+        if (pEntry->get_measure() != measure
+            || pEntry->get_times() != times
+            || pEntry->get_applied() != 0 )
         {
             cout << test_name() << ". JumpEntry " << i << ": "
                  << pEntry->dump_entry(m_pTable);
@@ -586,8 +542,7 @@ SUITE(MidiTableTest)
         //                 J 2,1
         load_mxl_score_for_test("01-repeat-end-repetition-barline.xml");
         CHECK( m_pTable->num_jumps() == 1 );
-        CHECK( is_jump1(0, 1,1) == true );
-        CHECK( is_jump1_event(0, 1,1) == true );
+        CHECK( check_jump(0, 1,1,1) == true );
         //cout << m_pTable->dump_midi_events() << endl;
     }
 
@@ -599,8 +554,7 @@ SUITE(MidiTableTest)
         //                       J 3,1
         load_mxl_score_for_test("02-repeat-start-end-repetition-barlines.xml");
         CHECK( m_pTable->num_jumps() == 1 );
-        CHECK( is_jump1(0, 3,1) == true );
-        CHECK( is_jump1_event(0, 3,6) == true );
+        CHECK( check_jump(0, 3,1,6) == true );
         //cout << m_pTable->dump_midi_events() << endl;
     }
 
@@ -609,7 +563,7 @@ SUITE(MidiTableTest)
         //@005. As 004 but with LDP score
         //  |    |:    |    :|     |     |
         //  1    2     3     4     5
-        //                 J 2,1
+        //                  J2,1
         Document doc(m_libraryScope, cout);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 q)(n e4 q)(barline startRepetition)"
@@ -621,8 +575,7 @@ SUITE(MidiTableTest)
 		m_pTable = pScore->get_midi_table();
 
         CHECK( m_pTable->num_jumps() == 1 );
-        CHECK( is_jump1(0, 2,1) == true );
-        CHECK( is_jump1_event(0, 2,5) == true );
+        CHECK( check_jump(0, 2,1,5) == true );
         //cout << m_pTable->dump_midi_events() << endl;
     }
 
@@ -634,10 +587,8 @@ SUITE(MidiTableTest)
         //            J 1,1       J 3,1
         load_mxl_score_for_test("03-repeat-double-end-repetition-barlines.xml");
         CHECK( m_pTable->num_jumps() == 2 );
-        CHECK( is_jump1(0, 1,1) == true );
-        CHECK( is_jump1_event(0, 1,1) == true );
-        CHECK( is_jump1(1, 3,1) == true );
-        CHECK( is_jump1_event(1, 3,6) == true );
+        CHECK( check_jump(0, 1,1,1) == true );
+        CHECK( check_jump(1, 3,1,7) == true );
         //cout << m_pTable->dump_midi_events() << endl;
     }
 
@@ -650,13 +601,85 @@ SUITE(MidiTableTest)
         //                 J 4,1  J 1,1
         //                   5,0
         load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
-        cout << m_pTable->dump_midi_events() << endl;
-        //cout << m_pScore->get_staffobjs_table()->dump() << endl;
-        CHECK( m_pTable->num_jumps() == 2 );
-        CHECK( is_jump2(0, 4,1, 5,0) == true );
-        CHECK( is_jump2_event(0, 4,9, 5,11) == true );
-        CHECK( is_jump1(1, 1,1) == true );
-        CHECK( is_jump1_event(1, 1,1) == true );
+        CHECK( m_pTable->num_jumps() == 3 );
+        CHECK( check_jump(0, 4,1,10) == true );
+        CHECK( check_jump(1, 5,0,13) == true );
+        CHECK( check_jump(2, 1,1,1) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+//      //TODO: Enabling this test causes a crash in destrictor and also in test 10 !!
+//    TEST_FIXTURE(MidiTableTestFixture, jumps_table_08)
+//    {
+//        //@008. [T5]  end-repetition barline with volta, two times
+//        //                  vt1,2  vt3
+//        //  |    |    |     |     :|     |     |     |
+//        //  1    2    3     4      5    6
+//        //                 J4,2   J1,2
+//        //                 J5,0
+//        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
+//        CHECK( m_pTable->num_jumps() == 3 );
+//        CHECK( check_jump(0, 4,2,10) == true );
+//        CHECK( check_jump(1, 5,0,13) == true );
+//        CHECK( check_jump(2, 1,2,1) == true );
+//        //cout << m_pTable->dump_midi_events() << endl;
+//    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_09)
+    {
+        //@009. [T7] three voltas
+        //            vt1   vt2    vt3
+        //  |    |    |    :|     :|     |     |
+        //  1    2    3     4      5    6
+        //           J3,1  J1,1   J1,1
+        //           J4,1
+        //           J5,0
+        load_mxl_score_for_test("07-repeat-barlines-three-volta.xml");
+        CHECK( m_pTable->num_jumps() == 5 );
+        CHECK( check_jump(0, 3,1) == true );
+        CHECK( check_jump(1, 4,1) == true );
+        CHECK( check_jump(2, 5,0) == true );
+        CHECK( check_jump(3, 1,1) == true );
+        CHECK( check_jump(4, 1,1) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_10)
+    {
+        //@010. [T8] three voltas long
+        //            vt1------- vt2------- vt3---------
+        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
+        //  1    2    3     4      5    6     7     8     9    10   11   12
+        //           J3,1        J1,1        J1,1
+        //           J5,1
+        //           J7,0
+        load_mxl_score_for_test("08-repeat-barlines-three-volta-long.xml");
+        CHECK( m_pTable->num_jumps() == 5 );
+        CHECK( check_jump(0, 3,1) == true );
+        CHECK( check_jump(1, 5,1) == true );
+        CHECK( check_jump(2, 7,0) == true );
+        CHECK( check_jump(3, 1,1) == true );
+        CHECK( check_jump(4, 1,1) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_11)
+    {
+        //@011. three voltas long several times
+        //            vt1,2------ vt3,5------- vt5---------
+        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
+        //  1    2    3     4      5    6     7     8     9    10   11   12
+        //           J3,2        J1,2        J1,2
+        //           J5,2
+        //           J7,0
+        load_mxl_score_for_test("09-repeat-barlines-three-volta-long-several-times.xml");
+        CHECK( m_pTable->num_jumps() == 5 );
+        CHECK( check_jump(0, 3,2) == true );
+        CHECK( check_jump(1, 5,2) == true );
+        CHECK( check_jump(2, 7,0) == true );
+        CHECK( check_jump(3, 1,2) == true );
+        CHECK( check_jump(4, 1,2) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
     }
 
 }

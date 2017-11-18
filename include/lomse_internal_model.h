@@ -332,6 +332,15 @@ class ImoWrapperBox;
         k_max_barline,
     };
 
+	enum EBarlineWings
+	{
+		k_wings_none = 0,
+		k_wings_straight,
+		k_wings_curved,
+		k_wings_double_straight,
+		k_wings_double_curved,
+	};
+
     //-----------------------------------------------------------------------------
     //Articulations
     //
@@ -2732,20 +2741,42 @@ protected:
     int m_barlineType;
     bool m_fMiddle;
 
+
+    int m_times;        //for k_barline_end_repetition and k_barline_double_repetition,
+                        //indicates the number of times the repeated section must be
+                        //played. If there are volta brackets m_times is updated with
+                        //the number of times implied by the volta bracket.
+
+	int m_winged;       //indicates whether the barline has winged extensions above and
+                        //below. The k_winged_none value indicates no wings.
+
+
+
+
     friend class ImFactory;
     ImoBarline()
-        : ImoStaffObj(k_imo_barline), m_barlineType(k_barline_simple), m_fMiddle(false)
+        : ImoStaffObj(k_imo_barline)
+        , m_barlineType(k_barline_simple)
+        , m_fMiddle(false)
+        , m_times(0)
+        , m_winged(k_wings_none)
     {
     }
 
 public:
     virtual ~ImoBarline() {}
 
-    //barline type
+    //getters
     inline int get_type() { return m_barlineType; }
-    inline void set_type(int barlineType) { m_barlineType = barlineType; }
     inline bool is_middle() { return m_fMiddle; }
+    inline int get_num_repeats() { return m_times; }
+	inline int get_winged() { return m_winged; }
+
+    //setters
+    inline void set_type(int barlineType) { m_barlineType = barlineType; }
     inline void set_middle(bool value) { m_fMiddle = value; }
+    inline void set_num_repeats(int times) { m_times = times; }
+	inline void set_winged(int wingsType) { m_winged = wingsType; }
 
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }
@@ -5074,6 +5105,10 @@ protected:
     string  m_voltaText;
         //If not empty, this text is used to be displayed in the volta bracket instead
         //the volta numbers, i.e.: "First time" instead of "1".
+    vector<int> m_repetitions;      //repetition numbers extracted from m_voltaNum
+
+    //data valid only in first volta of each set of voltas for a repetition
+    int m_numVoltas;                //number of voltas in the set
 
 	friend class ImFactory;
     ImoVoltaBracket()
@@ -5081,6 +5116,7 @@ protected:
         , m_fStopJog(true)
         , m_voltaNum()
         , m_voltaText()
+        , m_numVoltas(1)
     {
     }
 
@@ -5098,8 +5134,18 @@ public:
     inline void set_final_jog(bool value) { m_fStopJog = value; }
     inline void set_volta_number(const string& num) { m_voltaNum = num; }
     inline void set_volta_text(const string& text) { m_voltaText = text; }
+    inline void increment_total_voltas() { ++m_numVoltas; }
 
+    //info
+    inline bool is_first_repeat() { return m_repetitions[0] == 1; }
+    inline int get_number_of_repetitions() { return int(m_repetitions.size()); }
+    inline void set_repetitions(vector<int>& repetitions) { m_repetitions = repetitions; }
+    inline int get_total_voltas() { return m_numVoltas; }
+
+
+    //required override for ImoRelObj
     void reorganize_after_object_deletion();
+
 };
 
 
@@ -5115,6 +5161,8 @@ protected:
     string      m_voltaNum;
     string      m_voltaText;
     ImoBarline* m_pBarline;
+    vector<int> m_repetitions;      //repetition numbers extracted from m_voltaNum
+                                    //only for type k_start
 
 public:
     ImoVoltaBracketDto()
@@ -5140,6 +5188,7 @@ public:
     inline bool get_final_jog() { return m_fStopJog; }
     inline int get_volta_id() { return m_voltaId; }
     int get_line_number() { return m_lineNum; };
+    inline vector<int>& get_repetitions() { return m_repetitions; }
 
     //setters
     inline void set_volta_type(int value) { m_type = value; }
@@ -5149,6 +5198,7 @@ public:
     inline void set_final_jog(bool value) { m_fStopJog = value; }
     inline void set_volta_id(int value) { m_voltaId = value; }
     inline void set_line_number(int value) { m_lineNum = value; }
+    inline void set_repetitions(vector<int>& repetitions) { m_repetitions = repetitions; }
 
     //required by RelationBuilder
     int get_item_number() { return get_volta_id(); }

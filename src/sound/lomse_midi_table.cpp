@@ -130,10 +130,8 @@ void SoundEventsTable::create_events()
 {
     StaffObjsCursor cursor(m_pScore);
     ImoStaffObj* pSO = NULL;
-    int measure = 1;        //to count measures (1 based, normal musicians way)
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
-    int times = 1;
 
     rAnacrusisMissingTime = cursor.anacrusis_missing_time();
     ImoKeySignature* pKey = NULL;
@@ -142,6 +140,8 @@ void SoundEventsTable::create_events()
     //iterate over the collection to create the MIDI events
     while(!cursor.is_end())
     {
+        int measure = cursor.measure() + 1;     //start count in 1
+
         pSO = cursor.get_staffobj();
         if (pSO->is_note_rest())
         {
@@ -156,56 +156,23 @@ void SoundEventsTable::create_events()
             ImoBarline* pBar = static_cast<ImoBarline*>(pSO);
             if (pBar->get_type() == k_barline_start_repetition)
             {
-                measure++;
-                jumpToMeasure = measure;
+                jumpToMeasure = measure+1;
             }
             else if (pBar->get_type() == k_barline_end_repetition)
             {
+                int times = pBar->get_num_repeats();
                 JumpEntry* pJump = create_jump(jumpToMeasure, times);
                 add_jump(cursor, measure, pJump);
-                measure++;
             }
             else if (pBar->get_type() == k_barline_double_repetition)
             {
+                int times = pBar->get_num_repeats();
                 JumpEntry* pJump = create_jump(jumpToMeasure, times);
                 add_jump(cursor, measure, pJump);
-                measure++;
-                jumpToMeasure = measure;
+                jumpToMeasure = measure+1;
             }
-            else
-                measure++;
 
-            //deal with volta brackets
-            if (pBar->get_num_relations() > 0)
-            {
-                ImoRelations* pRelObjs = pBar->get_relations();
-                int size = pRelObjs->get_num_items();
-                for (int i=0; i < size; ++i)
-                {
-                    ImoRelObj* pRO = pRelObjs->get_item(i);
-                    if (pRO->is_volta_bracket())
-                    {
-                        if (pBar == pRO->get_start_object())
-                        {
-                            //Only first volta generates a jump.
-                            //First always jumps to next measure; number of
-                            //times is number of repetitions of this volta.
-                            //Also jumps to start of each next volta;  number of
-                            //times is number of repetitions of each next volta.
-                            //Other volta numbers do not create jumps
-
-                            JumpEntry* pJump = create_jump(jumpToMeasure, times);
-                            add_jump(cursor, measure, pJump);
-                        }
-                        else if (pBar == pRO->get_end_object())
-                        {
-                            //this serves to determine measures to jump to.
-                        }
-                    }
-                }
-            }
-            //----------------------------
-
+            add_jumps_if_volta_bracket(cursor, pBar, measure);
         }
         else if (pSO->is_time_signature())
         {
@@ -224,6 +191,73 @@ void SoundEventsTable::create_events()
         }
 
         cursor.move_next();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
+                                                  ImoBarline* pBar, int measure)
+{
+    static vector<JumpEntry*> m_pending;
+    static int m_iJump = 0;
+
+    if (pBar->get_num_relations() > 0)
+    {
+        ImoRelations* pRelObjs = pBar->get_relations();
+        int size = pRelObjs->get_num_items();
+        for (int i=0; i < size; ++i)
+        {
+            ImoRelObj* pRO = pRelObjs->get_item(i);
+            if (pRO->is_volta_bracket())
+            {
+                ImoVoltaBracket* pVB = static_cast<ImoVoltaBracket*>(pRO);
+                if (pBar == pRO->get_start_object())
+                {
+                    if (pVB->is_first_repeat())
+                    {
+                        //First volta bracket of a repetition set starts here.
+                        //Add all jumps for voltas in this set
+
+                        //jump for first volta
+                        int times = pVB->get_number_of_repetitions();
+                        JumpEntry* pJump = create_jump(measure+1, times);
+                        add_jump(cursor, measure, pJump);
+
+                        //jumps for the other voltas in this set
+                        int numVoltas = pVB->get_total_voltas();
+                        for (int i=2; i <= numVoltas; ++i)
+                        {
+                            int times = (i == numVoltas ? 0 : 1);
+                            pJump = create_jump(0, times);
+                            add_jump(cursor, measure, pJump);
+                            m_pending.push_back(pJump);
+                        }
+                        m_iJump = 0;
+                        m_pending.clear();
+                    }
+                    else
+                    {
+                        //volta bracket other than first starts here.
+                        //Update number of repeat times if not last volta
+                        JumpEntry* pJump = m_pending[m_iJump];
+                        if (pJump->get_times() != 0)
+                        {
+                            int times = pVB->get_number_of_repetitions();
+                            pJump->set_times(times);
+                        }
+                        ++m_iJump;
+                    }
+                }
+                else if (pBar == pRO->get_end_object())
+                {
+                    //This is the bar in which a volta bracket ends
+                    //this serves to determine measures to jump to.
+                        //fix measure number to jump
+                    int jumpMeasure = measure+1;
+                    m_pending[m_iJump]->set_measure(jumpMeasure);
+               }
+            }
+        }
     }
 }
 
@@ -620,12 +654,8 @@ void SoundEventsTable::add_events_to_jumps()
     vector<JumpEntry*>::iterator it;
     for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
     {
-        for (int i=0; i < (*it)->get_num_jumps(); ++i)
-        {
-            int nEntry = m_measures[(*it)->get_measure(i)];
-            SoundEvent* pSE = m_events[nEntry];
-            (*it)->set_event(i, pSE);
-        }
+        int nEntry = m_measures[(*it)->get_measure()];
+        (*it)->set_event( m_events[nEntry] );
     }
 }
 
@@ -648,11 +678,11 @@ int SoundEventsTable::get_event_index(SoundEvent* pSE)
 //=======================================================================================
 JumpEntry::JumpEntry(int jumpTo, int times)
 	: m_fIsActive(true)
+	, m_measure(jumpTo)
+	, m_numTimes(times)
+	, m_applied(0)
+	, m_event(nullptr)
 {
-	m_measure.push_back(jumpTo);
-	m_numTimes.push_back(times);
-	m_applied.push_back(0);
-	m_event.push_back(nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -695,15 +725,11 @@ JumpEntry::~JumpEntry()
 string JumpEntry::dump_entry(SoundEventsTable* pMidiTable)
 {
     stringstream s;
-    s << "Active=" << (m_fIsActive ? "yes " : "no  ");
-    for (int i=0; i < get_num_jumps(); ++i)
-    {
-        s << "(m=" << m_measure[i]
-          << ",e=" << pMidiTable->get_event_index(m_event[i])
-          << ",t=" << m_numTimes[i]
-          << ",a=" << m_applied[i] << ") ";
-    }
-    s << endl;
+    s << "Active=" << (m_fIsActive ? "yes " : "no  ")
+      << "(m=" << m_measure
+      << ",e=" << pMidiTable->get_event_index(m_event)
+      << ",t=" << m_numTimes
+      << ",a=" << m_applied << ") " << endl;
     return s.str();
 }
 

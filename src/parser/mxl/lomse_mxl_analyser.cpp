@@ -1858,14 +1858,34 @@ public:
     {
         //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
 
-        //attributes:
+            //attributes:
 
-        // location (right | left | middle) "right"
+        // attrib: location (right | left | middle) "right"
         string location = get_optional_string_attribute("location", "right");
 
-        //children elements:
+        // attrib: segno CDATA #IMPLIED
+			//TODO
 
-        // bar-style?
+        // attrib: coda CDATA #IMPLIED
+			//TODO
+
+        // attrib: divisions CDATA #IMPLIED
+			//TODO
+
+
+            //content:
+
+        //@ bar-style?
+        //@ Valid values are regular, dotted, dashed, heavy, light-light,
+        //@ light-heavy, heavy-light, heavy-heavy, tick (a
+        //@ short stroke through the top line), short (a partial
+        //@ barline between the 2nd and 4th lines), and none.
+        //@ <!ELEMENT bar-style (#PCDATA)>
+        //@ <!ATTLIST bar-style
+        //@     %color;
+        //@>
+        //
+        //TODO: proper analysis and validation of <bar-style>
         string barStyle = "";
         if (get_optional("bar-style"))
             barStyle = m_childToAnalyse.value();
@@ -1985,20 +2005,39 @@ protected:
         return type;
     }
 
-    // <!ELEMENT repeat EMPTY>
-    // <!ATTLIST repeat
-    //     direction (backward | forward) #REQUIRED
-    //     times CDATA #IMPLIED
-    //     winged (none | straight | curved |
-    //         double-straight | double-curved) #IMPLIED
-    // >
+    //@ <repeat>
+    //@ <!ELEMENT repeat EMPTY>
+    //@ <!ATTLIST repeat
+    //@     direction (backward | forward) #REQUIRED
+    //@     times CDATA #IMPLIED
+    //@     winged (none | straight | curved |
+    //@         double-straight | double-curved) #IMPLIED
+    //@ >
+    //
+    //TODO: proper analysis of <repeat>
     string get_repeat()
     {
-        //attrb: direction
+        // attrib: direction (backward | forward) #REQUIRED
+        // 		The start of the repeat has a forward direction
+        // 		while the end of the repeat has a backward direction.
         string direction = "";
         if (has_attribute(&m_childToAnalyse, "direction"))
             direction = m_childToAnalyse.attribute_value("direction");
         return direction;
+
+        // attrib: times CDATA #IMPLIED
+        // 		Backward repeats **that are not part of an ending** can use the times
+        // 		attribute to indicate the number of times the repeated section
+        // 		is played.
+            //TODO
+
+        // attrib: winged (none | straight | curved | double-straight | double-curved) #IMPLIED
+        // 		The winged attribute indicates whether the repeat
+        //		has winged extensions that appear above and below the barline.
+        // 		The straight and curved values represent single wings, while
+        // 		the double-straight and double-curved values represent double
+        // 		wings. The none value indicates no wings and is the default.
+            //TODO
     }
 
     void combine_barlines(ImoBarline* pBarline, EBarline rightType)
@@ -2040,6 +2079,11 @@ protected:
 #endif
 
         pBarline->set_type(type);
+        if (pBarline->get_num_repeats() == 0
+            && (type == k_barline_double_repetition || type == k_barline_end_repetition))
+        {
+            pBarline->set_num_repeats(1);           //TODO: extract from <repeat>
+        }
     }
 
     void advance_timepos_if_required()
@@ -2638,6 +2682,7 @@ public:
 
 protected:
 
+    //-----------------------------------------------------------------------------------
     bool set_volta_number()
     {
         //returns false if error
@@ -2649,12 +2694,24 @@ protected:
         if (num.empty())
             return false;   //error
 
-        //TODO: Check for valid values
+        //validate ending number
+        if (!mxl_is_valid_ending_number(num))
+        {
+            error_msg("Invalid ending number '" + num + "'. <ending> ignored.");
+            return false;   //error
+        }
 
+        //extract numbers
+        vector<int> repetitions;
+        mxl_extract_numbers_from_ending(num, &repetitions);
+
+        m_pVolta->set_repetitions(repetitions);
         m_pVolta->set_volta_number(num);
+
         return true;    //success
     }
 
+    //-----------------------------------------------------------------------------------
     bool set_volta_type()
     {
         //returns false if error
@@ -2690,6 +2747,35 @@ protected:
     }
 
 };
+
+//public function to simplify unit testing of the regex
+bool mxl_is_valid_ending_number(const string& num)
+{
+    //return TRUE if no error
+
+    //XSD regex is  "([ ]*)|([1-9][0-9]*(, ?[1-9][0-9]*)*)"
+    //but Lomse will be permissive with blank space errors such as :  "1,2", "1, 2 "
+    std::regex regexValid("([ ]*)|([1-9][0-9]*(, *[1-9][0-9]*)* *)");
+    return std::regex_match(num, regexValid);
+}
+
+//public function to simplify unit testing of the regex
+void mxl_extract_numbers_from_ending(const string& num, vector<int>* repetitions)
+{
+    std::regex regexExtract(R"(\d+)");
+    std::sregex_iterator it(num.begin(), num.end(), regexExtract);
+    std::sregex_iterator end;
+
+    while(it != end)
+    {
+        for(unsigned i = 0; i < it->size(); ++i)
+        {
+            repetitions->push_back( std::stoi( (*it)[i] ) );
+        }
+        ++it;
+    }
+}
+
 
 //@--------------------------------------------------------------------------------------
 //@ <eyeglasses>
@@ -6295,7 +6381,7 @@ protected:
 
 };
 
-//defined out of WordsMxlAnalyser for unit tests
+//defined out of WordsMxlAnalyser to simplify unit testing of the regex
 int type_of_repetion_mark(const string& value)
 {
     //get text and use it for deducing if it is a repetition mark
@@ -7051,6 +7137,7 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
 
     //set data taken from start dto
     pVB->set_volta_text( pStartDto->get_volta_text() );
+    pVB->set_repetitions( pStartDto->get_repetitions() );
 
     std::list<ImoVoltaBracketDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
@@ -7058,6 +7145,16 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
         ImoBarline* pBarline = (*it)->get_barline();
         pBarline->include_in_relation(pDoc, pVB, NULL);
     }
+
+    //count number of voltas in the set
+    if (pVB->is_first_repeat())
+        m_pFirstVB = pVB;
+    else if (m_pFirstVB)
+        m_pFirstVB->increment_total_voltas();
+
+    //set number of repetitions in barline
+    ImoBarline* pBarline = static_cast<ImoBarline*>( pVB->get_end_object() );
+    pBarline->set_num_repeats( pVB->get_number_of_repetitions() );
 }
 
 
