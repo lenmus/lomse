@@ -10,6 +10,14 @@ before_install:
   - sudo apt-get install -y libportmidi-dev libsqlite3-0 libsqlite3-dev
   - sudo apt-get install -y libfreetype6-dev libpng++-dev zlib1g-dev libwxgtk3.0-dev
   - sudo apt-get install -y libunittest++-dev
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.9
+	  - g++-4.9
 
 before_script:
   - mkdir build
