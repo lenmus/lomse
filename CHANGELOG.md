@@ -10,9 +10,15 @@
 
 ##### COMPATIBLE CHANGES
 
-- Changes for improving support for MusicXML:
-	- Import and render coda and segno symbols.
+- Playback improvements: playback now takes into account repetitions 
+  implied by barlines with repetition dots and volta brackets. But not
+  yet repetions implied by textual repetition marks (i.e. Da Capo, 
+  To Coda, etc, ...).
 
+- Technical changes: As c++11 and std::regex support is required,
+  CMakeLists.txt has been updated:
+	- cmake required version is now 2.8.10 or greater, and
+	- gcc required version is now 4.9 or greater.
 
 
 Version [0.21.0] (9/Nov/2017)
