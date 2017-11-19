@@ -38,20 +38,22 @@
     </defaults>
   <part-list>
     <score-part id="P1">
-      <part-name></part-name>
+      <part-name>Violin</part-name>
+      <part-abbreviation>Vln.</part-abbreviation>
       <score-instrument id="P1-I1">
         <instrument-name></instrument-name>
         </score-instrument>
       <midi-device id="P1-I1" port="1"></midi-device>
       <midi-instrument id="P1-I1">
         <midi-channel>1</midi-channel>
+        <midi-program>41</midi-program>
         <volume>78.7402</volume>
         <pan>0</pan>
         </midi-instrument>
       </score-part>
     </part-list>
   <part id="P1">
-    <measure number="1" width="238.13">
+    <measure number="1" width="256.60">
       <print>
         <system-layout>
           <system-margins>
@@ -85,11 +87,7 @@
         <type>whole</type>
         </note>
       </measure>
-    <measure number="2" width="162.50">
-      <barline location="left">
-        <bar-style>heavy-light</bar-style>
-        <repeat direction="forward"/>
-        </barline>
+    <measure number="2" width="198.51">
       <note default-x="12.00" default-y="-45.00">
         <pitch>
           <step>D</step>
@@ -100,10 +98,7 @@
         <type>whole</type>
         </note>
       </measure>
-    <measure number="3" width="180.03">
-      <barline location="left">
-        <ending number="1" type="start"/>
-        </barline>
+    <measure number="3" width="216.04">
       <note default-x="12.00" default-y="-40.00">
         <pitch>
           <step>E</step>
@@ -115,14 +110,10 @@
         </note>
       <barline location="right">
         <bar-style>light-heavy</bar-style>
-        <ending number="1" type="stop"/>
         <repeat direction="backward"/>
         </barline>
       </measure>
-    <measure number="4" width="162.50">
-      <barline location="left">
-        <ending number="2" type="start"/>
-        </barline>
+    <measure number="4" width="198.51">
       <note default-x="12.00" default-y="-35.00">
         <pitch>
           <step>F</step>
@@ -132,26 +123,12 @@
         <voice>1</voice>
         <type>whole</type>
         </note>
-      <barline location="right">
-        <ending number="2" type="stop"/>
-        </barline>
       </measure>
-    <measure number="5" width="162.50">
+    <measure number="5" width="207.51">
       <note default-x="12.00" default-y="-30.00">
         <pitch>
           <step>G</step>
           <octave>4</octave>
-          </pitch>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>whole</type>
-        </note>
-      </measure>
-    <measure number="6" width="171.50">
-      <note default-x="12.00" default-y="-15.00">
-        <pitch>
-          <step>C</step>
-          <octave>5</octave>
           </pitch>
         <duration>4</duration>
         <voice>1</voice>

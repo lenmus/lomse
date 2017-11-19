@@ -92,6 +92,7 @@ public:
     inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
     inline int staff() { return (*m_scoreIt)->staff(); }
     inline int line() { return (*m_scoreIt)->line(); }
+    inline int measure() { return (*m_scoreIt)->measure(); }
     inline TimeUnits time() { return (*m_scoreIt)->time(); }
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();

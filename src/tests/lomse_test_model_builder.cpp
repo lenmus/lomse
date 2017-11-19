@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -74,9 +74,8 @@ SUITE(ModelBuilderTest)
 
     TEST_FIXTURE(ModelBuilderTestFixture, ModelBuilderScore)
     {
-        //This just checks that compiler creates a model builder and it
-        //structurizes the score (creates the associated ColStaffObjs
-        // and the JumpsTable objects)
+        //This just checks that compiler creates a model builder and
+        //structurizes the score (that is, creates the associated ColStaffObjs)
 
         Document doc(m_libraryScope);
         //ModelBuilder* builder = Injector::inject_ModelBuilder(doc.get_scope());
@@ -89,7 +88,6 @@ SUITE(ModelBuilderTest)
         CHECK( pScore != NULL );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != NULL );
-//        CHECK( pScore->get_jumps_table() != NULL );
 
         delete pIModel;
     }

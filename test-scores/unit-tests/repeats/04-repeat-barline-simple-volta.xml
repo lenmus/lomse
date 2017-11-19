@@ -51,7 +51,7 @@
       </score-part>
     </part-list>
   <part id="P1">
-    <measure number="1" width="238.13">
+    <measure number="1" width="199.89">
       <print>
         <system-layout>
           <system-margins>
@@ -85,11 +85,7 @@
         <type>whole</type>
         </note>
       </measure>
-    <measure number="2" width="162.50">
-      <barline location="left">
-        <bar-style>heavy-light</bar-style>
-        <repeat direction="forward"/>
-        </barline>
+    <measure number="2" width="141.79">
       <note default-x="12.00" default-y="-45.00">
         <pitch>
           <step>D</step>
@@ -100,13 +96,24 @@
         <type>whole</type>
         </note>
       </measure>
-    <measure number="3" width="180.03">
-      <barline location="left">
-        <ending number="1" type="start"/>
-        </barline>
+    <measure number="3" width="141.79">
       <note default-x="12.00" default-y="-40.00">
         <pitch>
           <step>E</step>
+          <octave>4</octave>
+          </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        </note>
+      </measure>
+    <measure number="4" width="159.32">
+      <barline location="left">
+        <ending number="1" type="start"/>
+        </barline>
+      <note default-x="12.00" default-y="-35.00">
+        <pitch>
+          <step>F</step>
           <octave>4</octave>
           </pitch>
         <duration>4</duration>
@@ -119,13 +126,13 @@
         <repeat direction="backward"/>
         </barline>
       </measure>
-    <measure number="4" width="162.50">
+    <measure number="5" width="141.79">
       <barline location="left">
         <ending number="2" type="start"/>
         </barline>
-      <note default-x="12.00" default-y="-35.00">
+      <note default-x="12.00" default-y="-30.00">
         <pitch>
-          <step>F</step>
+          <step>G</step>
           <octave>4</octave>
           </pitch>
         <duration>4</duration>
@@ -136,10 +143,10 @@
         <ending number="2" type="stop"/>
         </barline>
       </measure>
-    <measure number="5" width="162.50">
-      <note default-x="12.00" default-y="-30.00">
+    <measure number="6" width="141.79">
+      <note default-x="12.00" default-y="-25.00">
         <pitch>
-          <step>G</step>
+          <step>A</step>
           <octave>4</octave>
           </pitch>
         <duration>4</duration>
@@ -147,11 +154,11 @@
         <type>whole</type>
         </note>
       </measure>
-    <measure number="6" width="171.50">
-      <note default-x="12.00" default-y="-15.00">
+    <measure number="7" width="150.79">
+      <note default-x="12.00" default-y="-20.00">
         <pitch>
-          <step>C</step>
-          <octave>5</octave>
+          <step>B</step>
+          <octave>4</octave>
           </pitch>
         <duration>4</duration>
         <voice>1</voice>

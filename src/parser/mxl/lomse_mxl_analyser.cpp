@@ -732,7 +732,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    //@ %font
+    //@ % font
     //@ - The font-family is a comma-separated list of font names.
     //@   These can be specific font styles such as Maestro or Opus, or one of several
     //@   generic font styles: music, engraved, handwritten, text, serif, sans-serif,
@@ -1858,14 +1858,34 @@ public:
     {
         //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
 
-        //attributes:
+            //attributes:
 
-        // location (right | left | middle) "right"
+        // attrib: location (right | left | middle) "right"
         string location = get_optional_string_attribute("location", "right");
 
-        //children elements:
+        // attrib: segno CDATA #IMPLIED
+			//TODO
 
-        // bar-style?
+        // attrib: coda CDATA #IMPLIED
+			//TODO
+
+        // attrib: divisions CDATA #IMPLIED
+			//TODO
+
+
+            //content:
+
+        //@ bar-style?
+        //@ Valid values are regular, dotted, dashed, heavy, light-light,
+        //@ light-heavy, heavy-light, heavy-heavy, tick (a
+        //@ short stroke through the top line), short (a partial
+        //@ barline between the 2nd and 4th lines), and none.
+        //@ <!ELEMENT bar-style (#PCDATA)>
+        //@ <!ATTLIST bar-style
+        //@     %color;
+        //@>
+        //
+        //TODO: proper analysis and validation of <bar-style>
         string barStyle = "";
         if (get_optional("bar-style"))
             barStyle = m_childToAnalyse.value();
@@ -1985,20 +2005,39 @@ protected:
         return type;
     }
 
-    // <!ELEMENT repeat EMPTY>
-    // <!ATTLIST repeat
-    //     direction (backward | forward) #REQUIRED
-    //     times CDATA #IMPLIED
-    //     winged (none | straight | curved |
-    //         double-straight | double-curved) #IMPLIED
-    // >
+    //@ <repeat>
+    //@ <!ELEMENT repeat EMPTY>
+    //@ <!ATTLIST repeat
+    //@     direction (backward | forward) #REQUIRED
+    //@     times CDATA #IMPLIED
+    //@     winged (none | straight | curved |
+    //@         double-straight | double-curved) #IMPLIED
+    //@ >
+    //
+    //TODO: proper analysis of <repeat>
     string get_repeat()
     {
-        //attrb: direction
+        // attrib: direction (backward | forward) #REQUIRED
+        // 		The start of the repeat has a forward direction
+        // 		while the end of the repeat has a backward direction.
         string direction = "";
         if (has_attribute(&m_childToAnalyse, "direction"))
             direction = m_childToAnalyse.attribute_value("direction");
         return direction;
+
+        // attrib: times CDATA #IMPLIED
+        // 		Backward repeats **that are not part of an ending** can use the times
+        // 		attribute to indicate the number of times the repeated section
+        // 		is played.
+            //TODO
+
+        // attrib: winged (none | straight | curved | double-straight | double-curved) #IMPLIED
+        // 		The winged attribute indicates whether the repeat
+        //		has winged extensions that appear above and below the barline.
+        // 		The straight and curved values represent single wings, while
+        // 		the double-straight and double-curved values represent double
+        // 		wings. The none value indicates no wings and is the default.
+            //TODO
     }
 
     void combine_barlines(ImoBarline* pBarline, EBarline rightType)
@@ -2040,6 +2079,11 @@ protected:
 #endif
 
         pBarline->set_type(type);
+        if (pBarline->get_num_repeats() == 0
+            && (type == k_barline_double_repetition || type == k_barline_end_repetition))
+        {
+            pBarline->set_num_repeats(1);           //TODO: extract from <repeat>
+        }
     }
 
     void advance_timepos_if_required()
@@ -2638,6 +2682,7 @@ public:
 
 protected:
 
+    //-----------------------------------------------------------------------------------
     bool set_volta_number()
     {
         //returns false if error
@@ -2649,12 +2694,24 @@ protected:
         if (num.empty())
             return false;   //error
 
-        //TODO: Check for valid values
+        //validate ending number
+        if (!mxl_is_valid_ending_number(num))
+        {
+            error_msg("Invalid ending number '" + num + "'. <ending> ignored.");
+            return false;   //error
+        }
 
+        //extract numbers
+        vector<int> repetitions;
+        mxl_extract_numbers_from_ending(num, &repetitions);
+
+        m_pVolta->set_repetitions(repetitions);
         m_pVolta->set_volta_number(num);
+
         return true;    //success
     }
 
+    //-----------------------------------------------------------------------------------
     bool set_volta_type()
     {
         //returns false if error
@@ -2690,6 +2747,35 @@ protected:
     }
 
 };
+
+//public function to simplify unit testing of the regex
+bool mxl_is_valid_ending_number(const string& num)
+{
+    //return TRUE if no error
+
+    //XSD regex is  "([ ]*)|([1-9][0-9]*(, ?[1-9][0-9]*)*)"
+    //but Lomse will be permissive with blank space errors such as :  "1,2", "1, 2 "
+    std::regex regexValid("([ ]*)|([1-9][0-9]*(, *[1-9][0-9]*)* *)");
+    return std::regex_match(num, regexValid);
+}
+
+//public function to simplify unit testing of the regex
+void mxl_extract_numbers_from_ending(const string& num, vector<int>* repetitions)
+{
+    std::regex regexExtract(R"(\d+)");
+    std::sregex_iterator it(num.begin(), num.end(), regexExtract);
+    std::sregex_iterator end;
+
+    while(it != end)
+    {
+        for(unsigned i = 0; i < it->size(); ++i)
+        {
+            repetitions->push_back( std::stoi( (*it)[i] ) );
+        }
+        ++it;
+    }
+}
+
 
 //@--------------------------------------------------------------------------------------
 //@ <eyeglasses>
@@ -5432,29 +5518,32 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ sound
-//<!ELEMENT sound ((midi-device?, midi-instrument?, play?)*, offset?)>
-//<!ATTLIST sound
-//    tempo CDATA #IMPLIED
-//    dynamics CDATA #IMPLIED
-//    dacapo %yes-no; #IMPLIED
-//    segno CDATA #IMPLIED
-//    dalsegno CDATA #IMPLIED
-//    coda CDATA #IMPLIED
-//    tocoda CDATA #IMPLIED
-//    divisions CDATA #IMPLIED
-//    forward-repeat %yes-no; #IMPLIED
-//    fine CDATA #IMPLIED
-//    %time-only;
-//    pizzicato %yes-no; #IMPLIED
-//    pan CDATA #IMPLIED                <-- deprecated MusicXML 2.0
-//    elevation CDATA #IMPLIED          <-- deprecated MusicXML 2.0
-//    damper-pedal %yes-no-number; #IMPLIED
-//    soft-pedal %yes-no-number; #IMPLIED
-//    sostenuto-pedal %yes-no-number; #IMPLIED
-//>
-
-
+//@ <sound>
+//@ A sound element represents a change in playback parameters.
+//@ It can stand alone within a part/measure, or be a
+//@ component element within a direction.
+//@
+//@<!ELEMENT sound ((midi-device?, midi-instrument?, play?)*, offset?)>
+//@<!ATTLIST sound
+//@    tempo CDATA #IMPLIED
+//@    dynamics CDATA #IMPLIED
+//@    dacapo %yes-no; #IMPLIED
+//@    segno CDATA #IMPLIED
+//@    dalsegno CDATA #IMPLIED
+//@    coda CDATA #IMPLIED
+//@    tocoda CDATA #IMPLIED
+//@    divisions CDATA #IMPLIED
+//@    forward-repeat %yes-no; #IMPLIED
+//@    fine CDATA #IMPLIED
+//@    %time-only;
+//@    pizzicato %yes-no; #IMPLIED
+//@    pan CDATA #IMPLIED                <-- deprecated MusicXML 2.0
+//@    elevation CDATA #IMPLIED          <-- deprecated MusicXML 2.0
+//@    damper-pedal %yes-no-number; #IMPLIED
+//@    soft-pedal %yes-no-number; #IMPLIED
+//@    sostenuto-pedal %yes-no-number; #IMPLIED
+//@>
+//
 class SoundMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5465,43 +5554,96 @@ public:
 
     ImoObj* do_analysis()
     {
-//        // attrib: tempo CDATA #IMPLIED - non-negative decimal
-//        // attrib: dynamics CDATA #IMPLIED - non-negative decimal
-//
-//        // attrib: dacapo %yes-no; #IMPLIED
-//        bool dacapo = get_optional_yes_no_attribute("dacapo", false);
-//
-//        // attrib: segno CDATA #IMPLIED - label to reference it
-//
-//        // attrib: dalsegno CDATA #IMPLIED - label to reference it
-//
-//        // attrib: coda CDATA #IMPLIED - label to reference it
-//
-//        // attrib: tocoda CDATA #IMPLIED - label to reference it
-//
-//        // attrib: divisions CDATA #IMPLIED
-//
-////        // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
-////        bool forwardRepeat = get_optional_yes_no_attribute("forward-repeat", false);
-////        if (!forwardRepeat)
-////        {
-////
-////        }
-//
-//        // attrib: fine CDATA #IMPLIED
-//        // attrib: %time-only;
-//
-//        // attrib: pizzicato %yes-no; #IMPLIED
-//        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
-//
-//        // attrib: damper-pedal %yes-no-number; #IMPLIED
-//        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
-//
-//        // attrib: soft-pedal %yes-no-number; #IMPLIED
-//        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
-//
-//        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
-//        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
+        //ImoDirection* pParent = NULL;
+        if (m_pAnchor && m_pAnchor->is_direction())
+        {
+            //pParent = static_cast<ImoDirection*>(m_pAnchor);
+        }
+        else if (m_pAnchor && m_pAnchor->is_music_data())
+        {
+            //TODO
+        }
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is neither <measure> nor <direction>.");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoSoundChange* pImo = static_cast<ImoSoundChange*>(
+                                    ImFactory::inject(k_imo_sound_change, pDoc));
+
+        // attrib: tempo CDATA #IMPLIED - non-negative decimal
+
+        // attrib: dynamics CDATA #IMPLIED - non-negative decimal
+
+        // attrib: dacapo %yes-no; #IMPLIED
+        if (has_attribute("dacapo"))
+        {
+            bool dacapo = get_optional_yes_no_attribute("dacapo", false);
+            pImo->add_attribute(k_mxl_attr_dacapo, dacapo);
+        }
+
+        // attrib: segno CDATA #IMPLIED - label to reference it
+        string segno = get_optional_string_attribute("segno", "");
+
+        // attrib: dalsegno CDATA #IMPLIED - label to reference it
+        string dalsegno = get_optional_string_attribute("dalsegno", "");
+
+        // attrib: coda CDATA #IMPLIED - label to reference it
+        string coda = get_optional_string_attribute("coda", "");
+
+        // attrib: tocoda CDATA #IMPLIED - label to reference it
+        string tocoda = get_optional_string_attribute("tocoda", "");
+
+        // attrib: divisions CDATA #IMPLIED
+
+        // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
+        if (has_attribute("forward-repeat"))
+        {
+            if (get_attribute("forward-repeat") != "yes")
+            {
+                error_msg2("Invalid value for 'forward-repeat' attribute. "
+                           "When used, value must be 'yes'. Ignored.");
+            }
+            else
+                pImo->add_attribute(k_mxl_attr_forward_repeat, true);
+        }
+
+        // attrib: fine CDATA #IMPLIED
+        //The fine attribute follows the final note or rest in a
+        //movement with a da capo or dal segno direction. If numeric,
+        //the value represents the actual duration of the final note or
+        //rest, which can be ambiguous in written notation and
+        //different among parts and voices. The value may also be
+        //"yes" to indicate no change to the final duration.
+
+        // attrib: %time-only;
+        //If the sound element applies only particular times through a
+        //repeat, the time-only attribute indicates which times to apply
+        //the sound element. The value is a comma-separated list of
+        //positive integers arranged in ascending order, indicating
+        //which times through the repeated section that the element
+        //applies.
+
+#if (0) //for now remove this code to avoid 'unused variable' warnings
+        // attrib: pizzicato %yes-no; #IMPLIED
+        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
+
+        // attrib: damper-pedal %yes-no-number; #IMPLIED
+        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
+
+        // attrib: soft-pedal %yes-no-number; #IMPLIED
+        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
+
+        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
+#endif
+            // content
+
+        // (midi-device?, midi-instrument?, play?)*
+
+        // offset?
 
         return NULL;
     }
@@ -5619,6 +5761,7 @@ public:
         // attrib: number %number-level; #IMPLIED
         int num = get_optional_int_attribute("number", 0);
 
+        //TODO
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
 //            pInfo->set_tie_number( get_child_value_integer(0) );
@@ -5647,6 +5790,7 @@ public:
                 m_pInfo1->set_orientation(k_orientation_under);
         }
 
+        //TODO
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
 //            pInfo->set_tie_number( get_child_value_integer(0) );
@@ -6242,7 +6386,7 @@ protected:
 
 };
 
-//defined out of WordsMxlAnalyser for unit tests
+//defined out of WordsMxlAnalyser to simplify unit testing of the regex
 int type_of_repetion_mark(const string& value)
 {
     //get text and use it for deducing if it is a repetition mark
@@ -6998,6 +7142,7 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
 
     //set data taken from start dto
     pVB->set_volta_text( pStartDto->get_volta_text() );
+    pVB->set_repetitions( pStartDto->get_repetitions() );
 
     std::list<ImoVoltaBracketDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
@@ -7005,6 +7150,16 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
         ImoBarline* pBarline = (*it)->get_barline();
         pBarline->include_in_relation(pDoc, pVB, NULL);
     }
+
+    //count number of voltas in the set
+    if (pVB->is_first_repeat())
+        m_pFirstVB = pVB;
+    else if (m_pFirstVB)
+        m_pFirstVB->increment_total_voltas();
+
+    //set number of repetitions in barline
+    ImoBarline* pBarline = static_cast<ImoBarline*>( pVB->get_end_object() );
+    pBarline->set_num_repeats( pVB->get_number_of_repetitions() );
 }
 
 

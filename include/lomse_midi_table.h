@@ -49,7 +49,41 @@ class ImoKeySignature;
 class ImoTimeSignature;
 class ImoNote;
 class StaffObjsCursor;
+class SoundEvent;
+class SoundEventsTable;
 
+//---------------------------------------------------------------------------------------
+//JumpsEntry: An entry in the JumpsTable. It describes a jump in playback.
+class JumpEntry
+{
+protected:
+	int m_measure;		        //number of the measure to jump to
+	int m_numTimes;		        //num.times the jumpTo must be active
+	int m_applied;		        //num.times the jumpTo has been executed
+	int m_event;                //index to event to jump to
+
+public:
+
+    JumpEntry(int jumpTo, int times);
+    virtual ~JumpEntry();
+
+	inline void reset_entry() { m_applied = 0; }
+
+	inline int get_measure() { return m_measure; }
+	inline int get_times() { return m_numTimes; }
+	inline int get_applied() { return m_applied; }
+	inline int get_event() { return m_event; }
+
+    inline void set_event(int iEvent) { m_event = iEvent; }
+    inline void set_measure(int measure) { m_measure = measure; }
+    inline void set_times(int times) { m_numTimes = times; }
+    inline void increment_applied() { ++m_applied; }
+
+
+    //debug
+    string dump_entry();
+
+};
 
 //---------------------------------------------------------------------------------------
 //auxiliary class SoundEvent describes a sound event
@@ -69,16 +103,28 @@ public:
         , Measure(nMeasure)
     {
     }
+    SoundEvent(TimeUnits rTime, int nEventType, JumpEntry* pJumpEntry, int nMeasure)
+        : DeltaTime(long(rTime + 0.5f))
+        , EventType(nEventType)
+        , Channel(0)
+        , NotePitch(0)
+        , Volume(0)
+        , NoteStep(0)
+        , pJump(pJumpEntry)
+        , Measure(nMeasure)
+    {
+    }
     ~SoundEvent() {}
 
     enum
     {
         // AWARE Event type value is used to sort the events table.
         // MUST keep order for priority
-        k_prog_instr = 1,       //program a new instrument
+        k_prog_instr = 1,       //program a new sound
         k_note_off,             //sound off
         k_visual_off,           //remove visual highlight. No effect on sound
         k_rhythm_change,        //change in rhythm (time signature)
+        k_jump,                 //jump in playback (repetition mark, volta bracket,...)
         k_note_on,              //sound on
         k_visual_on,            //add visual highlight. No effect on sound
         k_end_of_score,         //end of table
@@ -97,7 +143,10 @@ public:
         int     MeasureDuration;    //k_rhythm_change: In LDP duration units
     };
     int             NoteStep;   //k_note_xxx: Note step 0..6 : 0-Do, ... 6-Si
-    ImoStaffObj*    pSO;        //staffobj who originated the event (for visual highlight)
+    union {
+        ImoStaffObj*    pSO;        //staffobj who originated the event (for visual highlight)
+        JumpEntry*      pJump;      //jump entry, for playback jumps
+    };
     int             Measure;    //measure number containing this staffobj
 
 };
@@ -109,9 +158,10 @@ class SoundEventsTable
 protected:
     ImoScore* m_pScore;
     int m_numMeasures;
-    std::vector<SoundEvent*> m_events;
-    std::vector<int> m_measures;
-    std::vector<int> m_channels;
+    vector<SoundEvent*> m_events;
+    vector<int> m_measures;
+    vector<int> m_channels;
+    vector<JumpEntry*> m_jumps;
     TimeUnits rAnacrusisMissingTime;
     int m_accidentals[7];
 
@@ -122,13 +172,18 @@ public:
     void create_table();
 
     inline int num_events() { return int(m_events.size()); }
-    std::vector<SoundEvent*>& get_events() { return m_events; }
-    std::vector<int>& get_channels() { return m_channels; }
+    vector<SoundEvent*>& get_events() { return m_events; }
+    vector<int>& get_channels() { return m_channels; }
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
     inline TimeUnits get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
     inline bool is_anacrusis_start() { return is_greater_time(rAnacrusisMissingTime, 0.0f); }
+
+    //jumps table
+    inline int num_jumps() { return int(m_jumps.size()); }
+    JumpEntry* get_jump(int i);
+    void reset_jumps();
 
     //debug
     string dump_midi_events();
@@ -137,17 +192,24 @@ public:
 protected:
     void store_event(TimeUnits rTime, int eventType, int channel, MidiPitch pitch,
                      int volume, int step, ImoStaffObj* pSO, int measure);
+    void store_jump_event(TimeUnits rTime, JumpEntry* pJump, int measure);
     void program_sounds_for_instruments();
     void create_events();
     void close_table();
     void sort_by_time();
     void create_measures_table();
+    void add_jumps_if_volta_bracket(StaffObjsCursor& cursor, ImoBarline* pBar,
+                                    int measure);
+    void add_events_to_jumps();
     void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
+    void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
     void delete_events_table();
     int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
+    JumpEntry* create_jump(int jumpTo, int times);
+
 
     //debug
     string dump_events_table();

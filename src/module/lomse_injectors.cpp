@@ -71,16 +71,16 @@ namespace lomse
 LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     : m_reporter(reporter)
     , m_pDoorway(pDoorway)
-    , m_pNullDoorway(NULL)
-    , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
-    , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
-    , m_pGlobalMetronome(NULL)
-    , m_pDispatcher(NULL)
+    , m_pNullDoorway(nullptr)
+    , m_pLdpFactory(nullptr)       //lazzy instantiation. Singleton scope.
+    , m_pFontStorage(nullptr)      //lazzy instantiation. Singleton scope.
+    , m_pGlobalMetronome(nullptr)
+    , m_pDispatcher(nullptr)
     , m_sMusicFontFile("Bravura.otf")
     , m_sMusicFontName("Bravura")
     , m_sMusicFontPath(LOMSE_FONTS_PATH)
     , m_sFontsPath(LOMSE_FONTS_PATH)
-    , m_pMusicGlyphs(NULL)      //lazzy instantiation. Singleton scope.
+    , m_pMusicGlyphs(nullptr)      //lazzy instantiation. Singleton scope.
     , m_fReplaceLocalMetronome(false)
     , m_importOptions()
     , m_fJustifySystems(true)

@@ -930,7 +930,12 @@ public:
 
         // <type> (label)
         if (get_optional(k_label))
-            pBarline->set_type( get_barline_type() );
+        {
+            int type = get_barline_type();
+            pBarline->set_type(type);
+            if (type == k_barline_double_repetition || type == k_barline_end_repetition)
+                pBarline->set_num_repeats(1);
+        }
 
         // [middle] (label)
         if (get_optional(k_label))
