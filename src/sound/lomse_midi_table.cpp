@@ -153,26 +153,31 @@ void SoundEventsTable::create_events()
         {
             reset_accidentals(pKey);
 
-            ImoBarline* pBar = static_cast<ImoBarline*>(pSO);
-            if (pBar->get_type() == k_barline_start_repetition)
+            //only repetitions and volta brackets in first instrument are taken into
+            //consideration. Otherwise redundant invalid jumps will be created.
+            if (cursor.num_instrument() == 0)
             {
-                jumpToMeasure = measure+1;
-            }
-            else if (pBar->get_type() == k_barline_end_repetition)
-            {
-                int times = pBar->get_num_repeats();
-                JumpEntry* pJump = create_jump(jumpToMeasure, times);
-                add_jump(cursor, measure, pJump);
-            }
-            else if (pBar->get_type() == k_barline_double_repetition)
-            {
-                int times = pBar->get_num_repeats();
-                JumpEntry* pJump = create_jump(jumpToMeasure, times);
-                add_jump(cursor, measure, pJump);
-                jumpToMeasure = measure+1;
-            }
+                ImoBarline* pBar = static_cast<ImoBarline*>(pSO);
+                if (pBar->get_type() == k_barline_start_repetition)
+                {
+                    jumpToMeasure = measure+1;
+                }
+                else if (pBar->get_type() == k_barline_end_repetition)
+                {
+                    int times = pBar->get_num_repeats();
+                    JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                    add_jump(cursor, measure, pJump);
+                }
+                else if (pBar->get_type() == k_barline_double_repetition)
+                {
+                    int times = pBar->get_num_repeats();
+                    JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                    add_jump(cursor, measure, pJump);
+                    jumpToMeasure = measure+1;
+                }
 
-            add_jumps_if_volta_bracket(cursor, pBar, measure);
+                add_jumps_if_volta_bracket(cursor, pBar, measure);
+            }
         }
         else if (pSO->is_time_signature())
         {
