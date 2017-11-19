@@ -238,8 +238,11 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                     else
                     {
                         //volta bracket other than first starts here.
-                        //Update number of repeat times if not last volta
+                        //Update:
+                        //- measure to jump
+                        //- number of repeat times if not last volta
                         JumpEntry* pJump = m_pending[m_iJump];
+                        pJump->set_measure(measure+1);
                         if (pJump->get_times() != 0)
                         {
                             int times = pVB->get_number_of_repetitions();
@@ -248,14 +251,6 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                         ++m_iJump;
                     }
                 }
-                else if (pBar == pRO->get_end_object())
-                {
-                    //This is the bar in which a volta bracket ends
-                    //this serves to determine measures to jump to.
-                        //fix measure number to jump
-                    int jumpMeasure = measure+1;
-                    m_pending[m_iJump]->set_measure(jumpMeasure);
-               }
             }
         }
     }
@@ -492,7 +487,7 @@ string SoundEventsTable::dump_events_table()
                     break;
                 case SoundEvent::k_jump:
                     msg += "JUMP      ";
-                    msg += pSE->pJump->dump_entry(this);
+                    msg += pSE->pJump->dump_entry();
                     fAddData = false;
                     break;
                 default:
@@ -655,21 +650,16 @@ void SoundEventsTable::add_events_to_jumps()
     for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
     {
         int nEntry = m_measures[(*it)->get_measure()];
-        (*it)->set_event( m_events[nEntry] );
+        (*it)->set_event(nEntry);
     }
 }
 
 //---------------------------------------------------------------------------------------
-int SoundEventsTable::get_event_index(SoundEvent* pSE)
+void SoundEventsTable::reset_jumps()
 {
-    if (!pSE)
-        return -1;
-
-    vector<SoundEvent*>::iterator it = std::find(m_events.begin(), m_events.end(), pSE);
-    if (it != m_events.end())
-        return std::distance(m_events.begin(), it);
-    else
-        return -1;
+    vector<JumpEntry*>::iterator it;
+    for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
+        (*it)->reset_entry();
 }
 
 
@@ -677,11 +667,10 @@ int SoundEventsTable::get_event_index(SoundEvent* pSE)
 // JumpEntry implementation
 //=======================================================================================
 JumpEntry::JumpEntry(int jumpTo, int times)
-	: m_fIsActive(true)
-	, m_measure(jumpTo)
+	: m_measure(jumpTo)
 	, m_numTimes(times)
 	, m_applied(0)
-	, m_event(nullptr)
+	, m_event(0)
 {
 }
 
@@ -690,46 +679,14 @@ JumpEntry::~JumpEntry()
 {
 }
 
-////---------------------------------------------------------------------------------------
-//void JumpEntry::reset_entry()
-//{
-//    m_fIsActive = true;
-//    //m_applied.assign(m_applied.size(), 0);
-//    std::fill(m_applied.begin(), m_applied.end(), 0);
-//}
-//
-////---------------------------------------------------------------------------------------
-//int JumpEntry::exec_jump()
-//{
-//    //returns number of measure to jump to or -1 if no jump
-//
-//    if (!m_fIsActive)
-//        return -1;
-//
-//    // find first to.x with num-times > 0
-//    size_t i;
-//    for (i = 0; i < m_measure.size(); ++i)
-//    {
-//        if (m_applied[i] < m_numTimes[i])
-//        {
-//            ++m_applied[i];
-//            return m_measure[i];
-//        }
-//    }
-//
-//    m_fIsActive = false;
-//    return -1;
-//}
-
 //---------------------------------------------------------------------------------------
-string JumpEntry::dump_entry(SoundEventsTable* pMidiTable)
+string JumpEntry::dump_entry()
 {
     stringstream s;
-    s << "Active=" << (m_fIsActive ? "yes " : "no  ")
-      << "(m=" << m_measure
-      << ",e=" << pMidiTable->get_event_index(m_event)
-      << ",t=" << m_numTimes
-      << ",a=" << m_applied << ") " << endl;
+    s << "Jump: m=" << m_measure
+      << ", e=" << m_event
+      << ", t=" << m_numTimes
+      << ", a=" << m_applied << endl;
     return s.str();
 }
 

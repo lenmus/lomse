@@ -5554,9 +5554,11 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDirection* pParent = NULL;
+        //ImoDirection* pParent = NULL;
         if (m_pAnchor && m_pAnchor->is_direction())
-            pParent = static_cast<ImoDirection*>(m_pAnchor);
+        {
+            //pParent = static_cast<ImoDirection*>(m_pAnchor);
+        }
         else if (m_pAnchor && m_pAnchor->is_music_data())
         {
             //TODO
@@ -5624,6 +5626,7 @@ public:
         //which times through the repeated section that the element
         //applies.
 
+#if (0) //for now remove this code to avoid 'unused variable' warnings
         // attrib: pizzicato %yes-no; #IMPLIED
         bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
 
@@ -5635,7 +5638,7 @@ public:
 
         // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
         bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
-
+#endif
             // content
 
         // (midi-device?, midi-instrument?, play?)*
@@ -5758,6 +5761,7 @@ public:
         // attrib: number %number-level; #IMPLIED
         int num = get_optional_int_attribute("number", 0);
 
+        //TODO
 //        // attrib: %line-type;
 //        if (get_mandatory(k_number))
 //            pInfo->set_tie_number( get_child_value_integer(0) );
@@ -5786,6 +5790,7 @@ public:
                 m_pInfo1->set_orientation(k_orientation_under);
         }
 
+        //TODO
 //        // attrib: %position;
 //        if (get_mandatory(k_number))
 //            pInfo->set_tie_number( get_child_value_integer(0) );

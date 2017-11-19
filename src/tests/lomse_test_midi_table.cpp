@@ -120,14 +120,13 @@ public:
     bool check_jump(int i, int measure, int times, int event)
     {
         JumpEntry* pEntry = static_cast<JumpEntry*>( m_pTable->get_jump(i) );
-        int eventIndex = m_pTable->get_event_index(pEntry->get_event());
         if (pEntry->get_measure() != measure
             || pEntry->get_times() != times
             || pEntry->get_applied() != 0
-            || eventIndex != event )
+            || pEntry->get_event() != event )
         {
             cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
+                 << pEntry->dump_entry();
             return false;
         }
         return true;
@@ -141,7 +140,7 @@ public:
             || pEntry->get_applied() != 0 )
         {
             cout << test_name() << ". JumpEntry " << i << ": "
-                 << pEntry->dump_entry(m_pTable);
+                 << pEntry->dump_entry();
             return false;
         }
         return true;
@@ -608,22 +607,21 @@ SUITE(MidiTableTest)
         //cout << m_pTable->dump_midi_events() << endl;
     }
 
-//      //TODO: Enabling this test causes a crash in destrictor and also in test 10 !!
-//    TEST_FIXTURE(MidiTableTestFixture, jumps_table_08)
-//    {
-//        //@008. [T5]  end-repetition barline with volta, two times
-//        //                  vt1,2  vt3
-//        //  |    |    |     |     :|     |     |     |
-//        //  1    2    3     4      5    6
-//        //                 J4,2   J1,2
-//        //                 J5,0
-//        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
-//        CHECK( m_pTable->num_jumps() == 3 );
-//        CHECK( check_jump(0, 4,2,10) == true );
-//        CHECK( check_jump(1, 5,0,13) == true );
-//        CHECK( check_jump(2, 1,2,1) == true );
-//        //cout << m_pTable->dump_midi_events() << endl;
-//    }
+    TEST_FIXTURE(MidiTableTestFixture, jumps_table_08)
+    {
+        //@008. [T5]  end-repetition barline with volta, two times
+        //                  vt1,2  vt3
+        //  |    |    |     |     :|     |     |     |
+        //  1    2    3     4      5    6
+        //                 J4,2   J1,2
+        //                 J5,0
+        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
+        CHECK( m_pTable->num_jumps() == 3 );
+        CHECK( check_jump(0, 4,2,10) == true );
+        CHECK( check_jump(1, 5,0,13) == true );
+        CHECK( check_jump(2, 1,2,1) == true );
+        //cout << m_pTable->dump_midi_events() << endl;
+    }
 
     TEST_FIXTURE(MidiTableTestFixture, jumps_table_09)
     {

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -598,7 +598,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
                 }
 
-                //wait until new time arives
+                //wait until new time arrives
                 long waitT = nEvTime - curTime - elapsed;
                 if (waitT > 0L)
                 {
@@ -606,6 +606,27 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     boost::this_thread::sleep(waitTime);
                 }
             }
+
+            //if it is a jump event, do the jump
+            if (events[i]->EventType == SoundEvent::k_jump)
+            {
+                JumpEntry* pJump = events[i]->pJump;
+                if (pJump->get_times() == 0 || pJump->get_times() > pJump->get_applied())
+                {
+                    i = pJump->get_event();
+                    nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
+                    curTime = nEvTime;
+                    nMtrEvDeltaTime = events[i]->DeltaTime;
+                    if (pJump->get_times() > pJump->get_applied())
+                        pJump->increment_applied();
+                }
+                else
+                {
+                    ++i;
+                }
+                continue;   //needed if next event is also a jump, and for metronome clicks
+            }
+
 
             if (events[i]->EventType == SoundEvent::k_note_on)
             {
@@ -792,6 +813,9 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
 
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();
+
+    //reset all jumps
+    m_pTable->reset_jumps();
 
     //do not generate events if quit
     if (m_fQuit)

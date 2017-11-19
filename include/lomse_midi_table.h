@@ -57,34 +57,31 @@ class SoundEventsTable;
 class JumpEntry
 {
 protected:
-	bool m_fIsActive;           //true if this jump is still valid
 	int m_measure;		        //number of the measure to jump to
 	int m_numTimes;		        //num.times the jumpTo must be active
 	int m_applied;		        //num.times the jumpTo has been executed
-	SoundEvent* m_event;        //ptr to event to jump to
+	int m_event;                //index to event to jump to
 
 public:
 
     JumpEntry(int jumpTo, int times);
     virtual ~JumpEntry();
 
-//	void reset_entry();
-//	int exec_jump();
-
-	inline bool is_active() { return m_fIsActive; }
+	inline void reset_entry() { m_applied = 0; }
 
 	inline int get_measure() { return m_measure; }
 	inline int get_times() { return m_numTimes; }
 	inline int get_applied() { return m_applied; }
-	inline SoundEvent* get_event() { return m_event; }
+	inline int get_event() { return m_event; }
 
-    inline void set_event(SoundEvent* pSE) { m_event = pSE; }
+    inline void set_event(int iEvent) { m_event = iEvent; }
     inline void set_measure(int measure) { m_measure = measure; }
     inline void set_times(int times) { m_numTimes = times; }
+    inline void increment_applied() { ++m_applied; }
 
 
     //debug
-    string dump_entry(SoundEventsTable* pMidiTable);
+    string dump_entry();
 
 };
 
@@ -186,10 +183,10 @@ public:
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }
     JumpEntry* get_jump(int i);
+    void reset_jumps();
 
     //debug
     string dump_midi_events();
-    int get_event_index(SoundEvent* pSE);
 
 
 protected:
