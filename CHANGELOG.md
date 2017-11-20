@@ -20,6 +20,9 @@
 	- cmake required version is now 2.8.10 or greater, and
 	- gcc required version is now 4.9 or greater.
 
+- Bugs fixed:
+	- #98. Tempo speed setting problem using PlayerGui object.
+
 
 Version [0.21.0] (9/Nov/2017)
 =============================

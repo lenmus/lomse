@@ -402,7 +402,7 @@ protected:
 };
 
 //defined in WordsMxlAnalyser to simplify unit testing of the regex
-extern int type_of_repetion_mark(const string& value);
+extern int mxl_type_of_repetion_mark(const string& value);
 //defined in EndingMxlAnalyser to simplify unit testing of the regex
 extern bool mxl_is_valid_ending_number(const string& num);
 //defined in EndingMxlAnalyser to simplify unit testing of the regex

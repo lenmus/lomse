@@ -574,7 +574,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 nMtrEvDeltaTime += nMtrIntvalOff;
             }
             curTime = nEvTime;
-
         }
         else
         {
@@ -582,7 +581,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
             if (nEvTime > curTime)
             {
-                //flush acummulated events for curTime
+                //flush accumulated events for curTime
                 long elapsed = 0L;
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
@@ -736,22 +735,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             i++;
         }
 
-        //update metronome information, just in case metronome was updated
-        if (nMM == 0)
-        {
-            //BUG_BYPASS
-            // While clicking in metronome combo, method m_pPlayerGui->get_metronome_mm()
-            // returns spurious low values that freeze playback for a few seconds. So it is
-            // necessary to ensure a smooth downwards MM decrease rate.
-            long maxIntval = m_nMtrClickIntval + 5000L;     // max MM decrease: 5 MM per click
-            m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
-            if (m_nMtrClickIntval > maxIntval)
-                m_nMtrClickIntval = maxIntval;
-        }
-        fPlayWithMetronome = m_pPlayerGui->metronome_status();
-
         //check if the thread should be paused or stopped
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "In interrupt check point");
         if (m_fShouldStop)
         {
             LOMSE_LOG_DEBUG(Logger::k_score_player, "Going to finish 1");
@@ -766,6 +750,18 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 break;
             }
         }
+
+        //update metronome information, just in case metronome was updated
+        if (nMM == 0)   //AWARE: nMM==0 means: "read tempo from GUI controls"
+        {
+            long newMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
+            if (newMtrClickIntval != m_nMtrClickIntval)
+            {
+                m_nMtrClickIntval = newMtrClickIntval;
+                curTime = delta_to_milliseconds( events[i-1]->DeltaTime );
+            }
+        }
+        fPlayWithMetronome = m_pPlayerGui->metronome_status();
 
     } while (i <= nEvEnd);
 
