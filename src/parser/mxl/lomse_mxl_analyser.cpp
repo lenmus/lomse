@@ -6381,13 +6381,13 @@ protected:
 
     int is_repetion_mark(const string& value)
     {
-        return type_of_repetion_mark(value);
+        return mxl_type_of_repetion_mark(value);
     }
 
 };
 
 //defined out of WordsMxlAnalyser to simplify unit testing of the regex
-int type_of_repetion_mark(const string& value)
+int mxl_type_of_repetion_mark(const string& value)
 {
     //get text and use it for deducing if it is a repetition mark
 
