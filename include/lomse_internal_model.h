@@ -3594,6 +3594,7 @@ protected:
     friend class ImageAnalyser;
     friend class ImageLmdAnalyser;
     friend class ImageMxlAnalyser;
+    friend class ImageMnxAnalyser;
     inline void set_content(SpImage img) { m_image = img; }
 
 public:
@@ -3755,6 +3756,7 @@ public:
 protected:
     friend class LdpAnalyser;
     friend class MxlAnalyser;
+    friend class MnxAnalyser;
     friend class InstrumentAnalyser;
 
     //FIX: For lyrics space
@@ -4531,6 +4533,7 @@ public:
 protected:
     friend class MxlAnalyser;
     friend class LdpAnalyser;
+    friend class MnxAnalyser;
     inline void add_space_for_lyrics(LUnits space) { m_uMarging += space; }
 
 };
@@ -5041,8 +5044,10 @@ protected:
 
     friend class LyricMxlAnalyser;
     friend class LyricAnalyser;
+    friend class LyricMnxAnalyser;
     friend class LdpAnalyser;
     friend class MxlAnalyser;
+    friend class MnxAnalyser;
     void add_text_item(ImoLyricsTextInfo* pText);
     void link_to_next_lyric(ImoLyric* pNext) { link_to_next_ARO(pNext); }
     void set_prev_lyric(ImoLyric* pPrev) { set_prev_ARO(pPrev); }
