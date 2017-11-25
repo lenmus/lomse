@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,6 +39,8 @@
 #include "lomse_lmd_compiler.h"
 #include "lomse_mxl_analyser.h"
 #include "lomse_mxl_compiler.h"
+#include "lomse_mnx_analyser.h"
+#include "lomse_mnx_compiler.h"
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
 #include "lomse_font_storage.h"
@@ -326,6 +328,25 @@ MxlCompiler* Injector::inject_MxlCompiler(LibraryScope& libraryScope,
     XmlParser* pParser = Injector::inject_XmlParser(libraryScope, pDoc->get_scope());
     return LOMSE_NEW MxlCompiler(pParser,
                                  inject_MxlAnalyser(libraryScope, pDoc, pParser),
+                                 inject_ModelBuilder(pDoc->get_scope()),
+                                 pDoc );
+}
+
+//---------------------------------------------------------------------------------------
+MnxAnalyser* Injector::inject_MnxAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                          XmlParser* pParser)
+{
+    return LOMSE_NEW MnxAnalyser(pDoc->get_scope().default_reporter(),
+                                 libraryScope, pDoc, pParser);
+}
+
+//---------------------------------------------------------------------------------------
+MnxCompiler* Injector::inject_MnxCompiler(LibraryScope& libraryScope,
+                                          Document* pDoc)
+{
+    XmlParser* pParser = Injector::inject_XmlParser(libraryScope, pDoc->get_scope());
+    return LOMSE_NEW MnxCompiler(pParser,
+                                 inject_MnxAnalyser(libraryScope, pDoc, pParser),
                                  inject_ModelBuilder(pDoc->get_scope()),
                                  pDoc );
 }

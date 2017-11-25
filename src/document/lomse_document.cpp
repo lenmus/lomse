@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,6 +37,7 @@
 #include "lomse_xml_parser.h"
 #include "lomse_lmd_compiler.h"
 #include "lomse_mxl_compiler.h"
+#include "lomse_mnx_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
 #include "lomse_internal_model.h"
@@ -403,6 +404,9 @@ Compiler* Document::get_compiler_for_format(int format)
 
         case k_format_mxl:
             return Injector::inject_MxlCompiler(m_libraryScope, this);
+
+        case k_format_mnx:
+            return Injector::inject_MnxCompiler(m_libraryScope, this);
 
         default:
             return NULL;

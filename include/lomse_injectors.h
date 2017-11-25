@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,6 +54,8 @@ class LmdAnalyser;
 class LmdCompiler;
 class MxlAnalyser;
 class MxlCompiler;
+class MnxAnalyser;
+class MnxCompiler;
 class ModelBuilder;
 class Document;
 class LdpFactory;
@@ -283,6 +285,11 @@ public:
     static MxlAnalyser* inject_MxlAnalyser(LibraryScope& libraryScope, Document* pDoc,
                                            XmlParser* pParser);
     static MxlCompiler* inject_MxlCompiler(LibraryScope& libraryScope, Document* pDoc);
+
+    //MNX format
+    static MnxAnalyser* inject_MnxAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                           XmlParser* pParser);
+    static MnxCompiler* inject_MnxCompiler(LibraryScope& libraryScope, Document* pDoc);
 
 
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);

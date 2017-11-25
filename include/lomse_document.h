@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -93,6 +93,7 @@ protected:
     friend class LenmusdocAnalyser;
     friend class LenmusdocLmdAnalyser;
     friend class ScorePartwiseMxlAnalyser;
+    friend class MnxMnxAnalyser;
     void set_imo_doc(ImoDocument* pImoDoc);
 
 public:
@@ -109,6 +110,7 @@ public:
         k_format_ldp = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
         k_format_lmd,       //LenMus Document (LMD, XML syntax)
         k_format_mxl,       //MusicXML
+        k_format_mnx,       //W3C MNX
         k_format_unknown,
     };
 
