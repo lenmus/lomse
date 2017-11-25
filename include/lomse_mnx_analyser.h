@@ -231,6 +231,7 @@ protected:
 
     // information maintained in MnxAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
+    ImoInstrument*  m_pCurInstrument;   //the instrument being analysed
     ImoNote*        m_pLastNote;        //last note added to the score
     ImoBarline*     m_pLastBarline;     //last barline added to current instrument
     ImoDocument*    m_pImoDoc;          //the document containing the score
@@ -242,14 +243,15 @@ protected:
     string          m_curPartId;        //Part Id being analysed
     string          m_curMeasureNum;    //Num of measure being analysed
 
-    //inherited values
-//    int m_curStaff;
+    //current values
+    int m_curStaff;
     int m_curVoice;
+    map<string, int> m_nameToVoice;     //sequence name to voice conversion
 //    int m_nShowTupletBracket;
 //    int m_nShowTupletNumber;
 
     //conversion from xml element name to int
-    std::map<std::string, int>	m_NameToEnum;
+    map<string, int>	m_NameToEnum;
 
 
 public:
@@ -287,9 +289,24 @@ public:
     int set_musicxml_version(const string& version);
     inline int get_musicxml_version() { return m_musicxmlVersion; }
     ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
-    float current_divisions() { return m_divisions; }
     void set_current_divisions(float value) { m_divisions = value; }
     TimeUnits duration_to_timepos(int duration);
+
+    //access to document being analysed
+    inline Document* get_document_being_analysed() { return m_pDoc; }
+    inline const string& get_document_locator() { return m_fileLocator; }
+
+    //access to score being analysed
+    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
+    inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
+
+    //access to instrument being analysed
+    inline void instrument_analysis_begin(ImoInstrument* pInstr) { m_pCurInstrument = pInstr; }
+    ImoInstrument* get_instrument_being_analysed() { return m_pCurInstrument; }
+
+    //access to root ImoDocument
+    inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
+    inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
     //timepos
     TimeUnits get_current_time() { return m_time; }
@@ -305,12 +322,14 @@ public:
     }
     TimeUnits get_max_time() { return m_maxTime; }
 
-//    //inherited and saved values setters & getters
-//    inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
-//    inline int get_current_staff() { return m_curStaff; }
+    //inherited and saved values setters & getters
+    inline void set_current_staff(int iStaff) { m_curStaff = iStaff; }  //iStaff=0..n-1
+    inline int get_current_staff() { return m_curStaff; }  //return 0..n-1
 
-    inline void set_current_voice(int nVoice) { m_curVoice = nVoice; }
-    inline int get_current_voice() { return m_curVoice; }
+    inline void set_current_voice(int nVoice) { m_curVoice = nVoice; }  //nVoice=1..n
+    inline int get_current_voice() { return m_curVoice; }   //return 1..n
+    int get_voice_for_name(const string& name) const;		//return 1..n
+
 //
 //    inline void set_current_show_tuplet_bracket(int value) { m_nShowTupletBracket = value; }
 //    inline int get_current_show_tuplet_bracket() { return m_nShowTupletBracket; }
@@ -365,18 +384,6 @@ public:
     inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
     int get_line_number(XmlNode* node);
 
-    //access to score being analysed
-    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
-    inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
-
-    //access to document being analysed
-    inline Document* get_document_being_analysed() { return m_pDoc; }
-    inline const string& get_document_locator() { return m_fileLocator; }
-
-    //access to root ImoDocument
-    inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
-    inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
-
 
     int name_to_enum(const string& name) const;
     bool to_integer(const string& text, int* pResult);
@@ -391,6 +398,11 @@ protected:
     MnxElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
+
+    //auxiliary. for pitch analysis
+    static int to_step(const char& letter);
+    static int to_octave(const char& letter);
+    static EAccidentals to_accidentals(const std::string& accidentals);
 };
 
 ////defined out of WordsMnxAnalyser for unit tests

@@ -112,16 +112,16 @@ SUITE(MnxAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        //expected << "Line 0. <score-partwise>: missing mandatory element <part-list>." << endl;
+        //expected << "Line 0. " << endl;
         parser.parse_text("<mnx></mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-        cout << test_name() << endl;
-        cout << "[" << errormsg.str() << "]" << endl;
-        cout << "[" << expected.str() << "]" << endl;
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != NULL );
         CHECK( pIModel->get_root()->is_document() == true );
@@ -134,22 +134,57 @@ SUITE(MnxAnalyserTest)
     //@ clef -------------------------------------------------------------
 
 
-//    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_direction_words_612)
-//    {
-//        //@00612. regex for 'Da Capo'
-//
-//        CHECK (mxl_type_of_repetion_mark("Da Capo") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark(" da capo") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark(" da capo ") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark(" DaCapo") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("dc") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("d.c.") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("d. c.") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark("d.c. ") == k_repeat_da_capo );
-//        CHECK (mxl_type_of_repetion_mark(" d.c. ") == k_repeat_da_capo );
-//    }
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_pitch_612)
+    {
+        //@00612. pitch_to_components() method
+
+        int step;
+        int octave;
+        EAccidentals acc;
+        float alt;
+
+        CHECK (MnxAnalyser::pitch_to_components("C4", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_C);
+        CHECK (octave == 4);
+        CHECK (acc == k_no_accidentals);
+        CHECK (alt == 0.0f);
+
+        CHECK (MnxAnalyser::pitch_to_components("C#4", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_C);
+        CHECK (octave == 4);
+        CHECK (acc == k_sharp);
+        CHECK (alt == 0.0f);
+
+        CHECK (MnxAnalyser::pitch_to_components("Db4", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_D);
+        CHECK (octave == 4);
+        CHECK (acc == k_flat);
+        CHECK (alt == 0.0f);
+
+        CHECK (MnxAnalyser::pitch_to_components("G3+0.5", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_G);
+        CHECK (octave == 3);
+        CHECK (acc == k_no_accidentals);
+        CHECK (alt == 0.5f);
+
+        CHECK (MnxAnalyser::pitch_to_components("B5+1.5", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_B);
+        CHECK (octave == 5);
+        CHECK (acc == k_no_accidentals);
+        CHECK (alt == 1.5f);
+
+        CHECK (MnxAnalyser::pitch_to_components("C4-0.5", &step, &octave, &acc, &alt) == false );
+        CHECK (step == k_step_C);
+        CHECK (octave == 4);
+        CHECK (acc == k_no_accidentals);
+        CHECK (alt == -0.5f);
+
+        CHECK (MnxAnalyser::pitch_to_components("#c4", &step, &octave, &acc, &alt) == true );
+        CHECK (MnxAnalyser::pitch_to_components("C+4", &step, &octave, &acc, &alt) == true );
+        CHECK (MnxAnalyser::pitch_to_components("C12", &step, &octave, &acc, &alt) == true );
+        CHECK (MnxAnalyser::pitch_to_components("C4##", &step, &octave, &acc, &alt) == true );
+        CHECK (MnxAnalyser::pitch_to_components("C4+1,25", &step, &octave, &acc, &alt) == true );
+    }
 
 }
 

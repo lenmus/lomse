@@ -246,18 +246,9 @@ enum EMnxTag
 {
     k_mnx_tag_undefined = -1,
 
-    k_mnx_tag_event,
-    k_mnx_tag_head,
-    k_mnx_tag_measure,
-    k_mnx_tag_mnx,
-    k_mnx_tag_part,
-    k_mnx_tag_part_name,
-    k_mnx_tag_score,
-    k_mnx_tag_sequence,
-
 //    k_mnx_tag_accordion_registration,
 //    k_mnx_tag_articulations,
-//    k_mnx_tag_attributes,
+    k_mnx_tag_attributes,
 //    k_mnx_tag_backup,
 //    k_mnx_tag_barline,
 //    k_mnx_tag_bracket,
@@ -270,21 +261,27 @@ enum EMnxTag
 //    k_mnx_tag_direction_type,
 //    k_mnx_tag_dynamics,
 //    k_mnx_tag_ending,
+    k_mnx_tag_event,
 //    k_mnx_tag_eyeglasses,
 //    k_mnx_tag_fermata,
 //    k_mnx_tag_forward,
 //    k_mnx_tag_harp_pedals,
+    k_mnx_tag_head,
 //    k_mnx_tag_image,
 //    k_mnx_tag_key,
 //    k_mnx_tag_lyric,
+    k_mnx_tag_measure,
 //    k_mnx_tag_metronome,
 //    k_mnx_tag_midi_device,
 //    k_mnx_tag_midi_instrument,
+    k_mnx_tag_mnx,
 //    k_mnx_tag_notations,
 //    k_mnx_tag_octave_shift,
 //    k_mnx_tag_ornaments,
+    k_mnx_tag_part,
 //    k_mnx_tag_part_group,
 //    k_mnx_tag_part_list,
+    k_mnx_tag_part_name,
 //    k_mnx_tag_pedal,
 //    k_mnx_tag_percussion,
 //    k_mnx_tag_pitch,
@@ -292,12 +289,15 @@ enum EMnxTag
 //    k_mnx_tag_print,
 //    k_mnx_tag_rehearsal,
 //    k_mnx_tag_scordatura,
+    k_mnx_tag_score,
 //    k_mnx_tag_score_instrument,
 //    k_mnx_tag_score_part,
 //    k_mnx_tag_score_partwise,
 //    k_mnx_tag_segno,
+    k_mnx_tag_sequence,
 //    k_mnx_tag_slur,
 //    k_mnx_tag_sound,
+    k_mnx_tag_staff,
 //    k_mnx_tag_string_mute,
 //    k_mnx_tag_technical,
 //    k_mnx_tag_text,
@@ -362,12 +362,10 @@ protected:
 
     // 'get' methods just update m_childToAnalyse to point to the next node to analyse
     bool get_mandatory(const string& tag);
-//    bool get_optional(EMnxTag type);
     bool get_optional(const string& type);
 
     // 'analyse' methods do a 'get' and, if found, analyse the found element
     bool analyse_mandatory(const string& tag, ImoObj* pAnchor=nullptr);
-//    bool analyse_optional(EMnxTag type, ImoObj* pAnchor=nullptr);
     bool analyse_optional(const string& name, ImoObj* pAnchor=nullptr);
     string analyze_mandatory_child_pcdata(const string& name);
     string analyze_optional_child_pcdata(const string& name, const string& sDefault);
@@ -375,11 +373,11 @@ protected:
                                           int nMin, int nMax, int nDefault);
     float analyze_optional_child_pcdata_float(const string& name,
                                               float rMin, float rMax, float rDefault);
-//    void analyse_one_or_more(EMnxTag* pValid, int nValid);
-//    void analyse_staffobjs_options(ImoStaffObj* pSO);
-//    void analyse_scoreobj_options(ImoScoreObj* pSO);
 
-    //methods to analyse attributes of current node
+    //analysers for common elements
+    int analyse_optional_staff(int nDefault);
+
+    //methods to get attributes of current element
     bool has_attribute(const string& name);
     string get_attribute(const string& name);
     int get_attribute_as_integer(const string& name, int nNumber);
@@ -391,8 +389,29 @@ protected:
     int get_optional_int_attribute(const string& name, int nDefault);
     bool get_optional_yes_no_attribute(const string& name, bool fDefault);
 
+    //methods to analyse attributes of current element
+    bool get_attribute_note_value(int* noteType, int* dots);
+    Tenths get_attribute_as_tenths(const string& name, Tenths rDefault);
+    int get_attribute_placement();
+    void get_attributes_for_text_formatting(ImoObj* pImo);
+    void get_attributes_for_print_style_align(ImoObj* pImo);
+    void get_attributes_for_print_style(ImoObj* pImo);
+    void get_attributes_for_position(ImoObj* pObj);
+    void get_attribute_color(ImoObj* pImo);
+
     //methods to get value of current node
     int get_cur_node_value_as_integer(int nDefault);
+
+    //methods for analysing children
+    string get_child_value_string() { return m_childToAnalyse.value(); }
+    long get_child_value_long(long nDefault=0L);
+    int get_child_value_integer(int nDefault);
+    float get_child_value_float(float rDefault=0.0f);
+    bool get_child_value_bool(bool fDefault=false);
+    int get_child_value_yes_no(int nDefault);
+    bool is_child_value_long();
+    bool is_child_value_float();
+    bool is_child_value_bool();
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -450,662 +469,6 @@ protected:
         m_nextParam = m_analysedNode.first_child();
         prepare_next_one();
     }
-
-    //-----------------------------------------------------------------------------------
-    bool is_long_value()
-    {
-        string number = m_childToAnalyse.value();
-        long nNumber;
-        std::istringstream iss(number);
-        return !((iss >> std::dec >> nNumber).fail());
-    }
-
-    //-----------------------------------------------------------------------------------
-    long get_child_value_long(long nDefault=0L)
-    {
-        string number = m_childToAnalyse.value();
-        long nNumber;
-        std::istringstream iss(number);
-        if ((iss >> std::dec >> nNumber).fail())
-        {
-            stringstream replacement;
-            replacement << nDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                "Invalid integer number '" + number + "'. Replaced by '"
-                + replacement.str() + "'.");
-            return nDefault;
-        }
-        else
-            return nNumber;
-    }
-
-    //-----------------------------------------------------------------------------------
-    int get_child_value_integer(int nDefault)
-    {
-        return static_cast<int>( get_child_value_long(static_cast<int>(nDefault)) );
-    }
-
-    //-----------------------------------------------------------------------------------
-    bool is_float_value()
-    {
-        string number = m_childToAnalyse.value();
-        float rNumber;
-        std::istringstream iss(number);
-        return !((iss >> std::dec >> rNumber).fail());
-    }
-
-    //-----------------------------------------------------------------------------------
-    float get_child_value_float(float rDefault=0.0f)
-    {
-        string number = m_childToAnalyse.value();
-        float rNumber;
-        std::istringstream iss(number);
-        if ((iss >> std::dec >> rNumber).fail())
-        {
-            stringstream replacement;
-            replacement << rDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                "Invalid real number '" + number + "'. Replaced by '"
-                + replacement.str() + "'.");
-            return rDefault;
-        }
-        else
-            return rNumber;
-    }
-
-    //-----------------------------------------------------------------------------------
-    bool is_bool_value()
-    {
-        string value = string(m_childToAnalyse.value());
-        return  value == "true" || value == "yes"
-             || value == "false" || value == "no" ;
-    }
-
-    //-----------------------------------------------------------------------------------
-    bool get_child_value_bool(bool fDefault=false)
-    {
-        string value = string(m_childToAnalyse.value());
-        if (value == "true" || value == "yes")
-            return true;
-        else if (value == "false" || value == "no")
-            return false;
-        else
-        {
-            stringstream replacement;
-            replacement << fDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                "Invalid boolean value '" + value + "'. Replaced by '"
-                + replacement.str() + "'.");
-            return fDefault;
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    int get_child_value_yes_no(int nDefault)
-    {
-        string value = m_childToAnalyse.value();
-        if (value == "yes")
-            return k_yesno_yes;
-        else if (value == "no")
-            return k_yesno_no;
-        else
-        {
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                "Invalid yes/no value '" + value + "'. Replaced by default.");
-            return nDefault;
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    string get_child_value_string()
-    {
-        return m_childToAnalyse.value();
-    }
-
-
-    //-----------------------------------------------------------------------------------
-    // Analysers for common attributes
-    //-----------------------------------------------------------------------------------
-
-    //-----------------------------------------------------------------------------------
-    //Note value
-    bool get_attribute_note_value(int* noteType, int* dots)
-    {
-        //return FALSE is error
-
-        if (has_attribute(&m_analysedNode, "value"))
-        {
-            string value = m_analysedNode.attribute_value("value");
-
-//            stringstream s;
-//            s << "get_attribute_note_value. value=" << value;
-
-            //count and remove trailing '*'
-            *dots = 0;
-            while(value.back() == '*')
-            {
-                *dots += 1;
-                value.pop_back();
-            }
-
-            //analyse remaning string
-            if (value == "breve")
-                *noteType = k_longa;
-            else if (value == "1" || value == "whole")
-                *noteType = k_whole;
-            else if (value == "2" || value == "half")
-                *noteType = k_half;
-            else if (value == "4" || value == "quarter")
-                *noteType = k_quarter;
-            else if (value == "8" || value == "eighth")
-                *noteType = k_eighth;
-            else if (value == "16")
-                *noteType = k_16th;
-            else if (value == "32")
-                *noteType = k_32nd;
-            else if (value == "64")
-                *noteType = k_64th;
-            else if (value == "128")
-                *noteType = k_128th;
-            else
-                *noteType = k_256th;
-
-//            s << ". Value=" << value << ", noteType=" << *noteType
-//              << ", dots=" << *dots;
-//            LOMSE_LOG_DEBUG(Logger::k_all, s.str());
-
-            return true;
-        }
-        return false;
-    }
-
-
-    //-----------------------------------------------------------------------------------
-    //@ % tenths
-    //@ The tenths entity is a number representing tenths. Both integer and decimal
-    //@ values are allowed, such as 5 for a half space and -2.5
-    //@<!ENTITY % tenths "CDATA">
-    Tenths get_attribute_as_tenths(const string& name, Tenths rDefault)
-    {
-        if (has_attribute(&m_analysedNode, name))
-        {
-            string number = m_analysedNode.attribute_value(name);
-            float rNumber;
-            std::istringstream iss(number);
-            if ((iss >> std::dec >> rNumber).fail())
-            {
-                stringstream replacement;
-                replacement << rDefault;
-                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                    "Invalid real number '" + number + "'. Replaced by '"
-                    + replacement.str() + "'.");
-                return rDefault;
-            }
-            else
-                return rNumber;
-        }
-        else
-            return rDefault;
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % placement
-    //@ The placement attribute indicates whether something is
-    //@ above or below another element, such as a note or anotation.
-    //@<!ENTITY % placement
-    //@    "placement %above-below; #IMPLIED">
-    int get_attribute_placement()
-    {
-        if (has_attribute(&m_analysedNode, "placement"))
-        {
-            string value = m_analysedNode.attribute_value("placement");
-            if (value == "above")
-                return k_placement_above;
-            else if (value == "below")
-                return k_placement_below;
-            else
-            {
-                report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                    "Unknown placement attrib. '" + value + "'. Ignored.");
-                return k_placement_default;
-            }
-        }
-        else
-            return k_placement_default;
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % text-formatting
-    //@ The text-formatting entity contains the common formatting attributes for text
-    //@ elements. Default values may differ across the elements that use this entity.
-    //@
-    //@<!ENTITY % text-formatting
-    //@    "%justify;
-    //@     %print-style-align;   <------------
-    //@     %text-decoration;
-    //@     %text-rotation;
-    //@     %letter-spacing;
-    //@     %line-height;
-    //@     xml:lang NMTOKEN #IMPLIED
-    //@     xml:space (default | preserve) #IMPLIED
-    //@     %text-direction;
-    //@     %enclosure;">
-    //
-    void get_attributes_for_text_formatting(ImoObj* pImo)
-    {
-        //TODO
-        //get_attributes_for_justify(pImo);
-        get_attributes_for_print_style_align(pImo);
-        //get_attributes_for_text_decoration(pImo);
-        //get_attributes_for_text_rotation(pImo);
-        //get_attributes_for_letter_spacing(pImo);
-        //get_attributes_for_line_height(pImo);
-        //get_attributes_for_text_direction(pImo);
-        //get_attributes_for_enclosure(pImo);
-        //get_attributes_for_xml_lang(pImo);
-        //get_attributes_for_xml_space(pImo);
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % print-style-align
-    //@ The print-style-align entity adds the halign and valign attributes to the
-    //@ position, font, and color attributes.
-    //@
-    //@<!ENTITY % print-style-align
-    //@    "%print-style;
-    //@     %halign;
-    //@     %valign;">
-    //
-    void get_attributes_for_print_style_align(ImoObj* pImo)
-    {
-        get_attributes_for_print_style(pImo);
-        //TODO
-        //get_attributes_for_halign(pImo);
-        //get_attributes_for_valign(pImo);
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % print-style
-    //@ The print-style entity groups together the most popular combination of
-    //@ printing attributes: position, font, and color.
-    //@
-    //@<!ENTITY % print-style
-    //@    "%position;
-    //@     %font;
-    //@     %color;">
-    //
-    void get_attributes_for_print_style(ImoObj* pImo)
-    {
-        get_attributes_for_position(pImo);
-        //TODO
-        //get_attributes_for_font(pImo);
-        get_attribute_color(pImo);
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % position
-    //@<!ENTITY % position
-    //@    "default-x     %tenths;    #IMPLIED
-    //@     default-y     %tenths;    #IMPLIED
-    //@     relative-x    %tenths;    #IMPLIED
-    //@     relative-y    %tenths;    #IMPLIED">
-    //@
-    void get_attributes_for_position(ImoObj* pObj)
-    {
-        if (!pObj || !pObj->is_contentobj())
-            return;
-
-        ImoContentObj* pImo = static_cast<ImoContentObj*>(pObj);
-
-        if (has_attribute(&m_analysedNode, "default-x"))
-        {
-            Tenths pos = get_attribute_as_tenths("default-x", 0.0f);
-            if (pos != 0.0f)
-                pImo->set_user_ref_point_x(pos);
-        }
-
-        if (has_attribute(&m_analysedNode, "default-y"))
-        {
-            Tenths pos = get_attribute_as_tenths("default-y", 0.0f);
-            if (pos != 0.0f)
-                //AWARE: positive y is up, negative y is down
-                pImo->set_user_ref_point_y(-pos);
-        }
-
-        if (has_attribute(&m_analysedNode, "relative-x"))
-        {
-            Tenths pos = get_attribute_as_tenths("relative-x", 0.0f);
-            if (pos != 0.0f)
-                pImo->set_user_location_x(pos);
-        }
-
-        if (has_attribute(&m_analysedNode, "relative-y"))
-        {
-            Tenths pos = get_attribute_as_tenths("relative-y", 0.0f);
-            if (pos != 0.0f)
-                //AWARE: positive y is up, negative y is down
-                pImo->set_user_location_y(-pos);
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
-    //@ %font
-    //@ - The font-family is a comma-separated list of font names.
-    //@   These can be specific font styles such as Maestro or Opus, or one of several
-    //@   generic font styles: music, engraved, handwritten, text, serif, sans-serif,
-    //@   handwritten, cursive, fantasy, and monospace. The music, engraved, and
-    //@   handwritten values refer to music fonts; the rest refer to text fonts.
-    //@ - The font-style can be normal or italic.
-    //@ - The font-size can be one of the CSS sizes (xx-small, x-small, small, medium,
-    //@   large, x-large, xx-large) or a numeric point size.
-    //@ - The font-weight can be normal or bold.
-    //@
-    //@<!ENTITY % font
-    //@    "font-family  CDATA  #IMPLIED
-    //@     font-style   CDATA  #IMPLIED     can be normal or italic
-    //@     font-size    CDATA  #IMPLIED
-    //@     font-weight  CDATA  #IMPLIED">
-//    ImoStyle* get_attribute_font()
-//    {
-//        ImoStyle* pStyle = nullptr;pScore->new_unnamed_style();   //derived from default
-//        if (has_attribute(&m_childToAnalyse, "font-style"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-style");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-size"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-size");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-weight"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-weight");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (has_attribute(&m_childToAnalyse, "font-family"))
-//        {
-//            string value = get_attribute(&m_childToAnalyse, "font-family");
-//            if (!pStyle)
-//                pStyle = pScore->new_unnamed_style();   //derived from default
-//        }
-//        if (!pStyle)
-//            pStyle = pScore->default();
-//          return pStyle;
-//    }
-
-    //-----------------------------------------------------------------------------------
-    //@ % color
-    //@ The color entity indicates the color of an element. Color may be represented:
-    //@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
-    //@ - as hexadecimal ARGB tuples (i.e. "#40800080" transparent purple).
-    //@   Alpha 00 means 'totally transparent'; FF = 'totally opaque'
-    //@ If RGB is used, the A value is assumed to be FF
-    //@
-    //@<!ENTITY % color
-    //@    "color CDATA #IMPLIED">
-    //
-    void get_attribute_color(ImoObj* pImo)
-    {
-        if (!pImo || !pImo->is_scoreobj())
-            return;
-
-        ImoScoreObj* pObj = static_cast<ImoScoreObj*>(pImo);
-
-        if (has_attribute(&m_analysedNode, "color"))
-        {
-            string value = m_analysedNode.attribute_value("color");
-            bool fError = false;
-            ImoColorDto color;
-            if (value.length() == 7)
-                color.set_from_rgb_string(value);
-            else if (value.length() == 9)
-                color.set_from_argb_string(value);
-            else
-                fError = true;
-
-            if (fError || !color.is_ok())
-                error_msg("Invalid color value. Default color assigned.");
-            else
-                pObj->set_color( color.get_color() );
-        }
-    }
-
-//    //-----------------------------------------------------------------------------------
-//    float get_font_size_value()
-//    {
-//        const string value = m_childToAnalyse.value();
-//        int size = static_cast<int>(value.size()) - 2;
-//        string points = value.substr(0, size);
-//        string number = m_childToAnalyse.value();
-//        float rNumber;
-//        std::istringstream iss(number);
-//        if ((iss >> std::dec >> rNumber).fail())
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Invalid size '" + number + "'. Replaced by '12'.");
-//            return 12.0f;
-//        }
-//        else
-//            return rNumber;
-//    }
-//<!--
-//    In cases where text extends over more than one line,
-//    horizontal alignment and justify values can be different.
-//    The most typical case is for credits, such as:
-//
-//        Words and music by
-//          Pat Songwriter
-//
-//    Typically this type of credit is aligned to the right,
-//    so that the position information refers to the right-
-//    most part of the text. But in this example, the text
-//    is center-justified, not right-justified.
-//
-//    The halign attribute is used in these situations. If it
-//    is not present, its value is the same as for the justify
-//    attribute.
-//-->
-//<!ENTITY % halign
-//    "halign (left | center | right) #IMPLIED">
-//
-//<!--
-//    The valign entity is used to indicate vertical
-//    alignment to the top, middle, bottom, or baseline
-//    of the text. Defaults are implementation-dependent.
-//-->
-//<!ENTITY % valign
-//    "valign (top | middle | bottom | baseline) #IMPLIED">
-//
-
-
-    //-----------------------------------------------------------------------------------
-    // Analysers for common elements
-    //-----------------------------------------------------------------------------------
-
-    //-----------------------------------------------------------------------------------
-    //@ <staff>
-    //@ Staff assignment is only needed for music notated on
-    //@ multiple staves. Used by both notes and directions. Staff
-    //@ values are numbers, with 1 referring to the top-most staff
-    //@ in a part.
-    //@
-    //@ <!ELEMENT staff (#PCDATA)>
-    //
-    int analyse_optional_staff(int nDefault)
-    {
-        if (get_optional("staff"))
-            return get_child_value_integer(nDefault);
-        else
-            return nDefault;
-    }
-
-//<!--
-//    The text-decoration entity is based on the similar
-//    feature in XHTML and CSS. It allows for text to
-//    be underlined, overlined, or struck-through. It
-//    extends the CSS version by allow double or
-//    triple lines instead of just being on or off.
-//-->
-//<!ENTITY % text-decoration
-//    "underline  %number-of-lines;  #IMPLIED
-//     overline  %number-of-lines;   #IMPLIED
-//     line-through  %number-of-lines;   #IMPLIED">
-//
-//<!--
-//    The justify entity is used to indicate left, center, or
-//    right justification. The default value varies for different
-//    elements. For elements where the justify attribute is present
-//    but the halign attribute is not, the justify attribute
-//    indicates horizontal alignment as well as justification.
-//-->
-//<!ENTITY % justify
-//    "justify (left | center | right) #IMPLIED">
-//
-//<!--
-//    The valign-image entity is used to indicate vertical
-//    alignment for images and graphics, so it removes the
-//    baseline value. Defaults are implementation-dependent.
-//-->
-//<!ENTITY % valign-image
-//    "valign (top | middle | bottom) #IMPLIED">
-//
-//<!--
-//    The letter-spacing entity specifies text tracking.
-//    Values are either "normal" or a number representing
-//    the number of ems to add between each letter. The
-//    number may be negative in order to subtract space.
-//    The default is normal, which allows flexibility of
-//    letter-spacing for purposes of text justification.
-//-->
-//<!ENTITY % letter-spacing
-//    "letter-spacing CDATA #IMPLIED">
-//
-//<!--
-//    The line-height entity specified text leading. Values
-//    are either "normal" or a number representing the
-//    percentage of the current font height  to use for
-//    leading. The default is "normal". The exact normal
-//    value is implementation-dependent, but values
-//    between 100 and 120 are recommended.
-//-->
-//<!ENTITY % line-height
-//    "line-height CDATA #IMPLIED">
-//
-//<!--
-//    The text-direction entity is used to adjust and override
-//    the Unicode bidirectional text algorithm, similar to the
-//    W3C Internationalization Tag Set recommendation. Values
-//    are ltr (left-to-right embed), rtl (right-to-left embed),
-//    lro (left-to-right bidi-override), and rlo (right-to-left
-//    bidi-override). The default value is ltr. This entity
-//    is typically used by applications that store text in
-//    left-to-right visual order rather than logical order.
-//    Such applications can use the lro value to better
-//    communicate with other applications that more fully
-//    support bidirectional text.
-//-->
-//<!ENTITY % text-direction
-//    "dir (ltr | rtl | lro | rlo) #IMPLIED">
-//
-//<!--
-//    The text-rotation entity is used to rotate text
-//    around the alignment point specified by the
-//    halign and valign entities. The value is a number
-//    ranging from -180 to 180. Positive values are
-//    clockwise rotations, while negative values are
-//    counter-clockwise rotations.
-//-->
-//<!ENTITY % text-rotation
-//    "rotation CDATA #IMPLIED">
-//
-//<!--
-//    The enclosure entity is used to specify the
-//    formatting of an enclosure around text or symbols.
-//-->
-//<!ENTITY % enclosure
-//    "enclosure %enclosure-shape; #IMPLIED">
-//
-
-
-//    //-----------------------------------------------------------------------------------
-//    EHAlign get_alignment_value(EHAlign defaultValue)
-//    {
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "left")
-//            return k_halign_left;
-//        else if (value == "right")
-//            return k_halign_right;
-//        else if (value == "center")
-//            return k_halign_center;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                    "Invalid alignment value '" + value + "'. Assumed 'center'.");
-//            return defaultValue;
-//        }
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    ImoStyle* get_text_style_child(const string& defaulName="Default style")
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        string styleName = get_child_value_string();
-//        ImoStyle* pStyle = nullptr;
-//
-//        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-//        if (pScore)
-//        {
-//            pStyle = pScore->find_style(styleName);
-//            if (!pStyle)
-//            {
-//                //try to find it in document global styles
-//                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//                ImoDocument* pImoDoc = pDoc->get_imodoc();
-//                if (pImoDoc)
-//                    pStyle = pImoDoc->find_style(styleName);
-//            }
-//            if (!pStyle)
-//            {
-//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Style '" + styleName + "' is not defined. Default style will be used.");
-//                pStyle = pScore->get_style_or_default(defaulName);
-//            }
-//        }
-//
-//        return pStyle;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    TPoint get_point_child()
-//    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
-//        TPoint point;
-//        if (pImo->is_point_dto())
-//        {
-//            ImoPointDto* pPoint = static_cast<ImoPointDto*>( pImo );
-//            point = pPoint->get_point();
-//        }
-//        delete pImo;
-//        return point;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    TSize get_size_child()
-//    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
-//        TSize size;
-//        if (pImo->is_size_info())
-//        {
-//            ImoSizeDto* pSize = static_cast<ImoSizeDto*>( pImo );
-//            size = pSize->get_size();
-//        }
-//        delete pImo;
-//        return size;
-//    }
 
 };
 
@@ -1488,6 +851,395 @@ void MnxElementAnalyser::add_to_model(ImoObj* pImo, int type)
 }
 
 
+//---------------------------------------------------------------------------------------
+bool MnxElementAnalyser::is_child_value_long()
+{
+    string number = m_childToAnalyse.value();
+    long nNumber;
+    std::istringstream iss(number);
+    return !((iss >> std::dec >> nNumber).fail());
+}
+
+//---------------------------------------------------------------------------------------
+long MnxElementAnalyser::get_child_value_long(long nDefault)
+{
+    string number = m_childToAnalyse.value();
+    long nNumber;
+    std::istringstream iss(number);
+    if ((iss >> std::dec >> nNumber).fail())
+    {
+        stringstream replacement;
+        replacement << nDefault;
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            "Invalid integer number '" + number + "'. Replaced by '"
+            + replacement.str() + "'.");
+        return nDefault;
+    }
+    else
+        return nNumber;
+}
+
+//---------------------------------------------------------------------------------------
+int MnxElementAnalyser::get_child_value_integer(int nDefault)
+{
+    return static_cast<int>( get_child_value_long(static_cast<int>(nDefault)) );
+}
+
+//---------------------------------------------------------------------------------------
+bool MnxElementAnalyser::is_child_value_float()
+{
+    string number = m_childToAnalyse.value();
+    float rNumber;
+    std::istringstream iss(number);
+    return !((iss >> std::dec >> rNumber).fail());
+}
+
+//---------------------------------------------------------------------------------------
+float MnxElementAnalyser::get_child_value_float(float rDefault)
+{
+    string number = m_childToAnalyse.value();
+    float rNumber;
+    std::istringstream iss(number);
+    if ((iss >> std::dec >> rNumber).fail())
+    {
+        stringstream replacement;
+        replacement << rDefault;
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            "Invalid real number '" + number + "'. Replaced by '"
+            + replacement.str() + "'.");
+        return rDefault;
+    }
+    else
+        return rNumber;
+}
+
+//---------------------------------------------------------------------------------------
+bool MnxElementAnalyser::is_child_value_bool()
+{
+    string value = string(m_childToAnalyse.value());
+    return  value == "true" || value == "yes"
+         || value == "false" || value == "no" ;
+}
+
+//---------------------------------------------------------------------------------------
+bool MnxElementAnalyser::get_child_value_bool(bool fDefault)
+{
+    string value = string(m_childToAnalyse.value());
+    if (value == "true" || value == "yes")
+        return true;
+    else if (value == "false" || value == "no")
+        return false;
+    else
+    {
+        stringstream replacement;
+        replacement << fDefault;
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            "Invalid boolean value '" + value + "'. Replaced by '"
+            + replacement.str() + "'.");
+        return fDefault;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int MnxElementAnalyser::get_child_value_yes_no(int nDefault)
+{
+    string value = m_childToAnalyse.value();
+    if (value == "yes")
+        return k_yesno_yes;
+    else if (value == "no")
+        return k_yesno_no;
+    else
+    {
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            "Invalid yes/no value '" + value + "'. Replaced by default.");
+        return nDefault;
+    }
+}
+
+//-----------------------------------------------------------------------------------
+// Analysers for common attributes
+//-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
+//Note value
+bool MnxElementAnalyser::get_attribute_note_value(int* noteType, int* dots)
+{
+    //return FALSE is error
+
+    if (has_attribute(&m_analysedNode, "value"))
+    {
+        string value = m_analysedNode.attribute_value("value");
+
+//            stringstream s;
+//            s << "get_attribute_note_value. value=" << value;
+
+        //count and remove trailing '*'
+        *dots = 0;
+        while(value.back() == '*')
+        {
+            *dots += 1;
+            value.pop_back();
+        }
+
+        //analyse remaning string
+        if (value == "breve")
+            *noteType = k_longa;
+        else if (value == "1" || value == "whole")
+            *noteType = k_whole;
+        else if (value == "2" || value == "half")
+            *noteType = k_half;
+        else if (value == "4" || value == "quarter")
+            *noteType = k_quarter;
+        else if (value == "8" || value == "eighth")
+            *noteType = k_eighth;
+        else if (value == "16")
+            *noteType = k_16th;
+        else if (value == "32")
+            *noteType = k_32nd;
+        else if (value == "64")
+            *noteType = k_64th;
+        else if (value == "128")
+            *noteType = k_128th;
+        else
+            *noteType = k_256th;
+
+//            s << ". Value=" << value << ", noteType=" << *noteType
+//              << ", dots=" << *dots;
+//            LOMSE_LOG_DEBUG(Logger::k_all, s.str());
+
+        return true;
+    }
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------------
+//@ % tenths
+//@ The tenths entity is a number representing tenths. Both integer and decimal
+//@ values are allowed, such as 5 for a half space and -2.5
+//@<!ENTITY % tenths "CDATA">
+Tenths MnxElementAnalyser::get_attribute_as_tenths(const string& name, Tenths rDefault)
+{
+    if (has_attribute(&m_analysedNode, name))
+    {
+        string number = m_analysedNode.attribute_value(name);
+        float rNumber;
+        std::istringstream iss(number);
+        if ((iss >> std::dec >> rNumber).fail())
+        {
+            stringstream replacement;
+            replacement << rDefault;
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Invalid real number '" + number + "'. Replaced by '"
+                + replacement.str() + "'.");
+            return rDefault;
+        }
+        else
+            return rNumber;
+    }
+    else
+        return rDefault;
+}
+
+//-----------------------------------------------------------------------------------
+//@ % placement
+//@ The placement attribute indicates whether something is
+//@ above or below another element, such as a note or anotation.
+//@<!ENTITY % placement
+//@    "placement %above-below; #IMPLIED">
+int MnxElementAnalyser::get_attribute_placement()
+{
+    if (has_attribute(&m_analysedNode, "placement"))
+    {
+        string value = m_analysedNode.attribute_value("placement");
+        if (value == "above")
+            return k_placement_above;
+        else if (value == "below")
+            return k_placement_below;
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+            return k_placement_default;
+        }
+    }
+    else
+        return k_placement_default;
+}
+
+//-----------------------------------------------------------------------------------
+//@ % text-formatting
+//@ The text-formatting entity contains the common formatting attributes for text
+//@ elements. Default values may differ across the elements that use this entity.
+//@
+//@<!ENTITY % text-formatting
+//@    "%justify;
+//@     %print-style-align;   <------------
+//@     %text-decoration;
+//@     %text-rotation;
+//@     %letter-spacing;
+//@     %line-height;
+//@     xml:lang NMTOKEN #IMPLIED
+//@     xml:space (default | preserve) #IMPLIED
+//@     %text-direction;
+//@     %enclosure;">
+//
+void MnxElementAnalyser::get_attributes_for_text_formatting(ImoObj* pImo)
+{
+    //TODO
+    //get_attributes_for_justify(pImo);
+    get_attributes_for_print_style_align(pImo);
+    //get_attributes_for_text_decoration(pImo);
+    //get_attributes_for_text_rotation(pImo);
+    //get_attributes_for_letter_spacing(pImo);
+    //get_attributes_for_line_height(pImo);
+    //get_attributes_for_text_direction(pImo);
+    //get_attributes_for_enclosure(pImo);
+    //get_attributes_for_xml_lang(pImo);
+    //get_attributes_for_xml_space(pImo);
+}
+
+//-----------------------------------------------------------------------------------
+//@ % print-style-align
+//@ The print-style-align entity adds the halign and valign attributes to the
+//@ position, font, and color attributes.
+//@
+//@<!ENTITY % print-style-align
+//@    "%print-style;
+//@     %halign;
+//@     %valign;">
+//
+void MnxElementAnalyser::get_attributes_for_print_style_align(ImoObj* pImo)
+{
+    get_attributes_for_print_style(pImo);
+    //TODO
+    //get_attributes_for_halign(pImo);
+    //get_attributes_for_valign(pImo);
+}
+
+//-----------------------------------------------------------------------------------
+//@ % print-style
+//@ The print-style entity groups together the most popular combination of
+//@ printing attributes: position, font, and color.
+//@
+//@<!ENTITY % print-style
+//@    "%position;
+//@     %font;
+//@     %color;">
+//
+void MnxElementAnalyser::get_attributes_for_print_style(ImoObj* pImo)
+{
+    get_attributes_for_position(pImo);
+    //TODO
+    //get_attributes_for_font(pImo);
+    get_attribute_color(pImo);
+}
+
+//-----------------------------------------------------------------------------------
+//@ % position
+//@<!ENTITY % position
+//@    "default-x     %tenths;    #IMPLIED
+//@     default-y     %tenths;    #IMPLIED
+//@     relative-x    %tenths;    #IMPLIED
+//@     relative-y    %tenths;    #IMPLIED">
+//@
+void MnxElementAnalyser::get_attributes_for_position(ImoObj* pObj)
+{
+    if (!pObj || !pObj->is_contentobj())
+        return;
+
+    ImoContentObj* pImo = static_cast<ImoContentObj*>(pObj);
+
+    if (has_attribute(&m_analysedNode, "default-x"))
+    {
+        Tenths pos = get_attribute_as_tenths("default-x", 0.0f);
+        if (pos != 0.0f)
+            pImo->set_user_ref_point_x(pos);
+    }
+
+    if (has_attribute(&m_analysedNode, "default-y"))
+    {
+        Tenths pos = get_attribute_as_tenths("default-y", 0.0f);
+        if (pos != 0.0f)
+            //AWARE: positive y is up, negative y is down
+            pImo->set_user_ref_point_y(-pos);
+    }
+
+    if (has_attribute(&m_analysedNode, "relative-x"))
+    {
+        Tenths pos = get_attribute_as_tenths("relative-x", 0.0f);
+        if (pos != 0.0f)
+            pImo->set_user_location_x(pos);
+    }
+
+    if (has_attribute(&m_analysedNode, "relative-y"))
+    {
+        Tenths pos = get_attribute_as_tenths("relative-y", 0.0f);
+        if (pos != 0.0f)
+            //AWARE: positive y is up, negative y is down
+            pImo->set_user_location_y(-pos);
+    }
+}
+
+//-----------------------------------------------------------------------------------
+//@ % color
+//@ The color entity indicates the color of an element. Color may be represented:
+//@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
+//@ - as hexadecimal ARGB tuples (i.e. "#40800080" transparent purple).
+//@   Alpha 00 means 'totally transparent'; FF = 'totally opaque'
+//@ If RGB is used, the A value is assumed to be FF
+//@
+//@<!ENTITY % color
+//@    "color CDATA #IMPLIED">
+//
+void MnxElementAnalyser::get_attribute_color(ImoObj* pImo)
+{
+    if (!pImo || !pImo->is_scoreobj())
+        return;
+
+    ImoScoreObj* pObj = static_cast<ImoScoreObj*>(pImo);
+
+    if (has_attribute(&m_analysedNode, "color"))
+    {
+        string value = m_analysedNode.attribute_value("color");
+        bool fError = false;
+        ImoColorDto color;
+        if (value.length() == 7)
+            color.set_from_rgb_string(value);
+        else if (value.length() == 9)
+            color.set_from_argb_string(value);
+        else
+            fError = true;
+
+        if (fError || !color.is_ok())
+            error_msg("Invalid color value. Default color assigned.");
+        else
+            pObj->set_color( color.get_color() );
+    }
+}
+
+//-----------------------------------------------------------------------------------
+// Analysers for common elements
+//-----------------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------------
+//@ <staff>
+//@ Staff assignment is only needed for music notated on
+//@ multiple staves. Used by both notes and directions. Staff
+//@ values are numbers, with 1 referring to the top-most staff
+//@ in a part.
+//@
+//@ <!ELEMENT staff (#PCDATA)>
+//
+int MnxElementAnalyser::analyse_optional_staff(int nDefault)
+{
+    if (get_optional("staff"))
+        return get_child_value_integer(nDefault);
+    else
+        return nDefault;
+}
+
+
 
 
 
@@ -1514,45 +1266,172 @@ public:
     }
 };
 
-//---------------------------------------------------------------------------------------
-// template for analyser
+//@--------------------------------------------------------------------------------------
+//@ <attributes>
+//@ <!ELEMENT attributes (staff | instrument-sound | tempo | time)* )>
 //
-class TemplateMnxAnalyser : public MnxElementAnalyser
+class AttributesMnxAnalyser : public MnxElementAnalyser
 {
 public:
-    TemplateMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                        LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+    AttributesMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                          LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        {}
+
 
     ImoObj* do_analysis()
     {
-        return nullptr;
+        //In MNX Clefs, time signatures and key signatures are
+        //treated as attributes of a measure, not as objects and, therefore, ordering
+        //is not important for MNX and this information is
+        //coded bad order (first key signatures, then time signatures, then clefs).
+        //As Lomse expects that these objects are defined in correct order,
+        //objects creation will be delayed until all attributes are parsed.
+        vector<ImoObj*> times;
+        vector<ImoObj*> keys;
+        vector<ImoObj*> clefs;
+
+        // (staff | instrument-sound | tempo | time)*    alternatives: zero or more
+        int staves = 0;
+        while (more_children_to_analyse())
+        {
+            if (analyse_optional("staff"))
+            {
+                ++staves;
+            }
+            else if (analyse_optional("time"))
+            {
+            }
+            else if (analyse_optional("instrument-sound"))
+            {
+            }
+            else if (analyse_optional("tempo"))
+            {
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
+        }
+
+//        // staff*
+//        while ();
+//
+//        // key*
+//        while (get_optional("key"))
+//            keys.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+//
+//        // time*
+//        while (get_optional("time"))
+//            times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+//
+        // tempo
+
+        //set staves
+        if (staves > 1)
+        {
+            ImoInstrument* pInstr = m_pAnalyser->get_instrument_being_analysed();
+            for(; staves > 1; --staves)
+                pInstr->add_staff();
+        }
+
+        //add elements to model, in right order
+        vector<ImoObj*>::const_iterator it;
+        for (it = clefs.begin(); it != clefs.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = keys.begin(); it != keys.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = times.begin(); it != times.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        return m_pAnchor;
     }
+
+protected:
+    void set_divisions()
+    {
+        // Musical notation duration is commonly represented as fractions. The divisions
+        // element indicates how many divisions per quarter note are used to indicate a
+        // note's duration. For example, if duration = 1 and divisions = 2, this is an
+        // eighth note duration. Duration and divisions are used directly for generating
+        // sound output, so they must be chosen to take tuplets into account. Using a
+        // divisions element lets us use just one number to represent a duration for
+        // each note in the score, while retaining the full power of a fractional
+        // representation. If maximum compatibility with Standard MIDI 1.0 files is
+        // important, do not have the divisions value exceed 16383.
+
+        int divisions = get_child_value_integer(4);
+        m_pAnalyser->set_current_divisions( float(divisions) );
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
 //@ <event>
-//@     (note | rest)*)>
-//@ value
-//@ grace="true"
+//@<!ELEMENT event ( stem?,
+//@    (note | rest | tuplet | lyric | beam)* )>
+//@<!ATTLIST event
+//@    value            ==> event duration, expressed in terms of note value and dot count
+//@    grace="true"     ==> grace notes
+//@    type="measure"   ==> For full measure rests
+//@>
 //
 class EventMnxAnalyser : public MnxElementAnalyser
 {
+protected:
+    struct NoteInfo
+    {
+        int step;
+        int octave;
+        EAccidentals accidentals;
+        float alterations;
+
+        NoteInfo(int s, int o, EAccidentals acc, float alter)
+        {
+            step = s;
+            octave = o;
+            accidentals = acc;
+            alterations = alter;
+        }
+    };
+
+    struct RestInfo
+    {
+        int displayStep;
+        int displayOctave;
+
+        RestInfo(int s, int o)
+        {
+            displayStep = s;
+            displayOctave = o;
+        }
+    };
+
+    vector<NoteInfo*> m_notes;
+    vector<RestInfo*> m_rests;
+
 public:
     EventMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
+    ~EventMnxAnalyser()
+    {
+        delete_info_objects();
+    }
+
     ImoObj* do_analysis()
     {
-        //<event> is processed in two steps:
-        //- First the element content is parsed and all information about notes
-        //  and rests is saved.
-        //- Then the notes/rest are created and added to the model.
-
         //First step: extract information -----------------------------------------------
-
-        //vector
 
         // attrib: value
         int noteType;
@@ -1562,44 +1441,31 @@ public:
             error_msg("Missing or invalid 'value' attribute in <event>.");
             return nullptr;
         }
-//        stringstream s;
-//        s << "EventMnxAnalyser. noteType=" << noteType
-//          << ", dots=" << dots;
-//        LOMSE_LOG_DEBUG(Logger::k_all, s.str());
 
         // attrib: grace
             //TODO
         //bool fIsGrace = false;
 
-        // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
+        // attrib: type
+            //TODO
+
+        // (xxxx | yyyy | zzzz)*    alternatives: zero or more
         while (more_children_to_analyse())
         {
             if (get_optional("note"))
-            {
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
-                pNR->set_note_type_and_dots(noteType, dots);
-                pNR->set_notated_pitch(2, 4, k_no_accidentals);
-                pNR->set_staff(0);  // m_pAnalyser->get_current_staff() );
-                pNR->set_voice( m_pAnalyser->get_current_voice() );
-                add_to_model(pNR);
-                m_pAnalyser->shift_time( pNR->get_duration() );
-
                 analyse_note();
-            }
             else if (get_optional("rest"))
-            {
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoRest* pNR = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
-                pNR->set_note_type_and_dots(noteType, dots);
-                add_to_model(pNR);
-                pNR->set_staff(0);  // m_pAnalyser->get_current_staff() );
-                pNR->set_voice( m_pAnalyser->get_current_voice() );
-                m_pAnalyser->shift_time( pNR->get_duration() );
-
                 analyse_rest();
-            }
             else if (get_optional("stem"))
+            {
+            }
+            else if (get_optional("tuplet"))
+            {
+            }
+            else if (get_optional("lyric"))
+            {
+            }
+            else if (get_optional("beam"))
             {
             }
             else
@@ -1610,7 +1476,57 @@ public:
         }
 
 
-        //second step: create note/rests ------------------------------------------------
+        //second step: create notes -----------------------------------------------------
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        int staff = m_pAnalyser->get_current_staff();
+
+        //add notes
+        bool fIsChord = m_notes.size() > 1;
+        vector<NoteInfo*>::iterator itN;
+        ImoNote* pPrevNote = nullptr;
+        for (itN = m_notes.begin(); itN != m_notes.end(); ++itN)
+        {
+            ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
+            pNR->set_note_type_and_dots(noteType, dots);
+            pNR->set_notated_pitch((*itN)->step, (*itN)->octave, (*itN)->accidentals);
+            pNR->set_staff(staff);
+            pNR->set_voice( m_pAnalyser->get_current_voice() );
+            add_to_model(pNR);
+
+            //deal with notes in chord
+            if (fIsChord)
+            {
+                if (!pPrevNote)
+                {
+                    //this note is the base note. Create the chord
+                    ImoChord* pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
+                    pNR->include_in_relation(pDoc, pChord);
+                }
+                else
+                {
+                    //chord already created. just add this note to itN
+                    ImoChord* pChord = pPrevNote->get_chord();
+                    pNR->include_in_relation(pDoc, pChord);
+                }
+            }
+            pPrevNote = pNR;
+            delete *itN;
+        }
+
+        //add rests
+        vector<RestInfo*>::iterator itR;
+        for (itR = m_rests.begin(); itR != m_rests.end(); ++itR)
+        {
+            ImoRest* pNR = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
+            pNR->set_note_type_and_dots(noteType, dots);
+            add_to_model(pNR);
+            pNR->set_staff(staff);
+            pNR->set_voice( m_pAnalyser->get_current_voice() );
+            delete *itR;
+        }
+
+//        m_pAnalyser->shift_time( pNR->get_duration() );
 
         return nullptr;
     }
@@ -1619,527 +1535,63 @@ protected:
 
     void analyse_note()
     {
-        string pitch;   // = pParamToAnalyse->get_value();
-        int step, octave;
+        //@ <note>
+        //@<!ELEMENT note EMPTY )>
+        //@<!ATTLIST note
+        //@    pitch
+        //@>
+
+        if (!m_childToAnalyse.has_attribute("pitch"))
+        {
+            error_msg("Missing attribute 'pitch' in note. note ignored.");
+            return;
+        }
+
+        string pitch = m_childToAnalyse.attribute_value("pitch");
+        int step = k_step_C;
+        int octave = 4;
         EAccidentals accidentals = k_no_accidentals;
         float alter = 0.0f;
-//        if (pitch == "*")
-//            pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
-//        else
-//        {
-            if (MnxAnalyser::pitch_to_components(pitch, &step, &octave,
-                                                 &accidentals, &alter))
-            {
-//                report_msg(m_pParamToAnalyse->get_line_number(),
-//                    "Unknown note pitch '" + pitch + "'. Replaced by 'C4'.");
-//                pNote->set_notated_pitch(k_step_C, 4, k_no_accidentals);
-            }
-//            else
-//                pNote->set_notated_pitch(step, octave, accidentals);
-//        }
+        NoteInfo* pInfo;
+        if (MnxAnalyser::pitch_to_components(pitch, &step, &octave,&accidentals, &alter))
+        {
+            error_msg("Unknown note pitch '" + pitch + "'. Replaced by 'C4'.");
+            pInfo = LOMSE_NEW NoteInfo(k_step_C, 4, k_no_accidentals, 0.0f);
+        }
+        else
+            pInfo = LOMSE_NEW NoteInfo(step, octave, accidentals, alter);
+
+        m_notes.push_back(pInfo);
     }
 
     void analyse_rest()
     {
+        //@ <rest>
+        //@<!ELEMENT rest EMPTY )>
+        //@<!ATTLIST rest
+        //@>
+
+        int step = k_step_C;
+        int octave = 4;
+        RestInfo* pInfo = LOMSE_NEW RestInfo(step, octave);
+        m_rests.push_back(pInfo);
     }
 
+    void delete_info_objects()
+    {
+        m_notes.clear();
+        m_rests.clear();
+    }
 
 };
 
 //@--------------------------------------------------------------------------------------
-////@ <!ELEMENT note
-////@     (((grace, %full-note;, (tie, tie?)?) |
-////@      (cue, %full-note;, duration) |
-////@      (%full-note;, duration, (tie, tie?)?)),
-////@      instrument?, %editorial-voice;, type?, dot*,
-////@      accidental?, time-modification?, stem?, notehead?,
-////@      notehead-text?, staff?, beam*, notations*, lyric*, play?)>
-////@ <!ELEMENT cue EMPTY>
-////@ <!ELEMENT grace EMPTY>
-////@ <!ENTITY % full-note "(chord?, (pitch | unpitched | rest))">
-////@
-////@ - Grace notes do not have a duration element.
-////@ - Cue notes have a duration element, as do forward elements, but no tie elements.
-////@
-//
-//class NoteRestMnxAnalyser : public MnxElementAnalyser
-//{
-//protected:
-//    ImoBeamDto* m_pBeamInfo;
-////    ImoSlurDto* m_pSlurDto;
-////    std::string m_srcOldTuplet;
-//
-//public:
-//    NoteRestMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                     ImoObj* pAnchor)
-//        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-//        , m_pBeamInfo(nullptr)
-////        , m_pSlurDto(nullptr)
-////        , m_srcOldTuplet("")
-//    {
-//    }
-//
-//    ImoObj* do_analysis()
-//    {
-//        bool fIsCue = get_optional("cue");
-//        bool fIsGrace = get_optional("grace");
-//        bool fInChord = false;
-//        bool fIsRest = false;
-//
-//        //for now, ignore cue & grace notes
-//        if (fIsCue || fIsGrace)
-//            return nullptr;
-//
-//        // [<chord>]
-//        if (get_optional("chord"))
-//        {
-//            //The chord element indicates that this note is an additional chord tone
-//            //with the preceding note. The duration of this note can be no longer
-//            //than the preceding note.
-//            fInChord = true;
-//        }
-//
-//        // <pitch> | <unpitched> | <rest>
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoNoteRest* pNR = nullptr;
-//        ImoNote* pNote = nullptr;
-//        ImoRest* pRest = nullptr;
-//
-//        if (get_optional("rest"))
-//        {
-//            fIsRest = true;
-//            pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
-//            pNR = pRest;
-//            pRest->mark_as_full_measure( analyse_rest() );
-//        }
-//        else
-//        {
-//            pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
-//            pNR = pNote;
-//            if (get_optional("unpitched"))
-//                pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
-//            else
-//                analyse_mandatory("pitch", pNote);
-//        }
-//
-//        // <duration>, except for grace notes
-//        int duration = 0;
-//        if (!fIsGrace && get_optional("duration"))
-//            duration = get_child_value_integer(0);
-//
-//        //tie, except for cue notes
-//        //AWARE: <tie> is for sound
-//        if (!fIsCue && get_optional("tie"))
-//        {
-//        }
-//        if (!fIsCue && get_optional("tie"))
-//        {
-//        }
-//
-//        // [<instrument>]
-//        if (get_optional("instrument"))
-//        {
-//        }
-//
-//        // [<voice>]
-//        int voice = m_pAnalyser->get_current_voice();
-//        if (get_optional("voice"))
-//            voice = get_child_value_integer( voice );
-//        set_voice(pNR, voice);
-//
-//        // [<type>]
-//        string type;
-//        if (get_optional("type"))
-//            type = m_childToAnalyse.value();
-//
-//        // <dot>*
-//        int dots = 0;
-//        while (get_optional("dot"))
-//            dots++;
-//
-//        set_type_duration(pNR, type, dots, duration);
-//
-//        // [<accidental>]
-//        if (!fIsRest && get_optional("accidental"))
-//            set_notated_accidentals(pNote);
-//
-//        // [<time-modification>]
-//        analyse_optional("time-modification", pNR);
-//
-//        // [<stem>]
-//        if (!fIsRest && get_optional("stem"))
-//            set_stem(pNote);
-//
-//        // [<notehead>]
-//        if (get_optional("notehead"))
-//        {
-//        }
-//
-//        // [<notehead-text>]
-//        if (get_optional("notehead-text"))
-//        {
-//        }
-//
-//        //add note/rest to open tuplets
-//        m_pAnalyser->add_to_open_tuplets(pNR);
-//
-//        // [<staff>]
-//        if (get_optional("staff"))
-//            pNR->set_staff(get_child_value_integer(1) - 1);
-//
-//        // <beam>*
-//        while (get_optional("beam"))
-//            analyse_beam();
-//        add_beam_info(pNR);
-//
-//        // <notations>*
-//        while (analyse_optional("notations", pNR));
-//
-//        // <lyric>*
-//        while (analyse_optional("lyric", pNR));
-//
-//        // [<play>]
-//        if (get_optional("play"))
-//        {
-//        }
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pNR);
-//
-//        //deal with notes in chord
-//        if (!fIsRest && fInChord)
-//        {
-//            ImoNote* pPrevNote = m_pAnalyser->get_last_note();
-//            ImoChord* pChord;
-//            if (pPrevNote->is_in_chord())
-//            {
-//                //chord already created. just add note to it
-//                pChord = pPrevNote->get_chord();
-//            }
-//            else
-//            {
-//                //previous note is the base note. Create the chord
-//                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-//                pPrevNote->include_in_relation(pDoc, pChord);
-//            }
-//
-//            //add current note to chord
-//            pNote->include_in_relation(pDoc, pChord);
-//
-////        //TODO: check if note in chord has the same duration than base note
-////      //  if (fInChord && m_pLastNote
-////      //      && !IsEqualTime(m_pLastNote->GetDuration(), rDuration) )
-////      //  {
-////      //      report_msg("Error: note in chord has different duration than base note. Duration changed.");
-////		    //rDuration = m_pLastNote->GetDuration();
-////      //      nNoteType = m_pLastNote->GetNoteType();
-////      //      nDots = m_pLastNote->GetNumDots();
-////      //  }
-//        }
-//
-//        //save this note as last note
-//        if (!fIsRest)
-//            m_pAnalyser->save_last_note(pNote);
-//
-//        m_pAnalyser->shift_time( pNR->get_duration() );
-//        return pNR;
-//    }
-//
-//protected:
-//
-//    //----------------------------------------------------------------------------------
-//    bool analyse_rest()
-//    {
-//        //@ <!ELEMENT rest ((display-step, display-octave)?)>
-//        //@ <!ATTLIST rest
-//        //@      measure %yes-no; #IMPLIED
-//        //@ >
-//
-//        //returns value of measure attrib. (true or false)
-//        if (has_attribute(&m_childToAnalyse, "measure"))
-//        {
-//            const string& measure = m_childToAnalyse.attribute_value("measure");
-//            return measure == "yes";
-//        }
-//        else
-//            return false;
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void set_type_duration(ImoNoteRest* pNR, const string& type, int dots,
-//                           int duration)
-//    {
-//        int noteType = k_unknown_notetype;
-//        TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
-//        if (!type.empty())
-//            noteType = get_note_type(type);
-//        else if (pNR->is_rest() && static_cast<ImoRest*>(pNR)->is_full_measure())
-//        {
-//            dots = 0;
-//            noteType = k_whole;
-//        }
-//        else
-//        {
-//            //<type> is not required in multi-metric rests. And, in any
-//            //case it is not mandatory. If not present, <type>
-//            //must be derived from <duration>.
-//            if (is_equal_time(units, k_duration_longa))
-//                noteType = k_longa;
-//            else if (is_equal_time(units, k_duration_whole))
-//                noteType = k_whole;
-//            else if (is_equal_time(units, k_duration_half))
-//                noteType = k_half;
-//            else if (is_equal_time(units, k_duration_quarter))
-//                noteType = k_duration_quarter;
-//            else if (is_equal_time(units, k_duration_eighth))
-//                noteType = k_duration_eighth;
-//            else if (is_equal_time(units, k_duration_16th))
-//                noteType = k_duration_16th;
-//            else if (is_equal_time(units, k_duration_32nd))
-//                noteType = k_duration_32nd;
-//            else if (is_equal_time(units, k_duration_64th))
-//                noteType = k_duration_64th;
-//            else if (is_equal_time(units, k_duration_128th))
-//                noteType = k_duration_128th;
-//            else
-//                noteType = k_duration_256th;
-//        }
-//
-//        pNR->set_type_dots_duration(noteType, dots, units);
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    int get_note_type(const string& type)
-//    {
-//        int noteType = k_unknown_notetype;
-//
-//        if (type == "quarter")
-//            noteType = k_quarter;
-//        else if (type == "eighth")
-//            noteType = k_eighth;
-//        else if (type == "16th")
-//            noteType = k_16th;
-//        else if (type == "half")
-//            noteType = k_half;
-//        else if (type == "32nd")
-//            noteType = k_32nd;
-//        else if (type == "64th")
-//            noteType = k_64th;
-//        else if (type == "whole")
-//            noteType = k_whole;
-//        else if (type == "long")
-//            noteType = k_longa;
-//        else if (type == "128th")
-//            noteType = k_128th;
-//        else if (type == "256th")
-//            noteType = k_256th;
-//        else if (type == "breve")
-//            noteType = k_breve;
-////        else if (type == "512th")
-////            noteType = k_512th;
-////        else if (type == "1024th")
-////            noteType = k_1024th;
-////        else if (type == "maxima")
-////            noteType = k_maxima;
-//        else
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Invalid or not supported <type> value '" + type + "'. Replaced by 'eighth'.");
-//            noteType = k_eighth;
-//        }
-//        return noteType;
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void set_notated_accidentals(ImoNote* pNote)
-//    {
-//        //@ <!ELEMENT accidental (#PCDATA)>
-//        //@ <!ATTLIST accidental
-//        //@           cautionary %yes-no; #IMPLIED
-//        //@           editorial %yes-no; #IMPLIED
-//        //@           %level-display;
-//        //@           %print-style;
-//        //@>
-//        EAccidentals accidentals = k_no_accidentals;
-//        string acc = m_childToAnalyse.value();  //get_child_value_string();
-//        if (acc == "sharp")
-//            accidentals = k_sharp;
-//        else if (acc == "natural")
-//            accidentals = k_natural;
-//        else if (acc == "flat")
-//            accidentals = k_flat;
-//        else if (acc == "double-sharp")
-//            accidentals = k_double_sharp;
-//        else if (acc == "sharp-sharp")
-//            accidentals = k_sharp_sharp;
-//        else if (acc == "flat-flat")
-//            accidentals = k_flat_flat;
-//        //else if (acc == "double-flat")
-//            //AWARE: double-flat is not in the specification. Lilypond test suite
-//            //       uses it and MuseScore imports it correctly. But Michael Good
-//            //       is clear about this. See:
-//            //http://forums.makemusic.com/viewtopic.php?f=12&t=2253&p=5965#p5964
-//            //http://forums.makemusic.com/viewtopic.php?f=12&t=2408&p=6558#p6556
-//            //accidentals = k_flat_flat;
-//        else if (acc == "natural-sharp")
-//            accidentals = k_natural_sharp;
-//        else if (acc == "natural-flat")
-//            accidentals = k_natural_flat;
-//
-////        //Tartini-style quarter-tone accidentals
-////        else if (acc == "quarter-flat")
-////        else if (acc == "quarter-sharp")
-////        else if (acc == "three-quarters-flat")
-////        else if (acc == "three-quarters-sharp")
-////        //quarter-tone accidentals that include arrows pointing down or up
-////        else if (acc == "sharp-down")
-////        else if (acc == "sharp-up")
-////        else if (acc == "natural-down")
-////        else if (acc == "natural-up")
-////        else if (acc == "flat-down")
-////        else if (acc == "flat-up")
-////        else if (acc == "triple-sharp")
-////        else if (acc == "triple-flat")
-////        //used in Turkish classical music
-////        else if (acc == "slash-quarter-sharp")
-////        else if (acc == "slash-sharp")
-////        else if (acc == "slash-flat")
-////        else if (acc == "double-slash-flat")
-////        //superscripted versions of the accidental signs, used in Turkish folk music
-////        else if (acc == "sharp-1")
-////        else if (acc == "sharp-2")
-////        else if (acc == "sharp-3")
-////        else if (acc == "sharp-5")
-////        else if (acc == "flat-1")
-////        else if (acc == "flat-2")
-////        else if (acc == "flat-3")
-////        else if (acc == "flat-4")
-////        //microtonal sharp and flat accidentals used in Iranian and Persian music
-////        else if (acc == "sori")
-////        else if (acc == "koron")
-//
-//        else
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
-//        }
-//        pNote->set_notated_accidentals(accidentals);
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void set_stem(ImoNote* pNote)
-//    {
-//        string type = m_childToAnalyse.value();
-//        ENoteStem value = k_stem_default;
-//
-//        if (type == "none")
-//            value = k_stem_none;
-//        else if (type == "up")
-//            value = k_stem_up;
-//        else if (type == "down")
-//            value = k_stem_down;
-//        else if (type == "double")
-//            value = k_stem_double;
-//        else
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Invalid or not supported <stem> value '" + type + "'. Replaced by 'default'.");
-//        }
-//        pNote->set_stem_direction(value);
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void set_duration(ImoNoteRest* pNR)
-//    {
-//        pNR->set_note_type_and_dots(k_whole, 0);
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void analyse_beam()
-//    {
-//        //@ <!ELEMENT beam (#PCDATA)>
-//        //@ <!ATTLIST beam number %beam-level; "1" repeater %yes-no; #IMPLIED >
-//
-//        // attrib: number
-//        const string& level = m_childToAnalyse.attribute_value("number");
-//        int iLevel;
-//        if (m_pAnalyser->to_integer(level, &iLevel))
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Missing or invalid beam number '" + level + "'. Beam ignored.");
-//            return;
-//        }
-//
-//        if (iLevel <= 0 || iLevel > 6)
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Invalid beam number '" + level +"'. Beam ignored.");
-//            return;
-//        }
-//
-//        // value: beam type
-//        const string& type = m_childToAnalyse.value();
-//        int iType = ImoBeam::k_none;
-//        if (type == "begin")
-//            iType = ImoBeam::k_begin;
-//        else if (type == "continue")
-//            iType = ImoBeam::k_continue;
-//        else if (type == "end")
-//            iType = ImoBeam::k_end;
-//        else if (type == "forward hook")
-//            iType = ImoBeam::k_forward;
-//        else if (type == "backward hook")
-//            iType = ImoBeam::k_backward;
-//        else
-//        {
-//            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//            error_msg2(
-//                "Invalid or not supported <beam> value '" + type + "'. Beam ignored");
-//            return;
-//        }
-//
-//        if (m_pBeamInfo == nullptr)
-//            m_pBeamInfo = LOMSE_NEW ImoBeamDto();
-//
-//        m_pBeamInfo->set_beam_type(--iLevel, iType);
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void add_beam_info(ImoNoteRest* pNR)
-//    {
-//        if (m_pBeamInfo)
-//        {
-//            m_pBeamInfo->set_note_rest(pNR);
-//            m_pAnalyser->add_relation_info(m_pBeamInfo);
-//        }
-//    }
-//
-//    //----------------------------------------------------------------------------------
-//    void set_voice(ImoNoteRest* pNR, int voice)
-//    {
-//        m_pAnalyser->set_current_voice(voice);
-//        pNR->set_voice(voice);
-//    }
-//
-//};
-
-//@--------------------------------------------------------------------------------------
 //@ <head>
-//<head>
-//    <identification>
-//        <title>My Favorite Work</title>
-//        <creator type="composer">Alan Smithee</creator>
-//    </identification>
-//    <style>
-//        @import url(mystyles.css);
-//    </style>
-//</head>
+//@ <!ELEMENT head (identification?, style?
+//@     (sequence)* ) >
+//@ <!ATTLIST head
+//@>
+//
 class HeadMnxAnalyser : public MnxElementAnalyser
 {
 protected:
@@ -2159,10 +1611,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <!ELEMENT measure (attributes?,
-//@     (sequence)*) >
-//@     "(note | backup | forward | direction | attributes |
-//@       harmony | figured-bass | print | sound | barline |
-//@       grouping | link | bookmark)*">
+//@     (sequence)* ) >
 ////@ <!ATTLIST measure
 ////@     number CDATA #REQUIRED
 ////@     implicit %yes-no; #IMPLIED
@@ -2200,25 +1649,8 @@ public:
         {
             if (analyse_optional("sequence", pMD))
                 fSomethingAdded = true;
-//            if (analyse_optional("attributes", pMD))
-//                fSomethingAdded = true;
 //            else if (analyse_optional("barline", pMD))
 //                fSomethingAdded = true;
-//            else if (analyse_optional("direction", pMD))
-//                //TODO: add fSomethingAdded = true;  when direction analyser coded
-//                ;
-//            else if (analyse_optional("note", pMD))
-//                fSomethingAdded = true;
-//            else if (analyse_optional("forward", pMD))
-//                fSomethingAdded = true;
-//            else if (analyse_optional("backup", pMD))
-//                fSomethingAdded = true;
-//            else if (analyse_optional("print"))
-//                //TODO: add fSomethingAdded = true;  when print analyser coded
-//                ;
-//            else if (analyse_optional("sound", pMD))
-//                //TODO: add fSomethingAdded = true;  when sound analyser coded
-//                ;
             else
             {
                 error_invalid_child();
@@ -2326,192 +1758,12 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <score>
-//@<!ELEMENT score (system?,
-//@    part*)
-//@<
-//<!ATTLIST score
-//    content
-//>
-//
-//<score content="cwmn">
-//    <system>
-//        // measures describing system-wide features...
-//    </system>
-//    <part>
-//        // descriptive info for part 1...
-//        // measures describing part 1...
-//    </part>
-//    <part>
-//        // descriptive info for part 2...
-//        // measures describing part 2...
-//    </part>
-//    // additional parts...
-//</score>
-
-class ScoreMnxAnalyser : public MnxElementAnalyser
-{
-public:
-    ScoreMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                     LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoContent* pContent = static_cast<ImoContent*>(
-                        ImFactory::inject(k_imo_content, pDoc) );
-        add_to_model(pContent);
-
-        // attrb: content
-        if (get_attribute("content") != "cwmn")
-        {
-            error_msg("Invalid or unsupported score type '" + get_attribute("content")
-                      + "'.");
-            return nullptr;
-        }
-
-        ImoScore* pScore = create_score();
-
-		//TODO
-        // system?
-        get_optional("system");
-
-        // part*
-        analyse_mandatory("part", pScore);
-
-        m_pAnalyser->add_all_instruments(pScore);
-        return pScore;
-    }
-
-protected:
-
-    ImoScore* create_score()
-    {
-        //add an empty score
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
-        m_pAnalyser->score_analysis_begin(pScore);
-        add_to_model(pScore);
-        m_pAnchor = pScore;
-
-        pScore->set_version(200);   //2.0
-        set_options(pScore);
-        pScore->add_required_text_styles();
-
-        return pScore;
-    }
-
-    void set_options(ImoScore* pScore)
-    {
-        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
-        pOpt->set_float_value(0.35f);
-
-        pOpt = pScore->get_option("Score.JustifyLastSystem");
-        pOpt->set_long_value(3);    //justify it in any case
-
-        pOpt = pScore->get_option("Render.SpacingOptions");
-        pOpt->set_long_value(k_render_opt_breaker_optimal
-                             | k_render_opt_dmin_global);
-    }
-
-};
-
-//@--------------------------------------------------------------------------------------
-//@ <!ELEMENT sequence
-//@     (event | direction | tuplet )* >
-//@ <!ATTLIST sequence
-//@     orientation
-//@     staff
-//@     name
-//@ >
-class SequenceMnxAnalyser : public MnxElementAnalyser
-{
-public:
-    SequenceMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
-                        LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
-        while (more_children_to_analyse())
-        {
-            if (analyse_optional("event", m_pAnchor)
-                || analyse_optional("direction", m_pAnchor)
-                || analyse_optional("tuplet", m_pAnchor)
-               )
-            {
-            }
-            else
-            {
-                error_invalid_child();
-                move_to_next_child();
-            }
-        }
-        return nullptr;
-    }
-};
-
-//@--------------------------------------------------------------------------------------
-//@ <part-name> = string
-//@ attrb:   print-object="no"
-
-class PartNameMnxAnalyser : public MnxElementAnalyser
-{
-public:
-    PartNameMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-
-    ImoObj* do_analysis()
-    {
-//        //attrb: print-object
-//        string print = get_optional_string_attribute("print-object", "yes");
-//        bool fVisible = (print == "yes" ? true : false);
-//
-//        if (fVisible)
-//        {
-            //get value
-            string name = m_analysedNode.value();
-            if (!name.empty())
-            {
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoScoreText* pText = static_cast<ImoScoreText*>(
-                            ImFactory::inject(k_imo_score_text, pDoc));
-                pText->set_text(name);
-
-
-                // [<style>]
-                ImoStyle* pStyle = nullptr;
-    //            if (get_optional(k_style))
-    //                pStyle = get_text_style_param(m_styleName);
-    //            else
-                {
-                    ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-                    if (pScore)     //in unit tests the score might not exist
-                        pStyle = pScore->get_default_style();
-                }
-                pText->set_style(pStyle);
-
-                add_to_model(pText, k_name);
-            }
-//        }
-
-        return nullptr;
-    }
-};
-
-
-// score-part + part = --> part
-//@--------------------------------------------------------------------------------------
 //@<!ELEMENT part (identification?,
 //@    part-name, part-name-display?,
 //@    part-abbreviation?, part-abbreviation-display?,
 //@    group*, score-instrument*,
 //@    (midi-device?, midi-instrument?)*,
-//@    measure*) >
+//@    measure* )>
 //@<!ATTLIST part
 //@    id ID #REQUIRED
 //@>
@@ -2525,20 +1777,7 @@ public:
 
     ImoObj* do_analysis()
     {
-//        //attrb: id
-//        string id = get_mandatory_string_attribute("id", "", "score-part");
-//        if (id.empty())
-//            return nullptr;
-
-        ImoInstrument* pInstrument = create_instrument("P1");   //id);
-
-//        //attrb: id
-//        string id = get_optional_string_attribute("id", "");
-//        if (id.empty())
-//        {
-//            error_msg("<part>: missing mandatory 'id' attribute. <part> content will be ignored");
-//            return nullptr;
-//        }
+        ImoInstrument* pInstrument = create_instrument();
 
         // part-name
         analyse_optional("part-name", pInstrument);
@@ -2594,7 +1833,7 @@ public:
 
 protected:
 
-    ImoInstrument* create_instrument(const string& id)
+    ImoInstrument* create_instrument()
     {
         m_pAnalyser->clear_pending_relations();
 
@@ -2603,17 +1842,248 @@ protected:
                                         ImFactory::inject(k_imo_instrument, pDoc) );
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, pDoc) );
+
+
+        string id = generate_new_id();
         pInstrument->set_instr_id(id);
 
         Linker linker(pDoc);
         linker.add_child_to_model(pInstrument, pMD, pMD->get_obj_type());
-
         m_pAnalyser->add_score_part(id, pInstrument);
+        m_pAnalyser->instrument_analysis_begin(pInstrument);
         return pInstrument;
+    }
+
+    string generate_new_id()
+    {
+        static int num=1;
+        stringstream s;
+        s << "P" << num;
+        ++num;
+        return s.str();
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <part-name> = string
+//@ attrb:   print-object="no"
+//
+class PartNameMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    PartNameMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+//        //attrb: print-object
+//        string print = get_optional_string_attribute("print-object", "yes");
+//        bool fVisible = (print == "yes" ? true : false);
+//
+//        if (fVisible)
+//        {
+            //get value
+            string name = m_analysedNode.value();
+            if (!name.empty())
+            {
+                Document* pDoc = m_pAnalyser->get_document_being_analysed();
+                ImoScoreText* pText = static_cast<ImoScoreText*>(
+                            ImFactory::inject(k_imo_score_text, pDoc));
+                pText->set_text(name);
+
+
+                // [<style>]
+                ImoStyle* pStyle = nullptr;
+    //            if (get_optional(k_style))
+    //                pStyle = get_text_style_param(m_styleName);
+    //            else
+                {
+                    ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+                    if (pScore)     //in unit tests the score might not exist
+                        pStyle = pScore->get_default_style();
+                }
+                pText->set_style(pStyle);
+
+                add_to_model(pText, k_name);
+            }
+//        }
+
+        return nullptr;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <score>
+//@<!ELEMENT score (system?,
+//@    part* )>
+//@<!ATTLIST score
+//@    content="cwmn"
+//@    profile="standard"
+//@>
+//
+class ScoreMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    ScoreMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoContent* pContent = static_cast<ImoContent*>(
+                        ImFactory::inject(k_imo_content, pDoc) );
+        add_to_model(pContent);
+
+        // attrb: content
+        if (get_attribute("content") != "cwmn")
+        {
+            error_msg("Invalid or unsupported score type '" + get_attribute("content")
+                      + "'.");
+            return nullptr;
+        }
+
+        ImoScore* pScore = create_score();
+
+		//TODO
+        // system?
+        get_optional("system");
+
+        // part*
+        while (analyse_mandatory("part", pScore));
+
+        m_pAnalyser->add_all_instruments(pScore);
+        return pScore;
+    }
+
+protected:
+
+    ImoScore* create_score()
+    {
+        //add an empty score
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
+        m_pAnalyser->score_analysis_begin(pScore);
+        add_to_model(pScore);
+        m_pAnchor = pScore;
+
+        pScore->set_version(200);   //2.0
+        set_options(pScore);
+        pScore->add_required_text_styles();
+
+        return pScore;
+    }
+
+    void set_options(ImoScore* pScore)
+    {
+        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
+        pOpt->set_float_value(0.35f);
+
+        pOpt = pScore->get_option("Score.JustifyLastSystem");
+        pOpt->set_long_value(3);    //justify it in any case
+
+        pOpt = pScore->get_option("Render.SpacingOptions");
+        pOpt->set_long_value(k_render_opt_breaker_optimal
+                             | k_render_opt_dmin_global);
     }
 
 };
 
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT sequence
+//@     (event | direction | tuplet)* )>
+//@ <!ATTLIST sequence
+//@     orientation
+//@     staff
+//@     name
+//@ >
+class SequenceMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    SequenceMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        // attrib: orientation
+            //TODO
+
+        // attrib: staff
+        m_pAnalyser->set_current_staff( get_attribute_as_integer("staff", 1) - 1 );
+
+        // attrib: name
+            //TODO
+        m_pAnalyser->set_current_voice( m_pAnalyser->get_current_voice() + 1 );
+
+
+        // (event | direction | tuplet)*    alternatives: zero or more
+        while (more_children_to_analyse())
+        {
+            if (analyse_optional("event", m_pAnchor)
+                || analyse_optional("direction", m_pAnchor)
+                || analyse_optional("tuplet", m_pAnchor)
+               )
+            {
+            }
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
+        }
+        return nullptr;
+    }
+
+protected:
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <staff>
+//@ <!ELEMENT staff
+//@     (clef | bbb | ccc)* )>
+//@ <!ATTLIST staff
+//@     mmm
+//@     nnn
+//@ >
+//
+class StaffMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    StaffMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        return nullptr;
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <template_for_analyser>
+//@ <!ELEMENT xxxx
+//@     (aaa | bbb | ccc)* )>
+//@ <!ATTLIST xxxx
+//@     mmm
+//@     nnn
+//@ >
+//
+class TemplateMnxAnalyser : public MnxElementAnalyser
+{
+public:
+    TemplateMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        return nullptr;
+    }
+};
 
 
 
@@ -2868,10 +2338,10 @@ protected:
 ////@     transpose*, directive*, measure-style*)>
 ////@
 ////
-//class AtribbutesMnxAnalyser : public MnxElementAnalyser
+//class AttributesMnxAnalyser : public MnxElementAnalyser
 //{
 //public:
-//    AtribbutesMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+//    AttributesMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
 //                    ImoObj* pAnchor)
 //        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
 //        {}
@@ -6587,18 +6057,9 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_divisions(1.0f)
 {
     //populate the name to enum conversion map
-    m_NameToEnum["event"] = k_mnx_tag_event;
-    m_NameToEnum["head"] = k_mnx_tag_head;
-    m_NameToEnum["measure"] = k_mnx_tag_measure;
-    m_NameToEnum["mnx"] = k_mnx_tag_mnx;
-    m_NameToEnum["part"] = k_mnx_tag_part;
-    m_NameToEnum["part-name"] = k_mnx_tag_part_name;
-    m_NameToEnum["score"] = k_mnx_tag_score;
-    m_NameToEnum["sequence"] = k_mnx_tag_sequence;
-
 //    m_NameToEnum["accordion-registration"] = k_mnx_tag_accordion_registration;
 //    m_NameToEnum["articulations"] = k_mnx_tag_articulations;
-//    m_NameToEnum["attributes"] = k_mnx_tag_attributes;
+    m_NameToEnum["attributes"] = k_mnx_tag_attributes;
 //    m_NameToEnum["backup"] = k_mnx_tag_backup;
 //    m_NameToEnum["barline"] = k_mnx_tag_barline;
 //    m_NameToEnum["bracket"] = k_mnx_tag_bracket;
@@ -6611,22 +6072,28 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["direction-type"] = k_mnx_tag_direction_type;
 //    m_NameToEnum["dynamics"] = k_mnx_tag_dynamics;
 //    m_NameToEnum["ending"] = k_mnx_tag_ending;
+    m_NameToEnum["event"] = k_mnx_tag_event;
 //    m_NameToEnum["eyeglasses"] = k_mnx_tag_eyeglasses;
 //    m_NameToEnum["fermata"] = k_mnx_tag_fermata;
 //    m_NameToEnum["forward"] = k_mnx_tag_forward;
 //    m_NameToEnum["harp-pedals"] = k_mnx_tag_harp_pedals;
+    m_NameToEnum["head"] = k_mnx_tag_head;
 //    m_NameToEnum["image"] = k_mnx_tag_image;
 //    m_NameToEnum["key"] = k_mnx_tag_key;
 //    m_NameToEnum["lyric"] = k_mnx_tag_lyric;
+    m_NameToEnum["measure"] = k_mnx_tag_measure;
 //    m_NameToEnum["metronome"] = k_mnx_tag_metronome;
 //    m_NameToEnum["midi-device"] = k_mnx_tag_midi_device;
 //    m_NameToEnum["midi-instrument"] = k_mnx_tag_midi_instrument;
+    m_NameToEnum["mnx"] = k_mnx_tag_mnx;
 //    m_NameToEnum["notations"] = k_mnx_tag_notations;
 //    m_NameToEnum["note"] = k_mnx_tag_note;
 //    m_NameToEnum["octave-shift"] = k_mnx_tag_octave_shift;
 //    m_NameToEnum["ornaments"] = k_mnx_tag_ornaments;
+    m_NameToEnum["part"] = k_mnx_tag_part;
 //    m_NameToEnum["part-group"] = k_mnx_tag_part_group;
 //    m_NameToEnum["part-list"] = k_mnx_tag_part_list;
+    m_NameToEnum["part-name"] = k_mnx_tag_part_name;
 //    m_NameToEnum["pedal"] = k_mnx_tag_pedal;
 //    m_NameToEnum["percussion"] = k_mnx_tag_percussion;
 //    m_NameToEnum["pitch"] = k_mnx_tag_pitch;
@@ -6634,12 +6101,15 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["print"] = k_mnx_tag_print;
 //    m_NameToEnum["rehearsal"] = k_mnx_tag_rehearsal;
 //    m_NameToEnum["scordatura"] = k_mnx_tag_scordatura;
+    m_NameToEnum["score"] = k_mnx_tag_score;
 //    m_NameToEnum["score-instrument"] = k_mnx_tag_score_instrument;
 //    m_NameToEnum["score-part"] = k_mnx_tag_score_part;
 //    m_NameToEnum["score-partwise"] = k_mnx_tag_score_partwise;
 //    m_NameToEnum["segno"] = k_mnx_tag_segno;
+    m_NameToEnum["sequence"] = k_mnx_tag_sequence;
 //    m_NameToEnum["slur"] = k_mnx_tag_slur;
 //    m_NameToEnum["sound"] = k_mnx_tag_sound;
+    m_NameToEnum["staff"] = k_mnx_tag_staff;
 //    m_NameToEnum["string-mute"] = k_mnx_tag_string_mute;
 //    m_NameToEnum["technical"] = k_mnx_tag_technical;
 //    m_NameToEnum["text"] = k_mnx_tag_text;
@@ -6684,7 +6154,7 @@ ImoObj* MnxAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pVoltasBuilder = LOMSE_NEW MnxVoltasBuilder(m_reporter, this);
 
     m_pTree = root;
-//    m_curStaff = 0;
+    m_curStaff = 0;
     m_curVoice = 1;
     return analyse_node(root);
 }
@@ -6987,6 +6457,7 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
 
     switch ( name_to_enum(name) )
     {
+        case k_mnx_tag_attributes:          return LOMSE_NEW AttributesMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_event:               return LOMSE_NEW EventMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_head:                return LOMSE_NEW HeadMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_measure:             return LOMSE_NEW MeasureMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6995,6 +6466,7 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mnx_tag_part_name:           return LOMSE_NEW PartNameMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_score:               return LOMSE_NEW ScoreMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_sequence:            return LOMSE_NEW SequenceMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_staff:               return LOMSE_NEW StaffMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         default:
             return LOMSE_NEW NullMnxAnalyser(this, m_reporter, m_libraryScope, name);
     }
@@ -7010,6 +6482,16 @@ int MnxAnalyser::name_to_enum(const string& name) const
         return k_mnx_tag_undefined;
 }
 
+//---------------------------------------------------------------------------------------
+int MnxAnalyser::get_voice_for_name(const string& name) const
+{
+	map<string, int>::const_iterator it = m_nameToVoice.find(name);
+	if (it != m_nameToVoice.end())
+		return it->second;
+    else
+        return -1;
+}
+
 
 //---------------------------------------------------------------------------------------
 // static public methods
@@ -7018,9 +6500,9 @@ int MnxAnalyser::name_to_enum(const string& name) const
 bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octave,
                                       EAccidentals* accidentals, float* alterations)
 {
-    // Analyzes string pitch (MNX format), extracts its parts (step, octave and
-    // accidentals) and stores them in the corresponding parameters.
-    // Returns true if error (pitch is not a valid pitch name)
+    // Analyzes string pitch (MNX format), extracts its parts (step, octave, accidentals
+    // and alterations) and stores them in the corresponding parameters.
+    // Returns true if error (pitch is not a valid pitch string)
     //
     // In MNX pitch is represented as a combination of the step of the diatonic
     // scale, followed optionally by 0..2 occurrences of '#' or 'b' representing
@@ -7035,40 +6517,125 @@ bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octav
     //     C4+0.5   - The pitch one quarter-tone above middle C
     //     B3+1.5   - The pitch one quarter-tone above middle C (identical to the above)
     //     C#4-0.5  - The pitch one quarter-tone above middle C (identical to the above)
-    //
-    // As with MusicXML alter values, any occurrences of # or b do not imply rendering
-    // of accidentals on some associated element. These remain specified by an
-    // accidental value, if provided.
 
-    size_t i = pitch.length() - 1;
-    if (i < 1)
+    size_t iMax = pitch.length();
+    if (iMax < 2)
         return true;   //error
 
-//    // step
-//    *step = to_step(pitch[0]);
-//    if (*step == -1)
-//        return true;   //error
-//
-//    //0..2 accidentals
-//    if (++i == 0)
-//    {
-//        *accidentals = 0;
-//        return false;   //no error
-//    }
-//
-//    //octave
-//    *octave = to_octave(pitch[i--]);
-//    if (*octave == -1)
-//        return true;   //error
-//
-//    //optional: non-integer alteration
-//
-////    else
-////        *accidentals = to_accidentals(pitch.substr(0, i));
-////    if (*accidentals == k_invalid_accidentals)
-////        return true;   //error
+    // step
+    *step = to_step(pitch[0]);
+    if (*step == -1)
+        return true;   //error
+
+    //0..2 accidentals
+    unsigned int i = 1;
+    while(pitch[i] == '#' || pitch[i] == 'b')
+        ++i;
+    if (i == 1)
+        *accidentals = k_no_accidentals;
+    else
+    {
+        *accidentals = to_accidentals(pitch.substr(1, i-1));
+        if (*accidentals == k_invalid_accidentals)
+            return true;   //error
+    }
+
+    //octave
+    *octave = to_octave(pitch[i]);
+    if (*octave == -1)
+        return true;   //error
+
+    //optional: non-integer alteration
+    if (++i == iMax)
+        *alterations = 0.0f;
+    else
+    {
+        if (pitch[i] == '+' || pitch[i] == '-')
+        {
+            try
+            {
+                size_t sz;
+                *alterations = std::stof(pitch.substr(i), &sz);
+                if (i+sz != iMax)
+                    return true;   //error
+            }
+            catch (const std::invalid_argument& ia)
+            {
+                return true;   //error
+            }
+        }
+        else
+            return true;   //error
+    }
 
     return false;  //no error
+}
+
+//---------------------------------------------------------------------------------------
+int MnxAnalyser::to_step(const char& letter)
+{
+	switch (letter)
+    {
+		case 'A':	return k_step_A;
+		case 'B':	return k_step_B;
+		case 'C':	return k_step_C;
+		case 'D':	return k_step_D;
+		case 'E':	return k_step_E;
+		case 'F':	return k_step_F;
+		case 'G':	return k_step_G;
+	}
+	return -1;
+}
+
+//---------------------------------------------------------------------------------------
+int MnxAnalyser::to_octave(const char& letter)
+{
+	switch (letter)
+    {
+		case '0':	return 0;
+		case '1':	return 1;
+		case '2':	return 2;
+		case '3':	return 3;
+		case '4':	return 4;
+		case '5':	return 5;
+		case '6':	return 6;
+		case '7':	return 7;
+		case '8':	return 8;
+		case '9':	return 9;
+	}
+	return -1;
+}
+
+//---------------------------------------------------------------------------------------
+EAccidentals MnxAnalyser::to_accidentals(const std::string& accidentals)
+{
+    switch (accidentals.length())
+    {
+        case 0:
+            return k_no_accidentals;
+            break;
+
+        case 1:
+            if (accidentals[0] == '#')
+                return k_sharp;
+            else if (accidentals[0] == 'b')
+                return k_flat;
+            else
+                return k_invalid_accidentals;
+            break;
+
+        case 2:
+            if (accidentals.compare(0, 2, "##") == 0)
+                return k_sharp_sharp;
+            else if (accidentals.compare(0, 2, "bb") == 0)
+                return k_flat_flat;
+            else
+                return k_invalid_accidentals;
+            break;
+
+        default:
+            return k_invalid_accidentals;
+    }
 }
 
 
