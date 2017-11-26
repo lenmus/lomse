@@ -15,13 +15,16 @@
   yet repetions implied by textual repetition marks (i.e. Da Capo, 
   To Coda, etc, ...).
 
-- Technical changes: As c++11 and std::regex support is required,
-  CMakeLists.txt has been updated:
-	- cmake required version is now 2.8.10 or greater, and
-	- gcc required version is now 4.9 or greater.
+- Technical changes:
+	- As c++11 and std::regex support is required, CMakeLists.txt has
+	  been updated:
+		- cmake required version is now 2.8.10 or greater, and
+		- gcc required version is now 4.9 or greater.
+	- Added initial code for start experimentation with MNX format.
 
 - Bugs fixed:
 	- #98. Tempo speed setting problem using PlayerGui object.
+	- #96. Score deletion crash due to double inclusion in RelObjs.
 
 
 Version [0.21.0] (9/Nov/2017)
