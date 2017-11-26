@@ -119,7 +119,7 @@ struct PathAttributes
         , miter_limit(4.0)
         , stroke_width(1.0)
         , transform()
-        , fill_gradient(NULL)
+        , fill_gradient(nullptr)
     {
     }
 
@@ -136,7 +136,7 @@ struct PathAttributes
         , miter_limit(attr.miter_limit)
         , stroke_width(attr.stroke_width)
         , transform(attr.transform)
-        , fill_gradient(NULL)
+        , fill_gradient(nullptr)
     {
         if (attr.fill_gradient)
             fill_gradient = LOMSE_NEW GradientAttributes(attr.fill_gradient);
@@ -155,7 +155,7 @@ struct PathAttributes
         , miter_limit(attr.miter_limit)
         , stroke_width(attr.stroke_width)
         , transform(attr.transform)
-        , fill_gradient(NULL)
+        , fill_gradient(nullptr)
     {
         if (attr.fill_gradient)
             fill_gradient = LOMSE_NEW GradientAttributes(attr.fill_gradient);

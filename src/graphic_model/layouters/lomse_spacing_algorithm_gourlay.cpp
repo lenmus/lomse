@@ -71,12 +71,12 @@ SpAlgGourlay::SpAlgGourlay(LibraryScope& libraryScope,
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
     //
-    , m_pCurSlice(NULL)
-    , m_pLastEntry(NULL)
+    , m_pCurSlice(nullptr)
+    , m_pLastEntry(nullptr)
     , m_prevType(TimeSlice::k_undefined)
     , m_prevTime(0.0f)
     , m_numEntries(0)
-    , m_pCurColumn(NULL)
+    , m_pCurColumn(nullptr)
     , m_numSlices(0)
     , m_iPrevColumn(-1)
     //
@@ -785,8 +785,8 @@ TimeSlice::TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int i
     , m_numEntries(1)
     , m_type(entryType)
     , m_iColumn(column)
-    , m_next(NULL)
-    , m_prev(NULL)
+    , m_next(nullptr)
+    , m_prev(nullptr)
     //
     , m_xLi(0.0f)
     , m_xRi(0.0f)
@@ -1030,7 +1030,7 @@ void TimeSlice::assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* p
         if (m_prev->get_type() == TimeSlice::k_non_timed)
         {
             TimeSlice* prev = m_prev->m_prev;   //must always exist. Error in code/logic if not!
-            if (prev == NULL)
+            if (prev == nullptr)
             {
                 //TODO: check this is true. Score without prolog starting with (space)
                 LOMSE_LOG_ERROR("Error in code/logic. No previous slice exists for non-timed slice!");
@@ -1148,7 +1148,7 @@ LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
     //TODO tenths to logical: must use instrument & staff for pSO
 
     LUnits totalWidth = 0;
-    ImoStyle* pStyle = NULL;
+    ImoStyle* pStyle = nullptr;
     int numSyllables = pLyric->get_num_text_items();
     for (int i=0; i < numSyllables; ++i)
     {
@@ -1157,7 +1157,7 @@ LUnits TimeSlice::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
         const string& text = pText->get_syllable_text();
         const string& language = pText->get_syllable_language();
         pStyle = pText->get_syllable_style();
-        if (pStyle == NULL)
+        if (pStyle == nullptr)
             pStyle = pMeter->get_style_info("Lyrics");
 
         //measure this syllable
@@ -1644,7 +1644,7 @@ void ColumnDataGourlay::dump(ostream& outStream, bool fOrdered)
 void ColumnDataGourlay::set_num_entries(int numSlices)
 {
     m_orderedSlices.reserve(numSlices);
-    m_orderedSlices.assign(numSlices, (TimeSlice*)NULL);   //GCC 4.8.4 complains if NULL not casted
+    m_orderedSlices.assign(numSlices, (TimeSlice*)nullptr);   //GCC 4.8.4 complains if nullptr not casted
 }
 
 //---------------------------------------------------------------------------------------
@@ -1757,7 +1757,7 @@ void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& da
 //---------------------------------------------------------------------------------------
 bool ColumnDataGourlay::is_empty_column()
 {
-    return m_pFirstSlice == NULL;
+    return m_pFirstSlice == nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1947,7 +1947,7 @@ TimeGridTable* ColumnDataGourlay::create_time_grid_table()
 //StaffObjData implementation
 //=====================================================================================
 StaffObjData::StaffObjData()
-    : m_pShape(NULL)
+    : m_pShape(nullptr)
     , m_xUserShift(0.0f)
     , m_yUserShift(0.0f)
 {

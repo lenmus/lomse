@@ -77,7 +77,7 @@ public:
         : m_libraryScope(cout)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -125,7 +125,7 @@ SUITE(LmdAnalyserTest)
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != NULL );
+        CHECK( pIModel->get_root() != nullptr );
         CHECK( pIModel->get_root()->is_document() == true );
         CHECK( errormsg.str() == expected.str() );
 
@@ -149,10 +149,10 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "en" );
 
@@ -199,7 +199,7 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
 
         delete pIModel;
@@ -219,7 +219,7 @@ SUITE(LmdAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
 
         delete pIModel;
     }
@@ -242,7 +242,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != NULL );
+        CHECK( pIModel->get_root() != nullptr );
 
         delete pIModel;
     }
@@ -262,10 +262,10 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "zh_CN" );
 
@@ -287,12 +287,12 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         ImoStyle* pStyle = pDoc->find_style("Table");
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Table" );
 
         delete pIModel;
@@ -317,7 +317,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete pIModel;
@@ -339,7 +339,7 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete pIModel;
@@ -355,7 +355,7 @@ SUITE(LmdAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->is_visible() );
         CHECK( pClef->get_user_location_x() == 70.0f );
@@ -374,7 +374,7 @@ SUITE(LmdAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
         CHECK( pClef->get_user_location_y() == 0.0f );
@@ -400,7 +400,7 @@ SUITE(LmdAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
         CHECK( pClef->get_user_location_y() == 0.0f );
@@ -425,7 +425,7 @@ SUITE(LmdAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_id() == 12L );
 
@@ -508,7 +508,7 @@ SUITE(LmdAnalyserTest)
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() == NULL );
+        CHECK( pIModel->get_root() == nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -528,7 +528,7 @@ SUITE(LmdAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pIModel->get_root() );
-        CHECK( pColor != NULL );
+        CHECK( pColor != nullptr );
         CHECK( pColor->red() == 240 );
         CHECK( pColor->green() == 69 );
         CHECK( pColor->blue() == 127 );
@@ -572,7 +572,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->font_name() == "Arial" );
         CHECK( pStyle->font_file() == "FreeSans.ttf" );
@@ -608,7 +608,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_text_item() == true );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
-        CHECK( pText != NULL );
+        CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
 
         delete pIModel;
@@ -650,7 +650,7 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
-        CHECK( pText == NULL );
+        CHECK( pText == nullptr );
 
         delete pIModel;
     }
@@ -681,13 +681,13 @@ SUITE(LmdAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pText != NULL );
+        CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
         ImoStyle* pStyle = pText->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Title" );
 
         delete pIModel;
@@ -709,7 +709,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_text_item() == true );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
-        CHECK( pText != NULL );
+        CHECK( pText != nullptr );
         CHECK( pText->get_text() == " This is a text " );
         //cout << "result: \"" << pText->get_text() << "\"";
 
@@ -732,7 +732,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_text_item() == true );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
-        CHECK( pText != NULL );
+        CHECK( pText != nullptr );
         CHECK( pText->get_text() == " This is a text with newlines " );
         //cout << "result: \"" << pText->get_text() << "\"" << endl;
 
@@ -849,7 +849,7 @@ SUITE(LmdAnalyserTest)
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
         CHECK( pPara->get_num_items() == 1 );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pPara->get_first_item() );
-        CHECK( pLink != NULL );
+        CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "This is the url" );
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
@@ -921,7 +921,7 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
@@ -954,9 +954,9 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Credits" );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
@@ -984,7 +984,7 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
         CHECK( pStyle->get_name() == "Paragraph" );
         CHECK( pPara->get_num_items() == 1 );
@@ -1013,9 +1013,9 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style(false);
-        CHECK( pStyle == NULL );
+        CHECK( pStyle == nullptr );
 
         delete pIModel;
     }
@@ -1174,7 +1174,7 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
-        CHECK( pH != NULL );
+        CHECK( pH != nullptr );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
@@ -1207,9 +1207,9 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
-        CHECK( pH != NULL );
+        CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
@@ -1247,7 +1247,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
-        CHECK( pStyles != NULL );
+        CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
@@ -1320,7 +1320,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
-        CHECK( pStyles != NULL );
+        CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
@@ -1391,7 +1391,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
-        CHECK( pStyles != NULL );
+        CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
@@ -1426,7 +1426,7 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_param_info() == true );
         ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pIModel->get_root() );
-        CHECK( pParam != NULL );
+        CHECK( pParam != nullptr );
         CHECK( pParam->get_name() == "green" );
         CHECK( pParam->get_value() == "this is green" );
 
@@ -1449,7 +1449,7 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root() == NULL );
+        CHECK( pIModel->get_root() == nullptr );
 
         delete pIModel;
     }
@@ -1475,7 +1475,7 @@ SUITE(LmdAnalyserTest)
 
         CHECK( pIModel->get_root()->is_dynamic() == true );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pIModel->get_root() );
-        CHECK( pDyn != NULL );
+        CHECK( pDyn != nullptr );
         CHECK( pDyn->get_classid() == "test" );
         CHECK( pDyn->is_visible() );
 
@@ -1493,7 +1493,7 @@ SUITE(LmdAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pDoc->get_content_item(0) );
-        CHECK( pDyn != NULL );
+        CHECK( pDyn != nullptr );
 
         delete pIModel;
     }
@@ -1596,7 +1596,7 @@ SUITE(LmdAnalyserTest)
 
         CHECK( pIModel->get_root()->is_link() == true );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
-        CHECK( pLink != NULL );
+        CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "#TheoryHarmony_ch3.lms" );
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
@@ -1624,7 +1624,7 @@ SUITE(LmdAnalyserTest)
 
         CHECK( pIModel->get_root()->is_link() == true );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
-        CHECK( pLink != NULL );
+        CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "" );
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
@@ -1661,13 +1661,13 @@ SUITE(LmdAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pPara->get_first_item() );
-        CHECK( pLink != NULL );
+        CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "#TheoryHarmony_ch3.lms" );
         ImoStyle* pStyle = pLink->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Button" );
 
         delete pIModel;
@@ -1748,7 +1748,7 @@ SUITE(LmdAnalyserTest)
 
         CHECK( pIModel->get_root()->is_list() == true );
         ImoList* pList = dynamic_cast<ImoList*>( pIModel->get_root() );
-        CHECK( pList != NULL );
+        CHECK( pList != nullptr );
         CHECK( pList->get_list_type() == ImoList::k_itemized );
         CHECK( pList->get_num_content_items() == 2 );
         ImoListItem* pLI = pList->get_list_item(0);
@@ -2232,12 +2232,12 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pIModel->get_root() );
-        CHECK( pTable != NULL );
+        CHECK( pTable != nullptr );
 
-        CHECK( pTable->get_head() == NULL );
+        CHECK( pTable->get_head() == nullptr );
 
         ImoTableBody* pBody = pTable->get_body();
-        CHECK( pBody != NULL );
+        CHECK( pBody != nullptr );
         CHECK( pBody->get_num_items() == 1 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
@@ -2305,7 +2305,7 @@ SUITE(LmdAnalyserTest)
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
-        CHECK( pTable != NULL );
+        CHECK( pTable != nullptr );
 
         std::list<ImoStyle*>& cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
@@ -2360,19 +2360,19 @@ SUITE(LmdAnalyserTest)
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
-        CHECK( pTable != NULL );
+        CHECK( pTable != nullptr );
 
         std::list<ImoStyle*>& cols = pTable->get_column_styles();
         CHECK( cols.size() == 2 );
 
         ImoTableHead* pHead = pTable->get_head();
-        CHECK( pHead != NULL );
+        CHECK( pHead != nullptr );
         CHECK( pHead->get_num_items() == 1 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
         CHECK( pRow->is_table_row() == true );
 
         ImoTableBody* pBody = pTable->get_body();
-        CHECK( pBody != NULL );
+        CHECK( pBody != nullptr );
         CHECK( pBody->get_num_items() == 1 );
         pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
@@ -2414,7 +2414,7 @@ SUITE(LmdAnalyserTest)
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
-        CHECK( pTable != NULL );
+        CHECK( pTable != nullptr );
 
         delete pIModel;
     }
@@ -2451,7 +2451,7 @@ SUITE(LmdAnalyserTest)
 
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
 
         delete pIModel;
     }
@@ -2478,7 +2478,7 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_version_string() == "2.0" );
 
@@ -2513,7 +2513,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pIModel->get_root()->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != NULL );
+        CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete pIModel;
     }
@@ -2546,7 +2546,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pIModel->get_root()->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != NULL );
+        CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete pIModel;
     }
@@ -2580,7 +2580,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pIModel->get_root()->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != NULL );
+        CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete pIModel;
     }
@@ -2617,7 +2617,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pIModel->get_root()->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != NULL );
+        CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete pIModel;
     }
@@ -2682,11 +2682,11 @@ SUITE(LmdAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != NULL );
+        CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != NULL );
-        CHECK( pGroup->get_instrument(0) != NULL );
-        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup != nullptr );
+        CHECK( pGroup->get_instrument(0) != nullptr );
+        CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
@@ -2728,11 +2728,11 @@ SUITE(LmdAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != NULL );
+        CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != NULL );
-        CHECK( pGroup->get_instrument(0) != NULL );
-        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup != nullptr );
+        CHECK( pGroup->get_instrument(0) != nullptr );
+        CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );

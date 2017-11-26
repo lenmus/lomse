@@ -55,9 +55,9 @@ EngroutersCreator::EngroutersCreator(LibraryScope& libraryScope,
     : m_libraryScope(libraryScope)
     , m_itCurContent(itStart)
     , m_itEndContent(itEnd)
-    , m_pTextSplitter(NULL)
-    , m_pCurText(NULL)
-    , m_pPendingEngr(NULL)
+    , m_pTextSplitter(nullptr)
+    , m_pCurText(nullptr)
+    , m_pPendingEngr(nullptr)
 {
 }
 
@@ -71,7 +71,7 @@ EngroutersCreator::~EngroutersCreator()
 //---------------------------------------------------------------------------------------
 bool EngroutersCreator::more_content()
 {
-    return m_itCurContent != m_itEndContent || m_pPendingEngr != NULL;
+    return m_itCurContent != m_itEndContent || m_pPendingEngr != nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -80,11 +80,11 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace, bool fFirst
     if (!more_content())
     {
         LOMSE_LOG_DEBUG(Logger::k_layout, "No more content");
-        return NULL;
+        return nullptr;
     }
 
     LOMSE_LOG_DEBUG(Logger::k_layout, "");
-    Engrouter* pEngr = NULL;
+    Engrouter* pEngr = nullptr;
     if (!is_there_a_pending_engrouter())
     {
         ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *m_itCurContent );
@@ -134,13 +134,13 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace, bool fFirst
                 "Not enough space for engrouter. Needed=%.02f, available=%.02f")
                 % width % maxSpace ));
             save_engrouter_for_next_call(pEngr);
-            return NULL;
+            return nullptr;
         }
     }
     else
     {
         LOMSE_LOG_TRACE(Logger::k_layout, "Error: Engrouter not created!");
-        return NULL;
+        return nullptr;
     }
 }
 

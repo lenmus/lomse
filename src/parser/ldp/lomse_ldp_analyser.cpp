@@ -89,7 +89,7 @@ protected:
 
 public:
     ElementAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor=NULL)
+                    ImoObj* pAnchor=nullptr)
         : m_reporter(reporter)
         , m_pAnalyser(pAnalyser)
         , m_libraryScope(libraryScope)
@@ -118,9 +118,9 @@ protected:
     LdpElement* m_pNextNextParam;
 
     bool get_mandatory(ELdpElement type);
-    void analyse_mandatory(ELdpElement type, ImoObj* pAnchor=NULL);
+    void analyse_mandatory(ELdpElement type, ImoObj* pAnchor=nullptr);
     bool get_optional(ELdpElement type);
-    bool analyse_optional(ELdpElement type, ImoObj* pAnchor=NULL);
+    bool analyse_optional(ELdpElement type, ImoObj* pAnchor=nullptr);
     void analyse_one_or_more(ELdpElement* pValid, int nValid);
     void analyse_staffobjs_options(ImoStaffObj* pSO);
     void analyse_scoreobj_options(ImoScoreObj* pSO);
@@ -147,7 +147,7 @@ protected:
 
     //-----------------------------------------------------------------------------------
     inline bool more_params_to_analyse() {
-        return m_pNextParam != NULL;
+        return m_pNextParam != nullptr;
     }
 
     //-----------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ protected:
         if (m_pNextParam)
             m_pNextNextParam = m_pNextParam->get_next_sibling();
         else
-            m_pNextNextParam = NULL;
+            m_pNextNextParam = nullptr;
     }
 
     //-----------------------------------------------------------------------------------
@@ -347,7 +347,7 @@ protected:
     //-----------------------------------------------------------------------------------
     Color get_color_param()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr);
         Color color;
         if (pImo->is_color_dto())
         {
@@ -387,7 +387,7 @@ protected:
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string styleName = get_string_value();
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
 
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
         if (pScore)
@@ -415,7 +415,7 @@ protected:
     //-----------------------------------------------------------------------------------
     TPoint get_point_param()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr);
         TPoint point;
         if (pImo->is_point_dto())
         {
@@ -429,7 +429,7 @@ protected:
     //-----------------------------------------------------------------------------------
     TSize get_size_param()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr);
         TSize size;
         if (pImo->is_size_info())
         {
@@ -478,7 +478,7 @@ protected:
     //-----------------------------------------------------------------------------------
     ImoStyle* get_doc_text_style(const string& styleName)
     {
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
 
         ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
         if (pDoc)
@@ -692,21 +692,21 @@ protected:
                )
             {
                 return static_cast<ImoInlineLevelObj*>(
-                    m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+                    m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr) );
             }
             else
                 error_invalid_param();
 
             move_to_next_param();
         }
-        return NULL;
+        return nullptr;
     }
 
     //-----------------------------------------------------------------------------------
     void analyse_optional_style(ImoContentObj* pParent)
     {
         // [<style>]
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
         if (get_optional(k_style))
         {
             m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -1018,6 +1018,7 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBeamDto* pInfo = static_cast<ImoBeamDto*>(
                 ImFactory::inject(k_imo_beam_dto, pDoc, get_node_id()) );
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
 
         // num
         if (get_optional(k_number))
@@ -1169,7 +1170,7 @@ protected:
 
         void set_box_border(ImoTextBlockInfo& box)
         {
-            ImoObj* pImo = proceed(k_border, NULL);
+            ImoObj* pImo = proceed(k_border, nullptr);
             if (pImo)
             {
                 if (pImo->is_border_dto())
@@ -1808,8 +1809,8 @@ protected:
 
     ImoStyle* create_style(const string& name, const string& parent)
     {
-        ImoStyle* pDefault = NULL;
-        ImoStyles* pStyles = NULL;
+        ImoStyle* pDefault = nullptr;
+        ImoStyles* pStyles = nullptr;
         if (m_pAnchor && m_pAnchor->is_styles())
         {
             pStyles = static_cast<ImoStyles*>(m_pAnchor);
@@ -2177,7 +2178,7 @@ public:
 ////    if (oFBData.get_error_msg() != "")
 ////    {
 ////        AnalysisError(pNode, oFBData.get_error_msg());
-////        return (ImoFiguredBass*)NULL;    //error
+////        return (ImoFiguredBass*)nullptr;    //error
 ////    }
 ////
 ////    //initialize options with default values
@@ -2185,8 +2186,8 @@ public:
 ////    //one ending in it.
 ////    int nFBL=0;     //index to next fbline
 ////    lmFBLineInfo* pFBLineInfo[2];
-////    pFBLineInfo[0] = (lmFBLineInfo*)NULL;
-////    pFBLineInfo[1] = (lmFBLineInfo*)NULL;
+////    pFBLineInfo[0] = (lmFBLineInfo*)nullptr;
+////    pFBLineInfo[1] = (lmFBLineInfo*)nullptr;
 ////
 ////    //get options: <parenthesis> & <fbline>
 ////    int iP;
@@ -2213,7 +2214,7 @@ public:
 ////	lmLDPOptionalTags oOptTags(this);
 ////	oOptTags.SetValid(lm_eTag_Location_x, lm_eTag_Location_y, -1);		//finish list with -1
 ////	lmLocation tPos = g_tDefaultPos;
-////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, NULL, NULL, &tPos);
+////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, nullptr, nullptr, &tPos);
 ////
 ////	//create the Figured Bass object
 ////    ImoFiguredBass* pFB = pVStaff->AddFiguredBass(&oFBData, nId);
@@ -2602,12 +2603,12 @@ public:
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 
         // firstInstrId
-        ImoInstrument* pFirstInstr = NULL;
+        ImoInstrument* pFirstInstr = nullptr;
         if (get_mandatory(k_label))
         {
             string partId = m_pParamToAnalyse->get_value();
             pFirstInstr = pScore->get_instrument(partId);
-//            if (pFirstInstr == NULL)
+//            if (pFirstInstr == nullptr)
 //            {
 //                error_msg("");
 //            }
@@ -2616,12 +2617,12 @@ public:
             return;
 
         // lastInstrId
-        ImoInstrument* pLastInstr = NULL;
+        ImoInstrument* pLastInstr = nullptr;
         if (get_mandatory(k_label))
         {
             string partId = m_pParamToAnalyse->get_value();
             pLastInstr = pScore->get_instrument(partId);
-//            if (pFirstInstr == NULL)
+//            if (pFirstInstr == nullptr)
 //            {
 //                error_msg("");
 //            }
@@ -2876,7 +2877,7 @@ public:
         m_pAnalyser->reset_defaults_for_instrument();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoInstrument* pInstrument = NULL;
+        ImoInstrument* pInstrument = nullptr;
 
         // [<instrId>]
         if (get_optional(k_label))
@@ -2884,7 +2885,7 @@ public:
             string partId = m_pParamToAnalyse->get_value();
             ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
             pInstrument = pScore->get_instrument(partId);
-            if (pInstrument == NULL)
+            if (pInstrument == nullptr)
             {
                 if (m_pAnalyser->is_instr_id_required())
                 {
@@ -3058,7 +3059,7 @@ public:
 
     void do_analysis()
     {
-        ImoDocument* pImoDoc = NULL;
+        ImoDocument* pImoDoc = nullptr;
 
         // <vers>
         if (get_mandatory(k_vers))
@@ -3317,7 +3318,7 @@ public:
 
     void do_analysis()
     {
-        ImoNote* pNote = NULL;
+        ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
             pNote = static_cast<ImoNote*>(m_pAnchor);
 
@@ -3618,12 +3619,12 @@ public:
     NoteRestAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pTieDto(NULL)
-        , m_pTupletInfo(NULL)
-        , m_pBeamInfo(NULL)
-        , m_pSlurDto(NULL)
-        , m_pFermata(NULL)
-        , m_pTimeModifDto(NULL)
+        , m_pTieDto(nullptr)
+        , m_pTupletInfo(nullptr)
+        , m_pBeamInfo(nullptr)
+        , m_pSlurDto(nullptr)
+        , m_pFermata(nullptr)
+        , m_pTimeModifDto(nullptr)
         , m_srcOldBeam("")
         , m_srcOldTuplet("")
     {
@@ -3636,9 +3637,9 @@ public:
 
         // create object note or rest
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoNoteRest* pNR = NULL;
-        ImoNote* pNote = NULL;
-        ImoRest* pRest = NULL;
+        ImoNoteRest* pNR = nullptr;
+        ImoNote* pNote = nullptr;
+        ImoRest* pRest = nullptr;
         if (fIsRest)
         {
             pRest = static_cast<ImoRest*>(
@@ -3701,11 +3702,11 @@ public:
             while (more_params_to_analyse())
             {
                 if (get_optional(k_tie))
-                    m_pTieDto = static_cast<ImoTieDto*>( proceed(k_tie, NULL) );
+                    m_pTieDto = static_cast<ImoTieDto*>( proceed(k_tie, nullptr) );
                 else if (get_optional(k_stem))
                     set_stem(pNote);
                 else if (get_optional(k_slur))
-                    m_pSlurDto = static_cast<ImoSlurDto*>( proceed(k_slur, NULL) );
+                    m_pSlurDto = static_cast<ImoSlurDto*>( proceed(k_slur, nullptr) );
                 else if (get_optional(k_lyric))
                     proceed(k_lyric, pNR);
                 else
@@ -3743,7 +3744,7 @@ public:
             add_tuplet_info(pNR);
 
         //time modification
-        if (m_pTimeModifDto != NULL)
+        if (m_pTimeModifDto != nullptr)
         {
             pNR->set_time_modification( m_pTimeModifDto->get_top_number(),
                                         m_pTimeModifDto->get_bottom_number() );
@@ -3754,7 +3755,7 @@ public:
         //beam
         if (fAddOldBeam)
             set_beam_g(pNR);
-        else if (m_pBeamInfo==NULL && m_pAnalyser->is_old_beam_open())
+        else if (m_pBeamInfo==nullptr && m_pAnalyser->is_old_beam_open())
             add_to_old_beam(pNR);
 
         add_beam_info(pNR);
@@ -3798,17 +3799,17 @@ protected:
             if (type == k_tuplet)
             {
                 m_pTupletInfo = static_cast<ImoTupletDto*>(
-                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr) );
             }
             else if (type == k_time_modification)
             {
                 m_pTimeModifDto = static_cast<ImoTimeModificationDto*>(
-                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr) );
             }
             else if (type == k_beam)
             {
                 m_pBeamInfo = static_cast<ImoBeamDto*>(
-                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, nullptr) );
             }
             else if (type == k_voice)
             {
@@ -3897,6 +3898,7 @@ protected:
     {
         ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
         pInfo->set_note_rest(pNR);
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
         m_pAnalyser->add_old_beam(pInfo);
     }
 
@@ -3928,6 +3930,7 @@ protected:
         {
             ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
             pInfo->set_note_rest(pNR);
+            pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
             m_pAnalyser->close_old_beam(pInfo);
         }
     }
@@ -4014,6 +4017,7 @@ protected:
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_tuplet_type(ImoTupletDto::k_stop);
+        pInfo->set_line_number( m_pParamToAnalyse->get_line_number() );
         m_pAnalyser->add_relation_info(pInfo);
     }
 
@@ -4037,6 +4041,7 @@ protected:
         pInfo->set_note_rest(pNR);
         pInfo->set_actual_number(actual);
         pInfo->set_normal_number(normal);
+        pInfo->set_line_number( m_pParamToAnalyse->get_line_number() );
         m_pAnalyser->add_relation_info(pInfo);
     }
 
@@ -4524,7 +4529,7 @@ protected:
     void add_instrument(int nInstr, ImoScore* pScore)
     {
         string partId = m_pParamToAnalyse->get_parameter(nInstr)->get_value();
-        if (pScore->get_instrument(partId) == NULL)
+        if (pScore->get_instrument(partId) == nullptr)
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoInstrument* pInstr = static_cast<ImoInstrument*>(
@@ -4830,6 +4835,7 @@ public:
     {
         ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
         pInfo->set_id( get_node_id() );
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
 
         // num
         if (get_mandatory(k_number))
@@ -5396,7 +5402,7 @@ protected:
 
     void set_box_border(ImoTextBlockInfo& box)
     {
-        ImoObj* pImo = proceed(k_border, NULL);
+        ImoObj* pImo = proceed(k_border, nullptr);
         if (pImo)
         {
             if (pImo->is_border_dto())
@@ -5407,7 +5413,7 @@ protected:
 
     void set_box_text(ImoTextBox* pTB)
     {
-        ImoObj* pImo = proceed(k_text, NULL);
+        ImoObj* pImo = proceed(k_text, nullptr);
         if (pImo)
         {
             if (pImo->is_score_text())
@@ -5421,7 +5427,7 @@ protected:
 
     void set_anchor_line(ImoTextBox* pTB)
     {
-        ImoObj* pImo = proceed(k_anchorLine, NULL);
+        ImoObj* pImo = proceed(k_anchorLine, nullptr);
         if (pImo)
         {
             if (pImo->is_line_style())
@@ -5451,7 +5457,7 @@ public:
         string styleName = "Default style";
 
         // [<style>]
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
         if (get_optional(k_style))
         {
             m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -5533,7 +5539,7 @@ public:
             pText->set_text(get_string_value());
 
             // [<style>]
-            ImoStyle* pStyle = NULL;
+            ImoStyle* pStyle = nullptr;
             if (get_optional(k_style))
                 pStyle = get_text_style_param(m_styleName);
             else
@@ -5591,6 +5597,7 @@ public:
         //AWARE: ImoTieDto will be discarded. So no ID will be assigned to avoid
         //problems with undo/redo
         ImoTieDto* pInfo = LOMSE_NEW ImoTieDto();
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
 
         // num
         if (get_mandatory(k_number))
@@ -5922,6 +5929,7 @@ public:
         }
 
         pInfo->set_only_graphical( m_pAnalyser->get_score_version() >= 107 );
+        pInfo->set_line_number( m_pAnalysedNode->get_line_number() );
         m_pAnalysedNode->set_imo(pInfo);
     }
 
@@ -6084,7 +6092,7 @@ bool ElementAnalyser::get_mandatory(ELdpElement type)
     if (!more_params_to_analyse())
     {
         error_missing_element(type);
-        return NULL;
+        return nullptr;
     }
 
     m_pParamToAnalyse = get_param_to_analyse();
@@ -6292,21 +6300,21 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_libraryScope(libraryScope)
     , m_pDoc(pDoc)
     , m_pLdpFactory(libraryScope.ldp_factory())
-    , m_pTiesBuilder(NULL)
-    , m_pOldTiesBuilder(NULL)
-    , m_pBeamsBuilder(NULL)
-    , m_pOldBeamsBuilder(NULL)
-    , m_pTupletsBuilder(NULL)
-    , m_pSlursBuilder(NULL)
-    , m_pCurScore(NULL)
-    , m_pLastScore(NULL)
-    , m_pImoDoc(NULL)
+    , m_pTiesBuilder(nullptr)
+    , m_pOldTiesBuilder(nullptr)
+    , m_pBeamsBuilder(nullptr)
+    , m_pOldBeamsBuilder(nullptr)
+    , m_pTupletsBuilder(nullptr)
+    , m_pSlursBuilder(nullptr)
+    , m_pCurScore(nullptr)
+    , m_pLastScore(nullptr)
+    , m_pImoDoc(nullptr)
     , m_scoreVersion(0)
     , m_pTree()
     , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
-    , m_pLastNote(NULL)
+    , m_pLastNote(nullptr)
     , m_fInstrIdRequired(false)
     , m_extraMarginSpace(0.0f)
 {
@@ -6326,7 +6334,7 @@ void LdpAnalyser::reset_defaults_for_instrument()
 {
     m_curStaff = 0;
     m_curVoice = 1;
-    m_pLastNote = NULL;
+    m_pLastNote = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6399,7 +6407,7 @@ void LdpAnalyser::add_lyric(ImoNote* pNote, ImoLyric* pLyric)
     map<string, int>::iterator it = m_lyricIndex.find(id);
     if (it == m_lyricIndex.end())
     {
-        m_lyrics.push_back(NULL);
+        m_lyrics.push_back(nullptr);
         i = int(m_lyrics.size()) - 1;
         m_lyricIndex[id] = i;
 
@@ -7043,15 +7051,6 @@ void TiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
                << " will be ignored." << endl;
 }
 
-//---------------------------------------------------------------------------------------
-void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
-{
-    m_reporter << "Line " << pNewInfo->get_line_number()
-               << ". This tie has the same number than that defined in line "
-               << pExistingInfo->get_line_number()
-               << ". This tie will be ignored." << endl;
-}
-
 
 //=======================================================================================
 // OldTiesBuilder implementation
@@ -7059,7 +7058,7 @@ void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNew
 OldTiesBuilder::OldTiesBuilder(ostream& reporter, LdpAnalyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pStartNoteTieOld(NULL)
+    , m_pStartNoteTieOld(nullptr)
 {
 }
 
@@ -7108,12 +7107,12 @@ void OldTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
     if (notes_can_be_tied(m_pStartNoteTieOld, pEndNote))
     {
         tie_notes(m_pStartNoteTieOld, pEndNote);
-        m_pStartNoteTieOld = NULL;
+        m_pStartNoteTieOld = nullptr;
     }
     else if (m_pStartNoteTieOld->get_voice() == pEndNote->get_voice())
     {
         error_invalid_tie_old_syntax( m_pOldTieParam->get_line_number() );
-        m_pStartNoteTieOld = NULL;
+        m_pStartNoteTieOld = nullptr;
     }
     //else
     //  wait to see if it is possible to tie with next note
@@ -7281,7 +7280,7 @@ void TupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
     {
         //add tuplet to the note/rest
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, m_pTuplet, NULL);
+        pNR->include_in_relation(pDoc, m_pTuplet, nullptr);
 
         //if not only graphical (LDP < 2.0) add time modification the note/rest
         if (!pStartDto->is_only_graphical())

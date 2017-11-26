@@ -58,7 +58,7 @@ public:
 
     GmoShapeCodaSegno* create_shape(ImoSymbolRepetitionMark* pRepetitionMark, UPoint pos,
                                     Color color=Color(0,0,0),
-                                    GmoShape* pParentShape=NULL);
+                                    GmoShape* pParentShape=nullptr);
 
 protected:
     UPoint compute_location(UPoint pos);

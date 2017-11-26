@@ -51,7 +51,7 @@ BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreM
 
 //---------------------------------------------------------------------------------------
 BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
-    : Engraver(libraryScope, NULL)
+    : Engraver(libraryScope, nullptr)
 {
     //constructor for dragged images
 }
@@ -101,7 +101,7 @@ GmoShape* BarlineEngraver::create_tool_dragged_shape(int barType)
     Color color(255,0,0);       //TODO: options/configuration
     ShapeId idx = 0;
 
-    m_pBarlineShape = LOMSE_NEW GmoShapeBarline(NULL, idx, barType, 0.0, 0.0, yBottom,
+    m_pBarlineShape = LOMSE_NEW GmoShapeBarline(nullptr, idx, barType, 0.0, 0.0, yBottom,
                                                 thinLineWidth, thickLineWidth, spacing,
                                                 radius, color, uMinWidth);
     return m_pBarlineShape;

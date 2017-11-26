@@ -43,7 +43,7 @@ namespace lomse
 ElementIterator::ElementIterator(ImoObj* pObj)
     : m_pObj(pObj)
 {
-    m_pCurItem = NULL;    //m_pTree->begin();
+    m_pCurItem = nullptr;    //m_pTree->begin();
 }
 
 //---------------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ ElementIterator::~ElementIterator()
 ////---------------------------------------------------------------------------------------
 //bool ElementIterator::is_pointing_to(long objType)
 //{
-//    return *m_pCurItem != NULL && (*m_pCurItem)->get_type() == objType;
+//    return *m_pCurItem != nullptr && (*m_pCurItem)->get_type() == objType;
 //}
 //
 ////---------------------------------------------------------------------------------------
 //void ElementIterator::point_to(int objType)
 //{
-//    while (*m_pCurItem != NULL && !is_pointing_to(objType))
+//    while (*m_pCurItem != nullptr && !is_pointing_to(objType))
 //        next();
 //}
 //
@@ -87,7 +87,7 @@ void ElementIterator::point_to(ImoObj* pObj)
 ////---------------------------------------------------------------------------------------
 //void ElementIterator::enter_element()
 //{
-//    if (*m_pCurItem != NULL)
+//    if (*m_pCurItem != nullptr)
 //    {
 //        m_stack.push(m_pCurItem);
 //        ++m_pCurItem;
@@ -103,7 +103,7 @@ void ElementIterator::point_to(ImoObj* pObj)
 //        m_stack.pop();
 //    }
 //    else
-//        m_pCurItem = NULL;
+//        m_pCurItem = nullptr;
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ void ElementIterator::point_to(ImoObj* pObj)
 DocIterator::DocIterator(Document* pDoc)
     : ElementIterator(pDoc->get_imodoc())
     , m_pDoc(pDoc->get_imodoc())
-    //, m_pScoreElmIterator(NULL)
+    //, m_pScoreElmIterator(nullptr)
 {
     m_numContentItems = m_pDoc->get_num_content_items();
     m_curItemIndex = -1;
@@ -175,7 +175,7 @@ void DocIterator::point_to_current()
     if (m_curItemIndex >=0 && m_curItemIndex < m_numContentItems)
         m_pCurItem = m_pDoc->get_content_item(m_curItemIndex);
     else
-        m_pCurItem = NULL;
+        m_pCurItem = nullptr;
 }
 
 ////---------------------------------------------------------------------------------------

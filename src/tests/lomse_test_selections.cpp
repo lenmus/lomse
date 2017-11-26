@@ -104,7 +104,7 @@ SUITE(SelectionSetTest)
         //0101. Adding GmoObj to valid set, keeps it valid
         Document doc(m_libraryScope);
         MySelectionSet sel(&doc);
-        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
+        GmoShapeClef clef(nullptr, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
                           m_libraryScope, 21.0);
         //CHECK( sel.contains(&clef) == false );
 
@@ -118,7 +118,7 @@ SUITE(SelectionSetTest)
     {
         Document doc(m_libraryScope);
         MySelectionSet sel(&doc);
-        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
+        GmoShapeClef clef(nullptr, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
                           m_libraryScope, 21.0);
         sel.add(&clef);
         sel.clear();

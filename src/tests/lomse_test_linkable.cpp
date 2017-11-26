@@ -55,7 +55,7 @@ public:
     int m_typeHandle;
 
 
-    MyShape() : Linkable<int>(), m_refLinkedTo(NULL), m_refHandle(NULL)
+    MyShape() : Linkable<int>(), m_refLinkedTo(nullptr), m_refHandle(nullptr)
               , m_typeLinkedTo(-1), m_typeHandle(-1)
     {}
 

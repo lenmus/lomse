@@ -136,7 +136,7 @@ protected:
 
 public:
     LmdElementAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor=NULL)
+                    ImoObj* pAnchor=nullptr)
         : m_reporter(reporter)
         , m_pAnalyser(pAnalyser)
         , m_libraryScope(libraryScope)
@@ -167,16 +167,16 @@ protected:
 
     bool get_mandatory(ELdpElement type);
     bool get_mandatory(const string& name);
-    void analyse_mandatory(ELdpElement type, ImoObj* pAnchor=NULL);
-    void analyse_mandatory(const string& name, ImoObj* pAnchor=NULL);
+    void analyse_mandatory(ELdpElement type, ImoObj* pAnchor=nullptr);
+    void analyse_mandatory(const string& name, ImoObj* pAnchor=nullptr);
     bool get_optional(ELdpElement type);
     bool get_optional(const string& name);
-    bool analyse_optional(ELdpElement type, ImoObj* pAnchor=NULL);
-    bool analyse_optional(const string& name, ImoObj* pAnchor=NULL);
+    bool analyse_optional(ELdpElement type, ImoObj* pAnchor=nullptr);
+    bool analyse_optional(const string& name, ImoObj* pAnchor=nullptr);
     void analyse_one_or_more(ELdpElement* pValid, int nValid);
     void analyse_staffobjs_options(ImoStaffObj* pSO);
     void analyse_scoreobj_options(ImoScoreObj* pSO);
-    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_childToAnalyse, NULL); }
+    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr); }
     bool has_attribute(const string& name);
     string get_attribute(const string& name);
     string get_mandatory_string_attribute(const string& name, const string& sDefault,
@@ -202,7 +202,7 @@ protected:
     inline ImoId get_node_id(XmlNode* node) { return m_pAnalyser->get_node_id(node); }
     inline bool has_attribute(XmlNode* node, const string& name)
     {
-        return node->attribute(name.c_str()) != NULL;
+        return node->attribute(name.c_str()) != nullptr;
     }
     inline ELdpElement get_type(XmlNode* node) { return m_pAnalyser->get_type(node); }
 
@@ -441,7 +441,7 @@ protected:
     //-----------------------------------------------------------------------------------
     Color get_color_child()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
         Color color;
         if (pImo->is_color_dto())
         {
@@ -493,7 +493,7 @@ protected:
     {
         m_childToAnalyse = m_childToAnalyse.first_child();
         string styleName = get_string_value();
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
 
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
         if (pScore)
@@ -521,7 +521,7 @@ protected:
     //-----------------------------------------------------------------------------------
     TPoint get_point_child()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
         TPoint point;
         if (pImo->is_point_dto())
         {
@@ -535,7 +535,7 @@ protected:
     //-----------------------------------------------------------------------------------
     TSize get_size_child()
     {
-        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
         TSize size;
         if (pImo->is_size_info())
         {
@@ -579,7 +579,7 @@ protected:
     //-----------------------------------------------------------------------------------
     ImoStyle* get_doc_text_style(const string& styleName)
     {
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
 
         ImoDocument* pDoc = m_pAnalyser->get_root_imo_document();
         if (pDoc)
@@ -722,7 +722,7 @@ protected:
                )
             {
                 return static_cast<ImoInlineLevelObj*>(
-                    m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+                    m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
             }
             else if (type == k_string)
             {
@@ -734,7 +734,7 @@ protected:
 
             move_to_next_child();
         }
-        return NULL;
+        return nullptr;
     }
 
     //-----------------------------------------------------------------------------------
@@ -751,7 +751,7 @@ protected:
     void analyse_optional_style(ImoContentObj* pParent)
     {
         // [<style>]
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
         if (has_attribute("style"))
             pStyle = get_doc_text_style( get_attribute("style") );
         pParent->set_style(pStyle);
@@ -832,7 +832,7 @@ public:
     ImoObj* do_analysis()
     {
         cout << "Missing analyser for element '" << m_tag << "'. Node ignored." << endl;
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -985,7 +985,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoBeamDto* pInfo = NULL;
+        ImoBeamDto* pInfo = nullptr;
 
         // num
         if (get_optional(k_number))
@@ -994,7 +994,7 @@ public:
         {
             error_msg("Missing or invalid beam number. Beam ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // <beamtype> (label)
@@ -1002,7 +1002,7 @@ public:
         {
             error_msg("Missing or invalid beam type. Beam ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         return pInfo;
@@ -1293,7 +1293,7 @@ public:
         {
             error_msg("Missing or invalid color value. Must be #rrggbbaa. Color ignored.");
             delete pColor;
-            return NULL;
+            return nullptr;
         }
         return pColor;
     }
@@ -1424,7 +1424,7 @@ public:
         if (get_mandatory(k_name))
             name = get_string_value();
         else
-            return NULL;
+            return nullptr;
         string parent = (name == "Default style" ? "" : "Default style");
 
         pStyle = create_style(name, parent);
@@ -1645,8 +1645,8 @@ protected:
 
     ImoStyle* create_style(const string& name, const string& parent)
     {
-        ImoStyle* pDefault = NULL;
-        ImoStyles* pStyles = NULL;
+        ImoStyle* pDefault = nullptr;
+        ImoStyles* pStyles = nullptr;
         if (m_pAnchor && m_pAnchor->is_styles())
         {
             pStyles = static_cast<ImoStyles*>(m_pAnchor);
@@ -1702,7 +1702,7 @@ public:
         if (!has_attribute("classid"))
         {
             error_msg("dynamic: missing mandatory attribute 'classid'. Element ignored.");
-            return NULL;
+            return nullptr;
         }
 
 
@@ -1841,7 +1841,7 @@ public:
             add_to_model(pImo);
             return pImo;
         }
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -1851,7 +1851,7 @@ public:
 ////    if (oFBData.get_error_msg() != "")
 ////    {
 ////        AnalysisError(pNode, oFBData.get_error_msg());
-////        return (ImoFiguredBass*)NULL;    //error
+////        return (ImoFiguredBass*)nullptr;    //error
 ////    }
 ////
 ////    //initialize options with default values
@@ -1859,8 +1859,8 @@ public:
 ////    //one ending in it.
 ////    int nFBL=0;     //index to next fbline
 ////    lmFBLineInfo* pFBLineInfo[2];
-////    pFBLineInfo[0] = (lmFBLineInfo*)NULL;
-////    pFBLineInfo[1] = (lmFBLineInfo*)NULL;
+////    pFBLineInfo[0] = (lmFBLineInfo*)nullptr;
+////    pFBLineInfo[1] = (lmFBLineInfo*)nullptr;
 ////
 ////    //get options: <parenthesis> & <fbline>
 ////    int iP;
@@ -1887,7 +1887,7 @@ public:
 ////	lmLDPOptionalTags oOptTags(this);
 ////	oOptTags.SetValid(lm_eTag_Location_x, lm_eTag_Location_y, -1);		//finish list with -1
 ////	lmLocation tPos = g_tDefaultPos;
-////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, NULL, NULL, &tPos);
+////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, nullptr, nullptr, &tPos);
 ////
 ////	//create the Figured Bass object
 ////    ImoFiguredBass* pFB = pVStaff->AddFiguredBass(&oFBData, nId);
@@ -2032,7 +2032,7 @@ public:
                     report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                         "Element 'goFwd' has an incoherent value: go forward to start?. Element ignored.");
                     delete pImo;
-                    return NULL;
+                    return nullptr;
                 }
             }
             else if (duration == "end")
@@ -2044,7 +2044,7 @@ public:
                     report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                         "Element 'goBack' has an incoherent value: go backwards to end?. Element ignored.");
                     delete pImo;
-                    return NULL;
+                    return nullptr;
                 }
             }
             else
@@ -2055,7 +2055,7 @@ public:
                     report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                         "Unknown duration '" + duration + "'. Element ignored.");
                     delete pImo;
-                    return NULL;
+                    return nullptr;
                 }
                 else
                 {
@@ -2072,7 +2072,7 @@ public:
                 report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                     "Negative value for element 'goFwd/goBack'. Element ignored.");
                 delete pImo;
-                return NULL;
+                return nullptr;
             }
             else
                 pImo->set_time_shift(rTime);
@@ -2082,7 +2082,7 @@ public:
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Unknown duration '" + m_childToAnalyse.name() + "'. Element ignored.");
             delete pImo;
-            return NULL;
+            return nullptr;
         }
 
         error_if_more_elements();
@@ -2124,7 +2124,7 @@ public:
             {
                 report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                         "Unknown type '" + value + "'. Element 'graphic' ignored.");
-                return NULL;
+                return nullptr;
             }
         }
 
@@ -2183,32 +2183,32 @@ public:
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 
         // firstInstr
-        ImoInstrument* pFirstInstr = NULL;
+        ImoInstrument* pFirstInstr = nullptr;
         if (get_mandatory("firstInstr"))
         {
             string partId = m_childToAnalyse.first_child().value();
             pFirstInstr = pScore->get_instrument(partId);
-//            if (pFirstInstr == NULL)
+//            if (pFirstInstr == nullptr)
 //            {
 //                error_msg("");
 //            }
         }
         else
-            return NULL;
+            return nullptr;
 
         // lastInstr
-        ImoInstrument* pLastInstr = NULL;
+        ImoInstrument* pLastInstr = nullptr;
         if (get_mandatory("lastInstr"))
         {
             string partId = m_childToAnalyse.first_child().value();
             pLastInstr = pScore->get_instrument(partId);
-//            if (pFirstInstr == NULL)
+//            if (pFirstInstr == nullptr)
 //            {
 //                error_msg("");
 //            }
         }
         else
-            return NULL;
+            return nullptr;
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
@@ -2275,13 +2275,13 @@ protected:
             pText->set_text(name);
 
             ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-            ImoStyle* pStyle = NULL;
+            ImoStyle* pStyle = nullptr;
             if (pScore)     //in unit tests the score might not exist
                 pStyle = pScore->get_default_style();
             pText->set_style(pStyle);
             return pText;
         }
-        return NULL;
+        return nullptr;
     }
 
 };
@@ -2351,7 +2351,7 @@ public:
         {
             error_msg("Missing or invalid MIDI instrument (0..127). MIDI info ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // [num_channel]
@@ -2409,7 +2409,7 @@ public:
         m_pAnalyser->clear_pending_relations();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoInstrument* pInstrument = NULL;
+        ImoInstrument* pInstrument = nullptr;
 
         // [<instrId>]
         if (get_optional("instrId"))
@@ -2417,17 +2417,17 @@ public:
             string partId = m_childToAnalyse.first_child().value();
             ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
             pInstrument = pScore->get_instrument(partId);
-            if (pInstrument == NULL)
+            if (pInstrument == nullptr)
             {
                 error_msg("'instrId' is not defined in <parts> element. Instrument ignored.");
-                return NULL;
+                return nullptr;
             }
             pInstrument->set_instr_id( m_childToAnalyse.first_child().value() );
         }
         else if (m_pAnalyser->is_instr_id_required())
         {
             error_msg("instrument: missing 'instrId' element. Instrument ignored.");
-            return NULL;
+            return nullptr;
         }
         else
             pInstrument = static_cast<ImoInstrument*>(
@@ -2503,13 +2503,13 @@ protected:
             pText->set_text(name);
 
             ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-            ImoStyle* pStyle = NULL;
+            ImoStyle* pStyle = nullptr;
             if (pScore)     //in unit tests the score might not exist
                 pStyle = pScore->get_default_style();
             pText->set_style(pStyle);
             return pText;
         }
-        return NULL;
+        return nullptr;
     }
 
     void add_sound_info_if_needed(ImoInstrument* pInstr)
@@ -2608,7 +2608,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDocument* pImoDoc = NULL;
+        ImoDocument* pImoDoc = nullptr;
 
         // <vers>
         string version = get_mandatory_string_attribute("vers", "0.0", "lenmusdoc");
@@ -2889,7 +2889,7 @@ public:
                 pMtr->set_ticks_per_minute(60);
                 pMtr->set_mark_type(ImoMetronomeMark::k_value);
                 add_to_model(pMtr);
-                return NULL;
+                return nullptr;
             }
         }
         else if (get_optional(k_number))
@@ -2905,7 +2905,7 @@ public:
             pMtr->set_ticks_per_minute(60);
             pMtr->set_mark_type(ImoMetronomeMark::k_value);
             add_to_model(pMtr);
-            return NULL;
+            return nullptr;
         }
 
         // [parenthesis]
@@ -3013,11 +3013,11 @@ public:
     NoteRestLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
         : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pTieDto(NULL)
-        , m_pTupletInfo(NULL)
-        , m_pBeamInfo(NULL)
-        , m_pSlurDto(NULL)
-        , m_pFermata(NULL)
+        , m_pTieDto(nullptr)
+        , m_pTupletInfo(nullptr)
+        , m_pBeamInfo(nullptr)
+        , m_pSlurDto(nullptr)
+        , m_pFermata(nullptr)
         , m_srcOldBeam("")
         , m_srcOldTuplet("")
     {
@@ -3030,9 +3030,9 @@ public:
 
         // create object note or rest
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoNoteRest* pNR = NULL;
-        ImoNote* pNote = NULL;
-        ImoRest* pRest = NULL;
+        ImoNoteRest* pNR = nullptr;
+        ImoNote* pNote = nullptr;
+        ImoRest* pRest = nullptr;
         if (fIsRest)
         {
             pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
@@ -3129,7 +3129,7 @@ public:
         //tuplet
         if (fAddOldTuplet)
             set_old_tuplet(pNR);
-        else if (m_pTupletInfo==NULL && m_pAnalyser->is_tuplet_open())
+        else if (m_pTupletInfo==nullptr && m_pAnalyser->is_tuplet_open())
             add_to_current_tuplet(pNR);
 
         add_tuplet_info(pNR);
@@ -3137,7 +3137,7 @@ public:
         //beam
         if (fAddOldBeam)
             set_beam_g(pNR);
-        else if (m_pBeamInfo==NULL && m_pAnalyser->is_old_beam_open())
+        else if (m_pBeamInfo==nullptr && m_pAnalyser->is_old_beam_open())
             add_to_old_beam(pNR);
 
         add_beam_info(pNR);
@@ -3197,17 +3197,17 @@ protected:
             ELdpElement type = get_type(&m_childToAnalyse);
             if (type == k_tuplet)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
                 m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
             }
             else if (type == k_fermata)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
                 m_pFermata = static_cast<ImoFermata*>( pImo );
             }
             else if (type == k_beam)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
                 m_pBeamInfo = static_cast<ImoBeamDto*>( pImo );
             }
             else if (type == k_voice)
@@ -3316,6 +3316,7 @@ protected:
     {
         ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
         pInfo->set_note_rest(pNR);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pAnalyser->add_old_beam(pInfo);
     }
 
@@ -3347,6 +3348,7 @@ protected:
         {
             ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
             pInfo->set_note_rest(pNR);
+            pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
             m_pAnalyser->close_old_beam(pInfo);
         }
     }
@@ -3376,6 +3378,7 @@ protected:
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pAnalyser->add_relation_info(pInfo);
     }
 
@@ -3442,6 +3445,7 @@ protected:
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_tuplet_type(ImoTupletDto::k_stop);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pAnalyser->add_relation_info(pInfo);
     }
 
@@ -3464,6 +3468,7 @@ protected:
         pInfo->set_note_rest(pNR);
         pInfo->set_actual_number(actual);
         pInfo->set_normal_number(normal);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pAnalyser->add_relation_info(pInfo);
     }
 
@@ -3542,7 +3547,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoOptionInfo* pOpt = NULL;
+        ImoOptionInfo* pOpt = nullptr;
 
         // <name> (label)
         string name;
@@ -3621,7 +3626,7 @@ public:
         else
             delete pOpt;
 
-        return NULL;
+        return nullptr;
     }
 
     bool is_bool_option(const string& name)
@@ -3779,7 +3784,7 @@ public:
         if (m_pAnchor && m_pAnchor->is_page_info())
             pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
-            return NULL;         //what is this for?
+            return nullptr;         //what is this for?
             //pDto = &dto;
 
         //left
@@ -3825,7 +3830,7 @@ public:
         if (m_pAnchor && m_pAnchor->is_page_info())
             pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
-            return NULL;     //what is this for?
+            return nullptr;     //what is this for?
             //pDto = &dto;
 
         //width
@@ -3896,7 +3901,7 @@ public:
         if (!has_attribute("name"))
         {
             error_msg("Missing name for element 'param'. Element ignored.");
-            return NULL;
+            return nullptr;
         }
 
         string name = get_attribute("name");
@@ -3943,7 +3948,7 @@ public:
         }
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -3951,7 +3956,7 @@ protected:
     void add_instrument(ImoScore* pScore)
     {
         string instrId = m_childToAnalyse.first_child().value();
-        if (pScore->get_instrument(instrId) == NULL)
+        if (pScore->get_instrument(instrId) == nullptr)
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoInstrument* pInstr = static_cast<ImoInstrument*>(
@@ -4056,7 +4061,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4293,6 +4298,7 @@ public:
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // num
         if (get_mandatory(k_number))
@@ -4303,7 +4309,7 @@ public:
         {
             error_msg("Missing or invalid slur type. Slur ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // [<bezier>]
@@ -4367,7 +4373,7 @@ public:
         {
             error_msg("Missing width for spacer. Spacer ignored.");
             delete pSpacer;
-            return NULL;
+            return nullptr;
         }
 
         // [<staffobjOptions>*]
@@ -4416,7 +4422,7 @@ public:
         {
             error_msg("Missing or invalid staff number. Staff info ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // [<staffType>]
@@ -4584,7 +4590,7 @@ public:
         if (m_pAnchor && m_pAnchor->is_system_info())
             pDto = static_cast<ImoSystemInfo*>(m_pAnchor);
         else
-            return NULL;     //what is this for?
+            return nullptr;     //what is this for?
             //pDto = &dto;
 
         if (get_mandatory(k_number))
@@ -4741,7 +4747,7 @@ public:
         }
 
         error_if_more_elements();
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4939,7 +4945,7 @@ public:
     ImoObj* do_analysis()
     {
         // [<style>]
-        ImoStyle* pStyle = NULL;
+        ImoStyle* pStyle = nullptr;
         if (has_attribute("style"))
             pStyle = get_doc_text_style( get_attribute("style") );
 
@@ -4948,7 +4954,7 @@ public:
         if (value.empty())
         {
             error_msg("txt: missing mandatory value 'string'. Element <txt> ignored.");
-            return NULL;
+            return nullptr;
         }
         else
         {
@@ -4995,7 +5001,7 @@ public:
             pText->set_text(get_string_value());
 
             // [<style>]
-            ImoStyle* pStyle = NULL;
+            ImoStyle* pStyle = nullptr;
             if (get_optional(k_style))
                 pStyle = get_text_style_child(m_styleName);
             else
@@ -5024,7 +5030,7 @@ public:
             add_to_model(pText);
             return pText;
         }
-        return NULL;
+        return nullptr;
     }
 
 };
@@ -5046,6 +5052,7 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTieDto* pInfo = static_cast<ImoTieDto*>(
                                 ImFactory::inject(k_imo_tie_dto, pDoc));
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // num
         if (get_mandatory(k_number))
@@ -5056,7 +5063,7 @@ public:
         {
             error_msg("Missing or invalid tie type. Tie ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // [<bezier>]
@@ -5178,7 +5185,7 @@ public:
             add_to_model(pTitle);
             return pTitle;
         }
-        return NULL;
+        return nullptr;
     }
 
 };
@@ -5229,7 +5236,7 @@ public:
         {
             error_msg("Missing or invalid tuplet type. Tuplet ignored.");
             delete pInfo;
-            return NULL;
+            return nullptr;
         }
 
         if (pInfo->is_start_of_tuplet())
@@ -5239,7 +5246,7 @@ public:
             {
                 error_msg("Tuplet: missing or invalid actual notes number. Tuplet ignored.");
                 delete pInfo;
-                return NULL;
+                return nullptr;
             }
 
             // [<normalNotes>]
@@ -5249,7 +5256,7 @@ public:
             {
                 error_msg("Tuplet: Missing or invalid normal notes number. Tuplet ignored.");
                 delete pInfo;
-                return NULL;
+                return nullptr;
             }
 
             // [<tupletOptions>]
@@ -5265,6 +5272,7 @@ protected:
     {
         pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
         pInfo->set_placement(k_placement_default);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
     }
 
     void set_tuplet_id(ImoTupletDto* UNUSED(pInfo))
@@ -5736,22 +5744,22 @@ LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pDoc(pDoc)
     , m_pParser(parser)
     , m_pLdpFactory(libraryScope.ldp_factory())
-    , m_pTiesBuilder(NULL)
-    , m_pOldTiesBuilder(NULL)
-    , m_pBeamsBuilder(NULL)
-    , m_pOldBeamsBuilder(NULL)
-    , m_pTupletsBuilder(NULL)
-    , m_pSlursBuilder(NULL)
-    , m_pCurScore(NULL)
-    , m_pLastScore(NULL)
-    , m_pImoDoc(NULL)
+    , m_pTiesBuilder(nullptr)
+    , m_pOldTiesBuilder(nullptr)
+    , m_pBeamsBuilder(nullptr)
+    , m_pOldBeamsBuilder(nullptr)
+    , m_pTupletsBuilder(nullptr)
+    , m_pSlursBuilder(nullptr)
+    , m_pCurScore(nullptr)
+    , m_pLastScore(nullptr)
+    , m_pImoDoc(nullptr)
     , m_scoreVersion(0)
     , m_fInstrIdRequired(false)
     , m_pTree()
     , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
-    , m_pLastNote(NULL)
+    , m_pLastNote(nullptr)
 {
     m_NameToTag["clef"] = k_tag_clef;
     m_NameToTag["content"] = k_tag_content;
@@ -6300,15 +6308,6 @@ void LmdTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
                << " will be ignored." << endl;
 }
 
-//---------------------------------------------------------------------------------------
-void LmdTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
-{
-    m_reporter << "Line " << pNewInfo->get_line_number()
-               << ". This tie has the same number than that defined in line "
-               << pExistingInfo->get_line_number()
-               << ". This tie will be ignored." << endl;
-}
-
 
 //=======================================================================================
 // OldLmdTiesBuilder implementation
@@ -6316,7 +6315,7 @@ void LmdTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* p
 OldLmdTiesBuilder::OldLmdTiesBuilder(ostream& reporter, LmdAnalyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pStartNoteTieOld(NULL)
+    , m_pStartNoteTieOld(nullptr)
 {
 }
 
@@ -6365,12 +6364,12 @@ void OldLmdTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
     if (notes_can_be_tied(m_pStartNoteTieOld, pEndNote))
     {
         tie_notes(m_pStartNoteTieOld, pEndNote);
-        m_pStartNoteTieOld = NULL;
+        m_pStartNoteTieOld = nullptr;
     }
     else if (m_pStartNoteTieOld->get_voice() == pEndNote->get_voice())
     {
         error_invalid_tie_old_syntax( 0 );  //TODO_X    get_line_number(m_pOldTieParam) );
-        m_pStartNoteTieOld = NULL;
+        m_pStartNoteTieOld = nullptr;
     }
     else
     {
@@ -6532,7 +6531,7 @@ void LmdTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, pTuplet, NULL);
+        pNR->include_in_relation(pDoc, pTuplet, nullptr);
     }
 }
 

@@ -45,7 +45,7 @@ namespace lomse
 KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_pKeyShape(NULL)
+    , m_pKeyShape(nullptr)
 {
 }
 

@@ -71,14 +71,14 @@ public:
     ScoreCursorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
     }
 
     ~ScoreCursorTestFixture()    //TearDown fixture
     {
         delete m_pDoc;
-        m_pDoc = NULL;
+        m_pDoc = nullptr;
     }
 
     void dump_cursor_state(ScoreCursorState* pState)
@@ -1980,7 +1980,7 @@ SUITE(ScoreCursorTest)
         ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDoc) );
         ImoId id = pImo->get_id();
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
-        pInstr->insert_staffobj_at(NULL /*at start*/, pImo);
+        pInstr->insert_staffobj_at(nullptr /*at start*/, pImo);
         m_pScore->close();
         //dump_col_staff_objs();
 

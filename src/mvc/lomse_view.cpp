@@ -37,7 +37,7 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 View::View()
-    : m_pInteractor(NULL)
+    : m_pInteractor(nullptr)
 {
 }
 

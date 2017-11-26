@@ -378,7 +378,7 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
 //    : GmoShapeRectangle(pOwner, uxLeft, uyTop, uxRight, uyBottom, uBorderWidth,
 //                       nBorderColor, nBgColor, nShapeIdx, sName,
 //                       fDraggable, fSelectable, fVisible)
-//    , m_pControl((wxWindow*)NULL)
+//    , m_pControl((wxWindow*)nullptr)
 //{
 //}
 //

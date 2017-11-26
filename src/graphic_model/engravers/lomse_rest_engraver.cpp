@@ -48,7 +48,7 @@ namespace lomse
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* UNUSED(pShapesStorage), int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_pRest(NULL)
+    , m_pRest(nullptr)
 {
 }
 
@@ -76,7 +76,7 @@ GmoShape* RestEngraver::create_tool_dragged_shape(int restType, int dots)
 {
     m_restType = restType;
     m_numDots = dots;
-    m_pRest = NULL;
+    m_pRest = nullptr;
     m_uxLeft = 0.0;
     m_uyTop = 0.0;
     m_fontSize = 21.0;

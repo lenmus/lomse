@@ -58,7 +58,7 @@ using namespace lomse;
 //public:
 //    MyMultiColumnLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
 //                        LibraryScope& libraryScope, ImoStyles* pStyles)
-//        : MultiColumnLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
+//        : MultiColumnLayouter(pImo, nullptr, pGModel, libraryScope, pStyles)
 //    {
 //    }
 //    virtual ~MyMultiColumnLayouter() {}
@@ -117,8 +117,8 @@ SUITE(MultiColumnLayouterTest)
         //GraphicModel model;
         //ImoDocument* pDoc = doc.get_imodoc();
         //ImoStyles* pStyles = pDoc->get_styles();
-        //GmoBoxDocPage page(NULL);
-        //GmoBoxDocPageContent box(NULL);
+        //GmoBoxDocPage page(nullptr);
+        //GmoBoxDocPageContent box(nullptr);
         //box.set_owner_box(&page);
 
         //MyMultiColumnLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -162,8 +162,8 @@ SUITE(MultiColumnLayouterTest)
     //    GraphicModel model;
     //    ImoDocument* pDoc = doc.get_imodoc();
     //    ImoStyles* pStyles = pDoc->get_styles();
-    //    GmoBoxDocPage page(NULL);
-    //    GmoBoxDocPageContent box(NULL);
+    //    GmoBoxDocPage page(nullptr);
+    //    GmoBoxDocPageContent box(nullptr);
     //    box.set_owner_box(&page);
 
     //    MyMultiColumnLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -207,8 +207,8 @@ SUITE(MultiColumnLayouterTest)
     //    GraphicModel model;
     //    ImoDocument* pDoc = doc.get_imodoc();
     //    ImoStyles* pStyles = pDoc->get_styles();
-    //    GmoBoxDocPage page(NULL);
-    //    GmoBoxDocPageContent box(NULL);
+    //    GmoBoxDocPage page(nullptr);
+    //    GmoBoxDocPageContent box(nullptr);
     //    box.set_owner_box(&page);
 
     //    MyMultiColumnLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -253,8 +253,8 @@ SUITE(MultiColumnLayouterTest)
     //    GraphicModel model;
     //    ImoDocument* pDoc = doc.get_imodoc();
     //    ImoStyles* pStyles = pDoc->get_styles();
-    //    GmoBoxDocPage page(NULL);
-    //    GmoBoxDocPageContent box(NULL);
+    //    GmoBoxDocPage page(nullptr);
+    //    GmoBoxDocPageContent box(nullptr);
     //    box.set_owner_box(&page);
 
     //    MyMultiColumnLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -298,8 +298,8 @@ SUITE(MultiColumnLayouterTest)
     //    GraphicModel model;
     //    ImoDocument* pDoc = doc.get_imodoc();
     //    ImoStyles* pStyles = pDoc->get_styles();
-    //    GmoBoxDocPage page(NULL);
-    //    GmoBoxDocPageContent box(NULL);
+    //    GmoBoxDocPage page(nullptr);
+    //    GmoBoxDocPageContent box(nullptr);
     //    box.set_owner_box(&page);
 
     //    MyMultiColumnLayouter lyt(pPara, &model, m_libraryScope, pStyles);

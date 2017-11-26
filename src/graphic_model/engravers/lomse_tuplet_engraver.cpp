@@ -51,8 +51,8 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 TupletEngraver::TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
-    , m_pTupletShape(NULL)
-    , m_pTuplet(NULL)
+    , m_pTupletShape(nullptr)
+    , m_pTuplet(nullptr)
 {
 }
 
@@ -305,7 +305,7 @@ GmoShapeNote* TupletEngraver::get_first_note()
         if ((*it).first->is_note())
             return dynamic_cast<GmoShapeNote*>((*it).second);
     }
-    return NULL;    //imposible case unless all group are rests!
+    return nullptr;    //imposible case unless all group are rests!
 }
 
 //---------------------------------------------------------------------------------------
@@ -317,7 +317,7 @@ GmoShapeNote* TupletEngraver::get_last_note()
         if ((*it).first->is_note())
             return dynamic_cast<GmoShapeNote*>((*it).second);
     }
-    return NULL;    //imposible case unless all group are rests!
+    return nullptr;    //imposible case unless all group are rests!
 }
 
 //---------------------------------------------------------------------------------------

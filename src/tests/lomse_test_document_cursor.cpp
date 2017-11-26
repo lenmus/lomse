@@ -65,14 +65,14 @@ public:
     DocContentCursorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
     }
 
     ~DocContentCursorTestFixture()    //TearDown fixture
     {
         delete m_pDoc;
-        m_pDoc = NULL;
+        m_pDoc = nullptr;
     }
 
     void create_document_1()
@@ -116,11 +116,11 @@ SUITE(DocContentCursorTest)
 
     TEST_FIXTURE(DocContentCursorTestFixture, empty_doc_points_to_end_of_content)
     {
-        //002. if document is empty points to 'end-of-document' value (NULL)
+        //002. if document is empty points to 'end-of-document' value (nullptr)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
         MyDocContentCursor cursor(m_pDoc);
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == k_cursor_before_start );
     }
@@ -134,7 +134,7 @@ SUITE(DocContentCursorTest)
         ++cursor;
         CHECK( (*cursor)->is_paragraph() == true );
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
     }
@@ -146,11 +146,11 @@ SUITE(DocContentCursorTest)
         MyDocContentCursor cursor(m_pDoc);
         ++cursor;
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
     }
@@ -185,7 +185,7 @@ SUITE(DocContentCursorTest)
         MyDocContentCursor cursor(m_pDoc);
         ++cursor;
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
         --cursor;
@@ -199,13 +199,13 @@ SUITE(DocContentCursorTest)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
         MyDocContentCursor cursor(m_pDoc);
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == k_cursor_before_start );
 
         --cursor;
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == k_cursor_before_start );
     }
@@ -217,7 +217,7 @@ SUITE(DocContentCursorTest)
         MyDocContentCursor cursor(m_pDoc);
         //cout << m_pDoc->to_string(k_save_ids) << endl;
         cursor.point_to(110L);
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
         CHECK( cursor.get_prev_id() == 80L );
     }
@@ -228,7 +228,7 @@ SUITE(DocContentCursorTest)
         create_document_1();
         MyDocContentCursor cursor(m_pDoc);
         cursor.point_to(175L);
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
     }
@@ -239,7 +239,7 @@ SUITE(DocContentCursorTest)
         create_document_1();
         MyDocContentCursor cursor(m_pDoc);
         cursor.point_to(106L);       //time signature
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
     }
@@ -252,13 +252,13 @@ SUITE(DocContentCursorTest)
         cursor.point_to(110L);   //move to paragraph to get pointer to it
         ImoBlockLevelObj* pImo = static_cast<ImoBlockLevelObj*>( *cursor );
         cursor.point_to(174L);  //to end
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
 
         cursor.point_to(pImo);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( *cursor == pImo );
         CHECK( cursor.get_pointee_id() == 110L );
         CHECK( cursor.get_prev_id() == 80L );
@@ -275,7 +275,7 @@ SUITE(DocContentCursorTest)
 
         cursor.point_to(pClef);  //to end
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_prev_id() == 110L );
     }
@@ -295,7 +295,7 @@ SUITE(DocContentCursorTest)
 //        cout << "id=" << id << endl;
 //
 //        //cursor is not aware of changes
-//        CHECK( *cursor != NULL );
+//        CHECK( *cursor != nullptr );
 //        CHECK( cursor.get_pointee_id() == 26L );
 //        CHECK( cursor.get_prev_id() == 80L );
 //
@@ -335,10 +335,10 @@ SUITE(DocContentCursorTest)
 ////        //@ moves to end when current has been deleted and is last one
 ////        create_empty_document();
 ////        MyDocContentCursor cursor(m_pDoc);
-////        CHECK( *cursor == NULL );
+////        CHECK( *cursor == nullptr );
 ////        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
 ////        pImoDoc->add_paragraph();
-////        CHECK( *cursor == NULL );
+////        CHECK( *cursor == nullptr );
 ////        --cursor;
 ////        CHECK( (*cursor)->is_paragraph() == true );
 //        CHECK (false);
@@ -380,14 +380,14 @@ public:
     DocCursorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
     }
 
     ~DocCursorTestFixture()    //TearDown fixture
     {
         delete m_pDoc;
-        m_pDoc = NULL;
+        m_pDoc = nullptr;
     }
 
     void create_document_1()
@@ -446,10 +446,10 @@ SUITE(DocCursorTest)
 
     TEST_FIXTURE(DocCursorTestFixture, creation_102)
     {
-        //102. if document is empty points to 'end-of-document' value (NULL)
+        //102. if document is empty points to 'end-of-document' value (nullptr)
         create_empty_document();
         MyDocCursor cursor(m_pDoc);
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_pointee_id() == cursor.get_parent_id() );
         CHECK( cursor.is_inside_terminal_node() == false );
@@ -462,7 +462,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.enter_element();     //clef 103L
         ++cursor;                   //key 104L
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_key_signature() == true );
         CHECK( cursor.get_pointee_id() == 104L );
         CHECK( cursor.get_parent_id() == 80L );
@@ -471,7 +471,7 @@ SUITE(DocCursorTest)
         DocCursor cursor2(&cursor);
         //cout << (*cursor2)->to_string() << endl;
 
-        CHECK( *cursor2 != NULL );
+        CHECK( *cursor2 != nullptr );
         CHECK( (*cursor2)->is_key_signature() == true );
         CHECK( cursor2.get_pointee_id() == 104L );
         CHECK( cursor2.get_parent_id() == 80L );
@@ -488,7 +488,7 @@ SUITE(DocCursorTest)
         create_document_3();
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(68L);       //key in score
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_key_signature() == true );
         CHECK( cursor.get_pointee_id() == 68L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -497,7 +497,7 @@ SUITE(DocCursorTest)
         DocCursor cursor2(&cursor);
         //cout << (*cursor2)->to_string() << endl;
 
-        CHECK( *cursor2 != NULL );
+        CHECK( *cursor2 != nullptr );
         CHECK( (*cursor2)->is_key_signature() == true );
         CHECK( cursor2.get_pointee_id() == 68L );
         CHECK( cursor2.get_parent_id() == 64L );
@@ -518,10 +518,10 @@ SUITE(DocCursorTest)
         ++cursor;
         CHECK( (*cursor)->is_paragraph() == true );
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
 
         CHECK( cursor.get_pointee_id() == cursor.get_parent_id() );
@@ -575,12 +575,12 @@ SUITE(DocCursorTest)
         //cursor.dump_ids();
 
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         //cursor.dump_ids();
 
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
 
         CHECK( cursor.get_pointee_id() == cursor.get_parent_id() );
@@ -664,7 +664,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         ++cursor;
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
 
         --cursor;
@@ -681,7 +681,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(64L);   //last score
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
 
         --cursor;
@@ -697,12 +697,12 @@ SUITE(DocCursorTest)
         //305 to added element when doc was empty
         create_empty_document();
         MyDocCursor cursor(m_pDoc);
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         ImoDocument* pImoDoc = m_pDoc->get_imodoc();
         pImoDoc->add_paragraph();
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_parent_id() == k_cursor_at_end );
         CHECK( cursor.is_inside_terminal_node() == false );
@@ -723,7 +723,7 @@ SUITE(DocCursorTest)
 
         cursor.enter_element();
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 103L );
         CHECK( cursor.get_parent_id() == 80L );
@@ -740,7 +740,7 @@ SUITE(DocCursorTest)
 
         cursor.enter_element();     //trying to enter into clef
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 103L );
         CHECK( cursor.get_parent_id() == 80L );
@@ -755,7 +755,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(110L);   //paragraph
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
         CHECK( cursor.get_pointee_id() == 110L );
         CHECK( cursor.get_parent_id() == 110L );
@@ -774,7 +774,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(110L);   //paragraph
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
         CHECK( cursor.get_pointee_id() == 110L );
         CHECK( cursor.get_parent_id() == 110L );
@@ -789,7 +789,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(175L);
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         CHECK( cursor.get_parent_id() == k_cursor_at_end );
         CHECK( cursor.is_inside_terminal_node() == false );
@@ -803,7 +803,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(106L);   //first note
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == 106L );
         CHECK( cursor.get_parent_id() == 80L );
@@ -821,7 +821,7 @@ SUITE(DocCursorTest)
         ;
         cursor.point_to(104L);   //key signature
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_key_signature() == true );
         CHECK( cursor.get_pointee_id() == 104L );
         CHECK( cursor.get_parent_id() == 80L );
@@ -836,7 +836,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(64L);   //score
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
         CHECK( cursor.get_pointee_id() == 64L );
         CHECK( cursor.get_parent_id() == 22L );
@@ -852,7 +852,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(71L);   //first note in score
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == 71L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -898,7 +898,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == 110L );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_702)
@@ -912,7 +912,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == k_cursor_at_end );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_703)
@@ -925,7 +925,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == 80L );     //score
-        CHECK( state.get_delegate_state() != NULL );
+        CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
         CHECK( pSCE->id() == 106L );
         CHECK( pSCE->instrument() == 0 );
@@ -941,13 +941,13 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(107L);   //last rest
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
 
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == 80L );     //score
-        CHECK( state.get_delegate_state() != NULL );
+        CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE =
             dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
         CHECK( pSCE->is_at_end_of_score() );
@@ -963,7 +963,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == 20L );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_706)
@@ -978,7 +978,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == k_cursor_at_end );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_707)
@@ -991,7 +991,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
 
         CHECK( state.get_parent_level_id() == 64L );     //score
-        CHECK( state.get_delegate_state() != NULL );
+        CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
         CHECK( pSCE->id() == 71L );
         CHECK( pSCE->instrument() == 0 );
@@ -1007,7 +1007,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(101L);   //last barline in score 64L
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
 
         DocCursorState state = cursor.get_state();
@@ -1015,7 +1015,7 @@ SUITE(DocCursorTest)
         //cursor.dump_ids();
 
         CHECK( state.get_parent_level_id() == 64L );     //score
-        CHECK( state.get_delegate_state() != NULL );
+        CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE =
             dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
         CHECK( pSCE->is_at_end_of_score() );
@@ -1029,7 +1029,7 @@ SUITE(DocCursorTest)
         ++cursor;       //paragraph 108L
         DocCursorState state = cursor.get_state();
         CHECK( state.get_parent_level_id() == 110L );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
 
         cursor.to_start();      //move to antoher place
         cursor.restore_state(state);
@@ -1065,7 +1065,7 @@ SUITE(DocCursorTest)
         CHECK( cursor.get_parent_id() == 18L );
         DocCursorState state = cursor.get_state();
         CHECK( state.get_parent_level_id() == 20L );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
 
         cursor.to_start();      //move to antoher place
         cursor.restore_state(state);
@@ -1106,7 +1106,7 @@ SUITE(DocCursorTest)
         cursor.restore_state(state);
 
         CHECK( state.get_parent_level_id() == k_cursor_at_end );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, restore_state_725)
@@ -1116,7 +1116,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(107L);   //last rest
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
         CHECK( cursor.get_parent_id() == 80L );
         DocCursorState state = cursor.get_state();
@@ -1124,7 +1124,7 @@ SUITE(DocCursorTest)
         cursor.to_start();      //move to antoher place
         cursor.restore_state(state);
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
         CHECK( cursor.get_parent_id() == 80L );
     }
@@ -1143,7 +1143,7 @@ SUITE(DocCursorTest)
         cursor.restore_state(state);
 
         CHECK( state.get_parent_level_id() == k_cursor_at_end );
-        CHECK( state.get_delegate_state() == NULL );
+        CHECK( state.get_delegate_state() == nullptr );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, restore_state_727)
@@ -1153,7 +1153,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         cursor.point_to(101L);   //last barline in score 64
         ++cursor;
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
         CHECK( cursor.get_parent_id() == 64L );
         DocCursorState state = cursor.get_state();
@@ -1161,7 +1161,7 @@ SUITE(DocCursorTest)
         cursor.to_start();      //move to antoher place
         cursor.restore_state(state);
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
         CHECK( cursor.get_parent_id() == 64L );
     }
@@ -1206,7 +1206,7 @@ SUITE(DocCursorTest)
         cursor.reset_and_point_after(id);
 
         CHECK( cursor.is_inside_terminal_node() == false );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
     }
 
@@ -1225,7 +1225,7 @@ SUITE(DocCursorTest)
         cursor.reset_and_point_after(id);     //should move to end
 
         CHECK( cursor.is_inside_terminal_node() == false );
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         --cursor;
         CHECK( (*cursor)->is_score() == true );
@@ -1253,7 +1253,7 @@ SUITE(DocCursorTest)
         cursor.reset_and_point_after(id);
 
         CHECK( cursor.is_inside_terminal_node() == false );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_heading() == true );
     }
 
@@ -1272,7 +1272,7 @@ SUITE(DocCursorTest)
         cursor.reset_and_point_after(id);     //should move to end
 
         CHECK( cursor.is_inside_terminal_node() == false );
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
@@ -1313,7 +1313,7 @@ SUITE(DocCursorTest)
 
         bool fJailed = cursor.jailed_mode_in(64L);    //score
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 67L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -1331,7 +1331,7 @@ SUITE(DocCursorTest)
 
         bool fJailed = cursor.jailed_mode_in(71L);    //first note
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_heading() == true );
         CHECK( cursor.get_pointee_id() == 14L );
         CHECK( cursor.get_parent_id() == 14L );
@@ -1350,7 +1350,7 @@ SUITE(DocCursorTest)
 
         cursor.exit_element();
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 67L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -1369,7 +1369,7 @@ SUITE(DocCursorTest)
         cursor.terminate_jailed_mode();
         cursor.exit_element();
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
         CHECK( cursor.get_pointee_id() == 64L );
         CHECK( cursor.get_parent_id() == 22L );
@@ -1387,7 +1387,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(20L);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 67L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -1405,7 +1405,7 @@ SUITE(DocCursorTest)
 
         cursor.point_to(101L);  //last barline
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( cursor.get_pointee_id() == 101L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -1425,7 +1425,7 @@ SUITE(DocCursorTest)
 
         cursor.restore_state(state);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_clef() == true );
         CHECK( cursor.get_pointee_id() == 67L );
         CHECK( cursor.get_parent_id() == 64L );
@@ -1445,7 +1445,7 @@ SUITE(DocCursorTest)
 
         cursor.restore_state(state);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( cursor.get_pointee_id() == 101L );
         CHECK( cursor.get_parent_id() == 64L );

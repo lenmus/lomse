@@ -56,7 +56,7 @@ VisualEffect::VisualEffect(GraphicView* view, LibraryScope& libraryScope)
 //=======================================================================================
 DraggedImage::DraggedImage(GraphicView* view, LibraryScope& libraryScope)
     : VisualEffect(view, libraryScope)
-    , m_pShape(NULL)
+    , m_pShape(nullptr)
     , m_fShapeIsOwned(true)
 {
 }
@@ -81,7 +81,7 @@ void DraggedImage::delete_shape()
 {
     if (m_fShapeIsOwned)
         delete m_pShape;
-    m_pShape = NULL;
+    m_pShape = nullptr;
 }
 
 //---------------------------------------------------------------------------------------

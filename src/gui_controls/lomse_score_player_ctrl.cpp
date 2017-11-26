@@ -50,10 +50,10 @@ namespace lomse
 //=======================================================================================
 ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
                                  Document* pDoc)
-    : Control(libScope, pDoc, NULL)
+    : Control(libScope, pDoc, nullptr)
     , PlayerGui()
     , m_pOwnerImo(pOwner)
-    , m_pMainBox(NULL)
+    , m_pMainBox(nullptr)
     , m_width(1000.0f)
     , m_height(600.0f)
     , m_hoverColor( Color(255,80,80) )  //220, 255, 0) )      //greenish yellow

@@ -127,9 +127,9 @@ Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
 //=======================================================================================
 Presenter::Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec)
     : m_spDoc(spDoc)
-    , m_userData(NULL)
+    , m_userData(nullptr)
     , m_pExec(pExec)
-    , m_callback(NULL)
+    , m_callback(nullptr)
 {
     m_interactors.push_back( SpInteractor(pIntor) );
     m_spDoc->add_event_handler(k_doc_modified_event, pIntor);

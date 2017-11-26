@@ -86,28 +86,28 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, GmoBoxDocument_InitiallyEmpty)
     {
-        GmoBoxDocument boxDoc(NULL, NULL);
+        GmoBoxDocument boxDoc(nullptr, nullptr);
         CHECK( boxDoc.get_num_pages() == 0 );
     }
 
     TEST_FIXTURE(GmoTestFixture, GmoBoxDocument_AddPage)
     {
-        GmoBoxDocument boxDoc(NULL, NULL);
+        GmoBoxDocument boxDoc(nullptr, nullptr);
         boxDoc.add_new_page();
         CHECK( boxDoc.get_num_pages() == 1 );
         GmoBoxDocPage* pPage = boxDoc.get_page(0);
-        CHECK( pPage != NULL );
+        CHECK( pPage != nullptr );
         CHECK( pPage->get_number() == 1 );
     }
 
     TEST_FIXTURE(GmoTestFixture, GmoBoxDocument_AddPageIncrementsPagenum)
     {
-        GmoBoxDocument boxDoc(NULL, NULL);
+        GmoBoxDocument boxDoc(nullptr, nullptr);
         boxDoc.add_new_page();
         boxDoc.add_new_page();
         CHECK( boxDoc.get_num_pages() == 2 );
         GmoBoxDocPage* pPage = boxDoc.get_page(1);
-        CHECK( pPage != NULL );
+        CHECK( pPage != nullptr );
         CHECK( pPage->get_number() == 2 );
     }
 
@@ -115,14 +115,14 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, BoxScorePage_InitiallyEmpty)
     {
-        GmoBoxScorePage box(NULL);
+        GmoBoxScorePage box(nullptr);
         CHECK( box.get_num_systems() == 0 );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxScorePage_AddSystem)
     {
-        GmoBoxScorePage box(NULL);
-        GmoBoxSystem* pSys = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxScorePage box(nullptr);
+        GmoBoxSystem* pSys = LOMSE_NEW GmoBoxSystem(nullptr);
         box.add_system(pSys, 0);
         CHECK( box.get_num_systems() == 1 );
         CHECK( pSys = box.get_system(0) );
@@ -132,25 +132,25 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_InitiallyEmpty)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxSystem box(nullptr);
         CHECK( box.get_num_slices() == 0 );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_AddShapeUpdatesLayerPointers)
     {
         Document doc(m_libraryScope);
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
         GmoShapeStaff* pShape = LOMSE_NEW GmoShapeStaff(pInfo, 0, pInfo, 0, 20.0f, Color(0,0,0));
         pBox->add_staff_shape(pShape);
 
-        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
+        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == nullptr );
 
         pScorePage->add_system(pBox, 0);
         pBox->add_shapes_to_tables();
@@ -164,12 +164,12 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, BoxSystem_StoreShapes)
     {
         Document doc(m_libraryScope);
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         pScorePage->add_child_box(pBox);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
@@ -182,12 +182,12 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, Box_StoreShapes)
     {
         Document doc(m_libraryScope);
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         pScorePage->add_child_box(pBox);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
@@ -200,12 +200,12 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesHaveLayer)
     {
         Document doc(m_libraryScope);
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         pScorePage->add_child_box(pBox);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
@@ -218,12 +218,12 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesOrderedByLayer)
     {
         Document doc(m_libraryScope);
-        MyGmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        MyGmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
         GmoShapeStaff* pShape0 = LOMSE_NEW GmoShapeStaff(pInfo, 0, pInfo, 0, 20.0f, Color(0,0,0));
@@ -277,12 +277,12 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, Shape_SetOrigin)
     {
         Document doc(m_libraryScope);
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         page.add_child_box(pDPC);
-        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(NULL);
+        GmoBoxScorePage* pScorePage = LOMSE_NEW GmoBoxScorePage(nullptr);
         pDPC->add_child_box(pScorePage);
-        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(NULL);
+        GmoBoxSystem* pBox = LOMSE_NEW GmoBoxSystem(nullptr);
         pScorePage->add_child_box(pBox);
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
                                     ImFactory::inject(k_imo_staff_info, &doc));
@@ -300,9 +300,9 @@ SUITE(GmoTest)
     {
         GraphicModel gm;
         GmoBoxDocument* pDoc = gm.get_root();
-        GmoBoxDocPage* pDP = LOMSE_NEW GmoBoxDocPage(NULL);
+        GmoBoxDocPage* pDP = LOMSE_NEW GmoBoxDocPage(nullptr);
         pDoc->add_child_box(pDP);
-        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(nullptr);
         pDP->add_child_box(pDPC);
 
         CHECK( pDP->get_graphic_model() == &gm );

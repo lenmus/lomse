@@ -61,7 +61,7 @@ static long m_idCounter = 0L;
 GraphicModel::GraphicModel()
     : m_modified(true)
 {
-    m_root = LOMSE_NEW GmoBoxDocument(this, NULL);    //TODO: replace NULL by ImoDocument
+    m_root = LOMSE_NEW GmoBoxDocument(this, nullptr);    //TODO: replace nullptr by ImoDocument
     m_modelId = ++m_idCounter;
 }
 
@@ -144,7 +144,7 @@ GmoShape* GraphicModel::find_shape_for_object(ImoStaffObj* pSO)
         if (pShape)
             return pShape;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ GmoShape* GraphicModel::get_shape_for_imo(ImoId id, ShapeId shapeId)
         if (it != m_imoToSecondaryShape.end())
             return it->second;
         else
-            return NULL;
+            return nullptr;
     }
 }
 
@@ -225,7 +225,7 @@ GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
     {
         LOMSE_LOG_DEBUG(Logger::k_score_player, str(boost::format(
             "No shape found for Imo id: %d") % id) );
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -236,7 +236,7 @@ GmoObj* GraphicModel::get_box_for_control(GmoRef gref)
 	if (it != m_ctrolToPtr.end())
 		return it->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ GmoBox* GraphicModel::get_box_for_imo(ImoId id)
 	if (it != m_imoToBox.end())
 		return it->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId sco
     GmoBoxSystem* pSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
     if (pSystem)
         return pSystem->get_staff_shape(0);
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -313,7 +313,7 @@ int GraphicModel::get_system_for(ImoId UNUSED(scoreId), int UNUSED(instr),
 GmoBoxSystem* GraphicModel::get_system_box(int UNUSED(iSystem))
 {
     //TODO
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -331,7 +331,7 @@ ScoreStub* GraphicModel::get_stub_for(ImoId scoreId)
 	if (it != m_scores.end())
 		return it->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -367,7 +367,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
 
             //get the SliceInstr.
             GmoObj* pBox = find_inner_box_at(iPage, x, y);
-            //AWARE: NULL is returned if point is only in GmoBoxDocPage but no other box.
+            //AWARE: nullptr is returned if point is only in GmoBoxDocPage but no other box.
             if (pBox)
             {
                 //as point is in a GmoShapeStaff only two possibilities:
@@ -404,7 +404,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
         {
             //check if pointing to a box
             m_areaInfo.pGmo = find_inner_box_at(iPage, x, y);
-            //AWARE: NULL is returned if point is only in GmoBoxDocPage but no other box.
+            //AWARE: nullptr is returned if point is only in GmoBoxDocPage but no other box.
             if (m_areaInfo.pGmo)
             {
                 if (m_areaInfo.pGmo->is_box_slice_instr())
@@ -495,7 +495,7 @@ GmoBoxSystem* GModelAlgorithms::get_box_system_for(GmoObj* pGmo, LUnits y)
             return pPage->get_system(iSystem);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 

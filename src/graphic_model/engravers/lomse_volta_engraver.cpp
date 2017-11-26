@@ -123,7 +123,7 @@ void VoltaBracketEngraver::create_one_shape()
     set_shape_details(pShape, true);
 
 
-    m_shapesInfo[1].pShape = NULL;
+    m_shapesInfo[1].pShape = nullptr;
 }
 
 //---------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@ class MyListLayouter : public ListLayouter
 public:
     MyListLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                    LibraryScope& libraryScope, ImoStyles* pStyles)
-        : ListLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
+        : ListLayouter(pImo, nullptr, pGModel, libraryScope, pStyles)
     {
     }
     virtual ~MyListLayouter() {}
@@ -116,8 +116,8 @@ SUITE(ListLayouterTest)
 //        GraphicModel model;
 //        ImoDocument* pDoc = doc.get_imodoc();
 //        ImoStyles* pStyles = pDoc->get_styles();
-//        GmoBoxDocPage page(NULL);
-//        GmoBoxDocPageContent box(NULL);
+//        GmoBoxDocPage page(nullptr);
+//        GmoBoxDocPageContent box(nullptr);
 //        box.set_owner_box(&page);
 //
 //        MyListLayouter lyt(pList, &model, m_libraryScope, pStyles);
@@ -130,9 +130,9 @@ SUITE(ListLayouterTest)
 //        GmoBox* pListBox = lyt.my_get_main_box();
 //        GmoBox* pListItemBox = pListBox->get_child_box(0);
 //        GmoBox* pParaBox = pListItemBox->get_child_box(0);
-//        CHECK( pParaBox != NULL );
+//        CHECK( pParaBox != nullptr );
 //        GmoShape* pWord = pParaBox->get_shape(0);
-//        CHECK( pWord != NULL );
+//        CHECK( pWord != nullptr );
 ////        cout << "box: org=(" << pListBox->get_origin().x << ", "
 ////             << pListBox->get_origin().y << ") size=("
 ////             << pListBox->get_size().width << ", "

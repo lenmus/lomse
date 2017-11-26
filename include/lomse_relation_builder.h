@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -75,6 +75,7 @@ protected:
     void delete_consumed_info_items(T* pEndInfo);
     void delete_item_element(T* pInfo);
     T* find_matching_start_item(T* pInfo);
+    T* find_duplicated_staffobj(T* pInfo);
 
     virtual void add_relation_to_staffobjs(T* pInfo) = 0;
 
@@ -82,6 +83,7 @@ protected:
     void error_no_matching_items(T* pInfo);
     void error_no_end_item(T* pInfo);
     void error_duplicated_number(T* pExistingInfo, T* pNewInfo);
+    void error_duplicated_staffobj(T* pExistingInfo, T* pNewInfo);
 
     //temporary: items that match
     std::list<T*> m_matches;
@@ -115,13 +117,20 @@ RelationBuilder<T, A>::~RelationBuilder()
 template <class T, class A>
 void RelationBuilder<T, A>::add_item_info(T* pNewInfo)
 {
+    T* pExistingInfo = find_duplicated_staffobj(pNewInfo);
+    if (pExistingInfo)
+    {
+        error_duplicated_staffobj(pExistingInfo, pNewInfo);
+        return;
+    }
+
     if (pNewInfo->is_start_of_relation())
     {
-        T* pExistingInfo = find_matching_start_item(pNewInfo);
+        pExistingInfo = find_matching_start_item(pNewInfo);
         if (pExistingInfo)
             error_duplicated_number(pExistingInfo, pNewInfo);
-        else
-            save_item_info(pNewInfo);
+
+        save_item_info(pNewInfo);
     }
     else if (pNewInfo->is_end_of_relation())
         create_item(pNewInfo);
@@ -178,7 +187,21 @@ T* RelationBuilder<T, A>::find_matching_start_item(T* pInfo)
              && (*it)->is_start_of_relation() )
              return *it;
     }
-    return NULL;
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+template <class T, class A>
+T* RelationBuilder<T, A>::find_duplicated_staffobj(T* pInfo)
+{
+    ListIterator it;
+    for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+    {
+         if ((*it)->get_item_number() == pInfo->get_item_number()
+             && (*it)->get_staffobj() == pInfo->get_staffobj() )
+             return *it;
+    }
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -249,6 +272,18 @@ void RelationBuilder<T, A>::error_duplicated_number(T* pExistingInfo, T* pNewInf
     m_reporter << "Line " << pNewInfo->get_line_number()
                << ". This " << m_relationNameLowerCase
                << " has the same number than that defined in line "
+               << pExistingInfo->get_line_number()
+               << ". This " << m_relationNameLowerCase << " will be ignored." << endl;
+    delete pNewInfo;
+}
+
+//---------------------------------------------------------------------------------------
+template <class T, class A>
+void RelationBuilder<T, A>::error_duplicated_staffobj(T* pExistingInfo, T* pNewInfo)
+{
+    m_reporter << "Line " << pNewInfo->get_line_number()
+               << ". A " << m_relationNameLowerCase
+               << " with the same number is already defined for this element in line "
                << pExistingInfo->get_line_number()
                << ". This " << m_relationNameLowerCase << " will be ignored." << endl;
     delete pNewInfo;

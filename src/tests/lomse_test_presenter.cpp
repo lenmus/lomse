@@ -75,16 +75,16 @@ SUITE(PresenterTest)
         PresenterBuilder builder(m_libraryScope);
 
         Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
-        CHECK( pPresenter != NULL );
+        CHECK( pPresenter != nullptr );
         Document* pDoc = pPresenter->get_document_raw_ptr();
         ImoDocument* pImoDoc = pDoc->get_imodoc();
-        CHECK( pImoDoc->get_content_item(0) == NULL );
+        CHECK( pImoDoc->get_content_item(0) == nullptr );
         CHECK( pPresenter->get_num_interactors() == 1 );
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
-        CHECK( pIntor != NULL );
-        CHECK( pIntor->get_view() != NULL );
+        CHECK( pIntor != nullptr );
+        CHECK( pIntor->get_view() != nullptr );
         SimpleView* pView = dynamic_cast<SimpleView*>( pIntor->get_view() );
-        CHECK( pView != NULL );
+        CHECK( pView != nullptr );
 
         delete pPresenter;
     }
@@ -120,7 +120,7 @@ SUITE(PresenterTest)
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
     //    //cout << (*cursor)->to_string() << endl;
-    //    CHECK( *cursor == NULL );
+    //    CHECK( *cursor == nullptr );
     //    delete pPresenter;
     //}
 
@@ -132,7 +132,7 @@ SUITE(PresenterTest)
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
     //    //cout << (*cursor)->to_string() << endl;
-    //    CHECK( *cursor != NULL );
+    //    CHECK( *cursor != nullptr );
     //    //CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (n c4 q) (r q))))" );
     //    delete pPresenter;
     //}
@@ -143,11 +143,11 @@ SUITE(PresenterTest)
 
     //    Presenter* pPresenter = builder.open_document(ViewFactory::k_view_simple,
     //                            m_scores_path + "00011-empty-fill-page.lms");
-    //    CHECK( pPresenter != NULL );
+    //    CHECK( pPresenter != nullptr );
     //    Document* pDoc = pPresenter->get_document();
     //    //cout << pDoc->to_string() << endl;
     //    CHECK( pDoc->to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
-    //    CHECK( pPresenter->get_command_executer() != NULL );
+    //    CHECK( pPresenter->get_command_executer() != nullptr );
 
     //    delete pPresenter;
     //}
@@ -209,7 +209,7 @@ SUITE(PresenterTest)
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
     //    //cout << (*cursor)->to_string() << endl;
-    //    CHECK( *cursor != NULL );
+    //    CHECK( *cursor != nullptr );
     //    CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (n c4 q) (r q))))" );
     //    delete pPresenter;
     //}

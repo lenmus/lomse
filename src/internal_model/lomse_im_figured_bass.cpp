@@ -236,7 +236,7 @@ void ImoFiguredBassInfo::set_from_string(const std::string& sData)
     initialize_intervals();
 
     //interval being parsed
-    const char* pStart = NULL;          //pointer to first char of interval string
+    const char* pStart = nullptr;          //pointer to first char of interval string
     std::string prefix, suffix, over;
     EIntervalQuality quality = k_interval_as_implied;
     bool fParenthesis = false;
@@ -519,8 +519,8 @@ ImoFiguredBass::ImoFiguredBass(ImoFiguredBassInfo& info)
     //, m_fStartOfLine(false)
     //, m_fEndOfLine(false)
     //, m_fParenthesis(false)
-    //, m_pPrevFBLine((ImoFiguredBassLine*)NULL)
-    //, m_pNextFBLine((ImoFiguredBassLine*)NULL)
+    //, m_pPrevFBLine((ImoFiguredBassLine*)nullptr)
+    //, m_pNextFBLine((ImoFiguredBassLine*)nullptr)
 {
     //SetLayer(lm_eLayerNotes);
     //CopyDataFrom(pFBData);
@@ -538,15 +538,15 @@ ImoFiguredBass::~ImoFiguredBass()
 //ImoFiguredBassLine* ImoFiguredBass::create_line(ImoId nID, ImoFiguredBass* pEndFB)
 //{
 //    //create a line between the two figured bass objects. The start of the
-//    //line is this FB. The other is the end FB and can be NULL and in this
+//    //line is this FB. The other is the end FB and can be nullptr and in this
 //    //case the line will continue until the last note/rest.
 //
 //
 //    //check that there is no other line starting in this FB
 //    if (m_pNextFBLine)
-//        return (ImoFiguredBassLine*)NULL;
+//        return (ImoFiguredBassLine*)nullptr;
 //
-//    ImoFiguredBassLine* pFBL = (ImoFiguredBassLine*)NULL;
+//    ImoFiguredBassLine* pFBL = (ImoFiguredBassLine*)nullptr;
 //    if (pEndFB)
 //    {
 //        pFBL = LOMSE_NEW ImoFiguredBassLine(this, nID, this, pEndFB);
@@ -557,9 +557,9 @@ ImoFiguredBass::~ImoFiguredBass()
 //        pEndFB->AttachAuxObj(pFBL);
 //    }
 //    //else if (!pStartFB)
-//    //    SetTiePrev((ImoFiguredBassLine*)NULL);
+//    //    SetTiePrev((ImoFiguredBassLine*)nullptr);
 //    //else if (!pEndFB)
-//    //    SetTieNext((ImoFiguredBassLine*)NULL);
+//    //    SetTieNext((ImoFiguredBassLine*)nullptr);
 //    return pFBL;
 //}
 //
@@ -597,12 +597,12 @@ ImoFiguredBass::~ImoFiguredBass()
 //        if (m_pPrevFBLine == pRel)
 //        {
 //            this->DetachAuxObj(m_pPrevFBLine);
-//			m_pPrevFBLine = (ImoFiguredBassLine*)NULL;
+//			m_pPrevFBLine = (ImoFiguredBassLine*)nullptr;
 //        }
 //        else if (m_pNextFBLine == pRel)
 //        {
 //            this->DetachAuxObj(m_pNextFBLine);
-//			m_pNextFBLine = (ImoFiguredBassLine*)NULL;
+//			m_pNextFBLine = (ImoFiguredBassLine*)nullptr;
 //        }
 //        else
 //        {

@@ -92,7 +92,7 @@ SUITE(ScoreAlgorithmsTest)
         ImoNote* pNote = static_cast<ImoNote*>(
                             ScoreAlgorithms::find_noterest_at(pScore, 0, 1, 0.0) );
 
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
     }
 
@@ -116,7 +116,7 @@ SUITE(ScoreAlgorithmsTest)
         OverlappedNoteRest* pOV = overlaps.front();
         ImoNote* pNote = static_cast<ImoNote*>(pOV->pNR);
         CHECK( overlaps.size() == 1 );
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
         CHECK( pOV->type == k_overlap_full );
         CHECK( is_equal_time(pOV->overlap, 32.0) );
@@ -144,7 +144,7 @@ SUITE(ScoreAlgorithmsTest)
         OverlappedNoteRest* pOV = overlaps.front();
         ImoNote* pNote = static_cast<ImoNote*>(pOV->pNR);
         CHECK( overlaps.size() == 1 );
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
         CHECK( pOV->type == k_overlap_at_end );
         CHECK( is_equal_time(pOV->overlap, 8.0) );
@@ -173,7 +173,7 @@ SUITE(ScoreAlgorithmsTest)
         list<OverlappedNoteRest*>::const_iterator it = overlaps.begin();
         OverlappedNoteRest* pOV = *it;
         ImoNote* pNote = static_cast<ImoNote*>(pOV->pNR);
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
         CHECK( pOV->type == k_overlap_at_end );
         CHECK( is_equal_time(pOV->overlap, 8.0) );
@@ -181,7 +181,7 @@ SUITE(ScoreAlgorithmsTest)
         ++it;
         pOV = *it;
         pNote = static_cast<ImoNote*>(pOV->pNR);
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("f4") );
         CHECK( pOV->type == k_overlap_full );
         CHECK( is_equal_time(pOV->overlap, 32.0) );
@@ -209,7 +209,7 @@ SUITE(ScoreAlgorithmsTest)
         OverlappedNoteRest* pOV = overlaps.front();
         ImoNote* pNote = static_cast<ImoNote*>(pOV->pNR);
         CHECK( overlaps.size() == 1 );
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
         CHECK( pOV->type == k_overlap_at_start );
         CHECK( is_equal_time(pOV->overlap, 24.0) );
@@ -237,7 +237,7 @@ SUITE(ScoreAlgorithmsTest)
         list<OverlappedNoteRest*>::const_iterator it = overlaps.begin();
         OverlappedNoteRest* pOV = *it;
         ImoNote* pNote = static_cast<ImoNote*>(pOV->pNR);
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("e4") );
         CHECK( pOV->type == k_overlap_at_end );
         CHECK( is_equal_time(pOV->overlap, 8.0) );
@@ -245,7 +245,7 @@ SUITE(ScoreAlgorithmsTest)
         ++it;
         pOV = *it;
         pNote = static_cast<ImoNote*>(pOV->pNR);
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_fpitch() == FPitch("f4") );
         CHECK( pOV->type == k_overlap_at_start );
         CHECK( is_equal_time(pOV->overlap, 24.0) );

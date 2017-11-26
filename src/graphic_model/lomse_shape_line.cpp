@@ -189,7 +189,7 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //                  lm_eLine_Solid, nColor, lm_eEdgeNormal, lmDRAGGABLE,
 //                  lmSELECTABLE, fVisible, _T("FB Line"))
 //    , m_pEndFB(pEndFB)
-//    , m_pBrotherLine((GmoShapeFBLine*)NULL)
+//    , m_pBrotherLine((GmoShapeFBLine*)nullptr)
 //{
 //    m_nType = eGMO_ShapeFBLine;
 //

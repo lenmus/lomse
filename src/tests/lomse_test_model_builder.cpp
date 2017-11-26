@@ -85,9 +85,9 @@ SUITE(ModelBuilderTest)
             "(instrument (musicData (n c4 q) (barline simple))))))" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != NULL );
+        CHECK( pScore->get_staffobjs_table() != nullptr );
 
         delete pIModel;
     }
@@ -326,15 +326,15 @@ SUITE(MidiAssignerTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 0 );
 
         MyMidiAssigner assigner;
@@ -344,7 +344,7 @@ SUITE(MidiAssignerTest)
         CHECK( assigner.my_num_sounds() == 1 );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
     }
 
@@ -370,15 +370,15 @@ SUITE(MidiAssignerTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 0 );
 
         MyMidiAssigner assigner;
@@ -388,11 +388,11 @@ SUITE(MidiAssignerTest)
         CHECK( assigner.my_num_sounds() == 2 );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
         pInstr = pScore->get_instrument(1);
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-2" );
         list<ImoSoundInfo*>& sounds = assigner.get_sounds();
         list<ImoSoundInfo*>::iterator it = sounds.begin();
@@ -430,19 +430,19 @@ SUITE(MidiAssignerTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
         pInstr = pScore->get_instrument(1);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 0 );
 
         MyMidiAssigner assigner;
@@ -453,11 +453,11 @@ SUITE(MidiAssignerTest)
         pInstr = pScore->get_instrument(0);
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
         pInstr = pScore->get_instrument(1);
         CHECK( pInstr->get_num_sounds() == 1 );
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
         list<ImoSoundInfo*>& sounds = assigner.get_sounds();
@@ -480,13 +480,13 @@ SUITE(MidiAssignerTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "" );
         CHECK( pInfo->get_midi_channel() == 2 );
         CHECK( pInfo->get_midi_port() == -1 );
@@ -496,7 +496,7 @@ SUITE(MidiAssignerTest)
 
         CHECK( pInstr->get_num_sounds() == 1 );
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_midi_channel() == 2 );
         CHECK( pInfo->get_midi_port() == 0 );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
@@ -517,17 +517,17 @@ SUITE(MidiAssignerTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo->get_score_instr_id() == "" );
         CHECK( pInfo->get_midi_channel() == 0 );
         CHECK( pInfo->get_midi_port() == -1 );
         pInstr = pScore->get_instrument(1);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
 
         MyMidiAssigner assigner;
@@ -538,14 +538,14 @@ SUITE(MidiAssignerTest)
         pInstr = pScore->get_instrument(0);
         CHECK( pInstr->get_num_sounds() == 1 );
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_midi_channel() == 0 );
         CHECK( pInfo->get_midi_port() == 0 );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
 
         pInstr = pScore->get_instrument(1);
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-2" );
         CHECK( pInfo->get_midi_channel() == 1 );
         CHECK( pInfo->get_midi_port() == 0 );
@@ -578,16 +578,16 @@ SUITE(MidiAssignerTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root() != nullptr);
         CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != NULL );
+        CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
@@ -595,7 +595,7 @@ SUITE(MidiAssignerTest)
         CHECK( pInfo->get_midi_port() == 2 );
 
         pInstr = pScore->get_instrument(1);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 0 );
 
         MyMidiAssigner assigner;
@@ -606,14 +606,14 @@ SUITE(MidiAssignerTest)
         pInstr = pScore->get_instrument(0);
         CHECK( pInstr->get_num_sounds() == 1 );
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
         CHECK( pInfo->get_midi_channel() == 0 );
         CHECK( pInfo->get_midi_port() == 2 );
 
         pInstr = pScore->get_instrument(1);
         pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != NULL );
+        CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
         CHECK( pInfo->get_midi_channel() == 0 );
         CHECK( pInfo->get_midi_port() == 0 );

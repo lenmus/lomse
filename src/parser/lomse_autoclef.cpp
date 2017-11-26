@@ -73,7 +73,7 @@ void AutoClef::find_staves_needing_clef()
     m_fNeedsClef.assign(staves, false);
 
     m_pAt.reserve(staves);
-    m_pAt.assign(staves, (ImoStaffObj*)NULL);
+    m_pAt.assign(staves, (ImoStaffObj*)nullptr);
 
     m_maxPitch.reserve(staves);
     m_maxPitch.assign(staves, k_undefined_fpitch);
@@ -93,7 +93,7 @@ void AutoClef::find_staves_needing_clef()
         ImoStaffObj* pSO = m_pCursor->get_staffobj();
         int iStaff = m_pCursor->staff_index();
 
-        if (m_pAt[iStaff] == NULL)
+        if (m_pAt[iStaff] == nullptr)
             m_pAt[iStaff] = pSO;
 
         if (pSO->is_note())

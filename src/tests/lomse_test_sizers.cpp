@@ -68,7 +68,7 @@ SUITE(SizersTest)
     TEST_FIXTURE(SizersTestFixture, SizersTest_FlowVerticalTakesAllWidth)
     {
         FlowSizer sizer(FlowSizer::k_vertical);
-        GmoBoxScorePage box(NULL);
+        GmoBoxScorePage box(nullptr);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == true );
@@ -81,7 +81,7 @@ SUITE(SizersTest)
     TEST_FIXTURE(SizersTestFixture, SizersTest_FlowHorizontalTakesAllHeight)
     {
         FlowSizer sizer(FlowSizer::k_horizontal);
-        GmoBoxScorePage box(NULL);
+        GmoBoxScorePage box(nullptr);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == false );

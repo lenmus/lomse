@@ -326,7 +326,7 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
 
     if (result == k_success)
     {
-        UndoElement* pUE = NULL;
+        UndoElement* pUE = nullptr;
         if (pCmd->is_reversible())
             pUE = LOMSE_NEW UndoElement(pCmd,
                                         pCursor->get_state(),
@@ -515,7 +515,7 @@ int CmdAddChordNote::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCurso
     m_noteId = k_no_imoid;
 
     //A note and only one must be selected
-    if (pSelection == NULL
+    if (pSelection == nullptr
         || pSelection->num_selected() != 1
         || !pSelection->front()->is_note()
        )
@@ -688,7 +688,7 @@ void CmdAddNoteRest::find_and_classify_overlapped_noterests()
     m_overlaps =
         ScoreAlgorithms::find_and_classify_overlapped_noterests_at(m_pScore,
             m_instr, m_newVoice, m_insertionTime, m_newDuration);
-    m_pLastOverlapped = NULL;    //Will be computed in
+    m_pLastOverlapped = nullptr;    //Will be computed in
                                 //   reduce_duration_of_overlapped_at_start()
 }
 
@@ -702,9 +702,9 @@ void CmdAddNoteRest::determine_insertion_point()
         //insertion point is after last overlapped full, if any exists.
         //otherwise, before first overlapped at start, if any exists
         //otherwise, after last overlapped at end.
-        ImoNoteRest* pLastFullNR = NULL;
-        ImoNoteRest* pFirstStartNR = NULL;
-        ImoNoteRest* pLastEndNR = NULL;
+        ImoNoteRest* pLastFullNR = nullptr;
+        ImoNoteRest* pFirstStartNR = nullptr;
+        ImoNoteRest* pLastEndNR = nullptr;
         list<OverlappedNoteRest*>::const_iterator it;
         for (it = m_overlaps.begin(); it != m_overlaps.end(); ++it)
         {
@@ -712,7 +712,7 @@ void CmdAddNoteRest::determine_insertion_point()
             {
                 pLastFullNR = (*it)->pNR;
             }
-            else if (pFirstStartNR == NULL && (*it)->type == k_overlap_at_start)
+            else if (pFirstStartNR == nullptr && (*it)->type == k_overlap_at_start)
             {
                 pFirstStartNR = (*it)->pNR;
             }
@@ -942,7 +942,7 @@ int CmdAddTie::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     }
 
     m_error = msg.str();
-    return (pTie != NULL ? k_success : k_failure);
+    return (pTie != nullptr ? k_success : k_failure);
 }
 
 //---------------------------------------------------------------------------------------
@@ -977,8 +977,8 @@ int CmdAddTuplet::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
 {
     if (pSelection && !pSelection->empty())
     {
-        ImoNoteRest* pStart = NULL;
-        ImoNoteRest* pEnd = NULL;
+        ImoNoteRest* pStart = nullptr;
+        ImoNoteRest* pEnd = nullptr;
         pSelection->get_start_end_note_rests(&pStart, &pEnd);
         if (pStart && pEnd)
         {
@@ -1017,7 +1017,7 @@ int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     }
 
     m_error = msg.str();
-    return (pTuplet != NULL ? k_success : k_failure);
+    return (pTuplet != nullptr ? k_success : k_failure);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1091,7 +1091,7 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
     list< pair<ImoStaffObj*, ImoRelDataObj*> >::const_iterator it;
     it = objs.begin();
     ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );
-    ImoNoteRest* pPrevNR = NULL;
+    ImoNoteRest* pPrevNR = nullptr;
     ++it;
     while (pNR && pNR != pBeforeNR && it != objs.end())
     {
@@ -1104,7 +1104,7 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
     }
 
     //pBeforeNR must be found and it must not be the first one in the beam
-    if (pNR == NULL || pPrevNR == NULL || nNotesBefore == 0)
+    if (pNR == nullptr || pPrevNR == nullptr || nNotesBefore == 0)
         return k_failure;
 
     pPrevNR->set_dirty(true);
@@ -1207,7 +1207,7 @@ int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* UNUSED(pCurs
     //same measure
 
     bool fSavePitch = (m_oldPitch.size() == 0);
-    ImoScore* pScore = NULL;
+    ImoScore* pScore = nullptr;
     list<ImoId>::iterator it;
     for (it = m_notes.begin(); it != m_notes.end(); ++it)
     {
@@ -1234,7 +1234,7 @@ void CmdChangeAccidentals::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor
     // in one note could affect many notes in the same measure. Therefore, it is
     // necessary to recompute pitch of all notes
 
-    ImoScore* pScore = NULL;
+    ImoScore* pScore = nullptr;
     list<ImoId>::iterator itN;
     list<FPitch>::iterator itP = m_oldPitch.begin();
     for (itN = m_notes.begin(); itN != m_notes.end(); ++itN, ++itP)

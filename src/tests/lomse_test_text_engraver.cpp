@@ -70,7 +70,7 @@ SUITE(TextEngraverTest)
         doc.create_empty();
         ImoStyle* pStyle = doc.get_default_style();
         string text("This is a test");
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         TextEngraver engraver(m_libraryScope, &meter, text, "", pStyle);
 
         LUnits width = engraver.measure_width();

@@ -151,7 +151,7 @@ SpAlgColumn::SpAlgColumn(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
     , m_shapesStorage(shapesStorage)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
-    , m_pColsBuilder(NULL)
+    , m_pColsBuilder(nullptr)
 {
     m_pColsBuilder = LOMSE_NEW ColumnsBuilder(m_pScoreMeter, m_colsData,
                      m_pScoreLyt, m_pScore, m_shapesStorage,
@@ -352,7 +352,7 @@ void ColumnsBuilder::collect_content_for_this_column()
     m_pSpAlgorithm->start_column_measurements(m_iColumn);
 
     //loop to process all StaffObjs until this column is completed
-    ImoStaffObj* pSO = NULL;
+    ImoStaffObj* pSO = nullptr;
     while(!m_pSysCursor->is_end() )
     {
         pSO = m_pSysCursor->get_staffobj();
@@ -363,7 +363,7 @@ void ColumnsBuilder::collect_content_for_this_column()
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
         InstrumentEngraver* pIE = m_pPartsEngraver->get_engraver_for(iInstr);
         m_pagePos.y = pIE->get_top_line_of_staff(iStaff);
-        GmoShape* pShape = NULL;
+        GmoShape* pShape = nullptr;
 
         //if feasible column break, exit loop and finish column
         if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
@@ -592,7 +592,7 @@ void ColumnsBuilder::delete_shapes(int iCol)
 ColumnData::ColumnData(ScoreMeter* pScoreMeter, SpAlgColumn* pSpAlgorithm)
     : m_pScoreMeter(pScoreMeter)
     , m_fHasSystemBreak(false)
-    , m_pBoxSlice(NULL)
+    , m_pBoxSlice(nullptr)
     , m_pSpAlgorithm(pSpAlgorithm)
     , m_nTraceLevel(k_trace_off)
 {
@@ -609,11 +609,11 @@ void ColumnData::reserve_space_for_prolog_clefs_keys(int numStaves)
 {
     m_prologClefs.clear();
     m_prologClefs.reserve(numStaves);
-    m_prologClefs.assign(numStaves, (ColStaffObjsEntry*)NULL);     //GCC complains if NULL not casted
+    m_prologClefs.assign(numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
 
     m_prologKeys.clear();
     m_prologKeys.reserve(numStaves);
-    m_prologKeys.assign(numStaves, (ColStaffObjsEntry*)NULL);
+    m_prologKeys.assign(numStaves, (ColStaffObjsEntry*)nullptr);
 }
 
 //---------------------------------------------------------------------------------------

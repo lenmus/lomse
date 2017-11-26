@@ -148,7 +148,7 @@ LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
         ++it;
     (*it)->append_child(auxTree.get_root());
 
-    auxTree.set_root(NULL);
+    auxTree.set_root(nullptr);
     return pFinalTree;
 }
 

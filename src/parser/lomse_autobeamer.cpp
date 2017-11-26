@@ -69,7 +69,7 @@ void AutoBeamer::get_triad(int iNote)
     if (iNote == 0)
     {
         m_curNotePos = k_first_note;
-        m_pPrevNote = NULL;
+        m_pPrevNote = nullptr;
         m_pCurNote = m_notes[0];
         m_pNextNote = m_notes[1];
     }
@@ -78,7 +78,7 @@ void AutoBeamer::get_triad(int iNote)
         m_curNotePos = k_last_note;
         m_pPrevNote = m_pCurNote;
         m_pCurNote = m_notes[iNote];
-        m_pNextNote = NULL;
+        m_pNextNote = nullptr;
     }
     else
     {

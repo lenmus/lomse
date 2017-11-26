@@ -64,7 +64,7 @@ SUITE(LdpTokenizerTest)
         LdpTextReader reader("(score blue)");
         LdpTokenizer tokenizer(reader, cout);
         LdpToken* token = tokenizer.read_token();
-        CHECK( token != NULL );
+        CHECK( token != nullptr );
     }
 
     TEST_FIXTURE(LdpTokenizerTestFixture, TokenizerReadRightTokens)

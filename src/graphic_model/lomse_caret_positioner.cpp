@@ -53,7 +53,7 @@ namespace lomse
 // CaretPositioner implementation
 //=======================================================================================
 CaretPositioner::CaretPositioner()
-    : m_pCursor(NULL)
+    : m_pCursor(nullptr)
 {
 }
 
@@ -111,7 +111,7 @@ DocCursorState CaretPositioner::click_point_to_cursor_state(GraphicModel* pGMode
         InnerLevelCaretPositioner* p = new_positioner(pTopImo, pGModel);
         SpElementCursorState innerState =
                         p->click_point_to_cursor_state(iPage, x, y, pImo, pGmo);
-        int topId = (innerState.get() == NULL ? k_no_imoid : pTopImo->get_id());
+        int topId = (innerState.get() == nullptr ? k_no_imoid : pTopImo->get_id());
         return DocCursorState(topId, innerState);
     }
 	else
@@ -123,7 +123,7 @@ DocCursorState CaretPositioner::click_point_to_cursor_state(GraphicModel* pGMode
 // TopLevelCaretPositioner implementation
 //=======================================================================================
 TopLevelCaretPositioner::TopLevelCaretPositioner(GraphicModel* pGModel)
-    : m_pCursor(NULL)
+    : m_pCursor(nullptr)
     , m_pGModel(pGModel)
 {
 }
@@ -187,9 +187,9 @@ InnerLevelCaretPositioner::InnerLevelCaretPositioner(GraphicModel* pGModel)
 //=======================================================================================
 ScoreCaretPositioner::ScoreCaretPositioner(GraphicModel* pGModel)
     : InnerLevelCaretPositioner(pGModel)
-    , m_pDocCursor(NULL)
-    , m_pScoreCursor(NULL)
-    , m_pDoc(NULL)
+    , m_pDocCursor(nullptr)
+    , m_pScoreCursor(nullptr)
+    , m_pDoc(nullptr)
 {
 }
 
@@ -206,7 +206,7 @@ void ScoreCaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor)
     m_pDocCursor = pCursor;
     m_pScoreCursor = static_cast<ScoreCursor*>(pCursor->get_inner_cursor());
     m_pDoc = pCursor->get_document();
-    m_pBoxSystem = NULL;
+    m_pBoxSystem = nullptr;
 
     //get score cursor state
     DocCursorState state = m_pDocCursor->get_state();
@@ -318,7 +318,7 @@ void ScoreCaretPositioner::caret_at_start_of_score(Caret* pCaret)
     GmoBoxScorePage* pBSP =
             static_cast<GmoBoxScorePage*>( m_pGModel->get_box_for_imo(scoreId) );
     m_pBoxSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
-    GmoShapeStaff* pShape = (m_pBoxSystem ? m_pBoxSystem->get_staff_shape(0) : NULL);
+    GmoShapeStaff* pShape = (m_pBoxSystem ? m_pBoxSystem->get_staff_shape(0) : nullptr);
 
     URect bounds;
     if (pShape)

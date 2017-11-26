@@ -84,9 +84,9 @@ SUITE(LdpCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != NULL );
+        CHECK( pScore->get_staffobjs_table() != nullptr );
         CHECK( pScore->get_version_string() == "1.6" );
         delete pIModel;
     }
@@ -102,7 +102,7 @@ SUITE(LdpCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         delete pIModel;
     }
@@ -119,7 +119,7 @@ SUITE(LdpCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         delete pIModel;
     }

@@ -109,7 +109,7 @@ void TieEngraver::create_one_shape()
     m_shapesInfo[0].pShape =
         LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness, m_color);
 
-    m_shapesInfo[1].pShape = NULL;
+    m_shapesInfo[1].pShape = nullptr;
 }
 
 //---------------------------------------------------------------------------------------

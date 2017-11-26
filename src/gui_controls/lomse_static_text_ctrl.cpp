@@ -48,11 +48,11 @@ StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, Control* pParent,
                                LUnits width, LUnits height, ImoStyle* pStyle)
     : Control(libScope, pDoc, pParent)
     , m_label(label)
-    , m_pMainBox(NULL)
+    , m_pMainBox(nullptr)
     , m_width(width)
     , m_height(height)
 {
-    m_style = (pStyle == NULL ? create_default_style() : pStyle);
+    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
 
     measure();
 

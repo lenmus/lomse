@@ -56,7 +56,7 @@ void error_callback (png_structp, png_const_charp);
 //=======================================================================================
 SpImage ImageReader::load_image(const string& locator)
 {
-    InputStream* pFile = NULL;
+    InputStream* pFile = nullptr;
     try
     {
         pFile = FileSystem::open_input_stream(locator);
@@ -161,7 +161,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
 
     //create read struct
     png_structp pReadStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-                                                     NULL, NULL, NULL);
+                                                     nullptr, nullptr, nullptr);
     if (!pReadStruct)
     {
         pImage->set_error_msg("[PngImageDecoder::decode_file] out of memory creating read struct");
@@ -195,7 +195,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
 
     //read image info. Don't care about compression_type and filter_type => NULLs
     png_get_IHDR(pReadStruct, pInfoStruct, &width, &height, &bitDepth, &colorType,
-                 &interlaceType, NULL, NULL);
+                 &interlaceType, nullptr, nullptr);
 
     //set some transformations
         //expand palette images to 24-bit RGB
@@ -224,23 +224,23 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
 
     //all transformations have been defined.
     //Now allocate a buffer for the full bitmap
-    unsigned char* imgbuf = NULL;
+    unsigned char* imgbuf = nullptr;
     int stride = int(width) * 4;
-    if ((imgbuf = (unsigned char*)malloc(height * stride)) == NULL)
+    if ((imgbuf = (unsigned char*)malloc(height * stride)) == nullptr)
     {
         pImage->set_error_msg("[PngImageDecoder::decode_file] error allocating memory for image");
-        png_destroy_read_struct(&pReadStruct, &pInfoStruct, NULL);
+        png_destroy_read_struct(&pReadStruct, &pInfoStruct, nullptr);
         return SpImage(pImage);
     }
 
     //allocate pointers to rows
-    png_bytepp pRows = NULL;
-    if ((pRows = (png_bytepp)malloc(height*sizeof(png_bytep))) == NULL)
+    png_bytepp pRows = nullptr;
+    if ((pRows = (png_bytepp)malloc(height*sizeof(png_bytep))) == nullptr)
     {
         pImage->set_error_msg("[PngImageDecoder::decode_file] error allocating memory for line ptrs.");
-        png_destroy_read_struct(&pReadStruct, &pInfoStruct, NULL);
+        png_destroy_read_struct(&pReadStruct, &pInfoStruct, nullptr);
         free(imgbuf);
-        imgbuf = NULL;
+        imgbuf = nullptr;
         return SpImage(pImage);
     }
 
@@ -258,7 +258,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
 
     //image bitmap in RGBA format is now ready. Free memory used for row pointers
     free(pRows);
-    pRows = NULL;
+    pRows = nullptr;
 
     //create the Image object
     VSize bmpSize(width, height);

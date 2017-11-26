@@ -94,7 +94,7 @@ ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 //{
 //    m_pTree = pTree;
 //    DocIterator it(m_pTree);  //replace by tree iterator- DocIterator has been removed
-//    for (it.start_of_content(); *it != NULL; ++it)
+//    for (it.start_of_content(); *it != nullptr; ++it)
 //    {
 //        //Factory method ?
 //        if ((*it)->is_modified())
@@ -137,7 +137,7 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
 {
     StaffObjsCursor cursor(pScore);
 
-    ImoKeySignature* pKey = NULL;
+    ImoKeySignature* pKey = nullptr;
     reset_accidentals(pKey);
 
     while(!cursor.is_end())
@@ -346,7 +346,7 @@ void MidiAssigner::assign_port_and_channel()
             int i = c;
             while(true)
             {
-                if (m_assigned[i] == NULL)
+                if (m_assigned[i] == nullptr)
                 {
                     (*it)->set_midi_port(i / 16);
                     m_assigned[i] = *it;
@@ -365,7 +365,7 @@ void MidiAssigner::assign_port_and_channel()
                 if (ch==9) ++ch;
 
                 int i = p*16 + ch;
-                if (m_assigned[i] == NULL)
+                if (m_assigned[i] == nullptr)
                 {
                     (*it)->set_midi_channel(i % 16);
                     m_assigned[i] = *it;
@@ -382,7 +382,7 @@ void MidiAssigner::assign_port_and_channel()
         {
             while(true)
             {
-                if (m_assigned[idx] == NULL)
+                if (m_assigned[idx] == nullptr)
                 {
                     (*it)->set_midi_port(idx / 16);
                     (*it)->set_midi_channel(idx % 16);

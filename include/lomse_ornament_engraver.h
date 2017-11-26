@@ -60,7 +60,7 @@ public:
 
     GmoShapeOrnament* create_shape(ImoOrnament* pOrnament, UPoint pos,
                                    Color color=Color(0,0,0),
-                                   GmoShape* pParentShape=NULL);
+                                   GmoShape* pParentShape=nullptr);
 
 protected:
     bool determine_if_above();

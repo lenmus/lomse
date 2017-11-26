@@ -53,7 +53,7 @@ namespace lomse
 //platform independent methods
 //=======================================================================================
 LomseDoorway::LomseDoorway()
-    : m_pLibraryScope(NULL)
+    : m_pLibraryScope(nullptr)
     , m_pFunc_notify(null_notify_function)
     , m_pFunc_request(null_request_function)
 {

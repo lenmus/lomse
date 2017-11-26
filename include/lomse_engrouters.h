@@ -292,7 +292,7 @@ public:
     void measure() {}
     GmoObj* create_gm_object(UPoint UNUSED(pos), LineReferences& UNUSED(refs))
     {
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -339,12 +339,12 @@ protected:
     TextSplitter* create_text_splitter_for(ImoTextItem* pText);
 
     //helper
-    inline bool is_there_a_pending_engrouter() { return m_pPendingEngr != NULL; }
+    inline bool is_there_a_pending_engrouter() { return m_pPendingEngr != nullptr; }
     inline void save_engrouter_for_next_call(Engrouter* pEngr) { m_pPendingEngr = pEngr; }
     inline Engrouter* get_pending_engrouter()
     {
         Engrouter* pEngr = m_pPendingEngr;
-        m_pPendingEngr = NULL;
+        m_pPendingEngr = nullptr;
         return pEngr;
     }
 

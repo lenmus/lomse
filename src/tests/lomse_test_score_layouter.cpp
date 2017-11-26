@@ -65,7 +65,7 @@ class MyScoreLayouter : public ScoreLayouter
 public:
     MyScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                     LibraryScope& libraryScope)
-        : ScoreLayouter(pImo, NULL, pGModel, libraryScope)
+        : ScoreLayouter(pImo, nullptr, pGModel, libraryScope)
     {
     }
     virtual ~MyScoreLayouter() {}
@@ -125,10 +125,10 @@ public:
         : m_libraryScope(cout)
         , m_pFonts( m_libraryScope.font_storage() )
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
-        , m_pDocLayouter(NULL)
-        , m_pGModel(NULL)
-        , m_pScoreLayouter(NULL)
+        , m_pDoc(nullptr)
+        , m_pDocLayouter(nullptr)
+        , m_pGModel(nullptr)
+        , m_pScoreLayouter(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -170,10 +170,10 @@ public:
         m_pDocLayouter = LOMSE_NEW DocLayouter( m_pDoc->get_im_model(), m_libraryScope);
         m_pDocLayouter->layout_document();
         m_pGModel = m_pDocLayouter->get_graphic_model();
-        CHECK( m_pGModel != NULL );
+        CHECK( m_pGModel != nullptr );
 
         m_pScoreLayouter = m_pDocLayouter->get_score_layouter();
-        CHECK( m_pScoreLayouter != NULL );
+        CHECK( m_pScoreLayouter != nullptr );
     }
 
     void check_line_data_equal(int iSys, int iCol, int numCols, int nSrcLine)
@@ -266,11 +266,11 @@ public:
     void delete_test_data()
     {
         delete m_pDoc;
-        m_pDoc = NULL;
+        m_pDoc = nullptr;
         delete m_pGModel;
-        m_pGModel = NULL;
+        m_pGModel = nullptr;
         delete m_pDocLayouter;
-        m_pDocLayouter = NULL;
+        m_pDocLayouter = nullptr;
     }
 };
 
@@ -296,8 +296,8 @@ SUITE(ScoreLayouterTest)
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        scoreLyt.my_initialice_score_layouter();
 //
-//        CHECK( scoreLyt.my_get_columns_builder() != NULL);
-//        CHECK( scoreLyt.my_shapes_creator() != NULL );
+//        CHECK( scoreLyt.my_get_columns_builder() != nullptr);
+//        CHECK( scoreLyt.my_shapes_creator() != nullptr );
 //        std::vector<InstrumentEngraver*>& instrEngravers =
 //            scoreLyt.my_get_instrument_engravers();
 //        CHECK( instrEngravers.size() == 1 );
@@ -365,7 +365,7 @@ SUITE(ScoreLayouterTest)
         pageBox.set_height(25700.0f);
         scoreLyt.my_page_initializations(&pageBox);
 
-        CHECK( scoreLyt.my_get_current_box_page() != NULL );
+        CHECK( scoreLyt.my_get_current_box_page() != nullptr );
         CHECK( scoreLyt.my_get_num_page() == 0 );
         CHECK( scoreLyt.my_is_first_system_in_page() == true );
         CHECK( scoreLyt.my_is_first_page() == true );
@@ -766,7 +766,7 @@ SUITE(ColumnsBuilderTest)
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
 //        ColumnsBuilder* pColsBuilder = scoreLyt.my_get_columns_builder();
-//        CHECK(pColsBuilder != NULL );
+//        CHECK(pColsBuilder != nullptr );
 ////        std::vector<int>& breaks = scoreLyt.get_line_breaks();
 ////        CHECK( breaks.size() == 0 );
 //    }

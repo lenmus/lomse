@@ -101,7 +101,7 @@ SUITE(StackTest)
     {
         StackInt stack;
         int* p = stack.pop();
-        CHECK( p == NULL );
+        CHECK( p == nullptr );
     }
 
 }
@@ -168,7 +168,7 @@ SUITE(UndoableStackTest)
     {
         UndoStackInt stack;
         int* p = stack.pop();
-        CHECK( p == NULL );
+        CHECK( p == nullptr );
     }
 
     TEST_FIXTURE(UndoableStackTestFixture, UndoableStackUndoPop)

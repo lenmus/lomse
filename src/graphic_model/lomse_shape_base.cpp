@@ -46,7 +46,7 @@ GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color)
     , m_idx(idx)
     , m_layer(GmoShape::k_layer_background)
     , m_color(color)
-    , m_pRelatedShapes(NULL)
+    , m_pRelatedShapes(nullptr)
 {
 }
 
@@ -137,7 +137,7 @@ void GmoShape::add_related_shape(GmoShape* pShape)
 GmoShape* GmoShape::find_related_shape(int type)
 {
     if (!m_pRelatedShapes)
-        return NULL;;
+        return nullptr;;
 
     std::list<GmoShape*>::iterator it;
     for (it = m_pRelatedShapes->begin(); it != m_pRelatedShapes->end(); ++it)
@@ -145,7 +145,7 @@ GmoShape* GmoShape::find_related_shape(int type)
         if ((*it)->get_gmobj_type() == type)
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

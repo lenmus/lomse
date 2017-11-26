@@ -136,7 +136,7 @@ Renderer* RendererFactory::create_renderer(LibraryScope& libraryScope,
         //    return LOMSE_NEW RendererTemplate<PixFormat_bgra64>(libraryScope.get_screen_ppi(),
         //                                                 attr_storage, path);
         default:
-            return NULL;
+            return nullptr;
     }
 }
 

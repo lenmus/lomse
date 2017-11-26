@@ -110,7 +110,7 @@ bool PartList::mark_part_as_added(const string& id)
 ImoInstrument* PartList::get_instrument(const string& id)
 {
 	int i = find_index_for(id);
-	return (i != -1 ? m_instruments[i] : NULL);
+	return (i != -1 ? m_instruments[i] : nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ ImoInstrGroup* PartGroups::get_group(int number)
 	if (it != m_groups.end())
         return it->second;
     else
-        return NULL;
+        return nullptr;
 
 }
 
@@ -324,7 +324,7 @@ protected:
 
 public:
     MxlElementAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor=NULL)
+                    ImoObj* pAnchor=nullptr)
         : m_reporter(reporter)
         , m_pAnalyser(pAnalyser)
         , m_libraryScope(libraryScope)
@@ -354,7 +354,7 @@ protected:
     XmlNode m_nextNextParam;
 
     // the main method to perform the analysis of a node
-    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_childToAnalyse, NULL); }
+    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr); }
 
     // 'get' methods just update m_childToAnalyse to point to the next node to analyse
     bool get_mandatory(const string& tag);
@@ -362,9 +362,9 @@ protected:
     bool get_optional(const string& type);
 
     // 'analyse' methods do a 'get' and, if found, analyse the found element
-    bool analyse_mandatory(const string& tag, ImoObj* pAnchor=NULL);
-//    bool analyse_optional(EMxlTag type, ImoObj* pAnchor=NULL);
-    bool analyse_optional(const string& name, ImoObj* pAnchor=NULL);
+    bool analyse_mandatory(const string& tag, ImoObj* pAnchor=nullptr);
+//    bool analyse_optional(EMxlTag type, ImoObj* pAnchor=nullptr);
+    bool analyse_optional(const string& name, ImoObj* pAnchor=nullptr);
     string analyze_mandatory_child_pcdata(const string& name);
     string analyze_optional_child_pcdata(const string& name, const string& sDefault);
     int analyze_optional_child_pcdata_int(const string& name,
@@ -409,7 +409,7 @@ protected:
     //XmlNode helper methods
     inline bool has_attribute(XmlNode* node, const string& name)
     {
-        return node->attribute(name.c_str()) != NULL;
+        return node->attribute(name.c_str()) != nullptr;
     }
     inline string get_attribute(XmlNode* node, const string& name)
     {
@@ -750,7 +750,7 @@ protected:
     //@     font-weight  CDATA  #IMPLIED">
 //    ImoStyle* get_attribute_font()
 //    {
-//        ImoStyle* pStyle = NULL;pScore->new_unnamed_style();   //derived from default
+//        ImoStyle* pStyle = nullptr;pScore->new_unnamed_style();   //derived from default
 //        if (has_attribute(&m_childToAnalyse, "font-style"))
 //        {
 //            string value = get_attribute(&m_childToAnalyse, "font-style");
@@ -997,7 +997,7 @@ protected:
 //    {
 //        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        string styleName = get_child_value_string();
-//        ImoStyle* pStyle = NULL;
+//        ImoStyle* pStyle = nullptr;
 //
 //        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 //        if (pScore)
@@ -1025,7 +1025,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    TPoint get_point_child()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
 //        TPoint point;
 //        if (pImo->is_point_dto())
 //        {
@@ -1039,7 +1039,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    TSize get_size_child()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
+//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr);
 //        TSize size;
 //        if (pImo->is_size_info())
 //        {
@@ -1195,7 +1195,7 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
     if (!more_children_to_analyse())
     {
         error_missing_element(tag);
-        return NULL;
+        return nullptr;
     }
 
     m_childToAnalyse = get_child_to_analyse();
@@ -1213,7 +1213,7 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
 bool MxlElementAnalyser::analyse_mandatory(const string& tag, ImoObj* pAnchor)
 {
     if (get_mandatory(tag))
-        return (m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor) != NULL);
+        return (m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor) != nullptr);
     else
         return false;
 }
@@ -1453,7 +1453,7 @@ public:
     ImoObj* do_analysis()
     {
         error_msg("Missing analyser for element '" + m_tag + "'. Node ignored.");
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -1469,7 +1469,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -1498,13 +1498,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
+        ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
             pNR = static_cast<ImoNoteRest*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNoteRest");
+            return nullptr;
         }
 
         while (more_children_to_analyse())
@@ -1580,7 +1580,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -1733,11 +1733,11 @@ public:
 
         // key*
         while (get_optional("key"))
-            keys.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+            keys.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
         // time*
         while (get_optional("time"))
-            times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+            times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
         // staves?
         if (get_optional("staves"))
@@ -1762,7 +1762,7 @@ public:
 
         // clef*
         while (get_optional("clef"))
-            clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
+            clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
         // staff-details*
         while (get_optional("staff-details"))
@@ -1849,7 +1849,7 @@ public:
                     ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_fNewBarline(false)
-        , m_pBarline(NULL)
+        , m_pBarline(nullptr)
     {
     }
 
@@ -1928,7 +1928,7 @@ protected:
 
     void create_barline(const string& location)
     {
-        m_pBarline = NULL;
+        m_pBarline = nullptr;
         if (location == "left")
         {
             //must be combined with previous barline
@@ -1936,7 +1936,7 @@ protected:
         }
 
         m_fNewBarline = false;
-        if (m_pBarline == NULL)
+        if (m_pBarline == nullptr)
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             m_pBarline = static_cast<ImoBarline*>(
@@ -2117,7 +2117,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2314,7 +2314,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2337,15 +2337,15 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDirection* pDirection = NULL;
+        ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
             pDirection = static_cast<ImoDirection*>(m_pAnchor);
         else
         {
             //TODO: deal with <coda> when child of <measure>
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
             error_msg("<direction-type> <coda> is not child of <direction>. Ignored.");
-            return NULL;
+            return nullptr;
         }
         pDirection->set_display_repeat(k_repeat_coda);
 
@@ -2374,7 +2374,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2390,7 +2390,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2446,7 +2446,7 @@ public:
         else
         {
             delete pDirection;
-            pDirection = NULL;
+            pDirection = nullptr;
         }
 
         return pDirection;
@@ -2500,7 +2500,7 @@ public:
             ;
         }
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2539,13 +2539,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoStaffObj* pSO = NULL;
+        ImoStaffObj* pSO = nullptr;
         if (m_pAnchor && (m_pAnchor->is_note_rest() || m_pAnchor->is_direction()))
             pSO = static_cast<ImoStaffObj*>(m_pAnchor);
         else
         {
-            error_msg("pAnchor is NULL or it is neither ImoNoteRest nor ImoDirection.");
-            return NULL;
+            error_msg("pAnchor is nullptr or it is neither ImoNoteRest nor ImoDirection.");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -2630,19 +2630,19 @@ public:
     EndingMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                       LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pVolta(NULL)
+        , m_pVolta(nullptr)
     {
     }
 
     ImoObj* do_analysis()
     {
-        ImoBarline* pBarline = NULL;
+        ImoBarline* pBarline = nullptr;
         if (m_pAnchor && m_pAnchor->is_barline())
             pBarline = static_cast<ImoBarline*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoBarline");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not ImoBarline");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -2654,14 +2654,14 @@ public:
         if (!set_volta_number())
         {
             delete m_pVolta;
-            return NULL;
+            return nullptr;
         }
 
         // attrib: type (start | stop | discontinue) #REQUIRED
         if (!set_volta_type())
         {
             delete m_pVolta;
-            return NULL;
+            return nullptr;
         }
 
         //TODO
@@ -2789,7 +2789,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2821,13 +2821,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
+        ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
             pNR = static_cast<ImoNoteRest*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNoteRest");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -2908,11 +2908,11 @@ public:
     ImoObj* do_analysis()
     {
         bool fFwd = (m_analysedNode.name() == "forward");
-        ImoStaffObj* pSO = NULL;
+        ImoStaffObj* pSO = nullptr;
 
         // <duration>
         if (!get_mandatory("duration"))
-            return NULL;
+            return nullptr;
         int duration = get_child_value_integer(0);
         TimeUnits shift = m_pAnalyser->duration_to_timepos(duration);
 
@@ -2968,7 +2968,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -2984,7 +2984,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -3196,13 +3196,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNote* pNote = NULL;
+        ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
             pNote = static_cast<ImoNote*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNote");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNote");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -3231,7 +3231,7 @@ public:
         if (!analyse_mandatory("text", pText))
         {
             delete pData;
-            return NULL;
+            return nullptr;
         }
 
         // [extend]
@@ -3320,7 +3320,7 @@ public:
         if (num.empty())
         {
             error_msg("<measure>: missing mandatory 'number' attribute. <measure> content will be ignored");
-            return NULL;
+            return nullptr;
         }
         m_pAnalyser->save_current_measure_num(num);
 
@@ -3358,7 +3358,7 @@ public:
         if (fSomethingAdded)
         {
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
-            if (pSO == NULL || !pSO->is_barline())
+            if (pSO == nullptr || !pSO->is_barline())
                 add_barline(pMD);
         }
 
@@ -3410,7 +3410,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -3434,13 +3434,13 @@ public:
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
         if (!pInstr)
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            return nullptr;
         }
 
         //attrb: id
         string id = get_optional_string_attribute("id", "");
-        ImoSoundInfo* pInfo = NULL;
+        ImoSoundInfo* pInfo = nullptr;
         if (!id.empty())
         {
             pInfo = pInstr->get_sound_info(id);
@@ -3448,7 +3448,7 @@ public:
             {
                 error_msg("id '" + id + "' doesn't match any <score-instrument>"
                            + ". <midi-device> ignored.");
-                return NULL;
+                return nullptr;
             }
         }
 
@@ -3475,7 +3475,7 @@ public:
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
 };
@@ -3509,20 +3509,20 @@ public:
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
         if (!pInstr)
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            return nullptr;
         }
 
         //attrb: id
         string id = get_mandatory_string_attribute("id", "", "midi-instrument");
         if (id.empty())
-            return NULL;
+            return nullptr;
         ImoSoundInfo* pInfo = pInstr->get_sound_info(id);
         if (!pInfo)
         {
             error_msg("id '" + id + "' doesn't match any <score-instrument>"
                        + ". <midi-instrument> ignored.");
-            return NULL;
+            return nullptr;
         }
 
         // midi-channel?    1 to 16
@@ -3559,7 +3559,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 };
@@ -3603,7 +3603,7 @@ public:
             || analyse_optional("other-notation", m_pAnchor);
         }
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -3638,8 +3638,8 @@ public:
     NoteRestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pBeamInfo(NULL)
-//        , m_pSlurDto(NULL)
+        , m_pBeamInfo(nullptr)
+//        , m_pSlurDto(nullptr)
 //        , m_srcOldTuplet("")
     {
     }
@@ -3653,7 +3653,7 @@ public:
 
         //for now, ignore cue & grace notes
         if (fIsCue || fIsGrace)
-            return NULL;
+            return nullptr;
 
         // [<chord>]
         if (get_optional("chord"))
@@ -3666,9 +3666,9 @@ public:
 
         // <pitch> | <unpitched> | <rest>
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoNoteRest* pNR = NULL;
-        ImoNote* pNote = NULL;
-        ImoRest* pRest = NULL;
+        ImoNoteRest* pNR = nullptr;
+        ImoNote* pNote = nullptr;
+        ImoRest* pRest = nullptr;
 
         if (get_optional("rest"))
         {
@@ -3745,9 +3745,6 @@ public:
         {
         }
 
-        //add note/rest to open tuplets
-        m_pAnalyser->add_to_open_tuplets(pNR);
-
         // [<staff>]
         if (get_optional("staff"))
             pNR->set_staff(get_child_value_integer(1) - 1);
@@ -3759,6 +3756,7 @@ public:
 
         // <notations>*
         while (analyse_optional("notations", pNR));
+        m_pAnalyser->add_to_open_tuplets(pNR);
 
         // <lyric>*
         while (analyse_optional("lyric", pNR));
@@ -4069,9 +4067,10 @@ protected:
             return;
         }
 
-        if (m_pBeamInfo == NULL)
+        if (m_pBeamInfo == nullptr)
             m_pBeamInfo = LOMSE_NEW ImoBeamDto();
 
+        m_pBeamInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pBeamInfo->set_beam_type(--iLevel, iType);
     }
 
@@ -4114,18 +4113,18 @@ public:
         if (id.empty())
         {
             error_msg("<part>: missing mandatory 'id' attribute. <part> content will be ignored");
-            return NULL;
+            return nullptr;
         }
         ImoInstrument* pInstr = m_pAnalyser->get_instrument(id);
-        if (pInstr==NULL)
+        if (pInstr==nullptr)
         {
             error_msg("No <score-part> found for part id='" + id + "'. <part> content will be ignored.");
-            return NULL;
+            return nullptr;
         }
         if (m_pAnalyser->mark_part_as_added(id))
         {
             error_msg("Duplicated <part> for part id='" + id + "'. <part> content will be ignored.");
-            return NULL;
+            return nullptr;
         }
 
         m_pAnalyser->save_current_part_id(id);
@@ -4197,7 +4196,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4230,13 +4229,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
+        ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
             pNR = static_cast<ImoNoteRest*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNoteRest");
+            return nullptr;
         }
 
         while (more_children_to_analyse())
@@ -4307,7 +4306,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -4405,7 +4404,7 @@ public:
         {
             error_msg("<part-group>: invalid or missing mandatory 'number' attribute."
                       " Tag ignored.");
-            return NULL;
+            return nullptr;
         }
 
         //attrb: type = "start | stop"
@@ -4413,7 +4412,7 @@ public:
         if (type.empty())
         {
             error_msg("<part-group>: missing mandatory 'type' attribute. Tag ignored.");
-            return NULL;
+            return nullptr;
         }
 
         if (type == "stop")
@@ -4429,7 +4428,7 @@ public:
             else
             {
                 error_msg("<part-group> type='stop': missing <part-group> with the same number and type='start'.");
-                return NULL;
+                return nullptr;
             }
         }
 
@@ -4437,14 +4436,14 @@ public:
         {
             error_msg("<part-group>: invalid mandatory 'type' attribute. Must be "
                       "'start' or 'stop'.");
-            return NULL;
+            return nullptr;
         }
 
         ImoInstrGroup* pGrp = m_pAnalyser->start_part_group(number);
-        if (pGrp == NULL)
+        if (pGrp == nullptr)
         {
             error_msg("<part-group> type=start for number already started and not stopped");
-            return NULL;
+            return nullptr;
         }
 
         // group-name?
@@ -4495,7 +4494,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -4544,13 +4543,13 @@ protected:
             pText->set_text(name);
 
             ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-            ImoStyle* pStyle = NULL;
+            ImoStyle* pStyle = nullptr;
             if (pScore)     //in unit tests the score might not exist
                 pStyle = pScore->get_default_style();
             pText->set_style(pStyle);
             return pText;
         }
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4594,7 +4593,7 @@ public:
 
         m_pAnalyser->check_if_all_groups_are_closed();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -4632,7 +4631,7 @@ public:
 
 
                 // [<style>]
-                ImoStyle* pStyle = NULL;
+                ImoStyle* pStyle = nullptr;
     //            if (get_optional(k_style))
     //                pStyle = get_text_style_param(m_styleName);
     //            else
@@ -4647,7 +4646,7 @@ public:
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4663,7 +4662,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4679,7 +4678,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4808,7 +4807,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4824,7 +4823,7 @@ public:
     ImoObj* do_analysis()
     {
         //TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4840,7 +4839,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4876,14 +4875,14 @@ public:
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
         if (!pInstr)
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            return nullptr;
         }
 
         //attrb: id
         string id = get_mandatory_string_attribute("id", "", "score-instrument");
         if (id.empty())
-            return NULL;
+            return nullptr;
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
@@ -4925,7 +4924,7 @@ public:
         error_if_more_elements();
 
         pInstr->add_sound_info(pInfo);
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -4951,7 +4950,7 @@ public:
         //attrb: id
         string id = get_mandatory_string_attribute("id", "", "score-part");
         if (id.empty())
-            return NULL;
+            return nullptr;
 
         ImoInstrument* pInstrument = create_instrument(id);
 
@@ -5038,7 +5037,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDocument* pImoDoc = NULL;
+        ImoDocument* pImoDoc = nullptr;
 
         //create the document
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -5196,7 +5195,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -5219,15 +5218,15 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDirection* pDirection = NULL;
+        ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
             pDirection = static_cast<ImoDirection*>(m_pAnchor);
         else
         {
             //TODO: deal with <segno> when child of <measure>
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
             error_msg("<direction-type> <segno> is not child of <direction>. Ignored.");
-            return NULL;
+            return nullptr;
         }
         pDirection->set_display_repeat(k_repeat_segno);
 
@@ -5256,7 +5255,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -5279,13 +5278,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
+        ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
             pNR = static_cast<ImoNoteRest*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoNoteRest");
+            return nullptr;
         }
 
         while (more_children_to_analyse())
@@ -5334,7 +5333,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -5403,25 +5402,26 @@ public:
     SlurMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pInfo1(NULL)
-        , m_pInfo2(NULL)
+        , m_pInfo1(nullptr)
+        , m_pInfo2(nullptr)
     {
     }
 
     ImoObj* do_analysis()
     {
-        ImoNote* pNote = NULL;
+        ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
             pNote = static_cast<ImoNote*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoNote");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not ImoNote");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         m_pInfo1 = static_cast<ImoSlurDto*>(
                                 ImFactory::inject(k_imo_slur_dto, pDoc));
+        m_pInfo1->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // attrib: type %start-stop-continue; #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "slur");
@@ -5504,6 +5504,7 @@ protected:
             m_pInfo2 = static_cast<ImoSlurDto*>(
                                 ImFactory::inject(k_imo_slur_dto, pDoc));
             m_pInfo2->set_start(true);
+            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
             slurId =  m_pAnalyser->new_slur_id(num);
             m_pInfo2->set_slur_number(slurId);
         }
@@ -5511,7 +5512,7 @@ protected:
         {
             error_msg("Missing or invalid slur type. Slur ignored.");
             delete m_pInfo1;
-            m_pInfo1 = NULL;
+            m_pInfo1 = nullptr;
         }
     }
 
@@ -5554,7 +5555,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        //ImoDirection* pParent = NULL;
+        //ImoDirection* pParent = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
         {
             //pParent = static_cast<ImoDirection*>(m_pAnchor);
@@ -5565,8 +5566,8 @@ public:
         }
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is neither <measure> nor <direction>.");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is neither <measure> nor <direction>.");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -5645,7 +5646,7 @@ public:
 
         // offset?
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -5671,13 +5672,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoLyricsTextInfo* pParent = NULL;
+        ImoLyricsTextInfo* pParent = nullptr;
         if (m_pAnchor && m_pAnchor->is_lyrics_text_info())
             pParent = static_cast<ImoLyricsTextInfo*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoLyricsTextInfo");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not ImoLyricsTextInfo");
+            return nullptr;
         }
 
         //ATTLIST
@@ -5694,7 +5695,7 @@ public:
         if (value.empty())
         {
             error_msg("text: missing mandatory string in element <text>.");
-            return NULL;
+            return nullptr;
         }
 
         pParent->set_syllable_text(value);
@@ -5735,25 +5736,26 @@ public:
     TiedMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-        , m_pInfo1(NULL)
-        , m_pInfo2(NULL)
+        , m_pInfo1(nullptr)
+        , m_pInfo2(nullptr)
     {
     }
 
     ImoObj* do_analysis()
     {
-        ImoNote* pNote = NULL;
+        ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
             pNote = static_cast<ImoNote*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoNote");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not ImoNote");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         m_pInfo1 = static_cast<ImoTieDto*>(
                                 ImFactory::inject(k_imo_tie_dto, pDoc));
+        m_pInfo1->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // attrib: type %start-stop-continue; #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "tied");
@@ -5844,12 +5846,13 @@ protected:
             m_pInfo2->set_start(true);
             tieId =  m_pAnalyser->new_tie_id(num, pNote->get_fpitch());
             m_pInfo2->set_tie_number(tieId);
+            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         }
         else
         {
             error_msg("Missing or invalid tie type. Tie ignored.");
             delete m_pInfo1;
-            m_pInfo1 = NULL;
+            m_pInfo1 = nullptr;
         }
     }
 
@@ -5943,8 +5946,8 @@ public:
             m_pNR = static_cast<ImoNote*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not note/rest");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not note/rest");
+            return nullptr;
         }
 
         bool fError = false;
@@ -5971,7 +5974,7 @@ public:
         if (!fError)
             m_pNR->set_time_modification(m_normal, m_actual);
 
-        return NULL;
+        return nullptr;
     }
 
 protected:
@@ -6035,13 +6038,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoNoteRest* pNR = NULL;
+        ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
             pNR = static_cast<ImoNote*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not note/rest");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not note/rest");
+            return nullptr;
         }
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6049,6 +6052,7 @@ public:
                                 ImFactory::inject(k_imo_tuplet_dto, pDoc));
         set_default_values(m_pInfo);
         m_pInfo->set_note_rest(pNR);
+        m_pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
 
         // atrib: type %start-stop; #REQUIRED
         const string& type = get_mandatory_string_attribute("type", "", "tuplet");
@@ -6056,7 +6060,7 @@ public:
         {
             error_msg("Missing or invalid tuplet type. Tuplet ignored.");
             delete m_pInfo;
-            return NULL;
+            return nullptr;
         }
 
         // attrib: number %number-level; #IMPLIED
@@ -6106,6 +6110,7 @@ protected:
         pInfo->set_show_bracket(k_yesno_default);
         pInfo->set_placement(k_placement_default);
         pInfo->set_only_graphical(true);
+        pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
     }
 
     void set_tuplet_id(const string& snum)
@@ -6229,8 +6234,8 @@ public:
             m_pInfo = static_cast<ImoTupletDto*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAnchor or it is not tuplet dto");
-            return NULL;
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not tuplet dto");
+            return nullptr;
         }
 
         bool fIsActual = m_analysedNode.name() == "tuplet-actual";
@@ -6253,7 +6258,7 @@ public:
 
         //TODO: tuplet-type?, tuplet-dot*
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -6277,8 +6282,8 @@ public:
         //ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
         if (!pInfo)
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoInstrument");
-            return NULL;
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            return nullptr;
         }
 
         // virtual-library?
@@ -6291,7 +6296,7 @@ public:
 
         error_if_more_elements();
 
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -6307,7 +6312,7 @@ public:
     ImoObj* do_analysis()
     {
 		//TODO
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -6332,14 +6337,14 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDirection* pDirection = NULL;
+        ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
             pDirection = static_cast<ImoDirection*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoDirection");
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
             error_msg("<direction-type> <words> is not child of <direction>. Ignored.");
-            return NULL;
+            return nullptr;
         }
 
         string text = m_analysedNode.value();
@@ -6438,13 +6443,13 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pDoc(pDoc)
     , m_pParser(parser)
     , m_pLdpFactory(libraryScope.ldp_factory())
-    , m_pTiesBuilder(NULL)
-    , m_pBeamsBuilder(NULL)
-    , m_pTupletsBuilder(NULL)
-    , m_pSlursBuilder(NULL)
-    , m_pVoltasBuilder(NULL)
+    , m_pTiesBuilder(nullptr)
+    , m_pBeamsBuilder(nullptr)
+    , m_pTupletsBuilder(nullptr)
+    , m_pSlursBuilder(nullptr)
+    , m_pVoltasBuilder(nullptr)
     , m_musicxmlVersion(0)
-    , m_pNodeImo(NULL)
+    , m_pNodeImo(nullptr)
     , m_tieNum(0)
     , m_slurNum(0)
     , m_voltaNum(0)
@@ -6452,9 +6457,9 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
 //    , m_nShowTupletNumber(k_yesno_default)
-    , m_pCurScore(NULL)
-    , m_pLastNote(NULL)
-    , m_pImoDoc(NULL)
+    , m_pCurScore(nullptr)
+    , m_pLastNote(nullptr)
+    , m_pImoDoc(nullptr)
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
@@ -6587,7 +6592,7 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     clear_pending_relations();
     m_time = 0.0;
     m_maxTime = 0.0;
-    save_last_barline(NULL);
+    save_last_barline(nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -6636,7 +6641,7 @@ void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyric* pLyric)
     map<string, int>::iterator it = m_lyricIndex.find(id);
     if (it == m_lyricIndex.end())
     {
-        m_lyrics.push_back(NULL);
+        m_lyrics.push_back(nullptr);
         i = int(m_lyrics.size()) - 1;
         m_lyricIndex[id] = i;
 
@@ -6701,7 +6706,7 @@ void MxlAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
 ImoInstrGroup* MxlAnalyser::start_part_group(int number)
 {
     if (m_partGroups.group_exists(number))
-        return NULL;
+        return nullptr;
 
     Document* pDoc = get_document_being_analysed();
     ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
@@ -6987,15 +6992,6 @@ void MxlTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
                << " will be ignored." << endl;
 }
 
-//---------------------------------------------------------------------------------------
-void MxlTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
-{
-    m_reporter << "Line " << pNewInfo->get_line_number()
-               << ". This tie has the same number than that defined in line "
-               << pExistingInfo->get_line_number()
-               << ". This tie will be ignored." << endl;
-}
-
 
 //=======================================================================================
 // MxlSlursBuilder implementation
@@ -7071,8 +7067,9 @@ void MxlBeamsBuilder::add_relation_to_staffobjs(ImoBeamDto* pEndInfo)
 //=======================================================================================
 // MxlTupletsBuilder implementation
 //=======================================================================================
-void MxlTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* UNUSED(pEndDto))
+void MxlTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* pEndDto)
 {
+    m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoTupletDto* pStartDto = m_matches.front();
@@ -7082,7 +7079,7 @@ void MxlTupletsBuilder::add_relation_to_staffobjs(ImoTupletDto* UNUSED(pEndDto))
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->include_in_relation(pDoc, pTuplet, NULL);
+        pNR->include_in_relation(pDoc, pTuplet, nullptr);
     }
 }
 
@@ -7091,10 +7088,19 @@ void MxlTupletsBuilder::add_to_open_tuplets(ImoNoteRest* pNR)
 {
     if (m_pendingItems.size() > 0)
     {
+        list<int> excludes;
         ListIterator it;
         for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
         {
-            if ((*it)->is_start_of_relation() )
+            if ((*it)->get_staffobj() == pNR)
+                excludes.push_back((*it)->get_item_number());
+        }
+
+        for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+        {
+            if ((*it)->is_start_of_relation() && (*it)->get_item_number()
+                && (find(excludes.begin(), excludes.end(), (*it)->get_item_number())
+                     == excludes.end()) )
             {
                 ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
                 pInfo->set_tuplet_number( (*it)->get_item_number() );
@@ -7148,7 +7154,7 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoBarline* pBarline = (*it)->get_barline();
-        pBarline->include_in_relation(pDoc, pVB, NULL);
+        pBarline->include_in_relation(pDoc, pVB, nullptr);
     }
 
     //count number of voltas in the set

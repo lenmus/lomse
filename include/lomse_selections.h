@@ -65,8 +65,8 @@ public:
 
     //validations
     virtual bool is_valid_to_add_tie(SelectionSet* pSelection,
-                                   ImoNote** ppStartNote = NULL,
-                                   ImoNote** ppEndNote = NULL);
+                                   ImoNote** ppStartNote = nullptr,
+                                   ImoNote** ppEndNote = nullptr);
     virtual bool is_valid_to_remove_tie(SelectionSet* pSelection);
     virtual bool is_valid_to_add_tuplet(SelectionSet* pSelection);
     virtual bool is_valid_to_remove_tuplet(SelectionSet* pSelection);
@@ -116,7 +116,7 @@ public:
 
     //operations
     void add(GmoObj* pGmo);
-    void add(ImoId id, GraphicModel* pGM=NULL);
+    void add(ImoId id, GraphicModel* pGM=nullptr);
     void remove(ImoId id);
     bool contains(ImoObj* pImo);
     bool contains(ImoId id);
@@ -138,7 +138,7 @@ public:
     void get_start_end_note_rests(ImoNoteRest** ppStart, ImoNoteRest** ppEndNote);
 
     ///validations on the selection. Use set_validator() to change validation rules
-    bool is_valid_to_add_tie(ImoNote** ppStartNote = NULL, ImoNote** ppEndNote = NULL);
+    bool is_valid_to_add_tie(ImoNote** ppStartNote = nullptr, ImoNote** ppEndNote = nullptr);
     bool is_valid_to_remove_tie();
     bool is_valid_to_add_tuplet();
     bool is_valid_to_remove_tuplet();

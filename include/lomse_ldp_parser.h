@@ -67,9 +67,9 @@ public:
     //access to parser result
     LdpTree* get_ldp_tree();
     inline void release_last_tree_ownership() {
-        m_tree->set_root(NULL);
+        m_tree->set_root(nullptr);
         delete m_tree;
-        m_tree = NULL;
+        m_tree = nullptr;
     }
 
 //    inline int get_num_errors() { return m_numErrors; }

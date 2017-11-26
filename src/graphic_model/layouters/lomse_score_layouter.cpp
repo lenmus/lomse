@@ -84,16 +84,16 @@ namespace lomse
 //=======================================================================================
 ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
                              GraphicModel* pGModel, LibraryScope& libraryScope)
-    : Layouter(pItem, pParent, pGModel, libraryScope, NULL, true)
+    : Layouter(pItem, pParent, pGModel, libraryScope, nullptr, true)
     , m_libraryScope(libraryScope)
     , m_pScore( dynamic_cast<ImoScore*>(pItem) )
     , m_pScoreMeter( LOMSE_NEW ScoreMeter(m_pScore) )
-    , m_pSpAlgorithm(NULL)
-    , m_pShapesCreator(NULL)
-    , m_pPartsEngraver(NULL)
-    , m_pStub(NULL)
-    , m_pCurBoxPage(NULL)
-    , m_pCurBoxSystem(NULL)
+    , m_pSpAlgorithm(nullptr)
+    , m_pShapesCreator(nullptr)
+    , m_pPartsEngraver(nullptr)
+    , m_pStub(nullptr)
+    , m_pCurBoxPage(nullptr)
+    , m_pCurBoxSystem(nullptr)
     , m_iColumnToTrace(-1)
     , m_nTraceLevel(k_trace_off)
 {
@@ -262,7 +262,7 @@ void ScoreLayouter::remove_unused_space()
 //---------------------------------------------------------------------------------------
 bool ScoreLayouter::system_created()
 {
-    return m_pCurBoxSystem != NULL;
+    return m_pCurBoxSystem != nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -276,7 +276,7 @@ bool ScoreLayouter::enough_space_in_page_for_system()
 void ScoreLayouter::delete_system()
 {
     delete m_pCurBoxSystem;
-    m_pCurBoxSystem = NULL;
+    m_pCurBoxSystem = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ void ScoreLayouter::add_system_to_page()
 
     move_paper_cursor_to_bottom_of_added_system();
     is_first_system_in_page(false);
-    m_pCurBoxSystem = NULL;
+    m_pCurBoxSystem = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -736,7 +736,7 @@ void ScoreLayouter::add_error_message(const string& msg)
     TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle);
     LUnits x = m_pageCursor.x + 400.0;
     LUnits y = m_pageCursor.y + 800.0;
-    GmoShape* pText = engrv.create_shape(NULL, x, y);
+    GmoShape* pText = engrv.create_shape(nullptr, x, y);
     m_pItemMainBox->add_shape(pText, GmoShape::k_layer_top);
     m_pageCursor.y += pText->get_height();
 }
@@ -1153,7 +1153,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 {
     //factory method to create the engraver for relation auxobjs
 
-    RelObjEngraver* pEngrv = NULL;
+    RelObjEngraver* pEngrv = nullptr;
     switch (pRO->get_obj_type())
     {
         case k_imo_beam:
@@ -1261,7 +1261,7 @@ void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* p
 {
     //factory method to create the engraver for AuxRelObjs
 
-    AuxRelObjEngraver* pEngrv = NULL;
+    AuxRelObjEngraver* pEngrv = nullptr;
     switch (pARO->get_obj_type())
     {
         case k_imo_lyric:

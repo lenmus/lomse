@@ -112,7 +112,7 @@ ImoObj* IdAssigner::get_pointer_to_imo(ImoId id) const
 	if (it != m_idToImo.end())
 		return it->second;
     else
-      return NULL;
+      return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ Control* IdAssigner::get_pointer_to_control(ImoId id) const
 	if (it != m_idToControl.end())
 		return it->second;
     else
-      return NULL;
+      return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

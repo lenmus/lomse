@@ -85,18 +85,18 @@ public:
 
     ChordEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_pMeter(NULL)
-        , m_pNoteEngrv(NULL)
-        , m_pChord(NULL)
-        , m_pNote1(NULL)
-        , m_pNote2(NULL)
-        , m_pNote3(NULL)
-        , m_pShape1(NULL)
-        , m_pShape2(NULL)
-        , m_pShape3(NULL)
-        , m_pStorage(NULL)
-        , m_pChordEngrv(NULL)
-        , m_pDoc(NULL)
+        , m_pMeter(nullptr)
+        , m_pNoteEngrv(nullptr)
+        , m_pChord(nullptr)
+        , m_pNote1(nullptr)
+        , m_pNote2(nullptr)
+        , m_pNote3(nullptr)
+        , m_pShape1(nullptr)
+        , m_pShape2(nullptr)
+        , m_pShape3(nullptr)
+        , m_pStorage(nullptr)
+        , m_pChordEngrv(nullptr)
+        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -129,9 +129,9 @@ public:
             m_pNote3->include_in_relation(m_pDoc, m_pChord);
         }
         else
-            m_pNote3 = NULL;
+            m_pNote3 = nullptr;
 
-        m_pMeter = LOMSE_NEW ScoreMeter(NULL, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
@@ -142,7 +142,7 @@ public:
             m_pShape3 =
                 dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, k_clef_G2, UPoint(10.0f, 15.0f)) );
         else
-            m_pShape3 = NULL;
+            m_pShape3 = nullptr;
     }
 
     void delete_chord()
@@ -220,7 +220,7 @@ SUITE(ChordEngraverTest)
         m_pChordEngrv->create_shapes();
         MyChordEngraver* pEngrv = dynamic_cast<MyChordEngraver*>(m_pStorage->get_engraver(m_pChord));
 
-        CHECK( pEngrv != NULL );
+        CHECK( pEngrv != nullptr );
         CHECK( pEngrv->my_get_notes().size() == 3 );
         CHECK( pEngrv->my_get_base_note() == m_pNote1 );
 

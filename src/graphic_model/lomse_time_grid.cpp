@@ -45,7 +45,7 @@ namespace lomse
 TimeGrid::TimeGrid(GraphicView* view, LibraryScope& libraryScope)
     : VisualEffect(view, libraryScope)
     , m_color( Color(192,192,192) )     //light grey  //TODO: user option
-    , m_pBoxSystem(NULL)
+    , m_pBoxSystem(nullptr)
 {
 }
 

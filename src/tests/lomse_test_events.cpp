@@ -215,7 +215,7 @@ SUITE(DocumentEventsTest)
         SpDocument spDoc( new MyDocument(m_libraryScope) );
         spDoc->create_empty();
         ImoParagraph* pPara = spDoc->add_paragraph();
-        HyperlinkCtrl* pLink = new HyperlinkCtrl(m_libraryScope, NULL, spDoc.get(), "link");
+        HyperlinkCtrl* pLink = new HyperlinkCtrl(m_libraryScope, nullptr, spDoc.get(), "link");
         ImoControl* pControl = pPara->add_control(pLink);
         MyEventHandlerCPP handler;
         pLink->add_event_handler(k_on_click_event, &handler);

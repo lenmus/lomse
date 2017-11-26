@@ -52,7 +52,7 @@ ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 
 //---------------------------------------------------------------------------------------
 ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
-    : Engraver(libraryScope, NULL)
+    : Engraver(libraryScope, nullptr)
 {
     //constructor for dragged images
 }
@@ -91,7 +91,7 @@ GmoShape* ClefEngraver::create_tool_dragged_shape(int clefType)
     int iGlyph = find_glyph(clefType);
     UPoint pos(0.0, 0.0);
 
-    m_pClefShape = LOMSE_NEW GmoShapeClef(NULL, idx, iGlyph, pos, color, m_libraryScope,
+    m_pClefShape = LOMSE_NEW GmoShapeClef(nullptr, idx, iGlyph, pos, color, m_libraryScope,
                                           fontSize);
     return m_pClefShape;
 }
@@ -268,7 +268,7 @@ Tenths ClefEngraver::get_glyph_offset()
 //
 //        //if not prolog clef its size must be smaller. We know that it is a prolog clef because
 //        //there is no previous context
-//        bool fSmallClef = (m_pContext->GetPrev() != (lmContext*)NULL);
+//        bool fSmallClef = (m_pContext->GetPrev() != (lmContext*)nullptr);
 //
 //        //create the shape object
 //        GmoShape* pShape = CreateShape(pBox, pPaper, uPos, colorC, fSmallClef);

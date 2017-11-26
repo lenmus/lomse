@@ -92,9 +92,9 @@ SUITE(LmdCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != NULL );
+        CHECK( pScore->get_staffobjs_table() != nullptr );
         CHECK( pScore->get_version_string() == "1.6" );
         delete pIModel;
     }
@@ -108,7 +108,7 @@ SUITE(LmdCompilerTest)
     //    CHECK( pDoc->get_version() == "0.0" );
     //    CHECK( pDoc->get_num_content_items() == 1 );
     //    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-    //    CHECK( pScore != NULL );
+    //    CHECK( pScore != nullptr );
     //    //cout << "id=" << pScore->get_id() << endl;
     //    CHECK( pScore->get_id() == 3L );
     //    CHECK( pScore->get_num_instruments() == 1 );
@@ -128,7 +128,7 @@ SUITE(LmdCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "This is a text for this example." );
@@ -148,7 +148,7 @@ SUITE(LmdCompilerTest)
 //    //    CHECK( pDoc->get_version() == "0.0" );
 //    //    CHECK( pDoc->get_num_content_items() == 1 );
 //    //    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-//    //    CHECK( pScore != NULL );
+//    //    CHECK( pScore != nullptr );
 //    //    CHECK( pScore->get_id() == 3L );
 //    //    CHECK( pScore->get_num_instruments() == 1 );
 //    //    ImoInstrument* pInstr = pScore->get_instrument(0);

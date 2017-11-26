@@ -73,7 +73,7 @@ Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
     if (it !=  m_engravers.end())
         return it->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ Engraver* ShapesStorage::get_engraver(const string& tag)
     if (it !=  m_engravers2.end())
         return it->second;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

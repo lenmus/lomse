@@ -88,12 +88,12 @@ public:
 
     BeamEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_pScore(NULL)
-        , m_pMeter(NULL)
-        , m_pStorage(NULL)
-        , m_pNoteEngrv(NULL)
-        , m_pBeamEngrv(NULL)
-        , m_pBeamShape(NULL)
+        , m_pScore(nullptr)
+        , m_pMeter(nullptr)
+        , m_pStorage(nullptr)
+        , m_pNoteEngrv(nullptr)
+        , m_pBeamEngrv(nullptr)
+        , m_pBeamShape(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -187,11 +187,11 @@ public:
             delete *it;
         m_shapes.clear();
 
-        m_pMeter = NULL;
-        m_pStorage = NULL;
-        m_pNoteEngrv = NULL;
-        m_pBeamEngrv = NULL;
-        m_pBeamShape = NULL;
+        m_pMeter = nullptr;
+        m_pStorage = nullptr;
+        m_pNoteEngrv = nullptr;
+        m_pBeamEngrv = nullptr;
+        m_pBeamShape = nullptr;
     }
 
 
@@ -205,19 +205,19 @@ SUITE(BeamEngraverTest)
     {
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
-        CHECK( pBeam != NULL );
+        CHECK( pBeam != nullptr );
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, FeedEngraver)
     {
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
-        CHECK( pBeam != NULL );
+        CHECK( pBeam != nullptr );
         prepare_to_engrave_beam(pBeam);
 
         MyBeamEngraver* pEngrv = dynamic_cast<MyBeamEngraver*>(m_pStorage->get_engraver(pBeam));
 
-        CHECK( pEngrv != NULL );
+        CHECK( pEngrv != nullptr );
         CHECK( pEngrv == m_pBeamEngrv );
 
         delete_test_data();
@@ -231,7 +231,7 @@ SUITE(BeamEngraverTest)
 
         m_pBeamEngrv->create_shapes();
         m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->get_shape() );
-        CHECK( m_pBeamShape != NULL );
+        CHECK( m_pBeamShape != nullptr );
 
         delete_test_data();
     }

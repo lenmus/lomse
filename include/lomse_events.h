@@ -121,7 +121,7 @@ protected:
 public:
     virtual ~EventInfo() {}
 
-    virtual Observable* get_source() { return NULL; }
+    virtual Observable* get_source() { return nullptr; }
 
 
     //classification
@@ -632,7 +632,7 @@ public:
     virtual Observable* get_observable_child(int UNUSED(childType),
                                              ImoId UNUSED(childId))
     {
-        return NULL;
+        return nullptr;
     }
 
 };

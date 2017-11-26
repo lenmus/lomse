@@ -53,7 +53,7 @@ Caret::Caret(GraphicView* view, LibraryScope& libraryScope)
     , m_blinkTime(500)              //500 milliseconds
     , m_timer( libraryScope.get_io_service() )
 #endif
-    , m_pBoxSystem(NULL)
+    , m_pBoxSystem(nullptr)
 {
     schedule_the_timer();
 }
