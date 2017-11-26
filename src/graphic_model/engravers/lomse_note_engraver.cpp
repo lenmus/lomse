@@ -56,7 +56,7 @@ NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* pShapesStorage, int iInstr, int iStaff)
 //    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_pNote(NULL)
+    , m_pNote(nullptr)
     , m_pShapesStorage(pShapesStorage)
 {
 }
@@ -70,8 +70,8 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
     m_clefType = clefType;
     m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
     m_color = color;
-    m_pNoteShape = NULL;
-    m_pNoteheadShape = NULL;
+    m_pNoteShape = nullptr;
+    m_pNoteheadShape = nullptr;
     m_fontSize = determine_font_size();
 
     //compute y pos for note pitch
@@ -96,12 +96,12 @@ GmoShape* NoteEngraver::create_tool_dragged_shape(int noteType, EAccidentals acc
                                                   int dots)
 {
     //initialize
-    m_pNote = NULL;
+    m_pNote = nullptr;
     m_clefType = k_clef_G2;
     m_lineSpacing = 72.0;
     m_color = Color(255,0,0);       //TODO: options/configuration
-    m_pNoteShape = NULL;
-    m_pNoteheadShape = NULL;
+    m_pNoteShape = nullptr;
+    m_pNoteheadShape = nullptr;
     m_fontSize = 21.0;
 
     //y pos for note pitch

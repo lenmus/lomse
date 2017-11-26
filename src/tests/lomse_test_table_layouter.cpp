@@ -76,11 +76,11 @@ protected:
 public:
     MyTableLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                     LibraryScope& libraryScope, ImoStyles* pStyles)
-        : TableLayouter(pImo, NULL, pGModel, libraryScope, pStyles, true)
+        : TableLayouter(pImo, nullptr, pGModel, libraryScope, pStyles, true)
     {
     }
 //    MyTableLayouter(LibraryScope& libraryScope, LineReferences& refs)
-//        : TableLayouter(NULL, NULL, NULL, libraryScope, NULL)
+//        : TableLayouter(nullptr, nullptr, nullptr, libraryScope, nullptr)
 //    {
 //        m_lineRefs = refs;
 //    }
@@ -342,8 +342,8 @@ SUITE(TableLayouterTest)
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
         GraphicModel model;
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
@@ -351,7 +351,7 @@ SUITE(TableLayouterTest)
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
 
         GmoBox* pTableBox = lyt.my_get_main_box();
-        CHECK( pTableBox != NULL );
+        CHECK( pTableBox != nullptr );
     }
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_grid_size_1)
@@ -571,9 +571,9 @@ SUITE(TableLayouterTest)
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
-        CHECK( lyt.my_get_head_layouter() == NULL );
+        CHECK( lyt.my_get_head_layouter() == nullptr );
         TableSectionLayouter* pSL = lyt.my_get_body_layouter();
-        CHECK( pSL != NULL );
+        CHECK( pSL != nullptr );
     }
 
     TEST_FIXTURE(TableLayouterTestFixture, create_cell_layouters_1)
@@ -592,19 +592,19 @@ SUITE(TableLayouterTest)
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
-        CHECK( lyt.my_get_head_layouter() == NULL );
+        CHECK( lyt.my_get_head_layouter() == nullptr );
         TableSectionLayouter* pSL = lyt.my_get_body_layouter();
-        CHECK( pSL != NULL );
+        CHECK( pSL != nullptr );
         vector<TableCellLayouter*>& cellLyt = pSL->dbg_get_cell_layouters();
         CHECK( cellLyt.size() == 8 );
                                                             //   50  40  25  15
         CHECK( cellLyt[0]->get_cell_width() == 5000.0f );   //  +---+---+---+---+
         CHECK( cellLyt[1]->get_cell_width() == 6500.0f );   //  | 0 |       | 3 |
-        CHECK( cellLyt[2] == NULL );                        //  +---+   1   +---+
+        CHECK( cellLyt[2] == nullptr );                        //  +---+   1   +---+
         CHECK( cellLyt[3]->get_cell_width() == 1500.0f );   //  | 4 |       | 7 |
         CHECK( cellLyt[4]->get_cell_width() == 5000.0f );   //  +---+---+---+---+
-        CHECK( cellLyt[5] == NULL );
-        CHECK( cellLyt[6] == NULL );
+        CHECK( cellLyt[5] == nullptr );
+        CHECK( cellLyt[6] == nullptr );
         CHECK( cellLyt[7]->get_cell_width() == 1500.0f );
     }
 
@@ -625,17 +625,17 @@ SUITE(TableLayouterTest)
         MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
 
-        CHECK( lyt.my_get_head_layouter() == NULL );
+        CHECK( lyt.my_get_head_layouter() == nullptr );
         TableSectionLayouter* pSL = lyt.my_get_body_layouter();
-        CHECK( pSL != NULL );
+        CHECK( pSL != nullptr );
         vector<TableCellLayouter*>& cellLyt = pSL->dbg_get_cell_layouters();
         CHECK( cellLyt.size() == 10 );
 
         CHECK( cellLyt[0]->get_cell_width() == 5000.0f );   //   50  40  25  15  20
         CHECK( cellLyt[1]->get_cell_width() == 6500.0f );   //  +---+---+---+---+---+
-        CHECK( cellLyt[2] == NULL );                        //  | 0 |   1   |   3   |
+        CHECK( cellLyt[2] == nullptr );                        //  | 0 |   1   |   3   |
         CHECK( cellLyt[3]->get_cell_width() == 3500.0f );   //  +---+---+---+---+---+
-        CHECK( cellLyt[4] == NULL );                        //  | 5 | 6 | 7 | 8 | 9 +
+        CHECK( cellLyt[4] == nullptr );                        //  | 5 | 6 | 7 | 8 | 9 +
         //                                                  //  +---+---+---+---+---+
         CHECK( cellLyt[5]->get_cell_width() == 5000.0f );
         CHECK( cellLyt[6]->get_cell_width() == 4000.0f );
@@ -666,22 +666,22 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         TableSectionLayouter* pSH = lyt.my_get_head_layouter();
-        CHECK( pSH != NULL );
+        CHECK( pSH != nullptr );
         vector<TableCellLayouter*>& cellLytH = pSH->dbg_get_cell_layouters();
         CHECK( cellLytH.size() == 8 );
 
         CHECK( is_equal(cellLytH[0]->get_cell_width(), 7000.0f) );
         CHECK( is_equal(cellLytH[1]->get_cell_width(), 17000.0f) );
-        CHECK( cellLytH[2] == NULL );
+        CHECK( cellLytH[2] == nullptr );
         CHECK( is_equal(cellLytH[3]->get_cell_width(), 7000.0f) );
 
-        CHECK( cellLytH[4] == NULL );
+        CHECK( cellLytH[4] == nullptr );
         CHECK( is_equal(cellLytH[5]->get_cell_width(), 8000.0f) );
         CHECK( is_equal(cellLytH[6]->get_cell_width(), 9000.0f) );
-        CHECK( cellLytH[7] == NULL );
+        CHECK( cellLytH[7] == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
-        CHECK( pSB != NULL );
+        CHECK( pSB != nullptr );
         vector<TableCellLayouter*>& cellLytB = pSB->dbg_get_cell_layouters();
         CHECK( cellLytB.size() == 8 );
 
@@ -693,7 +693,7 @@ SUITE(TableLayouterTest)
         CHECK( is_equal(cellLytB[4]->get_cell_width(), 7000.0f) );
         CHECK( is_equal(cellLytB[5]->get_cell_width(), 8000.0f) );
         CHECK( is_equal(cellLytB[6]->get_cell_width(), 9000.0f) );
-        CHECK( cellLytB[7] == NULL );
+        CHECK( cellLytB[7] == nullptr );
     }
 
     TEST_FIXTURE(TableLayouterTestFixture, table_logical_rows_1)
@@ -752,10 +752,10 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         TableSectionLayouter* pSH = lyt.my_get_head_layouter();
-        CHECK( pSH == NULL );
+        CHECK( pSH == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
-        CHECK( pSB != NULL );
+        CHECK( pSB != nullptr );
         vector<int>& rowStart = pSB->dbg_get_row_start();
 //        cout << "size=" <<  rowStart.size() << endl;
         CHECK( rowStart.size() == 4 );
@@ -820,10 +820,10 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         TableSectionLayouter* pSH = lyt.my_get_head_layouter();
-        CHECK( pSH == NULL );
+        CHECK( pSH == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
-        CHECK( pSB != NULL );
+        CHECK( pSB != nullptr );
         vector<int>& rowStart = pSB->dbg_get_row_start();
 //        cout << "size=" <<  rowStart.size() << endl;
         CHECK( rowStart.size() == 3 );
@@ -886,10 +886,10 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         TableSectionLayouter* pSH = lyt.my_get_head_layouter();
-        CHECK( pSH == NULL );
+        CHECK( pSH == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
-        CHECK( pSB != NULL );
+        CHECK( pSB != nullptr );
         vector<int>& rowStart = pSB->dbg_get_row_start();
 //        cout << "size=" <<  rowStart.size() << endl;
         CHECK( rowStart.size() == 2 );
@@ -950,10 +950,10 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         TableSectionLayouter* pSH = lyt.my_get_head_layouter();
-        CHECK( pSH == NULL );
+        CHECK( pSH == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
-        CHECK( pSB != NULL );
+        CHECK( pSB != nullptr );
         vector<int>& rowStart = pSB->dbg_get_row_start();
 //        cout << "size=" <<  rowStart.size() << endl;
         CHECK( rowStart.size() == 2 );
@@ -975,10 +975,10 @@ SUITE(TableLayouterTest)
 
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
-        CHECK( pModel != NULL );
+        CHECK( pModel != nullptr );
 
         //GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         //GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -999,7 +999,7 @@ SUITE(TableLayouterTest)
 
         //GmoBox* pHit = pPage->find_inner_box_at(x, y);
 
-        //CHECK ( pHit != NULL );
+        //CHECK ( pHit != nullptr );
         //CHECK ( pHit == pBSliceInstr );
 
         delete pIntor;
@@ -1021,7 +1021,7 @@ protected:
 
 public:
     MockCellLayouter(LibraryScope& libraryScope, int rowspan, int colspan)
-        : TableCellLayouter(NULL, NULL, NULL, libraryScope, NULL)
+        : TableCellLayouter(nullptr, nullptr, nullptr, libraryScope, nullptr)
         , m_rowspan(rowspan)
         , m_colspan(colspan)
     {
@@ -1106,21 +1106,21 @@ public:
 
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 2,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,2) );
-        m_cellLayouters.push_back( NULL );
+        m_cellLayouters.push_back( nullptr );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 3,1) );
 
-        m_cellLayouters.push_back( NULL );
+        m_cellLayouters.push_back( nullptr );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 2,1) );
-        m_cellLayouters.push_back( NULL );
+        m_cellLayouters.push_back( nullptr );
 
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
         m_cellLayouters.push_back( new MockCellLayouter(m_libraryScope, 1,1) );
-        m_cellLayouters.push_back( NULL );
-        m_cellLayouters.push_back( NULL );
+        m_cellLayouters.push_back( nullptr );
+        m_cellLayouters.push_back( nullptr );
 
         m_heights.push_back(22.0f);
         m_heights.push_back(10.0f);

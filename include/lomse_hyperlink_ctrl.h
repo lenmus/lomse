@@ -58,7 +58,7 @@ protected:
 public:
     HyperlinkCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                   const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
-                  ImoStyle* pStyle=NULL);
+                  ImoStyle* pStyle=nullptr);
     virtual ~HyperlinkCtrl() {}
 
     //Control mandatory overrides

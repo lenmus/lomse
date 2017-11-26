@@ -93,7 +93,6 @@ protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
     void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
     void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
-    void error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo);
 };
 
 
@@ -162,7 +161,7 @@ private:
 public:
     TupletsBuilder(ostream& reporter, LdpAnalyser* pAnalyser)
         : RelationBuilder<ImoTupletDto, LdpAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet")
-        , m_pTuplet(NULL)
+        , m_pTuplet(nullptr)
     {
     }
     virtual ~TupletsBuilder() {}
@@ -233,7 +232,7 @@ public:
 
     //analysis
     void analyse_node(LdpTree::iterator itNode);
-    ImoObj* analyse_node(LdpElement* pNode, ImoObj* pAnchor=NULL);
+    ImoObj* analyse_node(LdpElement* pNode, ImoObj* pAnchor=nullptr);
 
     //helper, for score edition
     ImoBeam* create_beam(const list<ImoNoteRest*>& notes);
@@ -301,7 +300,7 @@ public:
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;
-        m_pCurScore = NULL;
+        m_pCurScore = nullptr;
     }
     inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
     inline ImoScore* get_last_analysed_score() { return m_pLastScore; }
@@ -325,7 +324,7 @@ public:
                                         EAccidentals* accidentals);
 
 protected:
-    ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
+    ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 

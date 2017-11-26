@@ -135,19 +135,19 @@ public:
     //parameter nMM.
     void play(bool fVisualTracking = k_no_visual_tracking,
               long nMM = 0,
-              Interactor* pInteractor = NULL);
+              Interactor* pInteractor = nullptr);
 
     void play_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
                       long nMM = 0,
-                      Interactor* pInteractor = NULL);
+                      Interactor* pInteractor = nullptr);
 
     void play_from_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
                            long nMM = 0,
-						   Interactor* pInteractor = NULL);
+						   Interactor* pInteractor = nullptr);
     void play_measures(int startMeasure, int numMeasures,
                        bool fVisualTracking = k_no_visual_tracking,
                        long nMM = 0,
-                       Interactor* pInteractor = NULL);
+                       Interactor* pInteractor = nullptr);
     void stop();
     void pause();
     void quit();

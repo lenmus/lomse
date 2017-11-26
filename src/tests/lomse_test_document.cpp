@@ -100,7 +100,7 @@ SUITE(IdAssignerTest)
     TEST_FIXTURE(IdAssignerTestFixture, id_not_found)
     {
         Document doc(m_libraryScope);
-        CHECK( doc.get_pointer_to_imo(7L) == NULL );
+        CHECK( doc.get_pointer_to_imo(7L) == nullptr );
     }
 
     TEST_FIXTURE(IdAssignerTestFixture, removes_id)
@@ -110,7 +110,7 @@ SUITE(IdAssignerTest)
         CHECK( doc.get_pointer_to_imo(0L) == pImo );
 
         doc.removed_from_model(pImo);
-        CHECK( doc.get_pointer_to_imo(0L) == NULL );
+        CHECK( doc.get_pointer_to_imo(0L) == nullptr );
         delete pImo;
     }
 };
@@ -128,7 +128,7 @@ public:
     DocumentTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -136,7 +136,7 @@ public:
     ~DocumentTestFixture()    //TearDown fixture
     {
         delete m_pDoc;
-        m_pDoc = NULL;
+        m_pDoc = nullptr;
     }
 
     void create_document_1()
@@ -171,10 +171,10 @@ SUITE(DocumentTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
-        CHECK( pImoDoc->get_content_item(0) == NULL );
+        CHECK( pImoDoc->get_content_item(0) == nullptr );
     }
 
     TEST_FIXTURE(DocumentTestFixture, creation_001)
@@ -183,7 +183,7 @@ SUITE(DocumentTest)
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
@@ -196,7 +196,7 @@ SUITE(DocumentTest)
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "08011-paragraph.lmd", Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
     }
@@ -208,7 +208,7 @@ SUITE(DocumentTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q))))))");
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( pImoDoc->get_language() == "en" );
         CHECK( doc.is_dirty() == true );
@@ -230,15 +230,15 @@ SUITE(DocumentTest)
             "</lenmusdoc>";
         doc.from_string(src, Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 
         ImoDocument* pDoc = doc.get_imodoc();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
-        CHECK( pPara != NULL );
+        CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Credits" );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
@@ -252,7 +252,7 @@ SUITE(DocumentTest)
         LdpFileReader reader(m_scores_path + "00011-empty-fill-page.lms");
         doc.from_input(reader);
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
@@ -356,15 +356,15 @@ SUITE(DocumentTest)
             "</part></score-partwise>"
             , Document::k_format_mxl);
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != NULL );
+        CHECK( pMD != nullptr );
         ImoObj::children_iterator it = pMD->begin();
 
         ImoClef* pClef = dynamic_cast<ImoClef*>(*it);
-        CHECK( pClef != NULL );
+        CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->get_staff() == 0 );
 
@@ -377,11 +377,11 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, get_score_100)
     {
-        //100. in empty doc returns NULL
+        //100. in empty doc returns nullptr
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore == NULL );
+        CHECK( pScore == nullptr );
     }
 
     TEST_FIXTURE(DocumentTestFixture, get_score_101)
@@ -390,7 +390,7 @@ SUITE(DocumentTest)
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
 //        CHECK( pScore.to_string() == "(score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))" );
     }
 
@@ -400,11 +400,11 @@ SUITE(DocumentTest)
         Document doc(m_libraryScope);
         doc.create_with_empty_score();
         ImoDocument* pImoDoc = doc.get_imodoc();
-        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc != nullptr );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
     }
 
     TEST_FIXTURE(DocumentTestFixture, id_assigner_110)
@@ -415,7 +415,7 @@ SUITE(DocumentTest)
             "(instrument (musicData (n c4 q))))))");
 //        cout << doc.to_string(k_save_ids) << endl;
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( doc.get_pointer_to_imo(101L) == pScore );
     }
 
@@ -429,7 +429,7 @@ SUITE(DocumentTest)
 //        imoDocument* pImoDoc = doc.get_imodoc();
 //        pImoDoc->add_
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-//        CHECK( pScore != NULL );
+//        CHECK( pScore != nullptr );
 //        CHECK( doc.get_pointer_to_imo(4L) == pScore );
 //    }
 
@@ -492,7 +492,7 @@ SUITE(DocumentTest)
 
         //cout << m_pDoc->get_checkpoint_data();
         pImo = m_pDoc->get_pointer_to_imo(121L);
-        CHECK( pImo == NULL );
+        CHECK( pImo == nullptr );
         pImo = m_pDoc->get_pointer_to_imo(243L);
         CHECK( pImo->is_note() );
     }

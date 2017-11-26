@@ -51,7 +51,7 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
     , m_pParentLayouter(pParent)
     , m_libraryScope(libraryScope)
     , m_pStyles(pStyles)
-    , m_pItemMainBox(NULL)
+    , m_pItemMainBox(nullptr)
     , m_pItem(pItem)
     , m_fAddShapesToModel(fAddShapesToModel)
 {
@@ -61,12 +61,12 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
 // constructor for DocumentLayouter
 Layouter::Layouter(LibraryScope& libraryScope)
     : m_fIsLayouted(false)
-    , m_pGModel(NULL)
-    , m_pParentLayouter(NULL)
+    , m_pGModel(nullptr)
+    , m_pParentLayouter(nullptr)
     , m_libraryScope(libraryScope)
-    , m_pStyles(NULL)
-    , m_pItemMainBox(NULL)
-    , m_pItem(NULL)
+    , m_pStyles(nullptr)
+    , m_pItemMainBox(nullptr)
+    , m_pItem(nullptr)
 {
 }
 

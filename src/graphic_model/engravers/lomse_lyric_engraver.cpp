@@ -53,7 +53,7 @@ namespace lomse
 LyricEngraver::LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                              InstrumentEngraver* pInstrEngrv)
     : AuxRelObjEngraver(libraryScope, pScoreMeter)
-    , m_pLyricsShape(NULL)
+    , m_pLyricsShape(nullptr)
     , m_pInstrEngrv(pInstrEngrv)
 {
 }
@@ -75,7 +75,7 @@ void LyricEngraver::set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(p
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
     m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
@@ -90,7 +90,7 @@ void LyricEngraver::set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
     m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
@@ -105,7 +105,7 @@ void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
-    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
+    ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
     m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
@@ -122,7 +122,7 @@ int LyricEngraver::create_shapes(Color color)
         ImoLyric* pLyric = dynamic_cast<ImoLyric*>(it->first);
         GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(it->second);
 
-        GmoShapeNote* pNextNoteShape = NULL;
+        GmoShapeNote* pNextNoteShape = nullptr;
         list< pair<ImoLyric*, GmoShape*> >::iterator nextIt = it;
         ++nextIt;
         if (nextIt != m_lyrics.end())
@@ -158,7 +158,7 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
                                               m_libraryScope);
 
     //create shapes for syllables and elision symbols and compute its total width
-    ImoStyle* pStyle = NULL;
+    ImoStyle* pStyle = nullptr;
     Color color;
     GmoShape* pSyllableShape;
     LUnits syllablesWidth = 0;
@@ -170,7 +170,7 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
         const string& text = pText->get_syllable_text();
         const string& language = pText->get_syllable_language();
         pStyle = pText->get_syllable_style();
-        if (pStyle == NULL)
+        if (pStyle == nullptr)
             pStyle = m_pMeter->get_style_info("Lyrics");
         color = pStyle->color();
 

@@ -385,7 +385,7 @@ protected:
 
     void add_name()
     {
-        start_element("name", NULL);
+        start_element("name", nullptr);
         close_start_tag();
         m_source << m_pObj->get_name();
         end_element(k_in_same_line);
@@ -411,7 +411,7 @@ protected:
 
         if (m_pObj->get_float_property(ImoStyle::k_font_size, &rValue))
         {
-            start_element("font-size", NULL);
+            start_element("font-size", nullptr);
             close_start_tag();
             m_source << rValue << "pt";
             end_element(k_in_same_line);
@@ -518,7 +518,7 @@ protected:
 
     void create_string_element(const string& tag, const string& value)
     {
-        start_element(tag, NULL);
+        start_element(tag, nullptr);
         close_start_tag();
         m_source << value;
         end_element(k_in_same_line);
@@ -526,7 +526,7 @@ protected:
 
     void create_float_element(const string& tag, float value)
     {
-        start_element(tag, NULL);
+        start_element(tag, nullptr);
         close_start_tag();
         m_source << value;
         end_element(k_in_same_line);
@@ -534,7 +534,7 @@ protected:
 
     void create_lunits_element(const string& tag, LUnits value)
     {
-        start_element(tag, NULL);
+        start_element(tag, nullptr);
         close_start_tag();
         m_source << value;
         end_element(k_in_same_line);
@@ -542,7 +542,7 @@ protected:
 
     void create_int_element(const string& tag, int value)
     {
-        start_element(tag, NULL);
+        start_element(tag, nullptr);
         close_start_tag();
         m_source << value;
         end_element(k_in_same_line);
@@ -550,7 +550,7 @@ protected:
 
     void create_color_element(const string& tag, Color color)
     {
-        start_element(tag, NULL);
+        start_element(tag, nullptr);
         close_start_tag();
 
         m_source << LmdExporter::color_to_ldp(color);
@@ -560,7 +560,7 @@ protected:
 
     void create_font_style(int value)
     {
-        start_element("font-style", NULL);
+        start_element("font-style", nullptr);
         close_start_tag();
 
         if (value == ImoStyle::k_font_style_normal)
@@ -575,7 +575,7 @@ protected:
 
     void create_font_weight(int value)
     {
-        start_element("font-weight", NULL);
+        start_element("font-weight", nullptr);
         close_start_tag();
 
         if (value == ImoStyle::k_font_weight_normal)
@@ -590,7 +590,7 @@ protected:
 
     void create_text_decoration(int value)
     {
-        start_element("text-decoration", NULL);
+        start_element("text-decoration", nullptr);
         close_start_tag();
 
         if (value == ImoStyle::k_decoration_none)
@@ -609,7 +609,7 @@ protected:
 
     void create_vertical_align(int value)
     {
-        start_element("vertical-align", NULL);
+        start_element("vertical-align", nullptr);
         close_start_tag();
 
         if (value == ImoStyle::k_valign_baseline)
@@ -636,7 +636,7 @@ protected:
 
     void create_text_align(int value)
     {
-        start_element("text-align", NULL);
+        start_element("text-align", nullptr);
         close_start_tag();
 
         if (value == ImoStyle::k_align_left)
@@ -1001,7 +1001,7 @@ protected:
       //          nVoice++;
       //      }
       //      int nVoicesProcessed = 1;   //voice 0 is automatically processed
-		    //lmBarline* pBL = (lmBarline*)NULL;
+		    //lmBarline* pBL = (lmBarline*)nullptr;
       //      bool fGoBack = false;
 		    //TimeUnits rTime = 0.0;
       //      while (true)
@@ -1101,7 +1101,7 @@ protected:
 
     void add_pitch()
     {
-        start_element("pitch", NULL);
+        start_element("pitch", nullptr);
         close_start_tag();
         static const string sNoteName[7] = { "c",  "d", "e", "f", "g", "a", "b" };
         static const string sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
@@ -1242,7 +1242,7 @@ protected:
 
     string generate_ldp()
     {
-        start_element("ldpmusic", NULL);
+        start_element("ldpmusic", nullptr);
         close_start_tag();
 
         LdpExporter exporter;
@@ -1554,7 +1554,7 @@ protected:
         {
 //            m_source << " p" << (m_pObj->get_staff() + 1);
             //m_source << "<staff>" << (m_pObj->get_staff() + 1) << "</staff>";
-            start_element("staff", NULL);
+            start_element("staff", nullptr);
             close_start_tag();
             m_source << (m_pObj->get_staff() + 1);
             end_element(k_in_same_line);
@@ -1830,7 +1830,7 @@ void LmdGenerator::decrement_indent()
 //---------------------------------------------------------------------------------------
 void LmdGenerator::add_duration(stringstream& source, int noteType, int dots)
 {
-    start_element("type", NULL);
+    start_element("type", nullptr);
     close_start_tag();
     switch(noteType)
     {

@@ -48,10 +48,10 @@ namespace lomse
 //=======================================================================================
 SelectionSet::SelectionSet(Document* pDoc)
     : m_pValidator( LOMSE_NEW SelectionValidator() )
-    , m_pMasterCollection(NULL)
-    , m_pCollection(NULL)
+    , m_pMasterCollection(nullptr)
+    , m_pCollection(nullptr)
     , m_fValid(true)
-    , m_pGModel(NULL)
+    , m_pGModel(nullptr)
     , m_pDoc(pDoc)
 {
 }
@@ -90,8 +90,8 @@ void SelectionSet::ensure_set_is_valid()
             m_gmos.clear();
             m_imos.clear();
             delete m_pCollection;
-            m_pCollection = NULL;
-            m_pMasterCollection = NULL;
+            m_pCollection = nullptr;
+            m_pMasterCollection = nullptr;
             m_fValid = true;
 
             list<ImoId>::iterator it = m_ids.begin();
@@ -136,14 +136,14 @@ void SelectionSet::add(ImoId id, GraphicModel* pGM)
     list<ImoId>::iterator it = std::find(m_ids.begin(), m_ids.end(), id);
     if (it == m_ids.end())
     {
-        if (pGM != NULL && pGM == m_pGModel)
+        if (pGM != nullptr && pGM == m_pGModel)
         {
             add( m_pGModel->get_main_shape_for_imo(id) );
         }
         else
         {
             m_fValid = false;
-            if (pGM != NULL)        //in some UnitTest there is no GM
+            if (pGM != nullptr)        //in some UnitTest there is no GM
                 m_pGModel = pGM;
             m_ids.push_back(id);
         }
@@ -227,8 +227,8 @@ void SelectionSet::clear()
     m_imos.clear();
     m_ids.clear();
     delete m_pCollection;
-    m_pCollection = NULL;
-    m_pMasterCollection = NULL;
+    m_pCollection = nullptr;
+    m_pMasterCollection = nullptr;
     m_fValid = true;
 }
 
@@ -265,7 +265,7 @@ list<ImoId> SelectionSet::filter_notes_rests()
 
     list<ImoId> notes;
     ColStaffObjs* pCollection = get_staffobjs_collection();
-    if (pCollection != NULL)
+    if (pCollection != nullptr)
     {
         ColStaffObjsIterator it;
         for (it = pCollection->begin(); it != pCollection->end(); ++it)
@@ -359,11 +359,11 @@ void SelectionSet::get_start_end_note_rests(ImoNoteRest** ppStart,
 {
     ensure_set_is_valid();
 
-    ImoNoteRest* pStart = NULL;
-    ImoNoteRest* pEnd = NULL;
+    ImoNoteRest* pStart = nullptr;
+    ImoNoteRest* pEnd = nullptr;
 
     ColStaffObjs* pCollection = get_staffobjs_collection();
-    if (pCollection != NULL)
+    if (pCollection != nullptr)
     {
         ColStaffObjsIterator it;
         for (it = pCollection->begin(); it != pCollection->end(); ++it)
@@ -416,7 +416,7 @@ bool SelectionValidator::is_valid_to_add_tie(SelectionSet* pSelection,
                                            ImoNote** ppEndNote)
 {
     //Returns TRUE if current selection is valid for adding a tie.
-    //If valid, returns pointers to start and end notes, if not NULL parameters received
+    //If valid, returns pointers to start and end notes, if not nullptr parameters received
 
 
     //Conditions to be valid:
@@ -424,11 +424,11 @@ bool SelectionValidator::is_valid_to_add_tie(SelectionSet* pSelection,
     //   2. If condition 1 is true, the next note must also be in the selection
 
     bool fValid = false;
-    ImoNote* pStart = NULL;
-    ImoNote* pEnd = NULL;
+    ImoNote* pStart = nullptr;
+    ImoNote* pEnd = nullptr;
 
     ColStaffObjs* pCollection = pSelection->get_staffobjs_collection();
-    if (pCollection == NULL)
+    if (pCollection == nullptr)
         return false;
 
     ColStaffObjsIterator it;
@@ -498,12 +498,12 @@ bool SelectionValidator::is_valid_to_add_tuplet(SelectionSet* pSelection)
     //      in the same voice.
 
     bool fValid = true;
-    ImoNoteRest* pStart = NULL;
+    ImoNoteRest* pStart = nullptr;
     int nNumNotes = 0;
     int nVoice;
 
     ColStaffObjs* pCollection = pSelection->get_staffobjs_collection();
-    if (pCollection == NULL)
+    if (pCollection == nullptr)
         return false;
 
     ColStaffObjsIterator it;
@@ -569,16 +569,16 @@ bool SelectionValidator::is_valid_for_join_beam(SelectionSet* pSelection)
     //   4. If beamed, all selected note/rest must not be in the same beam
 
     bool fValid = true;
-    ImoNoteRest* pStart = NULL;
+    ImoNoteRest* pStart = nullptr;
 
     int nNumNotes = 0;
     int nVoice;
-    ImoNoteRest* pLast = NULL;
+    ImoNoteRest* pLast = nullptr;
     bool fAllBeamed = true;     //assume that all are beamed in the same beam
-    ImoBeam* pCurBeam = NULL;
+    ImoBeam* pCurBeam = nullptr;
 
     ColStaffObjs* pCollection = pSelection->get_staffobjs_collection();
-    if (pCollection == NULL)
+    if (pCollection == nullptr)
         return false;
 
     ColStaffObjsIterator it;
@@ -633,7 +633,7 @@ bool SelectionValidator::is_valid_for_toggle_stem(SelectionSet* pSelection)
     //It is valid if there is at least a note with stem
 
     ColStaffObjs* pCollection = pSelection->get_staffobjs_collection();
-    if (pCollection == NULL)
+    if (pCollection == nullptr)
         return false;
 
     ColStaffObjsIterator it;

@@ -82,7 +82,7 @@ SUITE(SystemCursorTest)
         StaffObjsCursor cursor(pScore);
 
         CHECK( cursor.get_num_instruments() == 1 );
-        CHECK( cursor.get_clef_for_instr_staff(0, 0) == NULL );
+        CHECK( cursor.get_clef_for_instr_staff(0, 0) == nullptr );
         CHECK( cursor.get_key_type_for_instr_staff(0, 0) == k_key_undefined );
     }
 
@@ -100,10 +100,10 @@ SUITE(SystemCursorTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         CHECK( cursor.get_num_instruments() == 2 );
-        CHECK( cursor.get_clef_for_instr_staff(0, 0) == NULL );
-        CHECK( cursor.get_clef_for_instr_staff(0, 1) == NULL );
-        CHECK( cursor.get_clef_for_instr_staff(1, 0) == NULL );
-        CHECK( cursor.get_clef_for_instr_staff(1, 1) == NULL );
+        CHECK( cursor.get_clef_for_instr_staff(0, 0) == nullptr );
+        CHECK( cursor.get_clef_for_instr_staff(0, 1) == nullptr );
+        CHECK( cursor.get_clef_for_instr_staff(1, 0) == nullptr );
+        CHECK( cursor.get_clef_for_instr_staff(1, 1) == nullptr );
         CHECK( cursor.get_key_type_for_instr_staff(0, 0) == k_key_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(1, 0) == k_key_undefined );
@@ -324,7 +324,7 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to (n d4 e.)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( cursor.imo_object() );
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_note_type() == k_eighth );
@@ -347,12 +347,12 @@ SUITE(SystemCursorTest)
 
         cursor.go_back_to_saved_position();  //points to (key a)
         ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( cursor.imo_object() );
-        CHECK( pKey != NULL );
+        CHECK( pKey != nullptr );
 
         cursor.move_next();     //points to (n c4 q v2)
         cursor.move_next();     //points to (n d4 e.)
         ImoNote* pNote = dynamic_cast<ImoNote*>( cursor.imo_object() );
-        CHECK( pNote != NULL );
+        CHECK( pNote != nullptr );
         CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_note_type() == k_eighth );
@@ -371,7 +371,7 @@ SUITE(SystemCursorTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
 
-        CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
+        CHECK( cursor.get_time_signature_for_instrument(0) == nullptr );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, InitiallyTimeSignatureTwoInstr)
@@ -388,8 +388,8 @@ SUITE(SystemCursorTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         CHECK( cursor.get_num_instruments() == 2 );
-        CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
-        CHECK( cursor.get_time_signature_for_instrument(1) == NULL );
+        CHECK( cursor.get_time_signature_for_instrument(0) == nullptr );
+        CHECK( cursor.get_time_signature_for_instrument(1) == nullptr );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, PrologUpdateTimeSignature)
@@ -407,7 +407,7 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to (n d4 e.)
 
         ImoTimeSignature* pTS = cursor.get_time_signature_for_instrument(0);
-        CHECK( pTS != NULL );
+        CHECK( pTS != nullptr );
         CHECK( pTS->get_top_number() == 2 );
         CHECK( pTS->get_bottom_number() == 4 );
     }

@@ -103,7 +103,7 @@ public:
             boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
         }
         delete m_pThread;
-        m_pThread = NULL;
+        m_pThread = nullptr;
     }
 
 };
@@ -126,7 +126,7 @@ public:
             boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
         }
         delete m_pThread;
-        m_pThread = NULL;
+        m_pThread = nullptr;
     }
 };
 
@@ -233,7 +233,7 @@ SUITE(ScorePlayerTest)
 
         SoundEventsTable* pTable = player.my_get_table();
 
-        CHECK( pTable != NULL );
+        CHECK( pTable != nullptr );
         CHECK( pTable->num_events() == 4 );
     }
 
@@ -256,15 +256,15 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoMidi)
     {
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
-        pLomse->set_notify_callback(NULL, MyScorePlayer::my_callback);
+        pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_imodoc()->get_content_item(0) );
-        MyScorePlayer player(m_libraryScope, NULL);
+        MyScorePlayer player(m_libraryScope, nullptr);
         PlayerNoGui gui;
         player.load_score(pScore, &gui);
-        player.do_play(0, 3, k_no_visual_tracking, 60L, NULL);
+        player.do_play(0, 3, k_no_visual_tracking, 60L, nullptr);
 
         CHECK( m_notifications.size() == 0 );
     }
@@ -272,7 +272,7 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_NoHighlight)
     {
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
-        pLomse->set_notify_callback(NULL, MyScorePlayer::my_callback);
+        pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
@@ -283,7 +283,7 @@ SUITE(ScorePlayerTest)
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_no_visual_tracking,
-                          k_no_countoff, 60L, NULL);
+                          k_no_countoff, 60L, nullptr);
         player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
@@ -306,7 +306,7 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_HighlightNote)
     {
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
-        pLomse->set_notify_callback(NULL, MyScorePlayer::my_callback);
+        pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
@@ -316,7 +316,7 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, WpDocument(spDoc), NULL, NULL) );
+        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, WpDocument(spDoc), nullptr, nullptr) );
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, inter.get());
         player.my_wait_for_termination();
@@ -374,7 +374,7 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_HighlightChord)
     {
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
-        pLomse->set_notify_callback(NULL, MyScorePlayer::my_callback);
+        pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
@@ -384,7 +384,7 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, WpDocument(spDoc), NULL, NULL) );
+        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, WpDocument(spDoc), nullptr, nullptr) );
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, inter.get());
         player.my_wait_for_termination();
@@ -464,7 +464,7 @@ SUITE(ScorePlayerTest)
         CHECK( handler.event_received() == false );
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
-        player.play(k_no_visual_tracking, 60L, NULL);
+        player.play(k_no_visual_tracking, 60L, nullptr);
         player.my_wait_for_termination(); //AWARE: need to wait. Otherwise events arrive *after* CHECKs
 
         CHECK( handler.event_received() == true );
@@ -482,10 +482,10 @@ SUITE(ScorePlayerTest)
 //        ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_imodoc()->get_content_item(0) );
 //        MyMidiServer midi;
 //        MyScorePlayer player(m_libraryScope, &midi);
-//        player.load_score(pScore, NULL);
+//        player.load_score(pScore, nullptr);
 //        int nEvMax = player.my_get_table()->num_events() - 1;
 //        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
-//                          k_no_countoff, 60L, NULL);
+//                          k_no_countoff, 60L, nullptr);
 //
 //        std::list<int>& events = midi.my_get_events();
 //        std::list<int>::iterator it = events.begin();

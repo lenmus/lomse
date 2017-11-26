@@ -44,7 +44,7 @@ StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
     , m_numInstruments( pScore->get_num_instruments() )
     , m_numLines( pScore->get_staffobjs_table()->num_lines() )
     , m_fScoreIsEmpty( m_scoreIt.is_end() )
-    , m_pLastBarline(NULL)
+    , m_pLastBarline(nullptr)
 {
     initialize_clefs_keys_times(pScore);
 }
@@ -66,13 +66,13 @@ void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
     }
 
     m_clefs.reserve(m_numStaves);
-    m_clefs.assign(m_numStaves, (ColStaffObjsEntry*)NULL);     //GCC complains if NULL not casted
+    m_clefs.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
 
     m_keys.reserve(m_numStaves);
-    m_keys.assign(m_numStaves, (ColStaffObjsEntry*)NULL);
+    m_keys.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);
 
     m_times.reserve(m_numInstruments);
-    m_times.assign(m_numInstruments, (ColStaffObjsEntry*)NULL);
+    m_times.assign(m_numInstruments, (ColStaffObjsEntry*)nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ ImoClef* StaffObjsCursor::get_clef_for_instr_staff(int iInstr, int iStaff)
     if (pEntry)
         return dynamic_cast<ImoClef*>( pEntry->imo_object() );
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ int StaffObjsCursor::get_clef_type_for_instr_staff(int iInstr, int iStaff)
 ImoClef* StaffObjsCursor::get_applicable_clef()
 {
     if (m_fScoreIsEmpty)
-        return NULL;
+        return nullptr;
     else
         return get_clef_for_instr_staff( num_instrument(), staff() );
 }
@@ -185,14 +185,14 @@ ImoKeySignature* StaffObjsCursor::get_key_for_instr_staff(int iInstr, int iStaff
     if (pEntry)
         return dynamic_cast<ImoKeySignature*>( pEntry->imo_object() );
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
 ImoKeySignature* StaffObjsCursor::get_applicable_key()
 {
     if (m_fScoreIsEmpty)
-        return NULL;
+        return nullptr;
     else
         return get_key_for_instr_staff( num_instrument(), staff() );
 }
@@ -220,7 +220,7 @@ int StaffObjsCursor::get_key_type_for_instr_staff(int iInstr, int iStaff)
 ImoTimeSignature* StaffObjsCursor::get_applicable_time_signature()
 {
     if (m_fScoreIsEmpty)
-        return NULL;
+        return nullptr;
     else
         return get_time_signature_for_instrument( num_instrument() );
 }
@@ -232,7 +232,7 @@ ImoTimeSignature* StaffObjsCursor::get_time_signature_for_instrument(int iInstr)
     if (pEntry)
         return dynamic_cast<ImoTimeSignature*>( pEntry->imo_object() );
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

@@ -78,7 +78,7 @@ bool ZipInputStream::open_zip_archive(const std::string& filelocator)
         return false;
 
     m_uzFile = unzOpen(path.c_str());
-    return (m_uzFile != NULL);
+    return (m_uzFile != nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void ZipInputStream::close_zip_archive()
     {
         close_current_entry();
         unzClose(m_uzFile);
-        m_uzFile = NULL;
+        m_uzFile = nullptr;
     }
     m_curEntry.fEOF = true;
 }
@@ -183,7 +183,7 @@ bool ZipInputStream::get_current_entry_info(ZipEntryInfo& info)
     char filename[256];
 
     if (UNZ_OK != unzGetCurrentFileInfo(m_uzFile, &uzfi, filename,
-                                        255, NULL, 0, comment, 255))
+                                        255, nullptr, 0, comment, 255))
         return false;
 
     // copy across
@@ -400,7 +400,7 @@ unsigned char* ZipInputStream::get_as_string()
 {
     unsigned char* buffer;
     long size = get_size();
-    if ((buffer = LOMSE_NEW unsigned char[size+1]) == NULL)
+    if ((buffer = LOMSE_NEW unsigned char[size+1]) == nullptr)
     {
         throw std::runtime_error("[ZipInputStream::get_as_string] error allocating memory for zip file");
     }

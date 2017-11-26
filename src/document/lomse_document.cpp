@@ -147,8 +147,8 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_reporter(reporter)
     , m_docScope(reporter)
     , m_pIdAssigner( m_docScope.id_assigner() )
-    , m_pIModel(NULL)
-    , m_pImoDoc(NULL)
+    , m_pIModel(nullptr)
+    , m_pImoDoc(nullptr)
     , m_flags(k_dirty)
     , m_modified(0)
 {
@@ -172,7 +172,7 @@ void Document::initialize()
     }
 
     m_flags = k_dirty;
-    m_pImoDoc = NULL;
+    m_pImoDoc = nullptr;
     m_modified = 0;
 }
 
@@ -204,7 +204,7 @@ int Document::from_file(const string& filename, int format)
     if (m_pIModel)
     {
         m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-        if (m_pImoDoc == NULL)
+        if (m_pImoDoc == nullptr)
             create_empty();
     }
     else
@@ -250,8 +250,8 @@ int Document::from_checkpoint(const string& data)
 {
     //delete old internal model
     delete m_pIModel;
-    m_pIModel = NULL;
-    m_pImoDoc = NULL;
+    m_pIModel = nullptr;
+    m_pImoDoc = nullptr;
     m_flags = k_dirty;
 
     //reset IdAssigner
@@ -310,7 +310,7 @@ int Document::from_input(LdpReader& reader)
     {
         //this avoids programs crashes when a document is malformed but
         //will produce memory lekeages
-        m_pIModel = NULL;
+        m_pIModel = nullptr;
         create_empty();
         return 0;
     }
@@ -409,9 +409,9 @@ Compiler* Document::get_compiler_for_format(int format)
             return Injector::inject_MnxCompiler(m_libraryScope, this);
 
         default:
-            return NULL;
+            return nullptr;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -452,10 +452,10 @@ ImoObj* Document::create_object_from_ldp(const string& source, ostream& reporter
         }
         catch (...)
         {
-            return NULL;
+            return nullptr;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ ImoTuplet* Document::add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
     {
         reporter << "exception caught";
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -546,8 +546,8 @@ void Document::delete_relation(ImoRelObj* pRO)
     if (pRO->is_tie())
     {
         ImoTie* pTie = static_cast<ImoTie*>(pRO);
-        pTie->get_start_note()->set_tie_next(NULL);
-        pTie->get_end_note()->set_tie_prev(NULL);
+        pTie->get_start_note()->set_tie_next(nullptr);
+        pTie->get_end_note()->set_tie_prev(nullptr);
     }
 
     //procedure for all

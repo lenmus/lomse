@@ -82,7 +82,7 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
             throw runtime_error("[ViewFactory::create_view] invalid view type");
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -94,7 +94,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_libraryScope(libraryScope)
     , m_pDrawer(pDrawer)
     , m_options()
-    , m_pRenderBuf(NULL)
+    , m_pRenderBuf(nullptr)
 
     , m_expand(0.0)
     , m_gamma(1.0)
@@ -102,8 +102,8 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_transform()
     , m_vxOrg(0)
     , m_vyOrg(0)
-    , m_pCaret(NULL)
-    , m_pCursor(NULL)
+    , m_pCaret(nullptr)
+    , m_pCursor(nullptr)
     , m_fTempoLineVisible(false)
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
@@ -215,7 +215,7 @@ void GraphicView::delete_all_handlers()
         it = m_handlers.erase(it);
         delete pHandler;
     }
-    m_pOverlaysGenerator->set_handlers_owner(NULL);
+    m_pOverlaysGenerator->set_handlers_owner(nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -607,7 +607,7 @@ Handler* GraphicView::handlers_hit_test(LUnits x, LUnits y)
         if ((*it)->hit_test(x, y))
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

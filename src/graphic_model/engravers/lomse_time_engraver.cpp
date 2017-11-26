@@ -134,7 +134,7 @@ void TimeEngraver::create_digits(int digits, GmoShape* pShape[])
     else
     {
         pShape[0] = create_digit(digits);
-        pShape[1] = NULL;
+        pShape[1] = nullptr;
     }
 }
 

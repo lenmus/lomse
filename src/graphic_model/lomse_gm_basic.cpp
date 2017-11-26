@@ -63,7 +63,7 @@ GmoObj::GmoObj(int objtype, ImoObj* pCreatorImo)
     , m_size(0.0f, 0.0f)
     , m_flags(k_dirty)
     , m_pCreatorImo(pCreatorImo)
-    , m_pParentBox(NULL)
+    , m_pParentBox(nullptr)
 {
 }
 
@@ -349,7 +349,7 @@ GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
     if (i < get_num_boxes())
         return m_childBoxes[i];
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -393,7 +393,7 @@ GmoBoxDocPage* GmoBox::get_parent_box_page()
 GraphicModel* GmoBox::get_graphic_model()
 {
     GmoBox* pParent = get_parent_box();
-    return (pParent == NULL ? NULL : pParent->get_graphic_model());
+    return (pParent == nullptr ? nullptr : pParent->get_graphic_model());
 }
 
 //---------------------------------------------------------------------------------------
@@ -404,7 +404,7 @@ GmoShape* GmoBox::get_shape(int i)  //i = 0..n-1
     if (it != m_shapes.end())
         return *it;
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -576,7 +576,7 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
         }
         return this;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -682,7 +682,7 @@ ImoStyle* GmoBox::get_style()
         if (pImo)
             return pImo->get_style();
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -805,7 +805,7 @@ public:
 //            (!fSelectable && fFound) )
 //            return *it;
 //    }
-//    return NULL;
+//    return nullptr;
 //}
 
 
@@ -880,7 +880,7 @@ GmoShape* GmoBoxDocPage::get_first_shape_for_layer(int layer)
         if ((*it)->get_layer() == layer)
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -892,7 +892,7 @@ GmoShape* GmoBoxDocPage::find_shape_at(LUnits x, LUnits y)
         if ((*it)->hit_test(x, y))
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -904,7 +904,7 @@ GmoShape* GmoBoxDocPage::find_shape_for_object(ImoStaffObj* pSO)
         if ((*it)->was_created_by(pSO))
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -918,7 +918,7 @@ GmoObj* GmoBoxDocPage::hit_test(LUnits x, LUnits y)
     if (pBox)
 	    return pBox;
 
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -955,7 +955,7 @@ void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet* selection,
 //=======================================================================================
 GmoBoxDocument::GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo)
     : GmoBox(GmoObj::k_box_document, pCreatorImo)
-    , m_pLastPage(NULL)
+    , m_pLastPage(nullptr)
     , m_pGModel(pGModel)
 {
 }
@@ -963,7 +963,7 @@ GmoBoxDocument::GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo)
 //---------------------------------------------------------------------------------------
 GmoBoxDocPage* GmoBoxDocument::add_new_page()
 {
-    m_pLastPage = LOMSE_NEW GmoBoxDocPage(NULL);      //TODO creator imo?
+    m_pLastPage = LOMSE_NEW GmoBoxDocPage(nullptr);      //TODO creator imo?
     add_child_box(m_pLastPage);
     m_pLastPage->set_number(get_num_pages());
     return m_pLastPage;

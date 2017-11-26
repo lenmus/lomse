@@ -121,7 +121,7 @@ void SoundEventsTable::program_sounds_for_instruments()
             instr = pInfo->get_midi_program();
         }
         m_channels[iInstr] = channel;
-        store_event(0, SoundEvent::k_prog_instr, channel, instr, 0, 0, NULL, 0);
+        store_event(0, SoundEvent::k_prog_instr, channel, instr, 0, 0, nullptr, 0);
     }
 }
 
@@ -129,12 +129,12 @@ void SoundEventsTable::program_sounds_for_instruments()
 void SoundEventsTable::create_events()
 {
     StaffObjsCursor cursor(m_pScore);
-    ImoStaffObj* pSO = NULL;
+    ImoStaffObj* pSO = nullptr;
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
     rAnacrusisMissingTime = cursor.anacrusis_missing_time();
-    ImoKeySignature* pKey = NULL;
+    ImoKeySignature* pKey = nullptr;
     reset_accidentals(pKey);
 
     //iterate over the collection to create the MIDI events
@@ -286,7 +286,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
 {
     ImoStaffObj* pSO = cursor.get_staffobj();
     ImoTimeSignature* pTS = cursor.get_applicable_time_signature();
-    ImoNote* pNote = NULL;
+    ImoNote* pNote = nullptr;
     int step = 0;
     int pitch = 0;
     if (pSO->is_note())
@@ -374,7 +374,7 @@ void SoundEventsTable::close_table()
     TimeUnits maxTime = 0.0;
     if (m_events.size() > 0)
         maxTime = TimeUnits(m_events.back()->DeltaTime);
-    store_event(maxTime, SoundEvent::k_end_of_score, 0, 0, 0, 0, NULL, 0);
+    store_event(maxTime, SoundEvent::k_end_of_score, 0, 0, 0, 0, nullptr, 0);
 }
 
 //---------------------------------------------------------------------------------------

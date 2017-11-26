@@ -62,11 +62,11 @@ class MyInlinesContainerLayouter : public InlinesContainerLayouter
 public:
     MyInlinesContainerLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                         LibraryScope& libraryScope, ImoStyles* pStyles)
-        : InlinesContainerLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
+        : InlinesContainerLayouter(pImo, nullptr, pGModel, libraryScope, pStyles)
     {
     }
     MyInlinesContainerLayouter(LibraryScope& libraryScope, LineReferences& refs)
-        : InlinesContainerLayouter(NULL, NULL, NULL, libraryScope, NULL)
+        : InlinesContainerLayouter(nullptr, nullptr, nullptr, libraryScope, nullptr)
     {
         m_lineRefs = refs;
     }
@@ -139,8 +139,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -169,8 +169,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -207,8 +207,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -254,8 +254,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -300,8 +300,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -347,8 +347,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -393,8 +393,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -440,8 +440,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -469,8 +469,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -609,8 +609,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
@@ -672,8 +672,8 @@ SUITE(InlinesContainerLayouterTest)
         GraphicModel model;
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent box(NULL);
+        GmoBoxDocPage page(nullptr);
+        GmoBoxDocPageContent box(nullptr);
         box.set_owner_box(&page);
 
         MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);

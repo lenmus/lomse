@@ -49,7 +49,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     : m_libScope(libScope)
-    , m_pThread(NULL)
+    , m_pThread(nullptr)
     , m_pMidi(pMidi)
     , m_fPaused(false)
     , m_fShouldStop(false)
@@ -57,17 +57,17 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_fPostEvents(true)
     , m_fQuit(false)
     , m_fFinalEventSent(false)
-    , m_pScore(NULL)
-    , m_pTable(NULL)
+    , m_pScore(nullptr)
+    , m_pTable(nullptr)
     , m_MtrChannel(9)
     , m_MtrInstr(0)
     , m_MtrTone1(60)
     , m_MtrTone2(77)
     , m_fVisualTracking(false)
     , m_nMM(60)
-    , m_pInteractor(NULL)
-    , m_pPlayerGui(NULL)
-    , m_pMtr(NULL)
+    , m_pInteractor(nullptr)
+    , m_pPlayerGui(nullptr)
+    , m_pMtr(nullptr)
 {
 }
 
@@ -205,7 +205,7 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
     {
         if (pInteractor && !m_fPostEvents)
             pInteractor->enable_forced_view_updates(false);
-        fVisualTracking &= (pInteractor != NULL);
+        fVisualTracking &= (pInteractor != nullptr);
         do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
     }
     catch (boost::thread_interrupted&)
@@ -263,7 +263,7 @@ void ScorePlayer::stop()
         }
         LOMSE_LOG_DEBUG(Logger::k_score_player, "Delete thread");
         delete m_pThread;
-        m_pThread = NULL;
+        m_pThread = nullptr;
         m_fShouldStop = false;
     }
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
@@ -567,7 +567,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
-                if (fVisualTracking && events[i]->pSO != NULL)
+                if (fVisualTracking && events[i]->pSO != nullptr)
                     pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO->get_id());
 
                 fMtrOn = true;

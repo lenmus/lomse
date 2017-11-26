@@ -89,7 +89,7 @@ public:
     DocCommandTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
     }
 
@@ -175,7 +175,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Add note" );
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( pSC->is_at_end_of_staff() == true );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
 
@@ -214,7 +214,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Add note" );
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( pSC->is_at_end_of_staff() == true );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
 
@@ -1191,7 +1191,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Add tie" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
         CHECK( pNote2->is_tied_prev() == true );
@@ -1236,7 +1236,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Add tuplet" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->is_in_tuplet() == true );
@@ -1307,7 +1307,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->is_in_tuplet() == false );
@@ -1319,7 +1319,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->is_in_tuplet() == true );
@@ -1355,7 +1355,7 @@ SUITE(DocCommandTest)
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Break beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_A );
@@ -1393,7 +1393,7 @@ SUITE(DocCommandTest)
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Break beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_F );
@@ -1445,7 +1445,7 @@ SUITE(DocCommandTest)
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Break beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_A );
@@ -1498,7 +1498,7 @@ SUITE(DocCommandTest)
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Break beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -1569,7 +1569,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -1623,7 +1623,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change accidentals" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote->get_notated_accidentals() == k_sharp );
@@ -1698,7 +1698,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change barline type" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( pImo == *cursor );
         ImoBarline* pBar = static_cast<ImoBarline*>(pImo);
@@ -1727,7 +1727,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( pImo == *cursor );
         ImoBarline* pBar = static_cast<ImoBarline*>(pImo);
@@ -1735,7 +1735,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_barline() == true );
         CHECK( pImo == *cursor );
         pBar = static_cast<ImoBarline*>(pImo);
@@ -1764,7 +1764,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Toggle note stem" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pImo == *cursor );
         ImoNote* pNote = static_cast<ImoNote*>(pImo);
@@ -1793,7 +1793,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pImo == *cursor );
         ImoNote* pNote = static_cast<ImoNote*>(pImo);
@@ -1801,7 +1801,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pImo == *cursor );
         pNote = static_cast<ImoNote*>(pImo);
@@ -1832,7 +1832,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Change dots" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote->get_dots() == 1 );
@@ -1926,7 +1926,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Delete score" );
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
     }
 
@@ -1948,14 +1948,14 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 2 );
         CHECK( m_pDoc->is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
 
         executer.redo(&cursor, &sel);
 
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
     }
 
@@ -1984,7 +1984,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Delete tuplet" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->is_in_tuplet() == false );
@@ -2018,7 +2018,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Delete beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->is_beamed() == false );
@@ -2055,7 +2055,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_beamed() == true );
@@ -2066,7 +2066,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_beamed() == false );
@@ -2107,7 +2107,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == false );
@@ -2119,7 +2119,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == true );
@@ -2134,7 +2134,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == false );
@@ -2186,7 +2186,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );      // f4
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == false );
@@ -2205,7 +2205,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );      // f4
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == true );
@@ -2223,7 +2223,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );      //f4
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_tied_next() == false );
@@ -2264,7 +2264,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Delete tuplet" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->is_in_tuplet() == false );
@@ -2468,7 +2468,7 @@ SUITE(DocCommandTest)
 
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
         CHECK( pCmd->get_name() == "Delete note" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_rest() == true );
         CHECK( m_pDoc->is_dirty() == true );
 
@@ -2495,7 +2495,7 @@ SUITE(DocCommandTest)
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
         //cout << cursor.dump_cursor();
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == 126L );
         CHECK( m_pDoc->is_dirty() == true );
@@ -2520,7 +2520,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n e4 e v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2563,7 +2563,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
         executer.undo(&cursor, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 e v1 p1 (beam 126 +))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2606,7 +2606,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n f5 s v1 p1 (beam 127 +f))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2650,7 +2650,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
         executer.undo(&cursor, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n g5 s v1 p1 (beam 127 ++))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2694,7 +2694,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(chord (n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2737,7 +2737,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n g4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2781,7 +2781,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n g4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2828,7 +2828,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -2880,7 +2880,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->is_at_end_of_staff() == true );
         cursor.move_prev();         //points to n e4 s
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n e4 s v1 p1)" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -3117,7 +3117,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_name() == "Insert staff objects" );
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( doc.is_dirty() == true );
 
         pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -3181,7 +3181,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
 
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( doc.is_dirty() == true );
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -3219,7 +3219,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note e4
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteE4->get_id() );
 
@@ -3230,13 +3230,13 @@ SUITE(DocCommandTest)
         CHECK ( pNoteC4->get_fpitch() == C4_FPITCH );
 
         executer.undo(&cursor, &sel);    //remove initial insertions
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         executer.redo(&cursor, &sel);    //insert again all staffobjs. Cursor points to end of score
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         executer.redo(&cursor, &sel);    //insert note d4. Cursor points to end of score
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
@@ -3263,7 +3263,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_name() == "Insert clef" );
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
         CHECK( doc.is_dirty() == true );
 
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -3345,15 +3345,15 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
         executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note c4
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteC4->get_id() );
 
         executer.undo(&cursor, &sel);    //remove note c4. Cursor points to end of score
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         executer.redo(&cursor, &sel);    //insert note c4. Cursor points to end of score
-        CHECK( *cursor == NULL );
+        CHECK( *cursor == nullptr );
 
         executer.redo(&cursor, &sel);    //insert note d4. Cursor points to note c4
         pNoteC4 = *cursor;
@@ -3442,7 +3442,7 @@ SUITE(DocCommandTest)
         //cout << "name: '" << pCmd->get_name() << "'" << endl;
         CHECK( doc.is_dirty() == true );
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -3484,7 +3484,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -3527,7 +3527,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
 
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1 p1)" );
         //cout << "cursor: " << (*cursor)->to_string() << endl;
@@ -3623,7 +3623,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Join beam" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -3678,7 +3678,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Join beam and change dots" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -3734,7 +3734,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -3790,7 +3790,7 @@ SUITE(DocCommandTest)
         executer.redo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->get_step() == k_step_G );
@@ -3850,7 +3850,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Tie notes and change dots" );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
         CHECK( pNote2->is_tied_prev() == true );
@@ -3899,7 +3899,7 @@ SUITE(DocCommandTest)
 //        cout << pTable->dump();
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
         CHECK( pNote2->is_tied_prev() == false );
@@ -3949,7 +3949,7 @@ SUITE(DocCommandTest)
 //        cout << pTable->dump();
 
         CHECK( doc.is_dirty() == true );
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         pNote2 = static_cast<ImoNote*>( *cursor );
         CHECK( pNote2->is_tied_prev() == true );
@@ -4124,7 +4124,7 @@ SUITE(DocCommandTest)
 //        cout << cursor.dump_cursor();
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( cursor.get_pointee_id() == 126L );
@@ -4181,7 +4181,7 @@ SUITE(DocCommandTest)
 //        cout << sel.dump_selection() << endl;
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == 126L );
 
@@ -4203,7 +4203,7 @@ SUITE(DocCommandTest)
         //cout << sel.dump_selection() << endl;
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == 126L );
 
@@ -4267,7 +4267,7 @@ SUITE(DocCommandTest)
 //        cout << sel.dump_selection() << endl;
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == idNote1 );
 
@@ -4289,7 +4289,7 @@ SUITE(DocCommandTest)
 //        cout << sel.dump_selection() << endl;
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == idNote1 );
 
@@ -4342,7 +4342,7 @@ SUITE(DocCommandTest)
 //        cout << sel.dump_selection() << endl;
 
         //cursor has not moved
-        CHECK( *cursor != NULL );
+        CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_note() == true );
         CHECK( cursor.get_pointee_id() == idNote1 );
 

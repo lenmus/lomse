@@ -100,7 +100,7 @@ InternalModel* MnxCompiler::compile_file(const std::string& filename)
     if (root)
         return compile_parsed_tree(root);
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

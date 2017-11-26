@@ -68,7 +68,6 @@ protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
     void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
     void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
-    void error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo);
 };
 
 

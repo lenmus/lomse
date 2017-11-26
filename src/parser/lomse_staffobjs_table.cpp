@@ -79,8 +79,8 @@ ColStaffObjs::ColStaffObjs()
     , m_numEntries(0)
     , m_rMissingTime(0.0)
     , m_minNoteDuration(0.0f)   //LOMSE_NO_NOTE_DURATION
-    , m_pFirst(NULL)
-    , m_pLast(NULL)
+    , m_pFirst(nullptr)
+    , m_pLast(nullptr)
 {
 }
 
@@ -126,14 +126,14 @@ void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
         //first entry
         m_pFirst = pEntry;
         m_pLast = pEntry;
-        pEntry->set_prev( NULL );
-        pEntry->set_next( NULL );
+        pEntry->set_prev( nullptr );
+        pEntry->set_next( nullptr );
         return;
     }
 
     //insert in list in order
     ColStaffObjsEntry* pCurrent = m_pLast;
-    while (pCurrent != NULL)
+    while (pCurrent != nullptr)
     {
         if (is_lower_entry(pEntry, pCurrent))
             pCurrent = pCurrent->get_prev();
@@ -144,7 +144,7 @@ void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
             pEntry->set_prev( pCurrent );
             pEntry->set_next( pNext );
             pCurrent->set_next( pEntry );
-            if (pNext == NULL)
+            if (pNext == nullptr)
                 m_pLast = pEntry;
             else
                 pNext->set_prev( pEntry );
@@ -153,7 +153,7 @@ void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
     }
 
     //it is the first one
-    pEntry->set_prev( NULL );
+    pEntry->set_prev( nullptr );
     pEntry->set_next( m_pFirst );
     m_pFirst->set_prev( pEntry );
     m_pFirst = pEntry;
@@ -228,18 +228,18 @@ void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
     ColStaffObjsEntry* pPrev = pEntry->get_prev();
     ColStaffObjsEntry* pNext = pEntry->get_next();
     delete pEntry;
-    if (pPrev == NULL)
+    if (pPrev == nullptr)
     {
         //removing the head of the list
         m_pFirst = pNext;
         if (pNext)
-            pNext->set_prev(NULL);
+            pNext->set_prev(nullptr);
     }
-    else if (pNext == NULL)
+    else if (pNext == nullptr)
     {
         //removing the tail of the list
         m_pLast = pPrev;
-        pPrev->set_next(NULL);
+        pPrev->set_next(nullptr);
     }
     else
     {
@@ -259,7 +259,7 @@ ColStaffObjsEntry* ColStaffObjs::find_entry_for(ImoStaffObj* pSO)
         if ((*it)->imo_object() == pSO)
             return *it;
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -275,10 +275,10 @@ void ColStaffObjs::sort_table()
     // * in-place sort (does not require extra memory)
 
     ColStaffObjsEntry* pUnsorted = m_pFirst;
-    m_pFirst = NULL;
-    m_pLast = NULL;
+    m_pFirst = nullptr;
+    m_pLast = nullptr;
 
-    while (pUnsorted != NULL)
+    while (pUnsorted != nullptr)
     {
         ColStaffObjsEntry* pCurrent = pUnsorted;
 
@@ -344,7 +344,7 @@ void ColStaffObjsBuilderEngine::create_table()
 void ColStaffObjsBuilderEngine::collect_anacrusis_info()
 {
     ColStaffObjsIterator it = m_pColStaffObjs->begin();
-    ImoTimeSignature* pTS = NULL;
+    ImoTimeSignature* pTS = nullptr;
     TimeUnits rTime = -1.0;
 
     //find time signature
@@ -360,7 +360,7 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
             return;
         ++it;
     }
-    if (pTS == NULL)
+    if (pTS == nullptr)
         return;
 
     // find first barline
@@ -768,7 +768,7 @@ ImoNote* ScoreAlgorithms::find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
     //define a forwards iterator and find start note
     ColStaffObjsIterator it = pColStaffObjs->find(pStartNote);
     if (it == pColStaffObjs->end())
-        return NULL;    //pStartNote not found ??????
+        return nullptr;    //pStartNote not found ??????
 
     int instr = (*it)->num_instrument();
 
@@ -788,15 +788,15 @@ ImoNote* ScoreAlgorithms::find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
                 else
                     // a note in the same voice with different pitch found.
                     // Imposible to tie
-                    return NULL;
+                    return nullptr;
             }
             else
                 // a rest in the same voice found. Imposible to tie
-                return NULL;
+                return nullptr;
         }
         ++it;
     }
-    return NULL;        //no suitable note found
+    return nullptr;        //no suitable note found
 }
 
 //---------------------------------------------------------------------------------------
@@ -842,7 +842,7 @@ ImoNoteRest* ScoreAlgorithms::find_noterest_at(ImoScore* pScore,
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

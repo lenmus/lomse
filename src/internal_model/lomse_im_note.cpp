@@ -93,7 +93,7 @@ bool ImoNoteRest::is_end_of_beam()
 //---------------------------------------------------------------------------------------
 bool ImoNoteRest::is_in_tuplet()
 {
-    return find_relation(k_imo_tuplet) != NULL;
+    return find_relation(k_imo_tuplet) != nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -204,8 +204,8 @@ ImoNote::ImoNote()
     , m_notated_acc(k_no_accidentals)
     , m_actual_acc(k_acc_not_computed)
     , m_stemDirection(k_stem_default)
-    , m_pTieNext(NULL)
-    , m_pTiePrev(NULL)
+    , m_pTieNext(nullptr)
+    , m_pTiePrev(nullptr)
 {
 }
 
@@ -218,8 +218,8 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_notated_acc(accidentals)
     , m_actual_acc(k_acc_not_computed)
     , m_stemDirection(stem)
-    , m_pTieNext(NULL)
-    , m_pTiePrev(NULL)
+    , m_pTieNext(nullptr)
+    , m_pTiePrev(nullptr)
 {
     m_nVoice = voice;
     m_staff = staff;
@@ -231,16 +231,16 @@ ImoNote::~ImoNote()
 {
     //if tied, inform the other note
     if (m_pTieNext)
-        m_pTieNext->get_end_note()->set_tie_prev(NULL);
+        m_pTieNext->get_end_note()->set_tie_prev(nullptr);
 
     if (m_pTiePrev)
-        m_pTiePrev->get_start_note()->set_tie_next(NULL);
+        m_pTiePrev->get_start_note()->set_tie_next(nullptr);
 }
 
 //---------------------------------------------------------------------------------------
 bool ImoNote::is_in_chord()
 {
-    return get_chord() != NULL;
+    return get_chord() != nullptr;
 }
 
 //---------------------------------------------------------------------------------------

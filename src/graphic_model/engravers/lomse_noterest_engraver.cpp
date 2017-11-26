@@ -60,10 +60,10 @@ NoterestEngraver::NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScor
                            ShapesStorage* pShapesStorage, int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pShapesStorage(pShapesStorage)
-    , m_pNoteRest(NULL)
-    , m_pNoteRestShape(NULL)
-    , m_pStartBeamShape(NULL)
-    , m_pEndBeamShape(NULL)
+    , m_pNoteRest(nullptr)
+    , m_pNoteRestShape(nullptr)
+    , m_pStartBeamShape(nullptr)
+    , m_pEndBeamShape(nullptr)
 {
 }
 

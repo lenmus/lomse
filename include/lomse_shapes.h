@@ -266,7 +266,7 @@ public:
                       , const UPoint& pos = UPoint(0.0f, 0.0f)    //top-left corner
                       , const USize& size = USize(0.0f, 0.0f)     //rectangle size
                       , LUnits radius = 0.0f                      //for rounded corners
-                      , ImoStyle* pStyle = NULL       //for line style & background color
+                      , ImoStyle* pStyle = nullptr       //for line style & background color
                      );
     virtual ~GmoShapeRectangle() {}
 

@@ -55,7 +55,7 @@ InlinesContainerLayouter::InlinesContainerLayouter(ImoContentObj* pItem, Layoute
     , m_libraryScope(libraryScope)
     , m_pPara( dynamic_cast<ImoInlinesContainer*>(pItem) )
     , m_fFirstLine(true)
-    , m_pEngrCreator(NULL)
+    , m_pEngrCreator(nullptr)
     , m_firstLineIndent(0.0f)
     , m_firstLinePrefix(L"")
 {
@@ -149,7 +149,7 @@ void InlinesContainerLayouter::prepare_line()
 
     bool fSomethingAdded = false;
     bool fFirstEngrouterOfLine = true;
-    Engrouter* pEngr = NULL;
+    Engrouter* pEngr = nullptr;
     while (space_in_line() && !fBreak)
     {
         bool fRemoveLeftSpace = fFirstEngrouterOfLine;
@@ -193,7 +193,7 @@ Engrouter* InlinesContainerLayouter::create_next_engrouter(bool fRemoveLeftSpace
         }
         else
         {
-            LOMSE_LOG_DEBUG(Logger::k_layout, "Engrouter is NULL");
+            LOMSE_LOG_DEBUG(Logger::k_layout, "Engrouter is nullptr");
         }
         return pEngr;
     }
@@ -311,7 +311,7 @@ void InlinesContainerLayouter::add_engrouter_to_line(Engrouter* pEngrouter)
 
     //if it is a WordEngrouter, vertival alignment could imply changes in the
     //reference lines for the line.
-    bool fUpdateText = dynamic_cast<WordEngrouter*>(pEngrouter) != NULL;
+    bool fUpdateText = dynamic_cast<WordEngrouter*>(pEngrouter) != nullptr;
     if (fUpdateText)
     {
         int valign = pEngrouter->get_style()->vertical_align();

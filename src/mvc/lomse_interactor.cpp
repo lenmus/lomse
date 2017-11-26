@@ -71,10 +71,10 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
     , m_libScope(libraryScope)
     , m_wpDoc(wpDoc)
     , m_pView(pView)
-    , m_pGraphicModel(NULL)
-    , m_pTask(NULL)
-    , m_pCursor(NULL)
-    , m_pSelections(NULL)
+    , m_pGraphicModel(nullptr)
+    , m_pTask(nullptr)
+    , m_pCursor(nullptr)
+    , m_pSelections(nullptr)
     , m_pExec(pExec)
     , m_grefLastMouseOver(k_no_gmo_ref)
     , m_operatingMode(k_mode_read_only)
@@ -218,10 +218,10 @@ void Interactor::handle_event(SpEventInfo pEvent)
 void Interactor::delete_graphic_model()
 {
     delete m_pGraphicModel;
-    m_pGraphicModel = NULL;
-    m_pSelections->graphic_model_changed(NULL);
+    m_pGraphicModel = nullptr;
+    m_pSelections->graphic_model_changed(nullptr);
 //    m_idLastMouseOver = k_no_imoid;
-    set_drag_image(NULL, k_do_not_get_ownership, UPoint(0.0, 0.0));
+    set_drag_image(nullptr, k_do_not_get_ownership, UPoint(0.0, 0.0));
     LOMSE_LOG_DEBUG(Logger::k_render, "GModel deleted.");
 }
 
@@ -341,7 +341,7 @@ void Interactor::task_action_click_at_screen_point(Pixels x, Pixels y, unsigned 
     GmoObj* pGmo = find_object_at(x, y);
 
 //    stringstream msg;
-//    msg << "Click: Gmo=" << (pGmo ? pGmo->get_name() : "NULL") << ", point("
+//    msg << "Click: Gmo=" << (pGmo ? pGmo->get_name() : "nullptr") << ", point("
 //        << x << ", " << y << ")";
 //    LOMSE_LOG_INFO(msg.str());
 
@@ -372,7 +372,7 @@ void Interactor::send_click_event(GmoObj* pGmo, Pixels x, Pixels y, unsigned fla
 DocCursorState Interactor::click_event_to_cursor_state(SpEventMouse event)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView == NULL)
+    if (pGView == nullptr)
     {
         string msg = "Invoking Interactor::click_event_to_cursor_state() but no graphic view!";
         LOMSE_LOG_ERROR(msg);
@@ -394,7 +394,7 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
     //What would be the pitch if a note is inserted at received point?
 
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView == NULL)
+    if (pGView == nullptr)
     {
         string msg = "Invoking Interactor::get_pitch_at() but no graphic view!";
         LOMSE_LOG_ERROR(msg);
@@ -452,7 +452,7 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
                                           unsigned UNUSED(flags))
 {
     GmoObj* pGmo = find_object_at(x, y);
-    if (pGmo == NULL)
+    if (pGmo == nullptr)
         return;
 
     GmoRef gref = find_event_originator_gref(pGmo);
@@ -515,11 +515,11 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 ////    }
 ////
 ////    GmoObj* pGmo = find_object_at(x, y);
-////    ImoObj* pImo = (pGmo != NULL ? pGmo->get_creator_imo() : NULL);
+////    ImoObj* pImo = (pGmo != nullptr ? pGmo->get_creator_imo() : nullptr);
 ////    if (pImo && pImo->is_staffobj())
 ////    {
 ////        //click on staffobj: drag it
-////        GmoShape* pShape = NULL;
+////        GmoShape* pShape = nullptr;
 ////        if (pImo->is_note())
 ////        {
 ////            GmoShapeNote* pNote = static_cast<GmoShapeNote*>(pGmo);
@@ -648,7 +648,7 @@ GmoRef Interactor::find_event_originator_gref(GmoObj* pGmo)
 //    }
 //
 //    //?????????? throw
-//    return NULL;
+//    return nullptr;
 //}
 
 //---------------------------------------------------------------------------------------
@@ -697,7 +697,7 @@ GmoObj* Interactor::find_object_at(Pixels x, Pixels y)
     double yPos = double(y);
     int iPage = page_at_screen_point(xPos, yPos);
     if (iPage == -1)
-        return NULL;
+        return nullptr;
 
     screen_point_to_page_point(&xPos, &yPos);
     GraphicModel* pGM = get_graphic_model();
@@ -711,7 +711,7 @@ GmoBox* Interactor::find_box_at(Pixels x, Pixels y)
     double yPos = double(y);
     int iPage = page_at_screen_point(xPos, yPos);
     if (iPage == -1)
-        return NULL;
+        return nullptr;
 
     screen_point_to_page_point(&xPos, &yPos);
     GraphicModel* pGM = get_graphic_model();
@@ -728,7 +728,7 @@ Handler* Interactor::handlers_hit_test(Pixels x, Pixels y)
         return pGView->handlers_hit_test(pos.x, pos.y);
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -782,11 +782,11 @@ void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y,
     }
 
     GmoObj* pGmo = find_object_at(x, y);
-    ImoObj* pImo = (pGmo != NULL ? pGmo->get_creator_imo() : NULL);
+    ImoObj* pImo = (pGmo != nullptr ? pGmo->get_creator_imo() : nullptr);
     if (pImo && pImo->is_staffobj())
     {
         //click on staffobj: drag it
-        GmoShape* pShape = NULL;
+        GmoShape* pShape = nullptr;
         if (pImo->is_note())
         {
             GmoShapeNote* pNote = static_cast<GmoShapeNote*>(pGmo);
@@ -867,7 +867,7 @@ void Interactor::task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal
 
     //save reference for re-selecting the object
     m_idControlledImo = m_pCurHandler->get_controlled_gmo()->get_creator_imo()->get_id();
-    m_pCurHandler = NULL;
+    m_pCurHandler = nullptr;
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
@@ -1305,7 +1305,7 @@ bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighligh
 {
     //returns true if event discarded
 
-    ImoObj* pScore = NULL;
+    ImoObj* pScore = nullptr;
     if (SpDocument spDoc = m_wpDoc.lock())
         pScore = spDoc->get_pointer_to_imo( pEvent->get_score_id() );
 

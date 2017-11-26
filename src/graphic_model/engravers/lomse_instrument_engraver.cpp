@@ -58,7 +58,7 @@ PartsEngraver::PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_pScoreLyt(pScoreLyt)
     , m_uFirstSystemIndent(0.0f)
     , m_uOtherSystemIndent(0.0f)
-    , m_pRightAlignerFirst(NULL)
+    , m_pRightAlignerFirst(nullptr)
 {
     create_group_engravers();
     create_instrument_engravers();
@@ -108,7 +108,7 @@ void PartsEngraver::create_instrument_engravers()
 {
     int numInstr = m_pScore->get_num_instruments();
 
-    InstrumentEngraver* pPrevEngrv = NULL;
+    InstrumentEngraver* pPrevEngrv = nullptr;
     for (int iInstr = 0; iInstr < numInstr; iInstr++)
     {
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
@@ -548,7 +548,7 @@ InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
     , m_pInstr(pInstr)
     , m_pScore(pScore)
     , m_pFontStorage( libraryScope.font_storage() )
-    , m_pNextInstrEngr(NULL)
+    , m_pNextInstrEngr(nullptr)
 {
     int numStaves = m_pInstr->get_num_staves();
     m_staffTop.reserve(numStaves);

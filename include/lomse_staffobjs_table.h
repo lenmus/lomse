@@ -77,8 +77,8 @@ public:
         , m_line(line)
         , m_staff(staff)
         , m_pImo(pImo)
-        , m_pNext(NULL)
-        , m_pPrev(NULL)
+        , m_pNext(nullptr)
+        , m_pPrev(nullptr)
     {
     }
 
@@ -157,9 +157,9 @@ public:
             ColStaffObjsEntry* m_pNext;
 
         public:
-            iterator() : m_pCurrent(NULL), m_pPrev(NULL), m_pNext(NULL) {}
+            iterator() : m_pCurrent(nullptr), m_pPrev(nullptr), m_pNext(nullptr) {}
 
-            ///AWARE: This constructor requires pEntry != NULL.
+            ///AWARE: This constructor requires pEntry != nullptr.
             iterator(ColStaffObjsEntry* pEntry)
             {
                 m_pCurrent = pEntry;
@@ -171,8 +171,8 @@ public:
                 else
                 {
                     //is at end. But it is impossible to access any element!!!
-                    m_pPrev = NULL;
-                    m_pNext = NULL;
+                    m_pPrev = nullptr;
+                    m_pNext = nullptr;
                 }
             }
 
@@ -220,7 +220,7 @@ public:
     };
 
 	inline iterator begin() { return iterator(m_pFirst); }
-	inline iterator end() { return iterator(NULL); }
+	inline iterator end() { return iterator(nullptr); }
     inline ColStaffObjsEntry* back() { return m_pLast; }
     inline ColStaffObjsEntry* front() { return m_pFirst; }
     inline iterator find(ImoStaffObj* pSO) { return iterator(find_entry_for(pSO)); }

@@ -255,7 +255,7 @@ public:
 
     ~DocCursorState() {}
 
-    inline bool is_inside_terminal_node() { return m_spState.get() != NULL; }
+    inline bool is_inside_terminal_node() { return m_spState.get() != nullptr; }
     inline ImoId get_parent_level_id() { return m_id; }
     inline SpElementCursorState get_delegate_state() { return m_spState; }
     ImoId pointee_id()
@@ -362,7 +362,7 @@ public:
 
     //access to current position: mandatory overrides
     ImoObj* get_pointee()  { return m_pCurItem; }
-    ImoId get_pointee_id() { return m_pCurItem != NULL ? m_pCurItem->get_id()
+    ImoId get_pointee_id() { return m_pCurItem != nullptr ? m_pCurItem->get_id()
                                                        : k_cursor_at_end;
     }
 
@@ -545,8 +545,8 @@ protected:
     inline int p_iter_object_measure() { return (*m_it)->measure(); }
     inline int p_iter_object_staff() { return (*m_it)->staff(); }
     inline int p_iter_object_instrument() { return (*m_it)->num_instrument(); }
-    inline bool p_there_is_iter_object() { return m_it != m_pColStaffObjs->end() && (*m_it != NULL); }
-    inline bool p_there_is_not_iter_object() { return m_it != m_pColStaffObjs->end() || (*m_it == NULL); }
+    inline bool p_there_is_iter_object() { return m_it != m_pColStaffObjs->end() && (*m_it != nullptr); }
+    inline bool p_there_is_not_iter_object() { return m_it != m_pColStaffObjs->end() || (*m_it == nullptr); }
     inline bool p_iter_is_at_end() { return m_it == m_pColStaffObjs->end(); }
     inline bool p_iter_object_is_on_measure(int measure) {
         return p_iter_object_measure() == measure;
@@ -596,8 +596,8 @@ public:
     ImoObj* get_parent_object();
     ImoId get_pointee_id();
     ImoId get_parent_id();
-    inline bool is_inside_terminal_node() { return m_pInnerCursor != NULL; }
-//    inline bool is_at_top_level() { return m_pInnerCursor == NULL; }
+    inline bool is_inside_terminal_node() { return m_pInnerCursor != nullptr; }
+//    inline bool is_at_top_level() { return m_pInnerCursor == nullptr; }
     inline Document* get_document() { return m_pDoc; }
     inline ElementCursor* get_inner_cursor() { return m_pInnerCursor; }
     DocCursorState find_previous_pos_state();

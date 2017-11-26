@@ -150,7 +150,7 @@ public:
     string get_checkpoint_data();
     string get_checkpoint_data_for(ImoId id);
     inline string get_language() {
-        return (m_pImoDoc != NULL ? m_pImoDoc->get_language() : "en");
+        return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
     void removed_from_model(ImoObj* pImo);
 
@@ -184,10 +184,10 @@ public:
     //These violate the Open/Close principle as it would require to modify the API
     //when a new first level item is created. Nevertheless it is an upwards
     //compatible change.
-//    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
-//    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);
+//    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr);
+//    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=nullptr);
 //    ImoButton* create_button(const string& label, const USize& size,
-//                             ImoStyle* pStyle=NULL);
+//                             ImoStyle* pStyle=nullptr);
 
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }

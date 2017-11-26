@@ -77,7 +77,7 @@ public:
     inline bool get_remove_newlines() { return m_fRemoveNewlines; }
 
     //the main method
-    string get_source(ImoObj* pImo, ImoObj* pParent=NULL);
+    string get_source(ImoObj* pImo, ImoObj* pParent=nullptr);
 
     //static methods for ldp names to types conversion
     static string clef_type_to_ldp(int clefType);

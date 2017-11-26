@@ -46,8 +46,8 @@ namespace lomse
 //=======================================================================================
 DocContentCursor::DocContentCursor(Document* pDoc)
     : m_pDoc(pDoc)
-    , m_pCurItem(NULL)
-    , m_parent(NULL)
+    , m_pCurItem(nullptr)
+    , m_parent(nullptr)
 {
     start_of_content();
 }
@@ -100,7 +100,7 @@ void DocContentCursor::do_move_next()
             find_parent();
             if (parent_is_root_node())
             {
-                m_pCurItem = NULL;   //at end
+                m_pCurItem = nullptr;   //at end
                 return;
             }
             m_pCurItem = m_parent;                          //walk up ...
@@ -123,7 +123,7 @@ void DocContentCursor::move_prev()
     }
     else
     {
-        //case: k_cursor_at_end. m_pCurItem is NULL
+        //case: k_cursor_at_end. m_pCurItem is nullptr
         last_of_content();
     }
 }
@@ -148,7 +148,7 @@ void DocContentCursor::do_move_prev()
     if (m_pCurItem)
     {
         ImoObj* prev = m_pCurItem->get_prev_sibling();
-        if (prev != NULL)
+        if (prev != nullptr)
         {
             m_pCurItem = prev;
             down_to_last();
@@ -182,7 +182,7 @@ void DocContentCursor::point_to_current()
 //    if (m_curItemIndex >=0 && m_curItemIndex < m_numContentItems)
 //        m_pCurItem = m_pDoc->get_content_item(m_curItemIndex);
 //    else
-//        m_pCurItem = NULL;
+//        m_pCurItem = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -267,7 +267,7 @@ void DocContentCursor::to_end()
     ImoDocument* pImoDoc = m_pDoc->get_imodoc();
     ImoContent* pContent = pImoDoc->get_content();
     m_pCurItem = pContent->get_last_child();
-    m_pCurItem = NULL;
+    m_pCurItem = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -297,7 +297,7 @@ SpElementCursorState DocContentCursor::find_previous_pos_state()
 //=======================================================================================
 DocCursor::DocCursor(Document* pDoc)
     : m_pDoc(pDoc)
-    , m_pInnerCursor(NULL)
+    , m_pInnerCursor(nullptr)
     , m_outerCursor(pDoc)
     , m_idJailer(k_no_imoid)
 {
@@ -306,7 +306,7 @@ DocCursor::DocCursor(Document* pDoc)
 //---------------------------------------------------------------------------------------
 DocCursor::DocCursor(DocCursor* cursor)
     : m_pDoc(cursor->m_pDoc)
-    , m_pInnerCursor(NULL)
+    , m_pInnerCursor(nullptr)
     , m_outerCursor(m_pDoc)
     , m_idJailer(cursor->m_idJailer)
 {
@@ -316,7 +316,7 @@ DocCursor::DocCursor(DocCursor* cursor)
 //---------------------------------------------------------------------------------------
 DocCursor::DocCursor(DocCursor& cursor)
     : m_pDoc(cursor.m_pDoc)
-    , m_pInnerCursor(NULL)
+    , m_pInnerCursor(nullptr)
     , m_outerCursor(m_pDoc)
     , m_idJailer(cursor.m_idJailer)
 {
@@ -363,7 +363,7 @@ ImoId DocCursor::get_pointee_id()
     else
     {
         ImoObj* pImo = get_pointee();
-        return (pImo == NULL ? k_cursor_at_end : pImo->get_id() );
+        return (pImo == nullptr ? k_cursor_at_end : pImo->get_id() );
     }
 }
 
@@ -371,14 +371,14 @@ ImoId DocCursor::get_pointee_id()
 ImoId DocCursor::get_parent_id()
 {
     ImoObj* pImo = get_parent_object();
-    return (pImo == NULL ? k_cursor_at_end : pImo->get_id() );
+    return (pImo == nullptr ? k_cursor_at_end : pImo->get_id() );
 }
 
 ////---------------------------------------------------------------------------------------
 //ImoId DocCursor::get_top_id()
 //{
 //    ImoObj* pImo = get_top_object();
-//    return (pImo == NULL ? k_cursor_at_end : pImo->get_id() );
+//    return (pImo == nullptr ? k_cursor_at_end : pImo->get_id() );
 //}
 
 //---------------------------------------------------------------------------------------
@@ -424,7 +424,7 @@ void DocCursor::start_delegation()
 void DocCursor::stop_delegation()
 {
     delete m_pInnerCursor;
-    m_pInnerCursor = NULL;
+    m_pInnerCursor = nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -544,7 +544,7 @@ bool DocCursor::is_out_of_jailer(ImoObj* pImo)
         ImoObj* pParent = pImo->get_contentobj_parent();
         while (pParent && pParent->get_id() != m_idJailer)
             pParent = pParent->get_contentobj_parent();
-        return pParent == NULL;
+        return pParent == nullptr;
     }
     else
         return true;
@@ -816,7 +816,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
 //void ScoreCursor::to_inner_point(SpElementCursorState spState)
 //{
 //    ScoreCursorState* pSCS = dynamic_cast<ScoreCursorState*>(spState.get());
-//    if (pSCS == NULL)
+//    if (pSCS == nullptr)
 //        return;
 //
 //    if (pSCS->id() == k_no_imoid)
@@ -876,7 +876,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
 //void ScoreCursor::restore_state(SpElementCursorState spState)
 //{
 //    ScoreCursorState* pSCS = dynamic_cast<ScoreCursorState*>(spState.get());
-//    if (pSCS == NULL)
+//    if (pSCS == nullptr)
 //        return;
 //
 //    m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
@@ -913,7 +913,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
 //    if (m_currentState.id() >= 0L)
 //        return (*m_it)->imo_object();
 //    else
-//        return NULL;
+//        return nullptr;
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -922,7 +922,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
 //    if (m_it != m_pColStaffObjs->end())
 //        return (*m_it)->imo_object();
 //    else
-//        return NULL;
+//        return nullptr;
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -1720,21 +1720,21 @@ bool ScoreCursor::p_more_staves_in_instrument()
 //bool ScoreCursor::p_iter_object_is_clef()
 //{
 //    ImoClef* pImo = dynamic_cast<ImoClef*>((*m_it)->imo_object());
-//    return (pImo != NULL);
+//    return (pImo != nullptr);
 //}
 //
 ////---------------------------------------------------------------------------------------
 //bool ScoreCursor::p_iter_object_is_key()
 //{
 //    ImoKeySignature* pImo = dynamic_cast<ImoKeySignature*>((*m_it)->imo_object());
-//    return (pImo != NULL);
+//    return (pImo != nullptr);
 //}
 //
 ////---------------------------------------------------------------------------------------
 //bool ScoreCursor::p_iter_object_is_time()
 //{
 //    ImoTimeSignature* pImo = dynamic_cast<ImoTimeSignature*>((*m_it)->imo_object());
-//    return (pImo != NULL);
+//    return (pImo != nullptr);
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -1837,7 +1837,7 @@ bool ScoreCursor::p_more_staves_in_instrument()
 ////---------------------------------------------------------------------------------------
 //void ScoreCursor::p_determine_total_duration()
 //{
-//    ColStaffObjsEntry* pEntry = NULL;
+//    ColStaffObjsEntry* pEntry = nullptr;
 //    if (m_pColStaffObjs->num_entries() > 0)
 //        pEntry = m_pColStaffObjs->back();
 //
@@ -2372,7 +2372,7 @@ void ScoreCursor::p_skip_back_implicit_key_time_signatures()
 void ScoreCursor::p_skip_back_current_chord_if_any()
 {
     ImoStaffObj* pImo = p_iter_object();
-    ImoNote* pNote = NULL;
+    ImoNote* pNote = nullptr;
     if (!pImo || !pImo->is_note())
         return;
 
@@ -2504,7 +2504,7 @@ void ScoreCursor::to_measure(int measure, int instr, int staff)
 void ScoreCursor::restore_state(SpElementCursorState spState)
 {
     ScoreCursorState* pSCS = dynamic_cast<ScoreCursorState*>(spState.get());
-    if (pSCS == NULL)
+    if (pSCS == nullptr)
         return;
 
     m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
@@ -2567,7 +2567,7 @@ ImoStaffObj* ScoreCursor::staffobj()
     if (m_currentState.id() >= 0L)
         return (*m_it)->imo_object();
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2576,7 +2576,7 @@ ImoObj* ScoreCursor::staffobj_internal()
     if (m_it != m_pColStaffObjs->end())
         return (*m_it)->imo_object();
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3446,21 +3446,21 @@ bool ScoreCursor::p_iter_object_is_barline()
 bool ScoreCursor::p_iter_object_is_clef()
 {
     ImoClef* pImo = dynamic_cast<ImoClef*>((*m_it)->imo_object());
-    return (pImo != NULL);
+    return (pImo != nullptr);
 }
 
 //---------------------------------------------------------------------------------------
 bool ScoreCursor::p_iter_object_is_key()
 {
     ImoKeySignature* pImo = dynamic_cast<ImoKeySignature*>((*m_it)->imo_object());
-    return (pImo != NULL);
+    return (pImo != nullptr);
 }
 
 //---------------------------------------------------------------------------------------
 bool ScoreCursor::p_iter_object_is_time()
 {
     ImoTimeSignature* pImo = dynamic_cast<ImoTimeSignature*>((*m_it)->imo_object());
-    return (pImo != NULL);
+    return (pImo != nullptr);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -3533,7 +3533,7 @@ string ScoreCursor::dump_cursor()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_determine_total_duration()
 {
-    ColStaffObjsEntry* pEntry = NULL;
+    ColStaffObjsEntry* pEntry = nullptr;
     if (m_pColStaffObjs->num_entries() > 0)
         pEntry = m_pColStaffObjs->back();
 

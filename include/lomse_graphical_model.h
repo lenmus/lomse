@@ -98,9 +98,9 @@ public:
     AreaInfo()
         : x(-1000000000000.0)   //any impossible big value
         , y(-1000000000000.0)   //any impossible big value
-        , pShapeStaff(NULL)
-        , pBSI(NULL)
-        , pGmo(NULL)
+        , pShapeStaff(nullptr)
+        , pBSI(nullptr)
+        , pGmo(nullptr)
         , areaType(k_point_unknown)
         , gridTime(0.0)
     {
@@ -110,9 +110,9 @@ public:
     {
         x = xp;
         y = yp;
-        pShapeStaff = NULL;
-        pBSI = NULL;
-        pGmo = NULL;
+        pShapeStaff = nullptr;
+        pBSI = nullptr;
+        pGmo = nullptr;
         areaType = k_point_unknown;
         gridTime = 0.0;
     }

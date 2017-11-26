@@ -645,13 +645,13 @@ public:
     virtual ~InlineLevelCreatorApi() {}
 
     //API
-    ImoTextItem* add_text_item(const string& text, ImoStyle* pStyle=NULL);
+    ImoTextItem* add_text_item(const string& text, ImoStyle* pStyle=nullptr);
     ButtonCtrl* add_button(LibraryScope& libScope, const string& label,
-                          const USize& size, ImoStyle* pStyle=NULL);
-    ImoInlineWrapper* add_inline_box(LUnits width=0.0f, ImoStyle* pStyle=NULL);
-    ImoLink* add_link(const string& url, ImoStyle* pStyle=NULL);
+                          const USize& size, ImoStyle* pStyle=nullptr);
+    ImoInlineWrapper* add_inline_box(LUnits width=0.0f, ImoStyle* pStyle=nullptr);
+    ImoLink* add_link(const string& url, ImoStyle* pStyle=nullptr);
     ImoImage* add_image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
-                        USize imgSize, ImoStyle* pStyle=NULL);
+                        USize imgSize, ImoStyle* pStyle=nullptr);
     ImoControl* add_control(Control* pCtrol);
 
 };
@@ -673,11 +673,11 @@ public:
     virtual ~BlockLevelCreatorApi() {}
 
     //API
-    ImoContent* add_content_wrapper(ImoStyle* pStyle=NULL);
-    ImoList* add_list(int type, ImoStyle* pStyle=NULL);
-    ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=NULL);
-    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
-    ImoScore* add_score(ImoStyle* pStyle=NULL);
+    ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr);
+    ImoList* add_list(int type, ImoStyle* pStyle=nullptr);
+    ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=nullptr);
+    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr);
+    ImoScore* add_score(ImoStyle* pStyle=nullptr);
 
 private:
     void add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle);
@@ -1176,7 +1176,7 @@ protected:
     std::map<int, Color> m_colorProps;
 
     friend class ImFactory;
-    ImoStyle() : ImoSimpleObj(k_imo_style), m_name(), m_pParent(NULL) {}
+    ImoStyle() : ImoSimpleObj(k_imo_style), m_name(), m_pParent(nullptr) {}
 
 public:
     virtual ~ImoStyle() {}
@@ -1885,7 +1885,7 @@ public:
     void append_content_item(ImoContentObj* pItem);
 
 //    //API
-//    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
+//    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr);
 
 protected:
 //    virtual ImoContentObj* get_container_node()=0;
@@ -2079,7 +2079,7 @@ public:
 
     //relations
     void include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
-                             ImoRelDataObj* pData=NULL);
+                             ImoRelDataObj* pData=nullptr);
     void remove_from_relation(ImoRelObj* pRelObj);
     void remove_but_not_delete_relation(ImoRelObj* pRelObj);
 
@@ -2139,14 +2139,14 @@ protected:
 
     ImoAuxRelObj(int objtype)
         : ImoAuxObj(objtype)
-        , m_prevARO(NULL)
-        , m_nextARO(NULL)
+        , m_prevARO(nullptr)
+        , m_nextARO(nullptr)
     {
     }
     ImoAuxRelObj(ImoId id, int objtype)
         : ImoAuxObj(id, objtype)
-        , m_prevARO(NULL)
-        , m_nextARO(NULL)
+        , m_prevARO(nullptr)
+        , m_nextARO(nullptr)
     {
     }
 
@@ -2155,8 +2155,8 @@ public:
     virtual ~ImoAuxRelObj();
 
     //information
-    inline bool is_start_of_relation() { return m_prevARO == NULL; }
-    inline bool is_end_of_relation() { return m_nextARO == NULL; }
+    inline bool is_start_of_relation() { return m_prevARO == nullptr; }
+    inline bool is_end_of_relation() { return m_nextARO == nullptr; }
 
 protected:
 
@@ -2268,6 +2268,7 @@ protected:
     bool m_repeat[6];
     LdpElement* m_pBeamElm;
     ImoNoteRest* m_pNR;
+    int m_lineNum;
 
 public:
     ImoBeamDto();
@@ -2276,7 +2277,7 @@ public:
     //getters
     inline int get_beam_number() { return m_beamNum; }
     inline ImoNoteRest* get_note_rest() { return m_pNR; }
-    int get_line_number() { return 0; }
+    int get_line_number() { return m_lineNum; }
     int get_beam_type(int level);
     bool get_repeat(int level);
 
@@ -2286,6 +2287,7 @@ public:
     void set_beam_type(int level, int type);
     void set_beam_type(string& segments);
     void set_repeat(int level, bool value);
+    inline void set_line_number(int value) { m_lineNum = value; }
 
     //properties
     bool is_end_of_beam();
@@ -2295,6 +2297,7 @@ public:
     int get_item_number() { return get_beam_number(); }
     bool is_start_of_relation() { return is_start_of_beam(); }
     bool is_end_of_relation() { return is_end_of_beam(); }
+    ImoStaffObj* get_staffobj();
 
 };
 
@@ -2648,7 +2651,7 @@ protected:
     friend class ImoTextItem;
     friend class ImoLyricsTextInfo;
     friend class ImoTextRepetitionMark;
-    ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(NULL) {}
+    ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(nullptr) {}
 
 public:
     virtual ~ImoTextInfo() {}
@@ -2856,7 +2859,7 @@ protected:
 
     friend class ImFactory;
     ImoControl(Control* ctrol) : ImoInlineLevelObj(k_imo_control), m_ctrol(ctrol) {}
-    ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(NULL) {}
+    ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(nullptr) {}
 
     friend class InlineLevelCreatorApi;
     void attach_control(Control* ctrol);
@@ -3830,7 +3833,7 @@ class ImoLine : public ImoAuxObj
     ImoLineStyle* m_pStyle;
 
     friend class ImFactory;
-    ImoLine() : ImoAuxObj(k_imo_line), m_pStyle(NULL) {}
+    ImoLine() : ImoAuxObj(k_imo_line), m_pStyle(nullptr) {}
 
 public:
     virtual ~ImoLine() { delete m_pStyle; }
@@ -3873,7 +3876,7 @@ public:
     inline int get_list_type() { return m_listType; }
 
     //API
-    ImoListItem* add_listitem(ImoStyle* pStyle=NULL);
+    ImoListItem* add_listitem(ImoStyle* pStyle=nullptr);
 
     //helper, to access content
     inline ImoListItem* get_list_item(int iItem) {   //iItem = 0..n-1
@@ -4438,12 +4441,19 @@ protected:
     ImoNote* m_pNote;
     ImoBezierInfo* m_pBezier;
     Color m_color;
+    int m_lineNum;
 
 public:
-    ImoSlurDto() : ImoSimpleObj(k_imo_slur_dto), m_fStart(true)
-                , m_slurNum(0), m_orientation(k_orientation_default)
-                , m_pNote(NULL)
-                , m_pBezier(NULL) {}
+    ImoSlurDto()
+        : ImoSimpleObj(k_imo_slur_dto)
+        , m_fStart(true)
+        , m_slurNum(0)
+        , m_orientation(k_orientation_default)
+        , m_pNote(nullptr)
+        , m_pBezier(nullptr)
+        , m_lineNum(0)
+    {
+    }
     virtual ~ImoSlurDto();
 
     //getters
@@ -4452,7 +4462,7 @@ public:
     inline int get_orientation() { return m_orientation; }
     inline ImoNote* get_note() { return m_pNote; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
-    int get_line_number();
+    int get_line_number() { return m_lineNum; }
     inline Color get_color() { return m_color; }
 
     //setters
@@ -4462,11 +4472,13 @@ public:
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
     inline void set_color(Color value) { m_color = value; }
+    inline void set_line_number(int value) { m_lineNum = value; }
 
     //required by RelationBuilder
     int get_item_number() { return get_slur_number(); }
     bool is_start_of_relation() { return is_start(); }
     bool is_end_of_relation() { return !is_start(); }
+    ImoStaffObj* get_staffobj();
 };
 
 //---------------------------------------------------------------------------------------
@@ -4789,13 +4801,17 @@ protected:
     ImoNote* m_pNote;
     ImoBezierInfo* m_pBezier;
     Color m_color;
+    int m_lineNum;
 
 public:
     ImoTieDto()
-        : ImoSimpleObj(k_imo_tie_dto), m_fStart(true)
-        , m_tieNum(0), m_orientation(k_orientation_default)
-        , m_pNote(NULL)
-        , m_pBezier(NULL)
+        : ImoSimpleObj(k_imo_tie_dto)
+        , m_fStart(true)
+        , m_tieNum(0)
+        , m_orientation(k_orientation_default)
+        , m_pNote(nullptr)
+        , m_pBezier(nullptr)
+        , m_lineNum(0)
     {
     }
     virtual ~ImoTieDto();
@@ -4806,7 +4822,7 @@ public:
     inline int get_orientation() { return m_orientation; }
     inline ImoNote* get_note() { return m_pNote; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
-    int get_line_number() { return 0; }
+    int get_line_number() { return m_lineNum; }
     inline Color get_color() { return m_color; }
 
     //setters
@@ -4816,11 +4832,13 @@ public:
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
     inline void set_color(Color value) { m_color = value; }
+    inline void set_line_number(int value) { m_lineNum = value; }
 
     //required by RelationBuilder
     int get_item_number() { return get_tie_number(); }
     bool is_start_of_relation() { return is_start(); }
     bool is_end_of_relation() { return !is_start(); }
+    ImoStaffObj* get_staffobj();
 };
 
 //---------------------------------------------------------------------------------------
@@ -4943,6 +4961,7 @@ public:
     int get_item_number() { return m_tupletNum; }
     bool is_start_of_relation() { return is_start_of_tuplet(); }
     bool is_end_of_relation() { return is_end_of_tuplet(); }
+    ImoStaffObj* get_staffobj();
 };
 
 //---------------------------------------------------------------------------------------
@@ -5178,7 +5197,7 @@ public:
         , m_type(k_unknown)
         , m_voltaNum()
         , m_voltaText()
-        , m_pBarline(NULL)
+        , m_pBarline(nullptr)
     {
     }
     virtual ~ImoVoltaBracketDto() {}
@@ -5209,6 +5228,7 @@ public:
     int get_item_number() { return get_volta_id(); }
     bool is_start_of_relation() { return m_type == k_start; }
     bool is_end_of_relation() { return m_type == k_stop; }
+    ImoStaffObj* get_staffobj() { return m_pBarline; }
 };
 
 

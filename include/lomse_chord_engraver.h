@@ -100,7 +100,7 @@ public:
                           LUnits xRight, LUnits xLeft, LUnits yTop);
     int create_shapes(Color color=Color(0,0,0));
     int get_num_shapes() { return 0; }
-    ShapeBoxInfo* get_shape_box_info(int UNUSED(i)) { return NULL; }
+    ShapeBoxInfo* get_shape_box_info(int UNUSED(i)) { return nullptr; }
 
     inline int notes_missing() { return m_numNotesMissing; }
 

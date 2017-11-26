@@ -77,7 +77,6 @@ protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
     void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
     void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
-    void error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo);
 };
 
 
@@ -275,7 +274,7 @@ public:
     ImoObj* analyse_tree_and_get_object(XmlNode* tree);
 
     //analysis
-    ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=NULL);
+    ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
     void prepare_for_new_instrument_content();
 
     //part-list
@@ -396,7 +395,7 @@ public:
 
 
 protected:
-    MxlElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=NULL);
+    MxlElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 };

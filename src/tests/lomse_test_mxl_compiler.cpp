@@ -88,9 +88,9 @@ SUITE(MxlCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != NULL );
+        CHECK( pScore->get_staffobjs_table() != nullptr );
         delete pIModel;
     }
 
@@ -106,14 +106,14 @@ SUITE(MxlCompilerTest)
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != NULL );
+        CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != NULL );
+        CHECK( pScore->get_staffobjs_table() != nullptr );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != NULL );
+        CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != NULL );
+        CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 5 );
         ImoObj* pImo = pMD->get_first_child();
         CHECK( pImo->is_clef() == true );

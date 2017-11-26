@@ -56,7 +56,7 @@ class MyScoreLayouter3 : public ScoreLayouter
 public:
     MyScoreLayouter3(ImoContentObj* pImo, GraphicModel* pGModel,
                     LibraryScope& libraryScope)
-        : ScoreLayouter(pImo, NULL, pGModel, libraryScope)
+        : ScoreLayouter(pImo, nullptr, pGModel, libraryScope)
     {
     }
     virtual ~MyScoreLayouter3() {}
@@ -190,7 +190,7 @@ SUITE(SpAlgGourlayTest)
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-        CHECK( pAlg != NULL );
+        CHECK( pAlg != nullptr );
 
         //columns & slices
         CHECK( pAlg->get_num_columns() == 2 );
@@ -244,7 +244,7 @@ SUITE(SpAlgGourlayTest)
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-        CHECK( pAlg != NULL );
+        CHECK( pAlg != nullptr );
         CHECK( pAlg->get_num_columns() == 2 );
         ColumnDataGourlay* pCol;
         pCol = pAlg->my_get_column(0);
@@ -306,7 +306,7 @@ SUITE(SpAlgGourlayTest)
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-        CHECK( pAlg != NULL );
+        CHECK( pAlg != nullptr );
         CHECK( pAlg->get_num_columns() == 2 );
         ColumnDataGourlay* pCol;
         pCol = pAlg->my_get_column(0);
@@ -382,7 +382,7 @@ SUITE(SpAlgGourlayTest)
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-        CHECK( pAlg != NULL );
+        CHECK( pAlg != nullptr );
         CHECK( pAlg->get_num_columns() == 2 );
 
         MyColumnDataGourlay* pCol = static_cast<MyColumnDataGourlay*>(pAlg->my_get_column(0));
@@ -428,7 +428,7 @@ SUITE(SpAlgGourlayTest)
 
         scoreLyt.prepare_to_start_layout();     //this creates columns and do spacing
         MySpAlgGourlay* pAlg = static_cast<MySpAlgGourlay*>(scoreLyt.get_spacing_algorithm());
-        CHECK( pAlg != NULL );
+        CHECK( pAlg != nullptr );
         CHECK( pAlg->get_num_columns() == 1 );
 
         MyColumnDataGourlay* pCol = static_cast<MyColumnDataGourlay*>(pAlg->my_get_column(0));

@@ -82,7 +82,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
     , m_uPrologWidth(0.0f)
-    , m_pBoxSystem(NULL)
+    , m_pBoxSystem(nullptr)
     , m_yMin(0.0f)
     , m_yMax(0.0f)
     , m_barlinesInfo(0)
@@ -345,7 +345,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
         ColStaffObjsEntry* pKeyEntry =
             m_pSpAlgorithm->get_prolog_key(m_iFirstCol, iStaffIndex);
         ImoClef* pClef = pClefEntry ? static_cast<ImoClef*>(pClefEntry->imo_object())
-                                    : NULL;
+                                    : nullptr;
         int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
 
         //add clef shape
@@ -460,7 +460,7 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
 {
     //do not draw if 'hide staff lines' option enabled
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
-    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
+    bool fDrawStafflines = (pOpt == nullptr || pOpt->get_bool_value() == false);
     if (!fDrawStafflines)
         return;
 
@@ -494,7 +494,7 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
 void SystemLayouter::engrave_instrument_details()
 {
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
-    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
+    bool fDrawStafflines = (pOpt == nullptr || pOpt->get_bool_value() == false);
 
     m_pPartsEngraver->engrave_names_and_brackets(fDrawStafflines, m_pBoxSystem,
                                                  m_iSystem);

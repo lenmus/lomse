@@ -87,7 +87,7 @@ int main(int argc, char** argv)
             }
             Test* q = p;
             p = p->next;
-            q->next = NULL;
+            q->next = nullptr;
         }
 
         //run selected test(s) only

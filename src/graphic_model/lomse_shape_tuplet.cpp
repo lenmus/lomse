@@ -48,7 +48,7 @@ namespace lomse
 GmoShapeTuplet::GmoShapeTuplet(ImoObj* pCreatorImo, Color color, int design)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_tuplet, 0, color)
     , m_design(design)
-    , m_pShapeText(NULL)
+    , m_pShapeText(nullptr)
 {
 }
 

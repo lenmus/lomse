@@ -48,10 +48,10 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo,
     , VoiceRelatedShape()
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
-    , m_pNoteheadShape(NULL)
-	, m_pStemShape(NULL)
-    , m_pAccidentalsShape(NULL)
-    , m_pFlagShape(NULL)
+    , m_pNoteheadShape(nullptr)
+	, m_pStemShape(nullptr)
+    , m_pAccidentalsShape(nullptr)
+    , m_pFlagShape(nullptr)
     , m_uAnchorOffset(0.0f)
     , m_fUpOriented(true)
     , m_nPosOnStaff(1)
@@ -284,7 +284,7 @@ GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_rest, idx, color)
     , VoiceRelatedShape()
     , m_libraryScope(libraryScope)
-	, m_pBeamShape(NULL)
+	, m_pBeamShape(nullptr)
 {
 }
 

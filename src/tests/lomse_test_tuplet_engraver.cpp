@@ -68,13 +68,13 @@ public:
 
     TupletEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_pScore(NULL)
-        , m_pMeter(NULL)
-        , m_pStorage(NULL)
-        , m_pNoteEngrv(NULL)
-        , m_pRestEngrv(NULL)
-        , m_pTupletEngrv(NULL)
-        , m_pTupletShape(NULL)
+        , m_pScore(nullptr)
+        , m_pMeter(nullptr)
+        , m_pStorage(nullptr)
+        , m_pNoteEngrv(nullptr)
+        , m_pRestEngrv(nullptr)
+        , m_pTupletEngrv(nullptr)
+        , m_pTupletShape(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -179,12 +179,12 @@ public:
             delete *it;
         m_shapes.clear();
 
-        m_pMeter = NULL;
-        m_pStorage = NULL;
-        m_pNoteEngrv = NULL;
-        m_pRestEngrv = NULL;
-        m_pTupletEngrv = NULL;
-        m_pTupletShape = NULL;
+        m_pMeter = nullptr;
+        m_pStorage = nullptr;
+        m_pNoteEngrv = nullptr;
+        m_pRestEngrv = nullptr;
+        m_pTupletEngrv = nullptr;
+        m_pTupletShape = nullptr;
     }
 
 
@@ -198,7 +198,7 @@ SUITE(TupletEngraverTest)
     {
         Document doc(m_libraryScope);
         ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
-        CHECK( pTuplet != NULL );
+        CHECK( pTuplet != nullptr );
         CHECK( pTuplet->get_actual_number() == 2 );
         CHECK( pTuplet->get_normal_number() == 3 );
     }
@@ -211,7 +211,7 @@ SUITE(TupletEngraverTest)
 
         TupletEngraver* pEngrv = dynamic_cast<TupletEngraver*>(m_pStorage->get_engraver(pTuplet));
 
-        CHECK( pEngrv != NULL );
+        CHECK( pEngrv != nullptr );
         CHECK( pEngrv == m_pTupletEngrv );
 
         delete_test_data();
@@ -225,7 +225,7 @@ SUITE(TupletEngraverTest)
 
         m_pTupletEngrv->create_shapes();
         m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->get_shape() );
-        CHECK( m_pTupletShape != NULL );
+        CHECK( m_pTupletShape != nullptr );
 
         delete_test_data();
     }

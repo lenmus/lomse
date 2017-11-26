@@ -150,7 +150,7 @@ SUITE(GraphicViewTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -171,7 +171,7 @@ SUITE(GraphicViewTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -191,7 +191,7 @@ SUITE(GraphicViewTest)
 //        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
 //        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc);
-//        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+//        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
 //        pView->set_interactor(pIntor);
 //        RenderingBuffer rbuf;
 //        pView->set_rendering_buffer(&rbuf);
@@ -211,7 +211,7 @@ SUITE(GraphicViewTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -240,7 +240,7 @@ SUITE(GraphicViewTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, nullptr);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);

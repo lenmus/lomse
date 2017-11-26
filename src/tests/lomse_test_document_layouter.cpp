@@ -100,7 +100,7 @@ SUITE(DocLayouterTest)
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         //pGModel->dump_page(0, cout);
-        CHECK( pGModel != NULL );
+        CHECK( pGModel != nullptr );
         delete pGModel;
     }
 
@@ -112,7 +112,7 @@ SUITE(DocLayouterTest)
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel != NULL );
+        CHECK( pGModel != nullptr );
         CHECK( pGModel->get_num_pages() == 1 );
         delete pGModel;
     }
@@ -168,7 +168,7 @@ SUITE(DocLayouterTest)
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBox = pBDPC->get_child_box(0);      //ScorePage
-        CHECK( pBox != NULL );
+        CHECK( pBox != nullptr );
         CHECK( pBox->is_box_score_page() == true );
         CHECK( pBox->get_width() == 16000.0f );
         //cout << pBox->get_height() << endl;
@@ -193,7 +193,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
         GmoBox* pBox = pBSP->get_child_box(0);       //System
-        CHECK( pBox != NULL );
+        CHECK( pBox != nullptr );
         CHECK( pBox->is_box_system() == true );
         //CHECK( pBox->get_width() == 16000.0f );
         //CHECK( pBox->get_height() == 735.0f );
@@ -217,7 +217,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
         GmoBox* pBSys = pBSP->get_child_box(0);      //System
         GmoBox* pBox = pBSys->get_child_box(0);      //Slice
-        CHECK( pBox != NULL );
+        CHECK( pBox != nullptr );
         CHECK( pBox->is_box_slice() == true );
         //CHECK( pBox->get_width() == 16000.0f );
         //CHECK( pBox->get_height() == 735.0f );
@@ -242,7 +242,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSys = pBSP->get_child_box(0);      //System
         GmoBox* pBSlice = pBSys->get_child_box(0);   //Slice
         GmoBox* pBox = pBSlice->get_child_box(0);    //SliceInstr
-        CHECK( pBox != NULL );
+        CHECK( pBox != nullptr );
         CHECK( pBox->is_box_slice_instr() == true );
         //CHECK( pBox->get_width() == 16000.0f );
         //CHECK( pBox->get_height() == 735.0f );
@@ -266,7 +266,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         GmoBox* pBSys = pBSP->get_child_box(0);     //System
         GmoShape* pShape = pBSys->get_shape(0);     //ShapeStaff
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         //CHECK( pShape->get_width() == 16000.0f );
         delete pGModel;
@@ -287,7 +287,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
         GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
@@ -313,7 +313,7 @@ SUITE(DocLayouterTest)
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
         CHECK( pBSys->get_num_shapes() == 1 );
         GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
@@ -381,7 +381,7 @@ SUITE(DocLayouterTest)
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
         CHECK( pBSys->get_num_shapes() == 1 );
         GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
@@ -409,12 +409,12 @@ SUITE(DocLayouterTest)
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
         CHECK( pBSys->get_num_shapes() == 4 );  // two staves + bracket + left barline
         GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
         pShape = pBSys->get_staff_shape(1);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 1 );
@@ -441,12 +441,12 @@ SUITE(DocLayouterTest)
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
         CHECK( pBSys->get_num_shapes() == 3 );
         GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
         pShape = pBSys->get_staff_shape(1);
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_staff() == true );
         pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
@@ -461,7 +461,7 @@ SUITE(DocLayouterTest)
     //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    MyDocLayouter dl( doc.get_im_model() );
-    //    CHECK( dl.get_main_sizer() != NULL );
+    //    CHECK( dl.get_main_sizer() != nullptr );
     //}
 
 

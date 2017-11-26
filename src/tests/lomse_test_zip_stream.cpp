@@ -101,7 +101,7 @@ SUITE(ZipInputStreamTest)
         string path = m_scores_path + "10011-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
         ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
-        CHECK( zs != NULL );
+        CHECK( zs != nullptr );
         CHECK( zs->eof() == false );
         CHECK( zs->get_num_entries() == 1 );
         delete file;
@@ -139,7 +139,7 @@ SUITE(ZipInputStreamTest)
         string path = m_scores_path + "10012-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
         ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
-        CHECK( zs != NULL );
+        CHECK( zs != nullptr );
         CHECK( zs->eof() == false );
         CHECK( zs->get_num_entries() == 2 );
         delete file;

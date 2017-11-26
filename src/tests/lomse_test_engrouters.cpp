@@ -118,7 +118,7 @@ SUITE(EngroutersCreatorTest)
 
         TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
 
-        CHECK( dynamic_cast<DefaultTextSplitter*>( pSplitter ) != NULL );
+        CHECK( dynamic_cast<DefaultTextSplitter*>( pSplitter ) != nullptr );
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, chinesse_text_splitter)
@@ -133,7 +133,7 @@ SUITE(EngroutersCreatorTest)
 
         TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
 
-        CHECK( dynamic_cast<ChineseTextSplitter*>( pSplitter ) != NULL );
+        CHECK( dynamic_cast<ChineseTextSplitter*>( pSplitter ) != nullptr );
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, no_content)
@@ -148,7 +148,7 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 3000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr == NULL );
+        CHECK( pEngr == nullptr );
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, one_atomic_item)
@@ -164,9 +164,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 3000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
 
 //        CHECK( creator.more_content() == false );
 
@@ -184,7 +184,7 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 1500.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr == NULL );
+        CHECK( pEngr == nullptr );
 
         CHECK( creator.more_content() == true );
     }
@@ -198,16 +198,16 @@ SUITE(EngroutersCreatorTest)
         MyEngroutersCreator creator(pPara, m_libraryScope);
         LUnits availableWidth = 1500.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
-        CHECK( pEngr == NULL );
+        CHECK( pEngr == nullptr );
 
         CHECK( creator.more_content() == true );
 
         availableWidth = 3000.0f;
         pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
 
         CHECK( creator.more_content() == false );
 
@@ -225,15 +225,15 @@ SUITE(EngroutersCreatorTest)
 
         LUnits availableWidth = 2000.0f;
         Engrouter* pEngr1 = creator.create_next_engrouter(availableWidth, false);
-        CHECK( pEngr1 != NULL );
+        CHECK( pEngr1 != nullptr );
         ControlEngrouter* pBtEngr1 = dynamic_cast<ControlEngrouter*>( pEngr1 );
-        CHECK( pBtEngr1 != NULL );
+        CHECK( pBtEngr1 != nullptr );
 
         availableWidth = 2000.0f;
         Engrouter* pEngr2 = creator.create_next_engrouter(availableWidth, false);
-        CHECK( pEngr2 != NULL );
+        CHECK( pEngr2 != nullptr );
         ControlEngrouter* pBtEngr2 = dynamic_cast<ControlEngrouter*>( pEngr2 );
-        CHECK( pBtEngr2 != NULL );
+        CHECK( pBtEngr2 != nullptr );
 
         CHECK( pEngr1->get_creator_imo() != pEngr2->get_creator_imo() );
 
@@ -254,9 +254,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 1000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"Hello" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
@@ -277,9 +277,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 2000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"Hello" );
         CHECK( pEngr->break_requested() == false );
 
@@ -299,9 +299,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 1000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"This" );
         CHECK( creator.more_content() == true );
         CHECK( pEngr->break_requested() == true );
@@ -309,9 +309,9 @@ SUITE(EngroutersCreatorTest)
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"is a paragraph" );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
@@ -328,19 +328,19 @@ SUITE(EngroutersCreatorTest)
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         Engrouter* pEngr = creator.create_next_engrouter(1000.0f, false);
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         CHECK( creator.more_content() == true );
         CHECK( pEngr->break_requested() == false );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(3000.0f, false);
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
         delete pEngr;
@@ -356,17 +356,17 @@ SUITE(EngroutersCreatorTest)
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         Engrouter* pEngr = creator.create_next_engrouter(1000.0f, false);
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         NullEngrouter* pEngr1 = dynamic_cast<NullEngrouter*>( pEngr );
-        CHECK( pEngr1 != NULL );
+        CHECK( pEngr1 != nullptr );
         CHECK( creator.more_content() == true );
         CHECK( pEngr->break_requested() == false );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(3000.0f, false);
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         ControlEngrouter* pEngr2 = dynamic_cast<ControlEngrouter*>( pEngr );
-        CHECK( pEngr2 != NULL );
+        CHECK( pEngr2 != nullptr );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
         delete pEngr;
@@ -384,9 +384,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 1000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, true);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"This" );
         CHECK( creator.more_content() == true );
         CHECK( pEngr->break_requested() == true );
@@ -394,9 +394,9 @@ SUITE(EngroutersCreatorTest)
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"is a paragraph " );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
@@ -415,9 +415,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 1000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L" This" );
         CHECK( creator.more_content() == true );
         CHECK( pEngr->break_requested() == true );
@@ -425,9 +425,9 @@ SUITE(EngroutersCreatorTest)
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
         CHECK( pEngrouter->get_text() == L"is a paragraph " );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
@@ -445,9 +445,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 2000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
 
         delete pEngr;
     }
@@ -465,17 +465,17 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 8000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
 
         std::list<Engrouter*>& children = pEngrouter->get_engrouters();
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
 //        cout << children.size() << endl;
-        CHECK( dynamic_cast<ControlEngrouter*>(*it) != NULL );
+        CHECK( dynamic_cast<ControlEngrouter*>(*it) != nullptr );
         ++it;
-        CHECK( dynamic_cast<ControlEngrouter*>(*it) != NULL );
+        CHECK( dynamic_cast<ControlEngrouter*>(*it) != nullptr );
 
         delete pEngr;
     }
@@ -493,9 +493,9 @@ SUITE(EngroutersCreatorTest)
         LUnits availableWidth = 8000.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth, false);
 
-        CHECK( pEngr != NULL );
+        CHECK( pEngr != nullptr );
         BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
-        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter != nullptr );
 
         //cout << "box width = " << pEngrouter->get_width() << endl;
         //cout << "box height = " << pEngrouter->get_height() << endl;

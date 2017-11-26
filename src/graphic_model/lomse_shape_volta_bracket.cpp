@@ -45,9 +45,9 @@ namespace lomse
 //=======================================================================================
 GmoShapeVoltaBracket::GmoShapeVoltaBracket(ImoObj* pCreatorImo, ShapeId idx, Color color)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_volta_bracket, idx, color)
-    , m_pStartBarlineShape(NULL)
-    , m_pStopBarlineShape(NULL)
-    , m_pShapeText(NULL)
+    , m_pStartBarlineShape(nullptr)
+    , m_pStopBarlineShape(nullptr)
+    , m_pShapeText(nullptr)
     , m_fTwoBrackets(false)
     , m_fStopJog(true)
     , m_uJogLength(400.0f)

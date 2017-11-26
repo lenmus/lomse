@@ -102,7 +102,7 @@ public:
 
     //beam
     ImoBeam* get_beam();
-    inline bool is_beamed() { return find_relation(k_imo_beam) != NULL; }
+    inline bool is_beamed() { return find_relation(k_imo_beam) != nullptr; }
     void set_beam_type(int level, int type);
     int get_beam_type(int level);
     bool is_end_of_beam();
@@ -205,8 +205,8 @@ public:
     //ties
     inline ImoTie* get_tie_next() { return m_pTieNext; }
     inline ImoTie* get_tie_prev() { return m_pTiePrev; }
-    inline bool is_tied_next() { return m_pTieNext != NULL; }
-    inline bool is_tied_prev() { return m_pTiePrev != NULL; }
+    inline bool is_tied_next() { return m_pTieNext != nullptr; }
+    inline bool is_tied_prev() { return m_pTiePrev != nullptr; }
     inline void set_tie_next(ImoTie* pStartTie) { m_pTieNext = pStartTie; }
     inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
 

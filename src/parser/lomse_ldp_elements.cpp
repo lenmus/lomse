@@ -44,7 +44,7 @@ LdpElement::LdpElement()
     , m_fSimple(false)
     , m_numLine(0)
     , m_id(k_no_imoid)
-    , m_pImo(NULL)
+    , m_pImo(nullptr)
     //, m_fProcessed(false)
 {
 }

@@ -93,7 +93,7 @@ public:
     inline XmlNode next_sibling() { return XmlNode( m_node.next_sibling() ); }
     inline bool has_attribute(const string& name)
     {
-        return m_node.attribute(name.c_str()) != NULL;
+        return m_node.attribute(name.c_str()) != nullptr;
     }
 	///get value of attribute with the specified name
     inline string attribute_value(const string& name)

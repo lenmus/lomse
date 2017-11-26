@@ -160,7 +160,7 @@ SUITE(LdpElementsTest)
     TEST_FIXTURE(LdpElementsTestFixture, LdpElementsGetFloatFail)
     {
         bool fOk = false;
-        LdpElement* pNum = NULL;
+        LdpElement* pNum = nullptr;
         try
         {
             pNum = m_pLdpFactory->new_value(k_number, "abc");
@@ -172,7 +172,7 @@ SUITE(LdpElementsTest)
             e.what();
             fOk = true;
         }
-        CHECK( pNum != NULL );
+        CHECK( pNum != nullptr );
         CHECK( fOk );
         delete pNum;
     }

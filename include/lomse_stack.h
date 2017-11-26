@@ -64,7 +64,7 @@ public:
             return t;
         }
         else
-            return NULL;
+            return nullptr;
     }
 
     const T get_item(int i) {
@@ -121,7 +121,7 @@ public:
             return t;
         }
         else
-            return NULL;
+            return nullptr;
     }
 
     T undo_pop() {
@@ -133,7 +133,7 @@ public:
             return t;
         }
         else
-            return NULL;
+            return nullptr;
     }
 
     const T get_item(int i) {

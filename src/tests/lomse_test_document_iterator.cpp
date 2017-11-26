@@ -88,9 +88,9 @@ SUITE(DocIteratorTest)
         ++it;
         CHECK( (*it)->is_score_text() == true );
         ++it;
-        CHECK( *it == NULL );
+        CHECK( *it == nullptr );
         ++it;
-        CHECK( *it == NULL );
+        CHECK( *it == nullptr );
     }
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorStartOfContent)
@@ -101,7 +101,7 @@ SUITE(DocIteratorTest)
         ++it;
         ++it;
         ++it;
-        CHECK( *it == NULL );
+        CHECK( *it == nullptr );
         it.start_of_content();
         CHECK( (*it)->is_score() == true );
     }
@@ -131,9 +131,9 @@ SUITE(DocIteratorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         --it;
-        CHECK( *it == NULL );
+        CHECK( *it == nullptr );
         --it;
-        CHECK( *it == NULL );
+        CHECK( *it == nullptr );
     }
 
     //TEST_FIXTURE(DocIteratorTestFixture, DocIteratorEnterElement)
@@ -179,9 +179,9 @@ SUITE(DocIteratorTest)
 //        ++it;
 //        CHECK( (*it)->to_string() == "(instrument (musicData (n c4 q) (r q)))" );
 //        ++it;
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //        ++it;
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //    }
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorPrev)
@@ -200,9 +200,9 @@ SUITE(DocIteratorTest)
 //        --it;
 //        CHECK( (*it)->to_string() == "(vers 1.6)" );
 //        --it;
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //        --it;
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //    }
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorPointToType)
@@ -234,7 +234,7 @@ SUITE(DocIteratorTest)
 //        it.find_instrument(1);
 //        CHECK( (*it)->to_string() == "(instrument (musicData (n a3 e)))" );
 //        it.find_instrument(2);
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //    }
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorStartOfInstrument)
@@ -251,7 +251,7 @@ SUITE(DocIteratorTest)
 //        //cout << (*it)->to_string() << endl;
 //        CHECK( (*it)->to_string() == "(n a3 e)" );
 //        it.start_of_instrument(2);
-//        CHECK( *it == NULL );
+//        CHECK( *it == nullptr );
 //    }
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorIncrement)

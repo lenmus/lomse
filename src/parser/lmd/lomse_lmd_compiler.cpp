@@ -98,7 +98,7 @@ InternalModel* LmdCompiler::compile_file(const std::string& filename)
     if (root)
         return compile_parsed_tree(root);
     else
-        return NULL;
+        return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ InternalModel* LmdCompiler::create_with_empty_score()
 {
 //    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
 //    return compile_parsed_tree(m_pFinalTree);
-    return NULL;    //TODO: Probably this method is not needed
+    return nullptr;    //TODO: Probably this method is not needed
 }
 
 //---------------------------------------------------------------------------------------

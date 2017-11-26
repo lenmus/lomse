@@ -93,7 +93,6 @@ protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
     void tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto);
     void error_notes_can_not_be_tied(ImoTieDto* pEndInfo);
-    void error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo);
 };
 
 
@@ -218,7 +217,7 @@ public:
 
     //analysis
     //void analyse_node(LdpTree::iterator itNode);
-    ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=NULL);
+    ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
 
     //inherited and saved values setters & getters
     inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
@@ -273,7 +272,7 @@ public:
     }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;
-        m_pCurScore = NULL;
+        m_pCurScore = nullptr;
     }
     inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
     inline ImoScore* get_last_analysed_score() { return m_pLastScore; }
@@ -301,7 +300,7 @@ public:
     long get_node_id(XmlNode* node)
     {
         XmlAttribute attr = node->attribute("id");
-        if (attr == NULL)
+        if (attr == nullptr)
             return -1L;
         else
             return std::atol( attr.value() );
@@ -328,7 +327,7 @@ public:
 
 
 protected:
-    LmdElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=NULL);
+    LmdElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
     void delete_relation_builders();
 
     //auxiliary. for ldp notes analysis

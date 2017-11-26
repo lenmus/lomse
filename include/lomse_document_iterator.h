@@ -88,7 +88,7 @@ public:
 //
 //    //information
 //    bool is_pointing_to(long objType);
-//    inline bool is_out_of_range() { return *m_it == NULL; }
+//    inline bool is_out_of_range() { return *m_it == nullptr; }
 //
 protected:
     virtual void next()=0;    //to next sibling element

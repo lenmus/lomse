@@ -141,7 +141,7 @@ protected:
 
 public:
     Notification()
-        : m_pPresenter(NULL), m_pDoc(NULL), m_pView(NULL)
+        : m_pPresenter(nullptr), m_pDoc(nullptr), m_pView(nullptr)
     {
     }
 

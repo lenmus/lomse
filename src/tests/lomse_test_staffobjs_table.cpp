@@ -126,9 +126,9 @@ public:
 
     ColStaffObjsBuilderTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_pDoc(NULL)
-        , m_pTree(NULL)
-        , m_pIModel(NULL)
+        , m_pDoc(nullptr)
+        , m_pTree(nullptr)
+        , m_pIModel(nullptr)
     {
         m_pLdpFactory = m_libraryScope.ldp_factory();
     }
@@ -946,7 +946,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 0 );
         CHECK( (*it)->staff() == 0 );
         ImoSpacer* pAnchor = dynamic_cast<ImoSpacer*>( (*it)->imo_object() );
-        CHECK( pAnchor != NULL );
+        CHECK( pAnchor != nullptr );
         ++it;
         //CHECK( (*it)->to_string() == "(barline )" );
         CHECK( (*it)->imo_object()->is_barline() == true );
@@ -1146,7 +1146,7 @@ SUITE(ColStaffObjsBuilderTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pColStaffObjs != NULL );
+        CHECK( pColStaffObjs != nullptr );
         CHECK( pColStaffObjs->num_entries() == 0 );
 
         delete tree->get_root();

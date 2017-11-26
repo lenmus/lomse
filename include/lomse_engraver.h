@@ -85,7 +85,7 @@ struct ShapeBoxInfo
         : pShape(shape), iSystem(system), iCol(col), iInstr(instr)
     {
     }
-    ShapeBoxInfo() : pShape(NULL), iSystem(-1), iCol(-1), iInstr(-1) {}
+    ShapeBoxInfo() : pShape(nullptr), iSystem(-1), iCol(-1), iInstr(-1) {}
 };
 
 
@@ -100,7 +100,7 @@ protected:
 public:
     RelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
-        , m_pShape(NULL)
+        , m_pShape(nullptr)
         , m_color( Color(0,0,0) )
     {
     }
@@ -139,7 +139,7 @@ protected:
 public:
     AuxRelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
-        , m_pShape(NULL)
+        , m_pShape(nullptr)
         , m_color( Color(0,0,0) )
     {
     }

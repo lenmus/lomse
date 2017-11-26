@@ -76,13 +76,13 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(0);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,
                                         UPoint(10.0f, 15.0f)));
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_rest() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -100,13 +100,13 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(1);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,
                                         UPoint(10.0f, 15.0f)));
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_rest() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();

@@ -126,7 +126,7 @@ protected:
 
 public:
     MyInteractor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView)
-        : Interactor(libraryScope, wpDoc, pView, NULL)
+        : Interactor(libraryScope, wpDoc, pView, nullptr)
         , m_fSelRectInvoked(false)
         , m_fSelObjInvoked(false)
     {
@@ -193,10 +193,10 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
 
-        CHECK( pIntor != NULL );
-        CHECK( pIntor->get_graphic_model() != NULL );
+        CHECK( pIntor != nullptr );
+        CHECK( pIntor->get_graphic_model() != nullptr );
     }
 
     //-- selecting objects --------------------------------------------------------------
@@ -208,7 +208,7 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -234,7 +234,7 @@ SUITE(InteractorTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -270,7 +270,7 @@ SUITE(InteractorTest)
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -311,7 +311,7 @@ SUITE(InteractorTest)
         spDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
@@ -325,7 +325,7 @@ SUITE(InteractorTest)
         spDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
@@ -349,7 +349,7 @@ SUITE(InteractorTest)
         spDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
                                             spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
@@ -375,7 +375,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -393,7 +393,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -415,7 +415,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -457,7 +457,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
-        SpInteractor pIntor( Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL) );
+        SpInteractor pIntor( Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr) );
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -479,7 +479,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(libraryScope) );
         spDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -575,7 +575,7 @@ SUITE(InteractorTest)
     //    pPresenter->insert_rest(pView, "(r q)");
 
     //    CHECK( fNotified == true );
-    //    CHECK( *cursor == NULL );
+    //    CHECK( *cursor == nullptr );
     //    cursor.start_of_content();
     //    //cout << (*cursor)->to_string() << endl;
     //    CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (clef G) (key e) (n c4 q) (r q))))" );
@@ -600,7 +600,7 @@ SUITE(InteractorTest)
     //    pPresenter->insert_rest(pView, "(r q v2)");
 
     //    CHECK( fNotified == true );
-    //    CHECK( *cursor == NULL );
+    //    CHECK( *cursor == nullptr );
     //    cursor.start_of_content();
     //    //cout << (*cursor)->to_string() << endl;
     //    CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (clef G) (key e) (n a3 q v1) (goBack start) (r q v2))))" );
@@ -626,7 +626,7 @@ SUITE(InteractorTest)
     //    pPresenter->insert_rest(pView, "(r q v2)");
 
     //    CHECK( fNotified == true );
-    //    CHECK( *cursor == NULL );
+    //    CHECK( *cursor == nullptr );
     //    cursor.start_of_content();
     //    //cout << (*cursor)->to_string() << endl;
     //    CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (clef G) (key e) (n c4 q v1) (n a3 q v1) (goBack start) (goFwd 64) (r q v2))))" );

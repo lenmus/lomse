@@ -161,7 +161,7 @@ void XmlParser::find_root()
     m_encoding = "unknown";
     if (root.type() == pugi::node_declaration)
     {
-        if (root.attribute("encoding") != NULL)
+        if (root.attribute("encoding") != nullptr)
             m_encoding = root.attribute("encoding").value();
     }
     while (root && root.type() != pugi::node_element)

@@ -544,7 +544,7 @@ void ScreenDrawer::delete_paths()
     {
         PathAttributes& attr = m_attr_storage[i];
         delete attr.fill_gradient;
-        attr.fill_gradient = NULL;
+        attr.fill_gradient = nullptr;
     }
 
     m_attr_storage.clear();
@@ -1185,7 +1185,7 @@ void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap, UPoint dest)
     double x = double(dest.x);
     double y = double(dest.y);
     model_point_to_screen(&x, &y);
-    m_pRenderer->copy_from(bmap, NULL, int(x), int(y));
+    m_pRenderer->copy_from(bmap, nullptr, int(x), int(y));
 }
 
 //------------------------------------------------------------------------

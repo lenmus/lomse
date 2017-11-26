@@ -74,7 +74,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoDocument* pDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, &doc));
         pDoc->set_version("3.7");
-        CHECK( pDoc->get_content() == NULL );
+        CHECK( pDoc->get_content() == nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_version() == "3.7" );
         delete pDoc;
@@ -130,7 +130,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
-        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_musicdata() == nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
 //        CHECK( pInstr->is_in_group() == false );
         CHECK( pInstr->get_instr_id() == "" );
@@ -155,7 +155,7 @@ SUITE(InternalModelTest)
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
         pInstr->add_staff();
-        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_musicdata() == nullptr );
         CHECK( pInstr->get_num_staves() == 2 );
         //CHECK( pInstr->is_in_group() == false );
         delete pInstr;
@@ -170,14 +170,14 @@ SUITE(InternalModelTest)
         pInstr->add_staff();
         CHECK( pInstr->get_num_staves() == 3 );
         ImoStaffInfo* pStaff = pInstr->get_staff(0);
-        CHECK( pStaff != NULL );
+        CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 735.0f );
         pStaff = pInstr->get_staff(2);
-        CHECK( pStaff != NULL );
+        CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
@@ -213,14 +213,14 @@ SUITE(InternalModelTest)
 
         CHECK( pInstr->get_num_staves() == 3 );
         ImoStaffInfo* pStaff = pInstr->get_staff(2);
-        CHECK( pStaff != NULL );
+        CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 400.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 1615.0f );
         pStaff = pInstr->get_staff(1);
-        CHECK( pStaff != NULL );
+        CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
@@ -252,9 +252,9 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_option("Render.SpacingMethod")->get_long_value() == long(k_spacing_proportional) );
         CHECK( pScore->get_option("Render.SpacingValue")->get_long_value() == 35L );
         ImoInstruments* pColInstr = pScore->get_instruments();
-        CHECK( pColInstr != NULL );
+        CHECK( pColInstr != nullptr );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups == NULL );
+        CHECK( pGroups == nullptr );
         CHECK( pColInstr->get_num_children() == 0 );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
@@ -275,9 +275,9 @@ SUITE(InternalModelTest)
         pScore->add_instrument(pInstr);
 
         ImoInstruments* pColInstr = pScore->get_instruments();
-        CHECK( pColInstr != NULL );
+        CHECK( pColInstr != nullptr );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups == NULL );
+        CHECK( pGroups == nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument(0) == pInstr );
         CHECK( pInstr->get_instr_id() == "P8" );
@@ -314,7 +314,7 @@ SUITE(InternalModelTest)
         pScore->add_instruments_group(pGroup);
 
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != NULL );
+        CHECK( pGroups != nullptr );
         //cout << "Num.instruments = " << pScore->get_num_instruments() << endl;
 
         CHECK( pScore->get_num_instruments() == 3 );
@@ -336,7 +336,7 @@ SUITE(InternalModelTest)
 //        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
 //                                    ImFactory::inject(k_imo_instrument, &doc));
 //        CHECK( pInstr1->is_in_group() == false );
-//        CHECK( pInstr1->get_group() == NULL );
+//        CHECK( pInstr1->get_group() == nullptr );
 //
 //        pGroup->add_instrument(pInstr1);
 //        CHECK( pGroup->get_num_instruments() == 1 );
@@ -434,7 +434,7 @@ SUITE(InternalModelTest)
         pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
-        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2 != nullptr );
         CHECK( pOpt2->get_bool_value() == true );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
@@ -452,7 +452,7 @@ SUITE(InternalModelTest)
         pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Dots");
-        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2 != nullptr );
         CHECK( pOpt2->get_long_value() == 27L );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
@@ -470,7 +470,7 @@ SUITE(InternalModelTest)
         pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Pi");
-        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2 != nullptr );
         CHECK( pOpt2->get_float_value() == 3.1416f );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
@@ -544,7 +544,7 @@ SUITE(InternalModelTest)
 
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
-        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2 != nullptr );
         CHECK( pOpt2->get_bool_value() == true );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument(0) == pInstr );
@@ -822,7 +822,7 @@ SUITE(InternalModelTest)
         pClef->remove_attachment(pFmt);
 
         CHECK( pClef->get_num_attachments() == 0 );
-        CHECK( pClef->get_attachments() != NULL );
+        CHECK( pClef->get_attachments() != nullptr );
 
         delete pClef;
     }
@@ -867,7 +867,7 @@ SUITE(InternalModelTest)
         pNote->remove_from_relation(pTie);
 
         CHECK( pNote->get_num_relations() == 0 );
-        CHECK( pNote->get_relations() != NULL );
+        CHECK( pNote->get_relations() != nullptr );
 
         delete pNote;
     }
@@ -994,7 +994,7 @@ SUITE(InternalModelTest)
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         ImoStyle* pStyle = pScore->get_default_style();
 
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Default style" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_file() == "" );
@@ -1035,7 +1035,7 @@ SUITE(InternalModelTest)
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyle* pStyle = pDoc->get_style();
 
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Default style" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_name() == "Liberation serif" );
@@ -1055,7 +1055,7 @@ SUITE(InternalModelTest)
         CHECK( (*it)->is_paragraph() == true );
         ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
         ImoStyle* pStyle = pImo->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Paragraph" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_name() == "Liberation serif" );
@@ -1078,7 +1078,7 @@ SUITE(InternalModelTest)
         ImoObj* pTxt = pImo->get_child(0);
         CHECK( pTxt->is_text_item() );
         ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style(false);
-        CHECK( pStyle == NULL );
+        CHECK( pStyle == nullptr );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
@@ -1094,7 +1094,7 @@ SUITE(InternalModelTest)
         ImoObj* pTxt = pImo->get_child(0);
         CHECK( pTxt->is_text_item() );
         ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style();
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Paragraph" );
     }
 
@@ -1125,7 +1125,7 @@ SUITE(InternalModelTest)
         ImoDocument* pDoc = doc.get_imodoc();
         ImoStyle* pStyle = pDoc->create_private_style();
 
-        CHECK( pStyle != NULL );
+        CHECK( pStyle != nullptr );
         CHECK( pStyle->font_size() == 12.0f );
 
         pStyle->font_size( 21.0f) ;
@@ -1475,7 +1475,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoMultiColumn* pMC = ImFactory::inject_multicolumn(&doc);
 
-        CHECK( pMC != NULL );
+        CHECK( pMC != nullptr );
         CHECK( pMC->is_multicolumn() == true );
         CHECK( pMC->get_num_columns() == 0 );
 
@@ -1501,7 +1501,7 @@ SUITE(InternalModelTest)
 //        Document doc(m_libraryScope);
 //        ImoWidget* pImo = static_cast<ImoWidget*>( ImFactory::inject(k_imo_widget, &doc) );
 //
-//        CHECK( pImo != NULL );
+//        CHECK( pImo != nullptr );
 //        CHECK( pImo->is_imo_widget() == true );
 ////        CHECK( pImo->get_size() == USize(0.0f, 0.0f) );
 //
@@ -1514,7 +1514,7 @@ SUITE(InternalModelTest)
 //        doc.create_empty();
 //        ImoWidget* pImo = doc.add_widget((1000.0f, 600.0f);
 //
-//        CHECK( pImo != NULL );
+//        CHECK( pImo != nullptr );
 //        CHECK( pImo->is_imo_widget() == true );
 //        CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
 //    }
@@ -1527,7 +1527,7 @@ SUITE(InternalModelTest)
     //
     //    pImo->add()
 
-    //    CHECK( pImo != NULL );
+    //    CHECK( pImo != nullptr );
     //    CHECK( pImo->is_imo_widget() == true );
     //    CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
     //}

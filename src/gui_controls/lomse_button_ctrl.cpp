@@ -53,9 +53,9 @@ ButtonCtrl::ButtonCtrl(LibraryScope& libScope, Control* pParent,
     , m_normalColor( Color(255,255,255) )       //white
     , m_overColor( Color(255,200,0) )           //orange
     , m_fMouseIn(false)
-    , m_pMainBox(NULL)
+    , m_pMainBox(nullptr)
 {
-    m_style = (pStyle == NULL ? create_default_style() : pStyle);
+    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
 
     measure();
 

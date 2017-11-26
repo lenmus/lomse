@@ -46,8 +46,8 @@ TableLayouter::TableLayouter(ImoContentObj* pItem, Layouter* pParent,
     : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
     , m_libraryScope(libraryScope)
     , m_pTable( static_cast<ImoTable*>(pItem) )
-    , m_headLayouter(NULL)
-    , m_bodyLayouter(NULL)
+    , m_headLayouter(nullptr)
+    , m_bodyLayouter(nullptr)
 {
 }
 
@@ -285,7 +285,7 @@ TableSectionLayouter::TableSectionLayouter(ImoContentObj* pItem, Layouter* pPare
     , m_numSectionRows(numRows)
     , m_numTableColumns(numCols)
     , m_tableWidth(tableWidth)
-    , m_pRowLayouter(NULL)
+    , m_pRowLayouter(nullptr)
 {
 }
 
@@ -331,7 +331,7 @@ void TableSectionLayouter::create_cell_layouters()
     // - assigns x position to the cells
 
     int numCells = m_numSectionRows * m_numTableColumns;
-    m_cellLayouters.assign(numCells, (TableCellLayouter*)NULL);
+    m_cellLayouters.assign(numCells, (TableCellLayouter*)nullptr);
 
     vector<bool> freeCell;
     freeCell.assign(numCells, true);
@@ -409,7 +409,7 @@ LUnits TableSectionLayouter::add_row(GmoBox* pParentMainBox)
     m_availableHeight -= height;
 
     delete m_pRowLayouter;
-    m_pRowLayouter = NULL;
+    m_pRowLayouter = nullptr;
 
     return height;
 }
@@ -417,7 +417,7 @@ LUnits TableSectionLayouter::add_row(GmoBox* pParentMainBox)
 //---------------------------------------------------------------------------------------
 bool TableSectionLayouter::is_row_ready()
 {
-    return (m_pRowLayouter != NULL);
+    return (m_pRowLayouter != nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -546,7 +546,7 @@ void TableRowLayouter::layout_in_box()
         for (int iCol=0; iCol < m_numColumns; ++iCol)
         {
             int iCell = iRow * m_numColumns + iCol;
-            if (m_cellLayouters[iCell] != NULL)
+            if (m_cellLayouters[iCell] != nullptr)
             {
                 LUnits height = layout_cell(m_cellLayouters[iCell], m_pItemMainBox,
                                             UPoint(xPos, m_pageCursor.y));
@@ -639,7 +639,7 @@ void TableCellSizer::create_rowspan_table()
         int iTable = iRow * m_numColumns;
         for (int iCol=0; iCol < m_numColumns; ++iCol, ++iCell, ++iTable)
         {
-            if (m_cellLayouters[iCell] != NULL)
+            if (m_cellLayouters[iCell] != nullptr)
             {
                 int r = m_cellLayouters[iCell]->get_rowspan();
                 int iT = iTable;
@@ -699,7 +699,7 @@ void TableCellSizer::assing_height_to_cells()
         int iCell = (m_iFirstRow + iRow) * m_numColumns;
         for (int iCol=0; iCol < m_numColumns; ++iCol, ++iCell)
         {
-            if (m_cellLayouters[iCell] != NULL)
+            if (m_cellLayouters[iCell] != nullptr)
             {
                 int iH = iCell;
                 LUnits height = m_heights[iH];
@@ -731,7 +731,7 @@ void TableCellSizer::reposition_cells()
         int iCell = (m_iFirstRow + iRow) * m_numColumns;
         for (int iCol=0; iCol < m_numColumns; ++iCol, ++iCell)
         {
-            if (m_cellLayouters[iCell] != NULL)
+            if (m_cellLayouters[iCell] != nullptr)
             {
                 GmoBox* pCellBox = m_cellLayouters[iCell]->get_item_main_box();
                 pCellBox->shift_origin(shift);

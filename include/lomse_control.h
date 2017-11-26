@@ -72,7 +72,7 @@ protected:
         , m_pParent(pParent)
         , m_ownerImoId(k_no_imoid)
         , m_language()
-        , m_style(NULL)
+        , m_style(nullptr)
         , m_fEnabled(true)
         , m_fVisible(true)
         , m_id(k_no_imoid)
@@ -159,7 +159,7 @@ public:
         else if (m_pParent)
             return m_pParent->get_owner_imo();
         else
-            return NULL;
+            return nullptr;
     }
 
     //setters

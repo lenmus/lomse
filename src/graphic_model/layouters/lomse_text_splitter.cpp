@@ -97,7 +97,7 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace,
 {
     // Returns WordEngrouter with a text chunk of size <= maxSize. This chunk
     // always contains full words (splits at spaces).
-    // If not enough space for a word, returns NULL
+    // If not enough space for a word, returns nullptr
     // If no more text, returns NullEngrouter
 
     if (!more_text())
@@ -154,14 +154,14 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace,
     else
     {
         LOMSE_LOG_ERROR("Text without spaces is longer than line size");
-        //TODO: If a text without spaces is longer than line size, returning NULL
+        //TODO: If a text without spaces is longer than line size, returning nullptr
         //will enter the program in an infinite loop, as TextSplitter will be invoked
         //again. Therefore, it is necessary to deal with this case. A possibility is
-        //to save information about maxSize and a flag signaling that NULL was returned
-        //in previous invocation. Then, when NULL is going to be returned, if NULL
+        //to save information about maxSize and a flag signaling that nullptr was returned
+        //in previous invocation. Then, when nullptr is going to be returned, if nullptr
         //was previously returned and current maxSize == saved maxSize, it is clear
         //that text must be split in non-spaces position.
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -188,7 +188,7 @@ Engrouter* ChineseTextSplitter::get_next_text_engrouter(LUnits maxSpace,
                                                         bool UNUSED(fRemoveLeftSpaces))
 {
     if (!more_text())
-        return NULL;
+        return nullptr;
 
     LUnits width = 0.0f;
     size_t i = m_start;
@@ -214,14 +214,14 @@ Engrouter* ChineseTextSplitter::get_next_text_engrouter(LUnits maxSpace,
     else
     {
         LOMSE_LOG_ERROR("Text without spaces is longer than line size");
-        //TODO: If a text without spaces is longer than line size, returning NULL
+        //TODO: If a text without spaces is longer than line size, returning nullptr
         //will enter the program in an infinite loop, as TextSplitter will be invoked
         //again. Therefore, it is necessary to deal with this case. A possibility is
-        //to save information about maxSize and a flag signaling that NULL was returned
-        //in previous invocation. Then, when NULL is going to be returned, if NULL
+        //to save information about maxSize and a flag signaling that nullptr was returned
+        //in previous invocation. Then, when nullptr is going to be returned, if nullptr
         //was previously returned and current maxSize == saved maxSize, it is clear
         //that text must be split in non-spaces position.
-        return NULL;
+        return nullptr;
     }
 }
 

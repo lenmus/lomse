@@ -130,7 +130,7 @@ protected:
 public:
     NullLayouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
                  LibraryScope& libraryScope)
-        : Layouter(pItem, pParent, pGModel, libraryScope, NULL, false)
+        : Layouter(pItem, pParent, pGModel, libraryScope, nullptr, false)
     {
     }
     ~NullLayouter() {}

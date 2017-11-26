@@ -58,16 +58,16 @@ public:
 
     NoteEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_pMeter(NULL)
-        , m_pEngrv(NULL)
-        , m_pTuplet(NULL)
-        , m_pNote1(NULL)
-        , m_pNote2(NULL)
-        , m_pNote3(NULL)
-        , m_pShape1(NULL)
-        , m_pShape2(NULL)
-        , m_pShape3(NULL)
-        , m_pStorage(NULL)
+        , m_pMeter(nullptr)
+        , m_pEngrv(nullptr)
+        , m_pTuplet(nullptr)
+        , m_pNote1(nullptr)
+        , m_pNote2(nullptr)
+        , m_pNote3(nullptr)
+        , m_pShape1(nullptr)
+        , m_pShape2(nullptr)
+        , m_pShape3(nullptr)
+        , m_pStorage(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -92,7 +92,7 @@ public:
         ImoTupletDto dto1;
         dto1.set_tuplet_type(ImoTupletDto::k_start);
 
-        m_pNote1->include_in_relation(&doc, m_pTuplet, NULL);
+        m_pNote1->include_in_relation(&doc, m_pTuplet, nullptr);
         m_pNote1->set_step(2);
 
         m_pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
@@ -101,15 +101,15 @@ public:
         ImoTupletDto dto2;
         dto2.set_tuplet_type(ImoTupletDto::k_continue);
 
-        m_pNote2->include_in_relation(&doc, m_pTuplet, NULL);
+        m_pNote2->include_in_relation(&doc, m_pTuplet, nullptr);
 
         m_pNote3 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
 
         ImoTupletDto dto3;
         dto3.set_tuplet_type(ImoTupletDto::k_stop);
-        m_pNote3->include_in_relation(&doc, m_pTuplet, NULL);
+        m_pNote3->include_in_relation(&doc, m_pTuplet, nullptr);
 
-        m_pMeter = LOMSE_NEW ScoreMeter(NULL, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
         m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
@@ -158,12 +158,12 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -183,12 +183,12 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_quarter);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -210,12 +210,12 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -240,12 +240,12 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_whole);
         pNote->set_dots(1);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -268,12 +268,12 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_eighth);
         pNote->set_dots(2);
 
-        ScoreMeter meter(NULL, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
-        CHECK( pShape != NULL );
+        CHECK( pShape != nullptr );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
         std::list<GmoShape*>::iterator it = components.begin();
@@ -300,7 +300,7 @@ SUITE(NoteEngraverTest)
 //        create_tuplet();
 //        TupletEngraver* pEngrv = dynamic_cast<TupletEngraver*>(m_pStorage->get_engraver(m_pTuplet));
 //
-//        CHECK( pEngrv != NULL );
+//        CHECK( pEngrv != nullptr );
 //        CHECK( pEngrv->get_start_noterest() == m_pNote1 );
 //        CHECK( pEngrv->get_end_noterest() == m_pNote3 );
 //

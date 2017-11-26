@@ -591,7 +591,7 @@ protected:
 
 public:
     GmoBoxControl(Control* ctrl, const UPoint& origin, LUnits width, LUnits height,
-                  ImoStyle* style=NULL);
+                  ImoStyle* style=nullptr);
 
     virtual ~GmoBoxControl() {}
 

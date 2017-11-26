@@ -223,7 +223,7 @@ InputStream* FileSystem::open_input_stream(const string& filelocator)
             throw runtime_error("[FileSystem::open_input_stream] Invalid file locator protocol");
         }
     }
-    return NULL;    //compiler happy
+    return nullptr;    //compiler happy
 }
 
 

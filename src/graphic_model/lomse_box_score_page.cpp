@@ -68,7 +68,7 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 
 	int i = iSystem - m_nFirstSystem;
 	if (i < 0)
-		return NULL;		//the system is not in this page
+		return nullptr;		//the system is not in this page
 	else
 		return static_cast<GmoBoxSystem*>(m_childBoxes[i]);
 }

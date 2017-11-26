@@ -149,7 +149,7 @@ protected:
     int m_renderSpacingOpts;        //options for spacing and lines breaker algorithm
 
 public:
-    LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
+    LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=nullptr);
     ~LibraryScope();
 
     inline ostream& default_reporter() { return m_reporter; }

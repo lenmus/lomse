@@ -46,7 +46,7 @@ namespace lomse
 // Image implementation
 //=======================================================================================
 Image::Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize)
-    : m_bmap(NULL)
+    : m_bmap(nullptr)
     , m_error("")
 {
     //AWARE: ownership of imgbuf is transferred to this Image object
@@ -67,7 +67,7 @@ Image::Image()
 
     //allocate a buffer for the bitmap
     int bmpsize = 24 * 24 * 4;   //24px width, 24px height, 4bytes per pixel (RGBA)
-    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == nullptr)
     {
         LOMSE_LOG_ERROR("[Image constructor]: not enough memory for image buffer");
         throw runtime_error("[Image constructor]: not enough memory for image buffer");
@@ -86,7 +86,7 @@ Image::Image(const Image& img)
     m_error = "";
 
     int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
-    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == nullptr)
     {
         LOMSE_LOG_ERROR("[Image copy constructor]: not enough memory for image buffer");
         throw runtime_error("[Image copy constructor]: not enough memory for image buffer");
@@ -108,7 +108,7 @@ Image& Image::operator=(const Image &img)
         m_error = "";
 
         int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
-        if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+        if ((m_bmap = (unsigned char*)malloc(bmpsize)) == nullptr)
         {
             LOMSE_LOG_ERROR("[Image::operator=]: not enough memory for image buffer");
             throw runtime_error("[Image::operator=]: not enough memory for image buffer");

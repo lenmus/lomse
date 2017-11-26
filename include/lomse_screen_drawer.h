@@ -176,7 +176,7 @@ public:
     //void FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos);
     //void FtSetTextPositionPixels(lmPixels vxPos, lmPixels vyPos);
     //void FtGetTextExtent(const wxString& sText, lmLUnits* pWidth, lmLUnits* pHeight,
-    //                     lmLUnits* pDescender = NULL, lmLUnits* pAscender = NULL);
+    //                     lmLUnits* pDescender = nullptr, lmLUnits* pAscender = nullptr);
     //lmURect FtGetGlyphBounds(unsigned int nGlyph);
     //wxRect FtGetGlyphBoundsInPixels(unsigned int nGlyph);
 

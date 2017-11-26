@@ -81,9 +81,9 @@ public:
             depth_first_iterator(Tree<T>* tree)
                 : m_tree(tree), m_currentNode(tree->get_root()) {}
             depth_first_iterator(Tree<T>* tree, bool UNUSED(fLast))
-                : m_tree(tree), m_currentNode(NULL)  {}
-            depth_first_iterator() : m_tree(NULL), m_currentNode(NULL)  {}
-            depth_first_iterator(T* node) : m_tree(NULL), m_currentNode(node)  {}
+                : m_tree(tree), m_currentNode(nullptr)  {}
+            depth_first_iterator() : m_tree(nullptr), m_currentNode(nullptr)  {}
+            depth_first_iterator(T* node) : m_tree(nullptr), m_currentNode(node)  {}
             virtual ~depth_first_iterator() {}
 
             void operator =(T* node) { m_currentNode = node; }
@@ -98,10 +98,10 @@ public:
 
             depth_first_iterator& operator ++()
             {
-                if (m_currentNode == NULL)
+                if (m_currentNode == nullptr)
                     return *this;   //we are at end and will remain there
 
-	            if (m_currentNode->get_first_child() != NULL)
+	            if (m_currentNode->get_first_child() != nullptr)
                 {
 		            m_currentNode = m_currentNode->get_first_child();
 	            }
@@ -114,7 +114,7 @@ public:
                     {
                         //go back and proceed with next sibling
                         T* node = m_currentNode;
-                        while(node && node->get_next_sibling() == NULL)
+                        while(node && node->get_next_sibling() == nullptr)
                         {
                             node = node->get_parent();
                         }
@@ -126,15 +126,15 @@ public:
 
             depth_first_iterator& operator --()
             {
-                if (m_currentNode == NULL)
+                if (m_currentNode == nullptr)
                 {
                     //at end: move to last element
-                    if (m_tree != NULL)
+                    if (m_tree != nullptr)
                         m_currentNode = m_tree->get_last_node();
                     return *this;
                 }
 
-	            if (m_currentNode->get_prev_sibling() != NULL)
+	            if (m_currentNode->get_prev_sibling() != nullptr)
                 {
 		            m_currentNode = m_currentNode->get_prev_sibling();
 	            }
@@ -185,8 +185,8 @@ protected:
     T* m_nextSibling;
     int m_nModified;
 
-    TreeNode() : m_parent(NULL), m_firstChild(NULL), m_lastChild(NULL),
-                   m_prevSibling(NULL), m_nextSibling(NULL), m_nModified(0) {};
+    TreeNode() : m_parent(nullptr), m_firstChild(nullptr), m_lastChild(nullptr),
+                   m_prevSibling(nullptr), m_nextSibling(nullptr), m_nModified(0) {};
 
 public:
     virtual ~TreeNode() {}
@@ -217,10 +217,10 @@ public:
     void clear_modified();
 
     /// returns 'true' if this node is terminal (doesn't have children)
-	virtual bool is_terminal() const { return m_firstChild==NULL; }
+	virtual bool is_terminal() const { return m_firstChild==nullptr; }
 
 	/// returns true if this node is the root, that is, if there is no parent node
-	virtual bool is_root() const { return m_parent == NULL; }
+	virtual bool is_root() const { return m_parent == nullptr; }
 
     //methods related to children
 	virtual void append_child(T* child);
@@ -235,7 +235,7 @@ public:
             T* m_currentNode;
 
         public:
-            children_iterator() : m_currentNode(NULL) {}
+            children_iterator() : m_currentNode(nullptr) {}
             children_iterator(T* n) : m_currentNode(n) {}
             children_iterator(TreeNode<T>* n) { m_currentNode =  dynamic_cast<T*>(n); }
             virtual ~children_iterator() {}
@@ -280,7 +280,7 @@ void TreeNode<T>::append_child(T* child)
     //links in child
     child->set_parent(this);
     child->set_prev_sibling( m_lastChild );
-    child->set_next_sibling( static_cast<T*>(NULL) );
+    child->set_next_sibling( static_cast<T*>(nullptr) );
 
     //links in parent
     if (!m_firstChild)
@@ -402,11 +402,11 @@ template <class T>
 T* Tree<T>::get_last_node()
 {
     TreeNode<T>* node = get_root();
-    if (node == NULL)
-        return NULL;
+    if (node == nullptr)
+        return nullptr;
 
     TreeNode<T>* child = node->get_last_child();
-    while (child != NULL)
+    while (child != nullptr)
     {
         node = child;
         child = node->get_last_child();
@@ -454,7 +454,7 @@ typename Tree<T>::depth_first_iterator Tree<T>::erase(depth_first_iterator posit
             return nodeToErase->get_parent()->get_next_sibling();
         else
         {
-            set_root(NULL);
+            set_root(nullptr);
             return end();
         }
     }

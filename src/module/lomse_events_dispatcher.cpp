@@ -45,10 +45,10 @@ namespace lomse
 // EventsDispatcher implementation
 //=======================================================================================
 EventsDispatcher::EventsDispatcher()
-    : m_pThread(NULL)
+    : m_pThread(nullptr)
     , m_fStopLoop(false)
 #if (LOMSE_USE_BOOST_ASIO == 1)
-    , m_pFakeWork(NULL)
+    , m_pFakeWork(nullptr)
 #endif
 {
 }
