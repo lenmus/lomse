@@ -3288,8 +3288,9 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_sound_info() == true );
         ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == -1 );
-        CHECK( pInfo->get_midi_program() == 56 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == -1 );
+        CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3313,8 +3314,9 @@ SUITE(LdpAnalyserTest)
 
         ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == -1 );
-        CHECK( pInfo->get_midi_program() == 56 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == -1 );
+        CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3338,8 +3340,9 @@ SUITE(LdpAnalyserTest)
 
         ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == 10 );
-        CHECK( pInfo->get_midi_program() == 56 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 10 );
+        CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3369,8 +3372,9 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == 12 );
-        CHECK( pInfo->get_midi_program() == 56 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 12 );
+        CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
         delete pIModel;

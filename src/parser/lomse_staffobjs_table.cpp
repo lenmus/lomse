@@ -189,12 +189,12 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         if (pA->is_note_rest() && pB->get_duration() == 0.0f)
             return true;
 
-        //direction can not go between clefs/key/time ==>
+        //<direction> and <sound> can not go between clefs/key/time ==>
         //clef/key/time can not go after direction in other instruments/staves
-        if (pA->is_direction()
+        if ((pA->is_direction() || pA->is_sound_change())
             && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
         {
-            return (a->line() != b->line());    //move clef/key/time before direction
+            return (a->line() != b->line());    //move clef/key/time before 'A' object
         }
 
 ////        //clef in other staff can not go after key or time signature

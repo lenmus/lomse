@@ -49,6 +49,7 @@
 #include "lomse_ldp_analyser.h"
 #include "lomse_time.h"
 #include "lomse_autobeamer.h"
+#include "lomse_im_attributes.h"
 
 
 #include <iostream>
@@ -358,12 +359,10 @@ protected:
 
     // 'get' methods just update m_childToAnalyse to point to the next node to analyse
     bool get_mandatory(const string& tag);
-//    bool get_optional(EMxlTag type);
     bool get_optional(const string& type);
 
     // 'analyse' methods do a 'get' and, if found, analyse the found element
     bool analyse_mandatory(const string& tag, ImoObj* pAnchor=nullptr);
-//    bool analyse_optional(EMxlTag type, ImoObj* pAnchor=nullptr);
     bool analyse_optional(const string& name, ImoObj* pAnchor=nullptr);
     string analyze_mandatory_child_pcdata(const string& name);
     string analyze_optional_child_pcdata(const string& name, const string& sDefault);
@@ -371,14 +370,12 @@ protected:
                                           int nMin, int nMax, int nDefault);
     float analyze_optional_child_pcdata_float(const string& name,
                                               float rMin, float rMax, float rDefault);
-//    void analyse_one_or_more(EMxlTag* pValid, int nValid);
-//    void analyse_staffobjs_options(ImoStaffObj* pSO);
-//    void analyse_scoreobj_options(ImoScoreObj* pSO);
 
     //methods to analyse attributes of current node
     bool has_attribute(const string& name);
     string get_attribute(const string& name);
     int get_attribute_as_integer(const string& name, int nNumber);
+    float get_attribute_as_float(const string& name, float rDefault);
     string get_mandatory_string_attribute(const string& name, const string& sDefault,
                                           const string& element);
     string get_optional_string_attribute(const string& name, const string& sDefault);
@@ -386,9 +383,14 @@ protected:
                                         const string& element);
     int get_optional_int_attribute(const string& name, int nDefault);
     bool get_optional_yes_no_attribute(const string& name, bool fDefault);
+    float get_optional_float_attribute(const string& name, float rDefault);
 
     //methods to get value of current node
     int get_cur_node_value_as_integer(int nDefault);
+
+    //methods to get value of current child
+    int get_child_pcdata_int(const string& name, int nMin, int nMax, int nDefault);
+    float get_child_pcdata_float(const string& name, float rMin, float rMax, float rDefault);
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -1138,13 +1140,53 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 }
 
 //---------------------------------------------------------------------------------------
+float MxlElementAnalyser::get_attribute_as_float(const string& name, float rDefault)
+{
+    string number = m_analysedNode.attribute_value(name);
+    float rNumber;
+    bool fError = false;
+    try
+    {
+        size_t sz;
+        rNumber = std::stof(number, &sz);
+        fError = (number.size() != sz);
+    }
+    catch (const std::invalid_argument& ia)
+    {
+        fError = true;
+    }
+
+    if (fError)
+    {
+        stringstream replacement;
+        replacement << rDefault;
+        report_msg(get_line_number(),
+            "Invalid real number '" + number + "'. Replaced by '"
+            + replacement.str() + "'.");
+        return rDefault;
+    }
+    else
+        return rNumber;
+}
+
+//---------------------------------------------------------------------------------------
 int MxlElementAnalyser::get_optional_int_attribute(const string& name,
-                                                       int nDefault)
+                                                   int nDefault)
 {
     if (has_attribute(&m_analysedNode, name))
         return get_attribute_as_integer(name, nDefault);
     else
         return nDefault;
+}
+
+//---------------------------------------------------------------------------------------
+float MxlElementAnalyser::get_optional_float_attribute(const string& name,
+                                                       float rDefault)
+{
+    if (has_attribute(&m_analysedNode, name))
+        return get_attribute_as_float(name, rDefault);
+    else
+        return rDefault;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1269,36 +1311,41 @@ int MxlElementAnalyser::analyze_optional_child_pcdata_int(const string& name,
                                                           int nDefault)
 {
     if (get_optional(name))
+        return get_child_pcdata_int(name, nMin, nMax, nDefault);
+    else
+        return nDefault;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlElementAnalyser::get_child_pcdata_int(const string& name,
+                                             int nMin, int nMax, int nDefault)
+{
+    bool fError = false;
+    string number = m_childToAnalyse.value();
+    long nNumber;
+    std::istringstream iss(number);
+    if ((iss >> std::dec >> nNumber).fail())
+        fError = true;
+    else
     {
-        bool fError = false;
-        string number = m_childToAnalyse.value();
-        long nNumber;
-        std::istringstream iss(number);
-        if ((iss >> std::dec >> nNumber).fail())
+        if (nNumber < nMin || nNumber > nMax)
             fError = true;
-        else
-        {
-            if (nNumber < nMin || nNumber > nMax)
-                fError = true;
-        }
-
-        if (fError)
-        {
-            stringstream range;
-            range << nMin << " to " << nMax;
-            stringstream sDefault;
-            sDefault << nDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                name + ": invalid value " + number + ". Must be integer in range "
-                + range.str() + ". Value " + sDefault.str() + " assumed.");
-            return nDefault;
-
-        }
-        else
-            return nNumber;
     }
 
-	return nDefault;
+    if (fError)
+    {
+        stringstream range;
+        range << nMin << " to " << nMax;
+        stringstream sDefault;
+        sDefault << nDefault;
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            name + ": invalid value " + number + ". Must be integer in range "
+            + range.str() + ". Value " + sDefault.str() + " assumed.");
+        return nDefault;
+
+    }
+    else
+        return nNumber;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1307,36 +1354,41 @@ float MxlElementAnalyser::analyze_optional_child_pcdata_float(const string& name
                                                               float rDefault)
 {
     if (get_optional(name))
+        return get_child_pcdata_float(name, rMin, rMax, rDefault);
+    else
+        return rDefault;
+}
+
+//---------------------------------------------------------------------------------------
+float MxlElementAnalyser::get_child_pcdata_float(const string& name,
+                                                 float rMin, float rMax, float rDefault)
+{
+    bool fError = false;
+    string number = m_childToAnalyse.value();
+    long rNumber;
+    std::istringstream iss(number);
+    if ((iss >> rNumber).fail())
+        fError = true;
+    else
     {
-        bool fError = false;
-        string number = m_childToAnalyse.value();
-        long rNumber;
-        std::istringstream iss(number);
-        if ((iss >> rNumber).fail())
+        if (rNumber < rMin || rNumber > rMax)
             fError = true;
-        else
-        {
-            if (rNumber < rMin || rNumber > rMax)
-                fError = true;
-        }
-
-        if (fError)
-        {
-            stringstream range;
-            range << rMin << " to " << rMax;
-            stringstream sDefault;
-            sDefault << rDefault;
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                name + ": invalid value " + number + ". Must be decimal in range "
-                + range.str() + ". Value " + sDefault.str() + " assumed.");
-            return rDefault;
-
-        }
-        else
-            return rNumber;
     }
 
-	return rDefault;
+    if (fError)
+    {
+        stringstream range;
+        range << rMin << " to " << rMax;
+        stringstream sDefault;
+        sDefault << rDefault;
+        report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+            name + ": invalid value " + number + ". Must be decimal in range "
+            + range.str() + ". Value " + sDefault.str() + " assumed.");
+        return rDefault;
+
+    }
+    else
+        return rNumber;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3415,14 +3467,18 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//<!ELEMENT midi-device (#PCDATA)>
-//<!ATTLIST midi-device
-//    port CDATA #IMPLIED
-//    id IDREF #IMPLIED
-//>
+//@<!ELEMENT midi-device (#PCDATA)>
+//@<!ATTLIST midi-device
+//@    port CDATA #IMPLIED
+//@    id IDREF #IMPLIED
+//@>
 //
 class MidiDeviceMxlAnalyser : public MxlElementAnalyser
 {
+protected:
+    ImoSounds* m_pSounds;
+    ImoSoundChange* m_pSC;
+
 public:
     MidiDeviceMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                           LibraryScope& libraryScope, ImoObj* pAnchor)
@@ -3431,71 +3487,141 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
-        if (!pInstr)
+        //anchor parent is ImoSounds when analysing <score-instrument> or
+        //ImoSoundChange when analysing <sound>
+        m_pSounds = dynamic_cast<ImoSounds*>(m_pAnchor);
+        m_pSC = dynamic_cast<ImoSoundChange*>(m_pAnchor);
+        if (m_pSounds == nullptr && m_pSC == nullptr)
         {
-            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is neither ImoSounds nor ImoSoundChange.");
             return nullptr;
         }
 
-        //attrb: id
+        ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+
+        //attrb: id IDREF #IMPLIED
         string id = get_optional_string_attribute("id", "");
-        ImoSoundInfo* pInfo = nullptr;
         if (!id.empty())
         {
-            pInfo = pInstr->get_sound_info(id);
+            //validate id
+            ImoSoundInfo* pInfo = nullptr;
+            if (m_pSC && !pInstr)
+            {
+                error_msg("Unit test error? Can not analyse <midi-instrument> when not "
+                          "inside a <part> element. Ignored.");
+                return nullptr;
+            }
+            if (pInstr)
+                pInfo = pInstr->get_sound_info(id);
+            else if (m_pSounds)
+                pInfo = m_pSounds->get_sound_info(id);
             if (!pInfo)
             {
                 error_msg("id '" + id + "' doesn't match any <score-instrument>"
-                           + ". <midi-device> ignored.");
+                           + ". <midi-instrument> ignored.");
                 return nullptr;
             }
         }
 
-        // attrb: port
+
+        // attrb: port CDATA #IMPLIED
         int port = get_optional_int_attribute("port", 1);
 
         // midi-device name
         string name = m_analysedNode.value();
 
 
+        //If 'id' attribute is missing, the device assignment affects
+        //all ImoSoundInfo elements in this Instrument.
         if (!id.empty())
         {
-            pInfo->set_midi_port(port - 1);
-            pInfo->set_midi_device_name(name);
+            ImoMidiInfo* pMidi = get_midi_info(id);
+            pMidi->set_midi_port(port - 1);
+            pMidi->set_midi_device_name(name);
         }
         else
         {
-            int  nSounds = pInstr->get_num_sounds();
-            for (int i=0; i < nSounds; ++i)
+            if (m_pSounds)
             {
-                ImoSoundInfo* pInfo = pInstr->get_sound_info(i);
-                pInfo->set_midi_port(port - 1);
-                pInfo->set_midi_device_name(name);
+                int  nSounds = m_pSounds->get_num_sounds();
+                for (int i=0; i < nSounds; ++i)
+                {
+                    ImoSoundInfo* pInfo = m_pSounds->get_sound_info(i);
+                    ImoMidiInfo* pMidi = pInfo->get_midi_info();
+                    pMidi->set_midi_port(port - 1);
+                    pMidi->set_midi_device_name(name);
+                }
+            }
+            else    //m_pSC != nullptr, analysing <sound>
+            {
+                ImoSounds* pSounds = pInstr->get_sounds();
+                int  nSounds = pSounds->get_num_sounds();
+                for (int i=0; i < nSounds; ++i)
+                {
+                    ImoSoundInfo* pInfo = pSounds->get_sound_info(i);
+                    ImoMidiInfo* pMidi = get_midi_info(pInfo->get_score_instr_id());
+                    pMidi->set_midi_port(port - 1);
+                    pMidi->set_midi_device_name(name);
+                }
             }
         }
 
         return nullptr;
     }
 
+protected:
+
+    ImoMidiInfo* get_midi_info(const string& id)
+    {
+        //get midiInfo or create a new one
+        ImoMidiInfo* pMidi = nullptr;
+        if (m_pSC)
+        {
+            //analysing <sound>
+            //ImoMidiInfo could have been created analysing <midi-device>.
+            //But if not created, create it here
+            pMidi = m_pSC->get_midi_info(id);
+            if (!pMidi)
+            {
+                Document* pDoc = m_pAnalyser->get_document_being_analysed();
+                pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, pDoc) );
+                pMidi->set_score_instr_id(id);
+                m_pSC->append_child_imo(pMidi);
+
+                //copy data from latest MidiInfo for this score-instrument
+                ImoMidiInfo* pMidiOld = m_pAnalyser->get_latest_midi_info_for(id);
+                if (pMidi)
+                    *pMidi = *pMidiOld;
+                m_pAnalyser->set_latest_midi_info_for(id, pMidi);
+            }
+        }
+        else
+        {
+            ImoSoundInfo* pInfo = m_pSounds->get_sound_info(id);
+            pMidi = pInfo->get_midi_info();
+        }
+        return pMidi;
+    }
+
 };
 
 
 //@--------------------------------------------------------------------------------------
-//<!ELEMENT midi-instrument
-//    (midi-channel?, midi-name?, midi-bank?, midi-program?,
-//     midi-unpitched?, volume?, pan?, elevation?)>
-//<!ATTLIST midi-instrument
-//    id IDREF #REQUIRED
-//>
-//<!ELEMENT midi-channel (#PCDATA)>		1 to 16
-//<!ELEMENT midi-name (#PCDATA)>
-//<!ELEMENT midi-bank (#PCDATA)>		1 to 16,384
-//<!ELEMENT midi-program (#PCDATA)>		1 to 128
-//<!ELEMENT midi-unpitched (#PCDATA)>	1 to 128
-//<!ELEMENT volume (#PCDATA)>			0 to 100, with decimal values
-//<!ELEMENT pan (#PCDATA)>			    -180 and 180, with decimal values
-//<!ELEMENT elevation (#PCDATA)>		-90 and 90, with decimal values
+//@<!ELEMENT midi-instrument
+//@    (midi-channel?, midi-name?, midi-bank?, midi-program?,
+//@     midi-unpitched?, volume?, pan?, elevation?)>
+//@<!ATTLIST midi-instrument
+//@    id IDREF #REQUIRED
+//@>
+//@<!ELEMENT midi-channel (#PCDATA)>	1 to 16
+//@<!ELEMENT midi-name (#PCDATA)>
+//@<!ELEMENT midi-bank (#PCDATA)>		1 to 16,384
+//@<!ELEMENT midi-program (#PCDATA)>	1 to 128
+//@<!ELEMENT midi-unpitched (#PCDATA)>	1 to 128
+//@<!ELEMENT volume (#PCDATA)>			0 to 100, with decimal values
+//@<!ELEMENT pan (#PCDATA)>			    -180 and 180, with decimal values
+//@<!ELEMENT elevation (#PCDATA)>		-90 and 90, with decimal values
 //
 class MidiInstrumentMxlAnalyser : public MxlElementAnalyser
 {
@@ -3506,10 +3632,13 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
-        if (!pInstr)
+        //anchor parent is ImoSounds when analysing <score-instrument> or
+        //ImoSoundChange when analysing <sound>
+        ImoSounds* pSounds = dynamic_cast<ImoSounds*>(m_pAnchor);
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(m_pAnchor);
+        if (pSounds == nullptr && pSC == nullptr)
         {
-            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoInstrument");
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is neither ImoSounds nor ImoSoundChange.");
             return nullptr;
         }
 
@@ -3517,7 +3646,19 @@ public:
         string id = get_mandatory_string_attribute("id", "", "midi-instrument");
         if (id.empty())
             return nullptr;
-        ImoSoundInfo* pInfo = pInstr->get_sound_info(id);
+
+        ImoSoundInfo* pInfo = nullptr;
+        ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+        if (pSC && !pInstr)
+        {
+            error_msg("Unit test error? Can not analyse <midi-instrument> when not "
+                      "inside a <part> element. Ignored.");
+            return nullptr;
+        }
+        if (pInstr)
+            pInfo = pInstr->get_sound_info(id);
+        else if (pSounds)
+            pInfo = pSounds->get_sound_info(id);
         if (!pInfo)
         {
             error_msg("id '" + id + "' doesn't match any <score-instrument>"
@@ -3525,39 +3666,69 @@ public:
             return nullptr;
         }
 
+        //get midiInfo or create a new one
+        ImoMidiInfo* pMidi = nullptr;
+        if (pSC)
+        {
+            //analysing <sound>
+            //ImoMidiInfo could have been created analysing <midi-device>.
+            //But if not created, create it here
+            pMidi = pSC->get_midi_info(id);
+            if (!pMidi)
+            {
+                Document* pDoc = m_pAnalyser->get_document_being_analysed();
+                pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, pDoc) );
+                pMidi->set_score_instr_id(id);
+                pSC->append_child_imo(pMidi);
+
+                //copy data from latest MidiInfo for this score-instrument
+                ImoMidiInfo* pMidiOld = m_pAnalyser->get_latest_midi_info_for(id);
+                if (pMidi)
+                    *pMidi = *pMidiOld;
+                m_pAnalyser->set_latest_midi_info_for(id, pMidi);
+            }
+        }
+        else
+        {
+            pInfo = pSounds->get_sound_info(id);
+            pMidi = pInfo->get_midi_info();
+        }
+
         // midi-channel?    1 to 16
-        pInfo->set_midi_channel(
-                    analyze_optional_child_pcdata_int("midi-channel", 1, 16, 0) - 1);
+        if (get_optional("midi-channel"))
+            pMidi->set_midi_channel(get_child_pcdata_int("midi-channel", 1, 16, 1) - 1);
 
         // midi-name?
-        pInfo->set_midi_name(
-                    analyze_optional_child_pcdata("midi-name", "") );
+        if (get_optional("midi-name"))
+            pMidi->set_midi_name(m_childToAnalyse.value());
 
         // midi-bank?   1 to 16,384
-        pInfo->set_midi_bank(
-                    analyze_optional_child_pcdata_int("midi-bank", 1, 16384, 1) - 1);
+        if (get_optional("midi-bank"))
+            pMidi->set_midi_bank(get_child_pcdata_int("midi-bank", 1, 16384, 1) - 1);
 
         // midi-program?    1 to 128
-        pInfo->set_midi_program(
-                    analyze_optional_child_pcdata_int("midi-program", 1, 128, 1) - 1);
+        if (get_optional("midi-program"))
+            pMidi->set_midi_program(get_child_pcdata_int("midi-program", 1, 128, 1) - 1);
 
         // midi-unpitched?  1 to 128
-        pInfo->set_midi_unpitched(
-                    analyze_optional_child_pcdata_int("midi-unpitched", 1, 128, 1) - 1);
+        if (get_optional("midi-unpitched"))
+            pMidi->set_midi_unpitched(get_child_pcdata_int("midi-unpitched", 1, 128, 1) - 1);
 
         // volume?  0 to 100, with decimal values
-        pInfo->set_midi_volume(
-            analyze_optional_child_pcdata_float("volume", 0.0, 100.0, 100.0) / 100.0f );
+        if (get_optional("volume"))
+            pMidi->set_midi_volume(get_child_pcdata_float("volume", 0.0f, 100.0f, 100.0f) / 100.0f);
 
         // pan?     -180 and 180, with decimal values
-        pInfo->set_midi_pan(
-                    analyze_optional_child_pcdata_float("pan", -180.0, 180.0, 0.0) );
+        if (get_optional("pan"))
+            pMidi->set_midi_pan( get_child_pcdata_float("pan", -180.0f, 180.0f, 0.0f) );
 
         // elevation?   -90 and 90, with decimal values
-        pInfo->set_midi_elevation(
-                    analyze_optional_child_pcdata_float("elevation", -90.0, 90.0, 0.0) );
+        if (get_optional("elevation"))
+            pMidi->set_midi_elevation( get_child_pcdata_float("elevation", -90.0f, 90.0f, 0.0f) );
 
         error_if_more_elements();
+
 
         return nullptr;
     }
@@ -4889,6 +5060,8 @@ public:
                     ImFactory::inject(k_imo_sound_info, pDoc) );
 
         pInfo->set_score_instr_id(id);
+        m_pAnalyser->create_index_for_sound(id);
+        m_pAnalyser->set_latest_midi_info_for(id, pInfo->get_midi_info());
 
         // instrument-name
         pInfo->set_score_instr_name(
@@ -4975,26 +5148,25 @@ public:
         while (analyse_optional("group", pInstrument));
 
         // score-instrument*
-        while (get_optional("score-instrument"))
-            m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
+        bool fScoreInstr = false;
+        while (analyse_optional("score-instrument", pInstrument))
+            fScoreInstr = true;
 
         // (midi-device?, midi-instrument?)*
-        while (more_children_to_analyse())
+        // score-instrument is mandatory if midi-device or midi-instrument defined
+        if (fScoreInstr)
         {
-            m_childToAnalyse = get_child_to_analyse();
-            if (m_childToAnalyse.name() == "midi-device"
-                || m_childToAnalyse.name() == "midi-instrument")
+            ImoSounds* pSounds = pInstrument->get_sounds();
+            while (more_children_to_analyse())
             {
-                move_to_next_child();
-                m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
+                if (!(analyse_optional("midi-device", pSounds)
+                      || analyse_optional("midi-instrument", pSounds)
+                    ))
+                {
+                    break;
+                }
             }
-            else
-                break;
         }
-//        while (get_optional("midi-device") || get_optional("midi-instrument") )
-//        {
-//             m_pAnalyser->analyse_node(&m_childToAnalyse, pInstrument);
-//        }
 
         error_if_more_elements();
 
@@ -5018,6 +5190,7 @@ protected:
         linker.add_child_to_model(pInstrument, pMD, pMD->get_obj_type());
 
         m_pAnalyser->add_score_part(id, pInstrument);
+        m_pAnalyser->save_current_instrument(pInstrument);
         return pInstrument;
     }
 
@@ -5555,49 +5728,62 @@ public:
 
     ImoObj* do_analysis()
     {
-        //ImoDirection* pParent = nullptr;
-        if (m_pAnchor && m_pAnchor->is_direction())
-        {
-            //pParent = static_cast<ImoDirection*>(m_pAnchor);
-        }
-        else if (m_pAnchor && m_pAnchor->is_music_data())
-        {
-            //TODO
-        }
-        else
-        {
-            LOMSE_LOG_ERROR("nullptr pAnchor or it is neither <measure> nor <direction>.");
-            return nullptr;
-        }
-
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoSoundChange* pImo = static_cast<ImoSoundChange*>(
+        ImoSoundChange* pSC = static_cast<ImoSoundChange*>(
                                     ImFactory::inject(k_imo_sound_change, pDoc));
 
         // attrib: tempo CDATA #IMPLIED - non-negative decimal
+        //         quarter notes per minute. 0 = no change
+        if (has_attribute("tempo"))
+        {
+            float value = get_optional_float_attribute("tempo", 70.0f);
+            pSC->set_float_attribute(k_attr_tempo, value);
+        }
 
         // attrib: dynamics CDATA #IMPLIED - non-negative decimal
+        if (has_attribute("dynamics"))
+        {
+            float value = get_optional_float_attribute("dynamics", 70.0f);
+            pSC->set_float_attribute(k_attr_dynamics, value);
+        }
 
         // attrib: dacapo %yes-no; #IMPLIED
         if (has_attribute("dacapo"))
         {
-            bool dacapo = get_optional_yes_no_attribute("dacapo", false);
-            pImo->add_attribute(k_mxl_attr_dacapo, dacapo);
+            bool value = get_optional_yes_no_attribute("dacapo", false);
+            pSC->set_bool_attribute(k_attr_dacapo, value);
         }
 
         // attrib: segno CDATA #IMPLIED - label to reference it
-        string segno = get_optional_string_attribute("segno", "");
+        if (has_attribute("segno"))
+        {
+            string value = get_optional_string_attribute("segno", "");
+            pSC->set_string_attribute(k_attr_segno, value);
+        }
 
         // attrib: dalsegno CDATA #IMPLIED - label to reference it
-        string dalsegno = get_optional_string_attribute("dalsegno", "");
+        if (has_attribute("dalsegno"))
+        {
+            string value = get_optional_string_attribute("dalsegno", "");
+            pSC->set_string_attribute(k_attr_dalsegno, value);
+        }
 
         // attrib: coda CDATA #IMPLIED - label to reference it
-        string coda = get_optional_string_attribute("coda", "");
+        if (has_attribute("coda"))
+        {
+            string value = get_optional_string_attribute("coda", "");
+            pSC->set_string_attribute(k_attr_coda, value);
+        }
 
         // attrib: tocoda CDATA #IMPLIED - label to reference it
-        string tocoda = get_optional_string_attribute("tocoda", "");
+        if (has_attribute("tocoda"))
+        {
+            string value = get_optional_string_attribute("tocoda", "");
+            pSC->set_string_attribute(k_attr_tocoda, value);
+        }
 
         // attrib: divisions CDATA #IMPLIED
+            //TODO
 
         // attrib: forward-repeat %yes-no; #IMPLIED. When used, value must be "yes"
         if (has_attribute("forward-repeat"))
@@ -5608,46 +5794,107 @@ public:
                            "When used, value must be 'yes'. Ignored.");
             }
             else
-                pImo->add_attribute(k_mxl_attr_forward_repeat, true);
+                pSC->set_bool_attribute(k_attr_forward_repeat, true);
         }
 
-        // attrib: fine CDATA #IMPLIED
-        //The fine attribute follows the final note or rest in a
-        //movement with a da capo or dal segno direction. If numeric,
-        //the value represents the actual duration of the final note or
-        //rest, which can be ambiguous in written notation and
-        //different among parts and voices. The value may also be
-        //"yes" to indicate no change to the final duration.
+        // attrib: fine CDATA #IMPLIED - number or "yes"
+        if (has_attribute("fine"))
+        {
+            //TODO: treatment of value (number or "yes")
+            pSC->set_bool_attribute(k_attr_fine, true);
+        }
 
-        // attrib: %time-only;
-        //If the sound element applies only particular times through a
-        //repeat, the time-only attribute indicates which times to apply
-        //the sound element. The value is a comma-separated list of
-        //positive integers arranged in ascending order, indicating
-        //which times through the repeated section that the element
-        //applies.
+        // attrib: %time-only; = time-only CDATA #IMPLIED
+        if (has_attribute("time-only"))
+        {
+            string value = validate_time_only( get_attribute("time-only") );
+            pSC->set_string_attribute(k_attr_time_only, value);
+        }
 
-#if (0) //for now remove this code to avoid 'unused variable' warnings
         // attrib: pizzicato %yes-no; #IMPLIED
-        bool pizzicato = get_optional_yes_no_attribute("pizzicato", false);
+        if (has_attribute("pizzicato"))
+        {
+            bool value = get_optional_yes_no_attribute("pizzicato", false);
+            pSC->set_bool_attribute(k_attr_pizzicato, value);
+        }
 
-        // attrib: damper-pedal %yes-no-number; #IMPLIED
-        bool damperPedal = get_optional_yes_no_attribute("damper-pedal", false);
+        //TODO: yes-no-number
+//        // attrib: damper-pedal %yes-no-number; #IMPLIED
+//        if (has_attribute("damper-pedal"))
+//        {
+//            bool value = get_optional_yes_no_attribute("damper-pedal", false);
+//            pSC->set_bool_attribute(k_attr_damper_pedal, value);
+//        }
+//
+//        // attrib: soft-pedal %yes-no-number; #IMPLIED
+//        if (has_attribute("soft-pedal"))
+//        {
+//            bool value = get_optional_yes_no_attribute("soft-pedal", false);
+//            pSC->set_bool_attribute(k_attr_soft_pedal, value);
+//        }
+//
+//        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
+//        if (has_attribute("sostenuto-pedal"))
+//        {
+//            bool value = get_optional_yes_no_attribute("sostenuto-pedal", false);
+//            pSC->set_bool_attribute(k_attr_sostenuto_pedal, value);
+//        }
 
-        // attrib: soft-pedal %yes-no-number; #IMPLIED
-        bool softPedal = get_optional_yes_no_attribute("soft-pedal", false);
+        bool fHasContent = (pSC->get_num_attributes() > 0);
 
-        // attrib: sostenuto-pedal %yes-no-number; #IMPLIED
-        bool sostenutoPedal = get_optional_yes_no_attribute("sostenuto-pedal", false);
-#endif
+
             // content
 
-        // (midi-device?, midi-instrument?, play?)*
+        if (more_children_to_analyse())
+        {
+            // (midi-device?, midi-instrument?, play?)*, offset?
+            while (more_children_to_analyse())
+            {
+                if (analyse_optional("midi-device", pSC)
+                    || analyse_optional("midi-instrument", pSC)
+                    || analyse_optional("play", pSC))
+                {
+                }
+                else if (analyse_optional("offset", pSC))
+                {
+                    break;
+                }
+                else
+                {
+                    error_invalid_child();
+                    move_to_next_child();
+                }
+            }
 
-        // offset?
+            fHasContent |= (pSC->get_num_children() > 0);
+        }
 
-        return nullptr;
+
+        if (fHasContent)
+        {
+            add_to_model(pSC);
+            return pSC;
+        }
+        else
+        {
+            error_msg("Empty <sound> element. Ignored.");
+            return nullptr;
+        }
+
     }
+
+protected:
+
+    string validate_time_only(const string& value)
+    {
+        //The value must be a comma-separated list of positive integers arranged
+        //in ascending order.
+        //If error, string "1" is returned
+        //Otherwise any spaces are removed, i.e. "1, 2, 4" --> "1,2,4"
+            //TODO
+        return string("1");
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -6458,6 +6705,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    , m_nShowTupletBracket(k_yesno_default)
 //    , m_nShowTupletNumber(k_yesno_default)
     , m_pCurScore(nullptr)
+    , m_pCurInstrument(nullptr)
     , m_pLastNote(nullptr)
     , m_pImoDoc(nullptr)
     , m_time(0.0)
@@ -6593,6 +6841,41 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     m_time = 0.0;
     m_maxTime = 0.0;
     save_last_barline(nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_index_for_sound(const string& id)
+{
+	map<string, int>::const_iterator it = m_soundIdToIdx.find(id);
+	if (it != m_soundIdToIdx.end())
+		return it->second;
+    else
+        return -1;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::create_index_for_sound(const string& id)
+{
+    int idx = int(m_latestMidiInfo.size());
+    m_soundIdToIdx[id] = idx;
+    m_latestMidiInfo.push_back(nullptr);
+    return idx;
+}
+
+//---------------------------------------------------------------------------------------
+ImoMidiInfo* MxlAnalyser::get_latest_midi_info_for(const string& id)
+{
+    int idx = get_index_for_sound(id);
+    return m_latestMidiInfo[idx];
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::set_latest_midi_info_for(const string& id, ImoMidiInfo* pMidi)
+{
+    int idx = get_index_for_sound(id);
+    if (idx == -1)
+        idx = create_index_for_sound(id);
+    m_latestMidiInfo[idx] = pMidi;
 }
 
 //---------------------------------------------------------------------------------------

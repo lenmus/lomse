@@ -332,9 +332,11 @@ void MidiAssigner::assign_port_and_channel()
     list<ImoSoundInfo*>::iterator it;
     for (it=m_sounds.begin(); it != m_sounds.end(); ++it)
     {
+        ImoMidiInfo* pMidi = (*it)->get_midi_info();
+
         //assign port and channel
-        int p = (*it)->get_midi_port();
-        int c = (*it)->get_midi_channel();
+        int p = pMidi->get_midi_port();
+        int c = pMidi->get_midi_channel();
 
         // p,c specified
         if (p != -1 && c != -1)
@@ -348,7 +350,7 @@ void MidiAssigner::assign_port_and_channel()
             {
                 if (m_assigned[i] == nullptr)
                 {
-                    (*it)->set_midi_port(i / 16);
+                    pMidi->set_midi_port(i / 16);
                     m_assigned[i] = *it;
                     break;
                 }
@@ -367,7 +369,7 @@ void MidiAssigner::assign_port_and_channel()
                 int i = p*16 + ch;
                 if (m_assigned[i] == nullptr)
                 {
-                    (*it)->set_midi_channel(i % 16);
+                    pMidi->set_midi_channel(i % 16);
                     m_assigned[i] = *it;
                     fAssigned = true;
                     break;
@@ -384,8 +386,8 @@ void MidiAssigner::assign_port_and_channel()
             {
                 if (m_assigned[idx] == nullptr)
                 {
-                    (*it)->set_midi_port(idx / 16);
-                    (*it)->set_midi_channel(idx % 16);
+                    pMidi->set_midi_port(idx / 16);
+                    pMidi->set_midi_channel(idx % 16);
                     m_assigned[idx] = *it;
                     ++idx;
                     break;

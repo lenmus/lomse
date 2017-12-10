@@ -230,8 +230,9 @@ SUITE(ImVisitorTest)
 //        cout << "max_depth=" << v.max_depth()
 //             << ", num_in_nodes=" << v.num_in_nodes()
 //             << ", num_out_nodes=" << v.num_out_nodes() << endl;
+//        cout << doc.dump_ids() << endl;
         CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 107 );
+        CHECK( v.num_in_nodes() == 109 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 

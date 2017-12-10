@@ -63,6 +63,22 @@ enum EImoAttribute
     k_attr_voice,
     k_attr_xpos,
     k_attr_ypos,
+
+    k_attr_coda,                //string
+    k_attr_dacapo,              //bool
+    k_attr_dalsegno,            //string
+//    k_attr_damper_pedal,        //bool
+    k_attr_dynamics,            //float
+    k_attr_fine,                //bool
+    k_attr_forward_repeat,      //bool
+    k_attr_pizzicato,           //bool
+    k_attr_segno,               //string
+//    k_attr_soft_pedal,          //bool
+//    k_attr_sostenuto_pedal,     //bool
+    k_attr_tempo,               //float
+    k_attr_time_only,           //string
+    k_attr_tocoda,              //string
+
 };
 
 //data types

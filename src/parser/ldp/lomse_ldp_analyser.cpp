@@ -2841,7 +2841,8 @@ protected:
         if (value < 0 || value > 127)
             return false;   //error
 
-        pInfo->set_midi_program(value);
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        pMidi->set_midi_program(value);
         return true;
     }
 
@@ -2851,7 +2852,8 @@ protected:
         if (value < 0 || value > 15)
             return false;   //error
 
-        pInfo->set_midi_channel(value);
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        pMidi->set_midi_channel(value);
         return true;
     }
 

@@ -11,9 +11,9 @@
 ##### COMPATIBLE CHANGES
 
 - Playback improvements: playback now takes into account repetitions 
-  implied by barlines with repetition dots and volta brackets. But not
-  yet repetions implied by textual repetition marks (i.e. Da Capo, 
-  To Coda, etc, ...).
+  implied by barlines with repetition dots and volta brackets, as well
+  as repetions implied by textual repetition marks (i.e. Da Capo, 
+  To Coda, etc, ...) (issue #79).
 
 - Technical changes:
 	- As c++11 and std::regex support is required, CMakeLists.txt has

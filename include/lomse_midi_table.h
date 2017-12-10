@@ -57,27 +57,36 @@ class SoundEventsTable;
 class JumpEntry
 {
 protected:
-	int m_measure;		        //number of the measure to jump to
-	int m_numTimes;		        //num.times the jumpTo must be active
-	int m_applied;		        //num.times the jumpTo has been executed
-	int m_event;                //index to event to jump to
+	int m_measure;		    //number of the measure to jump to
+	int m_timesValid;   	//num.times the jump must be executed
+	int m_timesBefore;      //num.times the jump has to be visited before executing
+	int m_executed;         //num.times the jumpTo has been executed
+	int m_visited;          //num.times the jumpTo has been visited
+	int m_event;            //index to event to jump to
+	string m_label;         //label to jump to (for To Coda, Dal Segno)
 
 public:
 
-    JumpEntry(int jumpTo, int times);
+    JumpEntry(int jumpTo, int timesValid, int timesBefore);
     virtual ~JumpEntry();
 
-	inline void reset_entry() { m_applied = 0; }
+	inline void reset_entry() { m_executed = 0; m_visited = 0; }
 
 	inline int get_measure() { return m_measure; }
-	inline int get_times() { return m_numTimes; }
-	inline int get_applied() { return m_applied; }
+	inline int get_times_valid() { return m_timesValid; }
+	inline int get_executed() { return m_executed; }
+	inline int get_times_before() { return m_timesBefore; }
+	inline int get_visited() { return m_visited; }
 	inline int get_event() { return m_event; }
+	inline string& get_label() { return m_label; }
 
     inline void set_event(int iEvent) { m_event = iEvent; }
     inline void set_measure(int measure) { m_measure = measure; }
-    inline void set_times(int times) { m_numTimes = times; }
-    inline void increment_applied() { ++m_applied; }
+    inline void set_times_valid(int times) { m_timesValid = times; }
+    inline void increment_applied() { ++m_executed; }
+    inline void set_times_before(int times) { m_timesBefore = times; }
+    inline void increment_visited() { ++m_visited; }
+    inline void set_label(const string& label) { m_label = label; }
 
 
     //debug
@@ -162,6 +171,8 @@ protected:
     vector<int> m_measures;
     vector<int> m_channels;
     vector<JumpEntry*> m_jumps;
+    vector< pair<int, string> > m_targets;          //pair measure, label
+    vector<JumpEntry*> m_pendingLabel;              //jumps to be fixed
     TimeUnits rAnacrusisMissingTime;
     int m_accidentals[7];
 
@@ -201,6 +212,8 @@ protected:
     void add_jumps_if_volta_bracket(StaffObjsCursor& cursor, ImoBarline* pBar,
                                     int measure);
     void add_events_to_jumps();
+    void replace_label_in_jumps();
+    int find_measure_for_label(const string& label);
     void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
     void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
@@ -208,7 +221,9 @@ protected:
     int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
-    JumpEntry* create_jump(int jumpTo, int times);
+    JumpEntry* create_jump(int jumpTo, int timesValid, int timesBefore=0);
+    void process_sound_change(ImoSoundChange* pSound, StaffObjsCursor& cursor,
+                              int channel, int iInstr, int measure);
 
 
     //debug

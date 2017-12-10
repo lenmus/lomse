@@ -261,6 +261,9 @@ void ScorePlayer::stop()
                 //throw runtime_error("[ScorePlayer::stop] Thread interrupt failed");
             }
         }
+
+        m_pTable->reset_jumps();
+
         LOMSE_LOG_DEBUG(Logger::k_score_player, "Delete thread");
         delete m_pThread;
         m_pThread = nullptr;
@@ -606,23 +609,31 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 }
             }
 
-            //if it is a jump event, do the jump
+            //if it is a jump event, execute the jump if applicable
             if (events[i]->EventType == SoundEvent::k_jump)
             {
+                bool fExecuted = false;
                 JumpEntry* pJump = events[i]->pJump;
-                if (pJump->get_times() == 0 || pJump->get_times() > pJump->get_applied())
+                if (pJump->get_visited() >= pJump->get_times_before())
                 {
-                    i = pJump->get_event();
-                    nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
-                    curTime = nEvTime;
-                    nMtrEvDeltaTime = events[i]->DeltaTime;
-                    if (pJump->get_times() > pJump->get_applied())
-                        pJump->increment_applied();
+                    if (pJump->get_times_valid() == 0
+                        || pJump->get_times_valid() > pJump->get_executed())
+                    {
+                        i = pJump->get_event();
+                        nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
+                        curTime = nEvTime;
+                        nMtrEvDeltaTime = events[i]->DeltaTime;
+                        if (pJump->get_times_valid() > pJump->get_executed())
+                            pJump->increment_applied();
+                        fExecuted = true;
+                    }
                 }
-                else
-                {
+
+                pJump->increment_visited();
+
+                if (!fExecuted)
                     ++i;
-                }
+
                 continue;   //needed if next event is also a jump, and for metronome clicks
             }
 

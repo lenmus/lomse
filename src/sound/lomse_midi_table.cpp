@@ -37,6 +37,7 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_pitch.h"
 #include "lomse_score_utilities.h"
+#include "lomse_im_attributes.h"
 
 #include <boost/format.hpp>
 
@@ -100,6 +101,7 @@ void SoundEventsTable::create_table()
     sort_by_time();
     close_table();
     create_measures_table();
+    replace_label_in_jumps();
     add_events_to_jumps();
 }
 
@@ -117,8 +119,9 @@ void SoundEventsTable::program_sounds_for_instruments()
         if (pInstr->get_num_sounds() > 0)
         {
             ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-            channel = pInfo->get_midi_channel();
-            instr = pInfo->get_midi_program();
+            ImoMidiInfo* pMidi = pInfo->get_midi_info();
+            channel = pMidi->get_midi_channel();
+            instr = pMidi->get_midi_program();
         }
         m_channels[iInstr] = channel;
         store_event(0, SoundEvent::k_prog_instr, channel, instr, 0, 0, nullptr, 0);
@@ -190,12 +193,84 @@ void SoundEventsTable::create_events()
         }
         else if (pSO->is_direction())
         {
-//            int iInstr = cursor.num_instrument();
-//            int channel = m_channels[iInstr];
-//            add_noterest_events(cursor, channel, measure);
+            ImoSoundChange* pSound = static_cast<ImoSoundChange*>(
+                                          pSO->get_child_of_type(k_imo_sound_change));
+            if (pSound)
+            {
+                int iInstr = cursor.num_instrument();
+                int channel = m_channels[iInstr];
+                process_sound_change(pSound, cursor, channel, iInstr, measure);
+            }
+        }
+        else if (pSO->is_sound_change())
+        {
+            ImoSoundChange* pSound = static_cast<ImoSoundChange*>(pSO);
+            int iInstr = cursor.num_instrument();
+            int channel = m_channels[iInstr];
+            process_sound_change(pSound, cursor, channel, iInstr, measure);
         }
 
         cursor.move_next();
+    }
+}
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
+                                            StaffObjsCursor& cursor,
+                                            int UNUSED(channel),
+                                            int UNUSED(iInstr), int measure)
+{
+    ImoAttr* pAttr = pSound->get_first_attribute();
+    while (pAttr)
+    {
+        JumpEntry* pJump = nullptr;
+        switch (pAttr->get_attrib_idx())
+        {
+            case k_attr_coda:
+                m_targets.push_back(
+                    pair<int, string>(measure, string("C" + pAttr->get_string_value())));
+                break;
+
+            case k_attr_dacapo:
+                pJump = create_jump(1, 1);   //to measure 1, 1 time
+                add_jump(cursor, measure, pJump);
+                break;
+
+            case k_attr_dalsegno:
+                pJump = create_jump(0, 1);   //measure unknown, 1 time
+                pJump->set_label("S" + pAttr->get_string_value());
+                add_jump(cursor, measure, pJump);
+                m_pendingLabel.push_back(pJump);
+                break;
+
+            case k_attr_fine:
+                pJump = create_jump(-1, 1, 1);   //to end (-1), valid 1 time, the 2nd time
+                add_jump(cursor, measure, pJump);
+                break;
+
+            case k_attr_segno:
+                m_targets.push_back(
+                    pair<int, string>(measure, string("S" + pAttr->get_string_value())));
+                break;
+
+            case k_attr_tocoda:
+                pJump = create_jump(0, 1, 1);   //measure unknown, 1 time, the 2nd time
+                pJump->set_label("C" + pAttr->get_string_value());
+                add_jump(cursor, measure, pJump);
+                m_pendingLabel.push_back(pJump);
+                break;
+
+            case k_attr_dynamics:
+                break;
+            case k_attr_forward_repeat:
+                break;
+            case k_attr_time_only:
+                break;
+            case k_attr_tempo:
+                break;
+            default:
+                break;
+        }
+        pAttr = pAttr->get_next_attrib();
     }
 }
 
@@ -248,10 +323,10 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                         //- number of repeat times if not last volta
                         JumpEntry* pJump = m_pending[m_iJump];
                         pJump->set_measure(measure+1);
-                        if (pJump->get_times() != 0)
+                        if (pJump->get_times_valid() != 0)
                         {
                             int times = pVB->get_number_of_repetitions();
-                            pJump->set_times(times);
+                            pJump->set_times_valid(times);
                         }
                         ++m_iJump;
                     }
@@ -634,9 +709,9 @@ JumpEntry* SoundEventsTable::get_jump(int i)
 }
 
 //---------------------------------------------------------------------------------------
-JumpEntry* SoundEventsTable::create_jump(int jumpTo, int times)
+JumpEntry* SoundEventsTable::create_jump(int jumpTo, int timesValid, int timesBefore)
 {
-    JumpEntry* pJump = LOMSE_NEW JumpEntry(jumpTo, times);
+    JumpEntry* pJump = LOMSE_NEW JumpEntry(jumpTo, timesValid, timesBefore);
     m_jumps.push_back(pJump);
     return pJump;
 }
@@ -649,14 +724,41 @@ void SoundEventsTable::add_jump(StaffObjsCursor& cursor, int measure, JumpEntry*
 }
 
 //---------------------------------------------------------------------------------------
+void SoundEventsTable::replace_label_in_jumps()
+{
+    vector<JumpEntry*>::iterator it;
+    for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
+    {
+        int measure = find_measure_for_label( (*it)->get_label() );
+        if (measure > 0)
+            (*it)->set_measure(measure);
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void SoundEventsTable::add_events_to_jumps()
 {
     vector<JumpEntry*>::iterator it;
     for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
     {
-        int nEntry = m_measures[(*it)->get_measure()];
+        int measure = (*it)->get_measure();
+        int nEntry = m_events.size() - 1;
+        if (measure >= 0)
+            nEntry = m_measures[measure];
         (*it)->set_event(nEntry);
     }
+}
+
+//---------------------------------------------------------------------------------------
+int SoundEventsTable::find_measure_for_label(const string& label)
+{
+    vector< pair<int, string> >::iterator it;
+    for (it=m_targets.begin(); it != m_targets.end(); ++it)
+    {
+        if ((*it).second == label)
+            return (*it).first;
+    }
+    return 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -671,10 +773,12 @@ void SoundEventsTable::reset_jumps()
 //=======================================================================================
 // JumpEntry implementation
 //=======================================================================================
-JumpEntry::JumpEntry(int jumpTo, int times)
+JumpEntry::JumpEntry(int jumpTo, int timesValid, int timesBefore)
 	: m_measure(jumpTo)
-	, m_numTimes(times)
-	, m_applied(0)
+	, m_timesValid(timesValid)
+	, m_timesBefore(timesBefore)
+	, m_executed(0)
+	, m_visited(0)
 	, m_event(0)
 {
 }
@@ -689,9 +793,11 @@ string JumpEntry::dump_entry()
 {
     stringstream s;
     s << "Jump: m=" << m_measure
-      << ", e=" << m_event
-      << ", t=" << m_numTimes
-      << ", a=" << m_applied << endl;
+      << ", ev=" << m_event
+      << ", b=" << m_timesBefore
+      << ", v=" << m_timesValid
+      << ", vs=" << m_visited
+      << ", ex=" << m_executed << endl;
     return s.str();
 }
 

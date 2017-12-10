@@ -1055,6 +1055,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color);
         }
+        case k_imo_sound_change:
         default:
             return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
     }
