@@ -62,10 +62,9 @@ LUnits pt_to_LUnits(float pt)
 
 //---------------------------------------------------------------------------------------
 // static variables to convert from ImoObj type to name
-static std::map<int, std::string> m_TypeToName;
+static map<int, string> m_TypeToName;
 static bool m_fNamesRegistered;
 static string m_unknown = "unknown";
-
 
 //---------------------------------------------------------------------------------------
 //values for default style
@@ -113,88 +112,115 @@ static string m_unknown = "unknown";
 
 
 //=======================================================================================
-// AuxAttributes implementation
+// ImoAttr implementation
 //=======================================================================================
-AuxAttributes::AuxAttributes()
-    : m_first(nullptr)
+ImoAttr::ImoAttr(int idx, const string& value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-
+    set_string_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttributes::~AuxAttributes()
+ImoAttr::ImoAttr(int idx, int value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-    delete_all_attributes();
+    set_int_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-void AuxAttributes::delete_all_attributes()
+ImoAttr::ImoAttr(int idx, double value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-    if (m_first == nullptr)
-        return;
-
-    AuxAttrib* next = m_first->get_next_attrib();
-    delete m_first;
-    while (next != nullptr)
-    {
-        AuxAttrib* prev = next;
-        next = next->get_next_attrib();
-        delete prev;
-    }
-    m_first = nullptr;
+    set_double_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::get_last_attribute()
+ImoAttr::ImoAttr(int idx, bool value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-    if (m_first == nullptr)
-        return nullptr;
-
-    AuxAttrib* next = m_first->get_next_attrib();
-    AuxAttrib* prev = m_first;
-    while (next != nullptr)
-    {
-        prev = next;
-        next = next->get_next_attrib();
-    }
-
-    return prev;
+    set_bool_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::set_attribute_node(AuxAttrib* newAttr)
+ImoAttr::ImoAttr(int idx, float value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-    AuxAttrib* pLast = get_last_attribute();
-    if (pLast)
-        pLast->set_next_attrib(newAttr);
-    else
-        m_first = newAttr;
-
-    return newAttr;
+    set_float_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::add_attribute(int type, int value)
+ImoAttr::ImoAttr(int idx, Color value)
+    : m_attrbIdx(idx)
+    , m_next(nullptr)
 {
-    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+    set_color_value(value);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::add_attribute(int type, float value)
+const string ImoAttr::get_name()
 {
-    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+    return get_name(m_attrbIdx);
 }
 
 //---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::add_attribute(int type, const string& value)
+const string ImoAttr::get_name(int idx)
 {
-    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+    AttributesData data = AttributesTable::get_data_for(idx);
+    return data.label;
 }
 
-//---------------------------------------------------------------------------------------
-AuxAttrib* AuxAttributes::add_attribute(int type, bool value)
-{
-    return set_attribute_node( LOMSE_NEW AuxAttrib(type, value) );
+
+//=======================================================================================
+// implementation of standard interface for ImoObj objects containing an ImoSounds child
+//=======================================================================================
+#define LOMSE_IMPLEMENT_IMOSOUNDS_INTERFACE(xxxxx)                                       \
+ImoSounds* xxxxx::get_sounds()                                                           \
+{                                                                                        \
+    return dynamic_cast<ImoSounds*>( get_child_of_type(k_imo_sounds) );                  \
+}                                                                                        \
+                                                                                         \
+void xxxxx::add_sound_info(ImoSoundInfo* pInfo)                                          \
+{                                                                                        \
+    ImoSounds* pColSounds = get_sounds();                                                \
+    if (!pColSounds)                                                                     \
+    {                                                                                    \
+        Document* pDoc = get_the_document();                                             \
+        pColSounds = static_cast<ImoSounds*>( ImFactory::inject(k_imo_sounds, pDoc) );   \
+        append_child_imo(pColSounds);                                                    \
+    }                                                                                    \
+    pColSounds->add_sound_info(pInfo);                                                   \
+}                                                                                        \
+                                                                                         \
+int xxxxx::get_num_sounds()                                                              \
+{                                                                                        \
+    ImoSounds* pColSounds = get_sounds();                                                \
+    if (pColSounds)                                                                      \
+        return pColSounds->get_num_sounds();                                             \
+    else                                                                                 \
+        return 0;                                                                        \
+}                                                                                        \
+                                                                                         \
+ImoSoundInfo* xxxxx::get_sound_info(const string& soundId)                               \
+{                                                                                        \
+    ImoSounds* pColSounds = get_sounds();                                                \
+    if (pColSounds)                                                                      \
+        return pColSounds->get_sound_info(soundId);                                      \
+    else                                                                                 \
+        return nullptr;                                                                  \
+}                                                                                        \
+                                                                                         \
+ImoSoundInfo* xxxxx::get_sound_info(int iSound)                                          \
+{                                                                                        \
+    ImoSounds* pColSounds = get_sounds();                                                \
+    if (pColSounds)                                                                      \
+        return pColSounds->get_sound_info(iSound);                                       \
+    else                                                                                 \
+        return nullptr;                                                                  \
 }
 
 
@@ -361,6 +387,7 @@ ImoObj::ImoObj(int objtype, ImoId id)
     , m_id(id)
     , m_objtype(objtype)
     , m_flags(k_dirty)
+    , m_pAttribs(nullptr)
 {
 }
 
@@ -377,6 +404,13 @@ ImoObj::~ImoObj()
     }
 
     remove_id();
+    delete_attributes();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::initialize(Document* UNUSED(pDoc))
+{
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -387,6 +421,18 @@ void ImoObj::remove_id()
         Document* pDoc = get_the_document();
         if (pDoc)
             pDoc->removed_from_model(this);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::delete_attributes()
+{
+    ImoAttr* pAttr = get_first_attribute();
+    while (pAttr)
+    {
+        ImoAttr* pNext = pAttr->get_next_attrib();
+        delete pAttr;
+        pAttr = pNext;
     }
 }
 
@@ -450,6 +496,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_instr_group] = "instr-group";
         m_TypeToName[k_imo_line_style] = "line-style";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
+        m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";
         m_TypeToName[k_imo_param_info] = "param";
@@ -768,6 +815,201 @@ string ImoObj::to_string(bool fWithIds)
     exporter.set_remove_newlines(true);
     exporter.set_add_id(fWithIds);
     return exporter.get_source(this);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_int_attribute(TIntAttribute idx, int value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_int_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_color_attribute(TIntAttribute idx, Color value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_color_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_bool_attribute(TIntAttribute idx, bool value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_bool_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_double_attribute(TIntAttribute idx, double value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_double_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_float_attribute(TIntAttribute idx, float value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_float_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::set_string_attribute(TIntAttribute idx, const string& value)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        pAttr->set_string_value(value);
+    else
+        set_attribute_node( LOMSE_NEW ImoAttr(idx, value) );
+}
+
+//---------------------------------------------------------------------------------------
+int ImoObj::get_int_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_int_value();
+    else
+        return 0;
+}
+
+//---------------------------------------------------------------------------------------
+Color ImoObj::get_color_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_color_value();
+    else
+        return Color(0,0,0);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoObj::get_bool_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_bool_value();
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+double ImoObj::get_double_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_double_value();
+    else
+        return 0.0;
+}
+
+
+//---------------------------------------------------------------------------------------
+float ImoObj::get_float_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_float_value();
+    else
+        return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+string ImoObj::get_string_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_attribute_node(idx);
+    if (pAttr)
+        return pAttr->get_string_value();
+    else
+        return string();
+}
+
+//---------------------------------------------------------------------------------------
+ImoAttr* ImoObj::get_attribute_node(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_first_attribute();
+    while (pAttr && pAttr->get_attrib_idx() != idx)
+        pAttr = pAttr->get_next_attrib();
+
+    return pAttr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoAttr* ImoObj::set_attribute_node(ImoAttr* newAttr)
+{
+    newAttr->set_next_attrib(nullptr);
+    ImoAttr* pLast = get_last_attribute();
+    if (pLast)
+        pLast->set_next_attrib(newAttr);
+    else
+        m_pAttribs = newAttr;
+
+    return newAttr;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::remove_attribute(TIntAttribute idx)
+{
+    ImoAttr* pAttr = get_first_attribute();
+    ImoAttr* pPrev = nullptr;
+    while (pAttr && pAttr->get_attrib_idx() != idx)
+    {
+        pPrev = pAttr;
+        pAttr = pAttr->get_next_attrib();
+    }
+
+    if (pAttr)
+    {
+        if (pPrev)
+        {
+            ImoAttr* pNext = pAttr->get_next_attrib();
+            pPrev->set_next_attrib(pNext);
+        }
+    }
+
+    delete pAttr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoAttr* ImoObj::get_last_attribute()
+{
+    ImoAttr* pAttr = get_first_attribute();
+    ImoAttr* pLast = pAttr;
+    while (pAttr)
+    {
+        pLast = pAttr;
+        pAttr = pAttr->get_next_attrib();
+    }
+
+    return pLast;
+}
+
+//---------------------------------------------------------------------------------------
+int ImoObj::get_num_attributes()
+{
+    ImoAttr* pAttr = get_first_attribute();
+    int i = 0;
+    while (pAttr)
+    {
+        ++i;
+        pAttr = pAttr->get_next_attrib();
+    }
+
+    return i;
 }
 
 
@@ -2266,62 +2508,6 @@ void ImoInstrument::set_abbrev(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-ImoSounds* ImoInstrument::get_sounds()
-{
-    return dynamic_cast<ImoSounds*>( get_child_of_type(k_imo_sounds) );
-}
-
-//---------------------------------------------------------------------------------------
-void ImoInstrument::add_sound_info(ImoSoundInfo* pInfo)
-{
-    ImoSounds* pColSounds = get_sounds();
-    if (!pColSounds)
-    {
-        Document* pDoc = get_the_document();
-        pColSounds = static_cast<ImoSounds*>( ImFactory::inject(k_imo_sounds, pDoc) );
-        append_child_imo(pColSounds);
-    }
-    pColSounds->append_child_imo(pInfo);
-}
-
-//---------------------------------------------------------------------------------------
-int ImoInstrument::get_num_sounds()
-{
-    ImoSounds* pColSounds = get_sounds();
-    if (pColSounds)
-        return pColSounds->get_num_children();
-    else
-        return 0;
-}
-
-//---------------------------------------------------------------------------------------
-ImoSoundInfo* ImoInstrument::get_sound_info(const string& soundId)
-{
-    ImoSounds* pColSounds = get_sounds();
-    if (pColSounds)
-    {
-        ImoObj::children_iterator it;
-        for (it= pColSounds->begin(); it != pColSounds->end(); ++it)
-        {
-            ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(*it);
-            if (pInfo->get_score_instr_id() == soundId)
-                return pInfo;
-        }
-    }
-    return nullptr;
-}
-
-//---------------------------------------------------------------------------------------
-ImoSoundInfo* ImoInstrument::get_sound_info(int iSound)    //iSound = 0..n-1
-{
-    ImoSounds* pColSounds = get_sounds();
-    if (pColSounds)
-        return dynamic_cast<ImoSoundInfo*>( pColSounds->get_child(iSound) );
-    else
-        return nullptr;
-}
-
-//---------------------------------------------------------------------------------------
 ImoMusicData* ImoInstrument::get_musicdata()
 {
     return dynamic_cast<ImoMusicData*>( get_child_of_type(k_imo_music_data) );
@@ -2353,6 +2539,9 @@ void ImoInstrument::reserve_space_for_lyrics(int iStaff, LUnits space)
     ImoStaffInfo* pInfo = get_staff(iStaff);
     pInfo->add_space_for_lyrics(space);
 }
+
+// ImoSounds interface
+LOMSE_IMPLEMENT_IMOSOUNDS_INTERFACE(ImoInstrument);
 
 //---------------------------------------------------------------------------------------
 // Instrument API
@@ -3570,6 +3759,101 @@ int ImoScorePlayer::get_metronome_mm()
         return m_pPlayer->get_metronome_mm();
     else
         return 60;
+}
+
+
+//=======================================================================================
+// ImoSounds implementation
+//=======================================================================================
+void ImoSounds::add_sound_info(ImoSoundInfo* pInfo)
+{
+    append_child_imo(pInfo);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoSounds::get_num_sounds()
+{
+    return get_num_children();
+}
+
+//---------------------------------------------------------------------------------------
+ImoSoundInfo* ImoSounds::get_sound_info(const string& soundId)
+{
+    ImoObj::children_iterator it;
+    for (it= this->begin(); it != this->end(); ++it)
+    {
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(*it);
+        if (pInfo->get_score_instr_id() == soundId)
+            return pInfo;
+    }
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+ImoSoundInfo* ImoSounds::get_sound_info(int iSound)
+{
+    return dynamic_cast<ImoSoundInfo*>( get_child(iSound) );
+}
+
+
+//=======================================================================================
+// ImoSoundInfo implementation
+//=======================================================================================
+ImoSoundInfo::ImoSoundInfo()
+    : ImoSimpleObj(k_imo_sound_info)
+    , m_instrName("")
+    , m_instrAbbrev("")
+    , m_instrSound("")
+    , m_fSolo(false)
+    , m_fEnsemble(false)
+    , m_ensembleSize(0)
+    , m_virtualLibrary("")
+    , m_virtualName("")
+    , m_playTechnique(0)
+{
+
+}
+
+//---------------------------------------------------------------------------------------
+void ImoSoundInfo::initialize(Document* pDoc)
+{
+    ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                ImFactory::inject(k_imo_midi_info, pDoc) );
+    append_child_imo(pMidi);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoSoundInfo::set_score_instr_id(const string& value)
+{
+    m_soundId = value;
+    ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(get_child_of_type(k_imo_midi_info));
+    pMidi->set_score_instr_id(value);
+}
+
+
+//---------------------------------------------------------------------------------------
+ImoMidiInfo* ImoSoundInfo::get_midi_info()
+{
+    return static_cast<ImoMidiInfo*>(get_child_of_type(k_imo_midi_info));
+}
+
+
+//=======================================================================================
+// ImoSoundChange implementation
+//=======================================================================================
+ImoMidiInfo* ImoSoundChange::get_midi_info(const string& soundId)
+{
+    ImoObj::children_iterator it = this->begin();
+    while (it != this->end())
+    {
+        if ((*it)->is_midi_info())
+        {
+            ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(*it);
+            if (pMidi->get_score_instr_id() == soundId)
+                return pMidi;
+        }
+    }
+    return nullptr;
 }
 
 

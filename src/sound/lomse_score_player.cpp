@@ -610,13 +610,14 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             if (events[i]->EventType == SoundEvent::k_jump)
             {
                 JumpEntry* pJump = events[i]->pJump;
-                if (pJump->get_times() == 0 || pJump->get_times() > pJump->get_applied())
+                if (pJump->get_times_valid() == 0
+                    || pJump->get_times_valid() > pJump->get_executed())
                 {
                     i = pJump->get_event();
                     nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
                     curTime = nEvTime;
                     nMtrEvDeltaTime = events[i]->DeltaTime;
-                    if (pJump->get_times() > pJump->get_applied())
+                    if (pJump->get_times_valid() > pJump->get_executed())
                         pJump->increment_applied();
                 }
                 else

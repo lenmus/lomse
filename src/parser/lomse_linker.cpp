@@ -94,6 +94,9 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case k_imo_score_title:
             return add_title(static_cast<ImoScoreTitle*>(pChild));
 
+        case k_imo_sound_change:
+            return add_sound_change(static_cast<ImoSoundChange*>(pChild));
+
         case k_imo_sound_info:
             return add_sound_info(static_cast<ImoSoundInfo*>(pChild));
 
@@ -296,6 +299,27 @@ ImoObj* Linker::add_listitem(ImoListItem* pItem)
         return add_block_level_item(pItem);
     else
         return pItem;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_sound_change(ImoSoundChange* pInfo)
+{
+    if (m_pParent && (m_pParent->is_direction() || m_pParent->is_music_data()))
+    {
+        m_pParent->append_child_imo(pInfo);
+        return nullptr;
+    }
+    else
+    {
+        LOMSE_LOG_ERROR("Parent of ImoSoundChange is neither <music-data> nor <direction>.");
+        return pInfo;
+    }
+
+//        //TODO: Move this to linker
+//        //add ImoSounds object if not empty
+//        if (pSounds && pSounds->get_num_sounds() > 0)
+//            pImo->append_child_imo(pSounds);
+
 }
 
 //---------------------------------------------------------------------------------------

@@ -44,6 +44,7 @@
 #include "lomse_im_factory.h"
 #include "lomse_time.h"
 #include "lomse_import_options.h"
+#include "lomse_im_attributes.h"
 
 #include <regex>
 
@@ -221,9 +222,9 @@ SUITE(MxlAnalyserTest)
 
     //@ score_partwise ------------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_1)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_)
     {
-        //@00001 missing mandatory <part-list>. Returns empty document
+        //@01 missing mandatory <part-list>. Returns empty document
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -248,9 +249,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_2)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_02)
     {
-        //@00002 invalid score version, 1.0 assumed
+        //@02 invalid score version, 1.0 assumed
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -273,9 +274,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_3)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_03)
     {
-        //@00003 missing <score-part>. Returns empty document
+        //@03 missing <score-part>. Returns empty document
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -299,9 +300,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_4)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_04)
     {
-        //@00004 missing <part>. Returns empty score v1.6
+        //@04 missing <part>. Returns empty score v1.6
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -337,9 +338,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_5)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_05)
     {
-        //@00005 minimum score ok. Returns empty score with one instrument
+        //@05 minimum score ok. Returns empty score with one instrument
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -373,9 +374,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_6)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_06)
     {
-        //@00006 ImoScore created for <score-partwise>
+        //@06 ImoScore created for <score-partwise>
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -402,9 +403,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_7)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_07)
     {
-        //@00007 ImoInstrument created for <part-list>
+        //@07 ImoInstrument created for <part-list>
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -436,9 +437,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_8)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_08)
     {
-        //@00008 ImoMusicData created for <part>
+        //@08 ImoMusicData created for <part>
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -472,9 +473,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_9)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_09)
     {
-        //@00009 <part-list> with several <score-part>. Missing part
+        //@09 <part-list> with several <score-part>. Missing part
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -520,9 +521,9 @@ SUITE(MxlAnalyserTest)
     //@ score-part -------------------------------------------------------------
 
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_part_101)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_part_01)
     {
-        //@00101 <part-name> sets instrument name
+        //@01 <part-name> sets instrument name
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -556,9 +557,9 @@ SUITE(MxlAnalyserTest)
 
     //@ part-group -------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_110)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_01)
     {
-        //@00110 <part-group> type=start matched with type=stop
+        //@01 <part-group> type=start matched with type=stop
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -606,9 +607,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_111)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_02)
     {
-        //@00111 <part-group> type=start present but missing type=stop
+        //@02 <part-group> type=start present but missing type=stop
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -649,9 +650,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_112)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_03)
     {
-        //@00112 <part-group> missing number
+        //@03 <part-group> missing number
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -692,9 +693,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_113)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_04)
     {
-        //@00113 <part-group> missing type
+        //@04 <part-group> missing type
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -735,9 +736,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_114)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_05)
     {
-        //@00114 <part-group> missing type start for this number
+        //@05 <part-group> missing type start for this number
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -778,9 +779,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_115)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_06)
     {
-        //@00115 <part-group> type is not either 'start' or 'stop'
+        //@06 <part-group> type is not either 'start' or 'stop'
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -821,9 +822,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_116)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_07)
     {
-        //@00116 <part-group> type=start for number already started and not stopped
+        //@07 <part-group> type=start for number already started and not stopped
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -873,9 +874,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_117)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_08)
     {
-        //@00117 <part-group> group name and group abbrev ok
+        //@08 <part-group> group name and group abbrev ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -926,9 +927,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_118)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_09)
     {
-        //@00118 <part-group> group symbol ok
+        //@09 <part-group> group symbol ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -979,9 +980,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_119)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_10)
     {
-        //@00119 <part-group> group symbol: invalid value
+        //@10 <part-group> group symbol: invalid value
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1034,9 +1035,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_120)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_11)
     {
-        //@00120 <part-group> group-barline ok
+        //@11 <part-group> group-barline ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1089,9 +1090,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_121)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_12)
     {
-        //@00121 <part-group> group-barline mensurstrich ok
+        //@12 <part-group> group-barline mensurstrich ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1149,214 +1150,12 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    //@ clef -------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_130)
-    {
-        //@00130 minimum content parsed ok
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<clef><sign>G</sign><line>2</line></clef>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_G2 );
-        CHECK( pClef->get_staff() == 0 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_131)
-    {
-        //@00131 error in clef sign
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        expected << "Line 0. Part '', measure ''. Unknown clef 'H'. Assumed 'G' in line 2." << endl;
-        parser.parse_text("<clef><sign>H</sign><line>2</line></clef>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_G2 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_132)
-    {
-        //@00132 staff num parsed ok
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<clef number='2'><sign>F</sign><line>4</line></clef>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
-        CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_F4 );
-        CHECK( pClef->get_staff() == 1 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    //@ time ---------------------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_140)
-    {
-        //@00140 minimum content parsed ok
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<time><beats>6</beats><beat-type>8</beat-type></time>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
-        CHECK( pTimeSignature != nullptr );
-        CHECK( pTimeSignature->get_top_number() == 6 );
-        CHECK( pTimeSignature->get_bottom_number() == 8 );
-//        cout << test_name()
-//             << ": top number=" << pTimeSignature->get_top_number()
-//             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_141)
-    {
-        //@00141 error in time signature
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        expected << "Line 0. <time>: missing mandatory element <beat-type>." << endl;
-        parser.parse_text("<time><beats>6</beats></time>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
-        CHECK( pTimeSignature != nullptr );
-        CHECK( pTimeSignature->get_top_number() == 6 );
-        CHECK( pTimeSignature->get_bottom_number() == 4 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-
-    //@ key ------------------------------------------------------------------------------
-
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_160)
-    {
-        //@00160 minimum content parsed ok
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<key><fifths>2</fifths></key>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != nullptr );
-        CHECK( pKeySignature->get_key_type() == k_key_D );
-        CHECK( pKeySignature->get_staff() == 0 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_161)
-    {
-        //@00161 key in minor mode
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<key><fifths>5</fifths><mode>minor</mode></key>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
-        CHECK( pKeySignature != nullptr );
-        CHECK( pKeySignature->get_key_type() == k_key_gs );
-        CHECK( pKeySignature->get_staff() == 0 );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-
     //@ attributes -------------------------------------------------------------------
 
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_180)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_01)
     {
-        //@00180 attributes are added to MusicData in required order
+        //@01 attributes are added to MusicData in required order
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1407,9 +1206,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_181)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_02)
     {
-        //@00181 divisions
+        //@02 divisions
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1433,9 +1232,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_182)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_03)
     {
-        //@00182 if no divisions assume 1
+        //@03 if no divisions assume 1
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1464,12 +1263,776 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ barline --------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_01)
+    {
+        //@01 barline minimal content
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<barline><bar-style>light-light</bar-style></barline>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_barline() == true );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_double );
+        CHECK( pBarline->is_visible() );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ backup --------------------------------------------------------------------------
+    //@ forward -------------------------------------------------------------------------
+
+
+//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_backup_01)
+//    {
+//        //@01 backup
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        XmlParser parser;
+//        stringstream expected;
+//        parser.parse_text("<backup><duration>18</duration></backup>");
+//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+//        XmlNode* tree = parser.get_tree_root();
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( pIModel->get_root() == nullptr);
+//        //AWARE: initialy <divisions>==1 ==> duration is expressed in quarter notes
+//        CHECK( is_equal_time(a.get_current_time(), -18.0f*k_duration_64th) );
+//        cout << "420: timepos= " << a.get_current_time() << endl;
+//
+//        a.do_not_delete_instruments_in_destructor();
+//        delete pIModel;
+//    }
+
+
+    //@ clef -------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_01)
+    {
+        //@01 minimum content parsed ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<clef><sign>G</sign><line>2</line></clef>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pClef != nullptr );
+        CHECK( pClef->get_clef_type() == k_clef_G2 );
+        CHECK( pClef->get_staff() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_02)
+    {
+        //@02 error in clef sign
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part '', measure ''. Unknown clef 'H'. Assumed 'G' in line 2." << endl;
+        parser.parse_text("<clef><sign>H</sign><line>2</line></clef>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pClef != nullptr );
+        CHECK( pClef->get_clef_type() == k_clef_G2 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_03)
+    {
+        //@03 staff num parsed ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<clef number='2'><sign>F</sign><line>4</line></clef>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pClef != nullptr );
+        CHECK( pClef->get_clef_type() == k_clef_F4 );
+        CHECK( pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ direction -------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_01)
+    {
+        //@01 minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+        CHECK( pDM != nullptr );
+        CHECK( pDM->get_mark_type() == "fp" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_02)
+    {
+        //@02  <words> repeat-mark. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><words>To Coda</words></direction-type>"
+            "<sound tocoda='coda'/>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != nullptr );
+        CHECK( pAO->get_text() == "To Coda" );
+        CHECK( pAO->get_repeat_mark() == k_repeat_to_coda );
+        CHECK( pAO->get_language() == "it" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_03)
+    {
+        //@03  <words> other. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><words>Andante</words></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_none );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
+        CHECK( pAO != nullptr );
+        CHECK( pAO->get_text() == "Andante" );
+        CHECK( pAO->get_language() == "it" );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_04)
+    {
+        //@04. regex for 'Da Capo'
+
+        CHECK (mxl_type_of_repetion_mark("Da Capo") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark(" da capo") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark(" da capo ") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark(" DaCapo") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("dc") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("d.c.") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("d. c.") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark("d.c. ") == k_repeat_da_capo );
+        CHECK (mxl_type_of_repetion_mark(" d.c. ") == k_repeat_da_capo );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_05)
+    {
+        //@05. regex for 'Da Capo Al Fine'
+
+        CHECK (mxl_type_of_repetion_mark("da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("Da Capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("Da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" da capo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" da capo  al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" DaCapo al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("Da capo al fine ") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("dc al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("d.c. al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("d. c. al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark("d.c.  al fine") == k_repeat_da_capo_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" d.c. al fine ") == k_repeat_da_capo_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_06)
+    {
+        //@06. regex for 'Da Capo Al Coda'
+
+        CHECK (mxl_type_of_repetion_mark("da capo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" da capo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" da capo  al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" DaCapo al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark("Da capo al coda ") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark("dc al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark("d.c. al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark("d. c. al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark("d.c.  al coda") == k_repeat_da_capo_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" d.c. al coda ") == k_repeat_da_capo_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_07)
+    {
+        //@07. regex for 'Dal Segno'
+
+        CHECK (mxl_type_of_repetion_mark("dal segno") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark("del segno") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark(" dal  segno ") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark("d.s.") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark(" d.s.") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark("d.s. ") == k_repeat_dal_segno );
+        CHECK (mxl_type_of_repetion_mark(" d.s. ") == k_repeat_dal_segno );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_08)
+    {
+        //@08. regex for 'Dal Segno Al Fine'
+
+        CHECK (mxl_type_of_repetion_mark("dal segno al fine") == k_repeat_dal_segno_al_fine );
+        CHECK (mxl_type_of_repetion_mark("d.s. al fine") == k_repeat_dal_segno_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" dal  segno  al  fine ") == k_repeat_dal_segno_al_fine );
+        CHECK (mxl_type_of_repetion_mark(" d.s.  al  fine ") == k_repeat_dal_segno_al_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_09)
+    {
+        //@09. regex for 'Dal Segno Al Coda'
+
+        CHECK (mxl_type_of_repetion_mark("dal segno al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark("del segno al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" dal  segno  al  coda ") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark("d.s. al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" d.s. al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark("d.s.  al coda") == k_repeat_dal_segno_al_coda );
+        CHECK (mxl_type_of_repetion_mark(" d.s.  al  coda ") == k_repeat_dal_segno_al_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_10)
+    {
+        //@10. regex for 'Fine'
+
+        CHECK (mxl_type_of_repetion_mark("fine") == k_repeat_fine );
+        CHECK (mxl_type_of_repetion_mark(" fine") == k_repeat_fine );
+        CHECK (mxl_type_of_repetion_mark(" fine ") == k_repeat_fine );
+        CHECK (mxl_type_of_repetion_mark(" Fine") == k_repeat_fine );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_11)
+    {
+        //@11. regex for 'To Coda'
+
+        CHECK (mxl_type_of_repetion_mark("to coda") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark("to  coda") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark(" to coda") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark("to coda ") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark(" to coda ") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark(" to  coda ") == k_repeat_to_coda );
+        CHECK (mxl_type_of_repetion_mark("tocoda") == k_repeat_to_coda );
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_segno_12)
+    {
+        //@0012  <segno>. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><segno/></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_segno );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != nullptr );
+        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_coda_13)
+    {
+        //@13  <coda>. Minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><coda/></direction-type>"
+        "</direction>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_coda );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+
+        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+        CHECK( pAO != nullptr );
+        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ key ------------------------------------------------------------------------------
+
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_01)
+    {
+        //@01 minimum content parsed ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<key><fifths>2</fifths></key>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_key_signature() == true );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != nullptr );
+        CHECK( pKeySignature->get_key_type() == k_key_D );
+        CHECK( pKeySignature->get_staff() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_02)
+    {
+        //@02 key in minor mode
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<key><fifths>5</fifths><mode>minor</mode></key>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_key_signature() == true );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pKeySignature != nullptr );
+        CHECK( pKeySignature->get_key_type() == k_key_gs );
+        CHECK( pKeySignature->get_staff() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ midi-device -----------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, midi_device_01)
+    {
+        //@01. midi-device
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
+                "<part-name>Music</part-name>"
+                "<score-instrument id='P1-I1'>"
+                    "<instrument-name>Marimba</instrument-name>"
+                "</score-instrument>"
+                "<midi-device>Bank 1</midi-device>"
+            "</score-part></part-list><part id='P1'></part></score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != nullptr );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_score_instr_name() == "Marimba" );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_port() == 0 );
+        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
+        CHECK( pMidi->get_midi_name() == "" );
+        CHECK( pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi->get_midi_channel() == -1 );
+        CHECK( pMidi->get_midi_program() == 0 );
+        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( is_equal(pMidi->get_midi_volume(), 1.0f) );
+        CHECK( pMidi->get_midi_pan() == 0.0 );
+        CHECK( pMidi->get_midi_elevation() == 0.0 );
+//        cout << test_name() << endl;
+//        cout << "instr.name= " << pInfo->get_score_instr_name() << endl
+//             << "instr.abbrev= " << pInfo->get_score_instr_abbrev() << endl
+//             << "id= " << pInfo->get_score_instr_id() << endl
+//             << "name= " << pInfo->get_score_instr_name() << endl
+//             << "abbrev= " << pInfo->get_score_instr_abbrev() << endl
+//             << "sound= " << pInfo->get_score_instr_sound() << endl
+//             << "virt.library= " << pInfo->get_score_instr_virtual_library() << endl
+//             << "virt.name= " << pInfo->get_score_instr_virtual_name() << endl
+//             << "port= " << pMidi->get_midi_port() << endl
+//             << "device name= " << pMidi->get_midi_device_name() << endl
+//             << "midi name= " << pMidi->get_midi_name() << endl
+//             << "bank= " << pMidi->get_midi_bank() << endl
+//             << "channel= " << pMidi->get_midi_channel() << endl
+//             << "program= " << pMidi->get_midi_program() << endl
+//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+//             << "volume= " << pMidi->get_midi_volume() << endl
+//             << "pan= " << pMidi->get_midi_pan() << endl
+//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+
+        delete pIModel;
+    }
+
+    //@ midi-instrument -----------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_01)
+    {
+        //@01. midi-instrument. missing id
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. midi-instrument: missing mandatory attribute 'id'." << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
+                "<part-name>Music</part-name>"
+                "<score-instrument id='P1-I1'>"
+                    "<instrument-name>Marimba</instrument-name>"
+                "</score-instrument>"
+                "<midi-instrument>"
+                    "<midi-channel>1</midi-channel>"
+                "</midi-instrument>"
+            "</score-part></part-list><part id='P1'></part></score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != nullptr );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_score_instr_name() == "Marimba" );
+//        cout << test_name() << endl;
+//        cout << "score-instr: id= " << pInfo->get_score_instr_id()
+//             << ", name= " << pInfo->get_score_instr_name() << endl;
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_02)
+    {
+        //@02. midi instrument. full information
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
+                "<part-name>Flute 1</part-name>"
+                "<part-abbreviation>Fl. 1</part-abbreviation>"
+                "<score-instrument id='P1-I1'>"
+                    "<instrument-name>ARIA Player</instrument-name>"
+                    "<instrument-abbreviation>ARIA</instrument-abbreviation>"
+                    "<instrument-sound>wind.flutes.flute</instrument-sound>"
+                    "<virtual-instrument>"
+                        "<virtual-library>Garritan Instruments for Finale</virtual-library>"
+                        "<virtual-name>001. Woodwinds/1. Flutes/Flute Plr1</virtual-name>"
+                    "</virtual-instrument>"
+                "</score-instrument>"
+                "<midi-device>Bank 1</midi-device>"
+                "<midi-instrument id='P1-I1'>"
+                    "<midi-channel>1</midi-channel>"
+                    "<midi-program>1</midi-program>"
+                    "<volume>80</volume>"
+                    "<pan>-70</pan>"
+                "</midi-instrument>"
+            "</score-part></part-list><part id='P1'></part></score-partwise>"
+        );
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != nullptr );
+        CHECK( pInstr->get_name().get_text() == "Flute 1" );
+        CHECK( pInstr->get_abbrev().get_text() == "Fl. 1" );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_score_instr_name() == "ARIA Player" );
+        CHECK( pInfo->get_score_instr_abbrev() == "ARIA" );
+        CHECK( pInfo->get_score_instr_sound() == "wind.flutes.flute" );
+        CHECK( pInfo->get_score_instr_virtual_library() == "Garritan Instruments for Finale" );
+	    CHECK( pInfo->get_score_instr_virtual_name() == "001. Woodwinds/1. Flutes/Flute Plr1" );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_port() == 0 );
+        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
+        CHECK( pMidi->get_midi_name() == "" );
+        CHECK( pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_program() == 0 );
+        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( is_equal(pMidi->get_midi_volume(), 0.8f) );
+        CHECK( pMidi->get_midi_pan() == -70.0 );
+        CHECK( pMidi->get_midi_elevation() == 0.0 );
+//        cout << test_name() << endl;
+//        cout << "instr.name= " << pInstr->get_name().get_text() << endl
+//             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
+//             << "id= " << pInfo->get_score_instr_id() << endl
+//             << "name= " << pInfo->get_score_instr_name() << endl
+//             << "abbrev= " << pInfo->get_score_instr_abbrev() << endl
+//             << "sound= " << pInfo->get_score_instr_sound() << endl
+//             << "virt.library= " << pInfo->get_score_instr_virtual_library() << endl
+//             << "virt.name= " << pInfo->get_score_instr_virtual_name() << endl
+//             << "port= " << pMidi->get_midi_port() << endl
+//             << "device name= " << pMidi->get_midi_device_name() << endl
+//             << "midi name= " << pMidi->get_midi_name() << endl
+//             << "bank= " << pMidi->get_midi_bank() << endl
+//             << "channel= " << pMidi->get_midi_channel() << endl
+//             << "program= " << pMidi->get_midi_program() << endl
+//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+//             << "volume= " << pMidi->get_midi_volume() << endl
+//             << "pan= " << pMidi->get_midi_pan() << endl
+//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_03)
+    {
+        //@03. midi-instrument. id doesn't match any score-instrument
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. id 'I1' doesn't match any <score-instrument>"
+                 << ". <midi-instrument> ignored." << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
+                "<part-name>Music</part-name>"
+                "<score-instrument id='P1-I1'>"
+                    "<instrument-name>Marimba</instrument-name>"
+                "</score-instrument>"
+                "<midi-instrument id='I1'>"
+                    "<midi-channel>1</midi-channel>"
+                "</midi-instrument>"
+            "</score-part></part-list><part id='P1'></part></score-partwise>");
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != nullptr );
+        CHECK( pInstr->get_num_sounds() == 1 );
+        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
+        CHECK( pInfo->get_score_instr_name() == "Marimba" );
+
+        delete pIModel;
+    }
+
+
     //@ note -----------------------------------------------------------------------------
 
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_300)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_00)
     {
-        //@00300 minimum content parsed ok. Note saved
+        //@00 minimum content parsed ok. Note saved
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1503,9 +2066,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_301)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_01)
     {
-        //@00301 invalid step returns C
+        //@01 invalid step returns C
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1539,9 +2102,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_302)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_02)
     {
-        //@00302 invalid octave returns 4
+        //@02 invalid octave returns 4
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1575,9 +2138,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_303)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_03)
     {
-        //@00303 alter. Duration different from type
+        //@03 alter. Duration different from type
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1612,9 +2175,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_304)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_04)
     {
-        //@00304 accidental
+        //@04 accidental
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1650,9 +2213,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_305)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_05)
     {
-        //@00305 staff
+        //@05 staff
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1689,9 +2252,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_306)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_06)
     {
-        //@00306 stem
+        //@06 stem
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1725,9 +2288,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_307)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_07)
     {
-        //@00307 chord ok. start and end notes
+        //@07 chord ok. start and end notes
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1779,9 +2342,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_308)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_08)
     {
-        //@00308 chord ok. intermediate notes
+        //@08 chord ok. intermediate notes
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1842,9 +2405,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_309)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_09)
     {
-        //@00309. Type implied by duration
+        //@09 Type implied by duration
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1879,9 +2442,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_310)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_10)
     {
-        //@00310 unpitched note
+        //@10 unpitched note
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -1918,50 +2481,12 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_311)
-//    {
-//        //@00311 timepos is computed right
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        XmlParser parser;
-//        stringstream expected;
-//        parser.parse_text(
-//            "<score-partwise version='3.0'><part-list>"
-//            "<score-part id='P1'><part-name>Music</part-name></score-part>"
-//            "</part-list><part id='P1'>"
-//            "<measure number='1'>"
-//            "<note><pitch><step>A</step><octave>3</octave></pitch>"
-//                "<duration>4</duration><type>16th</type></note>"
-//            "<note><pitch><step>C</step><octave>4</octave></pitch>"
-//                "<duration>4</duration><type>16th</type></note>"
-//            "<note><pitch><step>E</step><octave>4</octave></pitch>"
-//                "<duration>4</duration><type>16th</type></note>"
-//            "</measure>"
-//            "</part></score-partwise>"
-//        );
-//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//        XmlNode* tree = parser.get_tree_root();
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//
-////        cout << test_name() << endl;
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pIModel->get_root() != nullptr);
-//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-//        ColStaffObjs* pCol = pScore->get_staffobjs_table();
-//
-//        a.do_not_delete_instruments_in_destructor();
-//        delete pIModel;
-//    }
-
 
     //@ rest --------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_rest_350)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_rest_01)
     {
-        //@00350 staff
+        //@01 staff
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1989,66 +2514,6 @@ SUITE(MxlAnalyserTest)
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;
     }
-
-
-    //@ barline --------------------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_barline_400)
-    {
-        //@00400 barline minimal content
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text("<barline><bar-style>light-light</bar-style></barline>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-
-    //@ backup --------------------------------------------------------------------------
-    //@ forward -------------------------------------------------------------------------
-
-
-//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_backup_420)
-//    {
-//        //@00420 backup
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        XmlParser parser;
-//        stringstream expected;
-//        parser.parse_text("<backup><duration>18</duration></backup>");
-//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//        XmlNode* tree = parser.get_tree_root();
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pIModel->get_root() == nullptr);
-//        //AWARE: initialy <divisions>==1 ==> duration is expressed in quarter notes
-//        CHECK( is_equal_time(a.get_current_time(), -18.0f*k_duration_64th) );
-//        cout << "420: timepos= " << a.get_current_time() << endl;
-//
-//        a.do_not_delete_instruments_in_destructor();
-//        delete pIModel;
-//    }
 
 
     //@ score-instrument ----------------------------------------------------------------
@@ -2275,273 +2740,517 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    //@ midi-device -----------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_30)
+    //@ slur ------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_slur_01)
     {
-        //@30. midi-device
+        //@01. double definition error detected
 
         stringstream errormsg;
         Document doc(m_libraryScope);
-        XmlParser parser;
+        XmlParser parser(errormsg);
         stringstream expected;
-        //expected << "" << endl;
+        expected << "Line 0. A slur with the same number is already defined for this "
+            "element in line 0. This slur will be ignored." << endl;
         parser.parse_text(
-            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
-                "<part-name>Music</part-name>"
-                "<score-instrument id='P1-I1'>"
-                    "<instrument-name>Marimba</instrument-name>"
-                "</score-instrument>"
-                "<midi-device>Bank 1</midi-device>"
-            "</score-part></part-list><part id='P1'></part></score-partwise>");
-        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+            "<note>"
+                "<pitch><step>A</step>"
+                "<octave>3</octave></pitch>"
+                "<duration>1</duration><type>quarter</type>"
+                "<notations>"
+                    "<slur number='1' type='start'/>"
+                    "<slur number='1' type='stop'/>"
+                "</notations>"
+            "</note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_sounds() == 1 );
-        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_score_instr_name() == "Marimba" );
-        CHECK( pInfo->get_midi_port() == 0 );
-        CHECK( pInfo->get_midi_device_name() == "Bank 1" );
-        CHECK( pInfo->get_midi_name() == "" );
-        CHECK( pInfo->get_midi_bank() == 0 );
-        CHECK( pInfo->get_midi_channel() == -1 );
-        CHECK( pInfo->get_midi_program() == 0 );
-        CHECK( pInfo->get_midi_unpitched() == -1 );
-        CHECK( is_equal(pInfo->get_midi_volume(), 1.0f) );
-        CHECK( pInfo->get_midi_pan() == 0.0 );
-        CHECK( pInfo->get_midi_elevation() == 0.0 );
-//        cout << test_name() << endl;
-//        cout << "instr.name= " << pInfo->get_name().get_text() << endl
-//             << "instr.abbrev= " << pInfo->get_abbrev().get_text() << endl
-//             << "id= " << pInfo->get_score_instr_id() << endl
-//             << "name= " << pInfo->get_score_instr_name() << endl
-//             << "abbrev= " << pInfo->get_score_instr_abbrev() << endl
-//             << "sound= " << pInfo->get_score_instr_sound() << endl
-//             << "virt.library= " << pInfo->get_score_instr_virtual_library() << endl
-//             << "virt.name= " << pInfo->get_score_instr_virtual_name() << endl
-//             << "port= " << pInfo->get_midi_port() << endl
-//             << "device name= " << pInfo->get_midi_device_name() << endl
-//             << "midi name= " << pInfo->get_midi_name() << endl
-//             << "bank= " << pInfo->get_midi_bank() << endl
-//             << "channel= " << pInfo->get_midi_channel() << endl
-//             << "program= " << pInfo->get_midi_program() << endl
-//             << "unpitched= " << pInfo->get_midi_unpitched() << endl
-//             << "volume= " << pInfo->get_midi_volume() << endl
-//             << "pan= " << pInfo->get_midi_pan() << endl
-//             << "elevation= " << pInfo->get_midi_elevation() << endl;
+        CHECK( pIModel->get_root()->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != nullptr );
 
+        a.do_not_delete_instruments_in_destructor();
         delete pIModel;
     }
 
-    //@ midi-instrument -----------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_40)
+    //@ sound ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_01)
     {
-        //@40. midi-instrument. missing id
+        //@01 empty <sound> ignored
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Empty <sound> element. Ignored." << endl;
+        parser.parse_text("<sound></sound>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == nullptr);
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_02)
+    {
+        //@02 dacapo
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. midi-instrument: missing mandatory attribute 'id'." << endl;
-        parser.parse_text(
-            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
-                "<part-name>Music</part-name>"
-                "<score-instrument id='P1-I1'>"
-                    "<instrument-name>Marimba</instrument-name>"
-                "</score-instrument>"
-                "<midi-instrument>"
-                    "<midi-channel>1</midi-channel>"
-                "</midi-instrument>"
-            "</score-part></part-list><part id='P1'></part></score-partwise>");
-        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        parser.parse_text("<sound dacapo='yes'></sound>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_sounds() == 1 );
-        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_score_instr_name() == "Marimba" );
-//        cout << test_name() << endl;
-//        cout << "score-instr: id= " << pInfo->get_score_instr_id()
-//             << ", name= " << pInfo->get_score_instr_name() << endl;
+        CHECK( pIModel->get_root()->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_bool_attribute(k_attr_dacapo) == true );
+        CHECK( pSC->get_bool_attribute(k_attr_pizzicato) == false );
 
+        a.do_not_delete_instruments_in_destructor();
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_41)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_03)
     {
-        //@41. midi instrument. full information
+        //@03 tempo
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text(
-            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
-                "<part-name>Flute 1</part-name>"
-                "<part-abbreviation>Fl. 1</part-abbreviation>"
-                "<score-instrument id='P1-I1'>"
-                    "<instrument-name>ARIA Player</instrument-name>"
-                    "<instrument-abbreviation>ARIA</instrument-abbreviation>"
-                    "<instrument-sound>wind.flutes.flute</instrument-sound>"
-                    "<virtual-instrument>"
-                        "<virtual-library>Garritan Instruments for Finale</virtual-library>"
-                        "<virtual-name>001. Woodwinds/1. Flutes/Flute Plr1</virtual-name>"
-                    "</virtual-instrument>"
-                "</score-instrument>"
-                "<midi-device>Bank 1</midi-device>"
-                "<midi-instrument id='P1-I1'>"
-                    "<midi-channel>1</midi-channel>"
-                    "<midi-program>1</midi-program>"
-                    "<volume>80</volume>"
-                    "<pan>-70</pan>"
-                "</midi-instrument>"
-            "</score-part></part-list><part id='P1'></part></score-partwise>"
+        parser.parse_text("<sound tempo='75'></sound>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_float_attribute(k_attr_tempo) == 75.0f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_04)
+    {
+        //@04 tempo error
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Invalid real number '75,7'. Replaced by '70'." << endl;
+        parser.parse_text("<sound tempo='75,7'/>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_float_attribute(k_attr_tempo) == 70.0f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_05)
+    {
+        //@05 forward-repeat error
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part '', measure ''. Invalid value for 'forward-repeat' "
+                    "attribute. When used, value must be 'yes'. Ignored." << endl;
+
+        parser.parse_text("<sound forward-repeat='no' tempo='72.5' />");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_num_attributes() == 1 );
+        CHECK( pSC->get_float_attribute(k_attr_tempo) == 72.5f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_06)
+    {
+        //@06. <sound> inside a <direction>: attached as child
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><words>To Coda</words></direction-type>"
+            "<sound tocoda='coda'/>"
+        "</direction>"
         );
-        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_name().get_text() == "Flute 1" );
-        CHECK( pInstr->get_abbrev().get_text() == "Fl. 1" );
-        CHECK( pInstr->get_num_sounds() == 1 );
-        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_score_instr_name() == "ARIA Player" );
-        CHECK( pInfo->get_score_instr_abbrev() == "ARIA" );
-        CHECK( pInfo->get_score_instr_sound() == "wind.flutes.flute" );
-        CHECK( pInfo->get_score_instr_virtual_library() == "Garritan Instruments for Finale" );
-	    CHECK( pInfo->get_score_instr_virtual_name() == "001. Woodwinds/1. Flutes/Flute Plr1" );
-        CHECK( pInfo->get_midi_port() == 0 );
-        CHECK( pInfo->get_midi_device_name() == "Bank 1" );
-        CHECK( pInfo->get_midi_name() == "" );
-        CHECK( pInfo->get_midi_bank() == 0 );
-        CHECK( pInfo->get_midi_channel() == 0 );
-        CHECK( pInfo->get_midi_program() == 0 );
-        CHECK( pInfo->get_midi_unpitched() == 0 );
-        CHECK( is_equal(pInfo->get_midi_volume(), 0.8f) );
-        CHECK( pInfo->get_midi_pan() == -70.0 );
-        CHECK( pInfo->get_midi_elevation() == 0.0 );
-//        cout << test_name() << endl;
-//        cout << "instr.name= " << pInstr->get_name().get_text() << endl
-//             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
-//             << "id= " << pInfo->get_score_instr_id() << endl
-//             << "name= " << pInfo->get_score_instr_name() << endl
-//             << "abbrev= " << pInfo->get_score_instr_abbrev() << endl
-//             << "sound= " << pInfo->get_score_instr_sound() << endl
-//             << "virt.library= " << pInfo->get_score_instr_virtual_library() << endl
-//             << "virt.name= " << pInfo->get_score_instr_virtual_name() << endl
-//             << "port= " << pInfo->get_midi_port() << endl
-//             << "device name= " << pInfo->get_midi_device_name() << endl
-//             << "midi name= " << pInfo->get_midi_name() << endl
-//             << "bank= " << pInfo->get_midi_bank() << endl
-//             << "channel= " << pInfo->get_midi_channel() << endl
-//             << "program= " << pInfo->get_midi_program() << endl
-//             << "unpitched= " << pInfo->get_midi_unpitched() << endl
-//             << "volume= " << pInfo->get_midi_volume() << endl
-//             << "pan= " << pInfo->get_midi_pan() << endl
-//             << "elevation= " << pInfo->get_midi_elevation() << endl;
+        CHECK( pIModel->get_root()->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pSO != nullptr );
+        CHECK( pSO->get_num_attachments() == 1 );
+        CHECK( pSO->get_placement() == k_placement_default );
+        CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
+        CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
+                                        pSO->get_child_of_type(k_imo_sound_change) );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
+
+        a.do_not_delete_instruments_in_destructor();
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_42)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_07)
     {
-        //@42. midi-instrument. id doesn't match any score-instrument
+        //@07. <sound> inside a <measure>: attached as child
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. id 'I1' doesn't match any <score-instrument>"
-                 << ". <midi-instrument> ignored." << endl;
         parser.parse_text(
-            "<score-partwise version='3.0'><part-list><score-part id='P1'>"
-                "<part-name>Music</part-name>"
-                "<score-instrument id='P1-I1'>"
-                    "<instrument-name>Marimba</instrument-name>"
-                "</score-instrument>"
-                "<midi-instrument id='I1'>"
-                    "<midi-channel>1</midi-channel>"
-                "</midi-instrument>"
-            "</score-part></part-list><part id='P1'></part></score-partwise>");
-        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<sound tempo='85'/>"
+            "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_sounds() == 1 );
-        ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_score_instr_name() == "Marimba" );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
 
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( pMD->get_num_children() == 3 );          //third one is the barline
+
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( *it );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_attribute_node(k_attr_tempo) != nullptr  );
+
+        ++it;
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+
+        a.do_not_delete_instruments_in_destructor();
         delete pIModel;
     }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_08)
+    {
+        //@08. midi instrument for one sound-instrument inside <sound>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list>"
+                "<score-part id='P1'>"
+                    "<part-name>Flute 1</part-name>"
+                    "<score-instrument id='P1-I1'>"
+                        "<instrument-name>ARIA Player</instrument-name>"
+                    "</score-instrument>"
+                    "<midi-device>Bank 1</midi-device>"
+                    "<midi-instrument id='P1-I1'>"
+                        "<midi-channel>1</midi-channel>"
+                        "<midi-program>1</midi-program>"
+                        "<volume>80</volume>"
+                        "<pan>-70</pan>"
+                    "</midi-instrument>"
+                "</score-part>"
+            "</part-list>"
+            "<part id='P1'>"
+                "<measure number='1'>"
+                "<sound>"
+                    "<midi-instrument id='P1-I1'>"
+                        "<midi-program>46</midi-program>"
+                    "</midi-instrument>"
+                "</sound>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>4</duration><type>16th</type></note>"
+                "</measure>"
+            "</part>"
+            "</score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
+                                    pMD->get_child_of_type(k_imo_sound_change) );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_num_attributes() == 0 );
+        ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
+                                    pSC->get_child_of_type(k_imo_midi_info) );
+        CHECK( pMidi != nullptr );
+        CHECK( pMidi->get_score_instr_id() == "P1-I1" );
+        CHECK( pMidi->get_midi_port() == 0 );
+        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
+        CHECK( pMidi->get_midi_name() == "" );
+        CHECK( pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_program() == 45 );
+        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( is_equal(pMidi->get_midi_volume(), 0.8f) );
+        CHECK( pMidi->get_midi_pan() == -70.0 );
+        CHECK( pMidi->get_midi_elevation() == 0.0 );
+//        cout << test_name() << endl;
+//        cout << "id= " << pMidi->get_score_instr_id() << endl
+//             << "port= " << pMidi->get_midi_port() << endl
+//             << "device name= " << pMidi->get_midi_device_name() << endl
+//             << "midi name= " << pMidi->get_midi_name() << endl
+//             << "bank= " << pMidi->get_midi_bank() << endl
+//             << "channel= " << pMidi->get_midi_channel() << endl
+//             << "program= " << pMidi->get_midi_program() << endl
+//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+//             << "volume= " << pMidi->get_midi_volume() << endl
+//             << "pan= " << pMidi->get_midi_pan() << endl
+//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_09)
+    {
+        //@09. midi device for one sound-instrument inside <sound>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'>"
+            "<part-list>"
+                "<score-part id='P1'>"
+                    "<part-name>Flute 1</part-name>"
+                    "<score-instrument id='P1-I1'>"
+                        "<instrument-name>ARIA Player</instrument-name>"
+                    "</score-instrument>"
+                    "<midi-device>Bank 1</midi-device>"
+                    "<midi-instrument id='P1-I1'>"
+                        "<midi-channel>1</midi-channel>"
+                        "<midi-program>1</midi-program>"
+                        "<volume>80</volume>"
+                        "<pan>-70</pan>"
+                    "</midi-instrument>"
+                "</score-part>"
+            "</part-list>"
+            "<part id='P1'>"
+                "<measure number='1'>"
+                "<sound>"
+                    "<midi-device>Bank 3</midi-device>"
+                    "<midi-instrument id='P1-I1'>"
+                        "<midi-program>19</midi-program>"
+                        "<volume>40</volume>"
+                    "</midi-instrument>"
+                "</sound>"
+                "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                    "<duration>4</duration><type>16th</type></note>"
+                "</measure>"
+            "</part>"
+            "</score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
+                                    pMD->get_child_of_type(k_imo_sound_change) );
+        CHECK( pSC != nullptr );
+        CHECK( pSC->get_num_attributes() == 0 );
+        ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
+                                    pSC->get_child_of_type(k_imo_midi_info) );
+        CHECK( pMidi != nullptr );
+        CHECK( pMidi->get_score_instr_id() == "P1-I1" );
+        CHECK( pMidi->get_midi_port() == 0 );
+        CHECK( pMidi->get_midi_device_name() == "Bank 3" );
+        CHECK( pMidi->get_midi_name() == "" );
+        CHECK( pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_program() == 18 );
+        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( is_equal(pMidi->get_midi_volume(), 0.4f) );
+        CHECK( pMidi->get_midi_pan() == -70.0 );
+        CHECK( pMidi->get_midi_elevation() == 0.0 );
+//        cout << test_name() << endl;
+//        cout << "id= " << pMidi->get_score_instr_id() << endl
+//             << "port= " << pMidi->get_midi_port() << endl
+//             << "device name= " << pMidi->get_midi_device_name() << endl
+//             << "midi name= " << pMidi->get_midi_name() << endl
+//             << "bank= " << pMidi->get_midi_bank() << endl
+//             << "channel= " << pMidi->get_midi_channel() << endl
+//             << "program= " << pMidi->get_midi_program() << endl
+//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+//             << "volume= " << pMidi->get_midi_volume() << endl
+//             << "pan= " << pMidi->get_midi_pan() << endl
+//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ time ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_01)
+    {
+        //@01 minimum content parsed ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<time><beats>6</beats><beat-type>8</beat-type></time>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pTimeSignature != nullptr );
+        CHECK( pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature->get_bottom_number() == 8 );
+//        cout << test_name()
+//             << ": top number=" << pTimeSignature->get_top_number()
+//             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_02)
+    {
+        //@02 error in time signature
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <time>: missing mandatory element <beat-type>." << endl;
+        parser.parse_text("<time><beats>6</beats></time>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        CHECK( pIModel->get_root()->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pTimeSignature != nullptr );
+        CHECK( pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature->get_bottom_number() == 4 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
 
     //@ time-modification ---------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, time_modification_0)
+    TEST_FIXTURE(MxlAnalyserTestFixture, time_modification_01)
     {
-        //@0. time-modification
+        //@01 time-modification
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -3193,11 +3902,59 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    //@ Options for dealing with malformed MusicXML files -------------------------------
+    //@ miscellaneous -------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_500)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_miscellaneous_01)
     {
-        //@500 fix wrong beam
+        //@01 Hello World
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<divisions>1</divisions><key><fifths>0</fifths></key>"
+                "<time><beats>4</beats><beat-type>4</beat-type></time>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+            "</attributes>"
+            "<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != nullptr );
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != nullptr );
+        CHECK( pInstr->get_num_staves() == 1 );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+        CHECK( pMD->get_num_items() == 5 );
+        ImoObj* pImo = pMD->get_first_child();
+        CHECK( pImo->is_clef() == true );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_misc_malformed_10)
+    {
+        //@10 malformed MusicXML: fix wrong beam
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -3268,394 +4025,6 @@ SUITE(MxlAnalyserTest)
 //             << ", " << pNote2->get_beam_type(3)
 //             << ", " << pNote2->get_beam_type(4)
 //             << ", " << pNote2->get_beam_type(5) << endl;
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-
-    //@ direction -------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_600)
-    {
-        //@00600 minimum content parsed ok
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        parser.parse_text("<direction>"
-            "<direction-type><dynamics><fp/></dynamics></direction-type>"
-            "</direction>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
-        CHECK( pDM != nullptr );
-        CHECK( pDM->get_mark_type() == "fp" );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_610)
-    {
-        //@00610  <words> repeat-mark. Minimum content parsed ok
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        parser.parse_text("<direction>"
-            "<direction-type><words>To Coda</words></direction-type>"
-            "<sound tocoda='coda'/>"
-        "</direction>"
-        );
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
-
-        ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_text() == "To Coda" );
-        CHECK( pAO->get_repeat_mark() == k_repeat_to_coda );
-        CHECK( pAO->get_language() == "it" );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_611)
-    {
-        //@00611  <words> other. Minimum content parsed ok
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        parser.parse_text("<direction>"
-            "<direction-type><words>Andante</words></direction-type>"
-        "</direction>"
-        );
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_none );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
-
-        ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_text() == "Andante" );
-        CHECK( pAO->get_language() == "it" );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_612)
-    {
-        //@00612. regex for 'Da Capo'
-
-        CHECK (mxl_type_of_repetion_mark("Da Capo") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark(" da capo") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark(" da capo ") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark(" DaCapo") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("Da capo") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("dc") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("d.c.") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("d. c.") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark("d.c. ") == k_repeat_da_capo );
-        CHECK (mxl_type_of_repetion_mark(" d.c. ") == k_repeat_da_capo );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_613)
-    {
-        //@00613. regex for 'Da Capo Al Fine'
-
-        CHECK (mxl_type_of_repetion_mark("da capo al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("Da Capo al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("Da capo al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" da capo al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" da capo  al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" DaCapo al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("Da capo al fine ") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("dc al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("d.c. al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("d. c. al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark("d.c.  al fine") == k_repeat_da_capo_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" d.c. al fine ") == k_repeat_da_capo_al_fine );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_614)
-    {
-        //@00614. regex for 'Da Capo Al Coda'
-
-        CHECK (mxl_type_of_repetion_mark("da capo al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" da capo al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" da capo  al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" DaCapo al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark("Da capo al coda ") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark("dc al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark("d.c. al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark("d. c. al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark("d.c.  al coda") == k_repeat_da_capo_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" d.c. al coda ") == k_repeat_da_capo_al_coda );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_615)
-    {
-        //@00615. regex for 'Dal Segno'
-
-        CHECK (mxl_type_of_repetion_mark("dal segno") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark("del segno") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark(" dal  segno ") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark("d.s.") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark(" d.s.") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark("d.s. ") == k_repeat_dal_segno );
-        CHECK (mxl_type_of_repetion_mark(" d.s. ") == k_repeat_dal_segno );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_616)
-    {
-        //@00616. regex for 'Dal Segno Al Fine'
-
-        CHECK (mxl_type_of_repetion_mark("dal segno al fine") == k_repeat_dal_segno_al_fine );
-        CHECK (mxl_type_of_repetion_mark("d.s. al fine") == k_repeat_dal_segno_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" dal  segno  al  fine ") == k_repeat_dal_segno_al_fine );
-        CHECK (mxl_type_of_repetion_mark(" d.s.  al  fine ") == k_repeat_dal_segno_al_fine );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_617)
-    {
-        //@00617. regex for 'Dal Segno Al Coda'
-
-        CHECK (mxl_type_of_repetion_mark("dal segno al coda") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark("del segno al coda") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" dal  segno  al  coda ") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark("d.s. al coda") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" d.s. al coda") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark("d.s.  al coda") == k_repeat_dal_segno_al_coda );
-        CHECK (mxl_type_of_repetion_mark(" d.s.  al  coda ") == k_repeat_dal_segno_al_coda );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_618)
-    {
-        //@00618. regex for 'Fine'
-
-        CHECK (mxl_type_of_repetion_mark("fine") == k_repeat_fine );
-        CHECK (mxl_type_of_repetion_mark(" fine") == k_repeat_fine );
-        CHECK (mxl_type_of_repetion_mark(" fine ") == k_repeat_fine );
-        CHECK (mxl_type_of_repetion_mark(" Fine") == k_repeat_fine );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_619)
-    {
-        //@00619. regex for 'To Coda'
-
-        CHECK (mxl_type_of_repetion_mark("to coda") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark("to  coda") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark(" to coda") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark("to coda ") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark(" to coda ") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark(" to  coda ") == k_repeat_to_coda );
-        CHECK (mxl_type_of_repetion_mark("tocoda") == k_repeat_to_coda );
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_segno_630)
-    {
-        //@00630  <segno>. Minimum content parsed ok
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        parser.parse_text("<direction>"
-            "<direction-type><segno/></direction-type>"
-        "</direction>"
-        );
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_segno );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
-
-        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_coda_640)
-    {
-        //@00640  <coda>. Minimum content parsed ok
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        parser.parse_text("<direction>"
-            "<direction-type><coda/></direction-type>"
-        "</direction>"
-        );
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_coda );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
-
-        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
-
-        a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
-    }
-
-
-    //@ miscellaneous -------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_miscellaneous_01)
-    {
-        //@99901 - Hello World
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        parser.parse_text(
-            "<score-partwise version='3.0'><part-list>"
-            "<score-part id='P1'><part-name>Music</part-name></score-part>"
-            "</part-list><part id='P1'>"
-            "<measure number='1'>"
-            "<attributes>"
-                "<divisions>1</divisions><key><fifths>0</fifths></key>"
-                "<time><beats>4</beats><beat-type>4</beat-type></time>"
-                "<clef><sign>G</sign><line>2</line></clef>"
-            "</attributes>"
-            "<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>"
-            "</measure>"
-            "</part></score-partwise>"
-        );
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_staves() == 1 );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        CHECK( pMD->get_num_items() == 5 );
-        ImoObj* pImo = pMD->get_first_child();
-        CHECK( pImo->is_clef() == true );
-
-        delete pIModel;
-    }
-
-
-    //@ slur ------------------------------------------------------------------
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_slur_01)
-    {
-        //@01. double definition error detected
-
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser(errormsg);
-        stringstream expected;
-        expected << "Line 0. A slur with the same number is already defined for this "
-            "element in line 0. This slur will be ignored." << endl;
-        parser.parse_text(
-            "<note>"
-                "<pitch><step>A</step>"
-                "<octave>3</octave></pitch>"
-                "<duration>1</duration><type>quarter</type>"
-                "<notations>"
-                    "<slur number='1' type='start'/>"
-                    "<slur number='1' type='stop'/>"
-                "</notations>"
-            "</note>");
-        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
-        CHECK( pNote != nullptr );
 
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;

@@ -88,9 +88,8 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // MidiAssigner. Implements the algorithm to traverse the score instruments and assign
-// midi channel and midi port pitch to
-// notes, based on notated pitch, and taking into account key signature and notated
-// accidentals introduced by previous notes on the same measure.
+// midi channel and midi port pitch to the <sound-instruments>. It also ensures that
+// all ImoInstruments have at least one ImoSoundInfo, creating one if not.
 class MidiAssigner
 {
 protected:

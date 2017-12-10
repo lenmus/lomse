@@ -52,15 +52,6 @@ class InternalModel;
 class ImoNote;
 class ImoRest;
 
-//---------------------------------------------------------------------------------------
-// MusicXML attributes
-enum EMxlAttribute
-{
-    k_mxl_attr_undefined = 0,
-    k_mxl_attr_dacapo,
-    k_mxl_attr_forward_repeat,
-};
-
 
 //---------------------------------------------------------------------------------------
 // helper class to save start of tie info, match them and build the tie
@@ -229,6 +220,9 @@ protected:
     MxlVoltasBuilder*   m_pVoltasBuilder;
     map<string, int>    m_lyricIndex;
     vector<ImoLyric*>   m_lyrics;
+    map<string, int>    m_soundIdToIdx;     //conversion sound-instrument id to index
+	vector<ImoMidiInfo*> m_latestMidiInfo;  //latest MidiInfo for each soundIdx
+
 
     int             m_musicxmlVersion;
     ImoObj*         m_pNodeImo;
@@ -244,6 +238,7 @@ protected:
 
     // information maintained in MxlAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
+    ImoInstrument*  m_pCurInstrument;   //the instrument being analysed
     ImoNote*        m_pLastNote;        //last note added to the score
     ImoBarline*     m_pLastBarline;     //last barline added to current instrument
     ImoDocument*    m_pImoDoc;          //the document containing the score
@@ -337,6 +332,28 @@ public:
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
     inline ImoBarline* get_last_barline() { return m_pLastBarline; }
 
+    //access to score being analysed
+    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
+    inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
+
+    //access to instrument being analysed
+    inline void save_current_instrument(ImoInstrument* pInstr) { m_pCurInstrument = pInstr; }
+    inline ImoInstrument* get_current_instrument() { return m_pCurInstrument; }
+
+    //access to document being analysed
+    inline Document* get_document_being_analysed() { return m_pDoc; }
+    inline const string& get_document_locator() { return m_fileLocator; }
+
+    //access to root ImoDocument
+    inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
+    inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
+
+    //sound-instruments and midi info management
+    int get_index_for_sound(const string& id);
+    int create_index_for_sound(const string& id);
+    ImoMidiInfo* get_latest_midi_info_for(const string& id);
+    void set_latest_midi_info_for(const string& id, ImoMidiInfo* pMidi);
+
     //interface for building relations
     void add_relation_info(ImoObj* pDto);
     void clear_pending_relations();
@@ -376,18 +393,6 @@ public:
     inline void save_current_part_id(const string& id) { m_curPartId = id; }
     inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
     int get_line_number(XmlNode* node);
-
-    //access to score being analysed
-    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
-    inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
-
-    //access to document being analysed
-    inline Document* get_document_being_analysed() { return m_pDoc; }
-    inline const string& get_document_locator() { return m_fileLocator; }
-
-    //access to root ImoDocument
-    inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
-    inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
 
     int name_to_enum(const string& name) const;

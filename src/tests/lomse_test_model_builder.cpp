@@ -488,8 +488,9 @@ SUITE(MidiAssignerTest)
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "" );
-        CHECK( pInfo->get_midi_channel() == 2 );
-        CHECK( pInfo->get_midi_port() == -1 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 2 );
+        CHECK( pMidi->get_midi_port() == -1 );
 
         MyMidiAssigner assigner;
         assigner.assign_midi_data(pScore);
@@ -497,8 +498,9 @@ SUITE(MidiAssignerTest)
         CHECK( pInstr->get_num_sounds() == 1 );
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == 2 );
-        CHECK( pInfo->get_midi_port() == 0 );
+        pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 2 );
+        CHECK( pMidi->get_midi_port() == 0 );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
     }
 
@@ -524,8 +526,9 @@ SUITE(MidiAssignerTest)
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo->get_score_instr_id() == "" );
-        CHECK( pInfo->get_midi_channel() == 0 );
-        CHECK( pInfo->get_midi_port() == -1 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_port() == -1 );
         pInstr = pScore->get_instrument(1);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -539,16 +542,18 @@ SUITE(MidiAssignerTest)
         CHECK( pInstr->get_num_sounds() == 1 );
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_midi_channel() == 0 );
-        CHECK( pInfo->get_midi_port() == 0 );
+        pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_port() == 0 );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
 
         pInstr = pScore->get_instrument(1);
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-2" );
-        CHECK( pInfo->get_midi_channel() == 1 );
-        CHECK( pInfo->get_midi_port() == 0 );
+        pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 1 );
+        CHECK( pMidi->get_midi_port() == 0 );
     }
 
     TEST_FIXTURE(MidiAssignerTestFixture, midi_assigner_06)
@@ -591,8 +596,9 @@ SUITE(MidiAssignerTest)
         CHECK( pInstr->get_num_sounds() == 1 );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_midi_channel() == -1 );
-        CHECK( pInfo->get_midi_port() == 2 );
+        ImoMidiInfo* pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == -1 );
+        CHECK( pMidi->get_midi_port() == 2 );
 
         pInstr = pScore->get_instrument(1);
         CHECK( pInstr != nullptr );
@@ -608,15 +614,17 @@ SUITE(MidiAssignerTest)
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
-        CHECK( pInfo->get_midi_channel() == 0 );
-        CHECK( pInfo->get_midi_port() == 2 );
+        pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_port() == 2 );
 
         pInstr = pScore->get_instrument(1);
         pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_score_instr_id() == "SOUND-1" );
-        CHECK( pInfo->get_midi_channel() == 0 );
-        CHECK( pInfo->get_midi_port() == 0 );
+        pMidi = pInfo->get_midi_info();
+        CHECK( pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi->get_midi_port() == 0 );
     }
 
 //"<part-list>"

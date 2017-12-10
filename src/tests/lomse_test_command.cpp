@@ -1019,14 +1019,15 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1 p1 (beam 152 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1 p1 (beam 152 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 152 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1 p1 (beam 153 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1 p1 (beam 153 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 153 -))" );
         CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1 p1 (beam 139 +))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1 p1 (beam 139 =))" );
         CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 139 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
-        //cout << pTable->dump() << endl;
+//        cout << pTable->dump() << endl;
+//        cout << doc.dump_ids() << endl;
      }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0402)
@@ -1156,11 +1157,12 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1 p1 (beam 129 +))" );
         CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1 p1 (beam 129 =))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1 p1 (beam 129 -))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1 p1 (beam 152 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1 p1 (beam 152 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 152 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1 p1 (beam 153 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1 p1 (beam 153 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1 p1 (beam 153 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
 //        cout << pTable->dump() << endl;
+//        cout << doc.dump_ids() << endl;
      }
 
 
@@ -3127,8 +3129,8 @@ SUITE(DocCommandTest)
         CHECK( pSC->time() == 64 );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 129 +))"
-              "(n c4 e v1 p1 (beam 129 -)))))))" );
+              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 130 +))"
+              "(n c4 e v1 p1 (beam 130 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3190,11 +3192,12 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_staff() == true );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 138 +))"
-              "(n c4 e v1 p1 (beam 138 -)))))))" );
+              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 139 +))"
+              "(n c4 e v1 p1 (beam 139 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
+//        cout << doc.dump_ids() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
     }
 
@@ -3211,7 +3214,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        pCmd = LOMSE_NEW CmdCursor(127L);     //point to first note
+        pCmd = LOMSE_NEW CmdCursor(128L);     //point to first note
         executer.execute(&cursor, pCmd, &sel);
         ImoObj* pNoteE4 = *cursor;
 

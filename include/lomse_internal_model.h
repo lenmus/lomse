@@ -65,6 +65,7 @@ class EventHandler;
 class Control;
 class ScorePlayerCtrl;
 class ButtonCtrl;
+class AttribsContainer;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -469,6 +470,7 @@ class ImoWrapperBox;
                 k_imo_instr_group,
                 k_imo_line_style,
                 k_imo_lyrics_text_info,
+                k_imo_midi_info,
                 k_imo_page_info,
                 k_imo_sound_info,
                 k_imo_staff_info,
@@ -687,96 +689,62 @@ private:
 //---------------------------------------------------------------------------------------
 // Auxiliary class: An attribute
 
-typedef boost::variant<int, string, bool, float> AttribValue;
+typedef boost::variant<int, string, bool, float, double, Color> AttribValue;
 
-class AuxAttrib
+class ImoAttr
 {
 protected:
-	int m_attrbType;
+	int m_attrbIdx;
 	AttribValue m_value;
-	AuxAttrib* m_next;
+	ImoAttr* m_next;
 
 public:
-    AuxAttrib(int type) : m_attrbType(type), m_next(nullptr) {}
-    AuxAttrib(int type, const string& value)
-        : m_attrbType(type)
-        , m_next(nullptr)
-    {
-        set_value(value);
-    }
-    AuxAttrib(int type, int value)
-        : m_attrbType(type)
-        , m_next(nullptr)
-    {
-        set_value(value);
-    }
-    AuxAttrib(int type, float value)
-        : m_attrbType(type)
-        , m_next(nullptr)
-    {
-        set_value(value);
-    }
-    AuxAttrib(int type, bool value)
-        : m_attrbType(type)
-        , m_next(nullptr)
-    {
-        set_value(value);
-    }
-    ~AuxAttrib() {}
+    ImoAttr(int idx) : m_attrbIdx(idx), m_next(nullptr) {}
+    ImoAttr(int idx, const string& value);
+    ImoAttr(int idx, int value);
+    ImoAttr(int idx, float value);
+    ImoAttr(int idx, double value);
+    ImoAttr(int idx, bool value);
+    ImoAttr(int idx, Color value);
+    ~ImoAttr() {}
 
-    inline AuxAttrib* get_next_attrib() { return m_next; }
-    inline int get_int_value(){ return boost::get<int>(m_value); }
-    inline float get_float_value(){ return boost::get<float>(m_value); }
-    inline string get_string_value(){ return boost::get<string>(m_value); }
-    inline bool get_bool_value(){ return boost::get<bool>(m_value); }
+    const string get_name();
 
-    inline void set_value(const string& value) { m_value = value; }
-    inline void set_value(int value) { m_value = value; }
-    inline void set_value(float value) { m_value = value; }
-    inline void set_value(bool value) { m_value = value; }
+    inline int get_int_value() { return boost::get<int>(m_value); }
+    inline double get_double_value() { return boost::get<double>(m_value); }
+    inline string get_string_value() { return boost::get<string>(m_value); }
+    inline bool get_bool_value() { return boost::get<bool>(m_value); }
+    inline float get_float_value() { return boost::get<float>(m_value); }
+    inline Color get_color_value() { return boost::get<Color>(m_value); }
+
+    inline void set_string_value(const string& value) { m_value = value; }
+    inline void set_int_value(int value) { m_value = value; }
+    inline void set_double_value(double value) { m_value = value; }
+    inline void set_float_value(float value) { m_value = value; }
+    inline void set_bool_value(bool value) { m_value = value; }
+    inline void set_color_value(Color value) { m_value = value; }
+
+    inline int get_attrib_idx() { return m_attrbIdx; }
+    inline ImoAttr* get_next_attrib() { return m_next; }
+
+    static const string get_name(int idx);
 
 protected:
-    friend class AuxAttributes;
-    inline void set_next_attrib(AuxAttrib* next) { m_next = next; }
+    friend class ImoObj;
+    inline void set_next_attrib(ImoAttr* pAttr) { m_next = pAttr; }
 
 };
 
-//---------------------------------------------------------------------------------------
-// Auxiliary class: container for attributes
-class AuxAttributes
-{
-protected:
-	AuxAttrib* m_first;
 
-public:
-    AuxAttributes();
-    ~AuxAttributes();
-
-    //basic interface
-	inline AuxAttrib* get_first_attribute() { return m_first; }
-	AuxAttrib* get_last_attribute();
-    AuxAttrib* add_attribute(int type, int value);
-    AuxAttrib* add_attribute(int type, float value);
-    AuxAttrib* add_attribute(int type, const string& value);
-    AuxAttrib* add_attribute(int type, bool value);
-
-//    // DOM Level 1 interface
-//    string& get_attribute(const string& name);
-//    void set_attribute(const string& name, const string& value);
-//    void remove_attribute(const string& name);
-//    AuxAttrib* get_attribute_node(const string& name);
-    AuxAttrib* set_attribute_node(AuxAttrib* newAttr);
-//    AuxAttrib* remove_attribute_node(AuxAttrib* newAttr);
-//    ImoDomNodeList* get_elements_by_tagname(const string& tagname);
-//
-//    // DOM Level 2 interface
-//    bool has_attribute(const string& name);
-
-protected:
-    void delete_all_attributes();
-
-};
-
+//=======================================================================================
+// standard interface for ImoObj objects containing an ImoSounds child
+//=======================================================================================
+#define LOMSE_DECLARE_IMOSOUNDS_INTERFACE                               \
+    ImoSounds* get_sounds();                                            \
+    void add_sound_info(ImoSoundInfo* pInfo);                           \
+    int get_num_sounds();                                               \
+    ImoSoundInfo* get_sound_info(const string& soundId);                \
+    ImoSoundInfo* get_sound_info(int iSound);    //iSound = 0..n-1
 
 
 //=======================================================================================
@@ -816,12 +784,14 @@ protected:
     ImoId m_id;
     int m_objtype;
     unsigned int m_flags;
+    ImoAttr* m_pAttribs;
 
 protected:
     ImoObj(int objtype, ImoId id=k_no_imoid);
 
     friend class ImFactory;
     inline void set_owner_document(Document* pDoc) { m_pDoc = pDoc; }
+    virtual void initialize(Document* pDoc);
 
 public:
     virtual ~ImoObj();
@@ -886,17 +856,26 @@ public:
     //properties
     virtual bool can_generate_secondary_shapes() { return false; }
 
-    //edition support
-    virtual void set_int_attribute(TIntAttribute UNUSED(attrib), int UNUSED(value)) {}      //TODO pure virtual
-    virtual int get_int_attribute(TIntAttribute UNUSED(attrib)) { return 0; }       //TODO pure virtual
-    virtual void set_color_attribute(TIntAttribute UNUSED(attrib), Color UNUSED(value)) {}  //TODO pure virtual
-    virtual Color get_color_attribute(TIntAttribute UNUSED(attrib)) { return Color(0,0,0); }    //TODO pure virtual
-    virtual void set_bool_attribute(TIntAttribute UNUSED(attrib), bool UNUSED(value)) {}  //TODO pure virtual
-    virtual bool get_bool_attribute(TIntAttribute UNUSED(attrib)) { return true; }    //TODO pure virtual
-    virtual void set_double_attribute(TIntAttribute UNUSED(attrib), double UNUSED(value)) {}  //TODO pure virtual
-    virtual double get_double_attribute(TIntAttribute UNUSED(attrib)) { return 0.0; }    //TODO pure virtual
-    virtual void set_string_attribute(TIntAttribute UNUSED(attrib), const string& UNUSED(value)) {}  //TODO pure virtual
-    virtual string get_string_attribute(TIntAttribute UNUSED(attrib)) { return ""; }    //TODO pure virtual
+    //IM attributes interface
+        //set attribute value
+    virtual void set_int_attribute(TIntAttribute idx, int value);
+    virtual void set_color_attribute(TIntAttribute idx, Color value);
+    virtual void set_bool_attribute(TIntAttribute idx, bool value);
+    virtual void set_float_attribute(TIntAttribute idx, float value);
+    virtual void set_double_attribute(TIntAttribute idx, double value);
+    virtual void set_string_attribute(TIntAttribute idx, const string& value);
+        //get attribute value
+    virtual int get_int_attribute(TIntAttribute idx);
+    virtual float get_float_attribute(TIntAttribute idx);
+    virtual double get_double_attribute(TIntAttribute idx);
+    virtual Color get_color_attribute(TIntAttribute idx);
+    virtual bool get_bool_attribute(TIntAttribute idx);
+    virtual string get_string_attribute(TIntAttribute idx);
+        //attribute nodes
+    ImoAttr* get_attribute_node(TIntAttribute idx);
+        //miscellaneous
+    virtual int get_num_attributes();
+    inline ImoAttr* get_first_attribute() { return m_pAttribs; }
     virtual list<TIntAttribute> get_supported_attributes()
     {
         list<TIntAttribute> supported;
@@ -986,6 +965,7 @@ public:
 	inline bool is_lyric() { return m_objtype == k_imo_lyric; }
 	inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
     inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
+    inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
 	inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
     inline bool is_music_data() { return m_objtype == k_imo_music_data; }
     inline bool is_note() { return m_objtype == k_imo_note; }
@@ -1052,6 +1032,12 @@ protected:
     void visit_children(BaseVisitor& v);
     void propagate_dirty();
     void remove_id();
+    void delete_attributes();
+
+    //attributes
+    ImoAttr* set_attribute_node(ImoAttr* newAttr);
+    void remove_attribute(TIntAttribute idx);
+    ImoAttr* get_last_attribute();
 
 };
 
@@ -1770,7 +1756,7 @@ public:
         return pStyle ? pStyle->margin_bottom() : 0.0f;
     }
 
-    //edition support
+    //IM attributes interface
     void set_int_attribute(TIntAttribute attrib, int value);
     int get_int_attribute(TIntAttribute attrib);
     void set_bool_attribute(TIntAttribute attrib, bool value);
@@ -2050,7 +2036,7 @@ public:
     //setters
     inline void set_color(Color color) { m_color = color; }
 
-    //edition support
+    //IM attributes interface
     void set_int_attribute(TIntAttribute attrib, int value);
     int get_int_attribute(TIntAttribute attrib);
     void set_color_attribute(TIntAttribute attrib, Color value);
@@ -2105,7 +2091,7 @@ public:
     ImoInstrument* get_instrument();
     ImoScore* get_score();
 
-    //edition support
+    //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
@@ -2463,6 +2449,84 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+//The <score-part> element allows for multiple score-instruments per
+//score-part. ImoMidiInfo contains the MIDI information for one score-instrument
+class ImoMidiInfo : public ImoSimpleObj
+{
+protected:
+	string	m_soundId;          //id of the score-instrument
+
+	//midi device
+	int     m_port;			    //port: 0-15 (MIDI 1-16)
+    string  m_midiDeviceName;   //DeviceName meta event
+
+	//midi instrument
+	string m_midiName;  //name: ProgramName meta-events
+	int m_bank;			//bank: 0-16383 (MIDI 1-16,384)
+    int m_channel;		//channel: 0-15 (MIDI 1-16)
+    int m_program;		//patch: 0-127 (MIDI 1-128)
+	int m_unpitched;	//pitch number for percussion: 1-128
+
+	//mixer information
+	float m_volume;		//channel volume: 0.0 (muted) to 1.0
+	int m_pan;			//degrees: -180 to 180.
+							// 0 = in front of the listener, centered
+							//-90 = hard left, 90 is hard right
+							//-180 and 180 = behind the listener, centered
+	int m_elevation;	//degrees: -90 to 90.
+							// 0 = listener level
+							// 90 = directly above
+							//-90 = directly below.
+
+    friend class ImFactory;
+    friend class ImoInstrument;
+    ImoMidiInfo()
+		: ImoSimpleObj(k_imo_midi_info)
+		, m_port(-1)
+        , m_midiDeviceName("")
+        , m_midiName("")
+		, m_bank(0)
+    	, m_channel(-1)
+    	, m_program(0)
+		, m_unpitched(0)
+		, m_volume(1.0)
+		, m_pan(0)
+		, m_elevation(0)
+	{
+	}
+
+public:
+    virtual ~ImoMidiInfo() {}
+
+    //getters
+	inline string& get_score_instr_id() { return 	m_soundId; }
+    inline int get_midi_port() { return m_port; }
+    inline string& get_midi_device_name() { return m_midiDeviceName; }
+    inline string& get_midi_name() { return m_midiName; }
+    inline int get_midi_bank() { return m_bank; }
+    inline int get_midi_channel() { return m_channel; }
+    inline int get_midi_program() { return m_program; }
+    inline int get_midi_unpitched() { return m_unpitched; }
+    inline float get_midi_volume() { return m_volume; }
+    inline int get_midi_pan() { return m_pan; }
+    inline int get_midi_elevation() { return m_elevation; }
+
+    //setters
+    inline void set_score_instr_id(const string& value) { m_soundId = value; }
+    inline void set_midi_port(int value) { m_port = value; }
+    inline void set_midi_device_name(const string& value) { m_midiDeviceName = value; }
+    inline void set_midi_name(const string& value) { m_midiName = value; }
+    inline void set_midi_bank(int value) { m_bank = value; }
+    inline void set_midi_channel(int value) { m_channel = value; }
+    inline void set_midi_program(int value) { m_program = value; }
+    inline void set_midi_unpitched(int value) { m_unpitched = value; }
+    inline void set_midi_volume(float value) { m_volume = value; }
+    inline void set_midi_pan(int value) { m_pan = value; }
+    inline void set_midi_elevation(int value) { m_elevation = value; }
+
+};
+
+//---------------------------------------------------------------------------------------
 class ImoTextBlockInfo : public ImoSimpleObj
 {
 //<location>[<size>][<color>][<border>]
@@ -2522,7 +2586,7 @@ public:
 class ImoSoundInfo : public ImoSimpleObj
 {
 protected:
-	string	m_id;
+	string	m_soundId;          //id of the score-instrument
 	string	m_instrName;		//not oriented to appearing printed on the score
 	string	m_instrAbbrev;		//not oriented to appearing printed on the score
 	string	m_instrSound;		//describes the default timbre of the score-instrument
@@ -2539,61 +2603,20 @@ protected:
 	string	m_virtualLibrary;		//virtual library name
 	string	m_virtualName;			//virtual instrument to use
 
+    //defines play technique to use for all notes played back with this instrument
+    int     m_playTechnique;
 
-        //MIDI information
-
-	//midi device
-	int     m_port;			    //port: 0-15 (MIDI 1-16)
-    string  m_midiDeviceName;   //DeviceName meta event
-
-	//midi instrument
-	string m_midiName;  //name: ProgramName meta-events
-	int m_bank;			//bank: 0-16383 (MIDI 1-16,384)
-    int m_channel;		//channel: 0-15 (MIDI 1-16)
-    int m_program;		//patch: 0-127 (MIDI 1-128)
-	int m_unpitched;	//pitch number for percussion: 1-128
-
-	//mixer information
-	float m_volume;		//channel volume: 0.0 (muted) to 1.0
-	int m_pan;			//degrees: -180 to 180.
-							// 0 = in front of the listener, centered
-							//-90 = hard left, 90 is hard right
-							//-180 and 180 = behind the listener, centered
-	int m_elevation;	//degrees: -90 to 90.
-							// 0 = listener level
-							// 90 = directly above
-							//-90 = directly below.
 
     friend class ImFactory;
     friend class ImoInstrument;
-    ImoSoundInfo()
-		: ImoSimpleObj(k_imo_sound_info)
-		, m_instrName("")
-		, m_instrAbbrev("")
-		, m_instrSound("")
-		, m_fSolo(false)
-		, m_fEnsemble(false)
-		, m_ensembleSize(0)
-		, m_virtualLibrary("")
-		, m_virtualName("")
-		, m_port(-1)
-        , m_midiDeviceName("")
-        , m_midiName("")
-		, m_bank(0)
-    	, m_channel(-1)
-    	, m_program(0)
-		, m_unpitched(-1)
-		, m_volume(1.0)
-		, m_pan(0)
-		, m_elevation(0)
-	{
-	}
+    ImoSoundInfo();
+    void initialize(Document* pDoc) override;
 
 public:
     virtual ~ImoSoundInfo() {}
 
     //getters
-	inline string& get_score_instr_id() { return 	m_id; }
+	inline string& get_score_instr_id() { return m_soundId; }
 	inline string& get_score_instr_name() { return m_instrName; }
 	inline string& get_score_instr_abbrev() { return m_instrAbbrev; }
 	inline string& get_score_instr_sound() { return m_instrSound; }
@@ -2602,19 +2625,9 @@ public:
 	inline int get_score_instr_ensemble_size() { return m_ensembleSize; }
 	inline string& get_score_instr_virtual_library() { return m_virtualLibrary; }
 	inline string& get_score_instr_virtual_name() { return m_virtualName; }
-    inline int get_midi_port() { return m_port; }
-    inline string& get_midi_device_name() { return m_midiDeviceName; }
-    inline string& get_midi_name() { return m_midiName; }
-    inline int get_midi_bank() { return m_bank; }
-    inline int get_midi_channel() { return m_channel; }
-    inline int get_midi_program() { return m_program; }
-    inline int get_midi_unpitched() { return m_unpitched; }
-    inline float get_midi_volume() { return m_volume; }
-    inline int get_midi_pan() { return m_pan; }
-    inline int get_midi_elevation() { return m_elevation; }
 
     //setters
-    inline void set_score_instr_id(const string& value) { m_id = value; }
+    void set_score_instr_id(const string& value);
 	inline void set_score_instr_name(const string& value) { m_instrName = value; }
 	inline void set_score_instr_abbrev(const string& value) { m_instrAbbrev = value; }
 	inline void set_score_instr_sound(const string& value) { m_instrSound = value; }
@@ -2623,16 +2636,9 @@ public:
 	inline void set_score_instr_ensemble_size(int value) { m_ensembleSize = value; }
 	inline void set_score_instr_virtual_library(const string& value) { m_virtualLibrary = value; }
 	inline void set_score_instr_virtual_name(const string& value) { m_virtualName = value; }
-    inline void set_midi_port(int value) { m_port = value; }
-    inline void set_midi_device_name(const string& value) { m_midiDeviceName = value; }
-    inline void set_midi_name(const string& value) { m_midiName = value; }
-    inline void set_midi_bank(int value) { m_bank = value; }
-    inline void set_midi_channel(int value) { m_channel = value; }
-    inline void set_midi_program(int value) { m_program = value; }
-    inline void set_midi_unpitched(int value) { m_unpitched = value; }
-    inline void set_midi_volume(float value) { m_volume = value; }
-    inline void set_midi_pan(int value) { m_pan = value; }
-    inline void set_midi_elevation(int value) { m_elevation = value; }
+
+    //access to ImoMidiInfo child
+    ImoMidiInfo* get_midi_info();
 
 };
 
@@ -2784,7 +2790,7 @@ public:
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }
 
-    //edition support
+    //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
@@ -3470,36 +3476,6 @@ public:
 class ImoSoundChange : public ImoStaffObj
 {
 protected:
-    AuxAttributes m_attribs;
-
-    float m_tempo;      //quarter notes per minute. 0 = no change
-    float m_dynamics;   //non-negative decimal
-    bool m_dacapo;
-    int m_repetitionMark;
-    string m_repetitionLabel;
-    // attrib: m_divisions CDATA #IMPLIED
-    bool m_forwardRepeat;
-    // attrib: m_fine CDATA #IMPLIED
-    //The fine attribute follows the final note or rest in a
-    //movement with a da capo or dal segno direction. If numeric,
-    //the value represents the actual duration of the final note or
-    //rest, which can be ambiguous in written notation and
-    //different among parts and voices. The value may also be
-    //"yes" to indicate no change to the final duration.
-
-    // attrib: %time-only;
-    //The value is a comma-separated list of
-    //positive integers arranged in ascending order, indicating
-    //which times through the repeated section this element
-    //applies.
-
-    bool m_pizzicato;
-    bool m_damperPedal;
-    bool m_softPedal;
-    bool m_sostenutoPedal;
-        // content
-    // (midi-device?, midi-instrument?, play?)*
-    // offset?
 
     friend class ImFactory;
     ImoSoundChange()
@@ -3510,51 +3486,8 @@ protected:
 public:
     virtual ~ImoSoundChange() {}
 
-    //attributes interface
-	inline AuxAttrib* get_first_attribute() { return m_attribs.get_first_attribute(); }
-	inline AuxAttrib* get_last_attribute() { return m_attribs.get_last_attribute(); }
-    inline AuxAttrib* add_attribute(int type, int value) { return m_attribs.add_attribute(type, value); }
-    inline AuxAttrib* add_attribute(int type, float value) { return m_attribs.add_attribute(type, value); }
-    inline AuxAttrib* add_attribute(int type, const string& value) { return m_attribs.add_attribute(type, value); }
-    inline AuxAttrib* add_attribute(int type, bool value) { return m_attribs.add_attribute(type, value); }
+    ImoMidiInfo* get_midi_info(const string& soundId);
 
-    // DOM Level 1 interface
-	inline AuxAttrib* set_attribute_node(AuxAttrib* attrb) { return m_attribs.set_attribute_node(attrb); }
-
-    //getters
-    inline float get_tempo() { return m_tempo; }
-    // attrib: dynamics CDATA #IMPLIED - non-negative decimal
-    inline bool get_dacapo() { return m_dacapo; }
-    inline int get_repetition_mark() { return m_repetitionMark; }
-    inline string& get_repetition_label() { return m_repetitionLabel; }
-    // attrib: divisions CDATA #IMPLIED
-    inline bool get_forward_repeat() { return m_forwardRepeat; }
-    // attrib: fine CDATA #IMPLIED
-    //The fine attribute follows the final note or rest in a
-    //movement with a da capo or dal segno direction. If numeric,
-    //the value represents the actual duration of the final note or
-    //rest, which can be ambiguous in written notation and
-    //different among parts and voices. The value may also be
-    //"yes" to indicate no change to the final duration.
-
-    // attrib: %time-only;
-    //If the sound element applies only particular times through a
-    //repeat, the time-only attribute indicates which times to apply
-    //the sound element. The value is a comma-separated list of
-    //positive integers arranged in ascending order, indicating
-    //which times through the repeated section that the element
-    //applies.
-
-    inline bool get_pizzicato() { return m_pizzicato; }
-    inline bool get_damperPedal() { return m_damperPedal; }
-    inline bool get_soft_pedal() { return m_softPedal; }
-    inline bool get_sostenuto_pedal() { return m_sostenutoPedal; }
-
-        // content
-
-    // (midi-device?, midi-instrument?, play?)*
-
-    // offset?
 
 };
 
@@ -3703,12 +3636,8 @@ public:
 
     enum EBarlineLayout { k_isolated=0, k_joined, k_mensurstrich, k_nothing, };
 
-	//sounds info
-	ImoSounds* get_sounds();
-	void add_sound_info(ImoSoundInfo* pInfo);
-	int get_num_sounds();
-	ImoSoundInfo* get_sound_info(const string& soundId);
-	ImoSoundInfo* get_sound_info(int iSound);    //iSound = 0..n-1
+    //methods for accessing ImoSounds child
+    LOMSE_DECLARE_IMOSOUNDS_INTERFACE;
 
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
@@ -3800,6 +3729,11 @@ protected:
 
 public:
     virtual ~ImoSounds() {}
+
+    void add_sound_info(ImoSoundInfo* pInfo);
+    int get_num_sounds();
+    ImoSoundInfo* get_sound_info(const string& soundId);
+    ImoSoundInfo* get_sound_info(int iSound);
 
 };
 

@@ -111,7 +111,7 @@ public:
     bool is_in_tuplet();
     ImoTuplet* get_first_tuplet();
 
-    //edition support
+    //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
@@ -137,7 +137,7 @@ protected:
     friend class NoteRestMnxAnalyser;
     inline void mark_as_full_measure(bool value) { m_fFullMeasureRest = value; }
 
-    //edition support
+    //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
@@ -167,7 +167,7 @@ protected:
     ImoNote(int step, int octave, int noteType, EAccidentals accidentals=k_no_accidentals,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
-    //edition support
+    //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();

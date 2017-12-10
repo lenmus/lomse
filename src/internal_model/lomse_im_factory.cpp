@@ -91,6 +91,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_lyric:               pObj = LOMSE_NEW ImoLyric();              break;
         case k_imo_lyrics_text_info:    pObj = LOMSE_NEW ImoLyricsTextInfo();     break;
         case k_imo_metronome_mark:      pObj = LOMSE_NEW ImoMetronomeMark();      break;
+        case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();             break;
         case k_imo_multicolumn:         pObj = LOMSE_NEW ImoMultiColumn(pDoc);    break;
         case k_imo_music_data:          pObj = LOMSE_NEW ImoMusicData();          break;
         case k_imo_note:                pObj = LOMSE_NEW ImoNote();               break;
@@ -151,6 +152,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         pDoc->assign_id(pObj);
     }
     pObj->set_owner_document(pDoc);
+    pObj->initialize(pDoc);
     return pObj;
 }
 

@@ -1090,8 +1090,9 @@ protected:
         if (m_pObj->get_num_sounds() > 0)
         {
             ImoSoundInfo* pInfo = m_pObj->get_sound_info(0);
-            int instr = pInfo->get_midi_program();
-            int channel = pInfo->get_midi_channel();
+            ImoMidiInfo* pMidi = pInfo->get_midi_info();
+            int instr = pMidi->get_midi_program();
+            int channel = pMidi->get_midi_channel();
             if (instr != 0 || channel != 0)
             {
                 start_element("infoMIDI", k_no_imoid);
