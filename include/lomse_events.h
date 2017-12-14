@@ -77,6 +77,7 @@ enum EEventType
     k_view_level_event = 0,
 
         k_update_window_event,      //ask user app to update window with current bitmap
+        k_update_viewport_event,    //ask user app to update window with current bitmap
 
         k_update_UI_event,          //possible need for UI updates
             k_selection_set_change,     //selected objects changed
@@ -188,7 +189,7 @@ public:
         , m_pDoc(pDoc)
     {
     }
-    ~EventDoc() {}
+    virtual ~EventDoc() {}
 
     inline Document* get_document() { return m_pDoc; }
 };
@@ -230,12 +231,42 @@ public:
         , m_damagedRectangle(damagedRectangle)
     {
     }
-    ~EventPaint() {}
+    virtual ~EventPaint() {}
 
     inline VRect get_damaged_rectangle() { return m_damagedRectangle; }
 };
 
 typedef SharedPtr<EventPaint>  SpEventPaint;
+
+
+//---------------------------------------------------------------------------------------
+// EventViewportChanged: inform user application about the need to repaint the screen
+// due to a viewport change automatically done by Lomse during score playback
+class EventViewportChanged : public EventView
+{
+protected:
+    VRect m_damagedRectangle;
+    Pixels m_x;
+    Pixels m_y;
+
+public:
+    EventViewportChanged(WpInteractor wpInteractor, VRect damagedRectangle,
+                         Pixels x, Pixels y)
+        : EventView(k_update_viewport_event, wpInteractor)
+        , m_damagedRectangle(damagedRectangle)
+        , m_x(x)
+        , m_y(y)
+    {
+    }
+    virtual ~EventViewportChanged() {}
+
+    inline VRect get_damaged_rectangle() { return m_damagedRectangle; }
+    inline Pixels get_new_viewport_x() { return m_x; }
+    inline Pixels get_new_viewport_y() { return m_y; }
+    void get_new_viewport(Pixels* x, Pixels* y)  { *x = m_x; *y = m_x; }
+};
+
+typedef SharedPtr<EventViewportChanged>  SpEventViewportChanged;
 
 
 //---------------------------------------------------------------------------------------

@@ -527,12 +527,15 @@ public:
 class GmoBoxScorePage : public GmoBox
 {
 protected:
-    int             m_nFirstSystem;     //0..n-1
-    int             m_nLastSystem;      //0..n-1
+    int m_nFirstSystem;     //0..n-1
+    int m_nLastSystem;      //0..n-1
+    int m_iPage;            //0..n-1
 
 public:
     GmoBoxScorePage(ImoScore* pScore);
     virtual ~GmoBoxScorePage();
+
+    inline void set_page_number(int iPage) { m_iPage = iPage; }
 
 	//systems
     void add_system(GmoBoxSystem* pSystem, int iSystem);
@@ -541,6 +544,7 @@ public:
         return (m_nFirstSystem == -1 ? 0 : m_nLastSystem - m_nFirstSystem + 1);
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
+	inline int get_page_number() { return m_iPage; }
 
     //hit tests related
     int nearest_system_to_point(LUnits y);

@@ -662,7 +662,15 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 //generate implicit visual on event
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
+                {
+                    ImoId id = events[i]->pSO->get_id();
+                    stringstream s;
+                    s << "VISUAL ON. Num.items=" << pEvent->get_num_items();
+                    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
+                    if (pEvent->get_num_items() < 2)    //first even is "advance tempo line"
+                        m_pInteractor->change_viewport_if_necessary(id);
+                    pEvent->add_item(k_highlight_on_event, id);
+                }
 
             }
             else if (events[i]->EventType == SoundEvent::k_note_off)

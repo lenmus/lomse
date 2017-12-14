@@ -42,6 +42,7 @@ GmoBoxScorePage::GmoBoxScorePage(ImoScore* pScore)
     : GmoBox(GmoObj::k_box_score_page, pScore)
     , m_nFirstSystem(-1)
     , m_nLastSystem(-1)
+    , m_iPage(0)
 {
 }
 

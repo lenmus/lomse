@@ -176,6 +176,7 @@ public:
 
     //scrolling support
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
+    virtual void change_viewport_if_necessary(ImoId id);
 
     //selection rectangle
     void start_selection_rectangle(LUnits x1, LUnits y1);

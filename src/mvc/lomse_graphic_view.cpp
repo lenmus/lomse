@@ -42,6 +42,9 @@
 #include "lomse_visual_effect.h"
 #include "lomse_overlays_generator.h"
 #include "lomse_handler.h"
+#include "lomse_box_slice.h"
+#include "lomse_box_slice_instr.h"
+#include "lomse_box_system.h"
 
 using namespace std;
 
@@ -232,9 +235,7 @@ void GraphicView::add_handler(int iHandler, GmoObj* pOwnerGmo)
 //---------------------------------------------------------------------------------------
 void GraphicView::new_viewport(Pixels x, Pixels y)
 {
-    stringstream s;
-    s << "x=" << x << ", y=" << y;
-    LOMSE_LOG_DEBUG(Logger::k_mvc, s.str());
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
     m_vxOrg = x;
     m_vyOrg = y;
@@ -246,6 +247,62 @@ void GraphicView::new_viewport(Pixels x, Pixels y)
 GraphicModel* GraphicView::get_graphic_model()
 {
     return m_pInteractor->get_graphic_model();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::change_viewport_if_necessary(ImoId id)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return;
+
+    GmoShape* pShape = pGModel->get_main_shape_for_imo(id);
+    if (!pShape)
+        return;
+
+    GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
+    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
+    GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
+
+    //TODO: what is needed is DocPage not ScorePage
+
+    int iPage = pBoxSystem->get_page_number();
+    double xPos = double(pBoxSystem->get_left());
+    double yPos = double(pBoxSystem->get_top());
+
+    //model point to screen returns shift from current viewport origin
+    model_point_to_screen(&xPos, &yPos, iPage);
+    Pixels xSys = Pixels(xPos);
+    Pixels ySys = Pixels(yPos);
+
+    stringstream s;
+    s << "Id=" << id << ", m_vyOrg=" << m_vyOrg << ", yPos=" << pBoxSystem->get_top() << ", ySys=" << ySys << ", iPage=" << iPage;
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
+
+    if (ySys < 0 || ySys > m_viewportSize.height)
+    {
+        new_viewport(m_vxOrg, m_vyOrg+ySys);
+        redraw_bitmap();
+
+        yPos = double(pBoxSystem->get_top());
+        model_point_to_screen(&xPos, &yPos, iPage);
+        Pixels newySys = Pixels(yPos);
+        stringstream s;
+        s << "Check: m_vyOrg=" << m_vyOrg << ", yPos=" << pBoxSystem->get_top() << ", ySys=" << newySys;
+        LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
+
+
+        //trim rectangle
+        Pixels x1 = 0;  //max(0, m_vxOrg);
+        Pixels y1 = 0;  //max(0, Pixels(yPos));
+        Pixels x2 = int(m_pRenderBuf->width());
+        Pixels y2 = int(m_pRenderBuf->height());    //min(Pixels(bottom), int(m_pRenderBuf->height()) );
+
+        VRect damagedRect = VRect(VPoint(x1, y1), VPoint(x2, y2));
+        m_pInteractor->request_viewport_change(m_vxOrg, yPos, damagedRect);
+    }
+
+
 }
 
 ////---------------------------------------------------------------------------------------
