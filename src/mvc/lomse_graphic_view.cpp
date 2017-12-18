@@ -252,7 +252,7 @@ GraphicModel* GraphicView::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void GraphicView::change_viewport_if_necessary(ImoId id)
 {
-    //AWARE: This code is executed in MIDI thread
+    //AWARE: This code is executed in the sound thread
 
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)
@@ -278,11 +278,6 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     Pixels vxSys = Pixels(xPos);
     Pixels vySysTop = Pixels(yTop);
 
-    stringstream s;
-    s << "vwp.top=" << m_vyOrg << ", vwp.height=" << m_viewportSize.height
-      << ", ySysTop=" << ySysTop << ", vySysTop=" << vySysTop << ", iPage=" << iPage;
-    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
-
     //determine if scroll needed
     Pixels xNew = 0;
     Pixels yNew = 0;
@@ -293,7 +288,6 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
         xNew = m_vxOrg;
         yNew = m_vyOrg + vySysTop;
         fDoScroll = true;
-        LOMSE_LOG_DEBUG(lomse::Logger::k_events, "Top of system before or after viewport");
     }
     else
     {
@@ -308,33 +302,12 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
             xNew = m_vxOrg;
             yNew = m_vyOrg + vySysTop;
             fDoScroll = true;
-            LOMSE_LOG_DEBUG(lomse::Logger::k_events, "Bottom of system out of sight");
         }
     }
 
-    //do scroll if required
+    //request scroll if required
     if (fDoScroll)
-    {
-        new_viewport(xNew, yNew);
-        redraw_bitmap();
-
-        yTop = double(pBoxSystem->get_top());
-        model_point_to_screen(&xPos, &yTop, iPage);
-        Pixels newySys = Pixels(yTop);
-        stringstream s;
-        s << "vwp.top=" << m_vyOrg << ", vwp.height=" << m_viewportSize.height
-          << ", yTop=" << pBoxSystem->get_top() << ", newySys=" << newySys;
-        LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
-
-
-        //view rectangle
-        Pixels x2 = int(m_pRenderBuf->width());
-        Pixels y2 = int(m_pRenderBuf->height());
-        VRect damagedRect = VRect(VPoint(0, 0), VPoint(x2, y2));
-
-        m_pInteractor->request_viewport_change(m_vxOrg, yTop, damagedRect);
-    }
-
+        m_pInteractor->request_viewport_change(xNew, yNew);
 }
 
 ////---------------------------------------------------------------------------------------

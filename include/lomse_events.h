@@ -246,9 +246,9 @@ typedef SharedPtr<EventPaint>  SpEventPaint;
 
 
 //---------------------------------------------------------------------------------------
-// EventViewportChanged: inform user application about the need to repaint the screen
-// due to a viewport change automatically done by Lomse during score playback
-class EventViewportChanged : public EventPaint
+// EventUpdateViewport: inform user application about the need to change the viewport
+// during score playback so that current played notes are visible
+class EventUpdateViewport : public EventView
 {
 protected:
     VRect m_damagedRectangle;
@@ -256,22 +256,20 @@ protected:
     Pixels m_y;
 
 public:
-    EventViewportChanged(WpInteractor wpInteractor, VRect damagedRectangle,
-                         Pixels x, Pixels y)
-        : EventPaint(k_update_viewport_event, wpInteractor, damagedRectangle)
+    EventUpdateViewport(WpInteractor wpInteractor, Pixels x, Pixels y)
+        : EventView(k_update_viewport_event, wpInteractor)
         , m_x(x)
         , m_y(y)
     {
     }
-    virtual ~EventViewportChanged() {}
+    virtual ~EventUpdateViewport() {}
 
-    inline VRect get_damaged_rectangle() { return m_damagedRectangle; }
     inline Pixels get_new_viewport_x() { return m_x; }
     inline Pixels get_new_viewport_y() { return m_y; }
     void get_new_viewport(Pixels* x, Pixels* y)  { *x = m_x; *y = m_x; }
 };
 
-typedef SharedPtr<EventViewportChanged>  SpEventViewportChanged;
+typedef SharedPtr<EventUpdateViewport>  SpEventUpdateViewport;
 
 
 //---------------------------------------------------------------------------------------

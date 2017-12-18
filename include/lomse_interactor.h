@@ -259,7 +259,7 @@ public:
 
     //for auto-scroll during playback
     virtual void change_viewport_if_necessary(ImoId id);
-    virtual void request_viewport_change(Pixels x, Pixels y, VRect damagedRect);
+    virtual void request_viewport_change(Pixels x, Pixels y);
 
     //for performance measurements
     void timing_start_measurements();
