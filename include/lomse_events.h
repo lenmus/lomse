@@ -225,6 +225,12 @@ class EventPaint : public EventView
 protected:
     VRect m_damagedRectangle;
 
+    EventPaint(EEventType type, WpInteractor wpInteractor, VRect damagedRectangle)
+        : EventView(type, wpInteractor)
+        , m_damagedRectangle(damagedRectangle)
+    {
+    }
+
 public:
     EventPaint(WpInteractor wpInteractor, VRect damagedRectangle)
         : EventView(k_update_window_event, wpInteractor)
@@ -242,7 +248,7 @@ typedef SharedPtr<EventPaint>  SpEventPaint;
 //---------------------------------------------------------------------------------------
 // EventViewportChanged: inform user application about the need to repaint the screen
 // due to a viewport change automatically done by Lomse during score playback
-class EventViewportChanged : public EventView
+class EventViewportChanged : public EventPaint
 {
 protected:
     VRect m_damagedRectangle;
@@ -252,8 +258,7 @@ protected:
 public:
     EventViewportChanged(WpInteractor wpInteractor, VRect damagedRectangle,
                          Pixels x, Pixels y)
-        : EventView(k_update_viewport_event, wpInteractor)
-        , m_damagedRectangle(damagedRectangle)
+        : EventPaint(k_update_viewport_event, wpInteractor, damagedRectangle)
         , m_x(x)
         , m_y(y)
     {

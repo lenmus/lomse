@@ -1011,15 +1011,17 @@ void Interactor::get_viewport(Pixels* x, Pixels* y)
 //---------------------------------------------------------------------------------------
 void Interactor::request_viewport_change(Pixels x, Pixels y, VRect damagedRect)
 {
+    //AWARE: This code is executed in MIDI thread
+
     LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
     SpEventView pEvent( LOMSE_NEW EventViewportChanged(wpIntor, damagedRect, x, y) );
 
-//    m_libScope.post_event(pEvent);
+    m_libScope.post_event(pEvent);
 
-    notify_observers(pEvent, this);
+//    notify_observers(pEvent, this);
 }
 
 //---------------------------------------------------------------------------------------

@@ -252,6 +252,8 @@ GraphicModel* GraphicView::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void GraphicView::change_viewport_if_necessary(ImoId id)
 {
+    //AWARE: This code is executed in MIDI thread
+
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)
         return;
@@ -263,45 +265,75 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
     GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
     GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
+    GmoBoxDocPage* pBoxPage = pBoxSystem->get_parent_doc_page();
 
-    //TODO: what is needed is DocPage not ScorePage
-
-    int iPage = pBoxSystem->get_page_number();
-    double xPos = double(pBoxSystem->get_left());
-    double yPos = double(pBoxSystem->get_top());
+    int iPage = pBoxPage->get_number() - 1;
+    double xSysLeft = double(pBoxSystem->get_left());
+    double ySysTop = double(pBoxSystem->get_top());
 
     //model point to screen returns shift from current viewport origin
-    model_point_to_screen(&xPos, &yPos, iPage);
-    Pixels xSys = Pixels(xPos);
-    Pixels ySys = Pixels(yPos);
+    double xPos = xSysLeft;
+    double yTop = ySysTop;
+    model_point_to_screen(&xPos, &yTop, iPage);
+    Pixels vxSys = Pixels(xPos);
+    Pixels vySysTop = Pixels(yTop);
 
     stringstream s;
-    s << "Id=" << id << ", m_vyOrg=" << m_vyOrg << ", yPos=" << pBoxSystem->get_top() << ", ySys=" << ySys << ", iPage=" << iPage;
+    s << "vwp.top=" << m_vyOrg << ", vwp.height=" << m_viewportSize.height
+      << ", ySysTop=" << ySysTop << ", vySysTop=" << vySysTop << ", iPage=" << iPage;
     LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
 
-    if (ySys < 0 || ySys > m_viewportSize.height)
+    //determine if scroll needed
+    Pixels xNew = 0;
+    Pixels yNew = 0;
+    bool fDoScroll = false;
+    if (vySysTop < 0 || vySysTop > m_viewportSize.height)
     {
-        new_viewport(m_vxOrg, m_vyOrg+ySys);
+        //top of system before or after viewport. Move top of system to top of view
+        xNew = m_vxOrg;
+        yNew = m_vyOrg + vySysTop;
+        fDoScroll = true;
+        LOMSE_LOG_DEBUG(lomse::Logger::k_events, "Top of system before or after viewport");
+    }
+    else
+    {
+        double xPos = xSysLeft;
+        double yBottom = ySysTop + double(pBoxSystem->get_height());
+        model_point_to_screen(&xPos, &yBottom, iPage);
+        Pixels vxSys = Pixels(xPos);
+        Pixels vySysBottom = Pixels(yBottom);
+        if (vySysBottom > m_viewportSize.height && vySysTop > 0)
+        {
+            //bottom of system out of sight. Move top of system to top of view
+            xNew = m_vxOrg;
+            yNew = m_vyOrg + vySysTop;
+            fDoScroll = true;
+            LOMSE_LOG_DEBUG(lomse::Logger::k_events, "Bottom of system out of sight");
+        }
+    }
+
+    //do scroll if required
+    if (fDoScroll)
+    {
+        new_viewport(xNew, yNew);
         redraw_bitmap();
 
-        yPos = double(pBoxSystem->get_top());
-        model_point_to_screen(&xPos, &yPos, iPage);
-        Pixels newySys = Pixels(yPos);
+        yTop = double(pBoxSystem->get_top());
+        model_point_to_screen(&xPos, &yTop, iPage);
+        Pixels newySys = Pixels(yTop);
         stringstream s;
-        s << "Check: m_vyOrg=" << m_vyOrg << ", yPos=" << pBoxSystem->get_top() << ", ySys=" << newySys;
+        s << "vwp.top=" << m_vyOrg << ", vwp.height=" << m_viewportSize.height
+          << ", yTop=" << pBoxSystem->get_top() << ", newySys=" << newySys;
         LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, s.str());
 
 
-        //trim rectangle
-        Pixels x1 = 0;  //max(0, m_vxOrg);
-        Pixels y1 = 0;  //max(0, Pixels(yPos));
+        //view rectangle
         Pixels x2 = int(m_pRenderBuf->width());
-        Pixels y2 = int(m_pRenderBuf->height());    //min(Pixels(bottom), int(m_pRenderBuf->height()) );
+        Pixels y2 = int(m_pRenderBuf->height());
+        VRect damagedRect = VRect(VPoint(0, 0), VPoint(x2, y2));
 
-        VRect damagedRect = VRect(VPoint(x1, y1), VPoint(x2, y2));
-        m_pInteractor->request_viewport_change(m_vxOrg, yPos, damagedRect);
+        m_pInteractor->request_viewport_change(m_vxOrg, yTop, damagedRect);
     }
-
 
 }
 

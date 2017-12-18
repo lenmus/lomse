@@ -375,18 +375,18 @@ void GmoBox::add_shapes_to_tables_in(GmoBoxDocPage* pPage)
 //---------------------------------------------------------------------------------------
 void GmoBox::add_shapes_to_tables()
 {
-    GmoBoxDocPage* pPage = get_parent_box_page();
+    GmoBoxDocPage* pPage = get_parent_doc_page();
     GmoBox* pBox = this;        //gcc complains if next method is invoked directly
     pBox->add_shapes_to_tables_in(pPage);
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxDocPage* GmoBox::get_parent_box_page()
+GmoBoxDocPage* GmoBox::get_parent_doc_page()
 {
     if (this->is_box_doc_page())
         return dynamic_cast<GmoBoxDocPage*>(this);
     else
-        return get_parent_box()->get_parent_box_page();
+        return get_parent_box()->get_parent_doc_page();
 }
 
 //---------------------------------------------------------------------------------------
