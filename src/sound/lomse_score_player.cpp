@@ -664,8 +664,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking && events[i]->pSO->is_visible())
                 {
                     ImoId id = events[i]->pSO->get_id();
-                    if (pEvent->get_num_items() == 2)    //first even is "advance tempo line"
-                        m_pInteractor->change_viewport_if_necessary(id);
+                    m_pInteractor->change_viewport_if_necessary(id);
                     pEvent->add_item(k_highlight_on_event, id);
                 }
 
@@ -697,8 +696,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             {
                 //set visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
-
+                {
+                    ImoId id = events[i]->pSO->get_id();
+                    m_pInteractor->change_viewport_if_necessary(id);
+                    pEvent->add_item(k_highlight_on_event, id);
+                }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {
