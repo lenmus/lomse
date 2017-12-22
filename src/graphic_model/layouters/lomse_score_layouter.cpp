@@ -356,6 +356,7 @@ void ScoreLayouter::reposition_system_if_page_has_changed()
         m_pCurBoxSystem->shift_origin_and_content(shift);
         m_pCurSysLyt->on_origin_shift(shift.height);
     }
+    m_pCurBoxSystem->set_page_number(m_iCurPage);
 }
 
 //---------------------------------------------------------------------------------------
@@ -379,6 +380,7 @@ void ScoreLayouter::page_initializations(GmoBox* pContainerBox)
 {
     m_iCurPage++;
     m_pCurBoxPage = dynamic_cast<GmoBoxScorePage*>( pContainerBox );
+    m_pCurBoxPage->set_page_number(m_iCurPage);
     is_first_system_in_page(true);
     m_startTop = m_pCurBoxPage->get_top();
 }

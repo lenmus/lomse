@@ -1009,6 +1009,20 @@ void Interactor::get_viewport(Pixels* x, Pixels* y)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::request_viewport_change(Pixels x, Pixels y)
+{
+    //AWARE: This code is executed in the sound thread
+
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
+
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wpIntor(sp);
+    SpEventView pEvent( LOMSE_NEW EventUpdateViewport(wpIntor, x, y) );
+
+    m_libScope.post_event(pEvent);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::start_selection_rectangle(Pixels x1, Pixels y1)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1096,6 +1110,15 @@ void Interactor::discard_all_highlight()
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->remove_all_highlight();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::change_viewport_if_necessary(ImoId id)
+{
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->change_viewport_if_necessary(id);
 }
 
 //---------------------------------------------------------------------------------------

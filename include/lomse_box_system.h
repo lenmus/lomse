@@ -50,6 +50,7 @@ protected:
 	vector<GmoShapeStaff*> m_staffShapes;
 	vector<int> m_firstStaff;       //index to first staff for each instrument
     TimeGridTable* m_pGridTable;
+    int m_iPage;        //number of score page (0..n-1) in which this system is contained
 
 public:
     GmoBoxSystem(ImoObj* pCreatorImo);
@@ -68,6 +69,8 @@ public:
     GmoShapeStaff* get_staff_shape(int iInstr, int iStaff);
     int instr_number_for_staff(int absStaff);
     int staff_number_for(int absStaff, int iInstr);
+    inline void set_page_number(int iPage) { m_iPage = iPage; }
+	inline int get_page_number() { return m_iPage; }
 
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);

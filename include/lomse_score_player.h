@@ -62,8 +62,8 @@ class Metronome;
 
 //---------------------------------------------------------------------------------------
 typedef boost::thread SoundThread;
-typedef boost::mutex SoundMutex;
-typedef boost::unique_lock<boost::mutex> SoundLock;
+//typedef boost::mutex SoundMutex;
+//typedef boost::unique_lock<boost::mutex> SoundLock;
 typedef boost::condition_variable SoundFlag;
 
 
@@ -100,7 +100,7 @@ protected:
     bool                m_fFinalEventSent;      //to avoid duplicating final event
     ImoScore*           m_pScore;       //score to play
     SoundEventsTable*   m_pTable;
-    SoundMutex          m_mutex;        //for pause/continue play back
+//    SoundMutex          m_mutex;        //for pause/continue play back
     SoundFlag           m_canPlay;      //playback is not paused
 
     //metronome: MIDI parameters

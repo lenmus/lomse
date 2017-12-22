@@ -15,6 +15,15 @@
   as repetions implied by textual repetition marks (i.e. Da Capo, 
   To Coda, etc, ...) (issue #79).
 
+- Auto-scroll during playback (issue #88): When playing back an score
+  it is necessary to ensure that current played notes are visible. 
+  Therefore, as the playback advances, the score should auto-scroll to
+  maintaint the viewport on the notes being played back. The implemented
+  solution defines a new Lomse event, *EventUpdateViewport*, that
+  informs about the need to change the viewport and provides the
+  coordinates for the new viewport origin. It is up to the user
+  application to do it or not.
+
 - Technical changes:
 	- As c++11 and std::regex support is required, CMakeLists.txt has
 	  been updated:

@@ -381,6 +381,7 @@ public:
 
     //parent
     GmoBox* get_parent_box() { return m_pParentBox; }
+    GmoBoxDocPage* get_parent_doc_page();
 
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
@@ -439,7 +440,6 @@ protected:
     GmoBox(int objtype, ImoObj* pCreatorImo);
     void delete_boxes();
     void delete_shapes();
-    GmoBoxDocPage* get_parent_box_page();
     void draw_border(Drawer* pDrawer, RenderOptions& opt);
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
@@ -480,7 +480,7 @@ public:
 class GmoBoxDocPage : public GmoBox
 {
 protected:
-    int m_numPage;
+    int m_numPage;      //1..n
     std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by layer and creation order
 
 public:
@@ -527,12 +527,15 @@ public:
 class GmoBoxScorePage : public GmoBox
 {
 protected:
-    int             m_nFirstSystem;     //0..n-1
-    int             m_nLastSystem;      //0..n-1
+    int m_nFirstSystem;     //0..n-1
+    int m_nLastSystem;      //0..n-1
+    int m_iPage;            //0..n-1        number of this score page
 
 public:
     GmoBoxScorePage(ImoScore* pScore);
     virtual ~GmoBoxScorePage();
+
+    inline void set_page_number(int iPage) { m_iPage = iPage; }
 
 	//systems
     void add_system(GmoBoxSystem* pSystem, int iSystem);
@@ -541,6 +544,7 @@ public:
         return (m_nFirstSystem == -1 ? 0 : m_nLastSystem - m_nFirstSystem + 1);
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
+	inline int get_page_number() { return m_iPage; }
 
     //hit tests related
     int nearest_system_to_point(LUnits y);

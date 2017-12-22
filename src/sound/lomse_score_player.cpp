@@ -662,7 +662,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 //generate implicit visual on event
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
+                {
+                    ImoId id = events[i]->pSO->get_id();
+                    m_pInteractor->change_viewport_if_necessary(id);
+                    pEvent->add_item(k_highlight_on_event, id);
+                }
 
             }
             else if (events[i]->EventType == SoundEvent::k_note_off)
@@ -692,8 +696,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             {
                 //set visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
-
+                {
+                    ImoId id = events[i]->pSO->get_id();
+                    m_pInteractor->change_viewport_if_necessary(id);
+                    pEvent->add_item(k_highlight_on_event, id);
+                }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {

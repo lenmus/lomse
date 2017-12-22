@@ -42,6 +42,9 @@
 #include "lomse_visual_effect.h"
 #include "lomse_overlays_generator.h"
 #include "lomse_handler.h"
+#include "lomse_box_slice.h"
+#include "lomse_box_slice_instr.h"
+#include "lomse_box_system.h"
 
 using namespace std;
 
@@ -232,20 +235,122 @@ void GraphicView::add_handler(int iHandler, GmoObj* pOwnerGmo)
 //---------------------------------------------------------------------------------------
 void GraphicView::new_viewport(Pixels x, Pixels y)
 {
-    stringstream s;
-    s << "x=" << x << ", y=" << y;
-    LOMSE_LOG_DEBUG(Logger::k_mvc, s.str());
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    do_change_viewport(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::do_change_viewport(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    std::lock_guard<std::mutex> lock(m_viewportMutex);
 
     m_vxOrg = x;
     m_vyOrg = y;
     m_transform.tx = double(-x);
     m_transform.ty = double(-y);
+
+    //ensure drawer has the new information, for pixels <-> LUnits conversions
+    m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
+    m_pDrawer->set_transform(m_transform);
 }
 
 //---------------------------------------------------------------------------------------
 GraphicModel* GraphicView::get_graphic_model()
 {
     return m_pInteractor->get_graphic_model();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::change_viewport_if_necessary(ImoId id)
+{
+    //AWARE: This code is executed in the sound thread
+
+    std::lock_guard<std::mutex> lock(m_viewportMutex);
+    static Pixels m_yNew = 0;
+
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return;
+
+    GmoShape* pShape = pGModel->get_main_shape_for_imo(id);
+    if (!pShape)
+        return;
+
+    GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
+    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
+    GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
+    GmoBoxDocPage* pBoxPage = pBoxSystem->get_parent_doc_page();
+
+    int iPage = pBoxPage->get_number() - 1;
+    double xSysLeft = double(pBoxSystem->get_left());
+    double ySysTop = double(pBoxSystem->get_top());
+
+    //model point to screen returns shift from current viewport origin
+    double xPos = xSysLeft;
+    double yTop = ySysTop;
+    model_point_to_screen(&xPos, &yTop, iPage);
+    //Pixels vxSys = Pixels(xPos);
+    Pixels vySysTop = Pixels(yTop);
+
+//    stringstream s;
+//    s << "vySysTop=" << vySysTop << ", vp.height=" << m_viewportSize.height
+//      << ", iPage=" << iPage << ", id=" << id;
+//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+
+    //determine if scroll needed
+    Pixels xNew = 0;
+    Pixels yNew = 0;
+    bool fDoScroll = false;
+    //AWARE: vySystop is shift from current viewport origin
+    if (vySysTop < 0 || vySysTop > m_viewportSize.height)
+    {
+        //top of system before or after viewport. Move top of system to top of view
+        xNew = m_vxOrg;
+        yNew = m_vyOrg + vySysTop;
+        fDoScroll = true;
+    }
+    else
+    {
+        double xPos = xSysLeft;
+        double yBottom = ySysTop + double(pBoxSystem->get_height());
+        model_point_to_screen(&xPos, &yBottom, iPage);
+        //Pixels vxSys = Pixels(xPos);
+        Pixels vySysBottom = Pixels(yBottom);
+
+//        stringstream s;
+//        s << "vySysBottom=" << vySysBottom << ", vp.height=" << m_viewportSize.height;
+//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+
+        //AWARE: vySysBottom is shift from current viewport origin
+        if (vySysBottom > m_viewportSize.height && vySysTop > 0)
+        {
+            //bottom of system out of sight. Move top of system to top of view
+            xNew = m_vxOrg;
+            yNew = m_vyOrg + vySysTop;
+            fDoScroll = true;
+        }
+    }
+
+    //request scroll if required
+    if (fDoScroll)
+    {
+//        stringstream s;
+//        s << "Requesting scroll to yNew=" << yNew << ", m_vyOrg=" << m_vyOrg;
+//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+        if (m_yNew != yNew)
+            m_pInteractor->request_viewport_change(xNew, yNew);
+//        else
+//            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Optimization: no request");
+        m_yNew = yNew;
+    }
+//    else
+//    {
+//        stringstream s;
+//        s << "No scroll required. m_vyOrg=" << m_vyOrg;
+//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+//    }
+
 }
 
 ////---------------------------------------------------------------------------------------
@@ -669,11 +774,8 @@ void GraphicView::zoom_in(Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = -Pixels(m_transform.tx);
-    m_vyOrg = -Pixels(m_transform.ty);
 
-    //ensure drawer has the new transform, for pixels <-> LUnits conversions
-    m_pDrawer->set_transform(m_transform);
+    do_change_viewport(-Pixels(m_transform.tx), -Pixels(m_transform.ty));
 }
 
 //---------------------------------------------------------------------------------------
@@ -692,8 +794,8 @@ void GraphicView::zoom_out(Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = -Pixels(m_transform.tx);
-    m_vyOrg = -Pixels(m_transform.ty);
+
+    do_change_viewport(-Pixels(m_transform.tx), -Pixels(m_transform.ty));
 }
 
 //---------------------------------------------------------------------------------------
@@ -722,8 +824,8 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = -Pixels(m_transform.tx);
-    m_vyOrg = -Pixels(m_transform.ty);
+
+    do_change_viewport(-Pixels(m_transform.tx), -Pixels(m_transform.ty));
 
     set_viewport_for_page_fit_full(screenWidth);
 }
@@ -749,8 +851,8 @@ void GraphicView::zoom_fit_width(Pixels screenWidth)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = -Pixels(m_transform.tx);
-    m_vyOrg = -Pixels(m_transform.ty);
+
+    do_change_viewport(-Pixels(m_transform.tx), -Pixels(m_transform.ty));
 
     set_viewport_at_page_center(screenWidth);
 }
@@ -769,8 +871,7 @@ void GraphicView::set_viewport_at_page_center(Pixels screenWidth)
     Pixels left = (pageWidth - screenWidth) / 2;
 
     //force new viewport
-    m_vxOrg = left;
-    m_transform.tx = double(-left);
+    do_change_viewport(left, m_vyOrg);
 }
 
 //---------------------------------------------------------------------------------------
@@ -788,8 +889,8 @@ void GraphicView::set_scale(double scale, Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = -Pixels(m_transform.tx);
-    m_vyOrg = -Pixels(m_transform.ty);
+
+    do_change_viewport(-Pixels(m_transform.tx), -Pixels(m_transform.ty));
 }
 
 //---------------------------------------------------------------------------------------

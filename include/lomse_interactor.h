@@ -257,6 +257,10 @@ public:
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }
 
+    //for auto-scroll during playback
+    virtual void change_viewport_if_necessary(ImoId id);
+    virtual void request_viewport_change(Pixels x, Pixels y);
+
     //for performance measurements
     void timing_start_measurements();
     void timing_graphic_model_build_end();

@@ -40,6 +40,7 @@
 //other
 #include <vector>
 #include <list>
+#include <mutex>
 using namespace std;
 
 
@@ -127,6 +128,7 @@ protected:
     //current viewport origin and size
     Pixels m_vxOrg, m_vyOrg;
     VSize  m_viewportSize;
+    std::mutex m_viewportMutex;
 
     //caret and other visual effects
     Caret*              m_pCaret;
@@ -176,6 +178,7 @@ public:
 
     //scrolling support
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
+    virtual void change_viewport_if_necessary(ImoId id);
 
     //selection rectangle
     void start_selection_rectangle(LUnits x1, LUnits y1);
@@ -284,6 +287,7 @@ protected:
     void layout_selection_highlight();
     void delete_all_handlers();
     void add_handler(int iHandler, GmoObj* pOwnerGmo);
+    void do_change_viewport(Pixels x, Pixels y);
 
 };
 
