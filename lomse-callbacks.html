@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.20.0</span>
+   &#160;<span id="projectnumber">0.21.0</span>
    </div>
   </td>
  </tr>
@@ -128,14 +128,14 @@ $(document).ready(function(){initNavTree('lomse-callbacks.html','');});
 <div class="line">{</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">//requests wrapper</span></div>
-<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_requests(<span class="keywordtype">void</span>* pThis, Request* pRequests)</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_requests(<span class="keywordtype">void</span>* pThis, <a class="code" href="classRequest.html">Request</a>* pRequests)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keyword">static_cast&lt;</span>MyApp*<span class="keyword">&gt;</span>(pThis)-&gt;on_lomse_request(pRequest);</div>
 <div class="line">    }</div>
 <div class="line">    ...</div>
 <div class="line"></div>
 <div class="line">protected:</div>
-<div class="line">    <span class="keywordtype">void</span> on_lomse_request(Request* pRequest);</div>
+<div class="line">    <span class="keywordtype">void</span> on_lomse_request(<a class="code" href="classRequest.html">Request</a>* pRequest);</div>
 <div class="line">    ...</div>
 <div class="line">};</div>
 </div><!-- fragment --><p>And inform lomse about it. We do it at lomse initialization:</p>
@@ -156,7 +156,7 @@ $(document).ready(function(){initNavTree('lomse-callbacks.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Sep 25 2017 11:39:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

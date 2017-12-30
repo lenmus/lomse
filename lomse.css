@@ -223,6 +223,12 @@ div.image img {
     margin-bottom: 3em;
 }
 
+code {
+    font-family: monospace, fixed;
+    font-size: 110%;
+    color: #444444;
+}
+
 /*----------------------------------------------------------------------------
 CSS selectors summary:
 

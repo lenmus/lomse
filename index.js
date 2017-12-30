@@ -63,5 +63,12 @@ var index =
       [ "Scrolling: the Viewport", "viewport-overview.html#viewport-concept", null ]
     ] ],
     [ "How Lomse callbacks work", "lomse-callbacks.html", null ],
-    [ "Events sent by Lomse", "lomse-events.html", null ]
+    [ "Events and Requests", "lomse-events.html", [
+      [ "Notifications: events and requests", "lomse-events.html#notifications", null ],
+      [ "Handling events", "lomse-events.html#handlig-events", [
+        [ "View events", "lomse-events.html#view-events", null ],
+        [ "Document events", "lomse-events.html#document-events", null ]
+      ] ],
+      [ "Handling requests", "lomse-events.html#handlig-requests", null ]
+    ] ]
 ];

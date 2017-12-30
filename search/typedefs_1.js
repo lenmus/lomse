@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['spinteractor',['SpInteractor',['../group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e',1,'lomse_presenter.h']]]
+  ['wpinteractor',['WpInteractor',['../group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602',1,'lomse_presenter.h']]]
 ];

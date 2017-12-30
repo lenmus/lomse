@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.20.0</span>
+   &#160;<span id="projectnumber">0.21.0</span>
    </div>
   </td>
  </tr>
@@ -112,6 +112,10 @@ $(document).ready(function(){initNavTree('group__enumerations.html','');});
 Enumerations</h2></td></tr>
 <tr class="memitem:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a> </td></tr>
 <tr class="separator:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabfcf510bafec7c6429906a6ecaac656d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> </td></tr>
+<tr class="separator:gabfcf510bafec7c6429906a6ecaac656d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0dc84b6205af6b43ac7867cd9779dfcc"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc">ERequestType</a> </td></tr>
+<tr class="separator:ga0dc84b6205af6b43ac7867cd9779dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6d2f4212f1b35b75797fd57153826029"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029">EImoAttribute</a> </td></tr>
 <tr class="separator:ga6d2f4212f1b35b75797fd57153826029"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd4d321bb9cc51030786d53d76b8b0bd"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gadd4d321bb9cc51030786d53d76b8b0bd">EDataType</a> </td></tr>
@@ -281,6 +285,9 @@ Enumerations</h2></td></tr>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggac2b9227b141b8d8aff14a30886e81b98a0cb2caec997f2ded02dfdaa5bf14e779"></a>k_barline_unknown</em>&#160;</td><td class="fielddoc">
 <p>Unknown barline type. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggac2b9227b141b8d8aff14a30886e81b98a56c9ab7cfbc6a700ba2f9107eae36892"></a>k_barline_none</em>&#160;</td><td class="fielddoc">
+<p>No barline. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggac2b9227b141b8d8aff14a30886e81b98a90555dae7a49d77cbda590b701459c61"></a>k_barline_simple</em>&#160;</td><td class="fielddoc">
 <p>Simple barline. </p>
@@ -477,6 +484,79 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="gabfcf510bafec7c6429906a6ecaac656d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum assigns an event type for Lomse events.</p>
+<p>#include &lt;<a class="el" href="lomse__events_8h_source.html">lomse_events.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51"></a>k_update_viewport_event</em>&#160;</td><td class="fielddoc">
+<p>ask user app to update window with current bitmap </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da5213cae529fd23e1c585ea3cefcac679"></a>k_update_UI_event</em>&#160;</td><td class="fielddoc">
+<p>ask user app to update window with current bitmap </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da02251f79a75012dfa080a0e3b62ecc38"></a>k_selection_set_change</em>&#160;</td><td class="fielddoc">
+<p>possible need for UI updates </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dab0528968408a8594fbaf8388a3a1da7f"></a>k_pointed_object_change</em>&#160;</td><td class="fielddoc">
+<p>selected objects changed </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da9ccfb453f7d43154c3ab8d9a8dc2c35e"></a>k_mouse_event</em>&#160;</td><td class="fielddoc">
+<p>cursor pointing to a different object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8"></a>k_mouse_out_event</em>&#160;</td><td class="fielddoc">
+<p>mouse goes over an object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4"></a>k_on_click_event</em>&#160;</td><td class="fielddoc">
+<p>mouse goes out from an object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da8b05b7ad1bafa8e3f7acd92c7ce42855"></a>k_show_contextual_menu_event</em>&#160;</td><td class="fielddoc">
+<p>Document, ImoContentObj: click on object. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daafe21a168be7e7d1cdd14990cc4740ff"></a>k_command_event</em>&#160;</td><td class="fielddoc">
+<p>Click event: object selected and menu request. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017"></a>k_highlight_event</em>&#160;</td><td class="fielddoc">
+<p>user moves a handler: handler released event </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dae886b9dedcbd475e8cf97c528be6b310"></a>k_highlight_on_event</em>&#160;</td><td class="fielddoc">
+<p>score playbaxk (highlight) </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da13e56ef497b4f68e47c72e179f57b003"></a>k_highlight_off_event</em>&#160;</td><td class="fielddoc">
+<p>add highlight to a note/rest </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dad3c90382b79ddf0d66aab1a8b459f2f6"></a>k_end_of_higlight_event</em>&#160;</td><td class="fielddoc">
+<p>remove highlight from a note/rest </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dae5a93cf095111e280797a2c8ca8017e7"></a>k_advance_tempo_line_event</em>&#160;</td><td class="fielddoc">
+<p>end of score play back. Remove all highlight. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398"></a>k_do_play_score_event</em>&#160;</td><td class="fielddoc">
+<p>score playback (sound) </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a"></a>k_pause_score_event</em>&#160;</td><td class="fielddoc">
+<p>start/resume playback </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa"></a>k_stop_playback_event</em>&#160;</td><td class="fielddoc">
+<p>pause playback </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daddaeb68131c02cdfa6b88deaa7c6a89b"></a>k_end_of_playback_event</em>&#160;</td><td class="fielddoc">
+<p>stop playback </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da61ee50a6802cbf80f6764aa64c60df4d"></a>k_doc_level_event</em>&#160;</td><td class="fielddoc">
+<p>end of playback </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a class="anchor" id="ga6d2f4212f1b35b75797fd57153826029"></a>
 <div class="memitem">
 <div class="memproto">
@@ -552,7 +632,7 @@ Enumerations</h2></td></tr>
 </div><div class="memdoc">
 <p>This enum describes valid types for internal model objects.</p>
 <p>#include &lt;<a class="el" href="lomse__internal__model_8h_source.html">lomse_internal_model.h</a>&gt;</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Document other ImoObj type values </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Document other ImoObj type values </dd></dl>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="gga51de1c04259c674284dd0c9f4d0d651facbe9b95277f71b0c56d4898d786f7685"></a>k_imo_block_level_obj</em>&#160;</td><td class="fielddoc">
 <p><b>Block level objects: Any of the following:</b> </p>
@@ -1222,6 +1302,25 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ga0dc84b6205af6b43ac7867cd9779dfcc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc">ERequestType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum assigns an request type for Lomse requests.</p>
+<p>#include &lt;<a class="el" href="lomse__events_8h_source.html">lomse_events.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="gga0dc84b6205af6b43ac7867cd9779dfcca478758eacf0fde44f569dc2b7ead827e"></a>k_get_font_filename</em>&#160;</td><td class="fielddoc">
+<p>request for dynamic content creation </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a class="anchor" id="gaeae8853f80e4ededd64180f81d0083fb"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1313,7 +1412,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 25 2017 11:39:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

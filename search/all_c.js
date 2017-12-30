@@ -1,6 +1,8 @@
 var searchData=
 [
   ['overview',['Overview',['../index.html',1,'']]],
+  ['observable',['Observable',['../classObservable.html',1,'']]],
+  ['observer',['Observer',['../classObserver.html',1,'']]],
   ['on_5fdocument_5fupdated',['on_document_updated',['../classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0',1,'Interactor']]],
   ['on_5fmouse_5fbutton_5fdown',['on_mouse_button_down',['../classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02',1,'Interactor']]],
   ['on_5fmouse_5fbutton_5fup',['on_mouse_button_up',['../classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8',1,'Interactor']]],

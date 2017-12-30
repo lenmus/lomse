@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.20.0</span>
+   &#160;<span id="projectnumber">0.21.0</span>
    </div>
   </td>
  </tr>
@@ -89,7 +89,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('classImportOptions.html','');});
+$(document).ready(function(){initNavTree('classObserver.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -108,22 +108,28 @@ $(document).ready(function(){initNavTree('classImportOptions.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">ImportOptions Member List</div>  </div>
+<div class="title">Observer Member List</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>This is the complete list of members for <a class="el" href="classImportOptions.html">ImportOptions</a>, including all inherited members.</p>
+<p>This is the complete list of members for <a class="el" href="classObserver.html">Observer</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="classImportOptions.html#a72f25e12d352ad8e7fe50e2aebaeead2">fix_beams</a>(bool value)</td><td class="entry"><a class="el" href="classImportOptions.html">ImportOptions</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classImportOptions.html#a89d1979bd0db15a90984b3f11e9cc3df">fix_beams</a>()</td><td class="entry"><a class="el" href="classImportOptions.html">ImportOptions</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classImportOptions.html#a3197c8853f3502aa8566db2a7c839f70">use_default_clefs</a>(bool value)</td><td class="entry"><a class="el" href="classImportOptions.html">ImportOptions</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classImportOptions.html#a3cae5e66911fec43cdb9a972d9fc74f0">use_default_clefs</a>()</td><td class="entry"><a class="el" href="classImportOptions.html">ImportOptions</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>add_handler</b>(int eventType, void(*pt2Func)(SpEventInfo event)) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>add_handler</b>(int eventType, void *pThis, void(*pt2Func)(void *pObj, SpEventInfo event)) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>add_handler</b>(int eventType, EventHandler *pHandler) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>add_handler</b>(int eventType, int childType, ImoId childId, EventHandler *pHandler) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>EventNotifier</b> (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"><span class="mlabel">friend</span></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>get_observable_type</b>() (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>notify</b>(SpEventInfo pEvent) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>remove_handler</b>(int evtType) (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>target</b>() (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0"><td class="entry"><b>~Observer</b>() (defined in <a class="el" href="classObserver.html">Observer</a>)</td><td class="entry"><a class="el" href="classObserver.html">Observer</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Sep 17 2017 17:29:00 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -30,18 +30,37 @@ var hierarchy =
     [ "EnableSharedFromThis", null, [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
-    [ "EventHandler", null, [
+    [ "EventHandler", "classEventHandler.html", [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
-    [ "EventNotifier", null, [
+    [ "EventInfo", "classEventInfo.html", [
+      [ "EventDoc", "classEventDoc.html", null ],
+      [ "EventView", "classEventView.html", [
+        [ "EventCommand", "classEventCommand.html", [
+          [ "EventControlPointMoved", "classEventControlPointMoved.html", null ]
+        ] ],
+        [ "EventMouse", "classEventMouse.html", null ],
+        [ "EventPaint", "classEventPaint.html", null ],
+        [ "EventPlayScore", "classEventPlayScore.html", null ],
+        [ "EventScoreHighlight", "classEventScoreHighlight.html", null ],
+        [ "EventUpdateUI", "classEventUpdateUI.html", null ],
+        [ "EventUpdateViewport", "classEventUpdateViewport.html", null ]
+      ] ]
+    ] ],
+    [ "EventNotifier", "classEventNotifier.html", [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
     [ "MusicXmlOptions", "classMusicXmlOptions.html", null ],
-    [ "Observable", null, [
+    [ "Observable", "classObservable.html", [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
+    [ "Observer", "classObserver.html", null ],
     [ "render-overview", null, [
       [ "Presenter", "classPresenter.html", null ]
+    ] ],
+    [ "Request", "classRequest.html", [
+      [ "RequestDynamic", "classRequestDynamic.html", null ],
+      [ "RequestFont", "classRequestFont.html", null ]
     ] ]
 ];

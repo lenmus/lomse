@@ -26,5 +26,8 @@ var classLomseDoorway =
     [ "set_default_fonts_path", "classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec", null ],
     [ "set_global_metronome_and_replace_local", "classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579", null ],
     [ "set_notify_callback", "classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15", null ],
-    [ "set_request_callback", "classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da", null ]
+    [ "set_request_callback", "classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da", null ],
+    [ "flip_y", "classLomseDoorway.html#aeb5af84189eb15def8dd93d0999f9757", null ],
+    [ "pixel_format", "classLomseDoorway.html#a50315ec325c9ad3e3ee5525a19f72f42", null ],
+    [ "screen_ppi", "classLomseDoorway.html#a2b7d51980a64a9434638892f0124b53f", null ]
 ];

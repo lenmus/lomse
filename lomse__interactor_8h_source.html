@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.20.0</span>
+   &#160;<span id="projectnumber">0.21.0</span>
    </div>
   </td>
  </tr>
@@ -128,9 +128,9 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">//Abstract class from which all Interactors must derive</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="classInteractor.html">   60</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a> : <span class="keyword">public</span> EventHandler</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                 , <span class="keyword">public</span> EventNotifier</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                 , <span class="keyword">public</span> Observable</div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="classInteractor.html">   60</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a> : <span class="keyword">public</span> <a class="code" href="classEventHandler.html">EventHandler</a></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                 , <span class="keyword">public</span> <a class="code" href="classEventNotifier.html">EventNotifier</a></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                 , <span class="keyword">public</span> <a class="code" href="classObservable.html">Observable</a></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                 , <span class="keyword">public</span> EnableSharedFromThis&lt;Interactor&gt;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;{</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">public</span>:</div>
@@ -278,7 +278,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_highlight_from_object(ImoStaffObj* pSO);</div>
 <div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_all_highlight();</div>
 <div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> discard_all_highlight();</div>
-<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_visual_highlight(SpEventScoreHighlight pEvent);</div>
+<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_visual_highlight(<a class="code" href="group__typedefs.html#gab8f5c6d7758a3e0ef3fc8b455a7dd306">SpEventScoreHighlight</a> pEvent);</div>
 <div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160;</div>
 <div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;</div>
 <div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;</div>
@@ -309,7 +309,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;</div>
 <div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">get_caret_timecode</a>();</div>
 <div class="line"><a name="l00845"></a><span class="lineno">  845</span>&#160;</div>
-<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;    DocCursorState <a class="code" href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">click_event_to_cursor_state</a>(SpEventMouse event);</div>
+<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;    DocCursorState <a class="code" href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">click_event_to_cursor_state</a>(<a class="code" href="group__typedefs.html#ga9e40f8b1b0190f8dc9e61e1555661f99">SpEventMouse</a> event);</div>
 <div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;</div>
 <div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a>(<span class="keywordtype">int</span> voice);</div>
 <div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;</div>
@@ -389,13 +389,13 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;    <span class="keyword">inline</span> SharedPtr&lt;Interactor&gt; get_shared_ptr_from_this() { <span class="keywordflow">return</span> shared_from_this(); }</div>
 <div class="line"><a name="l01222"></a><span class="lineno"> 1222</span>&#160;</div>
 <div class="line"><a name="l01223"></a><span class="lineno"> 1223</span>&#160;    <span class="comment">//mandatory override required by EventHandler</span></div>
-<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;    <span class="keywordtype">void</span> handle_event(SpEventInfo pEvent);</div>
+<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;    <span class="keywordtype">void</span> handle_event(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent);</div>
 <div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;</div>
 <div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;    <span class="comment">//Deprecated ?</span></div>
 <div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> highlight_voice(<span class="keywordtype">int</span> voice);</div>
 <div class="line"><a name="l01228"></a><span class="lineno"> 1228</span>&#160;</div>
 <div class="line"><a name="l01229"></a><span class="lineno"> 1229</span>&#160;    <span class="comment">//mandatory overrides from Observable</span></div>
-<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;    EventNotifier* get_event_notifier() { <span class="keywordflow">return</span> <span class="keyword">this</span>; }</div>
+<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;    <a class="code" href="classEventNotifier.html">EventNotifier</a>* get_event_notifier() { <span class="keywordflow">return</span> <span class="keyword">this</span>; }</div>
 <div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;</div>
 <div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;    <span class="comment">//for performance measurements</span></div>
 <div class="line"><a name="l01233"></a><span class="lineno"> 1233</span>&#160;    <span class="keywordtype">void</span> timing_start_measurements();</div>
@@ -444,15 +444,18 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="ttc" id="classInteractor_html_a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><div class="ttname"><a href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">Interactor::print_page</a></div><div class="ttdeci">virtual void print_page(int page, VPoint viewport=VPoint(0, 0))</div></div>
 <div class="ttc" id="classInteractor_html_acb5d21578acde66c5da165f1fa808fb6"><div class="ttname"><a href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">Interactor::set_operating_mode</a></div><div class="ttdeci">void set_operating_mode(int mode)</div></div>
 <div class="ttc" id="classInteractor_html_a2494425c26d19946921e4b4e97f189f3"><div class="ttname"><a href="classInteractor.html#a2494425c26d19946921e4b4e97f189f3">Interactor::set_rendering_buffer</a></div><div class="ttdeci">virtual void set_rendering_buffer(RenderingBuffer *rbuf)</div></div>
+<div class="ttc" id="group__typedefs_html_ga4d059e9b3deace601d55c1d9e51e0ed9"><div class="ttname"><a href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a></div><div class="ttdeci">SharedPtr&lt; EventInfo &gt; SpEventInfo</div><div class="ttdef"><b>Definition:</b> lomse_events.h:183</div></div>
 <div class="ttc" id="classInteractor_html_aaf1d978d7d7e4ef3e6e6b6495cf9d2d0"><div class="ttname"><a href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">Interactor::get_selection_set</a></div><div class="ttdeci">SelectionSet * get_selection_set()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:232</div></div>
 <div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:60</div></div>
 <div class="ttc" id="classInteractor_html_a81cf3a31b6c7e7bd4c6b22c20bb87f73"><div class="ttname"><a href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">Interactor::select_voice</a></div><div class="ttdeci">void select_voice(int voice)</div></div>
+<div class="ttc" id="classEventHandler_html"><div class="ttname"><a href="classEventHandler.html">EventHandler</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1461</div></div>
 <div class="ttc" id="classInteractor_html_a75600fd031826c9ae48ca4ada8b7ddce"><div class="ttname"><a href="classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce">Interactor::page_at_screen_point</a></div><div class="ttdeci">virtual int page_at_screen_point(double x, double y)</div></div>
 <div class="ttc" id="classInteractor_html_ac0f2b87ac27d4d4a4692dc9ce5b42291"><div class="ttname"><a href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command</a></div><div class="ttdeci">void exec_command(DocCommand *pCmd)</div></div>
 <div class="ttc" id="classInteractor_html_ac30c10982952f57d03a3e992e90eaca0"><div class="ttname"><a href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">Interactor::get_caret_timecode</a></div><div class="ttdeci">string get_caret_timecode()</div></div>
 <div class="ttc" id="classInteractor_html_abd162053d322ad64eb94159e1437ce1e"><div class="ttname"><a href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">Interactor::should_enable_edit_undo</a></div><div class="ttdeci">bool should_enable_edit_undo()</div></div>
 <div class="ttc" id="group__enumerations_html_ga6f553cc68bf4f84707dce1f1145d2107"><div class="ttname"><a href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a></div><div class="ttdeci">EEventFlag</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:23</div></div>
 <div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:29</div></div>
+<div class="ttc" id="classEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1552</div></div>
 <div class="ttc" id="classInteractor_html_a7a50ff5b4d8e3f8892f9b096efe1f471"><div class="ttname"><a href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">Interactor::on_mouse_move</a></div><div class="ttdeci">virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags)</div></div>
 <div class="ttc" id="classInteractor_html_ad8858370241ddad5b8a36300b22f5665"><div class="ttname"><a href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">Interactor::ETimingTarget</a></div><div class="ttdeci">ETimingTarget</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:90</div></div>
 <div class="ttc" id="classInteractor_html_a6fc96dec0a3767152cd953d2ec68ec96"><div class="ttname"><a href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">Interactor::zoom_out</a></div><div class="ttdeci">virtual void zoom_out(Pixels x=0, Pixels y=0, bool fForceRedraw=true)</div></div>
@@ -495,11 +498,14 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f">k_kbd_ctrl</a></div><div class="ttdoc">0x10. Keyboard Ctrol key pressed while mouse event </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:29</div></div>
 <div class="ttc" id="classInteractor_html_a077b8554590f3ae5890e3d42f6d779f2"><div class="ttname"><a href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">Interactor::click_event_to_cursor_state</a></div><div class="ttdeci">DocCursorState click_event_to_cursor_state(SpEventMouse event)</div></div>
 <div class="ttc" id="classInteractor_html_a3dcd4218ab368cfba17ca1ef6974c012"><div class="ttname"><a href="classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012">Interactor::get_pitch_at</a></div><div class="ttdeci">DiatonicPitch get_pitch_at(Pixels x, Pixels y)</div></div>
+<div class="ttc" id="group__typedefs_html_ga9e40f8b1b0190f8dc9e61e1555661f99"><div class="ttname"><a href="group__typedefs.html#ga9e40f8b1b0190f8dc9e61e1555661f99">SpEventMouse</a></div><div class="ttdeci">SharedPtr&lt; EventMouse &gt; SpEventMouse</div><div class="ttdef"><b>Definition:</b> lomse_events.h:692</div></div>
 <div class="ttc" id="classInteractor_html_a0b25e85a6074cc637ea6bd2a30e5bead"><div class="ttname"><a href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">Interactor::get_operating_mode</a></div><div class="ttdeci">int get_operating_mode()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:154</div></div>
 <div class="ttc" id="classInteractor_html_ab5402ba5556ee21c50bfab7a097cc5eb"><div class="ttname"><a href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">Interactor::set_print_buffer</a></div><div class="ttdeci">virtual void set_print_buffer(RenderingBuffer *rbuf)</div></div>
 <div class="ttc" id="classInteractor_html_a0eb3195aed54028cc3f250c38029e8f8"><div class="ttname"><a href="classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8">Interactor::new_viewport</a></div><div class="ttdeci">virtual void new_viewport(Pixels x, Pixels y, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_ad4f899789a36ae984e9861aa6b91a6f8"><div class="ttname"><a href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">Interactor::EInteractorOpMode</a></div><div class="ttdeci">EInteractorOpMode</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:74</div></div>
+<div class="ttc" id="classObservable_html"><div class="ttname"><a href="classObservable.html">Observable</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1518</div></div>
 <div class="ttc" id="classInteractor_html_a56006a47ef6164ad139c2d5bb1e17c3d"><div class="ttname"><a href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">Interactor::set_print_ppi</a></div><div class="ttdeci">virtual void set_print_ppi(double ppi)</div></div>
+<div class="ttc" id="group__typedefs_html_gab8f5c6d7758a3e0ef3fc8b455a7dd306"><div class="ttname"><a href="group__typedefs.html#gab8f5c6d7758a3e0ef3fc8b455a7dd306">SpEventScoreHighlight</a></div><div class="ttdeci">SharedPtr&lt; EventScoreHighlight &gt; SpEventScoreHighlight</div><div class="ttdef"><b>Definition:</b> lomse_events.h:1000</div></div>
 <div class="ttc" id="classInteractor_html_ab802d6e8a3fc482aa7f0fdf9029aecae"><div class="ttname"><a href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">Interactor::set_rendering_option</a></div><div class="ttdeci">virtual void set_rendering_option(int option, bool value)</div></div>
 <div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642">k_mouse_middle</a></div><div class="ttdoc">0x04. Mouse middle button pressed or released </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:27</div></div>
 <div class="ttc" id="classInteractor_html_a730f04bba76db217ff36512f63600470"><div class="ttname"><a href="classInteractor.html#a730f04bba76db217ff36512f63600470">Interactor::on_mouse_enter_window</a></div><div class="ttdeci">virtual void on_mouse_enter_window(Pixels x, Pixels y, unsigned flags)</div></div>
@@ -512,7 +518,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_interactor.h</b></li>
-    <li class="footer">Generated on Mon Sep 25 2017 11:39:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.20.0</span>
+   &#160;<span id="projectnumber">0.21.0</span>
    </div>
   </td>
  </tr>
@@ -118,10 +118,10 @@ $(document).ready(function(){initNavTree('classLomseDoorway.html','');});
 
 <p><code>#include &lt;<a class="el" href="lomse__doorway_8h_source.html">lomse_doorway.h</a>&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="classLomseDoorway.html">LomseDoorway</a> is the main interface with the lomse library. This class represent the gate between lomse and your application:</p>
+<div class="textblock"><p><a class="el" href="classLomseDoorway.html">LomseDoorway</a> is the main interface with the Lomse library. This class represent the gate between Lomse and your application:</p>
 <ul>
-<li>For your application it is entry point for interacting with the library: the way for configuring lomse, for accessing lomse version information and for creating/opening documents and scores, which in turn provides accessors for managing the open documents.</li>
-<li>For the lomse library, it is the way to access platform dependent information and methods, by using callbacks initialized by the user during lomse configuration. </li>
+<li>For your application it is entry point for interacting with the library: the way for configuring Lomse, for accessing Lomse version information and for creating/opening documents and scores, which in turn provides accessors for managing the open documents.</li>
+<li>For the Lomse library, it is the way to access platform dependent information and methods, by using callbacks initialized by the user during Lomse configuration. </li>
 </ul>
 <dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_qt_8cpp-example.html#_a1">example_1_qt.cpp</a>, and <a class="el" href="example_1_qt_8h-example.html#_a0">example_1_qt.h</a>.</dd>
 </dl></div><table class="memberdecls">
@@ -134,13 +134,11 @@ Public Types</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c49065371b1185e0d04b690c1cb6b05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a> ()</td></tr>
 <tr class="separator:a3c49065371b1185e0d04b690c1cb6b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a417b8c6b8895ce980c3eed82fa8cae7b"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b">~LomseDoorway</a> ()</td></tr>
-<tr class="separator:a417b8c6b8895ce980c3eed82fa8cae7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01e4f12682054e5a96afa236501ac80f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a> (int pixel_format, int ppi, bool reverse_y_axis, ostream &amp;reporter=cout)</td></tr>
 <tr class="separator:a01e4f12682054e5a96afa236501ac80f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a> (void *pThis, void(*pt2Func)(void *, SpEventInfo))</td></tr>
+<tr class="memitem:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a>))</td></tr>
 <tr class="separator:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a747d3488b15dfda96c5f7477a28525da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">set_request_callback</a> (void *pThis, void(*pt2Func)(void *, Request *))</td></tr>
+<tr class="memitem:a747d3488b15dfda96c5f7477a28525da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">set_request_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="classRequest.html">Request</a> *))</td></tr>
 <tr class="separator:a747d3488b15dfda96c5f7477a28525da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a080627915c615fa809fc0d78561ac9ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">set_default_fonts_path</a> (const string &amp;fontsPath)</td></tr>
 <tr class="separator:a080627915c615fa809fc0d78561ac9ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -209,31 +207,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Constructor. Your application should create only one instance of <a class="el" href="classLomseDoorway.html">LomseDoorway</a> and its life scope should be as long as your application need to use lomse. </p>
-
-</div>
-</div>
-<a class="anchor" id="a417b8c6b8895ce980c3eed82fa8cae7b"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual LomseDoorway::~LomseDoorway </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Destructor </p>
+<p>Constructor. Your application should create only one instance of <a class="el" href="classLomseDoorway.html">LomseDoorway</a> and its life scope should be as long as your application need to use Lomse. </p>
 
 </div>
 </div>
@@ -251,10 +225,10 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Method <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player()</a> informs lomse about the MIDI server that will be used for scores play back.</p>
+<p>Method <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player()</a> informs Lomse about the MIDI server that will be used for scores play back.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pSoundServer</td><td>Pointer to an instance of a class derived from MidiServerBase. Once this method is invoked, lomse will route all midi events originated in score play back to this object.</td></tr>
+    <tr><td class="paramname">pSoundServer</td><td>Pointer to an instance of a class derived from MidiServerBase. Once this method is invoked, Lomse will route all midi events originated in score play back to this object.</td></tr>
   </table>
   </dd>
 </dl>
@@ -274,7 +248,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns the build date and time of the lomse library. The string is twenty characters long and looks like "12-Feb-2016 17:54:03". Date and time are separated by one space. Date is in format dd-mm-yyyy and time in format hh:mm:ss. Day, hour, minutes and seconds are always padded with zero if only one digit i.e. "02-Mar-2016 07:54:03" </p>
+<p>Returns the build date and time of the Lomse library. The string is twenty characters long and looks like "12-Feb-2016 17:54:03". Date and time are separated by one space. Date is in format dd-mm-yyyy and time in format hh:mm:ss. Day, hour, minutes and seconds are always padded with zero if only one digit i.e. "02-Mar-2016 07:54:03" </p>
 
 </div>
 </div>
@@ -298,7 +272,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Get the pointer to an object of class LibraryScope. This object gives access to all lomse global functions and information. </p>
+<p>Get the pointer to an object of class LibraryScope. This object gives access to all Lomse global functions and information. </p>
 
 </div>
 </div>
@@ -388,7 +362,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns lomse version and build information as string. i.e. "0.17.20+aaf5e23" </p>
+<p>Returns Lomse version and build information as string. i.e. "0.17.20+aaf5e23" </p>
 
 </div>
 </div>
@@ -404,7 +378,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns lomse major version as integer number. For instance, if version string is "0.17.20" this method will return 0. </p>
+<p>Returns Lomse major version as integer number. For instance, if version string is "0.17.20" this method will return 0. </p>
 
 </div>
 </div>
@@ -420,7 +394,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns lomse minor version as integer number. For instance, if version string is "0.17.20" this method will return 17. </p>
+<p>Returns Lomse minor version as integer number. For instance, if version string is "0.17.20" this method will return 17. </p>
 
 </div>
 </div>
@@ -436,7 +410,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns lomse patch version as integer number. For instance, if version string is "0.17.20" this method will return 20. </p>
+<p>Returns Lomse patch version as integer number. For instance, if version string is "0.17.20" this method will return 20. </p>
 
 </div>
 </div>
@@ -452,7 +426,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns lomse version as string "major.minor.patch" i.e. "0.17.20" </p>
+<p>Returns Lomse version as string "major.minor.patch" i.e. "0.17.20" </p>
 
 </div>
 </div>
@@ -491,13 +465,13 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Before using the library, method <a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library()</a> <b>must</b> be invoked for initializing the library and providing the necessary information. As lomse renders scores and documents on a bitmap it is necessary to inform lomse about the required bitmap properties. Also, you can set an ostream to be used by lomse for reporting errors.</p>
+<p>Before using the library, method <a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library()</a> <b>must</b> be invoked for initializing the library and providing the necessary information. As Lomse renders scores and documents on a bitmap it is necessary to inform Lomse about the required bitmap properties. Also, you can set an ostream to be used by Lomse for reporting errors.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pixel_format</td><td>A value from the global enumeration type <a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
     <tr><td class="paramname">ppi</td><td>The required resolution in pixels per inch (i.e. 72) </td></tr>
-    <tr><td class="paramname">reverse_y_axis</td><td>lomse needs to know if the presentation device in which the bitmaps are going to be rendered follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, we have to inform lomse if the y-axis follows the standard convention for screens (reverse_y_axis = <span class="literal">false</span>) or, by the contrary, lomse has to reverse the y axis (reverse_y_axis = <span class="literal">true</span>). </td></tr>
-    <tr><td class="paramname">reporter</td><td>The ostream to be used by lomse for reporting errors. By default, all errors will be send to cout.</td></tr>
+    <tr><td class="paramname">reverse_y_axis</td><td>Lomse needs to know if the presentation device in which the bitmaps are going to be rendered follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, we have to inform Lomse if the y-axis follows the standard convention for screens (reverse_y_axis = <span class="literal">false</span>) or, by the contrary, Lomse has to reverse the y axis (reverse_y_axis = <span class="literal">true</span>). </td></tr>
+    <tr><td class="paramname">reporter</td><td>The ostream to be used by Lomse for reporting errors. By default, all errors will be send to cout.</td></tr>
   </table>
   </dd>
 </dl>
@@ -695,10 +669,10 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Method <a class="el" href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">set_default_fonts_path()</a> is used for informing lomse about the path in which additional fonts are installed. Default fonts used by lomse are located in folders known by lomse, but lomse has no knowledge about where the additional fonts the user would like to use are located. They are probably in the folder used by the operating system for fonts. But as lomse is platform independent, currently lomse has no knowledge about operating system folders for fonts. Therefore, applications using additional fonts to lomse default fonts should use this method for informing lomse about the path for the fonts.</p>
+<p>Method <a class="el" href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">set_default_fonts_path()</a> is used for informing Lomse about the path in which additional fonts are installed. Default fonts used by Lomse are located in folders known by Lomse, but Lomse has no knowledge about where the additional fonts the user would like to use are located. They are probably in the folder used by the operating system for fonts. But as Lomse is platform independent, currently it has no knowledge about operating system folders for fonts. Therefore, applications using additional fonts other than Lomse default fonts should use this method for informing Lomse about the path for the fonts.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">fontsPath</td><td>Absolute path to the fonts folder in which lomse will look for fonts other than lomse default fonts. Please note that lomse will not look into subfolders of the passed path. </td></tr>
+    <tr><td class="paramname">fontsPath</td><td>Absolute path to the fonts folder in which Lomse will look for fonts other than Lomse default fonts. Please note that Lomse will not look into sub-folders in the passed path. </td></tr>
   </table>
   </dd>
 </dl>
@@ -718,8 +692,8 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>This method is used for informing lomse about the metronome control to use to determine tempo in playback. By default, lomse takes metronome settings from ?. But your application can specify another metronome control, normally a global metronome for the all your application.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Clarify the purpose and usage of this method</dd></dl>
+<p>This method is used for informing Lomse about the metronome control to use to determine tempo in playback. By default, Lomse takes metronome settings from ?. But your application can specify another metronome control, normally a global metronome for the all your application.</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Clarify the purpose and usage of this method</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pMtr</td><td>Pointer to the Metronome object to be used. </td></tr>
@@ -742,7 +716,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void(*)(void *, SpEventInfo)&#160;</td>
+          <td class="paramtype">void(*)(void *, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a>)&#160;</td>
           <td class="paramname"><em>pt2Func</em>&#160;</td>
         </tr>
         <tr>
@@ -752,11 +726,11 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>This method is used by for informing lomse about the callback method that lomse should invoke when having to communicate an event to your application.</p>
+<p>This method is used by for informing Lomse about the callback method that Lomse should invoke when having to communicate an event to your application.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pThis</td><td>A pointer to the instance of object that will receive the notifications. </td></tr>
-    <tr><td class="paramname">pt2Func</td><td>A pointer to the method in previous object that lomse will invoke when an event is generated in lomse.</td></tr>
+    <tr><td class="paramname">pt2Func</td><td>A pointer to the method in previous object that Lomse will invoke when an event is generated in Lomse.</td></tr>
   </table>
   </dd>
 </dl>
@@ -766,14 +740,14 @@ Public Member Functions</h2></td></tr>
 <div class="line">{</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">//callback wrapper</span></div>
-<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_event_handler(<span class="keywordtype">void</span>* pThis, SpEventInfo pEvent)</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_event_handler(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keyword">static_cast&lt;</span>MyApp*<span class="keyword">&gt;</span>(pThis)-&gt;on_lomse_event(pEvent);</div>
 <div class="line">    }</div>
 <div class="line">    ...</div>
 <div class="line"></div>
 <div class="line">protected:</div>
-<div class="line">    <span class="keywordtype">void</span> on_lomse_event(SpEventInfo pEvent);</div>
+<div class="line">    <span class="keywordtype">void</span> on_lomse_event(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent);</div>
 <div class="line">    ...</div>
 <div class="line">};</div>
 </div><!-- fragment --><p>And inform lomse about it. We do it at lomse initialization:</p>
@@ -804,7 +778,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void(*)(void *, Request *)&#160;</td>
+          <td class="paramtype">void(*)(void *, <a class="el" href="classRequest.html">Request</a> *)&#160;</td>
           <td class="paramname"><em>pt2Func</em>&#160;</td>
         </tr>
         <tr>
@@ -814,12 +788,11 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>This method is used by for informing lomse about the callback method that lomse should invoke when having to request information to your application. Currently, the only requests are of type <code>RequestDynamic</code>, intended for allowing your application to inject dynamic content into the document before renderization.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Advanced topic: Dynamic content injection.</dd></dl>
+<p>This method is used by for informing Lomse about the callback method that Lomse should invoke when having to request information to your application. See <a class="el" href="classRequest.html">Request</a>, <a class="el" href="classRequestDynamic.html">RequestDynamic</a>, <a class="el" href="classRequestFont.html">RequestFont</a></p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pThis</td><td>A pointer to the instance of object that will receive the notifications. </td></tr>
-    <tr><td class="paramname">pt2Func</td><td>A pointer to the method in previous object that lomse will invoke when a requests is generated in lomse.</td></tr>
+    <tr><td class="paramname">pt2Func</td><td>A pointer to the method in previous object that Lomse will invoke when a requests is generated in Lomse.</td></tr>
   </table>
   </dd>
 </dl>
@@ -829,14 +802,14 @@ Public Member Functions</h2></td></tr>
 <div class="line">{</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">//requests wrapper</span></div>
-<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_requests(<span class="keywordtype">void</span>* pThis, Request* pRequests)</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_requests(<span class="keywordtype">void</span>* pThis, <a class="code" href="classRequest.html">Request</a>* pRequests)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keyword">static_cast&lt;</span>MyApp*<span class="keyword">&gt;</span>(pThis)-&gt;on_lomse_request(pRequest);</div>
 <div class="line">    }</div>
 <div class="line">    ...</div>
 <div class="line"></div>
 <div class="line">protected:</div>
-<div class="line">    <span class="keywordtype">void</span> on_lomse_request(Request* pRequest);</div>
+<div class="line">    <span class="keywordtype">void</span> on_lomse_request(<a class="code" href="classRequest.html">Request</a>* pRequest);</div>
 <div class="line">    ...</div>
 <div class="line">};</div>
 </div><!-- fragment --><p>And inform lomse about it. We do it at lomse initialization:</p>
@@ -860,7 +833,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Mon Sep 25 2017 11:39:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

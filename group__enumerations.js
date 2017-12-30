@@ -33,6 +33,7 @@ var group__enumerations =
     ] ],
     [ "EBarline", "group__enumerations.html#gac2b9227b141b8d8aff14a30886e81b98", [
       [ "k_barline_unknown", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a0cb2caec997f2ded02dfdaa5bf14e779", null ],
+      [ "k_barline_none", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a56c9ab7cfbc6a700ba2f9107eae36892", null ],
       [ "k_barline_simple", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a90555dae7a49d77cbda590b701459c61", null ],
       [ "k_barline_double", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a6a5bda981a625332578605eac6d21515", null ],
       [ "k_barline_start", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a92e2d591c1670bd7e463e88ee0a2342f", null ],
@@ -83,6 +84,27 @@ var group__enumerations =
       [ "k_kbd_shift", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269", null ],
       [ "k_kbd_ctrl", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f", null ],
       [ "k_kbd_alt", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f", null ]
+    ] ],
+    [ "EEventType", "group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d", [
+      [ "k_update_viewport_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51", null ],
+      [ "k_update_UI_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da5213cae529fd23e1c585ea3cefcac679", null ],
+      [ "k_selection_set_change", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da02251f79a75012dfa080a0e3b62ecc38", null ],
+      [ "k_pointed_object_change", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dab0528968408a8594fbaf8388a3a1da7f", null ],
+      [ "k_mouse_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da9ccfb453f7d43154c3ab8d9a8dc2c35e", null ],
+      [ "k_mouse_out_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8", null ],
+      [ "k_on_click_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4", null ],
+      [ "k_show_contextual_menu_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da8b05b7ad1bafa8e3f7acd92c7ce42855", null ],
+      [ "k_command_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daafe21a168be7e7d1cdd14990cc4740ff", null ],
+      [ "k_highlight_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017", null ],
+      [ "k_highlight_on_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dae886b9dedcbd475e8cf97c528be6b310", null ],
+      [ "k_highlight_off_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da13e56ef497b4f68e47c72e179f57b003", null ],
+      [ "k_end_of_higlight_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dad3c90382b79ddf0d66aab1a8b459f2f6", null ],
+      [ "k_advance_tempo_line_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dae5a93cf095111e280797a2c8ca8017e7", null ],
+      [ "k_do_play_score_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398", null ],
+      [ "k_pause_score_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a", null ],
+      [ "k_stop_playback_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa", null ],
+      [ "k_end_of_playback_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daddaeb68131c02cdfa6b88deaa7c6a89b", null ],
+      [ "k_doc_level_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da61ee50a6802cbf80f6764aa64c60df4d", null ]
     ] ],
     [ "EImoAttribute", "group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029", [
       [ "k_attr_barline", "group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029aff5b02773adb5e5d382bfd738d865230", null ],
@@ -291,6 +313,9 @@ var group__enumerations =
       [ "k_placement_default", "group__enumerations.html#gga314c59562f7d4c993a0e5330fa59df50a620b1464324b36e4f35ca84d6d4cec08", null ],
       [ "k_placement_above", "group__enumerations.html#gga314c59562f7d4c993a0e5330fa59df50a007e946e11566ea60fdc156ad1bfd576", null ],
       [ "k_placement_below", "group__enumerations.html#gga314c59562f7d4c993a0e5330fa59df50af12db6ff77652537d0694e8547f83876", null ]
+    ] ],
+    [ "ERequestType", "group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc", [
+      [ "k_get_font_filename", "group__enumerations.html#gga0dc84b6205af6b43ac7867cd9779dfcca478758eacf0fde44f569dc2b7ead827e", null ]
     ] ],
     [ "ESteps", "group__enumerations.html#gaeae8853f80e4ededd64180f81d0083fb", [
       [ "k_no_pitch", "group__enumerations.html#ggaeae8853f80e4ededd64180f81d0083fba8b27f10e541b6fc6e5601335a6b98d58", null ],
