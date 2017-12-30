@@ -1,0 +1,83 @@
+/**
+
+Lomse operates in the domain of music books. That is, Lomse deals with documents,  written in LDP language, containing texts, images, scores, exercises, graphics, headers, footers, etc.
+
+The LDP language is an 'external representation', that is, something oriented to be stored in a file and to be human readable, easy to enter with a QWERTY keyboard.
+
+This type of representation is not the most appropriate for processing. Therefore, to be usable in a program it has to be transformed into a suitable format, more flexible and powerful for processing. This is the 'internal model', to be described later.
+
+The ``Document`` class is a facade object that contains, basically, the internal model for the LDP document. The ``Document`` class encapsulates all the library internals, providing the basic API for creating and using an LDP document.
+
+It is an observable class and, therefore, inherits methods for notifying observers (other registered objects) when changes occur to the document. 
+
+From a Lomse user application point of view, the only mechanism for creating a ``Document`` is by requesting it to the ``LomseDoorway`` object. See :ref:`lomse-doorway-class` for details on using the library and creating documents.
+
+
+The main content of a Document is the <i>InternalModel</i>. It is something similar to the DOM in HTML. By accessing and modifying this internal model you have full control over the document content.
+
+A Document can be created:
+
+- From a file containing the document source code (MusicXML and LDP formats supported)
+- From a string, also containing the source code.
+- Or, dynamically, by program, either by creating an empty document and issuing edition commands for injecting content, or programatically, by direct creation/manipulation of the internal data structures representing the Document.
+
+The Document can also be created and modified by program. Commands on the Document and direct manipulation of the <i>InternalModel</i> give full flexibility for this. An special LDP tag <dynamic> instructs the <i>Analyser</i> to require from your application the content to be inserted at that point. This is something analogous to the HTML <object> tag.
+
+
+    
+ For importing, Lomse currently understands the following file formats:
+    - MusicXML music scores
+    - LenMus documents. You can see LenMus documents as something similar to HTML documents but with the ability of also including music scores. All other important classes are built around the Document, either for displaying it or for building/modifying its content.    
+
+
+See: @ref edition-commands, internal-model-manipulation.
+
+
+
+The InternalModel class
+==========================
+
+The ``InternalModel`` is a container for the objects that describe the content of an LDP document. These objects are generically named "Internal Model Objects" or, simply, "IMOs".
+
+There is, practically, a one-to-one correspondance between LDP elements and IMO objects. So, for instance, LDP tag 'score' is modelled by a ``ImoScore`` object.
+
+The internal model is, basically, a tree of IMOs, and the ``InternalModel`` object contains the tree root. This root object is, normally, an ``ImoDocument`` object. It represents the content of a LDP tag 'lenmusdoc', that is, a whole LDP document. IMO objects and the structure of the internal model tree is described in detail in section :ref:`internal-model-root`.
+
+Class ``Document`` could have stored the root of the IMO tree, making class ``InternalModel`` unnecessary, but I preferred to create a proxy object, ``InternalModel`` to create an isolation and abstraction layer. That gave me more freedom to change the internal model design without affecting other classes. 
+
+.. Important::
+    The real important 'thing' is not class ``InternalModel`` but its content: the tree of IMO objects. Therefore, along this document the term 'internal model' will be used for refering to the tree of IMO objetcs, reserving word ``InternalModel`` to refer to that specific class.
+    
+    Another source of trouble, at beginning, is the difference between classes ``Document`` and ``ImoDocument``.  As said, class ``Document`` is a container for class ``InternalModel`` wich in turn contains the root node of the internal model: an object of class ``ImoDocument``. Therefore, both objects, ``Document`` and ``ImoDocument``, represents the same thing: the content of an LDP document. The only difference is the point of view:
+    
+    * global point of view: ``Document`` class as the object managed by the Lomse library, or
+    * internal model representation: ``ImoDocument`` class as the root node of the representation.
+    
+    Therefore, althought the term 'document' could refer both to class ``Document`` or to class ``ImoDocument``, in practise there sould not be any problem, as context information would give you a clue.
+
+
+The internal model is described in detail in chapter :ref:`internal-model-root`.
+
+
+    The document and the internal representation
+    ===============================================
+
+    The document content is basically the parse tree. For texts the parse tree is a good internal model to work with. But for other objects, i.e. scores, the parse tree is not the ideal representation for rendering and edition as it is necessary to maintain additional data structures. For scores these are the internal model (objects deriving from ImObj class) and an ordered table of staff objects (modelled by class ColStaffObjs).
+
+    So two internal representations:
+
+        general: the document (decorated parse tree: parse tree with ImObjs)
+
+        specific for some ImoObjs (currently only for scores: the ColStaffObjs)
+
+
+    The collection of staff objects
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    The ModelBuilder class performs the last step in LDP file/stream compilation process: building the internal model. For this, it must traverse the tree, collect info from parse tree, adds it to ImObjs and builds any additional data structures any ImObj could require (i.e each ImScore object rquires a ColStaffObjs table). The process is as follows:
+
+        1. Traverse the document. For each top level element send a request is to the InternalStructurizerFactory global object to return an appropriate InternalStructurizer for that top level object type.
+
+        2. If an object is returned, its build() method is invoked.
+
+*/
