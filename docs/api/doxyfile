@@ -639,6 +639,7 @@ WARN_LOGFILE           = ../../../api-docs/doxygen.log
 INPUT     = api \
 			../../include/lomse_doorway.h \
 			../../include/lomse_events.h \
+			../../include/lomse_im_attributes.h \
 			mainpages \
 			examples \
             groups
