@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -83,33 +83,33 @@ enum EEventType
 
     k_view_level_event = 0,
 
-        k_update_window_event,      /// ask user app to update window with current bitmap
-        k_update_viewport_event,    ///ask user app to update window with current bitmap
+        k_update_window_event,      ///<  ask user app to update window with current bitmap
+        k_update_viewport_event,    ///< ask user app to update window with current bitmap
 
-        k_update_UI_event,          ///possible need for UI updates
-            k_selection_set_change,     ///selected objects changed
-            k_pointed_object_change,    ///cursor pointing to a different object
+        k_update_UI_event,          ///< possible need for UI updates
+            k_selection_set_change,     ///< selected objects changed
+            k_pointed_object_change,    ///< cursor pointing to a different object
 
         k_mouse_event,
-            k_mouse_in_event,               ///mouse goes over an object
-            k_mouse_out_event,              ///mouse goes out from an object
-            k_on_click_event,               ///Document, ImoContentObj: click on object
-            k_show_contextual_menu_event,   ///Click event: object selected and menu request
+            k_mouse_in_event,               ///< mouse goes over an object
+            k_mouse_out_event,              ///< mouse goes out from an object
+            k_on_click_event,               ///< Document, ImoContentObj: click on object
+            k_show_contextual_menu_event,   ///< Click event: object selected and menu request
 
         k_command_event,
-            k_control_point_moved_event,    ///user moves a handler: handler released event
+            k_control_point_moved_event,    ///< user moves a handler: handler released event
 
-        k_highlight_event,          ///score playbaxk (highlight)
-            k_highlight_on_event,           ///add highlight to a note/rest
-            k_highlight_off_event,          ///remove highlight from a note/rest
-            k_end_of_higlight_event,        ///end of score play back. Remove all highlight.
+        k_highlight_event,          ///< score playbaxk (highlight)
+            k_highlight_on_event,           ///< add highlight to a note/rest
+            k_highlight_off_event,          ///< remove highlight from a note/rest
+            k_end_of_higlight_event,        ///< end of score play back. Remove all highlight.
             k_advance_tempo_line_event,
 
-        k_play_score_event,         ///score playback (sound)
-            k_do_play_score_event,          ///start/resume playback
-            k_pause_score_event,            ///pause playback
-            k_stop_playback_event,          ///stop playback
-            k_end_of_playback_event,        ///end of playback
+        k_play_score_event,         ///< score playback (sound)
+            k_do_play_score_event,          ///< start/resume playback
+            k_pause_score_event,            ///< pause playback
+            k_stop_playback_event,          ///< stop playback
+            k_end_of_playback_event,        ///< end of playback
 
     k_doc_level_event = 1000,
         k_doc_modified_event,
@@ -1203,8 +1203,8 @@ typedef SharedPtr<EventControlPointMoved>  SpEventControlPointMoved;
 enum ERequestType
 {
     k_null_request = -1,
-    k_dynamic_content_request,      ///request for dynamic content creation
-    k_get_font_filename,            ///request the file path for the given font
+    k_dynamic_content_request,      ///> request for dynamic content creation
+    k_get_font_filename,            ///> request the file path for the given font
 };
 
 //---------------------------------------------------------------------------------------
