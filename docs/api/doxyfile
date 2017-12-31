@@ -636,13 +636,17 @@ WARN_LOGFILE           = ../../../api-docs/doxygen.log
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT     = api \
+INPUT     = mainpages \
+			../../include/lomse_command.h \
 			../../include/lomse_doorway.h \
 			../../include/lomse_events.h \
 			../../include/lomse_im_attributes.h \
 			../../include/lomse_import_options.h \
+			../../include/lomse_interactor.h \
+			../../include/lomse_internal_model.h \
 			../../include/lomse_pitch.h \
-			mainpages \
+			../../include/lomse_pixel_formats.h \
+			../../include/lomse_presenter.h \
 			examples \
             groups
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,9 +51,10 @@ using namespace std;
 #include <boost/variant.hpp>
 using namespace boost;
 
-
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //---------------------------------------------------------------------------------------
 //forward declarations
@@ -151,295 +152,384 @@ class ImoWrapperBox;
 // enums for common values
 
     //-----------------------------------------------------------------------------
-	//The placement attribute indicates whether something is above or below another
-    //element, such as a note or a notation.
+    /** @ingroup enumerations
+
+        This enum describes values for placement attribute.
+	    The placement attribute indicates whether something is above or below another
+        element, such as a note or a notation.
+
+        @#include <lomse_internal_model.h>
+    */
     enum EPlacement
     {
-        k_placement_default = 0,
-	    k_placement_above,
-        k_placement_below,
+        k_placement_default = 0,    ///< Use default placement
+	    k_placement_above,          ///< Place it above
+        k_placement_below,          ///< Place it below
     };
 
     //-----------------------------------------------------------------------------
-	//The orientation attribute indicates whether slurs and ties are overhand (tips
-    //down) or underhand (tips up). This is distinct from the placement attribute:
-    //placement is relative, one object with respect to another object. But
-    //orientation is referred to the object itself: turned up or down.
+    /** @ingroup enumerations
+
+        This enum describes values for orientation attribute.
+	    The orientation attribute indicates whether slurs and ties are overhand (tips
+        down) or underhand (tips up). This is distinct from the placement attribute:
+        placement is relative, one object with respect to another object. But
+        orientation is referred to the object itself: turned up or down.
+
+        @#include <lomse_internal_model.h>
+    */
 	enum EOrientation
     {
-        k_orientation_default = 0,
-        k_orientation_over,
-        k_orientation_under,
+        k_orientation_default = 0,      ///< Default orientation
+        k_orientation_over,             ///< Over (tips down)
+        k_orientation_under,            ///< Under (tips up)
     };
 
     //-----------------------------------------------------------------------------
-    //The line-type attribute distinguishes between solid, dashed, dotted, and
-    //wavy lines.
+    /** @ingroup enumerations
+
+        This enum describes values for line type.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ELineType
     {
-        k_line_type_solid = 0,
-        k_line_type_dashed,
-        k_line_type_dotted,
-        k_line_type_wavy,
+        k_line_type_solid = 0,  ///< Solid line
+        k_line_type_dashed,     ///< Dashed line
+        k_line_type_dotted,     ///< Dotted line
+        k_line_type_wavy,       ///< Wavy line
     };
 
     //-----------------------------------------------------------------------------
-    //The line-shape attribute is used to distinguish between straight and curved lines.
+    /** @ingroup enumerations
+
+        This enum describes values for tye line-shape attribute. This attribute is used
+        to distinguish between straight and curved lines.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ELineShape
     {
-        k_line_shape_straight = 0,
-        k_line_shape_curved,
+        k_line_shape_straight = 0,  ///< Strait line
+        k_line_shape_curved,        ///< Curved line
     };
 
 
     //-----------------------------------------------------------------------------
-    //clefs
+    /** @ingroup enumerations
+
+        This enum describes valid values for clefs.
+
+        @#include <lomse_internal_model.h>
+    */
     enum EClef
     {
-        k_clef_undefined=-1,
-        k_clef_G2 = 0,
-        k_clef_F4,
-        k_clef_F3,
-        k_clef_C1,
-        k_clef_C2,
-        k_clef_C3,
-        k_clef_C4,
-        k_clef_percussion,
+        k_clef_undefined=-1,    ///< Undefined clef
+        k_clef_G2 = 0,          ///< G clef on second line (treble clef)
+        k_clef_F4,              ///< F clef on fourth line (bass clef)
+        k_clef_F3,              ///< F clef on third line (baritone clef)
+        k_clef_C1,              ///< C clef on first line (soprano clef)
+        k_clef_C2,              ///< C clef on second line (mezzo-soprano clef)
+        k_clef_C3,              ///< C clef on third line (alto clef)
+        k_clef_C4,              ///< C clef on fourth line (tenor clef)
+        k_clef_percussion,      ///< Percussion clef
         // other clefs not available for exercises
-        k_clef_C5,
-        k_clef_F5,
-        k_clef_G1,
-        k_clef_8_G2,        //8 above
-        k_clef_G2_8,        //8 below
-        k_clef_8_F4,        //8 above
-        k_clef_F4_8,        //8 below
-        k_clef_15_G2,       //15 above
-        k_clef_G2_15,       //15 below
-        k_clef_15_F4,       //15 above
-        k_clef_F4_15,       //15 below
+        k_clef_C5,              ///< C clef on fifth line (baritone clef)
+        k_clef_F5,              ///< F clef on fifth line (subbass clef)
+        k_clef_G1,              ///< G clef on first line (French violin)
+        k_clef_8_G2,            ///< G clef on second line, 8ve. above
+        k_clef_G2_8,            ///< G clef on second line, 8ve. below
+        k_clef_8_F4,            ///< F clef on fourth line, 8ve. above
+        k_clef_F4_8,            ///< F clef on fourth line, 8ve below
+        k_clef_15_G2,           ///< G clef on second line, 15 above
+        k_clef_G2_15,           ///< G clef on second line, 15 below
+        k_clef_15_F4,           ///< F clef on fourth line, 15 above
+        k_clef_F4_15,           ///< F clef on fourth line, 15 below
 
-        k_max_clef,
+        k_max_clef,             ///< Last element, for loops and checks
     };
 
     //-----------------------------------------------------------------------------
-    //key signatures
+    /** @ingroup enumerations
+
+        This enum describes valid values for standard key signatures.
+
+        @#include <lomse_internal_model.h>
+    */
 	enum EKeySignature
 	{
-        k_key_undefined=-1,
+        k_key_undefined=-1,         ///< Undefined key signature
 
-        k_key_C=0,
-        k_min_key = k_key_C,
-        k_min_major_key = k_key_C,
-        k_key_G,
-        k_key_D,
-        k_key_A,
-        k_key_E,
-        k_key_B,
-        k_key_Fs,
-        k_key_Cs,
-        k_key_Cf,
-        k_key_Gf,
-        k_key_Df,
-        k_key_Af,
-        k_key_Ef,
-        k_key_Bf,
-        k_key_F,
-        k_max_major_key = k_key_F,
+        k_key_C=0,                  ///< C major key signature
+        k_min_key = k_key_C,        ///< Minimum valid value = C major key signature
+        k_min_major_key = k_key_C,  ///< Minimum value for major keys = C major key signature
+        k_key_G,                    ///< G major key signature
+        k_key_D,                    ///< D major key signature
+        k_key_A,                    ///< A major key signature
+        k_key_E,                    ///< E major key signature
+        k_key_B,                    ///< B major key signature
+        k_key_Fs,                   ///< F-sharp major key signature
+        k_key_Cs,                   ///< C-sharp major key signature
+        k_key_Cf,                   ///< C-flat major key signature
+        k_key_Gf,                   ///< G-flat major key signature
+        k_key_Df,                   ///< D-flat major key signature
+        k_key_Af,                   ///< A-flat major key signature
+        k_key_Ef,                   ///< E-flat major key signature
+        k_key_Bf,                   ///< B-flat major key signature
+        k_key_F,                    ///< F major key signature
+        k_max_major_key = k_key_F,  ///< Maximum value for valid major key signatures = F major
 
-        k_key_a,
-        k_min_minor_key = k_key_a,
-        k_key_e,
-        k_key_b,
-        k_key_fs,
-        k_key_cs,
-        k_key_gs,
-        k_key_ds,
-        k_key_as,
-        k_key_af,
-        k_key_ef,
-        k_key_bf,
-        k_key_f,
-        k_key_c,
-        k_key_g,
-        k_key_d,
-        k_max_minor_key = k_key_d,
-        k_max_key = k_key_d,
+        k_key_a,                    ///< A minor key signature
+        k_min_minor_key = k_key_a,  ///< Minimum value for minor keys = A minor key signature
+        k_key_e,                    ///< E minor key signature
+        k_key_b,                    ///< B minor key signature
+        k_key_fs,                   ///< F-sharp minor key signature
+        k_key_cs,                   ///< C-sharp minor key signature
+        k_key_gs,                   ///< G-sharp minor key signature
+        k_key_ds,                   ///< D-sharp minor key signature
+        k_key_as,                   ///< A-sharp minor key signature
+        k_key_af,                   ///< A-flat minor key signature
+        k_key_ef,                   ///< E-flat minor key signature
+        k_key_bf,                   ///< B-flat minor key signature
+        k_key_f,                    ///< F minor key signature
+        k_key_c,                    ///< C minor key signature
+        k_key_g,                    ///< G minor key signature
+        k_key_d,                    ///< D minor key signature
+        k_max_minor_key = k_key_d,  ///< Maximum value for valid minor key signatures = D minor
+        k_max_key = k_key_d,        ///< Maximum value for valid key signatures = D minor
     };
     #define k_num_keys k_max_key - k_min_key + 1
 
 
     //-----------------------------------------------------------------------------
-    //note/rest type
+    /** @ingroup enumerations
+
+        This enum describes valid note/rest types.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ENoteType
     {
-        k_unknown_notetype = -1,
-        k_longa = 0,
-        k_breve = 1,
-        k_whole = 2,
-        k_half = 3,
-        k_quarter = 4,
-        k_eighth = 5,
-        k_16th = 6,
-        k_32nd = 7,
-        k_64th = 8,
-        k_128th = 9,
-        k_256th = 10,
+        k_unknown_notetype = -1,    ///< Unknown note type
+        k_longa = 0,                ///< Longa note
+        k_breve = 1,                ///< Double note (breve)
+        k_whole = 2,                ///< Whole note (semibreve)
+        k_half = 3,                 ///< Half note (minim)
+        k_quarter = 4,              ///< Quarter note (crotchet)
+        k_eighth = 5,               ///< Eighth note (quaver)
+        k_16th = 6,                 ///< Sexteenth note (semiquaver)
+        k_32nd = 7,                 ///< Thirty-second note (demisemiquaver)
+        k_64th = 8,                 ///< Sixty-fourth note (hemidemisemiquaver)
+        k_128th = 9,                ///< Hundred twenty-eighth note (semihemidemisemiquaver)
+        k_256th = 10,               ///< Two hundred fifty-six note
 
-        k_max_note_type,
+        k_max_note_type,            ///< Last element, for loops and checks
     };
 
 
     //-----------------------------------------------------------------------------
-    //note/rest duration
+    /** @ingroup enumerations
+
+        This enum describes note/rest durations (in Lomse Time Units). It is
+        useful for comparisons.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ENoteDuration
     {
-        k_duration_longa_dotted = 1536,
-        k_duration_longa = 1024,
-        k_duration_breve_dotted = 768,
-        k_duration_breve = 512,
-        k_duration_whole_dotted = 384,
-        k_duration_whole = 256,
-        k_duration_half_dotted = 192,
-        k_duration_half = 128,
-        k_duration_quarter_dotted = 96,
-        k_duration_quarter = 64,
-        k_duration_eighth_dotted = 48,
-        k_duration_eighth = 32,
-        k_duration_16th_dotted = 24,
-        k_duration_16th = 16,
-        k_duration_32nd_dotted = 12,
-        k_duration_32nd = 8,
-        k_duration_64th_dotted = 6,
-        k_duration_64th = 4,
-        k_duration_128th_dotted = 3,
-        k_duration_128th = 2,
-        k_duration_256th = 1,
+        k_duration_longa_dotted = 1536,     ///< Duration of a dotted longa note
+        k_duration_longa = 1024,            ///< Duration of a longa note
+        k_duration_breve_dotted = 768,      ///< Duration of a dotted breve note
+        k_duration_breve = 512,             ///< Duration of a breve note
+        k_duration_whole_dotted = 384,      ///< Duration of a dotted whole note
+        k_duration_whole = 256,             ///< Duration of a whole note
+        k_duration_half_dotted = 192,       ///< Duration of a dotted half note
+        k_duration_half = 128,              ///< Duration of a half note
+        k_duration_quarter_dotted = 96,     ///< Duration of a dotted quarter note
+        k_duration_quarter = 64,            ///< Duration of a quarter note
+        k_duration_eighth_dotted = 48,      ///< Duration of a dotted eighth note
+        k_duration_eighth = 32,             ///< Duration of a eighth note
+        k_duration_16th_dotted = 24,        ///< Duration of a dotted 16th note
+        k_duration_16th = 16,               ///< Duration of a 16th note
+        k_duration_32nd_dotted = 12,        ///< Duration of a dotted 32nd note
+        k_duration_32nd = 8,                ///< Duration of a 32nd note
+        k_duration_64th_dotted = 6,         ///< Duration of a dotted 64th note
+        k_duration_64th = 4,                ///< Duration of a 64th note
+        k_duration_128th_dotted = 3,        ///< Duration of a dotted 128th note
+        k_duration_128th = 2,               ///< Duration of a 128th note
+        k_duration_256th = 1,               ///< Duration of a 256th note
    };
 
     //-----------------------------------------------------------------------------
-    //Barlines
+    /** @ingroup enumerations
+
+        This enum describes valid values for barlines.
+
+        @#include <lomse_internal_model.h>
+    */
     enum EBarline
     {
-        k_barline_unknown = -1,
-        k_barline_none,
-        k_barline_simple,
-        k_barline_double,
-        k_barline_start,
-        k_barline_end,
-        k_barline_start_repetition,
-        k_barline_end_repetition,
-        k_barline_double_repetition,
+        k_barline_unknown = -1,             ///< Unknown barline type
+        k_barline_none,						///< No barline
+        k_barline_simple,                   ///< Simple barline
+        k_barline_double,                   ///< Double barline
+        k_barline_start,                    ///< Start barline
+        k_barline_end,                      ///< End barline
+        k_barline_start_repetition,         ///< Start of repetition barline
+        k_barline_end_repetition,           ///< End of repetition barline
+        k_barline_double_repetition,        ///< Double repetition barline
 
-        k_max_barline,
+        k_max_barline,                      ///< Last element, for loops and checks
     };
 
+    //-----------------------------------------------------------------------------
+    /** @ingroup enumerations
+
+        This enum describes valid values for the winged attribute. It indicates
+		whether a repeat barline has winged extensions that appear above and below
+		the barline. The straight and curved values represent single wings,
+		while the double-straight and double-curved values represent double wings.
+		The none value indicates no wings.
+
+        @#include <lomse_internal_model.h>
+    */
 	enum EBarlineWings
 	{
-		k_wings_none = 0,
-		k_wings_straight,
-		k_wings_curved,
-		k_wings_double_straight,
-		k_wings_double_curved,
+		k_wings_none = 0,				///< No wings. Default value
+		k_wings_straight,				///< Strait wings
+		k_wings_curved,					///< Curved wings
+		k_wings_double_straight,		///< Double strait wings
+		k_wings_double_curved,			///< Doube curved wings
 	};
 
     //-----------------------------------------------------------------------------
-    //Articulations
-    //
-    //AWARE: when adding / removing / renaming /reordering, you must review
-    //  methods in ImoArticulationSymbol for determining the kind of articulation
+    /** @ingroup enumerations
+
+        This enum describes valid values for articulations.
+
+        @#include <lomse_internal_model.h>
+    */
     enum EArticulations
     {
-        k_articulation_unknown = -1,
+        k_articulation_unknown = -1,        ///< Unknown articulation
 
         //accents
-        k_articulation_accent,
-        k_articulation_legato_duro,
-        k_articulation_marccato,
-        k_articulation_marccato_legato,
-        k_articulation_marccato_staccato,
-        k_articulation_marccato_staccatissimo,
-        k_articulation_mezzo_staccato,
-        k_articulation_mezzo_staccatissimo,
-        k_articulation_staccato,
-        k_articulation_staccato_duro,
-        k_articulation_staccatissimo_duro,
-        k_articulation_staccatissimo,
-        k_articulation_tenuto,
-        //jazz pitch articulations
-        k_articulation_scoop,
-        k_articulation_plop,
-        k_articulation_doit,
-        k_articulation_falloff,
-        //stress articulations
-        k_articulation_stress,
-        k_articulation_unstress,
-        //other in MusicXML
-        k_articulation_spiccato,
-        //breath marks
-        k_articulation_breath_mark,
-        k_articulation_caesura,
+        k_articulation_accent,					///< Accent
+        k_articulation_strong_accent,       	///< Strong accent
+        k_articulation_detached_legato,     	///< Detached legato
+        k_articulation_legato_duro,				///< Legato duro
+        k_articulation_marccato,				///< Marccato
+        k_articulation_marccato_legato,			///< Marccato-legato
+        k_articulation_marccato_staccato,		///< Marccato-staccato
+        k_articulation_marccato_staccatissimo,	///< Marccato-staccatissimo
+        k_articulation_mezzo_staccato,			///< Mezzo-staccato
+        k_articulation_mezzo_staccatissimo,		///< Mezzo-staccatissimo
+        k_articulation_staccato,				///< Staccato
+        k_articulation_staccato_duro,			///< Staccato-duro
+        k_articulation_staccatissimo_duro,		///< Staccatissimo-duro
+        k_articulation_staccatissimo,			///< Staccatissimo
+        k_articulation_tenuto,					///< Tenuto
 
-        k_max_articulation,
+        //jazz pitch articulations
+        k_articulation_scoop,					///< Jazz pitch: Scoop
+        k_articulation_plop,					///< Jazz pitch: Plop
+        k_articulation_doit,					///< Jazz pitch: Doit
+        k_articulation_falloff,					///< Jazz pitch: Fall off
+
+        //stress articulations
+         k_articulation_stress,              ///< Stress
+        k_articulation_unstress,             ///< Unstress
+
+        //other in MusicXML
+        k_articulation_spiccato,            ///< Spicato
+
+        //breath marks
+        k_articulation_breath_mark,         ///< Breath mark
+        k_articulation_caesura,             ///< Caesura
+
+        k_max_articulation,						///< Last element, for loops and checks
     };
 
     //-----------------------------------------------------------------------------
-    //Ornaments
+    /** @ingroup enumerations
+
+        This enum describes valid values for ornaments.
+
+        @#include <lomse_internal_model.h>
+    */
     enum EOrnaments
     {
-        k_ornament_unknown = -1,
-        k_ornament_trill_mark,
-        k_ornament_vertical_turn,
-        k_ornament_shake,
-        k_ornament_turn,
-        k_ornament_delayed_turn,
-        k_ornament_inverted_turn,
-        k_ornament_delayed_inverted_turn,
-        k_ornament_mordent,
-        k_ornament_inverted_mordent,
-        k_ornament_wavy_line,
-        k_ornament_schleifer,
-        k_ornament_tremolo,
-        k_ornament_other,
+        k_ornament_unknown = -1,            ///< Unknown ornament
+        k_ornament_trill_mark,              ///< Trill mark
+        k_ornament_vertical_turn,           ///< Vertical turn
+        k_ornament_shake,                   ///< Shake
+        k_ornament_turn,                    ///< Turn
+        k_ornament_delayed_turn,            ///< Delayed turn
+        k_ornament_inverted_turn,           ///< Inverted turn
+        k_ornament_delayed_inverted_turn,   ///< Delayed inverted turn
+        k_ornament_mordent,                 ///< Mordent
+        k_ornament_inverted_mordent,        ///< Inverted mordent
+        k_ornament_wavy_line,               ///< Wavy line
+        k_ornament_schleifer,               ///< Schleifer
+        k_ornament_tremolo,                 ///< Tremolo
+        k_ornament_other,                   ///< Other ornaments (for MusicXML)
 
-        k_max_ornament,
+        k_max_ornament,                         ///< Last element, for loops and checks
     };
 
     //-----------------------------------------------------------------------------
-    //Technical marks
+    /** @ingroup enumerations
+
+        This enum describes valid values for technical marks.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ETechnical
     {
-        k_technical_unknown = -1,
-        k_technical_up_bow,
-        k_technical_down_bow,
-        k_technical_harmonic,
-        k_technical_fingering,
-        k_technical_double_tongue,
-        k_technical_triple_tongue,
-        k_technical_hole,
-        k_technical_handbell,
+        k_technical_unknown = -1,       ///< Unknown technical mark
+        k_technical_up_bow,             ///< Bow up
+        k_technical_down_bow,           ///< Bow down
+        k_technical_harmonic,           ///< Harmonic
+        k_technical_fingering,          ///< Fingering
+        k_technical_double_tongue,      ///< Double tongue
+        k_technical_triple_tongue,      ///< Triple tongue
+        k_technical_hole,               ///< Hole
+        k_technical_handbell,           ///< Handbell
 
-        k_max_technical,
+        k_max_technical,				///< Last element, for loops and checks
     };
 
     //-----------------------------------------------------------------------------
-    //Repetition marks or sound directions
+    /** @ingroup enumerations
+
+        This enum describes valid values for repetition marks and sound directions.
+
+        @#include <lomse_internal_model.h>
+    */
     enum ERepeatMark
 	{
-		k_repeat_none,
-		k_repeat_segno,
-		k_repeat_coda,
-		k_repeat_fine,
-		k_repeat_da_capo,
-		k_repeat_da_capo_al_fine,
-		k_repeat_da_capo_al_coda,
-		k_repeat_dal_segno,
-		k_repeat_dal_segno_al_fine,
-		k_repeat_dal_segno_al_coda,
-		k_repeat_to_coda,
+		k_repeat_none = 0,				///< No mark
+		k_repeat_segno,					///< Segno
+		k_repeat_coda,					///< Coda
+		k_repeat_fine,					///< Fine
+		k_repeat_da_capo,				///< D.C.
+		k_repeat_da_capo_al_fine,		///< D.C. al Fine
+		k_repeat_da_capo_al_coda,		///< D.C. al Coda
+		k_repeat_dal_segno,				///< Dal Segno
+		k_repeat_dal_segno_al_fine,		///< Dal Segno al Fine
+		k_repeat_dal_segno_al_coda,		///< Dal Segno al Coda
+		k_repeat_to_coda,				///< To Coda
     };
 
     //-----------------------------------------------------------------------------
-    //type for ImoObj objects
+    /** @ingroup enumerations
+
+        This enum describes valid types for internal model objects.
+
+        @#include <lomse_internal_model.h>
+
+        @todo Document other ImoObj type values
+    */
     enum EImoObjType
     {
         // ImoObj (A)
@@ -519,38 +609,38 @@ class ImoWrapperBox;
             k_imo_contentobj,
 
                 // ImoScoreObj (A) content only for scores
-                k_imo_scoreobj,
+                k_imo_scoreobj,             ///< <b>Score objects: content only valid for music scores. Any of the following:</b>
 
                     // ImoStaffObj (A)
-                    k_imo_staffobj,
-                        k_imo_barline,
-                        k_imo_clef,
-                        k_imo_direction,
-                        k_imo_figured_bass,
-                        k_imo_go_back_fwd,
-                        k_imo_key_signature,
-                        k_imo_metronome_mark,
-                        k_imo_note,
-                        k_imo_rest,
-                        k_imo_sound_change,
-                        k_imo_spacer,
-                        k_imo_system_break,
-                        k_imo_time_signature,
+                    k_imo_staffobj,             ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Staff object. Any of the following:</b>
+                        k_imo_barline,          ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Barline
+                        k_imo_clef,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Clef
+                        k_imo_direction,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Direction: a musical indication that is not attached to a specific note.
+                        k_imo_figured_bass,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figured bass mark
+                        k_imo_go_back_fwd,      ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GoBackFwd
+                        k_imo_key_signature,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Key signature
+                        k_imo_metronome_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Metronome mark
+                        k_imo_note,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note
+                        k_imo_rest,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rest
+                        k_imo_sound_change,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Playback parameters
+                        k_imo_spacer,           ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Spacer
+                        k_imo_system_break,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System break
+                        k_imo_time_signature,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Time signature
                     k_imo_staffobj_last,
 
                     // ImoAuxObj (A)
-                    k_imo_auxobj,
-                        k_imo_dynamics_mark,
-                        k_imo_fermata,
-                        k_imo_ornament,
-                        k_imo_symbol_repetition_mark,
-                        k_imo_technical,
-                        k_imo_text_repetition_mark,
+                    k_imo_auxobj,               ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Auxiliary object. Any of the following:</b>
+                        k_imo_dynamics_mark,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dynamics mark
+                        k_imo_fermata,          ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fermata
+                        k_imo_ornament,         ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ornament
+                        k_imo_symbol_repetition_mark,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Symbol for repetition mark
+                        k_imo_technical,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Technical mark
+                        k_imo_text_repetition_mark, ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Text for repetition mark
 
                         // ImoArticulation (A)
                         k_imo_articulation,
-                            k_imo_articulation_symbol,
-                            k_imo_articulation_line,
+                            k_imo_articulation_symbol,  ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Articulation symbol
+                            k_imo_articulation_line,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Articulation line
                         k_imo_articulation_last,
 
                         k_imo_score_text,
@@ -561,51 +651,61 @@ class ImoWrapperBox;
 
                         // ImoAuxReloObj (A)
                         k_imo_auxrelobj,
-                            k_imo_lyric,
+                            k_imo_lyric,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Lyrics
 
                     k_imo_auxobj_last,
 
                     // ImoRelObj (A)
-                    k_imo_relobj,
-                        k_imo_beam,
-                        k_imo_chord,
-                        k_imo_slur,
-                        k_imo_tie,
-                        k_imo_tuplet,
+                    k_imo_relobj,               ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Relation objects. Any of the following:</b>
+                        k_imo_beam,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beam
+                        k_imo_chord,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chord
+                        k_imo_slur,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Slur
+                        k_imo_tie,              ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tie
+                        k_imo_tuplet,           ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tuplet
                         k_imo_volta_bracket,
                     k_imo_relobj_last,
 
                 k_imo_scoreobj_last,
 
                 // ImoBlockLevelObj (A)
-                k_imo_block_level_obj,
-                    k_imo_score,
+                k_imo_block_level_obj,	///< <b>Block level objects: Any of the following:</b>
+                    k_imo_score,		    ///< &nbsp;&nbsp;&nbsp;&nbsp; Music score
 
                     // ImoBlocksContainer (A)
                     k_imo_blocks_container,
-                        k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
-                        k_imo_listitem, k_imo_multicolumn,
-                        k_imo_table, k_imo_table_cell, k_imo_table_row,
+                        k_imo_content,
+						k_imo_dynamic,
+						k_imo_document,
+						k_imo_list,         ///< &nbsp;&nbsp;&nbsp;&nbsp; Text list
+                        k_imo_listitem,
+						k_imo_multicolumn,
+                        k_imo_table,        ///< &nbsp;&nbsp;&nbsp;&nbsp; Table
+						k_imo_table_cell,
+						k_imo_table_row,
                     k_imo_blocks_container_last,
 
                     // ImoInlinesContainer (A)
                     k_imo_inlines_container,
-                        k_imo_anonymous_block, k_imo_heading, k_imo_para,
+                        k_imo_anonymous_block,
+                        k_imo_heading,      ///< &nbsp;&nbsp;&nbsp;&nbsp; Text header
+                        k_imo_para,         ///< &nbsp;&nbsp;&nbsp;&nbsp; Paragraph
                     k_imo_inlines_container_last,
 
                 k_imo_block_level_obj_last,
 
                 // ImoInlineLevelObj
-                k_imo_inline_level_obj,
-                    k_imo_image, k_imo_text_item,
+                k_imo_inline_level_obj,  ///< <b>Inline level objects: Any of the following:</b>
+                    k_imo_image,                ///< &nbsp;&nbsp;&nbsp;&nbsp; Image
+                    k_imo_text_item,            ///< &nbsp;&nbsp;&nbsp;&nbsp; Text item
                     k_imo_control,
-                        k_imo_score_player,
-                        k_imo_button,
+                        k_imo_score_player,     ///< &nbsp;&nbsp;&nbsp;&nbsp; Score player control
+                        k_imo_button,           ///< &nbsp;&nbsp;&nbsp;&nbsp; Button control
                     k_imo_control_end,
 
                     // ImoBoxInline (A)
                     k_imo_box_inline,
-                        k_imo_inline_wrapper, k_imo_link,
+                        k_imo_inline_wrapper,
+                        k_imo_link,             ///< &nbsp;&nbsp;&nbsp;&nbsp; Link
                     k_imo_box_inline_last,
 
                 k_imo_inline_level_obj_last,
@@ -615,6 +715,7 @@ class ImoWrapperBox;
 
     };
 
+///@cond INTERNALS
 //---------------------------------------------------------------------------------------
 // a struct to contain note/rest figure and dots
 struct NoteTypeAndDots
@@ -761,6 +862,7 @@ public:
     ~InternalModel();
 
     //getters
+    /// Returns the internal model root ImoObj object
     inline ImoObj* get_root() { return m_pRoot; }
 
 };
@@ -5227,6 +5329,7 @@ extern TimeUnits to_duration(int nNoteType, int nDots);
 
 
 }   //namespace lomse
+///@endcond
 
 #endif    // __LOMSE_INTERNAL_MODEL_H__
 

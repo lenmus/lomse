@@ -75,7 +75,7 @@ class EventsDispatcher;
 
     This enum assigns an event type for Lomse events.
 
-    \#include <lomse_events.h>
+    @#include <lomse_events.h>
 */
 enum EEventType
 {
@@ -1198,7 +1198,7 @@ typedef SharedPtr<EventControlPointMoved>  SpEventControlPointMoved;
 
     This enum assigns an request type for Lomse requests.
 
-    \#include <lomse_events.h>
+    @#include <lomse_events.h>
 */
 enum ERequestType
 {

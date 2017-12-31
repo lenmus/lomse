@@ -51,7 +51,7 @@ namespace lomse
     This enum describes values for valid attributes for CmdChangeAttribute
     commands, as well as valid attribute indexes for ImoAttr.
 
-    \#include <lomse_im_attributes.h>
+    @#include <lomse_im_attributes.h>
 */
 enum EImoAttribute
 {
@@ -90,7 +90,7 @@ enum EImoAttribute
 
     This enum describes data type for an attribute.
 
-    \#include <lomse_im_attributes.h>
+    @#include <lomse_im_attributes.h>
 */
 enum EDataType
 {

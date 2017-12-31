@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,7 +47,7 @@ namespace lomse
 
     This enum describes valid note steps. 'step' refers to the diatonic note name in the octave
 
-    \#include <lomse_pitch.h>
+    @#include <lomse_pitch.h>
 */
 enum ESteps
 {
@@ -69,7 +69,7 @@ enum ESteps
     This is the same meaning as in MIDI (note A in octave 4 = 440Hz).
     The lowest MIDI octave (-1) is not defined.
 
-    \#include <lomse_pitch.h>
+    @#include <lomse_pitch.h>
 */
 enum EOctave
 {
@@ -93,7 +93,7 @@ enum EOctave
     This enum describes valid accidental signs.
     No microtonal accidentals are considered, only traditional ones.
 
-    \#include <lomse_pitch.h>
+    @#include <lomse_pitch.h>
 */
 enum EAccidentals
 {
