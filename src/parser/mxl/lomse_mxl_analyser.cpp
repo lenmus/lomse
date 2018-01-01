@@ -5885,7 +5885,7 @@ public:
 
 protected:
 
-    string validate_time_only(const string& value)
+    string validate_time_only(const string& UNUSED(value))
     {
         //The value must be a comma-separated list of positive integers arranged
         //in ascending order.

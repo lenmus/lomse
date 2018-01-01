@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,8 +37,10 @@
 
 using namespace std;
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class DocCommandExecuter;
@@ -52,13 +54,22 @@ typedef SharedPtr<Document>     SpDocument;
 typedef WeakPtr<Document>       WpDocument;
 
 class Interactor;
+/** A shared pointer for an Interactor.
+    @ingroup typedefs
+    @#include <lomse_presenter.h>
+*/
 typedef SharedPtr<Interactor>   SpInteractor;
+
+/** A weak pointer for an Interactor.
+    @ingroup typedefs
+    @#include <lomse_presenter.h>
+*/
 typedef WeakPtr<Interactor>     WpInteractor;
 
 
 //---------------------------------------------------------------------------------------
+///@cond INTERNALS
 //excluded from public API. Only for internal use.
-#ifdef LOMSE_INTERNAL_API
 // PresenterBuilder: responsible for creating Presenter objects
 class PresenterBuilder
 {
@@ -79,13 +90,22 @@ public:
                              ostream& reporter = cout);
 
 };
-#endif  //excluded from public API
+///@endcond
 
 
 //---------------------------------------------------------------------------------------
-//Presenter: A facade object responsible for maintaining the life cycle and
-//relationships between MVC objects: Views, Interactors, Commands, Selections and the
-//Document.
+/** The %Presenter is a facade object responsible for maintaining the life cycle and
+    relationships between the objects in the Lomse MVC model: Views, Interactors and the
+    Document.
+
+    All these objects are created when invoking one of the LomseDoorway::new_document()
+    or LomseDoorway::open_document() methods.
+
+    The %Presenter, returned by previous methods, gives acess to the Document and to
+    the Interactors associated to the existing View objects for the Document.
+
+    See @subpage render-overview.
+*/
 class Presenter
 {
 protected:
@@ -96,24 +116,67 @@ protected:
     void (*m_callback)(Notification* event);
 
 public:
-    virtual ~Presenter();
+	/** Destructor
+		@attention As %Presenter ownership is transferred to the user application,
+		you have to take care of deleting the %Presenter when no longer needed. Deleting
+		the %Presenter will automatically cause deletion of all MVC involved objects:
+		the Document, all existing Views and their Interactors, selection sets,
+		undo/redo stack, etc.
+	*/
+     virtual ~Presenter();
 
     //interactors management
+	/** Returns the number of Interactors associated to the %Presenter, at least 1.
+        There exist as many Interactors as document Views.    */
     inline int get_num_interactors() { return static_cast<int>( m_interactors.size() ); }
+
+    /** Returns a shared pointer to the specified Interactor index.
+        @param iIntor is the number of the desired Interactor. It must be 0 for the
+            first interactor, and it must be lower than the value returned by method
+            get_num_interactors(); otherwise an exception will be thrown.
+    */
     SpInteractor get_interactor_shared_ptr(int iIntor);
+
+    /** Returns a weak pointer to the specified Interactor index.
+        @param iIntor is the number of the desired Interactor. It must be 0 for the
+            first interactor, and it must be lower than the value returned by method
+            get_num_interactors(); otherwise an exception will be thrown.
+    */
     WpInteractor get_interactor(int iIntor);
 
+
     //accessors
+    /** Returns a shared pointer to the Document associated to this %Presenter.    */
     inline SpDocument get_document_shared_ptr() { return m_spDoc; }
+
+    /** Returns a shared pointer to the Document associated to this %Presenter.    */
     WpDocument get_document_weak_ptr();
+
+    /** Returns the raw pointer to the Document associated to this %Presenter.    */
     inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
 
+
     //to save user data
+    /** Associates the given untyped application data pointer with this %Presenter.
+        @param pData	The application data to associate with the %Presenter.
+
+        This method is a commodity for your application, in case you would like to save
+        some data associated to %Presenter objects, i.e. for Document identification
+        or other.
+
+        @attention Your application has the ownership of the associated data.
+            Therefore, this data will not be deleted when the %Presenter is deleted.
+    */
     inline void set_user_data(void* pData) { m_userData = pData; }
+
+    /** Returns a pointer to the user data associated with this %Presenter (if any).
+        @return
+            A pointer to the user data, or NULL if no data saved.
+    */
     inline void* get_user_data() { return m_userData; }
 
-//excluded from public API. Only for internal use.
-#ifdef LOMSE_INTERNAL_API
+    ///@cond INTERNALS
+    //excluded from public API. Only for internal use.
     Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec);
 
     Interactor* get_interactor_raw_ptr(int iIntor);
@@ -125,13 +188,13 @@ public:
     void set_callback( void (*pt2Func)(Notification* event) );
     void notify_user_application(Notification* event);
 
-#endif  //excluded from public API
+    ///@endcond
 
 };
 
 //---------------------------------------------------------------------------------------
+///@cond INTERNALS
 //excluded from public API. Only for internal use.
-#ifdef LOMSE_INTERNAL_API
 class Notification
 {
 protected:
@@ -159,7 +222,7 @@ public:
     inline void set_presenter(Presenter* pPresenter) { m_pPresenter = pPresenter; }
 
 };
-#endif  //excluded from public API
+///@endcond
 
 
 }   //namespace lomse
