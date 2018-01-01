@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classRequestFont.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -156,7 +156,7 @@ Inheritance diagram for RequestFont:</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> MyApp::on_lomse_request(<a class="code" href="classRequest.html">Request</a>* pRequest)</div>
 <div class="line">{</div>
-<div class="line">    <span class="keywordtype">int</span> type = pRequest-&gt;get_request_type();</div>
+<div class="line">    <span class="keywordtype">int</span> type = pRequest-&gt;<a class="code" href="classRequest.html#aa1cef2d8dbdc04772277ce2ddeda6687">get_request_type</a>();</div>
 <div class="line">    <span class="keywordflow">switch</span> (type)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keywordflow">case</span> k_dynamic_content_request:</div>
@@ -246,8 +246,7 @@ Inheritance diagram for RequestFont:</div>
 </div><!-- fragment --> </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aeb307074782e992183a95dcc4dd82488"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeb307074782e992183a95dcc4dd82488"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>RequestFont</b> (const string &amp;fontname, bool bold, bool italic)</td></tr>
+<tr class="memitem:aeb307074782e992183a95dcc4dd82488"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestFont.html#aeb307074782e992183a95dcc4dd82488">RequestFont</a> (const string &amp;fontname, bool bold, bool italic)</td></tr>
 <tr class="separator:aeb307074782e992183a95dcc4dd82488"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09a369991cc6158da884e4cafaf72745"><td class="memItemLeft" align="right" valign="top">const string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestFont.html#a09a369991cc6158da884e4cafaf72745">get_fontname</a> ()</td></tr>
 <tr class="separator:a09a369991cc6158da884e4cafaf72745"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -258,8 +257,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a84bfe5b1e2e2d2ee9f975166f94f917f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestFont.html#a84bfe5b1e2e2d2ee9f975166f94f917f">set_font_fullname</a> (const string &amp;name)</td></tr>
 <tr class="separator:a84bfe5b1e2e2d2ee9f975166f94f917f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classRequest"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classRequest')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classRequest.html">Request</a></td></tr>
-<tr class="memitem:aa1cef2d8dbdc04772277ce2ddeda6687 inherit pub_methods_classRequest"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa1cef2d8dbdc04772277ce2ddeda6687"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_request_type</b> ()</td></tr>
+<tr class="memitem:a45cc5d15eb7b9c9e97bd7328c9a90d3f inherit pub_methods_classRequest"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequest.html#a45cc5d15eb7b9c9e97bd7328c9a90d3f">~Request</a> ()</td></tr>
+<tr class="separator:a45cc5d15eb7b9c9e97bd7328c9a90d3f inherit pub_methods_classRequest"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1cef2d8dbdc04772277ce2ddeda6687 inherit pub_methods_classRequest"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequest.html#aa1cef2d8dbdc04772277ce2ddeda6687">get_request_type</a> ()</td></tr>
 <tr class="separator:aa1cef2d8dbdc04772277ce2ddeda6687 inherit pub_methods_classRequest"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9290cd32d8efc4e84398078c7c80b190 inherit pub_methods_classRequest"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9290cd32d8efc4e84398078c7c80b190"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_dynamic_content_request</b> ()</td></tr>
@@ -268,6 +268,49 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_dynamic_content_re
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename</b> ()</td></tr>
 <tr class="separator:ae172ebd72720fd4fbe36453deb0381d8 inherit pub_methods_classRequest"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="aeb307074782e992183a95dcc4dd82488"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RequestFont::RequestFont </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>fontname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>bold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>italic</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a9c3719b6491ce9e2ebfe76292bebbd7d"></a>
 <div class="memitem">
@@ -290,7 +333,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 </table>
 </div><div class="memdoc">
 
-<p>Returns TRUE is the font is requested in bold face. */. </p>
+<p>Returns <span class="literal">true</span> is the font is requested in bold face. */. </p>
 
 </div>
 </div>
@@ -339,7 +382,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 </table>
 </div><div class="memdoc">
 
-<p>Returns TRUE is the font is requested in italic style. */. </p>
+<p>Returns <span class="literal">true</span> is the font is requested in italic style. */. </p>
 
 </div>
 </div>
@@ -374,7 +417,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classRequestFont.html">RequestFont</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

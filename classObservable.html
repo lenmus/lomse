@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classObservable.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -132,43 +132,390 @@ Inheritance diagram for Observable:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a236b94596401e5c8d89ab3b0edea7eac"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a236b94596401e5c8d89ab3b0edea7eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeba2229fd6aa952b9d2e67b22444682e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aeba2229fd6aa952b9d2e67b22444682e">EObservedChild</a> </td></tr>
+<tr class="separator:aeba2229fd6aa952b9d2e67b22444682e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1e08e4890d93e0932401b062c9a0cced"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1e08e4890d93e0932401b062c9a0cced"></a>
-virtual <a class="el" href="classEventNotifier.html">EventNotifier</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get_event_notifier</b> ()=0</td></tr>
+<tr class="memitem:a42f551d4d64ffa48a2ea8d7f0a4e42d4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a42f551d4d64ffa48a2ea8d7f0a4e42d4">~Observable</a> ()</td></tr>
+<tr class="separator:a42f551d4d64ffa48a2ea8d7f0a4e42d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e08e4890d93e0932401b062c9a0cced"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classEventNotifier.html">EventNotifier</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a1e08e4890d93e0932401b062c9a0cced">get_event_notifier</a> ()=0</td></tr>
 <tr class="separator:a1e08e4890d93e0932401b062c9a0cced"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa350bb80a827421d21cb68ee3131f61f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa350bb80a827421d21cb68ee3131f61f"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
-<tr class="separator:aa350bb80a827421d21cb68ee3131f61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ab7b17ee247743097ba03b5b71188b9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ab7b17ee247743097ba03b5b71188b9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
-<tr class="separator:a9ab7b17ee247743097ba03b5b71188b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0869e9051c399e3a80782dec852c5393"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0869e9051c399e3a80782dec852c5393"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
-<tr class="separator:a0869e9051c399e3a80782dec852c5393"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d2baa5abf0de7c2dfe7c1df9b93ea9b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8d2baa5abf0de7c2dfe7c1df9b93ea9b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int childType, ImoId childId, int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
-<tr class="separator:a8d2baa5abf0de7c2dfe7c1df9b93ea9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf457b8237c92af44e8c336cc1602e31"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaf457b8237c92af44e8c336cc1602e31"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int childType, ImoId childId, int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
-<tr class="separator:aaf457b8237c92af44e8c336cc1602e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef775f227ab270e6b6e4f8cec0d69243"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aef775f227ab270e6b6e4f8cec0d69243"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>add_event_handler</b> (int childType, ImoId childId, int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
-<tr class="separator:aef775f227ab270e6b6e4f8cec0d69243"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a993a493e3b27bf8113dd2e40a534f7d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a993a493e3b27bf8113dd2e40a534f7d9"></a>
-virtual <a class="el" href="classObservable.html">Observable</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get_observable_child</b> (int UNUSED(childType), ImoId UNUSED(childId))</td></tr>
+<tr class="memitem:a993a493e3b27bf8113dd2e40a534f7d9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classObservable.html">Observable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a993a493e3b27bf8113dd2e40a534f7d9">get_observable_child</a> (int UNUSED(childType), ImoId UNUSED(childId))</td></tr>
 <tr class="separator:a993a493e3b27bf8113dd2e40a534f7d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
+<tr class="memitem:aa350bb80a827421d21cb68ee3131f61f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aa350bb80a827421d21cb68ee3131f61f">add_event_handler</a> (int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
+<tr class="separator:aa350bb80a827421d21cb68ee3131f61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ab7b17ee247743097ba03b5b71188b9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a9ab7b17ee247743097ba03b5b71188b9">add_event_handler</a> (int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="separator:a9ab7b17ee247743097ba03b5b71188b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0869e9051c399e3a80782dec852c5393"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a0869e9051c399e3a80782dec852c5393">add_event_handler</a> (int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="separator:a0869e9051c399e3a80782dec852c5393"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
+<tr class="memitem:a8d2baa5abf0de7c2dfe7c1df9b93ea9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a8d2baa5abf0de7c2dfe7c1df9b93ea9b">add_event_handler</a> (int childType, ImoId childId, int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
+<tr class="separator:a8d2baa5abf0de7c2dfe7c1df9b93ea9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf457b8237c92af44e8c336cc1602e31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aaf457b8237c92af44e8c336cc1602e31">add_event_handler</a> (int childType, ImoId childId, int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="separator:aaf457b8237c92af44e8c336cc1602e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef775f227ab270e6b6e4f8cec0d69243"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aef775f227ab270e6b6e4f8cec0d69243">add_event_handler</a> (int childType, ImoId childId, int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="separator:aef775f227ab270e6b6e4f8cec0d69243"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a class="anchor" id="aeba2229fd6aa952b9d2e67b22444682e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classObservable.html#aeba2229fd6aa952b9d2e67b22444682e">Observable::EObservedChild</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This enum describes the valid observable targets. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="aeba2229fd6aa952b9d2e67b22444682ea0ce1be759d2081d0bbab788643f4b9c3"></a>k_root</em>&#160;</td><td class="fielddoc">
+<p>The Document (in fact its root node) </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="aeba2229fd6aa952b9d2e67b22444682ea6a46d2011be90fbc32991b41b8a5705e"></a>k_control</em>&#160;</td><td class="fielddoc">
+<p>A control (an ImoControl) object. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="aeba2229fd6aa952b9d2e67b22444682eaca4957784e6e1934ef78f2dbac2df665"></a>k_gmo</em>&#160;</td><td class="fielddoc">
+<p>A Graphic Model object (GmoObj) </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="aeba2229fd6aa952b9d2e67b22444682ea9ca1ddc7cd61419f5b840f31776392f0"></a>k_imo</em>&#160;</td><td class="fielddoc">
+<p>A child of the Document (an ImoObj) except ImoControl objs. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a42f551d4d64ffa48a2ea8d7f0a4e42d4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual Observable::~Observable </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aa350bb80a827421d21cb68ee3131f61f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classEventHandler.html">EventHandler</a> *&#160;</td>
+          <td class="paramname"><em>pHandler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a notification handler for an Observer. </p>
+
+</div>
+</div>
+<a class="anchor" id="a9ab7b17ee247743097ba03b5b71188b9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>pThis</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event)&#160;</td>
+          <td class="paramname"><em>pt2Func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a notification handler for an Observer. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0869e9051c399e3a80782dec852c5393"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event)&#160;</td>
+          <td class="paramname"><em>pt2Func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Register a notification handler for an Observer. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8d2baa5abf0de7c2dfe7c1df9b93ea9b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>childType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>childId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classEventHandler.html">EventHandler</a> *&#160;</td>
+          <td class="paramname"><em>pHandler</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Register an event handler for an Observer. Parameter childType must be a value from enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="aaf457b8237c92af44e8c336cc1602e31"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>childType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>childId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>pThis</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event)&#160;</td>
+          <td class="paramname"><em>pt2Func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Register an event handler for an Observer. Parameter childType must be a value from enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="aef775f227ab270e6b6e4f8cec0d69243"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Observable::add_event_handler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>childType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>childId</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>eventType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event)&#160;</td>
+          <td class="paramname"><em>pt2Func</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Register an event handler for an Observer. Parameter childType must be a value from enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1e08e4890d93e0932401b062c9a0cced"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classEventNotifier.html">EventNotifier</a>* Observable::get_event_notifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the <a class="el" href="classEventNotifier.html">EventNotifier</a> object associated to this Observable object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a993a493e3b27bf8113dd2e40a534f7d9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classObservable.html">Observable</a>* Observable::get_observable_child </td>
+          <td>(</td>
+          <td class="paramtype">int &#160;</td>
+          <td class="paramname"><em>UNUSED</em>childType, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId &#160;</td>
+          <td class="paramname"><em>UNUSED</em>childId&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns a pointer to the observable child. */. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classObservable.html">Observable</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

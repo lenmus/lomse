@@ -7,8 +7,9 @@ var NAVTREE =
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
-        [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
+        [ "All", "functions.html", "functions_dup" ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", null ],
         [ "Enumerations", "functions_enum.html", null ],
         [ "Enumerator", "functions_eval.html", null ]
       ] ]
@@ -24,8 +25,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classLomseDoorway.html#a2b7d51980a64a9434638892f0124b53f",
-"group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029a7679a62ff03867c78c82e13c5995db88"
+"classEventInfo.html#a5bc12138d33efc9d28e8fdd25e2c2ab5",
+"classRequest.html#a45cc5d15eb7b9c9e97bd7328c9a90d3f",
+"group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029a3e013b76457f66feba77c347eebda84e",
+"sound-generation.html#sound-generation-overview"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

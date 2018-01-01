@@ -1,5 +1,9 @@
 var searchData=
 [
-  ['new_5fdocument',['new_document',['../classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948',1,'LomseDoorway::new_document(int viewType)'],['../classLomseDoorway.html#aeb01dedc72fc5e973e3dcf65a26a68ed',1,'LomseDoorway::new_document(int viewType, const string &amp;source, int format, ostream &amp;reporter=cout)']]],
-  ['new_5fviewport',['new_viewport',['../classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8',1,'Interactor']]]
+  ['mark_5fas_5fno_5frecordable',['mark_as_no_recordable',['../classDocCmdComposite.html#ae206817e6d052e222048133bb712ef0b',1,'DocCmdComposite']]],
+  ['mark_5fas_5fno_5freversible',['mark_as_no_reversible',['../classDocCmdComposite.html#a9976bc78278fdd1741bfb42fb5f255fe',1,'DocCmdComposite']]],
+  ['mark_5fas_5ftarget_5fset_5fin_5fconstructor',['mark_as_target_set_in_constructor',['../classDocCmdComposite.html#a1c0239333e2adb5f6b9dd35be595246b',1,'DocCmdComposite']]],
+  ['midipitch',['MidiPitch',['../classMidiPitch.html',1,'MidiPitch'],['../classMidiPitch.html#a5c7b045d52d7e7de3f844d0fb5092705',1,'MidiPitch::MidiPitch(int note)'],['../classMidiPitch.html#ab232657af2658882d2d32f40131a5d1a',1,'MidiPitch::MidiPitch(int step, int octave, int acc=0)']]],
+  ['model_5fpoint_5fto_5fscreen',['model_point_to_screen',['../classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e',1,'Interactor']]],
+  ['musicxmloptions',['MusicXmlOptions',['../classMusicXmlOptions.html',1,'']]]
 ];

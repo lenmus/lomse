@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,7 +108,9 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classMusicXmlOptions-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">MusicXmlOptions Class Reference</div>  </div>
@@ -117,7 +119,7 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 
 <p><code>#include &lt;<a class="el" href="lomse__import__options_8h_source.html">lomse_import_options.h</a>&gt;</code></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class <a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> stores and manages the settings for dealing and fixing malformed imported files. The only instance of this class is stored in the LibraryScope object. You can access it and modify its settings either from LomseDoorway object or from the LibraryScope object:</p>
+<div class="textblock"><p>Class <a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> stores and manages the settings for dealing and fixing malformed imported files. The only instance of this class is stored in the LibraryScope object. You can access it and modify its settings either from <a class="el" href="classLomseDoorway.html">LomseDoorway</a> object or from the LibraryScope object:</p>
 <div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div>
 <div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div>
 </div><!-- fragment --><div class="fragment"><div class="line">LibraryScope&amp; lomse = ...</div>
@@ -125,7 +127,7 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 </div><!-- fragment --><p>Example of use:</p>
 <div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div>
 <div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div>
-<div class="line">opt-&gt;<a class="code" href="classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7">fix_beams</a>(<span class="keyword">true</span>);</div>
+<div class="line">opt-&gt;<a class="code" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams</a>(<span class="keyword">true</span>);</div>
 <div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(ViewFactory::k_view_vertical_book,</div>
 <div class="line">                                              <span class="stringliteral">&quot;my_score.xml&quot;</span>);</div>
 <div class="line">...</div>
@@ -145,19 +147,52 @@ $(document).ready(function(){initNavTree('classMusicXmlOptions.html','');});
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7">fix_beams</a> (bool value)</td></tr>
-<tr class="separator:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff534c8238205677ef09280daf98f5d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#aff534c8238205677ef09280daf98f5d9">use_default_clefs</a> (bool value)</td></tr>
-<tr class="separator:aff534c8238205677ef09280daf98f5d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5deb88f8d7aa69a1a658429e54bc9f5d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams</a> ()</td></tr>
 <tr class="separator:a5deb88f8d7aa69a1a658429e54bc9f5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9a44ce0d15b11be71b15d105e3af214"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#ab9a44ce0d15b11be71b15d105e3af214">use_default_clefs</a> ()</td></tr>
 <tr class="separator:ab9a44ce0d15b11be71b15d105e3af214"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#a619be98a1ead8e0e3a4e4bc2e41882c7">fix_beams</a> (bool value)</td></tr>
+<tr class="separator:a619be98a1ead8e0e3a4e4bc2e41882c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff534c8238205677ef09280daf98f5d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMusicXmlOptions.html#aff534c8238205677ef09280daf98f5d9">use_default_clefs</a> (bool value)</td></tr>
+<tr class="separator:aff534c8238205677ef09280daf98f5d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a2f36ce40935e471bcaa6c75d4f142274"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2f36ce40935e471bcaa6c75d4f142274"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>LibraryScope</b></td></tr>
+<tr class="separator:a2f36ce40935e471bcaa6c75d4f142274"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a5deb88f8d7aa69a1a658429e54bc9f5d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MusicXmlOptions::fix_beams </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns current setting for the 'fix_beams' option. </p>
+
+</div>
+</div>
 <a class="anchor" id="a619be98a1ead8e0e3a4e4bc2e41882c7"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MusicXmlOptions::fix_beams </td>
@@ -167,30 +202,46 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <p>Sets the value for 'fix_beams' option. When true, if beam information is not congruent with note type, the importer will fix the beam. </p>
 
 </div>
 </div>
-<a class="anchor" id="a5deb88f8d7aa69a1a658429e54bc9f5d"></a>
+<a class="anchor" id="ab9a44ce0d15b11be71b15d105e3af214"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool MusicXmlOptions::fix_beams </td>
+          <td class="memname">bool MusicXmlOptions::use_default_clefs </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Returns current setting for the 'fix_beams' option. </p>
+<p>Returns current setting for the 'use_default_clefs' option. </p>
 
 </div>
 </div>
 <a class="anchor" id="aff534c8238205677ef09280daf98f5d9"></a>
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void MusicXmlOptions::use_default_clefs </td>
@@ -200,24 +251,13 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <p>Sets the value for 'use_default_clefs' option. When true, if an score part has pitched notes but the clef is missing, the importer will assume a G or an F4 clef, depending on notes pitch range. </p>
-
-</div>
-</div>
-<a class="anchor" id="ab9a44ce0d15b11be71b15d105e3af214"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool MusicXmlOptions::use_default_clefs </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Returns current setting for the 'use_default_clefs' option. </p>
 
 </div>
 </div>
@@ -227,7 +267,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

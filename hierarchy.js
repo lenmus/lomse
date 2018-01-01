@@ -1,5 +1,6 @@
 var hierarchy =
 [
+    [ "DiatonicPitch", "classDiatonicPitch.html", null ],
     [ "DocCommand", "classDocCommand.html", [
       [ "DocCmdComposite", "classDocCmdComposite.html", null ],
       [ "DocCmdSimple", "classDocCmdSimple.html", [
@@ -24,9 +25,11 @@ var hierarchy =
           [ "CmdInsertStaffObj", "classCmdInsertStaffObj.html", null ]
         ] ],
         [ "CmdJoinBeam", "classCmdJoinBeam.html", null ],
+        [ "CmdMoveObjectPoint", "classCmdMoveObjectPoint.html", null ],
         [ "CmdSelection", "classCmdSelection.html", null ]
       ] ]
     ] ],
+    [ "DocCommandExecuter", "classDocCommandExecuter.html", null ],
     [ "EnableSharedFromThis", null, [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
@@ -50,7 +53,9 @@ var hierarchy =
     [ "EventNotifier", "classEventNotifier.html", [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
+    [ "FPitch", "classFPitch.html", null ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
+    [ "MidiPitch", "classMidiPitch.html", null ],
     [ "MusicXmlOptions", "classMusicXmlOptions.html", null ],
     [ "Observable", "classObservable.html", [
       [ "Interactor", "classInteractor.html", null ]
@@ -62,5 +67,7 @@ var hierarchy =
     [ "Request", "classRequest.html", [
       [ "RequestDynamic", "classRequestDynamic.html", null ],
       [ "RequestFont", "classRequestFont.html", null ]
-    ] ]
+    ] ],
+    [ "UndoElement", "classUndoElement.html", null ],
+    [ "UPitch", "classUPitch.html", null ]
 ];

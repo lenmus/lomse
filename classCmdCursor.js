@@ -17,5 +17,9 @@ var classCmdCursor =
     [ "CmdCursor", "classCmdCursor.html#a53c56633153e9d43679907124b568404", null ],
     [ "CmdCursor", "classCmdCursor.html#ad467109ca620d5c881416983f14c51b0", null ],
     [ "CmdCursor", "classCmdCursor.html#a17311885bb708fffb61a83b6acb550e2", null ],
-    [ "CmdCursor", "classCmdCursor.html#a91b8348d36c7dc352249c03fde12c2f6", null ]
+    [ "CmdCursor", "classCmdCursor.html#a91b8348d36c7dc352249c03fde12c2f6", null ],
+    [ "~CmdCursor", "classCmdCursor.html#a1db7986fdedfe9d41d558629ba09b7ed", null ],
+    [ "get_cursor_update_policy", "classCmdCursor.html#a06c379dc51e2982f185cdc72693767e9", null ],
+    [ "get_selection_update_policy", "classCmdCursor.html#a3b3653268195b7dc434d28e3bd3cf423", null ],
+    [ "get_undo_policy", "classCmdCursor.html#a6e08c9e6335207228bdd9bc9746845cf", null ]
 ];

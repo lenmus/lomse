@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -130,13 +130,13 @@ The high-level API: edition commands</h1>
 <p>All edition commands are objects derived from base abstract class <a class="el" href="classDocCommand.html">DocCommand</a>, and they work by modifying the <em>Internal Model</em> tree, either by inserting or removing elements or by modifying the attributes of an element. For instance, <a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> is a command for inserting a block level object. This command, as well as most commands for inserting new elements, require a parameter with the source code of the element to insert. Currently the source code for all edition commands must be in LMD format.</p>
 <p>Executing a command is just invoking <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and passing the command to execute, for instance:</p>
 <div class="fragment"><div class="line">    <span class="comment">//insert a paragraph and an empty music score</span></div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keywordtype">string</span> src = <span class="stringliteral">&quot;&lt;para&gt;This is a short paragraph&lt;/para&gt;&quot;</span>;</div>
-<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add paragraph&quot;</span>) );</div>
+<div class="line">        SpInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add paragraph&quot;</span>) );</div>
 <div class="line"></div>
 <div class="line">        src = <span class="stringliteral">&quot;&lt;ldpmusic&gt;(score (vers 2.0)(instrument (musicData)))&lt;/ldpmusic&gt;&quot;</span>;</div>
-<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add empty music score&quot;</span>) );</div>
+<div class="line">        SpInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add empty music score&quot;</span>) );</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="edit-overview-undo"></a>
@@ -216,7 +216,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

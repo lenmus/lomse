@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classEventInfo.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -139,12 +139,13 @@ Inheritance diagram for EventInfo:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2f573591ded0d80d168aa6f14578f707"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2f573591ded0d80d168aa6f14578f707"></a>
-virtual <a class="el" href="classObservable.html">Observable</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>get_source</b> ()</td></tr>
+<tr class="memitem:a0334d24f1097988d5320a90309815104"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a0334d24f1097988d5320a90309815104">~EventInfo</a> ()</td></tr>
+<tr class="separator:a0334d24f1097988d5320a90309815104"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f573591ded0d80d168aa6f14578f707"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classObservable.html">Observable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a2f573591ded0d80d168aa6f14578f707">get_source</a> ()</td></tr>
 <tr class="separator:a2f573591ded0d80d168aa6f14578f707"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a72874275db0eecbfdc4d322bc1422b4d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a72874275db0eecbfdc4d322bc1422b4d"></a>
-<a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a>&#160;</td><td class="memItemRight" valign="bottom"><b>get_event_type</b> ()</td></tr>
+<tr class="memitem:a72874275db0eecbfdc4d322bc1422b4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a72874275db0eecbfdc4d322bc1422b4d">get_event_type</a> ()</td></tr>
 <tr class="separator:a72874275db0eecbfdc4d322bc1422b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">For checking event type</div></td></tr>
 <tr class="memitem:af04cb1af87993e38a6bda4724b4e8524"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af04cb1af87993e38a6bda4724b4e8524"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_view_level_event</b> ()</td></tr>
 <tr class="separator:af04cb1af87993e38a6bda4724b4e8524"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,6 +155,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_UI_event</b
 <tr class="memitem:a0a67b7c14c9343afab96e44c36c75993"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0a67b7c14c9343afab96e44c36c75993"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_window_event</b> ()</td></tr>
 <tr class="separator:a0a67b7c14c9343afab96e44c36c75993"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
+<tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59f898e05e6ef815bf6cb5ddcaeb6755"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a59f898e05e6ef815bf6cb5ddcaeb6755"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_mouse_event</b> ()</td></tr>
 <tr class="separator:a59f898e05e6ef815bf6cb5ddcaeb6755"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,13 +216,91 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_level_event</b
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_modified_event</b> ()</td></tr>
 <tr class="separator:a5bc12138d33efc9d28e8fdd25e2c2ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a0334d24f1097988d5320a90309815104"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual EventInfo::~EventInfo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a72874275db0eecbfdc4d322bc1422b4d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> EventInfo::get_event_type </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the event type. It is a value from enmun <a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="a2f573591ded0d80d168aa6f14578f707"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classObservable.html">Observable</a>* EventInfo::get_source </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns a pointer to the <a class="el" href="classObservable.html">Observable</a> object (an ImoContentObj) related to the event. It is either the mouse pointed object or the first ancestor of type ImoContentObj in the internal model hierarchy. If the event is not related to an <a class="el" href="classObservable.html">Observable</a> object it returns nullptr. </p>
+
+<p>Reimplemented in <a class="el" href="classEventMouse.html#aef97b3490945ff7774d95b9388d0ea34">EventMouse</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventInfo.html">EventInfo</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

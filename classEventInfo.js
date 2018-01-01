@@ -23,6 +23,7 @@ var classEventInfo =
     [ "is_show_contextual_menu_event", "classEventInfo.html#a91c0fe2865477f1d3b5973e053179267", null ],
     [ "is_stop_playback_event", "classEventInfo.html#a6063de63918a8e6fdb4cd0df74ac8aa6", null ],
     [ "is_update_UI_event", "classEventInfo.html#acf5cb28901a26f23b086de3e2e144549", null ],
+    [ "is_update_viewport_event", "classEventInfo.html#a3a602cd33472edbe1ad3e4f747dcc361", null ],
     [ "is_update_window_event", "classEventInfo.html#a0a67b7c14c9343afab96e44c36c75993", null ],
     [ "is_view_level_event", "classEventInfo.html#af04cb1af87993e38a6bda4724b4e8524", null ]
 ];

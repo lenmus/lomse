@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classDocCmdComposite.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -108,6 +108,7 @@ $(document).ready(function(){initNavTree('classDocCmdComposite.html','');});
 
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classDocCmdComposite-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">DocCmdComposite Class Reference</div>  </div>
@@ -127,21 +128,298 @@ Inheritance diagram for DocCmdComposite:</div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract class, base for all composite commands. </p>
 </div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a1fdd3d58f52985e89499e6c9ec89afdc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#a1fdd3d58f52985e89499e6c9ec89afdc">DocCmdComposite</a> (const string &amp;name)</td></tr>
+<tr class="separator:a1fdd3d58f52985e89499e6c9ec89afdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4bb34d9a2245adf26e6da74062857ee"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#ac4bb34d9a2245adf26e6da74062857ee">~DocCmdComposite</a> ()</td></tr>
+<tr class="separator:ac4bb34d9a2245adf26e6da74062857ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa21db253f7e9c18a136cd8f0f37170ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#aa21db253f7e9c18a136cd8f0f37170ab">add_child_command</a> (<a class="el" href="classDocCommand.html">DocCommand</a> *pCmd)</td></tr>
+<tr class="separator:aa21db253f7e9c18a136cd8f0f37170ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1d254dc389c9ad392d6773d3f3c37d2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#aa1d254dc389c9ad392d6773d3f3c37d2">get_cursor_update_policy</a> ()</td></tr>
+<tr class="separator:aa1d254dc389c9ad392d6773d3f3c37d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f0ae227191db1c86b37748316fcbb86"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#a1f0ae227191db1c86b37748316fcbb86">get_undo_policy</a> ()</td></tr>
+<tr class="separator:a1f0ae227191db1c86b37748316fcbb86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4692f53236a29d27600e3fa441d809e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#af4692f53236a29d27600e3fa441d809e">get_selection_update_policy</a> ()</td></tr>
+<tr class="separator:af4692f53236a29d27600e3fa441d809e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9962cb51059cd8999dd7f823ce60c81"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#aa9962cb51059cd8999dd7f823ce60c81">is_composite</a> ()</td></tr>
+<tr class="separator:aa9962cb51059cd8999dd7f823ce60c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
+<tr class="memitem:a9976bc78278fdd1741bfb42fb5f255fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#a9976bc78278fdd1741bfb42fb5f255fe">mark_as_no_reversible</a> ()</td></tr>
+<tr class="separator:a9976bc78278fdd1741bfb42fb5f255fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae206817e6d052e222048133bb712ef0b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#ae206817e6d052e222048133bb712ef0b">mark_as_no_recordable</a> ()</td></tr>
+<tr class="separator:ae206817e6d052e222048133bb712ef0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0239333e2adb5f6b9dd35be595246b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCmdComposite.html#a1c0239333e2adb5f6b9dd35be595246b">mark_as_target_set_in_constructor</a> ()</td></tr>
+<tr class="separator:a1c0239333e2adb5f6b9dd35be595246b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
+<tr class="memitem:a242c0e33ef744f0b1958ac0c4176f823 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">~DocCommand</a> ()</td></tr>
+<tr class="separator:a242c0e33ef744f0b1958ac0c4176f823 inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
 <tr class="separator:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83621dd7d28d0a6d474bfc14cbe5397d inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible</a> ()</td></tr>
+<tr class="separator:a83621dd7d28d0a6d474bfc14cbe5397d inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1e21dc807ca0d323e046f7da6ac9ecf inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">is_recordable</a> ()</td></tr>
+<tr class="separator:ac1e21dc807ca0d323e046f7da6ac9ecf inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
 <tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_types_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
+<tr class="memitem:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> </td></tr>
+<tr class="separator:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a7a5b650d7d0b6af7aba50ca0e4173b inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">ECmdUndoPolicy</a> </td></tr>
+<tr class="separator:a0a7a5b650d7d0b6af7aba50ca0e4173b inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> </td></tr>
+<tr class="separator:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a1fdd3d58f52985e89499e6c9ec89afdc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DocCmdComposite::DocCmdComposite </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac4bb34d9a2245adf26e6da74062857ee"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual DocCmdComposite::~DocCmdComposite </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="aa21db253f7e9c18a136cd8f0f37170ab"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DocCmdComposite::add_child_command </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classDocCommand.html">DocCommand</a> *&#160;</td>
+          <td class="paramname"><em>pCmd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a child command. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa1d254dc389c9ad392d6773d3f3c37d2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int DocCmdComposite::get_cursor_update_policy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns a value from <a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> that indicates the update policy followed by this command. </p>
+
+<p>Implements <a class="el" href="classDocCommand.html#a23cf8b2e1f6790bf5ae85e24349441f2">DocCommand</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af4692f53236a29d27600e3fa441d809e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int DocCmdComposite::get_selection_update_policy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns a value from <a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> that indicates the undo policy followed by this command. </p>
+
+<p>Implements <a class="el" href="classDocCommand.html#a9018e1487527f436d5f0ac53b907d4d4">DocCommand</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1f0ae227191db1c86b37748316fcbb86"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int DocCmdComposite::get_undo_policy </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns a value from <a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b" title="This enum describes the available undo policies for commands. ">ECmdUndoPolicy</a> that indicates the undo policy followed by this command. </p>
+
+<p>Implements <a class="el" href="classDocCommand.html#a1676ed87380eb546cbbd1f4fdc37af16">DocCommand</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa9962cb51059cd8999dd7f823ce60c81"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool DocCmdComposite::is_composite </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns <span class="literal">true</span> if the command is composite. </p>
+
+<p>Implements <a class="el" href="classDocCommand.html#ab5d4341275844b9a597064effc09442b">DocCommand</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae206817e6d052e222048133bb712ef0b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DocCmdComposite::mark_as_no_recordable </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Change default settings for this command </p>
+
+</div>
+</div>
+<a class="anchor" id="a9976bc78278fdd1741bfb42fb5f255fe"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DocCmdComposite::mark_as_no_reversible </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Change default settings for this command </p>
+
+</div>
+</div>
+<a class="anchor" id="a1c0239333e2adb5f6b9dd35be595246b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DocCmdComposite::mark_as_target_set_in_constructor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Change default settings for this command </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocCmdComposite.html">DocCmdComposite</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

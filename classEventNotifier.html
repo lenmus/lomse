@@ -97,7 +97,7 @@ $(document).ready(function(){initNavTree('classEventNotifier.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -131,20 +131,17 @@ Inheritance diagram for EventNotifier:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a09e980febe20825e3ed63ffe5f8a844c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a09e980febe20825e3ed63ffe5f8a844c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>EventNotifier</b> (EventsDispatcher *dispatcher)</td></tr>
+<tr class="memitem:a09e980febe20825e3ed63ffe5f8a844c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a09e980febe20825e3ed63ffe5f8a844c">EventNotifier</a> (EventsDispatcher *dispatcher)</td></tr>
 <tr class="separator:a09e980febe20825e3ed63ffe5f8a844c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4e1b9225b3ea84cb88cef2aa468ea09"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa4e1b9225b3ea84cb88cef2aa468ea09"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>notify_observers</b> (<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent, <a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
+<tr class="memitem:ad34e980358eea3218183bdb49bcfac64"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ad34e980358eea3218183bdb49bcfac64">~EventNotifier</a> ()</td></tr>
+<tr class="separator:ad34e980358eea3218183bdb49bcfac64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4e1b9225b3ea84cb88cef2aa468ea09"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#aa4e1b9225b3ea84cb88cef2aa468ea09">notify_observers</a> (<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent, <a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
 <tr class="separator:aa4e1b9225b3ea84cb88cef2aa468ea09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d6c570059b544f93f194d193dd67c78"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8d6c570059b544f93f194d193dd67c78"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>remove_observer</b> (<a class="el" href="classObserver.html">Observer</a> *observer)</td></tr>
+<tr class="memitem:a8d6c570059b544f93f194d193dd67c78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a8d6c570059b544f93f194d193dd67c78">remove_observer</a> (<a class="el" href="classObserver.html">Observer</a> *observer)</td></tr>
 <tr class="separator:a8d6c570059b544f93f194d193dd67c78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8990a5faa47e3c605374ed4fd2b3e094"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8990a5faa47e3c605374ed4fd2b3e094"></a>
-<a class="el" href="classObserver.html">Observer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>add_observer_for</b> (<a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
+<tr class="memitem:a8990a5faa47e3c605374ed4fd2b3e094"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classObserver.html">Observer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a8990a5faa47e3c605374ed4fd2b3e094">add_observer_for</a> (<a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
 <tr class="separator:a8990a5faa47e3c605374ed4fd2b3e094"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7366bed1d2b2895a28b7c524dbe5c53"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad7366bed1d2b2895a28b7c524dbe5c53"></a>
-<a class="el" href="classObserver.html">Observer</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>add_observer_for_child</b> (<a class="el" href="classObservable.html">Observable</a> *parent, int childType, ImoId childId)</td></tr>
+<tr class="memitem:ad7366bed1d2b2895a28b7c524dbe5c53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classObserver.html">Observer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ad7366bed1d2b2895a28b7c524dbe5c53">add_observer_for_child</a> (<a class="el" href="classObservable.html">Observable</a> *parent, int childType, ImoId childId)</td></tr>
 <tr class="separator:ad7366bed1d2b2895a28b7c524dbe5c53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
@@ -153,13 +150,163 @@ Friends</h2></td></tr>
 class&#160;</td><td class="memItemRight" valign="bottom"><b>Observable</b></td></tr>
 <tr class="separator:a84c3bf340f4c5e56e2a710eb13cccee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a09e980febe20825e3ed63ffe5f8a844c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">EventNotifier::EventNotifier </td>
+          <td>(</td>
+          <td class="paramtype">EventsDispatcher *&#160;</td>
+          <td class="paramname"><em>dispatcher</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad34e980358eea3218183bdb49bcfac64"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual EventNotifier::~EventNotifier </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a8990a5faa47e3c605374ed4fd2b3e094"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classObserver.html">Observer</a>* EventNotifier::add_observer_for </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classObservable.html">Observable</a> *&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add <a class="el" href="classObserver.html">Observer</a> for the given event generator target. </p>
+
+</div>
+</div>
+<a class="anchor" id="ad7366bed1d2b2895a28b7c524dbe5c53"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classObserver.html">Observer</a>* EventNotifier::add_observer_for_child </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classObservable.html">Observable</a> *&#160;</td>
+          <td class="paramname"><em>parent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>childType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>childId</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Add <a class="el" href="classObserver.html">Observer</a> for events generated by the object whose ID and type are passed as parameters. The type must be a value from enum <a class="el" href="classObservable.html#aeba2229fd6aa952b9d2e67b22444682e" title="This enum describes the valid observable targets. ">Observable::EObservedChild</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa4e1b9225b3ea84cb88cef2aa468ea09"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool EventNotifier::notify_observers </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a>&#160;</td>
+          <td class="paramname"><em>pEvent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classObservable.html">Observable</a> *&#160;</td>
+          <td class="paramname"><em>target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sends the event to all objects observing the event generator object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8d6c570059b544f93f194d193dd67c78"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void EventNotifier::remove_observer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classObserver.html">Observer</a> *&#160;</td>
+          <td class="paramname"><em>observer</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Remove an <a class="el" href="classObserver.html">Observer</a>. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventNotifier.html">EventNotifier</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

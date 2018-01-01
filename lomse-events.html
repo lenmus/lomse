@@ -89,7 +89,7 @@ $(document).ready(function(){initNavTree('lomse-events.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(8)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -167,13 +167,13 @@ Handling events</h1>
 <li><code>pHandler</code> is a pointer to an object derived from <a class="el" href="classEventHandler.html">EventHandler</a> that will handle the event. It must implement method <code>handle_event()</code>.</li>
 </ul>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">//connect the View with the window buffer</span></div>
 <div class="line">    spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">//register to receive some events</span></div>
-<div class="line">    spInteractor-&gt;add_event_handler(k_update_window_event, <span class="keyword">this</span>, wrapper_update_window);</div>
+<div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>, <span class="keyword">this</span>, wrapper_update_window);</div>
 <div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398">k_do_play_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
@@ -248,7 +248,7 @@ Handling requests</h1>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> MyApp::on_lomse_request(<a class="code" href="classRequest.html">Request</a>* pRequest)</div>
 <div class="line">{</div>
-<div class="line">    <span class="keywordtype">int</span> type = pRequest-&gt;get_request_type();</div>
+<div class="line">    <span class="keywordtype">int</span> type = pRequest-&gt;<a class="code" href="classRequest.html#aa1cef2d8dbdc04772277ce2ddeda6687">get_request_type</a>();</div>
 <div class="line">    <span class="keywordflow">switch</span> (type)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keywordflow">case</span> k_dynamic_content_request:</div>
@@ -276,7 +276,7 @@ Handling requests</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Dec 30 2017 15:52:53 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

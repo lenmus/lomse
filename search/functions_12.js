@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_7epresenter',['~Presenter',['../classPresenter.html#a07b9bfdb69702b53e0797001e242fa9f',1,'Presenter']]]
+  ['view_5fneeds_5frepaint',['view_needs_repaint',['../classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636',1,'Interactor']]]
 ];

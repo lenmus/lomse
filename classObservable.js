@@ -1,9 +1,11 @@
 var classObservable =
 [
-    [ "k_root", "classObservable.html#a236b94596401e5c8d89ab3b0edea7eaca0ce1be759d2081d0bbab788643f4b9c3", null ],
-    [ "k_control", "classObservable.html#a236b94596401e5c8d89ab3b0edea7eaca6a46d2011be90fbc32991b41b8a5705e", null ],
-    [ "k_gmo", "classObservable.html#a236b94596401e5c8d89ab3b0edea7eacaca4957784e6e1934ef78f2dbac2df665", null ],
-    [ "k_imo", "classObservable.html#a236b94596401e5c8d89ab3b0edea7eaca9ca1ddc7cd61419f5b840f31776392f0", null ],
+    [ "EObservedChild", "classObservable.html#aeba2229fd6aa952b9d2e67b22444682e", [
+      [ "k_root", "classObservable.html#aeba2229fd6aa952b9d2e67b22444682ea0ce1be759d2081d0bbab788643f4b9c3", null ],
+      [ "k_control", "classObservable.html#aeba2229fd6aa952b9d2e67b22444682ea6a46d2011be90fbc32991b41b8a5705e", null ],
+      [ "k_gmo", "classObservable.html#aeba2229fd6aa952b9d2e67b22444682eaca4957784e6e1934ef78f2dbac2df665", null ],
+      [ "k_imo", "classObservable.html#aeba2229fd6aa952b9d2e67b22444682ea9ca1ddc7cd61419f5b840f31776392f0", null ]
+    ] ],
     [ "~Observable", "classObservable.html#a42f551d4d64ffa48a2ea8d7f0a4e42d4", null ],
     [ "add_event_handler", "classObservable.html#aa350bb80a827421d21cb68ee3131f61f", null ],
     [ "add_event_handler", "classObservable.html#a9ab7b17ee247743097ba03b5b71188b9", null ],

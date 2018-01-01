@@ -1,13 +1,9 @@
 var searchData=
 [
-  ['overview',['Overview',['../index.html',1,'']]],
-  ['observable',['Observable',['../classObservable.html',1,'']]],
-  ['observer',['Observer',['../classObserver.html',1,'']]],
-  ['on_5fdocument_5fupdated',['on_document_updated',['../classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0',1,'Interactor']]],
-  ['on_5fmouse_5fbutton_5fdown',['on_mouse_button_down',['../classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02',1,'Interactor']]],
-  ['on_5fmouse_5fbutton_5fup',['on_mouse_button_up',['../classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8',1,'Interactor']]],
-  ['on_5fmouse_5fenter_5fwindow',['on_mouse_enter_window',['../classInteractor.html#a730f04bba76db217ff36512f63600470',1,'Interactor']]],
-  ['on_5fmouse_5fleave_5fwindow',['on_mouse_leave_window',['../classInteractor.html#afbfb111029c260532f849362bf3b15f9',1,'Interactor']]],
-  ['on_5fmouse_5fmove',['on_mouse_move',['../classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471',1,'Interactor']]],
-  ['open_5fdocument',['open_document',['../classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e',1,'LomseDoorway::open_document(int viewType, const string &amp;filename, ostream &amp;reporter=cout)'],['../classLomseDoorway.html#a2dad5f6bcce3d56e363d176bfc60f3f9',1,'LomseDoorway::open_document(int viewType, LdpReader &amp;reader, ostream &amp;reporter=cout)']]]
+  ['new_5fdocument',['new_document',['../classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948',1,'LomseDoorway::new_document(int viewType)'],['../classLomseDoorway.html#aeb01dedc72fc5e973e3dcf65a26a68ed',1,'LomseDoorway::new_document(int viewType, const string &amp;source, int format, ostream &amp;reporter=cout)']]],
+  ['new_5fviewport',['new_viewport',['../classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8',1,'Interactor']]],
+  ['notated_5faccidentals_5ffor',['notated_accidentals_for',['../classFPitch.html#a917d10be06d698863d4b2332d8d3f3d5',1,'FPitch']]],
+  ['notify',['notify',['../classObserver.html#a4835f8e1467d41d585c864cd189f3e64',1,'Observer']]],
+  ['notify_5fobservers',['notify_observers',['../classEventNotifier.html#aa4e1b9225b3ea84cb88cef2aa468ea09',1,'EventNotifier']]],
+  ['num_5faccidentals',['num_accidentals',['../classFPitch.html#a69af4ef82925c858b0de75a0d0c0d92c',1,'FPitch']]]
 ];

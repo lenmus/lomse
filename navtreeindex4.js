@@ -1,0 +1,19 @@
+var NAVTREEINDEX4 =
+{
+"sound-generation.html#sound-generation-overview":[0,4,0],
+"tasks-page.html":[0,5],
+"tasks-page.html#gui-interaction":[0,5,0],
+"tasks-page.html#task-data-entry":[0,5,1,6],
+"tasks-page.html#task-drag-view":[0,5,1,0],
+"tasks-page.html#task-move-handler":[0,5,1,5],
+"tasks-page.html#task-move-object":[0,5,1,4],
+"tasks-page.html#task-only-clicks":[0,5,1,1],
+"tasks-page.html#task-selection":[0,5,1,2],
+"tasks-page.html#task-selection-rectangle":[0,5,1,3],
+"tasks-page.html#tasks-overview":[0,5,1],
+"todo.html":[6],
+"viewport-overview.html":[0,7],
+"viewport-overview.html#lomse-units":[0,7,0],
+"viewport-overview.html#scale-factor":[0,7,1],
+"viewport-overview.html#viewport-concept":[0,7,2]
+};

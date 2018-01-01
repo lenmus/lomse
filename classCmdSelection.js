@@ -7,5 +7,9 @@ var classCmdSelection =
       [ "k_clear", "classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ecaa9f6dc21250c8f90aa76b0467494eaac", null ]
     ] ],
     [ "CmdSelection", "classCmdSelection.html#a9febfd6fdb356120b28f51758282db27", null ],
-    [ "CmdSelection", "classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788", null ]
+    [ "CmdSelection", "classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788", null ],
+    [ "~CmdSelection", "classCmdSelection.html#a4d3b221348da7149601c497622854fa0", null ],
+    [ "get_cursor_update_policy", "classCmdSelection.html#ab3762e6c702bf6a856155c3b1f63b3d9", null ],
+    [ "get_selection_update_policy", "classCmdSelection.html#a10fc43547716eab76836ee701868296e", null ],
+    [ "get_undo_policy", "classCmdSelection.html#a803b22f82ca8949e7445837d6be7e25f", null ]
 ];

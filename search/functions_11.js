@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['zoom_5ffit_5ffull',['zoom_fit_full',['../classInteractor.html#ac83345221209221be48169f01a4cd253',1,'Interactor']]],
-  ['zoom_5ffit_5fwidth',['zoom_fit_width',['../classInteractor.html#a8d486a75231279d13370cb9744f8cf11',1,'Interactor']]],
-  ['zoom_5fin',['zoom_in',['../classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222',1,'Interactor']]],
-  ['zoom_5fout',['zoom_out',['../classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96',1,'Interactor']]]
+  ['undo',['undo',['../classDocCommandExecuter.html#a2bfb6f697dc51f54fba3a12cdcfd7d58',1,'DocCommandExecuter']]],
+  ['undo_5fstack_5fsize',['undo_stack_size',['../classDocCommandExecuter.html#a689e4964e29d906a21dccae654c06a11',1,'DocCommandExecuter']]],
+  ['undoelement',['UndoElement',['../classUndoElement.html#a1548d1d6a1663757a393f3ec94e094f7',1,'UndoElement']]],
+  ['upitch',['UPitch',['../classUPitch.html#a9e0527a6405b469bc5a6ce7a0ef1aa46',1,'UPitch']]],
+  ['use_5fdefault_5fclefs',['use_default_clefs',['../classMusicXmlOptions.html#ab9a44ce0d15b11be71b15d105e3af214',1,'MusicXmlOptions::use_default_clefs()'],['../classMusicXmlOptions.html#aff534c8238205677ef09280daf98f5d9',1,'MusicXmlOptions::use_default_clefs(bool value)']]]
 ];
