@@ -1,4 +1,3 @@
-# lomse-api
 Sources for Lomse API documentation
 ========================================
 
@@ -23,21 +22,21 @@ the headers of Lomse library. But not all header files are included in the
 documentation, only those explicitly referenced in Doxygen configuration
 file, at `Lomse/docs/api/doxyfile`, in the **`INPUT`** configuration option.
 An example follows:
-    ```
-	INPUT     = mainpages \
-				../../include/lomse_command.h \
-				../../include/lomse_doorway.h \
-				../../include/lomse_events.h \
-				../../include/lomse_im_attributes.h \
-				../../include/lomse_import_options.h \
-				../../include/lomse_interactor.h \
-				../../include/lomse_internal_model.h \
-				../../include/lomse_pitch.h \
-				../../include/lomse_pixel_formats.h \
-				../../include/lomse_presenter.h \
-				examples \
-		        groups
-    ```
+```
+INPUT     = mainpages \
+			../../include/lomse_command.h \
+			../../include/lomse_doorway.h \
+			../../include/lomse_events.h \
+			../../include/lomse_im_attributes.h \
+			../../include/lomse_import_options.h \
+			../../include/lomse_interactor.h \
+			../../include/lomse_internal_model.h \
+			../../include/lomse_pitch.h \
+			../../include/lomse_pixel_formats.h \
+			../../include/lomse_presenter.h \
+			examples \
+	        groups
+```
 
 Apart from documentation in header files, there are specific topic
 documents maintained in folder `Lomse/docs/api/mainpages/`.

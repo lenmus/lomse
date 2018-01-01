@@ -328,9 +328,9 @@ public:
 
 
 
-        //interface to View
-        /// @name Interface to View
-        //@{
+    //interface to View
+    /// @name Interface to View
+    //@{
 
     /** Invoking this method forces Lomse to render again the View and, therefore,
         the rendering buffer gets updated. After doing it, Lomse <b>does not</b>
@@ -457,8 +457,6 @@ public:
         @param option The option to set or reset. Valid values for this param are
             defined by enum #ERenderOptions
         @param value @TRUE for enabling the option or @FALSE for disabling it.
-
-        @todo Document enum ERenderOptions
 
         Example:
 

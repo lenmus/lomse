@@ -126,16 +126,21 @@ protected:
     EventInfo(EEventType type) : m_type(type) {}
 
 public:
+    /// Destructor
     virtual ~EventInfo() {}
 
+    /** Returns a pointer to the Observable object (an ImoContentObj) related to the
+        event. It is either the mouse pointed object or the first ancestor of type
+        ImoContentObj in the internal model hierarchy. If the event is not related
+        to an Observable object it returns nullptr. */
     virtual Observable* get_source() { return nullptr; }
 
 
-    //classification
-
+    /// Returns the event type. It is a value from enmun #EEventType.
     inline EEventType get_event_type() { return m_type; }
 
-        //view level events
+    /// @name For checking event type
+    //@{
     inline bool is_view_level_event() { return m_type >= k_view_level_event
                                             && m_type < k_doc_level_event;
                                       }
@@ -143,6 +148,7 @@ public:
                                        || m_type == k_pointed_object_change;
                                      }
     inline bool is_update_window_event() { return m_type == k_update_window_event; }
+    inline bool is_update_viewport_event() { return m_type == k_update_viewport_event; }
     inline bool is_mouse_event() { return m_type == k_on_click_event
                                        || m_type == k_mouse_in_event
                                        || m_type == k_mouse_out_event
@@ -173,6 +179,7 @@ public:
         //document level events
     inline bool is_doc_level_event() { return m_type >= k_doc_level_event; }
     inline bool is_doc_modified_event() { return m_type == k_doc_modified_event; }
+    //@}
 
 };
 
@@ -192,11 +199,13 @@ protected:
    Document* m_pDoc;
 
 public:
+    /// Constructor
     EventDoc(EEventType type, Document* pDoc)
         : EventInfo(type)
         , m_pDoc(pDoc)
     {
     }
+    /// Destructor
     virtual ~EventDoc() {}
 
     ///Returns a ptr. to the Document object in which the event is generated.
@@ -225,6 +234,7 @@ protected:
     }
 
 public:
+    /// Destructor
     virtual ~EventView() {}
 
     /** Returns a weak pointer to the Interactor object managing the
@@ -318,11 +328,13 @@ protected:
     }
 
 public:
+    /// Constructor
     EventPaint(WpInteractor wpInteractor, VRect damagedRectangle)
         : EventView(k_update_window_event, wpInteractor)
         , m_damagedRectangle(damagedRectangle)
     {
     }
+    /// Destructor
     virtual ~EventPaint() {}
 
     /** Returns the damaged rectangle, that is, the rectangle that needs repaint. */
@@ -421,14 +433,14 @@ protected:
     Pixels m_y;
 
 public:
-    /**
-    */
+    /// Constructor
     EventUpdateViewport(WpInteractor wpInteractor, Pixels x, Pixels y)
         : EventView(k_update_viewport_event, wpInteractor)
         , m_x(x)
         , m_y(y)
     {
     }
+    /// Destructor
     virtual ~EventUpdateViewport() {}
 
     /** Returns the x coordinate (pixels) for the new viewport origin. */
@@ -539,6 +551,7 @@ protected:
     EventUpdateUI(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
+    /// Constructor
     EventUpdateUI(EEventType type, WpInteractor wpInteractor, WpDocument wpDoc,
                   SelectionSet* pSelection, DocCursor* pCursor)
         : EventView(type, wpInteractor)
@@ -548,11 +561,15 @@ public:
     {
     }
 
-    // accessors
+    /** Returns a ptr to current SelectionSet object, containg the information for
+        currently selected objects.    */
     inline SelectionSet* get_selection() { return m_pSelection; }
+
+    /** Returns a ptr to current DocCursor object, so that user application can
+        determine where is the cursor pointing.    */
     inline DocCursor* get_cursor() { return m_pCursor; }
 
-    ///Returns TRUE if the event is still valid and can be processed.
+    ///Returns @true if the event is still valid and can be processed.
     bool is_still_valid() {
         return !m_wpDoc.expired() && !m_wpInteractor.expired();
     }
@@ -640,6 +657,7 @@ protected:
     EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
+    /// Constructor
     EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id,
                Pixels x, Pixels y, unsigned flags, WpDocument wpDoc)
         : EventView(type, wpInteractor)
@@ -680,7 +698,7 @@ public:
         took place. The different flags are described by enum #EEventFlag    */
     inline unsigned get_flags() { return m_flags; }
 
-    ///Returns TRUE if the event is still valid and can be processed.
+    ///Returns @true if the event is still valid and can be processed.
     bool is_still_valid();
 
 };
@@ -694,7 +712,15 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 
 //---------------------------------------------------------------------------------------
 // EventPlayScore
-/** An object holding information about an score playback event. The event type informs
+//k_end_of_playback is generated in the sound thread and posted to main application
+//handler. It is never posted to the Document observers.
+//
+//Your app generates an application event and returns control to Lomse
+//
+//Your application, later, processes the application event and ask Interactor to inform
+//PlayerGui, for any housekeeping it has to do.
+//
+/** An object holding information about an score player control event. The event type informs
 	the user application about the specific action.
 
 	@warning Events of type <tt>k_end_of_playback_event</tt> are generated by the View
@@ -754,7 +780,7 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 	@endcode
 
 
-	<b>ScorePlayerCtrl sub-events</b>
+	<b>ScorePlayerCtrl generated events</b>
 
 	All other types for this event (<tt>k_do_play_score_event</tt>,
 	<tt>k_pause_score_event</tt> and <tt>k_stop_playback_event</tt>) are generated
@@ -762,7 +788,7 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 	particular, these event are generated by the ScorePlayerCtrl object associated to an
 	ImoScorePlayer object embedded in the Document. These events inform about a user
 	action on any of the buttons of the ScorePlayerCtrl, so that the user application can
-	perform the actions associated to these buttons. If your application is oriented
+	perform the expected actions associated to these buttons. If your application is oriented
 	to process scores in MusicXML format or regular LDP files without embedded controls
 	you will never receive these event types.
 
@@ -862,6 +888,7 @@ protected:
     EventPlayScore(EEventType evType) : EventView(evType, WpInteractor()) {}    //for unit tests
 
 public:
+    /// Constructor
     EventPlayScore(EEventType evType, WpInteractor wpInteractor, ImoScore* pScore,
                    PlayerGui* pPlayer)
         : EventView(evType, wpInteractor)
@@ -961,6 +988,7 @@ protected:
     std::list< pair<int, ImoId> > m_items;
 
 public:
+    /// Constructor
     EventScoreHighlight(WpInteractor wpInteractor, ImoId nScoreID)
         : EventView(k_highlight_event, wpInteractor)
         , m_nID(nScoreID)
@@ -1030,7 +1058,7 @@ public:
     /// Returns the ID of the Document object (ImoObj) affected by the event.
     inline ImoId get_imo_id() { return m_imoId; }
 
-    ///Returns TRUE if the event is still valid and can be processed.
+    ///Returns @true if the event is still valid and can be processed.
     bool is_still_valid() {
         return !m_wpDoc.expired() && !m_wpInteractor.expired();
     }
@@ -1166,6 +1194,7 @@ protected:
     ShapeId m_idx;      //affected shape or -1 if box
 
 public:
+    /// Constructor
     EventControlPointMoved(EEventType type, WpInteractor wpInteractor, GmoObj* pGmo,
                            int iHandler, UPoint uShift, WpDocument wpDoc);
 
@@ -1224,12 +1253,18 @@ protected:
     Request(int type) : m_type(type) {}
 
 public:
+    /// Destructor
     virtual ~Request() {}
 
-    //classification
+    /// Returns the request type. It is a value from enmun #ERequestType.
     inline int get_request_type() { return m_type; }
+
+    //classification
+    /// @name For checking the request type
+    ///@{
     inline bool is_dynamic_content_request() { return m_type == k_dynamic_content_request; }
     inline bool is_get_font_filename() { return m_type == k_get_font_filename; }
+    ///@}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1251,6 +1286,7 @@ protected:
     ImoObj* m_pObj;
 
 public:
+    /// Constructor
     RequestDynamic(Document* pDoc, ImoObj* pObj)
         : Request(k_dynamic_content_request)
         , m_pDoc(pDoc)
@@ -1259,8 +1295,12 @@ public:
     }
     ~RequestDynamic() {}
 
-    //getters
+    /** If the user application has not yet handled this request, this method returns
+        the ImoDynamic object that should be replaced. Otherwise, returns the replacement
+        ImoObj set by the user application.    */
     inline ImoObj* get_object() { return m_pObj; }
+
+    /// Returns a pointer to the Document to which this request refers to.    */
     inline Document* get_document() { return m_pDoc; }
 
     ///for setting requested data
@@ -1409,6 +1449,7 @@ protected:
     string m_fullName;
 
 public:
+    /// Constructor
     RequestFont(const string& fontname, bool bold, bool italic)
         : Request(k_get_font_filename)
         , m_fontname(fontname)
@@ -1423,9 +1464,9 @@ public:
     /** Returns the <i>fontname</i>. It can be either the face name (i.e.
         "Book Antiqua") or the familly name (i.e. "Liberation sans"). */
     inline const string& get_fontname() { return m_fontname; }
-    ///Returns TRUE is the font is requested in bold face. */
+    ///Returns @true is the font is requested in bold face. */
     inline bool get_bold() { return m_bold; }
-    ///Returns TRUE is the font is requested in italic style. */
+    ///Returns @true is the font is requested in italic style. */
     inline bool get_italic() { return m_italic; }
 
     /** User application should use this method for setting the requested data
@@ -1461,8 +1502,10 @@ protected:
 class EventHandler
 {
 public:
+    /// Destructor
 	virtual ~EventHandler() {}
 
+    /// Request for handling the passed event.
 	virtual void handle_event(SpEventInfo pEvent) = 0;
 };
 
@@ -1486,17 +1529,31 @@ protected:
     Observer(Observable* root, int childType, ImoId childId);
 
 public:
+    /// Destructor
     virtual ~Observer();
 
+    /** Returns the event generator object that is being
+        observed by this %Observer.    */
     Observable* target();
+
+    /** Notify the event pEvent to all registered objects observing events of the same
+        type than pEvent type.    */
     void notify(SpEventInfo pEvent);
+
+    ///@{
+    /// Register to receive notifications from this %Observer.
     void add_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
     void add_handler(int eventType, void* pThis,
                      void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_handler(int eventType, EventHandler* pHandler);
     void add_handler(int eventType, int childType, ImoId childId, EventHandler* pHandler);
+    ///@}
+
+    /** Remove a registered handler so that in future it will not be notified of
+        new events.    */
     void remove_handler(int evtType);
 
+    /** Returns the type of the observed event generator object.    */
     inline int get_observable_type() { return m_type; }
 
 protected:
@@ -1518,25 +1575,40 @@ protected:
 class Observable
 {
 public:
+    /// Destructor
 	virtual ~Observable() {}
 
+    /// Returns the EventNotifier object associated to this %Observable object.
 	virtual EventNotifier* get_event_notifier() = 0;
 
+    ///@{
+    /// Register a notification handler for an %Observer.
     virtual void add_event_handler(int eventType, EventHandler* pHandler);
     virtual void add_event_handler(int eventType, void* pThis,
                                    void (*pt2Func)(void* pObj, SpEventInfo event) );
     virtual void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
+    ///@}
 
-    //observing children
-    enum { k_root=0, k_control, k_gmo, k_imo, };    //child type
+    /// This enum describes the valid observable targets.
+    enum EObservedChild
+    {   k_root=0,       ///< The Document (in fact its root node)
+        k_control,      ///< A control (an ImoControl) object
+        k_gmo,          ///< A Graphic Model object (GmoObj)
+        k_imo,          ///< A child of the Document (an ImoObj) except ImoControl objs.
+    };
 
+    ///@{
+    /** Register an event handler for an %Observer. Parameter childType must be a
+        value from enum #EImoObjType.     */
     void add_event_handler(int childType, ImoId childId, int eventType,
                            EventHandler* pHandler);
     void add_event_handler(int childType, ImoId childId, int eventType, void* pThis,
                            void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_event_handler(int childType, ImoId childId, int eventType,
                            void (*pt2Func)(SpEventInfo event) );
+    ///@}
 
+    /// Returns a pointer to the observable child.    */
     virtual Observable* get_observable_child(int UNUSED(childType),
                                              ImoId UNUSED(childId))
     {
@@ -1556,13 +1628,20 @@ protected:
     std::list<Observer*> m_observers;
 
 public:
+    /// Constructor
     EventNotifier(EventsDispatcher* dispatcher) : m_pDispatcher(dispatcher) {}
+    /// Destructor
     virtual ~EventNotifier();
 
     //Event notification
+    /// Sends the event to all objects observing the event generator object.
     bool notify_observers(SpEventInfo pEvent, Observable* target);
+    /// Remove an Observer
     void remove_observer(Observer* observer);
+    /// Add Observer for the given event generator target.
     Observer* add_observer_for(Observable* target);
+    /** Add Observer for events generated by the object whose ID and type are passed
+        as parameters. The type must be a value from enum Observable::EObservedChild. */
     Observer* add_observer_for_child(Observable* parent, int childType, ImoId childId);
 
 protected:

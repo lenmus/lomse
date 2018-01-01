@@ -106,6 +106,9 @@ public:
         k_update_after_insertion,   ///< Update the cursor. Cursor must point to inserted object.
         k_refresh,                  ///< Refresh cursor. Pointed object is valid but other related info. could have changed.
     };
+
+    /** Returns a value from #ECmdCursorPolicy that indicates the update policy
+        followed by this command.    */
     virtual int get_cursor_update_policy() = 0;
 
     /// This enum describes the available undo policies for commands
@@ -114,6 +117,9 @@ public:
         k_undo_policy_partial_checkpoint,   ///< Undo is based on a partial checkpoint
         k_undo_policy_specific,             ///< Undo is implemented by the command
     };
+
+    /** Returns a value from #ECmdUndoPolicy that indicates the undo policy
+        followed by this command.    */
     virtual int get_undo_policy() = 0;
 
     /** This enum describes the available policies for updating the SelectionSet after
@@ -123,6 +129,9 @@ public:
         k_sel_clear,                ///< Clear the selection after executing the command.
         k_sel_command_specific,     ///< Specific. The command will do whatever is needed.
     };
+
+    /** Returns a value from #ECmdSelectionPolicy that indicates the undo policy
+        followed by this command.    */
     virtual int get_selection_update_policy() = 0;
 
     //information
@@ -229,20 +238,22 @@ public:
 	/// Add a child command
     void add_child_command(DocCommand* pCmd);
 
-    //mandatory interface implementation
-    virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    virtual int perform_action(Document* pDoc, DocCursor* pCursor);
-    virtual void undo_action(Document* pDoc, DocCursor* pCursor);
-
     //overrides
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return m_undoPolicy; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
     bool is_composite() { return true; }
 
+    ///@cond INTERNALS
+    //mandatory interface implementation
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+
     //operations delegated by DocCommandExecuter
     void update_cursor(DocCursor* pCursor, DocCommandExecuter* pExecuter);
     void update_selection(SelectionSet* pSelection, DocCommandExecuter* pExecuter);
+    ///@endcond
 
 protected:
 
@@ -250,15 +261,18 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// undo/redo element: command and cursor
+/** Class %UndoElement holds the necessary information to perform an undo/redo
+    operation.
+*/
 class UndoElement
 {
 public:
-    DocCommand*         pCmd;
-    DocCursorState      cursorState;
-    SelectionState      selState;
+    DocCommand*         pCmd;           ///< ptr. to executed command object.
+    DocCursorState      cursorState;    ///< Cursor state before executing the command.
+    SelectionState      selState;       ///< SelectionSet before executing the command.
 
 public:
+    /// Constructor
     UndoElement(DocCommand* cmd, DocCursorState state, SelectionState sel)
         : pCmd(cmd), cursorState(state), selState(sel)
     {
@@ -282,18 +296,32 @@ private:
     string      m_error;
 
 public:
+    /// Constructor
     DocCommandExecuter(Document* target);
     virtual ~DocCommandExecuter() {}
+
+    /** Executes a command and saves the necessary information for undo/redo operation.
+        Returns value 0 if the command successfully executed. Otherwise returns value 1
+        and a relevant error message can be retrieved by invoking
+        method get_error().    */
     virtual int execute(DocCursor* pCursor, DocCommand* pCmd,
                         SelectionSet* pSelection);
+
+    /// Undo the command
     virtual void undo(DocCursor* pCursor, SelectionSet* pSelection);
+
+    /// Redo the command
     virtual void redo(DocCursor* pCursor, SelectionSet* pSelection);
+
+    /// In case and execute() operation Returns an string with the error message
     inline string get_error() { return m_error; }
 
     //info
+    /// Returns @true if there are undo-able commands in the undo/redo stack.
     bool is_undo_possible() { return m_stack.size() > 0; }
+    /// Returns @true if there are redo-able commands in the undo/redo stack.
     bool is_redo_possible() { return m_stack.history_size() > 0; }
-
+    /// Returns the number of undo/redo elements in the undo/redo stack.
     virtual size_t undo_stack_size() { return m_stack.size(); }
 
 protected:
@@ -368,11 +396,14 @@ public:
     CmdAddChordNote(const string& pitch, const string& name="Add chord note");
     virtual ~CmdAddChordNote() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_command_specific; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void update_selection(SelectionSet* pSelection);
@@ -440,11 +471,14 @@ public:
     CmdAddNoteRest(const string& source, int editMode, const string& name="");
     virtual ~CmdAddNoteRest() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_command_specific; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     //temporary data and helper methods using it
@@ -527,12 +561,15 @@ public:
     CmdAddTie(const string& name="Add tie");
     virtual ~CmdAddTie() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void log_command(ofstream &logger);
@@ -592,12 +629,15 @@ public:
     CmdAddTuplet(const string& src, const string& name="Add tuplet");
     virtual ~CmdAddTuplet() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void log_command(ofstream &logger);
@@ -647,11 +687,14 @@ public:
     CmdBreakBeam(const string& name="Break beam");
     virtual ~CmdBreakBeam() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void log_command(ofstream &logger);
@@ -701,12 +744,15 @@ public:
     CmdChangeAccidentals(EAccidentals acc, const string& name="Change accidentals");
     virtual ~CmdChangeAccidentals() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void log_command(ofstream &logger);
@@ -734,7 +780,23 @@ protected:
     Color           m_newColor;
 
 public:
-    // These commands operate on cursor pointed object
+
+    ///@{
+    /**
+        This command changes the value of an attribute on cursor pointed object.
+        @param attrb    The attribute whose value is going to be changed. It must be a
+            value from enum #EImoAttribute.
+        @param value    The new value for the attribute.
+        @param cmdName  The displayable name for the command. If not specified or
+            empty will default to "Change attribute".
+
+        <b>Remarks</b>
+        - If target object is not valid (e.g. NULL), the command
+            will not be executed and will return a failure code.
+        - After executing the command:
+            - the selection will not be changed.
+            - the cursor will not change its position.
+    */
     CmdChangeAttribute(EImoAttribute attrb, const string& value,
                        const string& cmdName="");
     CmdChangeAttribute(EImoAttribute attrb, double value,
@@ -743,6 +805,8 @@ public:
                        const string& cmdName="");
     CmdChangeAttribute(EImoAttribute attrb, Color value,
                        const string& cmdName="");
+    ///@}
+
 
     /**
         This command changes the value of an attribute in the passed object.
@@ -842,12 +906,15 @@ public:
 	/// Destructor
     virtual ~CmdChangeAttribute() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void set_default_name();
@@ -899,12 +966,15 @@ public:
     CmdChangeDots(int dots, const string& name="Change dots");
     virtual ~CmdChangeDots() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 };
 
@@ -1189,12 +1259,15 @@ public:
     CmdCursor(DocCursorState& state, const string& name="");
     virtual ~CmdCursor() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void set_default_name();
@@ -1208,6 +1281,9 @@ protected:
 class CmdDelete : public DocCmdSimple
 {
 protected:
+    //For recovering from a deletion, cursor must be moved to a safe place before
+    //deletion. Therefore, before executing a CmdDelete, the cursor is moved before
+    //the first object to be deleted. The ID of this object is saved here.
     ImoId m_cursorFinalId;
 
     CmdDelete(const string& name) : DocCmdSimple(name), m_cursorFinalId(k_no_imoid) {}
@@ -1215,10 +1291,12 @@ protected:
 public:
     virtual ~CmdDelete() {}
 
-    inline ImoId cursor_final_pos_id() { return m_cursorFinalId; }
-
 protected:
     virtual void prepare_cursor_for_deletion(DocCursor* pCursor);
+
+    friend class DocCommandExecuter;
+    inline ImoId cursor_final_pos_id() { return m_cursorFinalId; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -1248,11 +1326,14 @@ public:
     CmdDeleteBlockLevelObj(const string& name="");
     virtual ~CmdDeleteBlockLevelObj() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 };
 
 //---------------------------------------------------------------------------------------
@@ -1313,11 +1394,14 @@ public:
     CmdDeleteRelation(int type, const string& name="");
     virtual ~CmdDeleteRelation() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 private:
     int set_score_id(Document* pDoc);
@@ -1368,11 +1452,14 @@ public:
     CmdDeleteSelection(const string& name="Delete selection");
     virtual ~CmdDeleteSelection() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
@@ -1437,11 +1524,14 @@ public:
     CmdDeleteStaffObj(const string& name="");
     virtual ~CmdDeleteStaffObj() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 };
 
 //---------------------------------------------------------------------------------------
@@ -1459,17 +1549,18 @@ protected:
 public:
     ~CmdInsert() {}
 
-    virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-
-    /**
-        Once the command is executed, invoking this method returns the ID assigned to
+    /** Once the command is executed, invoking this method returns the ID assigned to
         the new inserted object. If the command inserts several objects this method
         only returns the ID of the last inserted object.
 
-        @remarks If this method is invoked and the command has not yet been executed, it will
-        return value <i>k_no_imoid</i>.
+        @remarks If this method is invoked and the command has not yet been executed,
+            it will return value <i>k_no_imoid</i>.
     */
     inline ImoId last_inserted_id() { return m_lastInsertedId; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    ///@endcond
 
 protected:
     void remove_object(Document* pDoc, ImoId id);
@@ -1543,11 +1634,14 @@ public:
     CmdInsertBlockLevelObj(const string& source, const string& name="");
     virtual ~CmdInsertBlockLevelObj() {};
 
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void perform_action_from_source(Document* pDoc, DocCursor* pCursor);
@@ -1587,11 +1681,14 @@ public:
 
     virtual ~CmdInsertManyStaffObjs() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void save_source_code_with_ids(Document* pDoc, const list<ImoStaffObj*>& objects);
@@ -1646,12 +1743,15 @@ public:
     CmdInsertStaffObj(const string& source, const string& name="");
     virtual ~CmdInsertStaffObj() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 };
 
 //---------------------------------------------------------------------------------------
@@ -1699,11 +1799,14 @@ public:
     CmdJoinBeam(const string& name="Join beam");
     virtual ~CmdJoinBeam() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void log_command(ofstream &logger);
@@ -1726,24 +1829,29 @@ protected:
     UPoint  m_shift;
 
 public:
-    /**
-        This command moves an object to another position.
-		@warning This command is not fully coded. Current code assumes that the object is a Tie and
-			the selected point is the first bezier
+    /** This command moves an object to another position.
+		@warning This command is not fully coded. Current code assumes that the object
+            is a Tie and the selected point is the first bezier point.
 
-        @param name The displayable name for the command. If not specified will be replaced
-            by the string "Move object point".
+        @param pointIndex   The control point (handler) number (0...n-1) to which
+            this command refers to.
+        @param shift    The shift (in logical units) to apply to the handler.
+        @param name     The displayable name for the command. If not specified will be
+            replaced by the string "Move object point".
     */
     CmdMoveObjectPoint(int pointIndex, UPoint shift,
                        const string& name="Move object point");
     virtual ~CmdMoveObjectPoint() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 };
 
 //---------------------------------------------------------------------------------------
@@ -1820,12 +1928,15 @@ public:
     //CmdSelection(DocCursorState& state, const string& name="");
     virtual ~CmdSelection() {};
 
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
 
 protected:
     void set_default_name();
