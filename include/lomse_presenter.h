@@ -104,7 +104,7 @@ public:
     The %Presenter, returned by previous methods, gives acess to the Document and to
     the Interactors associated to the existing View objects for the Document.
 
-    See @subpage render-overview.
+    See @subpage page-render-overview.
 */
 class Presenter
 {

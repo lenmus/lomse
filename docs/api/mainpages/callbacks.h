@@ -1,5 +1,5 @@
 /**
-@page lomse-callbacks How Lomse callbacks work
+@page page-callbacks How Lomse callbacks work
 
 It is very important to understand how a callback works and how to use a class method as callback.
 

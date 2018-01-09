@@ -157,7 +157,7 @@ public:
         @param pt2Func  A pointer to the method in previous object that Lomse will
             invoke when an event is generated in Lomse.
 
-        See @subpage lomse-callbacks.
+        See @subpage page-callbacks.
 
         For example, to prepare our application for handling @em score @em highlight
         events we could define a callback method:
@@ -207,7 +207,7 @@ public:
         @param pt2Func  A pointer to the method in previous object that Lomse will
             invoke when a requests is generated in Lomse.
 
-        See @subpage lomse-callbacks
+        See @subpage page-callbacks
         for an explanation of Lomse callbacks and its parameters.
 
         For example:
@@ -282,7 +282,7 @@ public:
             MidiServerBase. Once this method is invoked, Lomse will route all midi
             events originated in score play back to this object.
 
-        @see @subpage sound-generation
+        @see @subpage page-sound-generation
 	*/
     ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
 
@@ -301,7 +301,7 @@ public:
             Presenter will automatically cause deletion of all MVC involved objects:
             the Document, all existing Views and Interactors, etc.
 
-        @see @subpage render-overview
+        @see @subpage page-render-overview
 	*/
     Presenter* new_document(int viewType);
 
@@ -327,7 +327,7 @@ public:
             Presenter will automatically cause deletion of all MVC involved objects:
             the Document, all existing Views and Interactors, etc.
 
-        @see @subpage render-overview
+        @see @subpage page-render-overview
 	*/
     Presenter* new_document(int viewType, const string& source, int format,
                             ostream& reporter = cout);
@@ -349,7 +349,7 @@ public:
             Presenter will automatically cause deletion of all MVC involved objects:
             the Document, all existing Views and Interactors, etc.
 
-        @see @subpage render-overview
+        @see @subpage page-render-overview
 	*/
     Presenter* open_document(int viewType, const string& filename,
                              ostream& reporter = cout);
@@ -372,7 +372,7 @@ public:
             Presenter will automatically cause deletion of all MVC involved objects:
             the Document, all existing Views and Interactors, etc.
 
-        @see @subpage render-overview
+        @see @subpage page-render-overview
 	*/
     Presenter* open_document(int viewType, LdpReader& reader,
                              ostream& reporter = cout);

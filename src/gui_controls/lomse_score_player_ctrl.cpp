@@ -138,8 +138,9 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
             if (SpInteractor p = wpIntor.lock())
             {
                 ImoScore* pScore = m_pOwnerImo->get_score();
-                SpEventPlayScore event(
-                        LOMSE_NEW EventPlayScore(evType, wpIntor, pScore, this) );
+                SpEventPlayCtrl event(
+                        LOMSE_NEW EventPlayCtrl(evType, wpIntor, pEv->get_document(),
+                                                pScore, this) );
 
                 //AWARE: we notify directly to user app. (to observers of Interactor)
                 p->notify_observers(event, p.get());

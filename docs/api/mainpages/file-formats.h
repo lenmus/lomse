@@ -1,10 +1,10 @@
 /**
 
-@page file-formats File formats supoported by Lomse
+@page page-file-formats File formats supoported by Lomse
 
 @tableofcontents
 
-@section file-formats-overview Supported file formats
+@section page-file-formats-overview Supported file formats
 
 Lomse supports the following file formats:
 

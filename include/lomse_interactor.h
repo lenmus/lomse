@@ -104,7 +104,7 @@ enum EEventFlag
     and the Document (see @ref mvc-overview). It is responsible for translating your
     application requests into commands that manipulate the associated View and/or
     the Document, coordinating all the necessary actions. It also provides support for
-    managing the user interaction with your application GUI (see @ref tasks-page).
+    managing the user interaction with your application GUI (see @ref page-tasks).
 
 	The %Interactor plays the role of the Controller in the MVC model. Each View has an
 	associated %Interactor (in fact the View is owned by the %Interactor). The
@@ -134,7 +134,7 @@ enum EEventFlag
 
 	See:
 	- @ref mvc-overview.
-	- @ref tasks-page.
+	- @ref page-tasks.
 
 */
 class Interactor : public EventHandler
@@ -217,7 +217,7 @@ public:
             {
                 spInteractor->set_operating_mode(Interactor::k_mode_playback);
 
-                SpEventPlayScore pEv = boost::static_pointer_cast<EventPlayScore>(pEvent);
+                SpEventPlayCtrl pEv = boost::static_pointer_cast<EventPlayCtrl>(pEvent);
                 ImoScore* pScore = pEv->get_score();
                 ScorePlayer* pPlayer  = m_appScope.get_score_player();
                 PlayerGui* pPlayerGui = pEv->get_player();
@@ -278,7 +278,7 @@ public:
         @remarks When the %Interactor is created it is initialized with an instace of
             TaskSelection class.
 
-        See @ref tasks-page.
+        See @ref page-tasks.
 
         Example:
 
@@ -320,7 +320,7 @@ public:
 
     /** Returns the selection set associated to the View of this %Interactor.
 
-        See @ref document-edition-overview
+        See @ref page-edit-overview
     */
     inline SelectionSet* get_selection_set() { return m_pSelections; }
 
@@ -371,11 +371,11 @@ public:
     /**
         @todo This method should be for internal use. Analyse and refactor or document.
 
-        This method should be invoked when processing a EventPlayScore of type
+        This method should be invoked when processing a EventPlayCtrl of type
         <tt>k_end_of_playback_event</tt>. But this method generates a
         k_end_of_playback_event, this will create a loop!!!!   ?????????
     */
-    virtual void send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl);
+    virtual void on_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl);
 
 
     /** Invoking this method controls the behavior of method force_redraw(). If disabled,
@@ -803,14 +803,14 @@ public:
         In order to not interfere with screen display, a different
         rendering buffer is used for printing.
 
-        See @subpage print-api
+        See @subpage page-printing
     */
     virtual void set_print_buffer(RenderingBuffer* rbuf);
 
 
     /** Sets the resolution (in dots per inch, dpi) to use for printing.
 
-        See @subpage print-api
+        See @subpage page-printing
     */
     virtual void set_print_ppi(double ppi);
 
@@ -821,14 +821,14 @@ public:
             to this method your application can split the page in tiles, so that printing
             in large paper formats will not require huge buffer sizes.
 
-        See @subpage print-api
+        See @subpage page-printing
     */
     virtual void print_page(int page, VPoint viewport=VPoint(0, 0));
 
 
     /** Returns the number of pages in current document.
 
-        See @subpage print-api
+        See @subpage page-printing
     */
     virtual int get_num_pages();
 
@@ -842,7 +842,7 @@ public:
 
     /** Returns the cursor associated to the View of this %Interactor.
 
-        See @ref document-edition-overview
+        See @ref page-edit-overview
     */
     inline DocCursor* get_cursor() { return m_pCursor; }
 
@@ -850,7 +850,7 @@ public:
         it. Lomse caret does not blink and this method is oriented to implement a
         blinking caret in your application.
 
-        See @ref document-edition-overview
+        See @ref page-edit-overview
 
         @remarks
             - Caret is always shown when document edition is enabled.
@@ -881,7 +881,7 @@ public:
         when caret on a music score. If caret is not on a music score, the returned
         string is empty.
 
-        See @ref document-edition-overview
+        See @ref page-edit-overview
 
         This method can be useful for displaying the timecode of the caret. For example:
 
@@ -1083,7 +1083,7 @@ public:
             these flags are described by enum #EEventFlag.
 
         @see
-        - @ref tasks-page.
+        - @ref page-tasks.
         - switch_task().
     */
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
@@ -1097,7 +1097,7 @@ public:
             Values for these flas are described by enum #EEventFlag.
 
         @see
-        - @ref tasks-page.
+        - @ref page-tasks.
         - switch_task().
     */
     virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags);
@@ -1111,7 +1111,7 @@ public:
             Values for these flags are described by enum #EEventFlag.
 
         @see
-        - @ref tasks-page.
+        - @ref page-tasks.
         - switch_task().
     */
     virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags);
@@ -1125,7 +1125,7 @@ public:
             for these flags are described by enum #EEventFlag.
 
         @see
-        - @ref tasks-page.
+        - @ref page-tasks.
         - switch_task().
     */
     virtual void on_mouse_enter_window(Pixels x, Pixels y, unsigned flags);
@@ -1139,7 +1139,7 @@ public:
             Values for these flags are described by enum #EEventFlag.
 
         @see
-        - @ref tasks-page.
+        - @ref page-tasks.
         - switch_task().
     */
     virtual void on_mouse_leave_window(Pixels x, Pixels y, unsigned flags);
@@ -1351,7 +1351,7 @@ protected:
     ImoObj* find_event_originator_imo(GmoObj* pGmo);
     GmoRef find_event_originator_gref(GmoObj* pGmo);
     bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
-    bool is_valid_play_score_event(SpEventPlayScore pEvent);
+    bool is_valid_play_score_event(SpEventPlayCtrl pEvent);
     void update_caret_and_view();
     void redraw_caret();
     void send_update_UI_event(EEventType type);

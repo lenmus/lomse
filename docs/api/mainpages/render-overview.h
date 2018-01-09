@@ -1,5 +1,5 @@
 /**
-@page render-overview Rendering documents overview
+@page page-render-overview Rendering documents overview
 
 @tableofcontents
 

@@ -1,5 +1,5 @@
 /**
-@page viewport-overview Coordinate systems, units, scaling and viewport
+@page page-coordinates-viewport Coordinate systems, units, scaling and viewport
 
 @tableofcontents
 

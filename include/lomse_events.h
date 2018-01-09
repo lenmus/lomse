@@ -81,38 +81,38 @@ enum EEventType
 {
     k_null_event = -1,
 
-    k_view_level_event = 0,
+    //EventDoc
+        k_doc_modified_event,       ///< Informs that the Document has been modified
 
-        k_update_window_event,      ///<  ask user app to update window with current bitmap
-        k_update_viewport_event,    ///< ask user app to update window with current bitmap
+    //EventPaint
+        k_update_window_event,      ///< Request to update window with current bitmap
 
-        k_update_UI_event,          ///< possible need for UI updates
-            k_selection_set_change,     ///< selected objects changed
-            k_pointed_object_change,    ///< cursor pointing to a different object
+    //EventAction
+        //EventMouse
+        k_mouse_in_event,               ///< mouse enters in an object
+        k_mouse_out_event,              ///< mouse goes out from an object
+        k_on_click_event,               ///< click on object
+        k_link_clicked_event,           ///< left mouse click on a link (ImoLink object)
+        k_show_contextual_menu_event,   ///< right click on object: contextual menu request
+        //EventControlPointMoved
+        k_control_point_moved_event,    ///< user moves a handler: handler released event
+        //EventUpdateUI             ///< possible need for UI updates
+        k_selection_set_change,         ///< selected objects changed
+        k_pointed_object_change,        ///< cursor pointing to a different object
+        //EventPlayCtrl
+        k_do_play_score_event,          ///< Request to start/resume playback
+        k_pause_score_event,            ///< Request to pause playback
+        k_stop_playback_event,          ///< Request to stop playback
 
-        k_mouse_event,
-            k_mouse_in_event,               ///< mouse goes over an object
-            k_mouse_out_event,              ///< mouse goes out from an object
-            k_on_click_event,               ///< Document, ImoContentObj: click on object
-            k_show_contextual_menu_event,   ///< Click event: object selected and menu request
+    //EventPlayback
+        //EventScoreHighlight
+        k_highlight_event,              ///< Wrapper event containing a list of real events
+        //EventUpdateViewport
+        k_update_viewport_event,        ///< Suggest to change viewport
+        //EventEndOfPlayback
+        k_end_of_playback_event,        ///< Playback ended.
 
-        k_command_event,
-            k_control_point_moved_event,    ///< user moves a handler: handler released event
 
-        k_highlight_event,          ///< score playbaxk (highlight)
-            k_highlight_on_event,           ///< add highlight to a note/rest
-            k_highlight_off_event,          ///< remove highlight from a note/rest
-            k_end_of_higlight_event,        ///< end of score play back. Remove all highlight.
-            k_advance_tempo_line_event,
-
-        k_play_score_event,         ///< score playback (sound)
-            k_do_play_score_event,          ///< start/resume playback
-            k_pause_score_event,            ///< pause playback
-            k_stop_playback_event,          ///< stop playback
-            k_end_of_playback_event,        ///< end of playback
-
-    k_doc_level_event = 1000,
-        k_doc_modified_event,
 };
 
 //---------------------------------------------------------------------------------------
@@ -135,52 +135,32 @@ public:
         to an Observable object it returns nullptr. */
     virtual Observable* get_source() { return nullptr; }
 
-
     /// Returns the event type. It is a value from enmun #EEventType.
     inline EEventType get_event_type() { return m_type; }
 
-    /// @name For checking event type
+    /// @name Helpers for checking event type
     //@{
-    inline bool is_view_level_event() { return m_type >= k_view_level_event
-                                            && m_type < k_doc_level_event;
-                                      }
-    inline bool is_update_UI_event() { return m_type == k_selection_set_change
-                                       || m_type == k_pointed_object_change;
-                                     }
+    inline bool is_doc_modified_event() { return m_type == k_doc_modified_event; }
     inline bool is_update_window_event() { return m_type == k_update_window_event; }
-    inline bool is_update_viewport_event() { return m_type == k_update_viewport_event; }
-    inline bool is_mouse_event() { return m_type == k_on_click_event
-                                       || m_type == k_mouse_in_event
-                                       || m_type == k_mouse_out_event
-                                       || m_type == k_show_contextual_menu_event
-                                       || m_type == k_control_point_moved_event;
-                                 }
-    inline bool is_command_event() { return m_type == k_control_point_moved_event; }
-    inline bool is_play_score_event() { return m_type == k_do_play_score_event
-                                            || m_type == k_pause_score_event
-                                            || m_type == k_stop_playback_event
-                                            || m_type == k_end_of_playback_event;
-                                      }
     inline bool is_mouse_in_event() { return m_type == k_mouse_in_event; }
     inline bool is_mouse_out_event() { return m_type == k_mouse_out_event; }
     inline bool is_on_click_event() { return m_type == k_on_click_event; }
+    inline bool is_link_clicked_event() { return m_type == k_link_clicked_event; }
     inline bool is_show_contextual_menu_event() { return m_type == k_show_contextual_menu_event; }
     inline bool is_control_point_moved_event() { return m_type == k_control_point_moved_event; }
-    inline bool is_highlight_event() { return m_type == k_highlight_event; }
-    inline bool is_highlight_on_event() { return m_type == k_highlight_on_event; }
-    inline bool is_highlight_off_event() { return m_type == k_highlight_off_event; }
-    inline bool is_end_of_higlight_event() { return m_type == k_end_of_higlight_event; }
-    inline bool is_advance_tempo_line_event() { return m_type == k_advance_tempo_line_event; }
-    inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
+    inline bool is_selection_set_change() { return m_type == k_selection_set_change; }
+    inline bool is_pointed_object_change() { return m_type == k_pointed_object_change; }
     inline bool is_do_play_score_event() { return m_type == k_do_play_score_event; }
     inline bool is_pause_score_event() { return m_type == k_pause_score_event; }
     inline bool is_stop_playback_event() { return m_type == k_stop_playback_event; }
-
-        //document level events
-    inline bool is_doc_level_event() { return m_type >= k_doc_level_event; }
-    inline bool is_doc_modified_event() { return m_type == k_doc_modified_event; }
+    inline bool is_highlight_event() { return m_type == k_highlight_event; }
+    inline bool is_update_viewport_event() { return m_type == k_update_viewport_event; }
+    inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
     //@}
 
+protected:
+    friend class Interactor;
+    inline void set_type(EEventType type) { m_type = type; }
 };
 
 /** A shared pointer for an EventInfo.
@@ -191,7 +171,23 @@ typedef SharedPtr<EventInfo>  SpEventInfo;
 
 
 //---------------------------------------------------------------------------------------
-/** Base class for all Document related events.
+/** An event generated by the Document, not related to any specific View.
+
+    The only type for this event is <b>k_doc_modified_event</b> that is generated when
+    the Document is modified. This event is observed by the Interactor in order to
+    generate EvenPaint events when necessary. Therefore, your application normally
+    will not have to handle this event.
+
+    For handling it in your application, you will have to register a handler function
+    at the Document:
+    @code
+    pDoc->add_event_handler(k_doc_modified_event, MyHandler);
+    @endcode
+
+    You can always check if a Document has been modified by invoking method
+    Document::is_dirty().
+
+    See @ref handling-events
 */
 class EventDoc : public EventInfo
 {
@@ -220,36 +216,6 @@ typedef SharedPtr<EventDoc>  SpEventDoc;
 
 
 //---------------------------------------------------------------------------------------
-/** Base class for all View related events.
-*/
-class EventView : public EventInfo
-{
-protected:
-    WpInteractor m_wpInteractor;
-
-    EventView(EEventType type, WpInteractor wpInteractor)
-        : EventInfo(type)
-        , m_wpInteractor(wpInteractor)
-    {
-    }
-
-public:
-    /// Destructor
-    virtual ~EventView() {}
-
-    /** Returns a weak pointer to the Interactor object managing the
-        View in which the event is generated. */
-    inline WpInteractor get_interactor() { return m_wpInteractor; }
-};
-
-/** A shared pointer for an EventView.
-    @ingroup typedefs
-    @#include <lomse_events.h>
-*/
-typedef SharedPtr<EventView>  SpEventView;
-
-
-//---------------------------------------------------------------------------------------
 // EventPaint
 /** An event to inform user application about the need to repaint the screen.
 
@@ -258,11 +224,13 @@ typedef SharedPtr<EventView>  SpEventView;
 	inform the user application that it must immediately update the content of the
 	window associated to the lomse View, by displaying the current bitmap. User
 	application must put immediately the content of the currently rendered buffer
-	into the window without calling any Lomse methods (i.e. force_redraw).
+	into the window without calling any Lomse methods (i.e. force_redraw) or generating
+	application events. .
 
 	For receiving these events you will have to register a callback when
-	the View is created. For processing these events your application
-	just blits the new bitmap onto the window.
+	the View is created. For processing these events take into account that this event
+	is decoupled by design: user must do repaint immediately, without more delays; your
+	application should just blit the new bitmap onto the window.
 
     <b>Example</b>
 
@@ -316,13 +284,15 @@ typedef SharedPtr<EventView>  SpEventView;
 	}
 	@endcode
 */
-class EventPaint : public EventView
+class EventPaint : public EventInfo
 {
 protected:
+    WpInteractor m_wpInteractor;
     VRect m_damagedRectangle;
 
     EventPaint(EEventType type, WpInteractor wpInteractor, VRect damagedRectangle)
-        : EventView(type, wpInteractor)
+        : EventInfo(type)
+        , m_wpInteractor(wpInteractor)
         , m_damagedRectangle(damagedRectangle)
     {
     }
@@ -330,12 +300,17 @@ protected:
 public:
     /// Constructor
     EventPaint(WpInteractor wpInteractor, VRect damagedRectangle)
-        : EventView(k_update_window_event, wpInteractor)
+        : EventInfo(k_update_window_event)
+        , m_wpInteractor(wpInteractor)
         , m_damagedRectangle(damagedRectangle)
     {
     }
     /// Destructor
     virtual ~EventPaint() {}
+
+    /** Returns a weak pointer to the Interactor object managing the
+        View in which the event is generated. */
+    inline WpInteractor get_interactor() { return m_wpInteractor; }
 
     /** Returns the damaged rectangle, that is, the rectangle that needs repaint. */
     inline VRect get_damaged_rectangle() { return m_damagedRectangle; }
@@ -346,6 +321,80 @@ public:
     @#include <lomse_events.h>
 */
 typedef SharedPtr<EventPaint>  SpEventPaint;
+
+
+//---------------------------------------------------------------------------------------
+/** Base class for all events representing a user mouse action that
+    has been interpreted by Lomse as a command to change the Document or the GUI.
+*/
+class EventAction : public EventInfo
+{
+protected:
+    WpInteractor m_wpInteractor;
+    WpDocument m_wpDoc;
+
+    /// Constructor
+    EventAction(EEventType type, WpInteractor wpInteractor, WpDocument wpDoc)
+        : EventInfo(type)
+        , m_wpInteractor(wpInteractor)
+        , m_wpDoc(wpDoc)
+    {
+    }
+
+public:
+    /// Destructor
+    virtual ~EventAction() {}
+
+    /** Returns a weak pointer to the Interactor object managing the
+        View in which the event is generated. */
+    inline WpInteractor get_interactor() { return m_wpInteractor; }
+
+    /** Returns a weak pointer to the Document object related to this event. */
+    inline WpDocument get_document() { return m_wpDoc; }
+
+    ///Returns @true if the event is still valid and can be processed.
+    bool is_still_valid() {
+        return !m_wpDoc.expired() && !m_wpInteractor.expired();
+    }
+};
+
+/** A shared pointer for an EventAction.
+    @ingroup typedefs
+    @#include <lomse_events.h>
+*/
+typedef SharedPtr<EventAction>  SpEventAction;
+
+
+//---------------------------------------------------------------------------------------
+/** Base class for all events generated events generated by SoundPlayer in the sound
+    thread, during playback.
+*/
+class EventPlayback : public EventInfo
+{
+protected:
+    WpInteractor m_wpInteractor;
+
+    /// Constructor
+    EventPlayback(EEventType type, WpInteractor wpInteractor)   //, WpDocument wpDoc)
+        : EventInfo(type)
+        , m_wpInteractor(wpInteractor)
+    {
+    }
+
+public:
+    /// Destructor
+    virtual ~EventPlayback() {}
+
+    /** Returns a weak pointer to the Interactor object managing the
+        View in which the event is generated. */
+    inline WpInteractor get_interactor() { return m_wpInteractor; }
+};
+
+/** A shared pointer for an EventPlayback.
+    @ingroup typedefs
+    @#include <lomse_events.h>
+*/
+typedef SharedPtr<EventPlayback>  SpEventPlayback;
 
 
 //---------------------------------------------------------------------------------------
@@ -425,7 +474,7 @@ typedef SharedPtr<EventPaint>  SpEventPaint;
 	}
 	@endcode
 */
-class EventUpdateViewport : public EventView
+class EventUpdateViewport : public EventPlayback
 {
 protected:
     VRect m_damagedRectangle;
@@ -435,7 +484,7 @@ protected:
 public:
     /// Constructor
     EventUpdateViewport(WpInteractor wpInteractor, Pixels x, Pixels y)
-        : EventView(k_update_viewport_event, wpInteractor)
+        : EventPlayback(k_update_viewport_event, wpInteractor)
         , m_x(x)
         , m_y(y)
     {
@@ -460,29 +509,28 @@ typedef SharedPtr<EventUpdateViewport>  SpEventUpdateViewport;
 
 //---------------------------------------------------------------------------------------
 // EventUpdateUI
-/** EventUpdateUI events are generated to signal changes on the Document that could
-    require changes on the user application GUI, such as enabling or disabling tools,
-    menu items and buttons.
+/** %EventUpdateUI events are generated to inform about actions related to the Document
+    that could require changes on the user application GUI, such as enabling or
+    disabling tools, menu items and buttons.
 
-    EventUpdateUI events of type **k_selection_set_change** are generated when
+    %EventUpdateUI events of type **k_selection_set_change** are generated when
     Document objects are selected or deselected. The rationale is that some application
     tools should be enabled or disabled depending on the kind of selected objects.
 
-    EventUpdateUI events of type **k_pointed_object_change** are generated when the
+    %EventUpdateUI events of type **k_pointed_object_change** are generated when the
     document cursor is updated, as the object pointed by the cursor has changed. Again,
     the rationale is that some application tools should be enabled or disabled depending
     on the nature of the pointed object.
 
-    Although EventUpdateUI events are related to a Document, they are sent directly to
-    the application global handler (the one set by invoking
-    LomseDoorway::set_notify_callback() ), because it is assumed that these events are
-    of interest only for the application main frame.
+    %EventUpdateUI events are sent directly to the application global handler (the one
+    set by invoking LomseDoorway::set_notify_callback() ). For handling these events
+    you should generate application events, place them in the application events loop
+    and return control to Lomse.
 
     <b>Example</b>
 
 	For instance, in an application written using the wxWidgets framework you
-	could handle the EventUpdateUI by converting them in application events, placing
-	them in the application events loop and returning control to Lomse:
+	could handle the %EventUpdateUI as follows:
 
 	@code
 	void MainFrame::on_lomse_event(SpEventInfo pEvent)
@@ -541,21 +589,20 @@ typedef SharedPtr<EventUpdateViewport>  SpEventUpdateViewport;
     }
     @endcode
 */
-class EventUpdateUI : public EventView
+class EventUpdateUI : public EventAction
 {
 protected:
-    WpDocument m_wpDoc;
     SelectionSet* m_pSelection;
     DocCursor* m_pCursor;
 
-    EventUpdateUI(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
+    //for unit tests
+    EventUpdateUI(EEventType type) : EventAction(type, WpInteractor(), WpDocument()) {}
 
 public:
     /// Constructor
     EventUpdateUI(EEventType type, WpInteractor wpInteractor, WpDocument wpDoc,
                   SelectionSet* pSelection, DocCursor* pCursor)
-        : EventView(type, wpInteractor)
-        , m_wpDoc(wpDoc)
+        : EventAction(type, wpInteractor, wpDoc)
         , m_pSelection(pSelection)
         , m_pCursor(pCursor)
     {
@@ -568,12 +615,6 @@ public:
     /** Returns a ptr to current DocCursor object, so that user application can
         determine where is the cursor pointing.    */
     inline DocCursor* get_cursor() { return m_pCursor; }
-
-    ///Returns @true if the event is still valid and can be processed.
-    bool is_still_valid() {
-        return !m_wpDoc.expired() && !m_wpInteractor.expired();
-    }
-
 };
 
 /** A shared pointer for an EventUpdateUI.
@@ -599,6 +640,20 @@ typedef SharedPtr<EventUpdateUI>  SpEventUpdateUI;
 
     In particular, EventMouse events generation and suggested processing is as follows:
 
+    <b>Types k_mouse_in_event and k_mouse_out_event</b>
+
+    They are generated in the following situations:
+    - TaskOnlyClicks selected: Move mouse generates mouse-in-out events as mouse flies
+        over the different box areas. Probably your application should ignore these
+        events.
+    - TaskSelection selected: As mouse moves without clicking EventMouse of types
+        k_mouse_in_event & k_mouse_out_event are generated as mouse flies over the
+        different box areas. Probably your application should ignore these events.
+    - TaskDataEntry selected: As mouse moves, mouse in and out events are generated,
+        as mouse flies over the different box areas. Your application can handle these
+        events and react to them as convenient (i.e. highlighting the implied
+        insertion point/area).
+
     <b>Type k_on_click_event</b>
 
     They are generated in the following situations:
@@ -620,7 +675,31 @@ typedef SharedPtr<EventUpdateUI>  SpEventUpdateUI;
         command for inserting the object at the position implied by the event click
         point.
 
+    <b>Type k_link_clicked_event</b>
+
+    This event type is generated to inform about a left mouse click on a link (ImoLink)
+    object.
+
+    This event is generated when an %EventMouse of type k_on_click_event is being
+    processing by Lomse to determine possible actions to do before passing the event
+    to the user application. When Lomse determines that it is a left click on an ImoLink
+    object, the event is passed to the user as an event of type k_link_clicked_event
+    instead of a generic k_on_click_event.
+
+    @note
+	- Notice that an ImoLink object is different from an hyperlink control (an
+    ImoControl containing an HyperlinkCtrl object). Hyperlink controls are only used in
+    user applications that generate dynamic content (user defined GUI control objects
+    embedded in the %Document) and can not be created from files.
+	- A link (ImoLink) is only generated by a LMD @<link@> tag. Therefore, your application
+	will never receive events of this type when processing MusicXML or LDP files.
+
     <b>Type k_show_contextual_menu_event</b>
+
+    An %EventMouse of type k_show_contextual_menu_event informs about a mouse right
+    button click on an ImoObj that has been interpreted by Lomse as a request for
+    displaying its <i>contextual menu</i> (it is up to your application the decide what
+    is this menu, if any, and what to do whit this event).
 
     They are generated in the following situations:
     - TaskSelection selected: Right click down, selects object and sends EventUpdateUI
@@ -630,38 +709,23 @@ typedef SharedPtr<EventUpdateUI>  SpEventUpdateUI;
     - TaskDataEntry selected: Right click sends a EventMouse
         (k_show_contextual_menu_event) to request to show the contextual menu associated
         to the pointed object, if any.
-
-    <b>Types k_mouse_in_event and k_mouse_out_event</b>
-
-    They are generated in the following situations:
-    - TaskOnlyClicks selected: Move mouse generates mouse-in-out events as mouse flies
-        over the different box areas. Probably your application should ignore these
-        events.
-    - TaskSelection selected: As mouse moves without clicking EventMouse of types
-        k_mouse_in_event & k_mouse_out_event are generated as mouse flies over the
-        different box areas. Probably your application should ignore these events.
-    - TaskDataEntry selected: As mouse moves, mouse in and out events are generated,
-        as mouse flies over the different box areas. Your application can handle these
-        events and react to them as convenient (i.e. highlighting the implied
-        insertion point/area).
 */
-class EventMouse : public EventView
+class EventMouse : public EventAction
 {
 protected:
-    WpDocument m_wpDoc;
     ImoId m_imoId;
     Pixels m_x;
     Pixels m_y;
     unsigned m_flags;
 
-    EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
+    //for unit tests
+    EventMouse(EEventType type) : EventAction(type, WpInteractor(), WpDocument()) {}
 
 public:
     /// Constructor
     EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id,
                Pixels x, Pixels y, unsigned flags, WpDocument wpDoc)
-        : EventView(type, wpInteractor)
-        , m_wpDoc(wpDoc)
+        : EventAction(type, wpInteractor, wpDoc)
         , m_imoId(id)
         , m_x(x)
         , m_y(y)
@@ -698,9 +762,6 @@ public:
         took place. The different flags are described by enum #EEventFlag    */
     inline unsigned get_flags() { return m_flags; }
 
-    ///Returns @true if the event is still valid and can be processed.
-    bool is_still_valid();
-
 };
 
 /** A shared pointer for an EventMouse.
@@ -711,90 +772,21 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 
 
 //---------------------------------------------------------------------------------------
-// EventPlayScore
-//k_end_of_playback is generated in the sound thread and posted to main application
-//handler. It is never posted to the Document observers.
-//
-//Your app generates an application event and returns control to Lomse
-//
-//Your application, later, processes the application event and ask Interactor to inform
-//PlayerGui, for any housekeeping it has to do.
-//
+// EventPlayCtrl
 /** An object holding information about an score player control event. The event type informs
 	the user application about the specific action.
 
-	@warning Events of type <tt>k_end_of_playback_event</tt> are generated by the View
-		to inform about the end of playback, just in case your application would like to do
-		any action, such as enabling or disabling GUI buttons related to playback.
-
-		All other types for this event (<tt>k_do_play_score_event</tt>,
-		<tt>k_pause_score_event</tt> and <tt>k_stop_playback_event</tt>) are generated
-		only from LDP documents with embedded controls (buttons, links, etc.). In
-		particular these event are generated by the ScorePlayerCtrl object associated to an
-		ImoScorePlayer object embedded in the Document. More information on these
-		sub-events later.
-
-	Events of type <tt>k_end_of_playback_event</tt> should be handled by
-	They are typically used for enabling and disabling GUI buttons related to playback.
-	For instance, in an application written using the wxWidgets framework, you
-	could handle these sub-events as follows:
-
-	@code
-	void MainFrame::on_lomse_event(SpEventInfo pEvent)
-	{
-		DocumentWindow* pCanvas = get_active_document_window();
-
-		switch (pEvent->get_event_type())
-		{
-			...
-			case k_end_of_playback_event:
-			{
-			    if (pCanvas)
-			    {
-					//generate end of playback event
-			        SpEventPlayScore pEv( static_pointer_cast<EventPlayScore>(pEvent) );
-			        MyEndOfPlaybackEvent event(pEv);
-			        ::wxPostEvent(pCanvas, event);
-			    }
-			    break;
-			}
-		...
-	@endcode
-
-	Later, your application should just process the application event as convenient.
-	The recommended action is to use the Interactor to take care of all
-	details:
-
-	@code
-	void DocumentWindow::on_end_of_playback(MyEndOfPlaybackEvent& event)
-	{
-		SpEventPlayScore pEv = event.get_lomse_event();
-		WpInteractor wpInteractor = pEv->get_interactor();
-		if (SpInteractor spInteractor = wpInteractor.lock())
-		{
-		    spInteractor->send_end_of_play_event(pEv->get_score(), pEv->get_player());
-		    spInteractor->set_operating_mode(is_edition_enabled() ? Interactor::k_mode_edition
-		                                                          : Interactor::k_mode_read_only);
-		}
-	}
-	@endcode
-
-
-	<b>ScorePlayerCtrl generated events</b>
-
-	All other types for this event (<tt>k_do_play_score_event</tt>,
-	<tt>k_pause_score_event</tt> and <tt>k_stop_playback_event</tt>) are generated
-	only from LDP documents with embedded controls (buttons, links, etc.). In
-	particular, these event are generated by the ScorePlayerCtrl object associated to an
-	ImoScorePlayer object embedded in the Document. These events inform about a user
-	action on any of the buttons of the ScorePlayerCtrl, so that the user application can
-	perform the expected actions associated to these buttons. If your application is oriented
-	to process scores in MusicXML format or regular LDP files without embedded controls
-	you will never receive these event types.
+	This event is generated only from LMD documents with embedded controls (buttons,
+    links, etc.). In particular, these events are generated by the ScorePlayerCtrl
+    object associated to an ImoScorePlayer object embedded in the Document. These events
+    inform about a user action on any of the buttons of the ScorePlayerCtrl, so that the
+    user application can perform the expected actions associated to these buttons. If
+    your application is oriented to process scores in MusicXML format or regular LDP
+    files without embedded controls you will never receive these event types.
 
     <b>Example</b>
 
-	For instance, in an application oriented to process LDP documents with embedded
+	For instance, in an application oriented to process LMD documents with embedded
 	controls, written using the wxWidgets framework, you
 	could handle these events as follows:
 
@@ -845,7 +837,7 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 		{
 		    spInteractor->set_operating_mode(Interactor::k_mode_playback);
 
-		    SpEventPlayScore pEv = static_pointer_cast<EventPlayScore>(pEvent);
+		    SpEventPlayCtrl pEv = static_pointer_cast<EventPlayCtrl>(pEvent);
 		    ImoScore* pScore = pEv->get_score();
 		    ScorePlayer* pPlayer  = m_appScope.get_score_player();
 		    PlayerGui* pPlayerGui = pEv->get_player();
@@ -879,19 +871,20 @@ typedef SharedPtr<EventMouse>  SpEventMouse;
 	}
 	@endcode
 */
-class EventPlayScore : public EventView
+class EventPlayCtrl : public EventAction
 {
 protected:
     ImoScore* m_pScore;
     PlayerGui* m_pPlayer;
 
-    EventPlayScore(EEventType evType) : EventView(evType, WpInteractor()) {}    //for unit tests
+    //for unit tests
+    EventPlayCtrl(EEventType evType) : EventAction(evType, WpInteractor(), WpDocument()) {}
 
 public:
     /// Constructor
-    EventPlayScore(EEventType evType, WpInteractor wpInteractor, ImoScore* pScore,
-                   PlayerGui* pPlayer)
-        : EventView(evType, wpInteractor)
+    EventPlayCtrl(EEventType evType, WpInteractor wpInteractor, WpDocument wpDoc,
+                  ImoScore* pScore, PlayerGui* pPlayer)
+        : EventAction(evType, wpInteractor, wpDoc)
         , m_pScore(pScore)
         , m_pPlayer(pPlayer)
     {
@@ -904,11 +897,94 @@ public:
     inline PlayerGui* get_player() const { return m_pPlayer; }
 };
 
-/** A shared pointer for an EventPlayScore.
+/** A shared pointer for an EventPlayCtrl.
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventPlayScore>  SpEventPlayScore;
+typedef SharedPtr<EventPlayCtrl>  SpEventPlayCtrl;
+
+
+//---------------------------------------------------------------------------------------
+// EventEndOfPlayback
+/** An event generated by the ScorePlayer object to inform about the end of playback,
+    just in case your application would like to do any action, such as enabling or
+    disabling GUI buttons related to playback or to enable document edition.
+
+	Events of type <tt>k_end_of_playback_event</tt> must be handled by
+	by converting them into application events, placing them in the application events
+	loop and returning control to Lomse:
+
+	@code
+	void MainFrame::on_lomse_event(SpEventInfo pEvent)
+	{
+		DocumentWindow* pCanvas = get_active_document_window();
+
+		switch (pEvent->get_event_type())
+		{
+			...
+			case k_end_of_playback_event:
+			{
+			    if (pCanvas)
+			    {
+					//generate end of playback event
+			        SpEventEndOfPlayback pEv( static_pointer_cast<EventEndOfPlayback>(pEvent) );
+			        MyEndOfPlaybackEvent event(pEv);
+			        ::wxPostEvent(pCanvas, event);
+			    }
+			    break;
+			}
+		...
+	@endcode
+
+	Later, your application will process the application event. When doing it, it must
+	inform the Interactor, and then your application should do whatever it needs to
+	do, i.e.: enabling document edition:
+
+	@code
+	void DocumentWindow::on_end_of_playback(MyEndOfPlaybackEvent& event)
+	{
+		SpEventEndOfPlayback pEv = event.get_lomse_event();
+		WpInteractor wpInteractor = pEv->get_interactor();
+		if (SpInteractor spInteractor = wpInteractor.lock())
+		{
+		    spInteractor->on_end_of_play_event(pEv->get_score(), pEv->get_player());
+		    spInteractor->set_operating_mode(is_edition_enabled() ? Interactor::k_mode_edition
+		                                                          : Interactor::k_mode_read_only);
+		}
+	}
+	@endcode
+*/
+class EventEndOfPlayback : public EventPlayback
+{
+protected:
+    ImoScore* m_pScore;
+    PlayerGui* m_pPlayer;
+
+    EventEndOfPlayback(EEventType evType) : EventPlayback(evType, WpInteractor()) {}    //for unit tests
+
+public:
+    /// Constructor
+    EventEndOfPlayback(EEventType evType, WpInteractor wpInteractor, ImoScore* pScore,
+                   PlayerGui* pPlayer)
+        : EventPlayback(evType, wpInteractor)
+        , m_pScore(pScore)
+        , m_pPlayer(pPlayer)
+    {
+    }
+
+    // accessors
+    /// Returns a ptr. to the score affected by the event
+    inline ImoScore* get_score() const { return m_pScore; }
+	/// Returns a ptr. to the PlayerGui object associated with this score playback
+    inline PlayerGui* get_player() const { return m_pPlayer; }
+};
+
+/** A shared pointer for an EventEndOfPlayback.
+    @ingroup typedefs
+    @#include <lomse_events.h>
+*/
+typedef SharedPtr<EventEndOfPlayback>  SpEventEndOfPlayback;
+
 
 
 //---------------------------------------------------------------------------------------
@@ -921,13 +997,14 @@ typedef SharedPtr<EventPlayScore>  SpEventPlayScore;
 			 For processing it, do not retain control: generate an application
 			 event, place it on the application events loop, and return control to Lomse.
 
-	The EventScoreHighlight event, derived from EventView, signals the need to do
+	The %EventScoreHighlight event, derived from EventPlayback, signals the need to do
 	several actions related to highlighting / unhighlighting notes and to moving
 	the tempo line while the score is being played back. It contains a list of
 	sub-events and affected objects:
-	- <b>k_highlight_on_event</b>. Add highlight to a note/rest.
-	- <b>k_highlight_off_event</b>. Remove highlight from a note/rest.
-	- <b>k_end_of_higlight_event</b>. End of score play back. Remove all highlight.
+	- <b>k_highlight_on</b>. Add highlight to a note/rest.
+	- <b>k_highlight_off</b>. Remove highlight from a note/rest.
+	- <b>k_end_of_higlight</b>. End of score play back. Remove all highlight.
+	- <b>k_advance_tempo_line</b>. Advance visual tempo line to next beat.
 
 	For handling all events related to score playback it is **very important** to
 	return control to Lomse as soon
@@ -981,7 +1058,7 @@ typedef SharedPtr<EventPlayScore>  SpEventPlayScore;
 	}
 	@endcode
 */
-class EventScoreHighlight : public EventView
+class EventScoreHighlight : public EventPlayback
 {
 protected:
     ImoId m_nID;             //ID of the target score for the event
@@ -990,26 +1067,37 @@ protected:
 public:
     /// Constructor
     EventScoreHighlight(WpInteractor wpInteractor, ImoId nScoreID)
-        : EventView(k_highlight_event, wpInteractor)
+        : EventPlayback(k_highlight_event, wpInteractor)
         , m_nID(nScoreID)
     {
     }
 
     /// Copy constructor
     EventScoreHighlight(const EventScoreHighlight& event)
-        : EventView(event.m_type, event.m_wpInteractor)
+        : EventPlayback(event.m_type, event.m_wpInteractor)
         , m_nID(event.m_nID)
         , m_items(event.m_items)
     {
     }
 
+    ///Values for sub-events
+    enum EHighlightType
+    {
+        k_highlight_on,           ///< add highlight to a note/rest
+        k_highlight_off,          ///< remove highlight from a note/rest
+        k_end_of_higlight,        ///< end of score play back. Remove all highlight.
+        k_advance_tempo_line,     ///< advance visual tempo line to next beat
+    };
+
     /// Returns ID of the score affected by the event
     inline ImoId get_score_id() { return m_nID; }
+
 	/// Returns the number of sub-events
     inline int get_num_items() { return int( m_items.size() ); }
+
 	/** Returns the list of notes & rests affected by the event. Each list item is a pair
-		of two values: the event type, and the ID of the object (note / rest) to
-		highlight or un-highlight. */
+		of two values: the sub-event type (from enum #EHighlightType), and the ID of
+		the object (note / rest) to highlight or un-highlight. */
     inline std::list< pair<int, ImoId> >&  get_items() { return m_items; }
 
 ///@cond INTERNAL
@@ -1029,61 +1117,17 @@ typedef SharedPtr<EventScoreHighlight>  SpEventScoreHighlight;
 
 
 //---------------------------------------------------------------------------------------
-/** Base class for all events representing a user action (keyboard or mouse) that
-    has been interpreted by Lomse as a command to change the View or to modify
-	the Document.
-*/
-class EventCommand : public EventView
-{
-protected:
-    WpDocument m_wpDoc;
-    ImoId m_imoId;
-
-    EventCommand(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
-
-    EventCommand(EEventType type, WpInteractor wpInteractor, ImoId id, WpDocument wpDoc)
-        : EventView(type, wpInteractor)
-        , m_wpDoc(wpDoc)
-        , m_imoId(id)
-    {
-    }
-
-public:
-
-    // accessors
-
-    /// Returns a pointer to the Document object (ImoObj) affected by the event.
-    ImoObj* get_imo_object();
-
-    /// Returns the ID of the Document object (ImoObj) affected by the event.
-    inline ImoId get_imo_id() { return m_imoId; }
-
-    ///Returns @true if the event is still valid and can be processed.
-    bool is_still_valid() {
-        return !m_wpDoc.expired() && !m_wpInteractor.expired();
-    }
-
-};
-
-
-/** A shared pointer for an EventCommand.
-    @ingroup typedefs
-    @#include <lomse_events.h>
-*/
-typedef SharedPtr<EventCommand>  SpEventCommand;
-
-
-//---------------------------------------------------------------------------------------
-/** EventControlPointMoved event is generated when a mouse action has been
+// EventControlPointMoved
+/** %EventControlPointMoved event is generated when a mouse action has been
 	interpreted by Lomse as a command for moving an object control point (handler).
 
-    Operating system raw mouse events should be passed to Lomse to be processed by
+    Operating system raw mouse events can be passed to Lomse to be processed by
     the currently selected Task object (see @ref tasks-overview). Once done, Lomse will
-    generate relevant events of different type (normally EventMouse,
+    generate relevant events of different types (normally EventMouse,
     EventControlPointMoved and EventUpdateUI events) with relevant information about
     affected Document objects or other.
 
-	In particular, an EventControlPointMoved event is generated when TaskMoveHandler
+	In particular, an %EventControlPointMoved event is generated when TaskMoveHandler
 	is selected and the user releases the mouse button. For having a full view of the
 	event generation process, imagine that your application has selected TaskSelection
 	behavior; this is the default task when no specific task is assigned. This task is
@@ -1094,7 +1138,7 @@ typedef SharedPtr<EventCommand>  SpEventCommand;
 	receives this event and having determined that the pointed object is a handle,
 	decides to select the clicked object and switch to TaskMoveObject. Now, Lomse
 	will take care of moving the handle while the mouse moves, and when the mouse button
-	is released, Lomse will generate the EventControlPointMoved to inform your
+	is released, Lomse will generate the %EventControlPointMoved to inform your
 	application about the event and the final destination point of the handle.
 
 	For processing this event, probably your application will issue an edition command
@@ -1120,18 +1164,18 @@ typedef SharedPtr<EventCommand>  SpEventCommand;
 		    spInteractor->set_rendering_buffer(&m_rbuf_window);
 
 		    //register to receive desired events
-		    spInteractor->add_event_handler(k_control_point_moved_event, this, wrapper_on_command_event);
+		    spInteractor->add_event_handler(k_control_point_moved_event, this, wrapper_on_action_event);
 		...
 	}
 
-	void DocumentWindow::wrapper_on_command_event(void* pThis, SpEventInfo pEvent)
+	void DocumentWindow::wrapper_on_action_event(void* pThis, SpEventInfo pEvent)
 	{
-		static_cast<DocumentWindow*>(pThis)->on_command_event(pEvent);
+		static_cast<DocumentWindow*>(pThis)->on_action_event(pEvent);
 	}
 
-	void DocumentWindow::on_command_event(SpEventInfo pEvent)
+	void DocumentWindow::on_action_event(SpEventInfo pEvent)
 	{
-		SpEventCommand pEv( static_pointer_cast<EventCommand>(pEvent) );
+		SpEventAction pEv( static_pointer_cast<EventAction>(pEvent) );
 		if (!pEv->is_still_valid())
 		    return;
 
@@ -1140,11 +1184,11 @@ typedef SharedPtr<EventCommand>  SpEventCommand;
 		    SelectionSet* selection = spInteractor->get_selection_set();
 		    DocCursor* cursor = spInteractor->get_cursor();
 		    CommandEventHandler handler(m_appScope, this, m_toolsInfo, selection, cursor);
-		    handler.process_command_event(pEv);
+		    handler.process_action_event(pEv);
 		}
 	}
 
-	void CommandEventHandler::process_command_event(SpEventCommand event)
+    void CommandEventHandler::process_action_event(SpEventAction event)
 	{
 		m_fEventProcessed = false;
 		if (m_pController->is_edition_enabled())
@@ -1185,9 +1229,10 @@ typedef SharedPtr<EventCommand>  SpEventCommand;
 	}
 	@endcode
 */
-class EventControlPointMoved : public EventCommand
+class EventControlPointMoved : public EventAction
 {
 protected:
+    ImoId m_imoId;
     int m_iHandler;     //modified point index
     UPoint m_uShift;    //shift to apply to object
     int m_gmoType;
@@ -1277,7 +1322,7 @@ public:
     RequestDynamic::set_object() passing as argument a pointer to the ImoObj
     that must be inserted in the Document.
 
-    See @ref dynamic-content.
+    See @ref page-dynamic-content.
 */
 class RequestDynamic : public Request
 {
@@ -1581,32 +1626,90 @@ public:
     /// Returns the EventNotifier object associated to this %Observable object.
 	virtual EventNotifier* get_event_notifier() = 0;
 
-    ///@{
-    /// Register a notification handler for an %Observer.
+    //register to observe the whole object
+    /** Register a notification handler (EventHandler object) for all events generated by
+        this %Observable object.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pHandler     The object, derived from EventHandler, that will receive
+            the notifications (by invoking its EventHandler::handle_event() method.    */
     virtual void add_event_handler(int eventType, EventHandler* pHandler);
+
+    /** Register a notification handler (c++ method) for all events generated by this
+        %Observable object.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pThis    Pointer to the object that will receive the notifications.
+        @param pt2Func  The method in previous object that will be invoked to
+            notify events.
+
+        See @ref handling-events
+    */
     virtual void add_event_handler(int eventType, void* pThis,
                                    void (*pt2Func)(void* pObj, SpEventInfo event) );
+
+    /** Register a notification handler (c function) for all events generated by this
+        %Observable object.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pt2Func  The function that will be invoked to notify events.
+
+        See @ref handling-events
+    */
     virtual void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
-    ///@}
 
     /// This enum describes the valid observable targets.
     enum EObservedChild
-    {   k_root=0,       ///< The Document (in fact its root node)
+    {   k_root=0,       ///< The whole Document
         k_control,      ///< A control (an ImoControl) object
-        k_gmo,          ///< A Graphic Model object (GmoObj)
         k_imo,          ///< A child of the Document (an ImoObj) except ImoControl objs.
     };
 
-    ///@{
-    /** Register an event handler for an %Observer. Parameter childType must be a
-        value from enum #EImoObjType.     */
+    //register to observe just a child
+    /** Register an event handler (EventHandler object) for some events generated by
+        children of this %Observable object. Parameters <i>childType</i> and
+        <i>childId</i> allows to filter the desired events.
+        @param childType    It must be value <i>k_control</i> or <i>k_imo</i> from
+            enum #EObservedChild, and selects the source of the events to be notified.
+        @param childId      It is the ID of the ImoObj to observe.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pHandler     The object, derived from EventHandler, that will receive
+            the notifications (by invoking its EventHandler::handle_event() method.
+    */
     void add_event_handler(int childType, ImoId childId, int eventType,
                            EventHandler* pHandler);
+
+    /** Register an event handler (c++ method) for some events generated by children of
+        this %Observable object. Parameters <i>childType</i> and <i>childId</i> allows
+        to filter the desired events.
+        @param childType    It must be value <i>k_control</i> or <i>k_imo</i> from
+            enum #EObservedChild, and selects the source of the events to be notified.
+        @param childId      It is the ID of the ImoObj to observe.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pThis    Pointer to the object that will be notified.
+        @param pt2Func  The method in previous object that will be invoked to
+            notify events.
+
+        See @ref handling-events
+    */
     void add_event_handler(int childType, ImoId childId, int eventType, void* pThis,
                            void (*pt2Func)(void* pObj, SpEventInfo event) );
+
+    /** Register an event handler (c function) for some events generated by children
+        of this %Observable object. Parameters <i>childType</i> and <i>childId</i> allows
+        to filter the desired events.
+        @param childType    It must be value <i>k_control</i> or <i>k_imo</i> from
+            enum #EObservedChild, and selects the source of the events to be notified.
+        @param childId      It is the ID of the ImoObj to observe.
+        @param eventType    The type of event to be notified. It must be a value from
+            enmu #EEventType.
+        @param pt2Func  The method in previous object that will be invoked to
+            notify events.
+    */
     void add_event_handler(int childType, ImoId childId, int eventType,
                            void (*pt2Func)(SpEventInfo event) );
-    ///@}
 
     /// Returns a pointer to the observable child.    */
     virtual Observable* get_observable_child(int UNUSED(childType),

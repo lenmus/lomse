@@ -1,5 +1,5 @@
 /**
-@page tasks-page Interaction with your application GUI
+@page page-tasks Interaction with your application GUI
 
 @tableofcontents
 
