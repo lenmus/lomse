@@ -8,9 +8,9 @@ var searchData=
   ['is_5frecordable',['is_recordable',['../classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf',1,'DocCommand']]],
   ['is_5fredo_5fpossible',['is_redo_possible',['../classDocCommandExecuter.html#a4b0e2a24ffe21e2b4ec5440543d10127',1,'DocCommandExecuter']]],
   ['is_5freversible',['is_reversible',['../classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d',1,'DocCommand']]],
-  ['is_5fstill_5fvalid',['is_still_valid',['../classEventUpdateUI.html#ab0a2e3cb0963ae9063d99220c2a218a7',1,'EventUpdateUI::is_still_valid()'],['../classEventMouse.html#a5b07ee9086c34c9fdd362ad6e96d20c2',1,'EventMouse::is_still_valid()'],['../classEventCommand.html#a11145955b8ca7e730edead4a9ea3fce8',1,'EventCommand::is_still_valid()']]],
+  ['is_5fstill_5fvalid',['is_still_valid',['../classEventAction.html#a7b41f123b30722afcead687dbcd9fcde',1,'EventAction']]],
   ['is_5fundo_5fpossible',['is_undo_possible',['../classDocCommandExecuter.html#ac8a974ad847bba165e51471dff5cf552',1,'DocCommandExecuter']]],
   ['is_5fvalid',['is_valid',['../classFPitch.html#abe033a82ab8b4a08811498227682491e',1,'FPitch']]],
-  ['introduction',['Introduction',['../lomse-introduction.html',1,'index']]],
-  ['interaction_20with_20your_20application_20gui',['Interaction with your application GUI',['../tasks-page.html',1,'index']]]
+  ['introduction',['Introduction',['../page-introduction.html',1,'index']]],
+  ['interaction_20with_20your_20application_20gui',['Interaction with your application GUI',['../page-tasks.html',1,'index']]]
 ];

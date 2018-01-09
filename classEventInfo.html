@@ -109,6 +109,7 @@ $(document).ready(function(){initNavTree('classEventInfo.html','');});
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classEventInfo-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">EventInfo Class Reference</div>  </div>
@@ -122,16 +123,17 @@ Inheritance diagram for EventInfo:</div>
  <div class="center">
   <img src="classEventInfo.png" usemap="#EventInfo_map" alt=""/>
   <map id="EventInfo_map" name="EventInfo_map">
-<area href="classEventDoc.html" alt="EventDoc" shape="rect" coords="0,56,152,80"/>
-<area href="classEventView.html" alt="EventView" shape="rect" coords="486,56,638,80"/>
-<area href="classEventCommand.html" alt="EventCommand" shape="rect" coords="0,112,152,136"/>
+<area href="classEventAction.html" alt="EventAction" shape="rect" coords="243,56,395,80"/>
+<area href="classEventDoc.html" alt="EventDoc" shape="rect" coords="405,56,557,80"/>
+<area href="classEventPaint.html" alt="EventPaint" shape="rect" coords="567,56,719,80"/>
+<area href="classEventPlayback.html" alt="EventPlayback" shape="rect" coords="810,56,962,80"/>
+<area href="classEventControlPointMoved.html" alt="EventControlPointMoved" shape="rect" coords="0,112,152,136"/>
 <area href="classEventMouse.html" alt="EventMouse" shape="rect" coords="162,112,314,136"/>
-<area href="classEventPaint.html" alt="EventPaint" shape="rect" coords="324,112,476,136"/>
-<area href="classEventPlayScore.html" alt="EventPlayScore" shape="rect" coords="486,112,638,136"/>
-<area href="classEventScoreHighlight.html" alt="EventScoreHighlight" shape="rect" coords="648,112,800,136"/>
-<area href="classEventUpdateUI.html" alt="EventUpdateUI" shape="rect" coords="810,112,962,136"/>
+<area href="classEventPlayCtrl.html" alt="EventPlayCtrl" shape="rect" coords="324,112,476,136"/>
+<area href="classEventUpdateUI.html" alt="EventUpdateUI" shape="rect" coords="486,112,638,136"/>
+<area href="classEventEndOfPlayback.html" alt="EventEndOfPlayback" shape="rect" coords="648,112,800,136"/>
+<area href="classEventScoreHighlight.html" alt="EventScoreHighlight" shape="rect" coords="810,112,962,136"/>
 <area href="classEventUpdateViewport.html" alt="EventUpdateViewport" shape="rect" coords="972,112,1124,136"/>
-<area href="classEventControlPointMoved.html" alt="EventControlPointMoved" shape="rect" coords="0,168,152,192"/>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -145,28 +147,13 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2f573591ded0d80d168aa6f14578f707"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72874275db0eecbfdc4d322bc1422b4d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a72874275db0eecbfdc4d322bc1422b4d">get_event_type</a> ()</td></tr>
 <tr class="separator:a72874275db0eecbfdc4d322bc1422b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">For checking event type</div></td></tr>
-<tr class="memitem:af04cb1af87993e38a6bda4724b4e8524"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af04cb1af87993e38a6bda4724b4e8524"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_view_level_event</b> ()</td></tr>
-<tr class="separator:af04cb1af87993e38a6bda4724b4e8524"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf5cb28901a26f23b086de3e2e144549"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acf5cb28901a26f23b086de3e2e144549"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_UI_event</b> ()</td></tr>
-<tr class="separator:acf5cb28901a26f23b086de3e2e144549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Helpers for checking event type</div></td></tr>
+<tr class="memitem:a5bc12138d33efc9d28e8fdd25e2c2ab5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5bc12138d33efc9d28e8fdd25e2c2ab5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_modified_event</b> ()</td></tr>
+<tr class="separator:a5bc12138d33efc9d28e8fdd25e2c2ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a67b7c14c9343afab96e44c36c75993"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0a67b7c14c9343afab96e44c36c75993"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_window_event</b> ()</td></tr>
 <tr class="separator:a0a67b7c14c9343afab96e44c36c75993"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
-<tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59f898e05e6ef815bf6cb5ddcaeb6755"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a59f898e05e6ef815bf6cb5ddcaeb6755"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_mouse_event</b> ()</td></tr>
-<tr class="separator:a59f898e05e6ef815bf6cb5ddcaeb6755"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab59515e8fcf8bd291e6a7694d31d0213"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab59515e8fcf8bd291e6a7694d31d0213"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_command_event</b> ()</td></tr>
-<tr class="separator:ab59515e8fcf8bd291e6a7694d31d0213"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e5a0acf64ea582831e61917fd1863d1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e5a0acf64ea582831e61917fd1863d1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_play_score_event</b> ()</td></tr>
-<tr class="separator:a7e5a0acf64ea582831e61917fd1863d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1862ded144149111a2f26e6917083017"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1862ded144149111a2f26e6917083017"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_mouse_in_event</b> ()</td></tr>
 <tr class="separator:a1862ded144149111a2f26e6917083017"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -176,30 +163,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_mouse_out_event</b
 <tr class="memitem:af996285f31d0e32e8d22716a0c3b9393"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af996285f31d0e32e8d22716a0c3b9393"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_on_click_event</b> ()</td></tr>
 <tr class="separator:af996285f31d0e32e8d22716a0c3b9393"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b5d01176db6ed95e20413af386d7c8a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2b5d01176db6ed95e20413af386d7c8a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_link_clicked_event</b> ()</td></tr>
+<tr class="separator:a2b5d01176db6ed95e20413af386d7c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a91c0fe2865477f1d3b5973e053179267"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a91c0fe2865477f1d3b5973e053179267"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_show_contextual_menu_event</b> ()</td></tr>
 <tr class="separator:a91c0fe2865477f1d3b5973e053179267"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1dbba014478240c04410fee99a977420"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1dbba014478240c04410fee99a977420"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_control_point_moved_event</b> ()</td></tr>
 <tr class="separator:a1dbba014478240c04410fee99a977420"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba6529b7f8758eb2ce8eca5a2ea99409"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aba6529b7f8758eb2ce8eca5a2ea99409"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_on_event</b> ()</td></tr>
-<tr class="separator:aba6529b7f8758eb2ce8eca5a2ea99409"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73da25c4a40af3a02d8687a1b3c33649"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a73da25c4a40af3a02d8687a1b3c33649"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_off_event</b> ()</td></tr>
-<tr class="separator:a73da25c4a40af3a02d8687a1b3c33649"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5970c9d97b072f64a3759c0c1029c25"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad5970c9d97b072f64a3759c0c1029c25"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_higlight_event</b> ()</td></tr>
-<tr class="separator:ad5970c9d97b072f64a3759c0c1029c25"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace8c99aa644d030b01d22d9bb5a3b163"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ace8c99aa644d030b01d22d9bb5a3b163"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_advance_tempo_line_event</b> ()</td></tr>
-<tr class="separator:ace8c99aa644d030b01d22d9bb5a3b163"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a26f9ec8782908fbe260d5771991083e1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26f9ec8782908fbe260d5771991083e1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_event</b> ()</td></tr>
-<tr class="separator:a26f9ec8782908fbe260d5771991083e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a893e0aef9b96e8ccc1db6527dd6eb8f0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a893e0aef9b96e8ccc1db6527dd6eb8f0"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_selection_set_change</b> ()</td></tr>
+<tr class="separator:a893e0aef9b96e8ccc1db6527dd6eb8f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9b39608f10d2a0413a015d6b2294626"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae9b39608f10d2a0413a015d6b2294626"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pointed_object_change</b> ()</td></tr>
+<tr class="separator:ae9b39608f10d2a0413a015d6b2294626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab50b6abe11152f36dda73abe969b29f5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab50b6abe11152f36dda73abe969b29f5"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_do_play_score_event</b> ()</td></tr>
 <tr class="separator:ab50b6abe11152f36dda73abe969b29f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -209,12 +187,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49929ba5435719b29c70d8034f137f77"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a49929ba5435719b29c70d8034f137f77"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_level_event</b> ()</td></tr>
-<tr class="separator:a49929ba5435719b29c70d8034f137f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bc12138d33efc9d28e8fdd25e2c2ab5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5bc12138d33efc9d28e8fdd25e2c2ab5"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_modified_event</b> ()</td></tr>
-<tr class="separator:a5bc12138d33efc9d28e8fdd25e2c2ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
+<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
+<tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26f9ec8782908fbe260d5771991083e1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26f9ec8782908fbe260d5771991083e1"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_event</b> ()</td></tr>
+<tr class="separator:a26f9ec8782908fbe260d5771991083e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a2d3a0de5d7c5ac75a976628d07cdc1e0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2d3a0de5d7c5ac75a976628d07cdc1e0"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>Interactor</b></td></tr>
+<tr class="separator:a2d3a0de5d7c5ac75a976628d07cdc1e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a0334d24f1097988d5320a90309815104"></a>
@@ -300,7 +287,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_doc_modified_event
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventInfo.html">EventInfo</a></li>
-    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jan 9 2018 16:42:44 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

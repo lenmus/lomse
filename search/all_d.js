@@ -5,6 +5,7 @@ var searchData=
   ['observer',['Observer',['../classObserver.html',1,'']]],
   ['octave',['octave',['../classDiatonicPitch.html#aa9d9e55ca3d4bc1af8a55e66d1a78e21',1,'DiatonicPitch::octave()'],['../classFPitch.html#a4eae02ca999806784951de7fd493c6ca',1,'FPitch::octave()'],['../classUPitch.html#aed543f55ed33a3b7edce7c4933f59b64',1,'UPitch::octave()']]],
   ['on_5fdocument_5fupdated',['on_document_updated',['../classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0',1,'Interactor']]],
+  ['on_5fend_5fof_5fplay_5fevent',['on_end_of_play_event',['../classInteractor.html#a298fc7a069825f1c8301120c09400460',1,'Interactor']]],
   ['on_5fmouse_5fbutton_5fdown',['on_mouse_button_down',['../classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02',1,'Interactor']]],
   ['on_5fmouse_5fbutton_5fup',['on_mouse_button_up',['../classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8',1,'Interactor']]],
   ['on_5fmouse_5fenter_5fwindow',['on_mouse_enter_window',['../classInteractor.html#a730f04bba76db217ff36512f63600470',1,'Interactor']]],

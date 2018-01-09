@@ -105,29 +105,92 @@ $(document).ready(function(){initNavTree('lomse-events.html','');});
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
 <ul><li class="level1"><a href="#notifications">Notifications: events and requests</a></li>
-<li class="level1"><a href="#handlig-events">Handling events</a><ul><li class="level2"><a href="#view-events">View events</a></li>
-<li class="level2"><a href="#document-events">Document events</a></li>
-</ul>
-</li>
-<li class="level1"><a href="#handlig-requests">Handling requests</a></li>
+<li class="level1"><a href="#handling-events">Events and how to handle them</a></li>
+<li class="level1"><a href="#events-list">Events and how are they notified</a></li>
+<li class="level1"><a href="#event-handlers">How to register an event handler</a></li>
+<li class="level1"><a href="#handling-requests">Handling requests</a></li>
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="notifications"></a>
 Notifications: events and requests</h1>
-<p>As Lomse is platform independent code, it knows nothing about your platform mechanisms for creating events. For this reason, all Lomse communication with the user application takes place through <em>notifications</em>. They are sent to your application by invoking a callback function. Your application, in this function, will process the notifications as more appropiate, probably by creating <code>real</code> events for your platform and posting them to be processed when appropriate.</p>
+<p>Lomse is platform independent code, and knows nothing about your platform mechanisms for creating events. For this reason, all Lomse communication with the user application takes place through <em>notifications</em>, implemented by invoking a callback function in your application.</p>
 <p>Lomse <em>notifications</em> can be divided into two categories based on how they are created and how they are processed:</p>
 <ul>
-<li><b>Events</b>. They are informative notifications: the Lomse library just informs the user application about something, for instance, about a mouse click. Normally, the user application has to do some action but Lomse doesn't expect anything, and continues processing without waiting for any answer. Events can refer:<ul>
-<li>To a View, i.e. a <em>playback higlight</em> event, or a <em>window update</em> event.</li>
+<li><b>Requests</b>. When Lomse needs some information or some platform dependent service it sends a <em><a class="el" href="classRequest.html">Request</a></em>. Lomse process is paused until the user application provides the requested data so that Lomse can continue.</li>
+<li><b>Events</b>. They are informative notifications about something, for instance, about a mouse click. Events can refer:<ul>
+<li>To a View, i.e. a <em>playback highlight</em> event, or a <em>window update</em> event.</li>
 <li>To a Document or its content, i.e. a <em>mouse click</em> event; and</li>
 <li>To a Control object, i.e. a click on a link control.</li>
 </ul>
 </li>
-<li><b>Requests</b>. When Lomse needs some information or some platform dependent service it sends a <em><a class="el" href="classRequest.html">Request</a></em>. Lomse process is paused until the user application provides the requested data.</li>
 </ul>
-<h1><a class="anchor" id="handlig-events"></a>
-Handling events</h1>
-<p>It is not mandatory to handle Lomse events. But normally, your application will need to handle at least the <code>k_update_window_event</code>.</p>
+<h1><a class="anchor" id="handling-events"></a>
+Events and how to handle them</h1>
+<p>For managing events, Lomse architecture uses the observer pattern: any other object wanting to know about events must register as an observer by providing an event handler object or a callback method/function for handling the events. In theory, your application could register a handler for each event type wanting to receive.</p>
+<p>But in practice, you must be aware that <b>the name event could be misleading.</b> Lomse is not an event driven library, but a collection of services that run in the user application thread from which the service is requested. While processing a service request Lomse could find important things to communicate to your application. For this Lomse will invoke a callback so that you can take note, but Lomse <b>needs</b>to continue processing the service request. Therefore:</p>
+<ul>
+<li>You should be aware that <b>Lomse events are not 'true' events</b>, for which the event generation code and the event processing code is decoupled. Lomse event generation is just invoking the callback handler function in your application and so, it is not decoupled from processing the event in your application.</li>
+<li><b>It is your application responsibility to decouple event processing</b>, that is, your application shouldn’t retain the control more time than the strictly necessary for taking note of the event. The strongly recommended way for processing Lomse events is to create an OS/application event, put it in the application events loop and return control to Lomse, so that Lomse can terminate processing the service request that originated the event.</li>
+</ul>
+<p>Due to this, it was decided to send all events to a single event handler, instead of using the subscription mechanism. The rationale was that a single handler would simplify the user application task of creating an OS/application event, and putting it in the application events loop. This handler, named the <em>global handler</em> for events, is set up at Lomse initialization:</p>
+<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>&amp; lib = ...</div>
+<div class="line">lib.<a class="code" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a>(<span class="keyword">this</span>, lomse_event_handler);</div>
+</div><!-- fragment --><p>Unfortunately, currently not all events are sent to this handler. As I was developing the library I forgot the reasoning for having created the global handler and thus, for some events created later I maintained the subscription mechanism of the observer pattern. During the library tests, with the LenMus Phonascus application, there were no problems with these events by not having decoupled its processing in the user application. And so, the subscription mechanism remained active for these events.</p>
+<p>As a consequence, the situation is now a little bit confusing: some events are always sent to the global handler but other events will not be received unless your application register an specific event handler for each one of these event types. Of course you can always register the global handler as the handler for these events, but you will have to code it in your application.</p>
+<p>With the exception of the <code>k_update_window_event</code> it is not mandatory to handle all other Lomse events.</p>
+<h1><a class="anchor" id="events-list"></a>
+Events and how are they notified</h1>
+<p>Here is a list of all events, grouped by handling mechanism. For more information on each event read the class documentation for the event.</p>
+<p>a) Events always sent to the global handler:</p>
+<ul>
+<li>All events created during playback in the Lomse sound thread:<ul>
+<li><a class="el" href="classEventUpdateViewport.html">EventUpdateViewport</a> (type <code>k_update_viewport_event</code>) - Ask user app to update viewport origin using provided coordinates.</li>
+<li><a class="el" href="classEventEndOfPlayback.html">EventEndOfPlayback</a> (type <code>k_end_of_playback_event</code>) - End of playback.</li>
+<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (type <code>k_highlight_event</code>) - Event containing mainly a list of notes/rests to highlight or unhighlight</li>
+</ul>
+</li>
+<li>Mouse clicks on links (ImoLink objects):<ul>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_on_link_clicked_event</code>) - left click on link (ImoLink object).</li>
+</ul>
+</li>
+<li>Some events created only when document edition is enabled:<ul>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_show_contextual_menu_event</code>) - right click on object: contextual menu request</li>
+<li><a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> (type <code>k_selection_set_change</code>) - Selected objects changed</li>
+<li><a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> (type <code>k_pointed_object_change</code>) - Cursor pointing to a different object</li>
+</ul>
+</li>
+</ul>
+<p>b) Events for which you will have to register a handler at the event creator object (see <a class="el" href="lomse-events.html#event-handlers">How to register an event handler</a>):</p>
+<ul>
+<li>Register at the <a class="el" href="classInteractor.html">Interactor</a>:<ul>
+<li><a class="el" href="classEventPaint.html">EventPaint</a> (type <code>k_update_window_event</code>) - Ask user app to update window with current bitmap. <div class="fragment"><div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>, <span class="keyword">this</span>, on_update_window);</div>
+</div><!-- fragment --> This event is decoupled by design: user must do repaint immediately, without more delays.</li>
+<li><a class="el" href="classEventPlayCtrl.html">EventPlayCtrl</a> (type <code>k_do_play_score_event</code>) - Start/resume playback</li>
+<li><a class="el" href="classEventPlayCtrl.html">EventPlayCtrl</a> (type <code>k_pause_score_event</code>) - Pause playback</li>
+<li><a class="el" href="classEventPlayCtrl.html">EventPlayCtrl</a> (type <code>k_stop_playback_event</code>) - Stop playback <div class="fragment"><div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398">k_do_play_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
+<div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
+<div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
+</div><!-- fragment --> These events are created by ScorePlayerGui objects. These objects are only created when processing LMD files with &lt;scorePlayer&gt; tags.</li>
+<li><a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> (event type <code>k_control_point_moved_event</code>) - User moves a handler: handler released event <div class="fragment"><div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1">k_control_point_moved_event</a>, <span class="keyword">this</span>, wrapper_on_command_event);</div>
+</div><!-- fragment --> These events are created only when document edition is enabled.</li>
+</ul>
+</li>
+<li>Register at the Document or at specific objects in the Document:<ul>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_mouse_in_event</code>) - Mouse goes over an object</li>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_mouse_out_event</code>) - Mouse goes out from an object</li>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_on_click_event</code>) - Document, ImoContentObj: click on object <div class="fragment"><div class="line"><span class="comment">//example 1: register at the document</span></div>
+<div class="line">pDoc-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div>
+<div class="line"><span class="comment">//example 2: register for handling events related to an specific object</span></div>
+<div class="line">ButtonCtrl* pButton = ...</div>
+<div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>);</div>
+<div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da0d97a6ae325de2746db0cea3a4152226">k_mouse_in_event</a>, <span class="keyword">this</span>);</div>
+<div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8">k_mouse_out_event</a>, <span class="keyword">this</span>);</div>
+</div><!-- fragment --></li>
+</ul>
+</li>
+</ul>
+<h1><a class="anchor" id="event-handlers"></a>
+How to register an event handler</h1>
 <p>To capture and handle an event you must register an <code>event handler</code> on the object generating the events by invoking its <code>add_event_handler()</code> method. Your handler can be:</p>
 <ul>
 <li>a C function,</li>
@@ -136,11 +199,11 @@ Handling events</h1>
 </ul>
 <p>All Lomse objects that generate events derive from lomse::Observable class. Currently, events can be generated by the following objects:</p>
 <ul>
-<li>A View. You must register must register an <code>event handler</code> on the <a class="el" href="classInteractor.html">Interactor</a> for handling the View events.</li>
+<li>A View. For handling the View events you must register an <code>event handler</code> on the <a class="el" href="classInteractor.html">Interactor</a>.</li>
 <li>A Document or a document object (ImoContentObj); and</li>
 <li>A Control object.</li>
 </ul>
-<p>The parameters for the <code>add_event_handler()</code> method depends on the type of handler method. There are three posibilities:</p>
+<p>The parameters for the <code>add_event_handler()</code> method depends on the type of handler method. There are three possibilities:</p>
 <p>a) The handler is a C function: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span> (*pt2Func)(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event) );</div>
 </div><!-- fragment --><p>b) The handler is a C++ method: </p>
@@ -178,49 +241,7 @@ Handling events</h1>
 <div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">    spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">    ...</div>
-</div><!-- fragment --><h2><a class="anchor" id="view-events"></a>
-View events</h2>
-<p>Events generated by a View must be handled by adding a handler to the <a class="el" href="classInteractor.html">Interactor</a> associated to that View.</p>
-<p>Here is a list of all events generated by the View. For more information on each event read the class documentation for the event.</p>
-<p><b>Global View events:</b></p>
-<ul>
-<li><a class="el" href="classEventPaint.html">EventPaint</a> (event type <code>k_update_window_event</code>) - Ask user app to update window with current bitmap.</li>
-<li><a class="el" href="classEventUpdateViewport.html">EventUpdateViewport</a> (event type <code>k_update_viewport_event</code>) - Ask user app to update viewport origin using provided coordinates.</li>
-</ul>
-<p><b>Events related to selecting objects:</b></p>
-<ul>
-<li><a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> (event type <code>k_selection_set_change</code>) - Selected objects changed</li>
-<li><a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> (event type <code>k_pointed_object_change</code>) - Cursor pointing to a different object</li>
-</ul>
-<p><b>Events implying a posible edition command:</b></p>
-<ul>
-<li><a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> (event type <code>k_control_point_moved_event</code>) - User moves a handler: handler released event</li>
-</ul>
-<p><b>Events related to score playback:</b></p>
-<ul>
-<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (event type <code>k_highlight_on_event</code>) - Add highlight to a note/rest</li>
-<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (event type <code>k_highlight_off_event</code>) - Remove highlight from a note/rest</li>
-<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (event type <code>k_end_of_higlight_event</code>) - End of score play back. Remove all highlight.</li>
-<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (event type <code>k_advance_tempo_line_event</code>) -</li>
-<li><a class="el" href="classEventPlayScore.html">EventPlayScore</a> (event type <code>k_end_of_playback_event</code>) - End of playback. User application is informed just in case it would like to do any action (i.e. re-enabling playback button).</li>
-</ul>
-<h2><a class="anchor" id="document-events"></a>
-Document events</h2>
-<p>These events are generated by the Document. For handling them you will have to register a handler function either to the Document object or to the desired elements (ImoContentObj objects).</p>
-<p><b>Mouse events when interacting with Document objects:</b></p>
-<ul>
-<li><a class="el" href="classEventMouse.html">EventMouse</a> (event type <code>k_mouse_in_event</code>) - Mouse goes over an object</li>
-<li><a class="el" href="classEventMouse.html">EventMouse</a> (event type <code>k_mouse_out_event</code>) - Mouse goes out from an object</li>
-<li><a class="el" href="classEventMouse.html">EventMouse</a> (event type <code>k_on_click_event</code>) - Document, ImoContentObj: click on object</li>
-<li><a class="el" href="classEventMouse.html">EventMouse</a> (event type <code>k_show_contextual_menu_event</code>) - Click event: object selected and menu request</li>
-</ul>
-<p><b>Events related to score playback:</b></p>
-<ul>
-<li><a class="el" href="classEventPlayScore.html">EventPlayScore</a> (event type <code>k_do_play_score_event</code>) - Start/resume playback</li>
-<li><a class="el" href="classEventPlayScore.html">EventPlayScore</a> (event type <code>k_pause_score_event</code>) - Pause playback</li>
-<li><a class="el" href="classEventPlayScore.html">EventPlayScore</a> (event type <code>k_stop_playback_event</code>) - Stop playback</li>
-</ul>
-<h1><a class="anchor" id="handlig-requests"></a>
+</div><!-- fragment --><h1><a class="anchor" id="handling-requests"></a>
 Handling requests</h1>
 <p>It is mandatory to handle Lomse requests. For this, you have to set up a callback method (at library initialization). For instance:</p>
 <div class="fragment"><div class="line"><span class="keyword">class </span>MyApp</div>
@@ -265,7 +286,7 @@ Handling requests</h1>
 <div class="line">}</div>
 </div><!-- fragment --><p>Lomse will make any necessary request by invoking this callback method. Therefore, requests are always handled in a single point in your application.</p>
 <p>When your callback method is invoked, it will receive as parameter an object derived from class <a class="el" href="classRequest.html">Request</a>, containing the information about the required information or platform dependent service. And Lomse process is paused until the user application provides the requested data.</p>
-<p>The list of posible Requests is:</p>
+<p>The list of possible Requests is:</p>
 <ul>
 <li><a class="el" href="classRequestDynamic.html">RequestDynamic</a>. While parsing an LDP document, a <code>(dynamic)</code> element has been found. Lomse is requesting user application for the dynamic content that must be inserted.</li>
 <li><a class="el" href="classRequestFont.html">RequestFont</a>. The font used for an element is not available in Lomse package. Lomse requests the file path for the font. </li>
@@ -276,7 +297,7 @@ Handling requests</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jan 9 2018 15:26:40 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

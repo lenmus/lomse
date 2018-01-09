@@ -16,8 +16,8 @@ var NAVTREE =
     ] ],
     [ "Types and constants", "modules.html", "modules" ],
     [ "Examples", "examples.html", "examples" ],
-    [ "License for code samples", "samples-license.html", null ],
-    [ "Library license", "library-license.html", null ],
+    [ "License for code samples", "page-code-license.html", null ],
+    [ "Library license", "page-library-license.html", null ],
     [ "Todo List", "todo.html", null ]
   ] ]
 ];
@@ -25,10 +25,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classEventInfo.html#a5bc12138d33efc9d28e8fdd25e2c2ab5",
-"classRequest.html#a45cc5d15eb7b9c9e97bd7328c9a90d3f",
-"group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029a3e013b76457f66feba77c347eebda84e",
-"sound-generation.html#sound-generation-overview"
+"classEventInfo.html#a2b5d01176db6ed95e20413af386d7c8a",
+"classPresenter.html#af3935244d12adf2de9973953d7fa444b",
+"group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029acc2f401c9df3ff4d0611f9d467a2d936",
+"page-sound-generation.html#how-to-play-score"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

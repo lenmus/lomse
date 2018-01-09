@@ -37,16 +37,17 @@ var hierarchy =
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "EventInfo", "classEventInfo.html", [
-      [ "EventDoc", "classEventDoc.html", null ],
-      [ "EventView", "classEventView.html", [
-        [ "EventCommand", "classEventCommand.html", [
-          [ "EventControlPointMoved", "classEventControlPointMoved.html", null ]
-        ] ],
+      [ "EventAction", "classEventAction.html", [
+        [ "EventControlPointMoved", "classEventControlPointMoved.html", null ],
         [ "EventMouse", "classEventMouse.html", null ],
-        [ "EventPaint", "classEventPaint.html", null ],
-        [ "EventPlayScore", "classEventPlayScore.html", null ],
+        [ "EventPlayCtrl", "classEventPlayCtrl.html", null ],
+        [ "EventUpdateUI", "classEventUpdateUI.html", null ]
+      ] ],
+      [ "EventDoc", "classEventDoc.html", null ],
+      [ "EventPaint", "classEventPaint.html", null ],
+      [ "EventPlayback", "classEventPlayback.html", [
+        [ "EventEndOfPlayback", "classEventEndOfPlayback.html", null ],
         [ "EventScoreHighlight", "classEventScoreHighlight.html", null ],
-        [ "EventUpdateUI", "classEventUpdateUI.html", null ],
         [ "EventUpdateViewport", "classEventUpdateViewport.html", null ]
       ] ]
     ] ],
@@ -61,7 +62,7 @@ var hierarchy =
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "Observer", "classObserver.html", null ],
-    [ "render-overview", null, [
+    [ "page-render-overview", null, [
       [ "Presenter", "classPresenter.html", null ]
     ] ],
     [ "Request", "classRequest.html", [

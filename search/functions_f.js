@@ -3,7 +3,6 @@ var searchData=
   ['screen_5fpoint_5fto_5fmodel_5fpoint',['screen_point_to_model_point',['../classInteractor.html#a986167b680f97ad5914c69343a7d15c5',1,'Interactor']]],
   ['screen_5fpoint_5fto_5fpage_5fpoint',['screen_point_to_page_point',['../classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff',1,'Interactor']]],
   ['select_5fvoice',['select_voice',['../classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73',1,'Interactor']]],
-  ['send_5fend_5fof_5fplay_5fevent',['send_end_of_play_event',['../classInteractor.html#a3108aa6a66e6db48008e8863f4604232',1,'Interactor']]],
   ['set_5fbox_5fto_5fdraw',['set_box_to_draw',['../classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309',1,'Interactor']]],
   ['set_5fdefault_5ffonts_5fpath',['set_default_fonts_path',['../classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec',1,'LomseDoorway']]],
   ['set_5ffont_5ffullname',['set_font_fullname',['../classRequestFont.html#a84bfe5b1e2e2d2ee9f975166f94f917f',1,'RequestFont']]],

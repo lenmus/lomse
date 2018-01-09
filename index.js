@@ -1,74 +1,73 @@
 var index =
 [
-    [ "Introduction", "lomse-introduction.html", [
-      [ "Lomse philosophy", "lomse-introduction.html#lomse-philosophy", null ],
-      [ "Class LomseDoorway", "lomse-introduction.html#overview-doorway", null ],
-      [ "The Document and related classes", "lomse-introduction.html#overview-mvc", null ],
-      [ "Displaying documents", "lomse-introduction.html#overview-rendering", null ],
-      [ "Printing documents", "lomse-introduction.html#overview-print", null ],
-      [ "Editing documents", "lomse-introduction.html#overview-edition", null ],
-      [ "The sound engine", "lomse-introduction.html#overview-sound-engine", null ]
+    [ "Introduction", "page-introduction.html", [
+      [ "Lomse philosophy", "page-introduction.html#lomse-philosophy", null ],
+      [ "Class LomseDoorway", "page-introduction.html#overview-doorway", null ],
+      [ "The Document and related classes", "page-introduction.html#overview-mvc", null ],
+      [ "Displaying documents", "page-introduction.html#overview-rendering", null ],
+      [ "Printing documents", "page-introduction.html#overview-print", null ],
+      [ "Editing documents", "page-introduction.html#overview-edition", null ],
+      [ "The sound engine", "page-introduction.html#overview-sound-engine", null ]
     ] ],
-    [ "Rendering documents overview", "render-overview.html", [
-      [ "How to render a document", "render-overview.html#mvc-rendering", null ],
-      [ "The Lomse Model-View-Controller", "render-overview.html#mvc-overview", null ],
-      [ "The rendering buffer for the View", "render-overview.html#rendering-buffer", null ],
-      [ "Initializing the Lomse library", "render-overview.html#init-lomse", null ],
-      [ "Displaying the document", "render-overview.html#rendering-display", null ]
+    [ "Rendering documents overview", "page-render-overview.html", [
+      [ "How to render a document", "page-render-overview.html#mvc-rendering", null ],
+      [ "The Lomse Model-View-Controller", "page-render-overview.html#mvc-overview", null ],
+      [ "The rendering buffer for the View", "page-render-overview.html#rendering-buffer", null ],
+      [ "Initializing the Lomse library", "page-render-overview.html#init-lomse", null ],
+      [ "Displaying the document", "page-render-overview.html#rendering-display", null ]
     ] ],
-    [ "Printing documents overview", "print-api.html", [
-      [ "The print API", "print-api.html#print-overview", null ],
-      [ "Determining print buffer size", "print-api.html#print-buffer-size", null ],
-      [ "Save memory by tiling", "print-api.html#print-tiles", null ]
+    [ "Printing documents overview", "page-printing.html", [
+      [ "The print API", "page-printing.html#print-overview", null ],
+      [ "Determining print buffer size", "page-printing.html#print-buffer-size", null ],
+      [ "Save memory by tiling", "page-printing.html#print-tiles", null ]
     ] ],
-    [ "Editing documents overview", "document-edition-overview.html", [
-      [ "How to modify a document", "document-edition-overview.html#edit-overview", null ],
-      [ "The high-level API: edition commands", "document-edition-overview.html#edit-high-level", [
-        [ "Undo/Redo", "document-edition-overview.html#edit-overview-undo", null ],
-        [ "Cursor and selections", "document-edition-overview.html#edit-overview-cursor", null ]
+    [ "Editing documents overview", "page-edit-overview.html", [
+      [ "How to modify a document", "page-edit-overview.html#edit-overview", null ],
+      [ "The high-level API: edition commands", "page-edit-overview.html#edit-high-level", [
+        [ "Undo/Redo", "page-edit-overview.html#edit-overview-undo", null ],
+        [ "Cursor and selections", "page-edit-overview.html#edit-overview-cursor", null ]
       ] ],
-      [ "Supported edition modes", "document-edition-overview.html#edit-modes", null ],
-      [ "Edition commands", "document-edition-overview.html#edit-commands", null ]
+      [ "Supported edition modes", "page-edit-overview.html#edit-modes", null ],
+      [ "Edition commands", "page-edit-overview.html#edit-commands", null ]
     ] ],
-    [ "Scores playback overview", "sound-generation.html", [
-      [ "How Lomse playback works", "sound-generation.html#sound-generation-overview", null ],
-      [ "Your application set-up: summary", "sound-generation.html#playback-summary", null ],
-      [ "How to handle sound events", "sound-generation.html#handling-sound-events", null ],
-      [ "How to play an score", "sound-generation.html#how-to-play-score", null ],
-      [ "Handling highlight events", "sound-generation.html#handling-highlight-events", null ],
-      [ "The PlayerGui object", "sound-generation.html#implementing-player-gui", null ]
+    [ "Scores playback overview", "page-sound-generation.html", [
+      [ "How Lomse playback works", "page-sound-generation.html#page-sound-generation-overview", null ],
+      [ "Your application set-up: summary", "page-sound-generation.html#playback-summary", null ],
+      [ "How to handle sound events", "page-sound-generation.html#handling-sound-events", null ],
+      [ "How to play an score", "page-sound-generation.html#how-to-play-score", null ],
+      [ "Handling highlight events", "page-sound-generation.html#handling-highlight-events", null ],
+      [ "The PlayerGui object", "page-sound-generation.html#implementing-player-gui", null ]
     ] ],
-    [ "Interaction with your application GUI", "tasks-page.html", [
-      [ "Interactors and Tasks", "tasks-page.html#gui-interaction", null ],
-      [ "Task objects", "tasks-page.html#tasks-overview", [
-        [ "TaskDragView class", "tasks-page.html#task-drag-view", null ],
-        [ "TaskOnlyClicks class", "tasks-page.html#task-only-clicks", null ],
-        [ "TaskSelection class", "tasks-page.html#task-selection", null ],
-        [ "TaskSelectionRectangle class", "tasks-page.html#task-selection-rectangle", null ],
-        [ "TaskMoveObject class", "tasks-page.html#task-move-object", null ],
-        [ "TaskMoveHandler class", "tasks-page.html#task-move-handler", null ],
-        [ "TaskDataEntry class", "tasks-page.html#task-data-entry", null ]
+    [ "Interaction with your application GUI", "page-tasks.html", [
+      [ "Interactors and Tasks", "page-tasks.html#gui-interaction", null ],
+      [ "Task objects", "page-tasks.html#tasks-overview", [
+        [ "TaskDragView class", "page-tasks.html#task-drag-view", null ],
+        [ "TaskOnlyClicks class", "page-tasks.html#task-only-clicks", null ],
+        [ "TaskSelection class", "page-tasks.html#task-selection", null ],
+        [ "TaskSelectionRectangle class", "page-tasks.html#task-selection-rectangle", null ],
+        [ "TaskMoveObject class", "page-tasks.html#task-move-object", null ],
+        [ "TaskMoveHandler class", "page-tasks.html#task-move-handler", null ],
+        [ "TaskDataEntry class", "page-tasks.html#task-data-entry", null ]
       ] ]
     ] ],
-    [ "File formats supoported by Lomse", "file-formats.html", [
-      [ "Supported file formats", "file-formats.html#file-formats-overview", [
-        [ "LDP format", "file-formats.html#ldp-format", null ],
-        [ "LMD format", "file-formats.html#lmd-format", null ],
-        [ "MusicXML format", "file-formats.html#mxl-format", null ]
+    [ "File formats supoported by Lomse", "page-file-formats.html", [
+      [ "Supported file formats", "page-file-formats.html#page-file-formats-overview", [
+        [ "LDP format", "page-file-formats.html#ldp-format", null ],
+        [ "LMD format", "page-file-formats.html#lmd-format", null ],
+        [ "MusicXML format", "page-file-formats.html#mxl-format", null ]
       ] ]
     ] ],
-    [ "Coordinate systems, units, scaling and viewport", "viewport-overview.html", [
-      [ "Device and logical units", "viewport-overview.html#lomse-units", null ],
-      [ "Scaling", "viewport-overview.html#scale-factor", null ],
-      [ "Scrolling: the Viewport", "viewport-overview.html#viewport-concept", null ]
+    [ "Coordinate systems, units, scaling and viewport", "page-coordinates-viewport.html", [
+      [ "Device and logical units", "page-coordinates-viewport.html#lomse-units", null ],
+      [ "Scaling", "page-coordinates-viewport.html#scale-factor", null ],
+      [ "Scrolling: the Viewport", "page-coordinates-viewport.html#viewport-concept", null ]
     ] ],
-    [ "How Lomse callbacks work", "lomse-callbacks.html", null ],
-    [ "Events and Requests", "lomse-events.html", [
-      [ "Notifications: events and requests", "lomse-events.html#notifications", null ],
-      [ "Handling events", "lomse-events.html#handlig-events", [
-        [ "View events", "lomse-events.html#view-events", null ],
-        [ "Document events", "lomse-events.html#document-events", null ]
-      ] ],
-      [ "Handling requests", "lomse-events.html#handlig-requests", null ]
+    [ "How Lomse callbacks work", "page-callbacks.html", null ],
+    [ "Events and Requests", "page-events.html", [
+      [ "Notifications: events and requests", "page-events.html#notifications", null ],
+      [ "Events and how to handle them", "page-events.html#handling-events", null ],
+      [ "Events and how are they notified", "page-events.html#events-list", null ],
+      [ "How to register an event handler", "page-events.html#event-handlers", null ],
+      [ "Handling requests", "page-events.html#handling-requests", null ]
     ] ]
 ];

@@ -501,7 +501,7 @@ Enumerations</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>This enum describes the behavior of edition commands related to adding or removing notes and rests.</p>
-<p>See <a class="el" href="document-edition-overview.html#edit-modes">Supported edition modes</a>.</p>
+<p>See <a class="el" href="page-edit-overview.html#edit-modes">Supported edition modes</a>.</p>
 <p>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt; </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97"></a>k_edit_mode_replace</em>&#160;</td><td class="fielddoc">
@@ -560,14 +560,29 @@ Enumerations</h2></td></tr>
 <p>This enum assigns an event type for Lomse events.</p>
 <p>#include &lt;<a class="el" href="lomse__events_8h_source.html">lomse_events.h</a>&gt; </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49"></a>k_update_window_event</em>&#160;</td><td class="fielddoc">
-<p>ask user app to update window with current bitmap </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dac984f42eda573e88c436b2c0507509ec"></a>k_doc_modified_event</em>&#160;</td><td class="fielddoc">
+<p>Informs that the Document has been modified. </p>
 </td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51"></a>k_update_viewport_event</em>&#160;</td><td class="fielddoc">
-<p>ask user app to update window with current bitmap </p>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49"></a>k_update_window_event</em>&#160;</td><td class="fielddoc">
+<p><a class="el" href="classRequest.html">Request</a> to update window with current bitmap. </p>
 </td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da5213cae529fd23e1c585ea3cefcac679"></a>k_update_UI_event</em>&#160;</td><td class="fielddoc">
-<p>possible need for UI updates </p>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da0d97a6ae325de2746db0cea3a4152226"></a>k_mouse_in_event</em>&#160;</td><td class="fielddoc">
+<p>mouse enters in an object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8"></a>k_mouse_out_event</em>&#160;</td><td class="fielddoc">
+<p>mouse goes out from an object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4"></a>k_on_click_event</em>&#160;</td><td class="fielddoc">
+<p>click on object </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da2de31024ecf721e92122d6568fef5553"></a>k_link_clicked_event</em>&#160;</td><td class="fielddoc">
+<p>left mouse click on a link (ImoLink object) </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da8b05b7ad1bafa8e3f7acd92c7ce42855"></a>k_show_contextual_menu_event</em>&#160;</td><td class="fielddoc">
+<p>right click on object: contextual menu request </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1"></a>k_control_point_moved_event</em>&#160;</td><td class="fielddoc">
+<p>user moves a handler: handler released event </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da02251f79a75012dfa080a0e3b62ecc38"></a>k_selection_set_change</em>&#160;</td><td class="fielddoc">
 <p>selected objects changed </p>
@@ -575,47 +590,23 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dab0528968408a8594fbaf8388a3a1da7f"></a>k_pointed_object_change</em>&#160;</td><td class="fielddoc">
 <p>cursor pointing to a different object </p>
 </td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da0d97a6ae325de2746db0cea3a4152226"></a>k_mouse_in_event</em>&#160;</td><td class="fielddoc">
-<p>mouse goes over an object </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8"></a>k_mouse_out_event</em>&#160;</td><td class="fielddoc">
-<p>mouse goes out from an object </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4"></a>k_on_click_event</em>&#160;</td><td class="fielddoc">
-<p>Document, ImoContentObj: click on object. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da8b05b7ad1bafa8e3f7acd92c7ce42855"></a>k_show_contextual_menu_event</em>&#160;</td><td class="fielddoc">
-<p>Click event: object selected and menu request. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1"></a>k_control_point_moved_event</em>&#160;</td><td class="fielddoc">
-<p>user moves a handler: handler released event </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017"></a>k_highlight_event</em>&#160;</td><td class="fielddoc">
-<p>score playbaxk (highlight) </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dae886b9dedcbd475e8cf97c528be6b310"></a>k_highlight_on_event</em>&#160;</td><td class="fielddoc">
-<p>add highlight to a note/rest </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da13e56ef497b4f68e47c72e179f57b003"></a>k_highlight_off_event</em>&#160;</td><td class="fielddoc">
-<p>remove highlight from a note/rest </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dad3c90382b79ddf0d66aab1a8b459f2f6"></a>k_end_of_higlight_event</em>&#160;</td><td class="fielddoc">
-<p>end of score play back. Remove all highlight. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da8c574596413da165d650c2bbe320ffc4"></a>k_play_score_event</em>&#160;</td><td class="fielddoc">
-<p>score playback (sound) </p>
-</td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398"></a>k_do_play_score_event</em>&#160;</td><td class="fielddoc">
-<p>start/resume playback </p>
+<p><a class="el" href="classRequest.html">Request</a> to start/resume playback. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a"></a>k_pause_score_event</em>&#160;</td><td class="fielddoc">
-<p>pause playback </p>
+<p><a class="el" href="classRequest.html">Request</a> to pause playback. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa"></a>k_stop_playback_event</em>&#160;</td><td class="fielddoc">
-<p>stop playback </p>
+<p><a class="el" href="classRequest.html">Request</a> to stop playback. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017"></a>k_highlight_event</em>&#160;</td><td class="fielddoc">
+<p>Wrapper event containing a list of real events. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51"></a>k_update_viewport_event</em>&#160;</td><td class="fielddoc">
+<p>Suggest to change viewport. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656daddaeb68131c02cdfa6b88deaa7c6a89b"></a>k_end_of_playback_event</em>&#160;</td><td class="fielddoc">
-<p>end of playback </p>
+<p>Playback ended. </p>
 </td></tr>
 </table>
 
@@ -1576,7 +1567,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Jan 1 2018 18:58:22 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jan 9 2018 16:42:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

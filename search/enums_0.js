@@ -13,6 +13,7 @@ var searchData=
   ['eeditmode',['EEditMode',['../group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70',1,'lomse_command.h']]],
   ['eeventflag',['EEventFlag',['../group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107',1,'lomse_interactor.h']]],
   ['eeventtype',['EEventType',['../group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d',1,'lomse_events.h']]],
+  ['ehighlighttype',['EHighlightType',['../classEventScoreHighlight.html#a806e298256b9f36e7e9cb80d3224c425',1,'EventScoreHighlight']]],
   ['eimoattribute',['EImoAttribute',['../group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029',1,'lomse_im_attributes.h']]],
   ['eimoobjtype',['EImoObjType',['../group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f',1,'lomse_internal_model.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],

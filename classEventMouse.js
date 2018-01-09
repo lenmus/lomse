@@ -6,6 +6,5 @@ var classEventMouse =
     [ "get_imo_object", "classEventMouse.html#aa2bb0545de0cdc10dd738618d5d8cbbe", null ],
     [ "get_source", "classEventMouse.html#aef97b3490945ff7774d95b9388d0ea34", null ],
     [ "get_x", "classEventMouse.html#af79fd6811e3033cd08276eb3f68a7500", null ],
-    [ "get_y", "classEventMouse.html#a7df79bb4129b6a67936c0e8f26162b7b", null ],
-    [ "is_still_valid", "classEventMouse.html#a5b07ee9086c34c9fdd362ad6e96d20c2", null ]
+    [ "get_y", "classEventMouse.html#a7df79bb4129b6a67936c0e8f26162b7b", null ]
 ];
