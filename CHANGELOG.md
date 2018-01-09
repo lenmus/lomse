@@ -1,12 +1,55 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.21.0
+[Since last version] 0.22.0
+=============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.22.0
+
+- None.
+
+##### COMPATIBLE CHANGES
+
+- None.
+
+
+
+Version [0.22.0] (9/Jan/2018)
 =============================
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.21.0
 
-- None.
+While documenting Lomse events some issues where found (see issue #111)
+and it was decided to refactor some events. Unfortunatelly most of these
+changes create incompatibilities due to renames. In particular:
+
+- Some useless event classification methods in EventInfo have been removed.
+
+- EventPlayScore has been renamed:
+	- EventPlayScore of types k_do_play_score_event, k_pause_score_event and
+      k_stop_playback_event renamed as EventPlayCtrl.
+    - EventPlayScore of type k_end_of_playback_event renamed as EventEndOfPlayback
+
+- Removed event types k_highlight_on_event, k_highlight_off_event,
+  k_end_of_higlight_event and k_advance_tempo_line_event, and replaced by
+  an enum in EventScoreHighlight. 
+
+- Event EventMouse (type k_show_contextual_menu_event) renamed as
+  EventContextualMenu (type k_show_contextual_menu_event)
+
+- Created EventMouse, type k_link_clicked_event. It replaces on_click
+  events on ImoLink because the way in which they are sent to the user
+  application is different and, therefore, it is confusing how to handle
+  them. The new event type is also more specific.
+
+- Removed EventView and created bases classes EventAction and EventPlayback
+
+- Method Interactor::send_end_of_play_event()" renamed as 
+  "on_end_of_play_event()" to avoid raising questions on users about 
+  the contradiction of having to ask the Interactor to
+  "send_end_of_play_event" when an end of play event has been received
+  and is being processed.
+
 
 ##### COMPATIBLE CHANGES
 
@@ -539,7 +582,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.21.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.22.0...HEAD
+[0.22.0]: https://github.com/lenmus/lomse/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/lenmus/lomse/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/lenmus/lomse/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/lenmus/lomse/compare/0.18.0...0.19.0

@@ -1,10 +1,10 @@
 /**
 
-@page sound-generation Scores playback overview
+@page page-sound-generation Scores playback overview
 
 @tableofcontents
 
-@section sound-generation-overview How Lomse playback works
+@section page-sound-generation-overview How Lomse playback works
 
 Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.
 

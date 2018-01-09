@@ -341,7 +341,7 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoId> >& items = pEv->get_items();
         std::list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
@@ -353,10 +353,10 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 2);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
         //cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == k_highlight_on_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
@@ -367,7 +367,7 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_end_of_higlight_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_higlight );
         //cout << "item type: " << (*itItem).first << endl;
     }
 
@@ -414,7 +414,7 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoId> >& items = pEv->get_items();
         std::list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
 //        cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
@@ -425,16 +425,16 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 4);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
 //        cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == k_highlight_on_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
 //        cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == k_highlight_on_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
 //        cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == k_highlight_on_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
 //        cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
@@ -445,7 +445,7 @@ SUITE(ScorePlayerTest)
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_end_of_higlight_event );
+        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_higlight );
 //        cout << "item type: " << (*itItem).first << endl;
     }
 
@@ -501,7 +501,7 @@ SUITE(ScorePlayerTest)
 //        std::list<int>::iterator itN = m_notifications.begin();
 ////        cout << "notif.type = " << *itN << endl;
 //        CHECK( *(itN++) == k_prepare_for_highlight_event );
-//        CHECK( *(itN++) == k_highlight_on_event );
+//        CHECK( *(itN++) == EventScoreHighlight::k_highlight_on );
 //        CHECK( *(itN++) == k_highlight_off_event );
 //        CHECK( *(itN++) == k_end_of_higlight_event );
 //    }

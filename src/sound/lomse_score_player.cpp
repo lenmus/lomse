@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -487,7 +487,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         if (fVisualTracking)
         {
             if (events[i]->pSO)
-                pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO->get_id());
+                pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
             if (nMtrEvDeltaTime < events[i]->DeltaTime)
             {
                 //last metronome click is previous to first event from table.
@@ -571,7 +571,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
                 if (fVisualTracking && events[i]->pSO != nullptr)
-                    pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO->get_id());
+                    pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
 
                 fMtrOn = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;
@@ -665,7 +665,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     m_pInteractor->change_viewport_if_necessary(id);
-                    pEvent->add_item(k_highlight_on_event, id);
+                    pEvent->add_item(EventScoreHighlight::k_highlight_on, id);
                 }
 
             }
@@ -690,7 +690,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 //generate implicit visual off event
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(k_highlight_off_event, events[i]->pSO->get_id());
+                    pEvent->add_item(EventScoreHighlight::k_highlight_off, events[i]->pSO->get_id());
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
@@ -699,14 +699,14 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     m_pInteractor->change_viewport_if_necessary(id);
-                    pEvent->add_item(k_highlight_on_event, id);
+                    pEvent->add_item(EventScoreHighlight::k_highlight_on, id);
                 }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {
                 //remove visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(k_highlight_off_event, events[i]->pSO->get_id());
+                    pEvent->add_item(EventScoreHighlight::k_highlight_off, events[i]->pSO->get_id());
 
             }
             else if (events[i]->EventType == SoundEvent::k_end_of_score)
@@ -789,7 +789,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         m_fFinalEventSent = true;
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(k_end_of_higlight_event, k_no_imoid);
+        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
@@ -818,7 +818,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
             wpInteractor = WpInteractor();
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(k_end_of_higlight_event, k_no_imoid);
+        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
@@ -846,7 +846,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
     if (pInteractor)
         pInteractor->enable_forced_view_updates(true);
 
-    //update player gui
+    //create event for updating player gui
     if (m_pPlayerGui)
     {
         //prepare weak_ptr to interactor
@@ -859,9 +859,9 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
         else
             wpInteractor = WpInteractor();
 
-        SpEventPlayScore event(
-            LOMSE_NEW EventPlayScore(k_end_of_playback_event, wpInteractor,
-                                     m_pScore, m_pPlayerGui) );
+        SpEventEndOfPlayback event(
+            LOMSE_NEW EventEndOfPlayback(k_end_of_playback_event, wpInteractor,
+                                         m_pScore, m_pPlayerGui) );
         if (m_fPostEvents)
             m_libScope.post_event(event);
         else if (pInteractor)

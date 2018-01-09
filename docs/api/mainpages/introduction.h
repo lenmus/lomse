@@ -1,6 +1,6 @@
 /**
 
-@page lomse-introduction Introduction
+@page page-introduction Introduction
 
 @ingroup pages
 
@@ -61,7 +61,7 @@ Lomse is platform independent code and knows nothing about how to create a windo
 
 These operations are usually triggered by your application when handling some operating system events, such as <b>window paint</b> events.
 
-The details and methods you have to use for displaying documents are described in @ref render-overview.
+The details and methods you have to use for displaying documents are described in @ref page-render-overview.
 
 
 
@@ -69,7 +69,7 @@ The details and methods you have to use for displaying documents are described i
 
 As Lomse is platform independent code, it knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.
 
-The details and methods you have to use for printing are described in @ref print-api.
+The details and methods you have to use for printing are described in @ref page-printing.
 
 
 
@@ -85,7 +85,7 @@ Most edition commands require a reference point in the document. For this, Lomse
 
 For moving the cursor to another position and for selecting or deselecting objects your application just issue specific edition commands, such as <i>advance cursor</i>, <i>move cursor to start of score</i> or <i>select object</i>.
 
-And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the GUI as you'd like, or for not a having a GUI! For more details see  @ref document-edition-overview.
+And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the GUI as you'd like, or for not a having a GUI! For more details see  @ref page-edit-overview.
 
 
 
@@ -93,7 +93,7 @@ And this is, basically, the document edition API. It is very simple and gives fu
 
 Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.
 
-The details and classes you have to use for scores playback are described in @ref sound-generation.
+The details and classes you have to use for scores playback are described in @ref page-sound-generation.
 
 */
 

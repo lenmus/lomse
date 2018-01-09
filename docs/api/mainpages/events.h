@@ -1,5 +1,5 @@
 /**
-@page lomse-events Events and Requests
+@page page-events Events and Requests
 
 
 @tableofcontents
@@ -7,20 +7,109 @@
 
 @section notifications Notifications: events and requests
 
-As Lomse is platform independent code, it knows nothing about your platform mechanisms for creating events. For this reason, all Lomse communication with the user application takes place through <i>notifications</i>. They are sent to your application by invoking a callback function. Your application, in this function, will process the notifications as more appropiate, probably by creating <tt>real</tt> events for your platform and posting them to be processed when appropriate.
+Lomse is platform independent code, and knows nothing about your platform mechanisms for creating events. For this reason, all Lomse communication with the user application takes place through <i>notifications</i>, implemented by invoking a callback function in your application.
 
 Lomse <i>notifications</i> can be divided into two categories based on how they are created and how they are processed:
-	- <b>Events</b>. They are informative notifications: the Lomse library just informs the user application about something, for instance, about a mouse click. Normally, the user application has to do some action but Lomse doesn't expect anything, and continues processing without waiting for any answer. Events can refer:
-		- To a View, i.e. a <i>playback higlight</i> event, or a <i>window update</i> event.
+    - <b>Requests</b>. When Lomse needs some information or some platform dependent service it sends a <i>Request</i>. Lomse process is paused until the user application provides the requested data so that Lomse can continue.
+	- <b>Events</b>. They are informative notifications about something, for instance, about a mouse click. Events can refer:
+		- To a View, i.e. a <i>playback highlight</i> event, or a <i>window update</i> event.
 		- To a Document or its content, i.e. a <i>mouse click</i> event; and
 		- To a Control object, i.e. a click on a link control.
 
-    - <b>Requests</b>. When Lomse needs some information or some platform dependent service it sends a <i>Request</i>. Lomse process is paused until the user application provides the requested data.
+
+@section handling-events Events and how to handle them
+
+For managing events, Lomse architecture uses the observer pattern: any other object wanting to know about events must register as an observer by providing an event handler object or a callback method/function for handling the events. In theory, your application could register a handler for each event type wanting to receive.
+
+But in practice, you must be aware that <b>the name event could be misleading.</b> Lomse is not an event driven library, but a collection of services that run in the user application thread from which the service is requested. While processing a service request Lomse could find important things to communicate to your application. For this Lomse will invoke a callback so that you can take note, but Lomse <b>needs</b>to continue processing the service request. Therefore:
+
+- You should be aware that <b>Lomse events are not 'true' events</b>, for which the event generation code and the event processing code is decoupled. Lomse event generation is just invoking the callback handler function in your application and so, it is not decoupled from processing the event in your application.
+
+- <b>It is your application responsibility to decouple event processing</b>, that is, your application shouldn’t retain the control more time than the strictly necessary for taking note of the event. The strongly recommended way for processing Lomse events is to create an OS/application event, put it in the application events loop and return control to Lomse, so that Lomse can terminate processing the service request that originated the event.
+
+Due to this, it was decided to send all events to a single event handler, instead of using the subscription mechanism. The rationale was that a single handler would simplify the user application task of creating an OS/application event, and putting it in the application events loop. This handler, named the <i>global handler</i> for events, is set up at Lomse initialization:
+
+@code
+LomseDoorway& lib = ...
+lib.set_notify_callback(this, lomse_event_handler);
+@endcode
+
+Unfortunately, currently not all events are sent to this handler. As I was developing the library I forgot the reasoning for having created the global handler and thus, for some events created later I maintained the subscription mechanism of the observer pattern. During the library tests, with the LenMus Phonascus application, there were no problems with these events by not having decoupled its processing in the user application. And so, the subscription mechanism remained active for these events.
+
+As a consequence, the situation is now a little bit confusing: some events are always sent to the global handler but other events will not be received unless your application register an specific event handler for each one of these event types. Of course you can always register the global handler as the handler for these events, but you will have to code it in your application.
+
+With the exception of the <tt>k_update_window_event</tt> it is not mandatory to handle all other Lomse events.
 
 
-@section handlig-events Handling events
 
-It is not mandatory to handle Lomse events. But normally, your application will need to handle at least the <tt>k_update_window_event</tt>.
+
+@section events-list Events and how are they notified
+
+Here is a list of all events, grouped by handling mechanism. For more information on each event read the class documentation for the event.
+
+a) Events always sent to the global handler:
+
+- All events created during playback in the Lomse sound thread:
+
+	- EventUpdateViewport (type <tt>k_update_viewport_event</tt>) - Ask user app to update viewport origin using provided coordinates.
+	- EventEndOfPlayback (type <tt>k_end_of_playback_event</tt>) - End of playback.
+	- EventScoreHighlight (type <tt>k_highlight_event</tt>) - Event containing mainly a list of notes/rests to highlight or unhighlight
+
+- Mouse clicks on links (ImoLink objects):
+
+	- EventMouse (type <tt>k_on_link_clicked_event</tt>) - left click on link (ImoLink object).
+
+- Some events created only when document edition is enabled:
+
+	- EventMouse (type <tt>k_show_contextual_menu_event</tt>) - right click on object: contextual menu request
+	- EventUpdateUI (type <tt>k_selection_set_change</tt>) - Selected objects changed
+	- EventUpdateUI (type <tt>k_pointed_object_change</tt>) - Cursor pointing to a different object
+
+b) Events for which you will have to register a handler at the event creator object (see @ref event-handlers):
+
+- Register at the Interactor:
+	- EventPaint (type <tt>k_update_window_event</tt>) - Ask user app to update window with current bitmap.
+		@code
+	    spInteractor->add_event_handler(k_update_window_event, this, on_update_window);
+		@endcode
+		This event is decoupled by design: user must do repaint immediately, without more delays.
+
+	- EventPlayCtrl (type <tt>k_do_play_score_event</tt>) - Start/resume playback
+	- EventPlayCtrl (type <tt>k_pause_score_event</tt>) - Pause playback
+	- EventPlayCtrl (type <tt>k_stop_playback_event</tt>) - Stop playback
+		@code
+	    spInteractor->add_event_handler(k_do_play_score_event, this, wrapper_play_score);
+	    spInteractor->add_event_handler(k_pause_score_event, this, wrapper_play_score);
+	    spInteractor->add_event_handler(k_stop_playback_event, this, wrapper_play_score);
+		@endcode
+		These events are created by ScorePlayerGui objects. These objects are only created when processing
+		LMD files with @<scorePlayer@> tags.
+
+	- EventControlPointMoved (event type <tt>k_control_point_moved_event</tt>) - User moves a handler: handler released event
+		@code
+		spInteractor->add_event_handler(k_control_point_moved_event, this, wrapper_on_command_event);
+		@endcode
+		These events are created only when document edition is enabled.
+
+- Register at the Document or at specific objects in the Document:
+
+	- EventMouse (type <tt>k_mouse_in_event</tt>) - Mouse goes over an object
+	- EventMouse (type <tt>k_mouse_out_event</tt>) - Mouse goes out from an object
+	- EventMouse (type <tt>k_on_click_event</tt>) - Document, ImoContentObj: click on object
+		@code
+		//example 1: register at the document
+	    pDoc->add_event_handler(k_on_click_event, this, wrapper_on_click_event);
+		//example 2: register for handling events related to an specific object
+        ButtonCtrl* pButton = ...
+        pButton->add_event_handler(k_on_click_event, this);
+        pButton->add_event_handler(k_mouse_in_event, this);
+        pButton->add_event_handler(k_mouse_out_event, this);
+		@endcode
+
+
+
+
+@section event-handlers How to register an event handler
 
 To capture and handle an event you must register an <tt>event handler</tt> on the object generating the events by invoking its <tt>add_event_handler()</tt> method. Your handler can be:
 - a C function,
@@ -28,11 +117,11 @@ To capture and handle an event you must register an <tt>event handler</tt> on th
 - a C++ object, derived form lomse::EventHandler.
 
 All Lomse objects that generate events derive from lomse::Observable class. Currently, events can be generated by the following objects:
-	- A View. You must register must register an <tt>event handler</tt> on the Interactor for handling the View events.
+	- A View. For handling the View events you must register an <tt>event handler</tt> on the Interactor.
 	- A Document or a document object (ImoContentObj); and
 	- A Control object.
 
-The parameters for the <tt>add_event_handler()</tt> method depends on the type of handler method. There are three posibilities:
+The parameters for the <tt>add_event_handler()</tt> method depends on the type of handler method. There are three possibilities:
 
 a) The handler is a C function:
 @code
@@ -86,60 +175,7 @@ if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
 @endcode
 
 
-
-@subsection view-events View events
-
-Events generated by a View must be handled by adding a handler to the Interactor associated to that View. 
-
-Here is a list of all events generated by the View. For more information on each event read the class documentation for the event.
-
-<b>Global View events:</b>
-
-- EventPaint (event type <tt>k_update_window_event</tt>) - Ask user app to update window with current bitmap.
-- EventUpdateViewport (event type <tt>k_update_viewport_event</tt>) - Ask user app to update viewport origin using provided coordinates.
-
-<b>Events related to selecting objects:</b>
-
-- EventUpdateUI (event type <tt>k_selection_set_change</tt>) - Selected objects changed
-- EventUpdateUI (event type <tt>k_pointed_object_change</tt>) - Cursor pointing to a different object
-
-<b>Events implying a posible edition command:</b>
-
-- EventControlPointMoved (event type <tt>k_control_point_moved_event</tt>) - User moves a handler: handler released event
-
-<b>Events related to score playback:</b>
-
-- EventScoreHighlight (event type <tt>k_highlight_on_event</tt>) - Add highlight to a note/rest
-- EventScoreHighlight (event type <tt>k_highlight_off_event</tt>) - Remove highlight from a note/rest
-- EventScoreHighlight (event type <tt>k_end_of_higlight_event</tt>) - End of score play back. Remove all highlight.
-- EventScoreHighlight (event type <tt>k_advance_tempo_line_event</tt>) -
-- EventPlayScore (event type <tt>k_end_of_playback_event</tt>) - End of playback. User application is
-	informed just in case it would like to do any action (i.e. re-enabling playback button).
-
-
-
-
-@subsection document-events Document events
-
-These events are generated by the Document. For handling them you will have to register a handler 
-function either to the Document object or to the desired elements (ImoContentObj objects).
-
-<b>Mouse events when interacting with Document objects:</b>
-
-- EventMouse (event type <tt>k_mouse_in_event</tt>) - Mouse goes over an object
-- EventMouse (event type <tt>k_mouse_out_event</tt>) - Mouse goes out from an object
-- EventMouse (event type <tt>k_on_click_event</tt>) - Document, ImoContentObj: click on object
-- EventMouse (event type <tt>k_show_contextual_menu_event</tt>) - Click event: object selected and menu request
-
-<b>Events related to score playback:</b>
-
-- EventPlayScore (event type <tt>k_do_play_score_event</tt>) - Start/resume playback
-- EventPlayScore (event type <tt>k_pause_score_event</tt>) - Pause playback
-- EventPlayScore (event type <tt>k_stop_playback_event</tt>) - Stop playback
-
-
-
-@section handlig-requests Handling requests
+@section handling-requests Handling requests
 
 It is mandatory to handle Lomse requests. For this, you have to set up a callback method (at library initialization). For instance:
 
@@ -190,7 +226,7 @@ Lomse will make any necessary request by invoking this callback method. Therefor
 
 When your callback method is invoked, it will receive as parameter an object derived from class Request, containing the information about the required information or platform dependent service. And Lomse process is paused until the user application provides the requested data.
 
-The list of posible Requests is:
+The list of possible Requests is:
 - RequestDynamic. While parsing an LDP document, a <tt>(dynamic)</tt> element has been found. Lomse is requesting user application for the dynamic content that must be inserted.
 - RequestFont. The font used for an element is not available in Lomse package. Lomse requests the file path for the font.
 

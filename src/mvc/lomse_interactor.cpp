@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -200,12 +200,12 @@ void Interactor::handle_event(SpEventInfo pEvent)
 
         case k_end_of_playback_event:
         {
-            //AWARE: It could never arrive here as send_end_of_play_event() could
+            //AWARE: It could never arrive here as on_end_of_play_event() could
             //be invoked directly by user application
             LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] End of playback event received");
-            SpEventPlayScore pEv( static_pointer_cast<EventPlayScore>(pEvent) );
+            SpEventPlayCtrl pEv( static_pointer_cast<EventPlayCtrl>(pEvent) );
             if (is_valid_play_score_event(pEv))
-                send_end_of_play_event(pEv->get_score(), pEv->get_player());
+                on_end_of_play_event(pEv->get_score(), pEv->get_player());
             break;
         }
 
@@ -321,10 +321,11 @@ void Interactor::task_action_select_object_and_show_contextual_menu(
                 ImoId id = pImo ? pImo->get_id() : k_no_imoid;
                 SpInteractor sp = get_shared_ptr_from_this();
                 WpInteractor wp(sp);
-                SpEventMouse pEvent(
+                SpEventInfo pEvent(
                     LOMSE_NEW EventMouse(k_show_contextual_menu_event,
-                                         wp, id, x, y, flags, m_wpDoc) );
-                m_libScope.post_event(pEvent);
+                                                  wp, id, x, y, flags, m_wpDoc) );
+                m_libScope.post_event(pEvent);  //--> to global handler
+                //notify_event(pEvent, pGmo);     //--> to Document observers
             }
         }
     }
@@ -1017,7 +1018,7 @@ void Interactor::request_viewport_change(Pixels x, Pixels y)
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
-    SpEventView pEvent( LOMSE_NEW EventUpdateViewport(wpIntor, x, y) );
+    SpEventInfo pEvent( LOMSE_NEW EventUpdateViewport(wpIntor, x, y) );  //m_wpDoc
 
     m_libScope.post_event(pEvent);
 }
@@ -1346,7 +1347,7 @@ bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighligh
 }
 
 //---------------------------------------------------------------------------------------
-bool Interactor::is_valid_play_score_event(SpEventPlayScore UNUSED(pEvent))
+bool Interactor::is_valid_play_score_event(SpEventPlayCtrl UNUSED(pEvent))
 {
     LOMSE_LOG_ERROR("TODO: Method not implemented");
     //TODO
@@ -1380,22 +1381,22 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
         {
             switch ((*it).first)
             {
-                case k_end_of_higlight_event:
+                case EventScoreHighlight::k_end_of_higlight:
                     hide_tempo_line();
                     remove_all_highlight();
                     break;
 
-                case k_highlight_off_event:
+                case EventScoreHighlight::k_highlight_off:
                     remove_highlight_from_object( static_cast<ImoStaffObj*>(
                                                 spDoc->get_pointer_to_imo((*it).second) ));
                     break;
 
-                case k_highlight_on_event:
+                case EventScoreHighlight::k_highlight_on:
                     highlight_object( static_cast<ImoStaffObj*>(
                                             spDoc->get_pointer_to_imo((*it).second) ));
                     break;
 
-                case k_advance_tempo_line_event:
+                case EventScoreHighlight::k_advance_tempo_line:
                     xPos += 20;
                     show_tempo_line(xPos, 150, xPos+1, 200);
                     break;
@@ -1416,21 +1417,34 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
+void Interactor::on_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
 {
+    //AWARE: This method initially named "send_end_of_play_event" was designed to be
+    //directly invoked from the SoundPlayer for generating the EndOfPlay event.
+    //Unfortunately, it is necessary to decouple from the sound thread and currently this
+    //is done by generating the EndOfPlay event in the sound thread, posting it to the
+    //user application global handler, and requesting the user to invoke this method.
+    //Therefore, the name of this method was changed to "on_end_of_play_event" to
+    //avoid raising questions on users about the contradiction of having to invoke
+    // "send_end_of_play_event" when an end of play event is received!!
+
     LOMSE_LOG_DEBUG(Logger::k_events, "");
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        Document* pDoc = spDoc.get();
-        SpInteractor sp = get_shared_ptr_from_this();
-        WpInteractor wpIntor(sp);
-//        SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wpIntor) );
-        SpEventView pEvent( LOMSE_NEW EventPlayScore(k_end_of_playback_event,
-                                                     wpIntor, pScore, pPlayCtrl) );
         if (pPlayCtrl)
             pPlayCtrl->on_end_of_playback();
 
+        //AWARE: now generate the end of play event for observers (i.e. an play ctrl) and
+        //for the user application. Due to current event handling path, it is non-sense
+        //to send again a new end-of-play event to the user application; worse: this
+        //could create an infinite processing loop. Therefore, user application must
+        //never register at the Document an observer for this event.
+        Document* pDoc = spDoc.get();
+        SpInteractor sp = get_shared_ptr_from_this();
+        WpInteractor wpIntor(sp);
+        SpEventInfo pEvent( LOMSE_NEW EventEndOfPlayback(k_end_of_playback_event,
+                                                     wpIntor, pScore, pPlayCtrl) );
         pDoc->notify_observers(pEvent, pDoc);
 
         update_view_if_needed();
@@ -1533,17 +1547,20 @@ void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
 
         if (pGmo->is_box_control())
         {
-            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to GmoBoxControl");
+            //AWARE: HyperlinkCtrl and all other dynamic controls arrive here
+            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to GmoBoxControl -> Document");
             (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
             update_view_if_gmodel_modified();
         }
         else if (pGmo->is_box_link() || pGmo->is_in_link())
         {
-            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to link");
+            //AWARE: Only ImoLink (LMD tag <link>) arrives here.
+            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to link -> Global handler");
             find_parent_link_box_and_notify_event(pEvent, pGmo);
         }
         else
         {
+            //All other cases arrive here
             LOMSE_LOG_DEBUG(Logger::k_events, "Notify to Document");
             if (!spDoc->notify_observers(pEvent, pEvent->get_source() ))
             {
@@ -1570,6 +1587,8 @@ void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoOb
         if (pEvent->is_on_click_event())
         {
             LOMSE_LOG_DEBUG(Logger::k_events, " post_event to user app.");
+            //change event type to be more specific
+            pEvent->set_type(k_link_clicked_event);
             m_libScope.post_event(pEvent);
             //AWARE: current document will be destroyed when the event is processed
         }

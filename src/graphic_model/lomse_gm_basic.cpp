@@ -1049,6 +1049,8 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
     else if (pEvent->is_on_click_event())
     {
         LOMSE_LOG_ERROR("is_on_click_event: TODO");
+        //AWARE: should not reach this point as click events on links
+        //will be dispatched to the global handler.
         //TODO: GmoBoxLink::notify_event, on_click_event
 //        m_visited = true;
 //        m_prevColor = m_visitedColor;

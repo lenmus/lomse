@@ -1,6 +1,6 @@
 /**
 
-@page print-api Printing documents overview
+@page page-printing Printing documents overview
 
 @tableofcontents
 

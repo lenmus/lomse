@@ -1,5 +1,5 @@
 /**
-@page library-license Library license
+@page page-library-license Library license
 
 Lomse is free software: you can redistribute it and/or modify it under the terms of the BSD 2-Clause license. This is a human-readable summary of (and not a substitute for) the license:
 

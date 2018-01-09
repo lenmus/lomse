@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -415,19 +415,13 @@ Observable* EventMouse::get_source()
     return nullptr;
 }
 
-//---------------------------------------------------------------------------------------
-bool EventMouse::is_still_valid()
-{
-    return !m_wpDoc.expired() && !m_wpInteractor.expired();
-}
-
 
 //=======================================================================================
 // EventControlPointMoved implementation
 //=======================================================================================
 EventControlPointMoved::EventControlPointMoved(EEventType type, WpInteractor wpInteractor,
                     GmoObj* pGmo, int iHandler, UPoint uShift, WpDocument wpDoc)
-    : EventCommand(type, wpInteractor, 0, wpDoc)
+    : EventAction(type, wpInteractor, wpDoc)
     , m_iHandler(iHandler)
     , m_uShift(uShift)
 {
