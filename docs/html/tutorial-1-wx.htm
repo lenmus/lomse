@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/04/27 -->
+<!-- $Updated: 2018/01/11 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -769,7 +769,7 @@ Ok, lets's do it. Open a terminal window, move to the directory containing the s
 </p>
 
 <pre class="console">
-gcc example_1_wxwidgets.cpp -o example-1-wx    \
+g++ -std=c++11 example_1_wxwidgets.cpp -o example-1-wx    \
     `pkg-config --cflags liblomse` `wx-config --cflags`   \
     `pkg-config --libs liblomse` `wx-config --libs` \
     -lstdc++
