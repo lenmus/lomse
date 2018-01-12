@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/04/27 -->
+<!-- $Updated: 2018/01/11 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -673,7 +673,7 @@ Now for the fun (an sometimes troubling) part. Compiling your code and running i
 </p>
 
 <pre class="console">
-gcc example_1_x11.cpp -o example-1-x11  \
+g++ -std=c++11 example_1_x11.cpp -o example-1-x11  \
     `pkg-config --cflags x11` `pkg-config --cflags liblomse`   \
     `pkg-config --libs liblomse` `pkg-config --libs x11` -lstdc++
 </pre>
