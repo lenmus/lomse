@@ -1654,6 +1654,7 @@ protected:
 
     friend class DefineStyleLmdGenerator;
     friend class DefineStyleLdpGenerator;
+    friend class DefineStyleMnxGenerator;
 
     //getters non-inheriting from parent. Returns true if property exists
     bool get_float_property(int prop, float* value)
@@ -4614,6 +4615,7 @@ protected:
     void create_default_styles();
 
  	friend class StylesLmdGenerator;
+ 	friend class StylesMnxGenerator;
  	inline std::map<std::string, ImoStyle*>& get_styles_collection() { return m_nameToStyle; }
 
 };

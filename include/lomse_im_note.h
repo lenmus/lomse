@@ -134,7 +134,7 @@ protected:
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
 
     friend class NoteRestMxlAnalyser;
-    friend class NoteRestMnxAnalyser;
+    friend class EventMnxAnalyser;
     inline void mark_as_full_measure(bool value) { m_fFullMeasureRest = value; }
 
     //IM attributes interface

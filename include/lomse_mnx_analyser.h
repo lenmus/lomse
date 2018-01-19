@@ -33,7 +33,7 @@
 #include <list>
 #include "lomse_xml_parser.h"
 #include "lomse_analyser.h"
-#include "lomse_ldp_elements.h"
+//#include "lomse_ldp_elements.h"
 #include "lomse_relation_builder.h"
 #include "lomse_internal_model.h"       //required to define MnxBeamsBuilder, MnxSlursBuilder
 #include "lomse_im_note.h"              //required for enum EAccidentals
@@ -81,6 +81,34 @@ public:
     virtual ~MnxBeamsBuilder() {}
 
     void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
+};
+
+
+//---------------------------------------------------------------------------------------
+// helper class to save beam info items, match them and build the beams
+// For old g+/g- syntax
+class MnxBeamsBuilder2
+{
+protected:
+    ostream& m_reporter;
+    MnxAnalyser* m_pAnalyser;
+    list<ImoBeamDto*> m_pendingBeams;
+
+public:
+    MnxBeamsBuilder2(ostream& reporter, MnxAnalyser* pAnalyser);
+    ~MnxBeamsBuilder2();
+
+    void add_old_beam(ImoBeamDto* pInfo);
+    bool is_old_beam_open();
+    void close_old_beam(ImoBeamDto* pInfo);
+    void clear_pending_old_beams();
+
+protected:
+    void do_create_old_beam();
+
+    //errors
+    void error_no_end_old_beam(ImoBeamDto* pInfo);
+
 };
 
 
@@ -207,9 +235,9 @@ protected:
     LibraryScope&       m_libraryScope;
     Document*           m_pDoc;
     XmlParser*          m_pParser;
-    LdpFactory*         m_pLdpFactory;
     MnxTiesBuilder*     m_pTiesBuilder;
     MnxBeamsBuilder*    m_pBeamsBuilder;
+    MnxBeamsBuilder2*   m_pOldBeamsBuilder;
     MnxTupletsBuilder*  m_pTupletsBuilder;
     MnxSlursBuilder*    m_pSlursBuilder;
     MnxVoltasBuilder*   m_pVoltasBuilder;
@@ -228,6 +256,9 @@ protected:
     XmlNode* m_pTree;
     string m_fileLocator;
 
+    //analysis output
+    void*           m_pResult;
+
     // information maintained in MnxAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
     ImoInstrument*  m_pCurInstrument;   //the instrument being analysed
@@ -245,6 +276,7 @@ protected:
     //current values
     int m_curStaff;
     int m_curVoice;
+    int m_beamLevel;
     map<string, int> m_nameToVoice;     //sequence name to voice conversion
 //    int m_nShowTupletBracket;
 //    int m_nShowTupletNumber;
@@ -263,8 +295,9 @@ public:
     ImoObj* analyse_tree_and_get_object(XmlNode* tree);
 
     //analysis
-    ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
+    bool analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
     void prepare_for_new_instrument_content();
+    void* get_result() { return m_pResult; }
 
     //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
@@ -348,7 +381,19 @@ public:
     void clear_pending_relations();
 
     //interface for building beams
-    inline bool fix_beams() { return m_libraryScope.get_musicxml_options()->fix_beams(); }
+    inline void increment_beam_level() { ++m_beamLevel; }
+    inline int get_beam_level() { return m_beamLevel; }
+    inline void decrement_beam_level() { --m_beamLevel; }
+    //inline bool fix_beams() { return m_libraryScope.get_musicxml_options()->fix_beams(); }
+
+    //interface for building beams: based on old 'g+/g-' syntax
+    inline void add_old_beam(ImoBeamDto* pInfo) {
+        m_pOldBeamsBuilder->add_old_beam(pInfo);
+    }
+    inline bool is_old_beam_open() { return m_pOldBeamsBuilder->is_old_beam_open(); }
+    inline void close_old_beam(ImoBeamDto* pInfo) {
+        m_pOldBeamsBuilder->close_old_beam(pInfo);
+    }
 
     //interface for building lyric lines
     void add_lyrics_data(ImoNote* pNote, ImoLyric* pData);
@@ -394,7 +439,10 @@ public:
 
 
 protected:
+    friend class MnxElementAnalyser;
     MnxElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=nullptr);
+    void set_result(void* pValue) { m_pResult = pValue; }
+
     void delete_relation_builders();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 
