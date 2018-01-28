@@ -82,6 +82,10 @@ do
     shift # past argument or value
 done
 
+# define the number of jobs to create (as many as the number of processors)
+num_jobs=`getconf _NPROCESSORS_ONLN`
+
+
 #build the local branch
 if [ ${fOnlyTests} -eq 0 ]; then
 #create or clear build folder
@@ -109,12 +113,12 @@ if [ ${fOnlyTests} -eq 0 ]; then
     # create the makefile
     cd "${build_path}"
     echo -e "${enhanced}Creating makefile${reset}"
-    cmake -G "Unix Makefiles" ${sources}  || exit 1
+    cmake -G "Unix Makefiles" ${sources} || exit 1
 
     # build lomse
-    echo -e "${enhanced}Building liblomse${reset}"
+    echo -e "${enhanced}Building liblomse. Will use ${num_jobs} jobs.${reset}"
     start_time=$(date -u +"%s")
-    make -j2 || exit 1
+    make -j$num_jobs || exit 1
     end_time=$(date -u +"%s")
     secs=$(($end_time-$start_time))
     echo "Build time: $(($secs / 60))m:$(($secs % 60))s"
