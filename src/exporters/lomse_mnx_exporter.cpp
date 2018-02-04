@@ -27,13 +27,12 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_lmd_exporter.h"
+#include "lomse_mnx_exporter.h"
 
 #include <iostream>
 #include <iomanip>
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-#include "lomse_ldp_exporter.h"
 #include "lomse_mnx_exporter.h"
 #include "lomse_logger.h"
 
@@ -52,19 +51,17 @@ namespace lomse
 {
 
 //=======================================================================================
-// LmdGenerator
+// MnxGenerator
 //=======================================================================================
-class LmdGenerator
+class MnxGenerator
 {
 protected:
-    LmdExporter* m_pExporter;
+    MnxExporter* m_pExporter;
     stringstream m_source;
-    bool m_fTagOpen;
-    stack<string> m_openTags;
 
 public:
-    LmdGenerator(LmdExporter* pExporter);
-    virtual ~LmdGenerator() {}
+    MnxGenerator(MnxExporter* pExporter);
+    virtual ~MnxGenerator() {}
 
     virtual string generate_source() = 0;
 
@@ -74,7 +71,7 @@ protected:
     void start_attrib(const string& name);
     void end_attrib();
     void add_attribute(const string& name, const string& value);
-    void end_element(bool fInNewLine = true);
+    void end_element(bool fInNewLine = true, bool fNewElement=true);
     void start_comment();
     void end_comment();
     void empty_line();
@@ -99,6 +96,8 @@ protected:
 const bool k_in_same_line = false;
 const bool k_in_new_line = true;
 const int k_indent_step = 3;
+const bool k_add_close_tag = false;
+const bool k_add_close_element = true;
 
 //=======================================================================================
 // generators for specific elements
@@ -106,14 +105,14 @@ const int k_indent_step = 3;
 
 
 //---------------------------------------------------------------------------------------
-class xxxxxxLmdGenerator : public LmdGenerator
+class xxxxxxMnxGenerator : public MnxGenerator
 {
 protected:
     //ImoXXXXX* m_pObj;
 
 public:
-    xxxxxxLmdGenerator(ImoObj* UNUSED(pImo), LmdExporter* pExporter)
-        : LmdGenerator(pExporter)
+    xxxxxxMnxGenerator(ImoObj* UNUSED(pImo), MnxExporter* pExporter)
+        : MnxGenerator(pExporter)
     {
         //m_pObj = static_cast<ImoXXXXX*>(pImo);
     }
@@ -129,13 +128,13 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class BarlineLmdGenerator : public LmdGenerator
+class BarlineMnxGenerator : public MnxGenerator
 {
 protected:
     ImoBarline* m_pObj;
 
 public:
-    BarlineLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    BarlineMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoBarline*>(pImo);
     }
@@ -154,129 +153,63 @@ protected:
 
     void add_barline_type()
     {
-        m_source << LmdExporter::barline_type_to_ldp( m_pObj->get_type() );
+        m_source << MnxExporter::barline_type_to_mnx( m_pObj->get_type() );
     }
 
 };
 
 
 //---------------------------------------------------------------------------------------
-class ClefLmdGenerator : public LmdGenerator
+class ClefMnxGenerator : public MnxGenerator
 {
 protected:
     ImoClef* m_pObj;
 
 public:
-    ClefLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    ClefMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoClef*>(pImo);
     }
 
     string generate_source()
     {
+        if (m_pExporter->current_open_tag() != "directions")
+        {
+            start_element("directions", nullptr);
+            close_start_tag();
+        }
         start_element("clef", m_pObj);
-        close_start_tag();
-        add_type();
-        source_for_base_staffobj(m_pObj);
-        end_element();
+        add_line_sign();
+        //source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line, k_add_close_tag);
         return m_source.str();
     }
 
 protected:
 
-    void add_type()
+    void add_line_sign()
     {
-        m_source << LmdExporter::clef_type_to_ldp( m_pObj->get_clef_type() );
+        string clef = MnxExporter::clef_type_to_mnx( m_pObj->get_clef_type() );
+        start_attrib("line");
+        m_source << clef.back();
+        end_attrib();
+
+        start_attrib("sign");
+        m_source << clef.front();
+        end_attrib();
     }
 
 };
 
 
 //---------------------------------------------------------------------------------------
-class ContentLmdGenerator : public LmdGenerator
-{
-protected:
-    ImoContent* m_pObj;
-
-public:
-    ContentLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoContent*>(pImo);
-    }
-
-    string generate_source()
-    {
-        start_element("content", m_pObj);
-        add_optional_style(m_pObj);
-        close_start_tag();
-
-        add_contained_objects();
-
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_contained_objects()
-    {
-        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
-        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
-        {
-            add_source_for(*it);
-        }
-    }
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class ControlLmdGenerator : public LmdGenerator
-{
-protected:
-    ImoControl* m_pObj;
-
-public:
-    ControlLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoControl*>(pImo);
-    }
-
-    string generate_source()
-    {
-        start_element("control", m_pObj);
-        add_optional_style(m_pObj);
-        close_start_tag();
-
-        m_source << "<TODO: details for the Control>";
-        //add_contained_objects();
-
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_contained_objects()
-    {
-        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
-        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
-        {
-            add_source_for(*it);
-        }
-    }
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class ContentObjLmdGenerator : public LmdGenerator
+class ContentObjMnxGenerator : public MnxGenerator
 {
 protected:
     ImoContentObj* m_pObj;
 
 public:
-    ContentObjLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    ContentObjMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoContentObj*>(pImo);
     }
@@ -295,11 +228,11 @@ protected:
     {
         Tenths ux = m_pObj->get_user_location_x();
         if (ux != 0.0f)
-            m_source << " (dx " << LmdExporter::float_to_string(ux) << ")";
+            m_source << " (dx " << MnxExporter::float_to_string(ux) << ")";
 
         Tenths uy = m_pObj->get_user_location_y();
         if (uy != 0.0f)
-            m_source << " (dy " << LmdExporter::float_to_string(uy) << ")";
+            m_source << " (dy " << MnxExporter::float_to_string(uy) << ")";
     }
 
     void add_attachments()
@@ -317,18 +250,18 @@ protected:
 //                    ImRelObj* pRO = dynamic_cast<ImRelObj*)>(pAuxObj);
 //
 //                    //exclude beams, as source code for them is generted in ImoNote.
-//                    //AWARE. This is necessary because LMD parser needs to have beam
+//                    //AWARE. This is necessary because MNX parser needs to have beam
 //                    //info to crete the note, before it can process any other attachment.
 //                    //Therefore, it was decided to generate beam tag before generating
 //                    //attachment tags.
 //                    if (!pRO->IsBeam())
 //                    {
 //                        if ( pRO->GetStartNoteRest() == (lmNoteRest*)this )
-//                            m_source += pRO->SourceLMD_First(nIndent, fUndoData, (lmNoteRest*)this);
+//                            m_source += pRO->SourceMNX_First(nIndent, fUndoData, (lmNoteRest*)this);
 //                        else if ( pRO->GetEndNoteRest() == (lmNoteRest*)this )
-//                            m_source += pRO->SourceLMD_Last(nIndent, fUndoData, (lmNoteRest*)this);
+//                            m_source += pRO->SourceMNX_Last(nIndent, fUndoData, (lmNoteRest*)this);
 //                        else
-//                            m_source += pRO->SourceLMD_Middle(nIndent, fUndoData, (lmNoteRest*)this);
+//                            m_source += pRO->SourceMNX_Middle(nIndent, fUndoData, (lmNoteRest*)this);
 //                    }
 //                }
 //                else if ( pAuxObj->IsRelObX() )
@@ -336,18 +269,18 @@ protected:
 //                    lmRelObX* pRO = (lmRelObX*)pAuxObj;
 //
 //                    //exclude beams, as source code for them is generted in ImoNote.
-//                    //AWARE. This is necessary because LMD parser needs to have beam
+//                    //AWARE. This is necessary because MNX parser needs to have beam
 //                    //info to crete the note, before it can process any other attachment.
 //                    //Therefore, it was decided to generate beam tag before generating
 //                    //attachment tags.
 //                    if (!pRO->IsBeam())
 //                    {
 //                        if (pRO->GetStartSO() == this)
-//                            m_source += pRO->SourceLMD_First(nIndent, fUndoData, this);
+//                            m_source += pRO->SourceMNX_First(nIndent, fUndoData, this);
 //                        else if (pRO->GetEndSO() == this)
-//                            m_source += pRO->SourceLMD_Last(nIndent, fUndoData, this);
+//                            m_source += pRO->SourceMNX_Last(nIndent, fUndoData, this);
 //                        else
-//                            m_source += pRO->SourceLMD_Middle(nIndent, fUndoData, this);
+//                            m_source += pRO->SourceMNX_Middle(nIndent, fUndoData, this);
 //                    }
 //                }
 //                else
@@ -360,13 +293,13 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class DefineStyleLmdGenerator : public LmdGenerator
+class DefineStyleMnxGenerator : public MnxGenerator
 {
 protected:
     ImoStyle* m_pObj;
 
 public:
-    DefineStyleLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    DefineStyleMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStyle*>(pImo);
     }
@@ -553,7 +486,7 @@ protected:
         start_element(tag, nullptr);
         close_start_tag();
 
-        m_source << LmdExporter::color_to_ldp(color);
+        m_source << MnxExporter::color_to_mnx(color);
 
         end_element(k_in_same_line);
     }
@@ -657,52 +590,14 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class DynamicLmdGenerator : public LmdGenerator
-{
-protected:
-    ImoDynamic* m_pObj;
-
-public:
-    DynamicLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoDynamic*>(pImo);
-    }
-
-    string generate_source()
-    {
-        start_element("dynamic", m_pObj);
-        add_optional_style(m_pObj);
-        close_start_tag();
-
-        add_contained_objects();
-
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_contained_objects()
-    {
-        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
-        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
-        {
-            add_source_for(*it);
-        }
-    }
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class ErrorLmdGenerator : public LmdGenerator
+class ErrorMnxGenerator : public MnxGenerator
 {
 protected:
     ImoObj* m_pImo;
 
 public:
-    ErrorLmdGenerator(ImoObj* pImo, LmdExporter* pExporter)
-        : LmdGenerator(pExporter)
+    ErrorMnxGenerator(ImoObj* pImo, MnxExporter* pExporter)
+        : MnxGenerator(pExporter)
         , m_pImo(pImo)
     {
     }
@@ -711,7 +606,7 @@ public:
     {
         start_element("TODO", m_pImo);
         close_start_tag();
-        m_source << "Error: no LmdExporter for Imo. Imo name=" << m_pImo->get_name()
+        m_source << "Error: no MnxExporter for Imo. Imo name=" << m_pImo->get_name()
                  << ", Imo type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
@@ -721,13 +616,13 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class ImObjLmdGenerator : public LmdGenerator
+class ImObjMnxGenerator : public MnxGenerator
 {
 protected:
     ImoObj* m_pObj;
 
 public:
-    ImObjLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    ImObjMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = pImo;
     }
@@ -740,26 +635,27 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class InstrumentLmdGenerator : public LmdGenerator
+class InstrumentMnxGenerator : public MnxGenerator
 {
 protected:
     ImoInstrument* m_pObj;
 
 public:
-    InstrumentLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    InstrumentMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoInstrument*>(pImo);
     }
 
     string generate_source()
     {
-        start_element("instrument", m_pObj);
+        start_element("part", m_pObj);
         close_start_tag();
         add_num_staves();
         add_sound_info();
         add_name_abbreviation();
         add_music_data();
         end_element();
+        empty_line();
         return m_source.str();
     }
 
@@ -767,16 +663,16 @@ protected:
 
     void add_num_staves()
     {
-	    //sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
+	    //sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
 	    //sSource += wxString::Format(_T("(staves %d)\n"), m_pVStaff->GetNumStaves());
      //   int nStaves = m_pVStaff->GetNumStaves();
      //   for (int i=0; i < nStaves; i++)
-     //       sSource += m_pVStaff->GetStaff(i+1)->SourceLMD(nIndent, fUndoData);
+     //       sSource += m_pVStaff->GetStaff(i+1)->SourceMNX(nIndent, fUndoData);
     }
 
     void add_sound_info()
     {
-	    //sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
+	    //sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
 	    //sSource += wxString::Format(_T("(infoMIDI %d %d)\n"), m_nMidiInstr, m_nMidiChannel);
     }
 
@@ -784,14 +680,14 @@ protected:
     {
      //   if (m_pName)
      //   {
-	    //    sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
-     //       sSource += m_pName->SourceLMD(_T("name"), fUndoData);
+	    //    sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
+     //       sSource += m_pName->SourceMNX(_T("name"), fUndoData);
      //       sSource += _T("\n");
      //   }
      //   if (m_pAbbreviation)
      //   {
-	    //    sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
-     //       sSource += m_pAbbreviation->SourceLMD(_T("abbrev"), fUndoData);
+	    //    sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
+     //       sSource += m_pAbbreviation->SourceMNX(_T("abbrev"), fUndoData);
      //       sSource += _T("\n");
      //   }
     }
@@ -804,13 +700,13 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class KeySignatureLmdGenerator : public LmdGenerator
+class KeySignatureMnxGenerator : public MnxGenerator
 {
 protected:
     ImoKeySignature* m_pObj;
 
 public:
-    KeySignatureLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    KeySignatureMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoKeySignature*>(pImo);
     }
@@ -869,13 +765,13 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class LenmusdocLmdGenerator : public LmdGenerator
+class LenmusdocMnxGenerator : public MnxGenerator
 {
 protected:
     ImoDocument* m_pObj;
 
 public:
-    LenmusdocLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    LenmusdocMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoDocument*>(pImo);
     }
@@ -883,24 +779,31 @@ public:
     string generate_source()
     {
         m_source << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        start_element("lenmusdoc", m_pObj);
-        add_attribute("vers", m_pObj->get_version());
-        add_attribute("language", m_pObj->get_language());
+        add_comment();
+        start_element("mnx", m_pObj);
+        //add_attribute("vers", m_pObj->get_version());
+        //add_attribute("language", m_pObj->get_language());
         close_start_tag();
 
-        add_comment();
 
-        // [<styles>]
-        add_styles();
-
-        // <content>
+        add_head();
         add_content();
 
-        end_element();
+        end_element();    //mnx
         return m_source.str();
     }
 
 protected:
+
+    void add_head()
+    {
+        start_element("head", m_pObj);
+        close_start_tag();
+
+        add_styles();
+
+        end_element();
+    }
 
     void add_styles()
     {
@@ -914,7 +817,7 @@ protected:
         if (!m_pExporter->get_remove_newlines())
         {
             start_comment();
-            m_source << "LMD file generated by Lomse, version "
+            m_source << "MNX file generated by Lomse, version "
                      << m_pExporter->get_version_and_time_string();
             end_comment();
         }
@@ -922,40 +825,33 @@ protected:
 
     void add_content()
     {
-        ImoContent* pContent = m_pObj->get_content();
-        start_element("content", pContent);
-        close_start_tag();
         int numItems = m_pObj->get_num_content_items();
         for (int i=0; i < numItems; i++)
         {
             m_source << " ";
             add_source_for( m_pObj->get_content_item(i) );
         }
-        end_element();
     }
 
 };
 
 
 //---------------------------------------------------------------------------------------
-class MusicDataLmdGenerator : public LmdGenerator
+class MusicDataMnxGenerator : public MnxGenerator
 {
 protected:
     ImoMusicData* m_pObj;
 
 public:
-    MusicDataLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    MusicDataMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoMusicData*>(pImo);
     }
 
     string generate_source()
     {
-        start_element("musicData", m_pObj);
-        close_start_tag();
         add_staffobjs();
         empty_line();
-        end_element();
         return m_source.str();
     }
 
@@ -965,7 +861,7 @@ protected:
     {
         ImoObj::children_iterator it = m_pObj->begin();
         bool fNewMeasure = true;
-        int nMeasure = 0;
+        int nMeasure = 1;
         while (it != m_pObj->end())
         {
             if (fNewMeasure)
@@ -973,15 +869,30 @@ protected:
                 if (!m_pExporter->get_remove_newlines())
                 {
                     empty_line();
-                    start_comment();
-                    m_source << "measure " << nMeasure++;
-                    end_comment();
+
+                    start_element("measure", nullptr);
+                    start_attrib("number");
+                    m_source << nMeasure++;
+                    end_attrib();
+                    close_start_tag();  //measure
                 }
                 fNewMeasure = false;
             }
 
             add_source_for(*it);
+
             fNewMeasure = (*it)->is_barline();
+            if (fNewMeasure)
+            {
+                if (m_pExporter->current_open_tag() == "directions")
+                    end_element();
+
+                if (m_pExporter->current_open_tag() == "sequence")
+                    end_element();
+
+                end_element();  //measure
+            }
+
             ++it;
         }
       //  //iterate over the collection of StaffObjs, ordered by voice.
@@ -990,7 +901,7 @@ protected:
       //  {
       //      //add comment to separate measures
       //      sSource += _T("\n");
-      //      sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
+      //      sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
       //      sSource += wxString::Format(_T("//Measure %d\n"), nMeasure);
 
       //      int nNumVoices = m_cStaffObjs.GetNumVoicesInMeasure(nMeasure);
@@ -1018,17 +929,17 @@ protected:
 					 //   {
 						//    if (!pSO->IsNoteRest() || ((lmNoteRest*)pSO)->GetVoice() == nVoice)
 						//    {
-						//	    LMD_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
-						//	    sSource += pSO->SourceLMD(nIndent, fUndoData);
-						//	    rTime = LMD_AdvanceTimeCounter(pSO);
+						//	    MNX_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
+						//	    sSource += pSO->SourceMNX(nIndent, fUndoData);
+						//	    rTime = MNX_AdvanceTimeCounter(pSO);
 						//    }
 					 //   }
 					 //   else
 						//    if (pSO->IsNoteRest() && ((lmNoteRest*)pSO)->GetVoice() == nVoice)
 						//    {
-						//	    LMD_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
-						//	    sSource += pSO->SourceLMD(nIndent, fUndoData);
-						//	    rTime = LMD_AdvanceTimeCounter(pSO);
+						//	    MNX_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
+						//	    sSource += pSO->SourceMNX(nIndent, fUndoData);
+						//	    rTime = MNX_AdvanceTimeCounter(pSO);
 						//    }
 				  //  }
 				  //  else
@@ -1051,7 +962,7 @@ protected:
       //          //there are more voices. Add (goBak) tag
       //          fGoBack = true;
       //          sSource += _T("\n");
-      //          sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
+      //          sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
       //          sSource += _T("(goBack start)\n");
       //          rTime = 0.0;
       //      }
@@ -1059,13 +970,13 @@ protected:
       //      //if goBack added, add a goFwd to ensure that we are at end of measure
       //      if (fGoBack)
       //      {
-      //          sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
+      //          sSource.append(nIndent * lmMNX_INDENT_STEP, _T(' '));
       //          sSource += _T("(goFwd end)\n");
       //      }
 
 		    ////add barline, if present
 		    //if (pBL)
-			   // sSource += pBL->SourceLMD(nIndent, fUndoData);
+			   // sSource += pBL->SourceMNX(nIndent, fUndoData);
 
       //  }
 
@@ -1075,25 +986,51 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class NoteLmdGenerator : public LmdGenerator
+class NoteMnxGenerator : public MnxGenerator
 {
 protected:
     ImoNote* m_pObj;
 
 public:
-    NoteLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    NoteMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoNote*>(pImo);
     }
 
     string generate_source()
     {
+        if (m_pExporter->current_open_tag() == "directions")
+            end_element();
+
+        if (m_pExporter->current_open_tag() != "sequence"
+            && m_pExporter->current_open_tag() != "event")
+        {
+            start_element("sequence", nullptr);
+            close_start_tag();
+        }
+
+        if (!m_pObj->is_in_chord() || m_pObj->is_start_of_chord())
+        {
+            start_element("event", nullptr);
+            add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+            close_start_tag();
+
+            m_pExporter->set_processing_chord(m_pObj->is_start_of_chord());
+        }
+
+        //export note
         start_element("note", m_pObj);
-        close_start_tag();
         add_pitch();
-        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        source_for_base_staffobj(m_pObj);
-        end_element();
+//        source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line, k_add_close_tag);   //note
+
+
+        if (!m_pObj->is_in_chord() || m_pObj->is_end_of_chord())
+        {
+            end_element();  //event
+            m_pExporter->set_processing_chord(false);
+        }
+
         return m_source.str();
     }
 
@@ -1101,16 +1038,15 @@ protected:
 
     void add_pitch()
     {
-        start_element("pitch", nullptr);
-        close_start_tag();
-        static const string sNoteName[7] = { "c",  "d", "e", "f", "g", "a", "b" };
+        static const string sNoteName[7] = { "C",  "D", "E", "F", "G", "A", "B" };
         static const string sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
                                             "7", "8", "9", "10", "11", "12"  };
 
         if (m_pObj->get_step() == k_no_pitch)
         {
+            start_attrib("pitch");
             m_source << "*";
-            end_element(k_in_same_line);
+            end_attrib();
             return;
         }
 
@@ -1130,74 +1066,51 @@ protected:
             default:                        break;
         }
 
+
+        start_attrib("pitch");
         m_source << sNoteName[m_pObj->get_step()];
         m_source << sOctave[m_pObj->get_octave()];
-        end_element(k_in_same_line);
+        end_attrib();
     }
+
 
 };
 
 
 //---------------------------------------------------------------------------------------
-class ParagraphLmdGenerator : public LmdGenerator
-{
-protected:
-    ImoParagraph* m_pObj;
-
-public:
-    ParagraphLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoParagraph*>(pImo);
-    }
-
-    string generate_source()
-    {
-        start_element("para", m_pObj);
-        add_optional_style(m_pObj);
-        close_start_tag();
-
-        add_inline_objects();
-
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_inline_objects()
-    {
-        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
-        bool fFirstItem = true;
-        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
-        {
-            ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *it );
-            source_for_inline_level_object(pImo, fFirstItem, m_pObj->get_style());
-            fFirstItem = false;
-        }
-    }
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class RestLmdGenerator : public LmdGenerator
+class RestMnxGenerator : public MnxGenerator
 {
 protected:
     ImoRest* m_pObj;
 
 public:
-    RestLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    RestMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoRest*>(pImo);
     }
 
     string generate_source()
     {
-        start_element("rest", m_pObj);
+        if (m_pExporter->current_open_tag() == "directions")
+            end_element();
+
+        if (m_pExporter->current_open_tag() != "sequence"
+            && m_pExporter->current_open_tag() != "event")
+        {
+            start_element("sequence", nullptr);
+            close_start_tag();
+        }
+
+        start_element("event", nullptr);
+        if (m_pObj->is_full_measure())
+            add_attribute("measure", "yes");
+        else
+            add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         close_start_tag();
-        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        source_for_base_staffobj(m_pObj);
-        end_element();
+        start_element("rest", m_pObj);
+        //source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line, k_add_close_tag);
+        end_element();  //event
         return m_source.str();
     }
 
@@ -1205,82 +1118,22 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class ScoreLmdGenerator : public LmdGenerator
+class ScoreMnxGenerator : public MnxGenerator
 {
 protected:
     ImoScore* m_pObj;
 
 public:
-    ScoreLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    ScoreMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoScore*>(pImo);
     }
 
     string generate_source()
     {
-        int format = m_pExporter->get_score_format();
-        switch(format)
-        {
-            case LmdExporter::k_format_ldp:
-                return generate_ldp();
-            case LmdExporter::k_format_lmd:
-                return generate_lmd();
-            case LmdExporter::k_format_musicxml:
-                return generate_musicxml();
-            case LmdExporter::k_format_mnx:
-                return generate_mnx();
-            default:
-            {
-                stringstream s;
-                s << "[ScoreLmdGenerator::generate_source] Invalid score format. Value="
-                  << format;
-                LOMSE_LOG_ERROR(s.str());
-                throw runtime_error(s.str());
-            }
-        }
-    }
-
-protected:
-
-    string generate_ldp()
-    {
-        start_element("ldpmusic", nullptr);
-        close_start_tag();
-
-        LdpExporter exporter;
-        exporter.set_indent( m_pExporter->get_indent() );
-        exporter.set_add_id( m_pExporter->get_add_id() );
-        m_source << exporter.get_source(m_pObj);
-
-        end_element();
-        return m_source.str();
-    }
-
-    string generate_musicxml()
-    {
-//        start_element("musicxml", m_pObj);
-//        close_start_tag();
-//
-//        MusicXmlExporter exporter;
-//        exporter.set_indent( m_pExporter->get_indent() );
-//        m_source << exporter.get_source(m_pObj);
-//
-//        end_element();
-
-        //TODO: MusicXmlExporter
-        start_element("TODO: MusicXml exporter", m_pObj);
-        close_start_tag();
-        end_element();
-        return m_source.str();
-    }
-
-    string generate_lmd()
-    {
         start_element("score", m_pObj);
         close_start_tag();
-        add_version();
-        add_undo_data();
-        add_creation_mode();
+        add_cwmnx_tag();
         add_styles();
         add_titles();
         add_page_layout();
@@ -1288,53 +1141,32 @@ protected:
         add_cursor();
         add_options();
         add_instruments_and_groups();
-        end_element();
+        end_element();  //cwmnx
+        end_element();  //score
         return m_source.str();
     }
 
-    string generate_mnx()
+protected:
+
+    void add_cwmnx_tag()
     {
-        start_element("mnx-music", nullptr);
+        start_element("cwmnx", nullptr);
+        add_attribute("profile", "standard");
         close_start_tag();
+        add_global();
+    }
 
-        MnxExporter exporter( m_pExporter->get_library_scope() );
-        exporter.set_indent( m_pExporter->get_indent() );
-        //exporter.set_add_id( m_pExporter->get_add_id() );
-        m_source << exporter.get_source(m_pObj);
-
+    void add_global()
+    {
+        start_element("global", nullptr);
+        close_start_tag();
         end_element();
-        return m_source.str();
-    }
-
-    void add_version()
-    {
-        m_source << "(vers 2.0)";
-    }
-
-    void add_undo_data()
-    {
-    ////ID counter value for undo/redo
-    //if (fUndoData)
-    //    sSource += wxString::Format(_T("   (undoData (idCounter  %d))\n"), m_nCounterID);
-    }
-
-    void add_creation_mode()
-    {
-//    //creation mode
-//    if (!m_sCreationModeName.empty())
-//    {
-//        m_source << _T("   (creationMode ");
-//        m_source << m_sCreationModeName;
-//        m_source << _T(" ");
-//        m_source << m_sCreationModeVers;
-//        m_source << _T(")\n");
-//    }
     }
 
     void add_styles()
     {
 //    //styles
-//    m_source << m_TextStyles.SourceLMD(1, fUndoData);
+//    m_source << m_TextStyles.SourceMNX(1, fUndoData);
     }
 
     void add_titles()
@@ -1344,7 +1176,7 @@ protected:
 //    {
 //	    for (int i=0; i < (int)m_pAuxObjs->size(); i++)
 //	    {
-//		    m_source << (*m_pAuxObjs)[i]->SourceLMD(1, fUndoData);
+//		    m_source << (*m_pAuxObjs)[i]->SourceMNX(1, fUndoData);
 //	    }
 //    }
     }
@@ -1359,14 +1191,14 @@ protected:
 //#if 0
 //		std::list<lmPageInfo*>::iterator it;
 //		for (it = m_PagesInfo.begin(); it != m_PagesInfo.end(); ++it)
-//            m_source << (*it)->SourceLMD(1, fUndoData);
+//            m_source << (*it)->SourceMNX(1, fUndoData);
 //#else
 //        lmPageInfo* pPageInfo = m_PagesInfo.front();
-//        m_source << pPageInfo->SourceLMD(1, fUndoData);
+//        m_source << pPageInfo->SourceMNX(1, fUndoData);
 //#endif
 //        //first system and other systems layout info
-//        m_source << m_SystemsInfo.front()->SourceLMD(1, true, fUndoData);
-//        m_source << m_SystemsInfo.back()->SourceLMD(1, false, fUndoData);
+//        m_source << m_SystemsInfo.front()->SourceMNX(1, true, fUndoData);
+//        m_source << m_SystemsInfo.back()->SourceMNX(1, false, fUndoData);
 //    }
     }
 
@@ -1414,7 +1246,7 @@ protected:
     //    }
     //
     //    //double
-    //    for (int i=0; i < (int)(sizeof(m_DoubleOptions)/sizeof(lmDoubleOption)); i++)
+    //    for (int i=0; i < (int)(sizeof(m_DoubleOptions)/sizeof(MNXoubleOption)); i++)
     //    {
     //        rDoubleValue = GetOptionDouble(m_DoubleOptions[i].sOptName);
     //        if (rDoubleValue != m_DoubleOptions[i].rDoubleValue)
@@ -1435,14 +1267,14 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class ScoreObjLmdGenerator : public LmdGenerator
+class ScoreObjMnxGenerator : public MnxGenerator
 {
 protected:
     ImoScoreObj* m_pObj;
 
 public:
-    ScoreObjLmdGenerator(ImoObj* pImo, LmdExporter* pExporter)
-        : LmdGenerator(pExporter)
+    ScoreObjMnxGenerator(ImoObj* pImo, MnxExporter* pExporter)
+        : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
@@ -1468,64 +1300,19 @@ protected:
         //color (if not black)
         Color color = m_pObj->get_color();
         if (color.r != 0 || color.g != 0  || color.b != 0 || color.a != 255)
-            m_source << " (color " << LmdExporter::color_to_ldp(color) << ")";
+            m_source << " (color " << MnxExporter::color_to_mnx(color) << ")";
     }
 };
 
 
 //---------------------------------------------------------------------------------------
-class SectionLmdGenerator : public LmdGenerator
-{
-protected:
-    ImoHeading* m_pObj;
-
-public:
-    SectionLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
-    {
-        m_pObj = static_cast<ImoHeading*>(pImo);
-    }
-
-    string generate_source()
-    {
-        start_element("section", m_pObj);
-        add_level();
-        add_optional_style(m_pObj);
-        close_start_tag();
-        add_inline_objects();
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_level()
-    {
-        m_source << " level=\"" << m_pObj->get_level() << "\"";
-    }
-
-    void add_inline_objects()
-    {
-        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
-        bool fFirstItem = true;
-        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
-        {
-            ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *it );
-            source_for_inline_level_object(pImo, fFirstItem, m_pObj->get_style());
-            fFirstItem = false;
-        }
-    }
-
-};
-
-
-//---------------------------------------------------------------------------------------
-class SpacerLmdGenerator : public LmdGenerator
+class SpacerMnxGenerator : public MnxGenerator
 {
 protected:
     ImoSpacer* m_pObj;
 
 public:
-    SpacerLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    SpacerMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoSpacer*>(pImo);
     }
@@ -1542,13 +1329,13 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class StaffObjLmdGenerator : public LmdGenerator
+class StaffObjMnxGenerator : public MnxGenerator
 {
 protected:
     ImoStaffObj* m_pObj;
 
 public:
-    StaffObjLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    StaffObjMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
@@ -1581,13 +1368,13 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class StylesLmdGenerator : public LmdGenerator
+class StylesMnxGenerator : public MnxGenerator
 {
 protected:
     ImoStyles* m_pObj;
 
 public:
-    StylesLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    StylesMnxGenerator(ImoObj* pImo, MnxExporter* pExporter) : MnxGenerator(pExporter)
     {
         m_pObj = static_cast<ImoStyles*>(pImo);
     }
@@ -1640,16 +1427,15 @@ protected:
 
 
 //=======================================================================================
-// LmdGenerator implementation
+// MnxGenerator implementation
 //=======================================================================================
-LmdGenerator::LmdGenerator(LmdExporter* pExporter)
+MnxGenerator::MnxGenerator(MnxExporter* pExporter)
     : m_pExporter(pExporter)
-    , m_fTagOpen(false)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::start_element(const string& name, ImoObj* pImo)
+void MnxGenerator::start_element(const string& name, ImoObj* pImo)
 {
     new_line_and_indent_spaces();
     m_source << "<" << name;
@@ -1660,25 +1446,25 @@ void LmdGenerator::start_element(const string& name, ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::close_start_tag()
+void MnxGenerator::close_start_tag()
 {
     m_source << ">";
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::start_attrib(const string& name)
+void MnxGenerator::start_attrib(const string& name)
 {
     m_source << " " << name << "=\"";
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::end_attrib()
+void MnxGenerator::end_attrib()
 {
     m_source << "\"";
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::add_attribute(const string& name, const string& value)
+void MnxGenerator::add_attribute(const string& name, const string& value)
 {
     start_attrib(name);
     m_source << value;
@@ -1686,37 +1472,50 @@ void LmdGenerator::add_attribute(const string& name, const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::end_element(bool fInNewLine)
+void MnxGenerator::end_element(bool fInNewLine, bool fNewElement)
 {
-    decrement_indent();
-    if (fInNewLine)
-        new_line_and_indent_spaces();
-    m_source << "</" << m_pExporter->current_open_tag() << ">";
+    if (fNewElement)
+    {
+        decrement_indent();
+        if (fInNewLine)
+            new_line_and_indent_spaces();
+        if (!m_pExporter->are_there_open_tags())
+            m_source << "Error in logic. Requested to close element and no more elements!"
+                << endl;
+        else
+            m_source << "</" << m_pExporter->current_open_tag() << ">";
+    }
+    else
+    {
+        m_source << "/>";
+        decrement_indent();
+    }
 
-    m_pExporter->pop_tag();
+    if (m_pExporter->are_there_open_tags())
+        m_pExporter->pop_tag();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::start_comment()
+void MnxGenerator::start_comment()
 {
     new_line_and_indent_spaces();
     m_source << "<!-- ";
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::end_comment()
+void MnxGenerator::end_comment()
 {
     m_source << " -->";
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::empty_line()
+void MnxGenerator::empty_line()
 {
     m_source.clear();
     new_line();
 }
 //---------------------------------------------------------------------------------------
-void LmdGenerator::new_line_and_indent_spaces(bool fStartLine)
+void MnxGenerator::new_line_and_indent_spaces(bool fStartLine)
 {
     m_source.clear();
     if (!m_pExporter->get_remove_newlines())
@@ -1733,56 +1532,56 @@ void LmdGenerator::new_line_and_indent_spaces(bool fStartLine)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::new_line()
+void MnxGenerator::new_line()
 {
     if (!m_pExporter->get_remove_newlines())
         m_source << endl;
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::add_source_for(ImoObj* pImo)
+void MnxGenerator::add_source_for(ImoObj* pImo)
 {
     m_source << m_pExporter->get_source(pImo);
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_base_staffobj(ImoObj* pImo)
+void MnxGenerator::source_for_base_staffobj(ImoObj* pImo)
 {
-    StaffObjLmdGenerator gen(pImo, m_pExporter);
+    StaffObjMnxGenerator gen(pImo, m_pExporter);
     m_source << gen.generate_source();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_base_scoreobj(ImoObj* pImo)
+void MnxGenerator::source_for_base_scoreobj(ImoObj* pImo)
 {
-    ScoreObjLmdGenerator gen(pImo, m_pExporter);
+    ScoreObjMnxGenerator gen(pImo, m_pExporter);
     m_source << gen.generate_source();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_base_contentobj(ImoObj* pImo)
+void MnxGenerator::source_for_base_contentobj(ImoObj* pImo)
 {
-    ContentObjLmdGenerator gen(pImo, m_pExporter);
+    ContentObjMnxGenerator gen(pImo, m_pExporter);
     m_source << gen.generate_source();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_base_imobj(ImoObj* pImo)
+void MnxGenerator::source_for_base_imobj(ImoObj* pImo)
 {
     increment_indent();
-    ImObjLmdGenerator gen(pImo, m_pExporter);
+    ImObjMnxGenerator gen(pImo, m_pExporter);
     m_source << gen.generate_source();
     decrement_indent();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_auxobj(ImoObj* pImo)
+void MnxGenerator::source_for_auxobj(ImoObj* pImo)
 {
     m_source <<  m_pExporter->get_source(pImo);
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
+void MnxGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
                                                   bool UNUSED(fFirstItem),
                                                   ImoStyle* pParentStyle)
 {
@@ -1821,7 +1620,7 @@ void LmdGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::add_optional_style(ImoContentObj* pObj)
+void MnxGenerator::add_optional_style(ImoContentObj* pObj)
 {
     ImoStyle* pStyle = pObj->get_style();
     if (pStyle && !pStyle->is_default_style_with_default_values())
@@ -1829,56 +1628,55 @@ void LmdGenerator::add_optional_style(ImoContentObj* pObj)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::increment_indent()
+void MnxGenerator::increment_indent()
 {
     m_pExporter->increment_indent();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::decrement_indent()
+void MnxGenerator::decrement_indent()
 {
     m_pExporter->decrement_indent();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::add_duration(stringstream& source, int noteType, int dots)
+void MnxGenerator::add_duration(stringstream& source, int noteType, int dots)
 {
-    start_element("type", nullptr);
-    close_start_tag();
+    start_attrib("value");
     switch(noteType)
     {
-        case k_longa:   source << "l";  break;
-        case k_breve:   source << "b";  break;
-        case k_whole:   source << "w";  break;
-        case k_half:    source << "h";  break;
-        case k_quarter: source << "q";  break;
-        case k_eighth:  source << "e";  break;
-        case k_16th:    source << "s";  break;
-        case k_32nd:    source << "t";  break;
-        case k_64th:    source << "i";  break;
-        case k_128th:   source << "o";  break;
-        case k_256th:   source << "f";  break;
+        case k_longa:   source << "*4";  break;
+        case k_breve:   source << "*2";  break;
+        case k_whole:   source << "/1";  break;
+        case k_half:    source << "/2";  break;
+        case k_quarter: source << "/4";  break;
+        case k_eighth:  source << "/8";  break;
+        case k_16th:    source << "/16";  break;
+        case k_32nd:    source << "/32";  break;
+        case k_64th:    source << "/64";  break;
+        case k_128th:   source << "/128";  break;
+        case k_256th:   source << "/256";  break;
         default:                        break;
     }
 
     while (dots > 0)
     {
-        source << ".";
+        source << "d";
         --dots;
     }
-    end_element(k_in_same_line);
+    end_attrib();
 }
 
 
 //=======================================================================================
-// LmdExporter implementation
+// MnxExporter implementation
 //=======================================================================================
-LmdExporter::LmdExporter(LibraryScope& libScope)
+MnxExporter::MnxExporter(LibraryScope& libScope)
     : m_libraryScope(libScope)
     , m_nIndent(0)
     , m_fAddId(false)
-    , m_scoreFormat(k_format_lmd)
     , m_fRemoveNewlines(false)
+    , m_fProcessingChord(false)
 {
     m_lomseVersion = libScope.get_version_string();
 
@@ -1889,12 +1687,12 @@ LmdExporter::LmdExporter(LibraryScope& libScope)
 }
 
 //---------------------------------------------------------------------------------------
-LmdExporter::~LmdExporter()
+MnxExporter::~MnxExporter()
 {
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::get_version_and_time_string()
+string MnxExporter::get_version_and_time_string()
 {
     string value = m_lomseVersion;
     value.append(", date ");
@@ -1903,40 +1701,35 @@ string LmdExporter::get_version_and_time_string()
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::get_source(ImoObj* pImo)
+string MnxExporter::get_source(ImoObj* pImo)
 {
-    LmdGenerator* pGen = new_generator(pImo);
+    MnxGenerator* pGen = new_generator(pImo);
     string source = pGen->generate_source();
     delete pGen;
     return source;
 }
 
 //---------------------------------------------------------------------------------------
-LmdGenerator* LmdExporter::new_generator(ImoObj* pImo)
+MnxGenerator* MnxExporter::new_generator(ImoObj* pImo)
 {
     //factory method
 
     switch(pImo->get_obj_type())
     {
-        case k_imo_barline:         return LOMSE_NEW BarlineLmdGenerator(pImo, this);
-        case k_imo_clef:            return LOMSE_NEW ClefLmdGenerator(pImo, this);
-        case k_imo_content:         return LOMSE_NEW ContentLmdGenerator(pImo, this);
-        case k_imo_control:         return LOMSE_NEW ControlLmdGenerator(pImo, this);
-        case k_imo_document:        return LOMSE_NEW LenmusdocLmdGenerator(pImo, this);
-        case k_imo_dynamic:         return LOMSE_NEW DynamicLmdGenerator(pImo, this);
-        case k_imo_heading:         return LOMSE_NEW SectionLmdGenerator(pImo, this);
-        case k_imo_instrument:      return LOMSE_NEW InstrumentLmdGenerator(pImo, this);
-        case k_imo_key_signature:   return LOMSE_NEW KeySignatureLmdGenerator(pImo, this);
-        case k_imo_music_data:      return LOMSE_NEW MusicDataLmdGenerator(pImo, this);
-        case k_imo_note:            return LOMSE_NEW NoteLmdGenerator(pImo, this);
-        case k_imo_para:            return LOMSE_NEW ParagraphLmdGenerator(pImo, this);
-        case k_imo_rest:            return LOMSE_NEW RestLmdGenerator(pImo, this);
-        case k_imo_score:           return LOMSE_NEW ScoreLmdGenerator(pImo, this);
-        case k_imo_spacer:          return LOMSE_NEW SpacerLmdGenerator(pImo, this);
-        case k_imo_style:           return LOMSE_NEW DefineStyleLmdGenerator(pImo, this);
-        case k_imo_styles:          return LOMSE_NEW StylesLmdGenerator(pImo, this);
+        case k_imo_barline:         return LOMSE_NEW BarlineMnxGenerator(pImo, this);
+        case k_imo_clef:            return LOMSE_NEW ClefMnxGenerator(pImo, this);
+        case k_imo_document:        return LOMSE_NEW LenmusdocMnxGenerator(pImo, this);
+        case k_imo_instrument:      return LOMSE_NEW InstrumentMnxGenerator(pImo, this);
+        case k_imo_key_signature:   return LOMSE_NEW KeySignatureMnxGenerator(pImo, this);
+        case k_imo_music_data:      return LOMSE_NEW MusicDataMnxGenerator(pImo, this);
+        case k_imo_note:            return LOMSE_NEW NoteMnxGenerator(pImo, this);
+        case k_imo_rest:            return LOMSE_NEW RestMnxGenerator(pImo, this);
+        case k_imo_score:           return LOMSE_NEW ScoreMnxGenerator(pImo, this);
+        case k_imo_spacer:          return LOMSE_NEW SpacerMnxGenerator(pImo, this);
+        case k_imo_style:           return LOMSE_NEW DefineStyleMnxGenerator(pImo, this);
+        case k_imo_styles:          return LOMSE_NEW StylesMnxGenerator(pImo, this);
         default:
-            return new ErrorLmdGenerator(pImo, this);
+            return new ErrorMnxGenerator(pImo, this);
     }
 }
 
@@ -1945,11 +1738,11 @@ LmdGenerator* LmdExporter::new_generator(ImoObj* pImo)
 // static methods
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::clef_type_to_ldp(int clefType)
+string MnxExporter::clef_type_to_mnx(int clefType)
 {
     //AWARE: indexes in correspondence with enum k_clef__type
     static const string name[] = {
-        "G",
+        "G2",
         "F4",
         "F3",
         "C1",
@@ -1979,10 +1772,11 @@ string LmdExporter::clef_type_to_ldp(int clefType)
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::barline_type_to_ldp(int barType)
+string MnxExporter::barline_type_to_mnx(int barType)
 {
     //AWARE: indexes in correspondence with enum in ImoBarline
     static const string name[] = {
+        "none",
         "simple",
         "double",
         "start",
@@ -1996,7 +1790,7 @@ string LmdExporter::barline_type_to_ldp(int barType)
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::color_to_ldp(Color color)
+string MnxExporter::color_to_mnx(Color color)
 {
     stringstream source;
     source << "#";
@@ -2012,7 +1806,7 @@ string LmdExporter::color_to_ldp(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::float_to_string(float UNUSED(num))
+string MnxExporter::float_to_string(float UNUSED(num))
 {
     return "(TODO: float_to_string)";
 }

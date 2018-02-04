@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -112,7 +112,7 @@ SUITE(MnxAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        //expected << "Line 0. " << endl;
+        expected << "Line 0. <mnx>: missing mandatory element <head>." << endl;
         parser.parse_text("<mnx></mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
