@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,15 +31,10 @@
 
 #include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
-#include "lomse_internal_model.h"
+#include "lomse_document.h"
 #include "lomse_layouter.h"
 #include "lomse_score_layouter.h"
 #include "lomse_calligrapher.h"
-
-////remove warning for using 'this' in constructor
-//#if (LOMSE_COMPILER_MSVC == 1)
-//#pragma warning(disable:4355)
-//#endif
 
 namespace lomse
 {
@@ -52,11 +47,11 @@ namespace lomse
 //  delegates in specialized layouters.
 //---------------------------------------------------------------------------------------
 
-DocLayouter::DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
+DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope)
     : Layouter(libraryScope)
     , m_pScoreLayouter(nullptr)
 {
-    m_pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+    m_pDoc = pDoc->get_imodoc();
     m_pStyles = m_pDoc->get_styles();
     m_pGModel = LOMSE_NEW GraphicModel();
 }

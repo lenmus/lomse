@@ -143,11 +143,11 @@ void Interactor::create_graphic_model()
     {
         m_gmodelBuildStartTime = get_current_time();
 
-        InternalModel* pIModel = spDoc->get_im_model();
-        if (pIModel)
+        Document* pDoc = spDoc.get();
+        if (pDoc)
         {
             LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
-            DocLayouter layouter(pIModel, m_libScope);
+            DocLayouter layouter(pDoc, m_libScope);
             layouter.layout_document();
             m_pGraphicModel = layouter.get_graphic_model();
             m_pGraphicModel->build_main_boxes_table();

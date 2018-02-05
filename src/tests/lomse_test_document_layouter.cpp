@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -57,8 +57,8 @@ using namespace lomse;
 class MyDocLayouter : public DocLayouter
 {
 public:
-    MyDocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
-        : DocLayouter(pIModel, libraryScope) {}
+    MyDocLayouter(Document* pDoc, LibraryScope& libraryScope)
+        : DocLayouter(pDoc, libraryScope) {}
     ~MyDocLayouter() {}
 
     void my_layout_content() { layout_content(); }
@@ -96,7 +96,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         //pGModel->dump_page(0, cout);
@@ -109,7 +109,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel != nullptr );
@@ -124,7 +124,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -141,7 +141,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -161,7 +161,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
 //        pGModel->dump_page(0, cout);
@@ -185,7 +185,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
 //        pGModel->dump_page(0, cout);
@@ -209,7 +209,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -233,7 +233,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -258,7 +258,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -279,7 +279,7 @@ SUITE(DocLayouterTest)
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -300,7 +300,7 @@ SUITE(DocLayouterTest)
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData)))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -328,7 +328,7 @@ SUITE(DocLayouterTest)
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G) )) )))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -368,7 +368,7 @@ SUITE(DocLayouterTest)
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData)) )))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -396,7 +396,7 @@ SUITE(DocLayouterTest)
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData)))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -428,7 +428,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData)) (instrument (musicData)) )))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
+        DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -460,7 +460,7 @@ SUITE(DocLayouterTest)
     //    Document doc(m_libraryScope);
     //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-    //    MyDocLayouter dl( doc.get_im_model() );
+    //    MyDocLayouter dl(&doc );
     //    CHECK( dl.get_main_sizer() != nullptr );
     //}
 

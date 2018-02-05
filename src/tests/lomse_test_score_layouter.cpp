@@ -167,7 +167,7 @@ public:
         m_pDoc = LOMSE_NEW Document(m_libraryScope, cout);
         m_pDoc->from_file(filename);
 
-        m_pDocLayouter = LOMSE_NEW DocLayouter( m_pDoc->get_im_model(), m_libraryScope);
+        m_pDocLayouter = LOMSE_NEW DocLayouter(m_pDoc, m_libraryScope);
         m_pDocLayouter->layout_document();
         m_pGModel = m_pDocLayouter->get_graphic_model();
         CHECK( m_pGModel != nullptr );
