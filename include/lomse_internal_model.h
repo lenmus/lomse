@@ -3217,6 +3217,7 @@ public:
 class ImoDocument : public ImoBlocksContainer
 {
 protected:
+    friend class Document;
     string m_version;
     string m_language;
     ImoPageInfo m_pageInfo;

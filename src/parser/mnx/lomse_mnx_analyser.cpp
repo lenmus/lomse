@@ -1075,8 +1075,8 @@ bool MnxElementAnalyser::get_note_value(const string& value, int* noteType, int*
 
 //-----------------------------------------------------------------------------------
 //Note value quantity
-bool MnxElementAnalyser::get_note_value_quantity(const string& value, int* noteType,
-                                                 int* dots, int* multiplier)
+bool MnxElementAnalyser::get_note_value_quantity(const string& UNUSED(value), int* UNUSED(noteType),
+                                                 int* UNUSED(dots), int* UNUSED(multiplier))
 {
     //TODO
     return false;

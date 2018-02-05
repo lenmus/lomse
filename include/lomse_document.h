@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -89,13 +89,6 @@ protected:
     unsigned int    m_flags;
     int             m_modified;
 
-protected:
-    friend class LenmusdocAnalyser;
-    friend class LenmusdocLmdAnalyser;
-    friend class ScorePartwiseMxlAnalyser;
-    friend class MnxMnxAnalyser;
-    void set_imo_doc(ImoDocument* pImoDoc);
-
 public:
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
     virtual ~Document();
@@ -143,7 +136,6 @@ public:
 
     //internal model
     inline ImoDocument* get_imodoc() const { return m_pImoDoc; }
-    inline InternalModel* get_im_model() const { return m_pIModel; }
     ImoObj* get_pointer_to_imo(ImoId id) const;
     Control* get_pointer_to_control(ImoId id) const;
     string to_string(bool fWithIds = false);
@@ -153,6 +145,28 @@ public:
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
     void removed_from_model(ImoObj* pImo);
+
+    //facade methods for accessing ImoDocument methods
+        //info
+    inline std::string& get_version() { return m_pImoDoc->m_version; }
+    inline void set_version(const string& version) { m_pImoDoc->m_version = version; }
+    inline Document* get_owner() { return this; }
+    inline void set_language(const string& language) { m_pImoDoc->m_language = language; }
+        //document intended paper size
+    void add_page_info(ImoPageInfo* pPI) { m_pImoDoc->add_page_info(pPI); }
+    inline ImoPageInfo* get_page_info() { return &(m_pImoDoc->m_pageInfo); }
+    inline LUnits get_paper_width() { return m_pImoDoc->m_pageInfo.get_page_width(); }
+    inline LUnits get_paper_height() { return m_pImoDoc->m_pageInfo.get_page_height(); }
+        //styles
+    ImoStyles* get_styles() { return m_pImoDoc->get_styles(); }
+    void add_style(ImoStyle* pStyle) { m_pImoDoc->add_style(pStyle); }
+    ImoStyle* get_style_or_default(const std::string& name) { return m_pImoDoc->get_style_or_default(name); }
+        //support for edition commands
+    void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew) { m_pImoDoc->insert_block_level_obj(pAt, pImoNew); }
+    void delete_block_level_obj(ImoBlockLevelObj* pAt) { m_pImoDoc->delete_block_level_obj(pAt); }
+        //cursor
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+
 
 
     //API: objects creation/modification
@@ -224,6 +238,12 @@ protected:
 
     friend class Control;
     void assign_id(Control* pControl);
+
+    friend class LenmusdocAnalyser;
+    friend class LenmusdocLmdAnalyser;
+    friend class ScorePartwiseMxlAnalyser;
+    friend class MnxMnxAnalyser;
+    void set_imo_doc(ImoDocument* pImoDoc);
 
 };
 
