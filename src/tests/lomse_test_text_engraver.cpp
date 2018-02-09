@@ -82,7 +82,7 @@ SUITE(TextEngraverTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (name ''Violin'')(musicData (n c4 q))))))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoScoreText& text = pInstr->get_name();
         ImoStyle* pStyle = pScore->get_default_style();

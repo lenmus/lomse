@@ -503,7 +503,7 @@ protected:
             {
                 //try to find it in document global styles
                 Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoDocument* pImoDoc = pDoc->get_imodoc();
+                ImoDocument* pImoDoc = pDoc->get_im_root();
                 if (pImoDoc)
                     pStyle = pImoDoc->find_style(styleName);
             }

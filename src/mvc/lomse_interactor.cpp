@@ -1758,7 +1758,7 @@ bool Interactor::is_operating_mode_allowed(int mode)
     {
         if (SpDocument spDoc = m_wpDoc.lock())
         {
-            ImoDocument* pImoDoc = spDoc->get_imodoc();
+            ImoDocument* pImoDoc = spDoc->get_im_root();
             int iMax = pImoDoc->get_num_content_items();
             for (int i=0; i < iMax; ++i)
             {

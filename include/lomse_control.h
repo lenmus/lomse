@@ -80,7 +80,7 @@ protected:
         pDoc->assign_id(this);
 
         //default language
-        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+        ImoDocument* pImoDoc = m_pDoc->get_im_root();
         m_language = pImoDoc->get_language();
     }
 
@@ -184,7 +184,7 @@ protected:
 //        string fontName = m_style->font_name();
 //
 //        //get document language
-//        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+//        ImoDocument* pImoDoc = m_pDoc->get_im_root();
 //        if (pImoDoc)    //AWARE: in untit tests there could be no ImoDoc
 //            language = pImoDoc->get_language();
 //

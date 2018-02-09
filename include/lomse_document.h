@@ -41,8 +41,10 @@
 #include <sstream>
 using namespace std;
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class DocCommand;
@@ -63,17 +65,16 @@ class ImoTextItem;
 
 
 //------------------------------------------------------------------------------------
-// Base class for lomse document.
-// Encapsulates all the library internals, providing the basic API for creating and
-// using a document.
-//      - an iterator to traverse the document;
-//      - support for visitors;
-//      - serialization; and
-//      - atomic methods to modify the document (no undo/redo capabilities).
-//      - methods to set/check a 'document modified' flag (but no logic to
-//        manage this flag, only reset when the document is created/loaded)
-//------------------------------------------------------------------------------------
-
+/** Base class for any Lomse document.
+    Encapsulates a document, providing the basic API for creating and using it, such
+    as:
+      - An iterator to traverse the document.
+      - Support for visitors.
+      - Loading from file or string and exporting to file or string.
+      - Low level methods to modify the document (no undo/redo capabilities).
+      - Methods to set/check a 'document modified' flag (but no logic to
+        manage this flag, only reset when the document is created/loaded).
+*/
 class LOMSE_EXPORT Document : public BlockLevelCreatorApi
                             , public EventNotifier
                             , public Observable
@@ -102,8 +103,8 @@ public:
     enum {
         k_format_ldp = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
         k_format_lmd,       //LenMus Document (LMD, XML syntax)
-        k_format_mxl,       //MusicXML
-        k_format_mnx,       //W3C MNX
+        k_format_mxl,       //MusicXML format
+        k_format_mnx,       //W3C MNX format
         k_format_unknown,
     };
 
@@ -111,15 +112,18 @@ public:
     inline DocumentScope& get_scope() { return m_docScope; }
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
-    //creation
+    /// @name Document creation
+    //@{
+
     int from_file(const string& filename, int format=k_format_ldp);
     int from_string(const string& source, int format=k_format_ldp);
     int from_input(LdpReader& reader);
-    int from_checkpoint(const string& data);
-    int replace_object_from_checkpoint_data(ImoId id, const string& data);
     void create_empty();
     void create_with_empty_score();
     inline SharedPtr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
+
+    //@}    //Document creation
+
 
     //properties
     bool is_editable();
@@ -128,54 +132,83 @@ public:
     inline void clear_dirty() { m_flags &= ~k_dirty; }
     inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
 
-    //modified since last 'save to file' operation
-    inline void clear_modified() { m_modified = 0; }
-    inline bool is_modified() { return m_modified > 0; }
-    inline void set_modified() { ++m_modified; }
-    inline void reset_modified() { if (m_modified > 0) --m_modified; }
 
-    //internal model
-    inline ImoDocument* get_imodoc() const { return m_pImoDoc; }
+    /// @name Access to the internal model
+    //@{
+
+    /** Returns a pointer to the root object of the internal model. It is always an
+        ImoDocument object. Access to this object is not always necessary as
+        %Document provides facade methods for the most common operations. */
+    inline ImoDocument* get_im_root() const { return m_pImoDoc; }
+
+    /** Returns version of the internal model document. */
+    inline std::string& get_version() { return m_pImoDoc->m_version; }
+
+    /** Returns a pointer to the internal model object with the given ID. */
     ImoObj* get_pointer_to_imo(ImoId id) const;
+
+    /** Returns a pointer to the ImoControl object with the given ID. */
     Control* get_pointer_to_control(ImoId id) const;
-    string to_string(bool fWithIds = false);
-    string get_checkpoint_data();
-    string get_checkpoint_data_for(ImoId id);
     inline string get_language() {
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
     void removed_from_model(ImoObj* pImo);
 
-    //facade methods for accessing ImoDocument methods
-        //info
-    inline std::string& get_version() { return m_pImoDoc->m_version; }
-    inline void set_version(const string& version) { m_pImoDoc->m_version = version; }
-    inline Document* get_owner() { return this; }
+    //@}    //Access to the internal model
+
+
+    /// @name Low level edition API: ImoDocument related
+    //@{
+
+    /** Set the language used in this %Document. Parameter 'language' is a language code
+    drawn from ISO 639, optionally extended with a country code drawn from ISO 3166, as
+    'en-US'. It represents the default language for all texts in the document. */
     inline void set_language(const string& language) { m_pImoDoc->m_language = language; }
+
         //document intended paper size
+    /** Append a ImoPageInfo node with default values. */
     void add_page_info(ImoPageInfo* pPI) { m_pImoDoc->add_page_info(pPI); }
+
+    /** Return the ImoPageInfo node for this %Document. */
     inline ImoPageInfo* get_page_info() { return &(m_pImoDoc->m_pageInfo); }
+
+    /** Return the paper width intended for rendering this %Document. The returned value
+        is in logical units (cents of a millimeter). */
     inline LUnits get_paper_width() { return m_pImoDoc->m_pageInfo.get_page_width(); }
+
+    /** Return the paper height intended for rendering this %Document. The returned value
+        is in logical units (cents of a millimeter). */
     inline LUnits get_paper_height() { return m_pImoDoc->m_pageInfo.get_page_height(); }
-        //styles
-    ImoStyles* get_styles() { return m_pImoDoc->get_styles(); }
-    void add_style(ImoStyle* pStyle) { m_pImoDoc->add_style(pStyle); }
-    ImoStyle* get_style_or_default(const std::string& name) { return m_pImoDoc->get_style_or_default(name); }
-        //support for edition commands
+
+    /** Append a new empty score (no instruments) at the end of the %Document. Returns a
+        pointer to the created ImoScore object. */
+    ImoScore* add_score(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_score(pStyle); }
+
+    /** Insert a block level object (a node of class ImoBlockLevelObj, such as ImoScore or
+        ImoParagraph) before the pointed node 'pAt'. If 'pAt' is nullptr
+        then the block level object will be appended to the end of the %Document. */
     void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew) { m_pImoDoc->insert_block_level_obj(pAt, pImoNew); }
+
+    /** Remove from the internal model (and delete) the block level object referenced
+        by pointer 'pAt'.  */
     void delete_block_level_obj(ImoBlockLevelObj* pAt) { m_pImoDoc->delete_block_level_obj(pAt); }
-        //cursor
-    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+
+    //@}    //Low level edition API: ImoDocument related
 
 
+    /// @name Low level edition API: objects creation/modification
+    //@{
 
-    //API: objects creation/modification
+    /** When you modify the content of a %Document it is necessary to update some
+        structures associated to music scores, such as the staffobjs collection.
+        For this it is mandatory to invoke this method. Alternatively, you can
+        invoke ImoScore::end_of_changes(), on the modified scores. */
     void end_of_changes();
 
+    void add_staff_objects(const string& source, ImoMusicData* pMD);
     ImoObj* create_object_from_ldp(const string& source, ostream& reporter);
     ImoObj* create_object_from_ldp(const string& source);
     ImoObj* create_object_from_lmd(const string& source);
-    void add_staff_objects(const string& source, ImoMusicData* pMD);
     void delete_relation(ImoRelObj* pRO);
     void delete_auxobj(ImoAuxObj* pAO);
     ImoTuplet* add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
@@ -184,37 +217,60 @@ public:
     ImoTie* tie_notes(ImoNote* pStart, ImoNote* pEnd, ostream& reporter);
 
 
-    //API: styles
+    /// @name Low level edition API: styles
+    //@{
+
     ImoStyle* get_default_style();
     ImoStyle* create_style(const string& name, const string& parent="Default style");
     ImoStyle* create_private_style(const string& parent="Default style");
     ImoStyle* find_style(const string& name);
+    ImoStyles* get_styles() { return m_pImoDoc->get_styles(); }
+    void add_style(ImoStyle* pStyle) { m_pImoDoc->add_style(pStyle); }
+    ImoStyle* get_style_or_default(const std::string& name) { return m_pImoDoc->get_style_or_default(name); }
 
-    ////API: traversing the document
-    //ImoContent* get_content();
-    //void append_content_item(ImoContentObj* pItem);
+    //@}    //Low level edition API: styles
 
-    //API: adding first level onjects
-    //These violate the Open/Close principle as it would require to modify the API
-    //when a new first level item is created. Nevertheless it is an upwards
-    //compatible change.
-//    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr);
+
+
+    /// @name Low level edition API: traversing the document
+    //@{
+
+    int get_num_content_items() { return m_pImoDoc->get_num_content_items(); }
+    ImoContent* get_content() { return m_pImoDoc->get_content(); }
+    ImoContentObj* get_content_item(int iItem) { return m_pImoDoc->get_content_item(iItem); }
+    ImoContentObj* get_first_content_item() { return m_pImoDoc->get_first_content_item(); }
+    ImoContentObj* get_last_content_item() { return m_pImoDoc->get_last_content_item(); }
+    void append_content_item(ImoContentObj* pItem) { return m_pImoDoc->append_content_item(pItem); }
+
+    //@}    //Low level edition API: traversing the document
+
+
+
+    /// @name Low level edition API: adding first level objects
+    //@{
+
 //    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=nullptr);
 //    ImoButton* create_button(const string& label, const USize& size,
 //                             ImoStyle* pStyle=nullptr);
+    ImoParagraph* add_paragraph(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_paragraph(pStyle); }
+    ImoContent* add_content_wrapper(ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_content_wrapper(pStyle); }
+    ImoList* add_list(int type, ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_list(type, pStyle); }
+    ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=nullptr) { return m_pImoDoc->add_multicolumn_wrapper(numCols, pStyle); }
+
+    //@}    //Low level edition API: adding first level objects
 
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }
     Observable* get_observable_child(int childType, ImoId childId);
 
-    /** Send doc-modified events
-        To have more control about when to update views, the document doesn't
-        automatically notify observers when the document is updated.
-        Views observing the document will be notified about modifications only
-        when the following method is invoked. Commands (atomic, DocCommands and
-        UserCommands)don't invoke it. Invoking this method is a responsibility
-        of the Interactor (or the user application if Interactor is not used)
-        whenever a command or an event altering the document is processed.
+    /** Send an EventDoc of type `k_doc_modified_event` if the document has been
+        modified (if it is dirty).
+        Notice that to have more control about when to update views, the document
+        doesn't automatically notify observers when the document is modified, so it
+        is responsibility of the code modifying the %Document to invoke this
+        method after finishing the modifications.
+
+        Edition commands and low level edition API methods do not invoke it.
     */
     void notify_if_document_modified();
 
@@ -222,10 +278,37 @@ public:
     //protected as soon as buttons changed to controls
     inline void set_dirty() { m_flags |= k_dirty; }
 
+
+
+///@cond INTERNALS
+//methods excluded from documented public API. Only for internal use.
+
+    //excluded from low level edition API
+
+
+    //undo/redo support
+    int from_checkpoint(const string& data);
+    int replace_object_from_checkpoint_data(ImoId id, const string& data);
+    string get_checkpoint_data();
+    string get_checkpoint_data_for(ImoId id);
+
+    //modified since last 'save to file' operation
+    inline void clear_modified() { m_modified = 0; }
+    inline bool is_modified() { return m_modified > 0; }
+    inline void set_modified() { ++m_modified; }
+    inline void reset_modified() { if (m_modified > 0) --m_modified; }
+
     //debug
     string dump_ids() const;
     size_t id_assigner_size() const;
     string dump_tree() const;
+    string to_string(bool fWithIds = false);
+
+    //inherited from LenMos 3.0. Not yet used
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+
+///@endcond
+
 
 protected:
     void initialize();

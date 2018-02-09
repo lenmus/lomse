@@ -719,7 +719,7 @@ SUITE(GraphicModelTest)
 //////        ImoInstrument* pInstr = pScore->add_instrument();
 //////        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
 ////
-////        ImoDocument* pDoc = spDoc->get_imodoc();
+////        ImoDocument* pDoc = spDoc->get_im_root();
 ////        ImoContent* pContent = static_cast<ImoContent*>(
 ////                                    pDoc->get_child_of_type(k_content) );
 ////        GmoBoxDocPageContent* pBDPC = LOMSE_NEW GmoBoxDocPageContent(pContent);

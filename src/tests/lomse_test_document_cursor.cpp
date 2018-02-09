@@ -288,7 +288,7 @@ SUITE(DocContentCursorTest)
 //        cursor.move_next();
 //        CHECK( cursor.get_pointee_id() == 26L );
 //        CHECK( cursor.get_prev_id() == 80L );
-//        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+//        ImoDocument* pImoDoc = m_pDoc->get_im_root();
 //
 //        ImoParagraph* pImo = pImoDoc->add_paragraph();
 //        ImoId id = pImo->get_id();
@@ -336,7 +336,7 @@ SUITE(DocContentCursorTest)
 ////        create_empty_document();
 ////        MyDocContentCursor cursor(m_pDoc);
 ////        CHECK( *cursor == nullptr );
-////        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+////        ImoDocument* pImoDoc = m_pDoc->get_im_root();
 ////        pImoDoc->add_paragraph();
 ////        CHECK( *cursor == nullptr );
 ////        --cursor;
@@ -699,7 +699,7 @@ SUITE(DocCursorTest)
         MyDocCursor cursor(m_pDoc);
         CHECK( *cursor == nullptr );
 
-        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+        ImoDocument* pImoDoc = m_pDoc->get_im_root();
         pImoDoc->add_paragraph();
 
         CHECK( *cursor == nullptr );

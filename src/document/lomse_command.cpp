@@ -570,7 +570,7 @@ int CmdAddChordNote::perform_action(Document* pDoc, DocCursor* pCursor)
     ImoTreeAlgoritms::add_note_to_chord(pBaseNote, pNewNote, pDoc);
 
     //force to rebuild ColStaffObjs table
-    pScore->close();
+    pScore->end_of_changes();
 
     return k_success;
 }
@@ -652,7 +652,7 @@ int CmdAddNoteRest::perform_action(Document* pDoc, DocCursor* pCursor)
     clear_temporary_objects();
 
     //force to rebuild ColStaffObjs table
-    m_pScore->close();
+    m_pScore->end_of_changes();
 
     return k_success;
 }
@@ -1478,7 +1478,7 @@ int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
 
     //rebuild StaffObjs collection
     ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-    pScore->close();
+    pScore->end_of_changes();
 
     return k_success;
 }
@@ -1497,7 +1497,7 @@ void CmdChangeDots::undo_action(Document* pDoc, DocCursor* pCursor)
 
     //rebuild StaffObjs collection
     ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-    pScore->close();
+    pScore->end_of_changes();
 }
 
 //=======================================================================================
@@ -1723,8 +1723,7 @@ int CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
         prepare_cursor_for_deletion(pCursor);
         if (m_name == "")
             set_command_name("Delete ", pImo);
-        ImoDocument* pImoDoc = pDoc->get_imodoc();
-        pImoDoc->delete_block_level_obj(pImo);
+        pDoc->delete_block_level_obj(pImo);
         return k_success;
     }
     return k_failure;
@@ -1879,7 +1878,7 @@ int CmdDeleteSelection::perform_action(Document* pDoc, DocCursor* pCursor)
 
     //rebuild StaffObjs collection
     ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-    pScore->close();
+    pScore->end_of_changes();
 
     return k_success;
 }
@@ -2112,7 +2111,7 @@ int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 
         //rebuild StaffObjs collection
         ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-        pScore->close();
+        pScore->end_of_changes();
 
         return k_success;
     }
@@ -2144,7 +2143,7 @@ void CmdInsert::remove_object(Document* pDoc, ImoId id)
         ImoStaffObj* pImo = static_cast<ImoStaffObj*>( pDoc->get_pointer_to_imo(id) );
 
         //remove object from imo tree
-        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        ImoDocument* pImoDoc = pDoc->get_im_root();
         TreeNode<ImoObj>::iterator it(pImo);
         pImoDoc->erase(it);
         pImoDoc->set_dirty(true);
@@ -2183,7 +2182,7 @@ void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* UNUSED(pCurs
 {
     if (m_lastInsertedId != k_no_imoid)
     {
-        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        ImoDocument* pImoDoc = pDoc->get_im_root();
         ImoBlockLevelObj* pImo = static_cast<ImoBlockLevelObj*>(
                                             pDoc->get_pointer_to_imo(m_lastInsertedId) );
         pImoDoc->delete_block_level_obj(pImo);
@@ -2211,7 +2210,7 @@ void CmdInsertBlockLevelObj::perform_action_from_type(Document* pDoc,
         static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_blockType, pDoc) );
     if (m_name == "")
         set_command_name("Insert ", pImo);
-    ImoDocument* pImoDoc = pDoc->get_imodoc();
+    ImoDocument* pImoDoc = pDoc->get_im_root();
     ImoBlockLevelObj* pAt = dynamic_cast<ImoBlockLevelObj*>(
                                 pDoc->get_pointer_to_imo(m_idAt) );
     pImoDoc->insert_block_level_obj(pAt, pImo);
@@ -2230,7 +2229,7 @@ void CmdInsertBlockLevelObj::perform_action_from_source(Document* pDoc,
         //insert the created subtree at desired point
         ImoBlockLevelObj* pAt = dynamic_cast<ImoBlockLevelObj*>(
                                     pDoc->get_pointer_to_imo(m_idAt) );
-        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        ImoDocument* pImoDoc = pDoc->get_im_root();
         pImoDoc->insert_block_level_obj(pAt, static_cast<ImoBlockLevelObj*>(pImo));
         m_lastInsertedId = pImo->get_id();
     }
@@ -2292,7 +2291,7 @@ int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
         list<ImoStaffObj*> objects = pInstr->insert_staff_objects_at(pAt, m_source, errormsg);
         if (objects.size() > 0)
         {
-            pScore->close();        //update ColStaffObjs table
+            pScore->end_of_changes();        //update ColStaffObjs table
             save_source_code_with_ids(pDoc, objects);
             m_lastInsertedId = objects.back()->get_id();
             objects.clear();
@@ -2355,7 +2354,7 @@ void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
 
         //update ColStaffObjs
         ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
-        pScore->close();
+        pScore->end_of_changes();
     }
 }
 
@@ -2400,7 +2399,7 @@ int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
             }
 
             //update ColStaffObjs table
-            pScore->close();
+            pScore->end_of_changes();
 
             //assign name to this command
             if (m_name == "")

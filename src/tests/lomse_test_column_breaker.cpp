@@ -133,7 +133,7 @@ SUITE(ColumnBreakerTest)
 //            "(n d4 q)(n g4 q)(barline)"
 //            "(n e4 q) )))" );
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        StaffObjsCursor soCursor(pScore);
 //
 //        MyColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -154,7 +154,7 @@ SUITE(ColumnBreakerTest)
 //            "(n d4 q)(n g4 q)(barline)"
 //            "(n e4 q) )))" );
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        StaffObjsCursor soCursor(pScore);
 //
 //        MyColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -184,7 +184,7 @@ SUITE(ColumnBreakerTest)
             "(n d4 q)(n g4 q)(barline)"
             ")))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         MyColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -210,7 +210,7 @@ SUITE(ColumnBreakerTest)
             "(n d4 q)(n g4 q)(barline)"
             ")))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         MyColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -244,7 +244,7 @@ SUITE(ColumnBreakerTest)
             "(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -278,7 +278,7 @@ SUITE(ColumnBreakerTest)
             "(barline simple middle)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -307,7 +307,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -335,7 +335,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -364,7 +364,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -408,7 +408,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -445,7 +445,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -481,7 +481,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -526,7 +526,7 @@ SUITE(ColumnBreakerTest)
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -568,7 +568,7 @@ SUITE(ColumnBreakerTest)
             "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -606,7 +606,7 @@ SUITE(ColumnBreakerTest)
             "(instrument#121L (musicData (clef G)(n c4 q)(n e4 q)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -666,7 +666,7 @@ SUITE(ColumnBreakerTest)
             "(n c3 q p2 v2)(n e3 q)(barline)"
             "(n g4 q p1 v1)(n c5 q)(n e5 q)(n g5 q)(n c6 q)"
             "(n e3 q p2 v2)(n c4 q)(n e4 q)(n g4 q) ))) ))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -713,7 +713,7 @@ SUITE(ColumnBreakerTest)
             "(n c6 q)(n b5 q)(n a5 q)"
             "(n e3 w p2 v2)(n f3 h)"
             "(n a2 q p2 v3)(n c3 q) ))) ))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -751,7 +751,7 @@ SUITE(ColumnBreakerTest)
             "(n c3 q p2 v2)(n d3 s p2 g+)(n e3 s)(n f3 s)(n g3 s g-)"
             ")) )))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -782,7 +782,7 @@ SUITE(ColumnBreakerTest)
             "(n c3 q p2 v2)(n d3 e l+)(n d3 e)"
             ")) )))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -827,7 +827,7 @@ SUITE(ColumnBreakerTest)
             "(n c5 e g+)(n b4 s)(n a4 s g-)(barline) ))"
             ")))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
         //cout << test_name() << endl;
         //cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -853,7 +853,7 @@ SUITE(ColumnBreakerTest)
 //            "(n c4 q)(n d4 q)(n e4 q)(barline)"
 //            ")))" );
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        StaffObjsCursor soCursor(pScore);
 //
 //        MyColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
@@ -886,7 +886,7 @@ SUITE(ColumnBreakerTest)
             "(n c3 q)(barline)(n d3 q) ))"
             ")))" );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor soCursor(pScore);
 
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);

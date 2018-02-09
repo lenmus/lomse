@@ -717,7 +717,7 @@ string Document::dump_tree() const
     stringstream data;
 
     DumpVisitor v(m_libraryScope, data);
-    ImoDocument* pRoot = get_imodoc();
+    ImoDocument* pRoot = get_im_root();
     pRoot->accept_visitor(v);
 
     return data.str();

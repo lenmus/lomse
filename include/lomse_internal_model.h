@@ -4386,9 +4386,16 @@ public:
     ImoStyle* get_default_style();
     ImoStyle* get_style_or_default(const std::string& name);
 
-    //API
+    //low level edition API
+    /** Append a new empty instrument (score part) to the score. Returns a pointer to
+        the created instrument. */
     ImoInstrument* add_instrument();
-    void close();
+
+    /** When you modify the content of an score it is necessary to update associated
+        structures, such as the staffobjs collection. For this it is mandatory to
+        invoke this method. Alternatively, you can invoke Document::end_of_changes(),
+        that will invoke this method on all scores. */
+    void end_of_changes();
 
 
 protected:

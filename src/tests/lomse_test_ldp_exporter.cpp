@@ -102,7 +102,7 @@ SUITE(LdpExporterTest)
 ////        doc.from_file(m_scores_path + "50180-new-system-tag.lms" );
 ////        doc.from_file(m_scores_path + "50110-graphic-line-text.lms" );
 ////        doc.from_file("/datos/USR/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
-//        ImoDocument* pRoot = doc.get_imodoc();
+//        ImoDocument* pRoot = doc.get_im_root();
 //
 //        LdpExporter exporter(&m_libraryScope);
 //        exporter.set_add_id(true);
@@ -120,7 +120,7 @@ SUITE(LdpExporterTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6) (instrument (musicData (barline end))))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
@@ -138,7 +138,7 @@ SUITE(LdpExporterTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6) (instrument#100 (musicData (barline#105 end))))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
@@ -189,7 +189,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (barline end (text \"Hello\")) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoBarline* pImo = static_cast<ImoBarline*>(
@@ -211,7 +211,7 @@ SUITE(LdpExporterTest)
             "(score (vers 1.6)(instrument#100 (musicData "
             "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)(barline))) )"
             );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -234,7 +234,7 @@ SUITE(LdpExporterTest)
             "(chord (n e4 e. g+ (stem up))(n g4 e.))"
             "(chord (n d4 s g- (stem up))(n f4 s))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -258,7 +258,7 @@ SUITE(LdpExporterTest)
             "(chord (n e4 e. g+ v2 (stem up))(n g4 e. v2))"
             "(chord (n d4 s g- v2 (stem up))(n f4 s v2))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -282,7 +282,7 @@ SUITE(LdpExporterTest)
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(goBack start)(n c2 w v3)(barline)"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -361,7 +361,7 @@ SUITE(LdpExporterTest)
             "(n g4  q (dyn \"sfz\" above))"
             "(n g4  q (dyn \"sfz\" above (dx 50)(dy -70)(color #ff0000)))"
             ")))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -393,7 +393,7 @@ SUITE(LdpExporterTest)
         //staves
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
         LdpExporter exporter(&m_libraryScope);
@@ -412,7 +412,7 @@ SUITE(LdpExporterTest)
             "(staff 1 (staffType ossia)(staffLines 5)(staffSpacing 250.00)"
             "         (staffDistance 2000.00)(lineThickness 15.00))"
             "(musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
         LdpExporter exporter(&m_libraryScope);
@@ -431,7 +431,7 @@ SUITE(LdpExporterTest)
         //midi data
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (infoMIDI 9 12)(musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
         LdpExporter exporter(&m_libraryScope);
@@ -447,7 +447,7 @@ SUITE(LdpExporterTest)
         //name, abbrev
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (name \"Guitar\")(abbrev \"G.\")(musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
         LdpExporter exporter(&m_libraryScope);
@@ -467,7 +467,7 @@ SUITE(LdpExporterTest)
             "(defineStyle \"Best2\" (font \"Times New Roman\" 10pt bold) (color #000000))"
             "(instrument (name \"Guitar\" (style \"Best1\"))"
             "(abbrev \"G.\" (style \"Best2\"))(musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
 
         LdpExporter exporter(&m_libraryScope);
@@ -503,7 +503,7 @@ SUITE(LdpExporterTest)
         //@01 key id
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100 (musicData (key#123 A))))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
@@ -522,7 +522,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (key A (text \"Hello\")) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
@@ -548,7 +548,7 @@ SUITE(LdpExporterTest)
             "(n e4 q (lyric 1 \"line\")(lyric 2 \"cond\"))"
             "(n f4 q (lyric 1 \"one.\")(lyric 2 \"line.\"))"
             "(barline))))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -575,7 +575,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (metronome q 55) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
@@ -595,7 +595,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (metronome#123 q q.) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
@@ -615,7 +615,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (metronome 77 noVisible) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
@@ -633,7 +633,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (metronome q 80 parenthesis) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
@@ -652,7 +652,7 @@ SUITE(LdpExporterTest)
         //empty musicData
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -672,7 +672,7 @@ SUITE(LdpExporterTest)
         doc.from_string("(score (vers 1.6)"
             "(instrument (musicData (clef G)(r q)(barline)(n c4 q)) )"
             ")");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -693,7 +693,7 @@ SUITE(LdpExporterTest)
             "(instrument (musicData (clef G)(r q)(barline)(n c4 q)) )"
             "(instrument (musicData (clef C3)(n f4 e)) )"
             ")");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(1);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -712,7 +712,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)"
             "(instrument (musicData (clef G)(n c4 q p1)(goFwd 32)(n a3 e p1)) ))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -734,7 +734,7 @@ SUITE(LdpExporterTest)
             "(instrument (staves 2)(musicData "
             "(clef G p1)(clef F4 p2)(key C)(time 2 4)(n c4 e v1 p1)"
             "(goBack start)(n g2 e v3 p2)(n c3 e v3)(n e3 e v3)(n g3 e v3)(barline)) ))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -758,7 +758,7 @@ SUITE(LdpExporterTest)
         doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)"
             "(n c5 q)(chord (n c4 e)(n e4 e)(n g4 e))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -780,7 +780,7 @@ SUITE(LdpExporterTest)
         doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)"
             "(goFwd q)(chord (n c4 e)(n e4 e)(n g4 e))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -811,7 +811,7 @@ SUITE(LdpExporterTest)
             "(n b5 e g+)(n a5 s)(n g5 s g-)(n g5 e g+)(n g5 e g-)(barline)"
             "(n e5 e g+)(n d5 s)(n c5 s g-)(n e5 e g+)(n e5 e g-)(barline))) )"
             );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        dump_colection(pScore);
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -840,7 +840,7 @@ SUITE(LdpExporterTest)
             "(score (vers 1.6)(instrument#100 (musicData "
             "(clef G)(n c4 e (t + 3 2))(n e4 e)(n g4 e (t -))"
             "))) ))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -865,7 +865,7 @@ SUITE(LdpExporterTest)
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 e v1)(goFwd e v1)(n e4 e v1)"
             "))) ))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -890,7 +890,7 @@ SUITE(LdpExporterTest)
             "(score (vers 1.6)(style \"Score1\")"
             "(instrument (musicData (clef G))))"
             "))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -911,7 +911,7 @@ SUITE(LdpExporterTest)
             "(defineStyle \"Score1\" (font \"Arial\" 14pt bold)(color #00fe0f7f))"
             "(instrument (musicData (clef G))))"
             "))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -934,7 +934,7 @@ SUITE(LdpExporterTest)
             "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
             "(instrument (musicData (clef G))))"
             "))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -958,7 +958,7 @@ SUITE(LdpExporterTest)
             "(systemLayout other (systemMargins 0 0 1800 2000))"
             "(instrument (musicData (clef G))))"
             "))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -984,7 +984,7 @@ SUITE(LdpExporterTest)
             "(opt Score.FillPageWithEmptyStaves true)"
             "(opt StaffLines.StopAtFinalBarline false) "
             "(instrument (musicData)))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_current_score(pScore);
@@ -1016,7 +1016,7 @@ SUITE(LdpExporterTest)
             "(instrument (musicData (clef G)"
             "(text \"Largo\" (style \"Notations\")(dx -20)(dy -45)) ))"
             ")");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -1041,7 +1041,7 @@ SUITE(LdpExporterTest)
             "(instrument (musicData (n c4 q (slur 1 start))"
             "(n e4 q (slur 1 stop)) )))"
             );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -1083,7 +1083,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (spacer#123 50) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoSpacer* pImo = static_cast<ImoSpacer*>(
@@ -1103,7 +1103,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (spacer 50 (text \"Hello\")) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoSpacer* pImo = static_cast<ImoSpacer*>(
@@ -1128,7 +1128,7 @@ SUITE(LdpExporterTest)
             "(instrument (musicData (n c4 q (tie 1 start))"
             "(n c4 q (tie 1 stop)) )))"
             );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -1170,7 +1170,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (time#123 5 4) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
@@ -1190,7 +1190,7 @@ SUITE(LdpExporterTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (time common (text \"Hello\")) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
@@ -1213,7 +1213,7 @@ SUITE(LdpExporterTest)
 //            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
 //            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
 //            ")))" );
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        LdpExporter exporter(&m_libraryScope);
 //        string source = exporter.get_source(pScore);
 //        cout << test_name() << endl << "\"" << source << "\"" << endl;
@@ -1298,7 +1298,7 @@ SUITE(LdpExporterTest)
             "(n c4 s (beam 110 ==))"
             "(n b3 e (t 100 -)(beam 110 --))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -1328,7 +1328,7 @@ SUITE(LdpExporterTest)
             "(n c4 s (beam 131 ==)(tm 3 2))"
             "(n b3 e (t 100 -)(tm 3 2)(beam 131 --))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
@@ -1360,7 +1360,7 @@ SUITE(LdpExporterTest)
             "(n c4 q (lyric 1 \"This\")(lyric 2 \"A\"))"
             "(n g5 s g+)(n f5 s)(n g5 e g-)"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
 

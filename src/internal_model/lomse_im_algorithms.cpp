@@ -109,7 +109,7 @@ list<ImoStaffObj*> ImoTreeAlgoritms::insert_staffobjs(ImoInstrument* pInstr,
     list<ImoStaffObj*> objects
                 = pInstr->insert_staff_objects_at(pAt, ldpsource, errormsg);
     if (objects.size() > 0)
-        pScore->close();        //update ColStaffObjs table
+        pScore->end_of_changes();        //update ColStaffObjs table
 
     return objects;
 }

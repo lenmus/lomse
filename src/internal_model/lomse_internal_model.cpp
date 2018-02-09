@@ -254,7 +254,7 @@ ButtonCtrl* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const stri
 {
     Document* pDoc = m_pParent->get_the_document();
     ImoButton* pImo = static_cast<ImoButton*>(ImFactory::inject(k_imo_button, pDoc));
-    ImoDocument* pImoDoc = pDoc->get_imodoc();
+    ImoDocument* pImoDoc = pDoc->get_im_root();
     pImo->set_label(label);
     pImo->set_language( pImoDoc->get_language() );
     pImo->set_size(size);
@@ -364,6 +364,7 @@ ImoScore* BlockLevelCreatorApi::add_score(ImoStyle* pStyle)
     Document* pDoc = m_pParent->get_the_document();
     ImoScore* pImo = static_cast<ImoScore*>(
                                 ImFactory::inject(k_imo_score, pDoc) );
+    pImo->set_version(200);   //version 2.0
     add_to_model(pImo, pStyle);
     return pImo;
 }
@@ -638,7 +639,7 @@ Document* ImoObj::get_the_document()
 ImoDocument* ImoObj::get_document()
 {
     if (m_pDoc)
-        return m_pDoc->get_imodoc();
+        return m_pDoc->get_im_root();
     else
         return nullptr;
 }
@@ -3518,7 +3519,7 @@ ImoStyle* ImoScore::create_default_style()
     //TODO: How to get default values for comparisons (k_default_language) ?
     {
         //get document language
-        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+        ImoDocument* pImoDoc = m_pDoc->get_im_root();
         if (pImoDoc)    //AWARE: in unit tests there could be no ImoDoc
         {
             string& language = pImoDoc->get_language();
@@ -3678,10 +3679,8 @@ ImoInstrument* ImoScore::add_instrument()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoScore::close()
+void ImoScore::end_of_changes()
 {
-    //ColStaffObjsBuilder builder;
-    //builder.build(this);
     ModelBuilder builder;
     builder.structurize(this);
 }

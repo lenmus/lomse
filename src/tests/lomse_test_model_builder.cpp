@@ -184,7 +184,7 @@ SUITE(PitchAssignerTest)
             "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
             "(instrument (musicData (clef G)(key D)(n f4 q)(n +d4 q)(n d4 q)(barline) ))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
         {
@@ -218,7 +218,7 @@ SUITE(PitchAssignerTest)
         CHECK( pNote2->get_fpitch() == k_undefined_fpitch );
         CHECK( pNote3->get_fpitch() == k_undefined_fpitch );
 
-        pScore->close();
+        pScore->end_of_changes();
 
         CHECK( pNote1->get_fpitch() == FPitch("+f4") );
         CHECK( pNote2->get_fpitch() == FPitch("+d4") );
@@ -234,7 +234,7 @@ SUITE(PitchAssignerTest)
             "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
             "(instrument (musicData (clef G)(key D)(n * q)(n * q)(n * q)(barline) ))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
         {

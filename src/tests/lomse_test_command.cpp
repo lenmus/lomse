@@ -166,7 +166,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -205,7 +205,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.redo(&cursor, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -250,7 +250,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -290,7 +290,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.redo(&cursor, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -337,7 +337,7 @@ SUITE(DocCommandTest)
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 ////        cout << pTable->dump();
@@ -381,7 +381,7 @@ SUITE(DocCommandTest)
 //        executer.undo(&cursor, &sel);
 //        executer.redo(&cursor, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 ////        cout << pTable->dump();
@@ -430,7 +430,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -471,7 +471,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.redo(&cursor, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -517,7 +517,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -558,7 +558,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.redo(&cursor, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -604,7 +604,7 @@ SUITE(DocCommandTest)
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 ////        cout << pTable->dump();
@@ -647,7 +647,7 @@ SUITE(DocCommandTest)
 //        executer.undo(&cursor, &sel);
 //        executer.redo(&cursor, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 ////        cout << pTable->dump();
@@ -697,7 +697,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         //cout << pSC->dump_cursor() << endl;
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -745,7 +745,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.redo(&cursor, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 
@@ -802,7 +802,7 @@ SUITE(DocCommandTest)
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -856,7 +856,7 @@ SUITE(DocCommandTest)
 //        executer.undo(&cursor, &sel);
 //        executer.redo(&cursor, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        CHECK( pTable->num_lines() == 2 );
 //        CHECK( pTable->num_entries() == 7 );
@@ -913,7 +913,7 @@ SUITE(DocCommandTest)
 //
 //        executer.execute(&cursor, pCmd, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -961,7 +961,7 @@ SUITE(DocCommandTest)
 //        executer.undo(&cursor, &sel);
 //        executer.redo(&cursor, &sel);
 //
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 ////        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 ////        cout << pSC->dump_cursor() << endl;
 ////        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -1006,7 +1006,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         //cout << pSC->dump_cursor() << endl;
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -1052,7 +1052,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         //cout << pSC->dump_cursor() << endl;
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -1094,7 +1094,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         //cout << pSC->dump_cursor() << endl;
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -1141,7 +1141,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         //cout << pSC->dump_cursor() << endl;
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -1205,7 +1205,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1245,7 +1245,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1279,7 +1279,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1315,7 +1315,7 @@ SUITE(DocCommandTest)
         CHECK( pNote2->is_in_tuplet() == false );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -1328,7 +1328,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1369,7 +1369,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1420,7 +1420,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1473,7 +1473,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1536,7 +1536,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1670,7 +1670,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1880,7 +1880,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -1926,7 +1926,7 @@ SUITE(DocCommandTest)
 
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_full_checkpoint );
         CHECK( pCmd->get_name() == "Delete score" );
-        CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
+        CHECK( m_pDoc->get_im_root()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
@@ -1948,14 +1948,14 @@ SUITE(DocCommandTest)
         MySelectionSet sel(m_pDoc);
         executer.execute(&cursor, pCmd, &sel);
         executer.undo(&cursor, &sel);
-        CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 2 );
+        CHECK( m_pDoc->get_im_root()->get_num_content_items() == 2 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_score() == true );
 
         executer.redo(&cursor, &sel);
 
-        CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
+        CHECK( m_pDoc->get_im_root()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != nullptr );
         CHECK( (*cursor)->is_paragraph() == true );
@@ -1993,7 +1993,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2031,7 +2031,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2079,7 +2079,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2148,7 +2148,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2170,7 +2170,7 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
 
 //        cout << "Before delete tie: id=" << pTie->get_id() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2181,7 +2181,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd, &sel);
 
 //        cout << "After delete tie:" << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2201,7 +2201,7 @@ SUITE(DocCommandTest)
         CHECK( pNote->is_tied_prev() == false );
 
 //        cout << "After delete tie:" << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -2219,7 +2219,7 @@ SUITE(DocCommandTest)
 
 //        pTie = pNote->get_tie_prev();
 //        cout << "After undo: id=" << pTie->get_id() << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -2238,7 +2238,7 @@ SUITE(DocCommandTest)
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 //        cout << "After redo:" << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2273,7 +2273,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -2306,7 +2306,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Delete my selection" );
         CHECK( doc.is_dirty() == true );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2346,7 +2346,7 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_name() == "Delete selection" );
         CHECK( doc.is_dirty() == true );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2384,7 +2384,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
@@ -2428,7 +2428,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
@@ -2464,7 +2464,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(m_pDoc);
         executer.execute(&cursor, pCmd, &sel);
         //cout << m_pDoc->to_string(true) << endl;
-        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         //cout << pScore->get_staffobjs_table()->dump() << endl;
         //cout << "cmd name = " << pCmd->get_name() << endl;
 
@@ -2493,7 +2493,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
 
 //        cout << m_pDoc->to_string(true) << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
         //cout << cursor.dump_cursor();
 
@@ -2531,7 +2531,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2574,7 +2574,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
@@ -2617,7 +2617,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
@@ -2661,7 +2661,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
@@ -2705,7 +2705,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 3 );
@@ -2750,7 +2750,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2795,7 +2795,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2841,7 +2841,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2889,7 +2889,7 @@ SUITE(DocCommandTest)
         pNote = static_cast<ImoNote*>( *cursor );
         CHECK( pNote->is_in_tuplet() == false );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2919,7 +2919,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -2951,7 +2951,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_entries() == 0 );
         CHECK( pTable->is_anacrusis_start() == false );
@@ -2982,7 +2982,7 @@ SUITE(DocCommandTest)
 //        cout << doc.to_string() << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Insert paragraph" );
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoObj* pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
@@ -2990,18 +2990,18 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 1 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
     }
 
@@ -3025,7 +3025,7 @@ SUITE(DocCommandTest)
         executer.execute(&cursor, pCmd2, &sel);
         CHECK( pCmd2->get_name() == "Insert score" );
 //        cout << doc.to_string() << endl;
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoObj* pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 2 );
         ImoObj* pScore = pContent->get_first_child();
@@ -3034,7 +3034,7 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        pImoDoc = doc.get_imodoc();
+        pImoDoc = doc.get_im_root();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
@@ -3042,7 +3042,7 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        pImoDoc = doc.get_imodoc();
+        pImoDoc = doc.get_im_root();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 2 );
         pScore = pContent->get_first_child();
@@ -3052,7 +3052,7 @@ SUITE(DocCommandTest)
         executer.undo(&cursor, &sel);
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        pImoDoc = doc.get_imodoc();
+        pImoDoc = doc.get_im_root();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 0 );
         CHECK( doc.is_dirty() == true );
@@ -3075,7 +3075,7 @@ SUITE(DocCommandTest)
 //        cout << doc.to_string() << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Insert block" );
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoObj* pContent = pImoDoc->get_child_of_type(k_imo_content);
         CHECK( pContent->get_num_children() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
@@ -3083,18 +3083,18 @@ SUITE(DocCommandTest)
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
 
         executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 1 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
         executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
-        CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
+        CHECK( doc.get_im_root()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
     }
 
@@ -3131,7 +3131,7 @@ SUITE(DocCommandTest)
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
               "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 130 +))"
               "(n c4 e v1 p1 (beam 130 -)))))))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -3160,7 +3160,7 @@ SUITE(DocCommandTest)
 
         CHECK( doc.is_dirty() == true );
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (staves 1)(musicData)))))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
 //        cout << doc.to_string() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -3194,7 +3194,7 @@ SUITE(DocCommandTest)
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
               "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 139 +))"
               "(n c4 e v1 p1 (beam 139 -)))))))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
 //        cout << doc.dump_ids() << endl;
@@ -3241,7 +3241,7 @@ SUITE(DocCommandTest)
         executer.redo(&cursor, &sel);    //insert note d4. Cursor points to end of score
         CHECK( *cursor == nullptr );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
     }
 
@@ -3269,7 +3269,7 @@ SUITE(DocCommandTest)
         CHECK( *cursor == nullptr );
         CHECK( doc.is_dirty() == true );
 
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        cout << doc.to_string() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << pSC->dump_cursor() << endl;
@@ -3299,7 +3299,7 @@ SUITE(DocCommandTest)
         string expected = "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
             "(instrument (staves 1)(musicData)))))";
         CHECK( doc.to_string() == expected );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
 //        cout << doc.to_string() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -3454,7 +3454,7 @@ SUITE(DocCommandTest)
         //cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 3 );
@@ -3496,7 +3496,7 @@ SUITE(DocCommandTest)
         //cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 2 );
@@ -3539,7 +3539,7 @@ SUITE(DocCommandTest)
         //cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 3 );
@@ -3561,7 +3561,7 @@ SUITE(DocCommandTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument#121 (musicData (clef G)(n c4 q))))");
         doc.clear_dirty();
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
@@ -3642,7 +3642,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -3700,7 +3700,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -3755,7 +3755,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -3812,7 +3812,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
     }
@@ -3846,7 +3846,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -3897,7 +3897,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -3947,7 +3947,7 @@ SUITE(DocCommandTest)
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
@@ -4121,7 +4121,7 @@ SUITE(DocCommandTest)
         sel.debug_add(pNote1);
         executer.execute(&cursor, pCmd, &sel);
 
-//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        cout << m_pDoc->to_string(true) << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << cursor.dump_cursor();
@@ -4166,7 +4166,7 @@ SUITE(DocCommandTest)
 //        cout << "After excute command:" << endl;
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4178,7 +4178,7 @@ SUITE(DocCommandTest)
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4200,7 +4200,7 @@ SUITE(DocCommandTest)
 //        cout << "After redo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
         //cout << sel.dump_selection() << endl;
@@ -4252,7 +4252,7 @@ SUITE(DocCommandTest)
 //        cout << "After excute command:" << endl;
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4264,7 +4264,7 @@ SUITE(DocCommandTest)
 //        cout << "After undo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4286,7 +4286,7 @@ SUITE(DocCommandTest)
 //        cout << "After redo:" << endl;
 //        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4339,7 +4339,7 @@ SUITE(DocCommandTest)
 //        cout << "msg=[" << executer.get_error() << "]" << endl;
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4385,7 +4385,7 @@ SUITE(DocCommandTest)
         CHECK( pNote2->get_fpitch() == FPitch("g4") );
         CHECK( pNote2->is_in_chord() == true );
 
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << sel.dump_selection() << endl;
@@ -4400,7 +4400,7 @@ SUITE(DocCommandTest)
 //        cout << "msg=[" << executer.get_error() << "]" << endl;
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
-//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 //        cout << exporter.get_source(pScore) << endl;

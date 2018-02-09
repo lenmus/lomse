@@ -94,7 +94,7 @@ SUITE(LmdExporterTest)
 //
 //        Document doc(m_libraryScope);
 //        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
-//        ImoDocument* pRoot = doc.get_imodoc();
+//        ImoDocument* pRoot = doc.get_im_root();
 //
 //        LmdExporter exporter(m_libraryScope);
 //        exporter.set_score_format(LmdExporter::k_format_ldp);
@@ -321,7 +321,7 @@ SUITE(LmdExporterTest)
 //            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
 //            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
 //            ")))" );
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        LmdExporter exporter("0.12.5", "2012/12/21 13:10:27");
 //        string source = exporter.get_source(pScore);
 //        cout << "\"" << source << "\"" << endl;
@@ -412,7 +412,7 @@ SUITE(LmdExporterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("<lenmusdoc vers='2.3'><content/></lenmusdoc>", Document::k_format_lmd);
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
 
         MyLmdExporter exporter(m_libraryScope, "0.12.5", "2012/12/21 13:10:27");
         string source = exporter.get_source(pImoDoc);
@@ -432,7 +432,7 @@ SUITE(LmdExporterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("<lenmusdoc vers='2.3'><content/></lenmusdoc>", Document::k_format_lmd);
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
 
         MyLmdExporter exporter(m_libraryScope, "0.12.5", "2012/12/21 13:10:27");
         exporter.set_add_id(true);

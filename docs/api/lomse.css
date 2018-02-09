@@ -229,6 +229,16 @@ code {
     color: #444444;
 }
 
+div.line {
+    font-family: monospace, fixed;
+    font-size: 110%;
+    line-height: 1.3;
+}
+
+div.left-aligned div.image {
+	text-align: left;
+}
+
 /*----------------------------------------------------------------------------
 CSS selectors summary:
 

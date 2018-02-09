@@ -111,11 +111,11 @@ SUITE(MultiColumnLayouterTest)
         //doc.create_empty();
         //ImoStyle* pDefStyle = doc.get_default_style();
         //ImoStyle* pParaStyle = doc.create_style("para");
-        //ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+        //ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
         //pPara->add_text_item("Exercise options", pDefStyle);
 
         //GraphicModel model;
-        //ImoDocument* pDoc = doc.get_imodoc();
+        //ImoDocument* pDoc = doc.get_im_root();
         //ImoStyles* pStyles = pDoc->get_styles();
         //GmoBoxDocPage page(nullptr);
         //GmoBoxDocPageContent box(nullptr);
@@ -156,11 +156,11 @@ SUITE(MultiColumnLayouterTest)
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
     //    pParaStyle->margin_top( 1000.0f);
-    //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+    //    ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
     //    GraphicModel model;
-    //    ImoDocument* pDoc = doc.get_imodoc();
+    //    ImoDocument* pDoc = doc.get_im_root();
     //    ImoStyles* pStyles = pDoc->get_styles();
     //    GmoBoxDocPage page(nullptr);
     //    GmoBoxDocPageContent box(nullptr);
@@ -201,11 +201,11 @@ SUITE(MultiColumnLayouterTest)
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
     //    pParaStyle->margin_left( 1000.0f);
-    //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+    //    ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
     //    GraphicModel model;
-    //    ImoDocument* pDoc = doc.get_imodoc();
+    //    ImoDocument* pDoc = doc.get_im_root();
     //    ImoStyles* pStyles = pDoc->get_styles();
     //    GmoBoxDocPage page(nullptr);
     //    GmoBoxDocPageContent box(nullptr);
@@ -247,11 +247,11 @@ SUITE(MultiColumnLayouterTest)
     //    ImoStyle* pParaStyle = doc.create_style("para");
     //    pParaStyle->margin_left( 1000.0f);
     //    pParaStyle->margin_bottom( 1000.0f);
-    //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+    //    ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
     //    GraphicModel model;
-    //    ImoDocument* pDoc = doc.get_imodoc();
+    //    ImoDocument* pDoc = doc.get_im_root();
     //    ImoStyles* pStyles = pDoc->get_styles();
     //    GmoBoxDocPage page(nullptr);
     //    GmoBoxDocPageContent box(nullptr);
@@ -292,11 +292,11 @@ SUITE(MultiColumnLayouterTest)
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
     //    pParaStyle->margin_top( 1000.0f);
-    //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+    //    ImoParagraph* pPara = doc.get_im_root()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
     //    GraphicModel model;
-    //    ImoDocument* pDoc = doc.get_imodoc();
+    //    ImoDocument* pDoc = doc.get_im_root();
     //    ImoStyles* pStyles = pDoc->get_styles();
     //    GmoBoxDocPage page(nullptr);
     //    GmoBoxDocPageContent box(nullptr);

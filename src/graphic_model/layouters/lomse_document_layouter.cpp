@@ -51,7 +51,7 @@ DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope)
     : Layouter(libraryScope)
     , m_pScoreLayouter(nullptr)
 {
-    m_pDoc = pDoc->get_imodoc();
+    m_pDoc = pDoc->get_im_root();
     m_pStyles = m_pDoc->get_styles();
     m_pGModel = LOMSE_NEW GraphicModel();
 }
