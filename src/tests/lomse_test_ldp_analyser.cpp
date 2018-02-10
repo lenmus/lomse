@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -5248,6 +5248,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pDoc->get_num_content_items() == 0 );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_lenmusdoc)
@@ -5269,6 +5270,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_language)
@@ -5291,6 +5293,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pDoc->get_language() == "zh_CN" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_HasContent)
@@ -5312,6 +5315,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pDoc->get_num_content_items() == 1 );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_GetContentItemText)
@@ -5328,6 +5332,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "hello world" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_GetContentItemScore)
@@ -5348,6 +5353,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "hello world" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score)
@@ -5369,6 +5375,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_content)
@@ -5390,6 +5397,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_id() == 60L );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, lenmusdoc_10)
@@ -5413,6 +5421,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->get_name() == "Heading-1" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // TiesBuilder ----------------------------------------------------------------------
@@ -8105,6 +8114,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->is_portrait() == false );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // font -----------------------------------------------------------------------------
@@ -9456,6 +9466,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_style() != nullptr );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_Location)
@@ -9628,6 +9639,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_Style)
@@ -9657,6 +9669,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_DefaultStyle)
@@ -9686,6 +9699,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // heading --------------------------------------------------------------------------
@@ -9803,6 +9817,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_Style)
@@ -9832,6 +9847,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_DefaultStyle)
@@ -9861,6 +9877,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // styles ---------------------------------------------------------------------------
@@ -9931,6 +9948,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Styles_Default)
@@ -9960,6 +9978,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->get_name() == "Default style" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // param ----------------------------------------------------------------------------
@@ -10068,6 +10087,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pDyn != nullptr );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_GeneratesRequest)
@@ -10089,6 +10109,7 @@ SUITE(LdpAnalyserTest)
         CHECK( m_pDoc == pDoc );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_WithParams)
@@ -10482,6 +10503,7 @@ SUITE(LdpAnalyserTest)
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_player)
@@ -10505,6 +10527,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSP->get_id() == 10L );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_metronome)
@@ -10531,6 +10554,7 @@ SUITE(LdpAnalyserTest)
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_label_play)
@@ -10559,6 +10583,7 @@ SUITE(LdpAnalyserTest)
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // tableCell ------------------------------------------------------------------------
@@ -10944,6 +10969,7 @@ SUITE(LdpAnalyserTest)
         CHECK( (*it)->get_name() == "table1-col2" );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, table_full_table)
@@ -10999,6 +11025,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // other test to fix detected errors ------------------------------------------------
