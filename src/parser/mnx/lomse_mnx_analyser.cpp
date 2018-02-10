@@ -3499,11 +3499,10 @@ ImoObj* MnxAnalyser::analyse_tree_and_get_object(XmlNode* root)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* MnxAnalyser::analyse_tree(XmlNode* tree, const string& locator)
+ImoObj* MnxAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 {
     m_fileLocator = locator;
-    ImoObj* pRoot = analyse_tree_and_get_object(tree);
-    return LOMSE_NEW InternalModel( pRoot );
+    return analyse_tree_and_get_object(tree);
 }
 
 //---------------------------------------------------------------------------------------

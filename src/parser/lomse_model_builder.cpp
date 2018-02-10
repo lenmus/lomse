@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -77,37 +77,15 @@ public:
 //=======================================================================================
 // ModelBuilder implementation
 //=======================================================================================
-ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
+ImoDocument* ModelBuilder::build_model(ImoDocument* pImoDoc)
 {
-    ImoDocument* pDoc = static_cast<ImoDocument*>( IModel->get_root() );
-    if (pDoc)
+    if (pImoDoc)
     {
         VisitorForStructurizables v(this);
-        pDoc->accept_visitor(v);
+        pImoDoc->accept_visitor(v);
     }
-    return pDoc;
+    return pImoDoc;
 }
-
-
-////---------------------------------------------------------------------------------------
-//void ModelBuilder::update_model(InternalModel* IModel)
-//{
-//    m_pTree = pTree;
-//    DocIterator it(m_pTree);  //replace by tree iterator- DocIterator has been removed
-//    for (it.start_of_content(); *it != nullptr; ++it)
-//    {
-//        //Factory method ?
-//        if ((*it)->is_modified())
-//        {
-//            if((*it)->is_type(k_score))
-//            {
-//                ImoScore* pScore = dynamic_cast<ImoScore*>( (*it)->get_imobj() );
-//                ColStaffObjsBuilder builder(m_pTree);
-//                builder.update(pScore);
-//            }
-//        }
-//    }
-//}
 
 //---------------------------------------------------------------------------------------
 void ModelBuilder::structurize(ImoObj* pImo)

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -147,7 +147,6 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_reporter(reporter)
     , m_docScope(reporter)
     , m_pIdAssigner( m_docScope.id_assigner() )
-    , m_pIModel(nullptr)
     , m_pImoDoc(nullptr)
     , m_flags(k_dirty)
     , m_modified(0)
@@ -157,7 +156,7 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
 //---------------------------------------------------------------------------------------
 Document::~Document()
 {
-    delete m_pIModel;
+    delete m_pImoDoc;
     delete_observers();
 }
 
@@ -191,7 +190,7 @@ int Document::from_file(const string& filename, int format)
     Compiler* pCompiler = get_compiler_for_format(format);
     if (pCompiler)
     {
-        m_pIModel = pCompiler->compile_file(filename);
+        m_pImoDoc = pCompiler->compile_file(filename);
         numErrors = pCompiler->get_num_errors();
         delete pCompiler;
     }
@@ -201,13 +200,7 @@ int Document::from_file(const string& filename, int format)
         numErrors = 1;
     }
 
-    if (m_pIModel)
-    {
-        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-        if (m_pImoDoc == nullptr)
-            create_empty();
-    }
-    else
+    if (m_pImoDoc == nullptr)
         create_empty();
 
     if (m_pImoDoc && format == Document::k_format_mxl)
@@ -224,7 +217,7 @@ int Document::from_string(const string& source, int format)
     Compiler* pCompiler = get_compiler_for_format(format);
     if (pCompiler)
     {
-        m_pIModel = pCompiler->compile_string(source);
+        m_pImoDoc = pCompiler->compile_string(source);
         numErrors = pCompiler->get_num_errors();
         delete pCompiler;
     }
@@ -234,9 +227,7 @@ int Document::from_string(const string& source, int format)
         numErrors = 1;
     }
 
-    if (m_pIModel)
-        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-    else
+    if (m_pImoDoc == nullptr)
         create_empty();
 
     if (m_pImoDoc && format == Document::k_format_mxl)
@@ -249,8 +240,6 @@ int Document::from_string(const string& source, int format)
 int Document::from_checkpoint(const string& data)
 {
     //delete old internal model
-    delete m_pIModel;
-    m_pIModel = nullptr;
     m_pImoDoc = nullptr;
     m_flags = k_dirty;
 
@@ -300,8 +289,7 @@ int Document::from_input(LdpReader& reader)
     try
     {
         LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-        m_pIModel = pCompiler->compile_input(reader);
-        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+        m_pImoDoc = pCompiler->compile_input(reader);
         int numErrors = pCompiler->get_num_errors();
         delete pCompiler;
         return numErrors;
@@ -310,7 +298,7 @@ int Document::from_input(LdpReader& reader)
     {
         //this avoids programs crashes when a document is malformed but
         //will produce memory lekeages
-        m_pIModel = nullptr;
+        m_pImoDoc = nullptr;
         create_empty();
         return 0;
     }
@@ -321,8 +309,7 @@ void Document::create_empty()
 {
     initialize();
     LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-    m_pIModel = pCompiler->create_empty();
-    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    m_pImoDoc = pCompiler->create_empty();
     delete pCompiler;
 }
 
@@ -331,8 +318,7 @@ void Document::create_with_empty_score()
 {
     initialize();
     LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-    m_pIModel = pCompiler->create_with_empty_score();
-    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    m_pImoDoc = pCompiler->create_with_empty_score();
     delete pCompiler;
 }
 
@@ -340,7 +326,7 @@ void Document::create_with_empty_score()
 void Document::end_of_changes()
 {
     ModelBuilder builder;
-    builder.build_model(m_pIModel);
+    builder.build_model(m_pImoDoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -581,14 +567,6 @@ ImoObj* Document::create_object_from_lmd(const string& source)
     ModelBuilder builder;
     builder.structurize(pImo);
     return pImo;
-
-
-//    Compiler* pCompiler = get_compiler_for_format(format);
-//    m_pIModel = pCompiler->compile_string(source);
-//    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-//    int numErrors = pCompiler->get_num_errors();
-//    delete pCompiler;
-//    return numErrors;
 }
 
 //---------------------------------------------------------------------------------------
@@ -599,8 +577,8 @@ void Document::add_staff_objects(const string& source, ImoMusicData* pMD)
     parser.parse_text(data);
     LdpTree* tree = parser.get_ldp_tree();
     LdpAnalyser a(m_reporter, m_libraryScope, this);
-    InternalModel* pIModel = a.analyse_tree(tree, "string:");
-    ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+    ImoObj* pRoot = a.analyse_tree(tree, "string:");
+    ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>(pRoot);
     ImoObj::children_iterator it = pMusic->begin();
     while (it != pMusic->end())
     {
@@ -610,7 +588,7 @@ void Document::add_staff_objects(const string& source, ImoMusicData* pMD)
         it = pMusic->begin();
     }
     delete tree->get_root();
-    delete pIModel;
+    delete pRoot;
 }
 
 //---------------------------------------------------------------------------------------

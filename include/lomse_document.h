@@ -52,7 +52,6 @@ class DocCommandExecuter;
 class Compiler;
 class IdAssigner;
 class Interactor;
-class InternalModel;
 class ImoDocument;
 class ImoMusicData;
 class ImoScore;
@@ -85,12 +84,12 @@ protected:
     ostream&        m_reporter;
     DocumentScope   m_docScope;
     IdAssigner*     m_pIdAssigner;
-    InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
     int             m_modified;
 
 public:
+    /// Constructor
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
     virtual ~Document();
 

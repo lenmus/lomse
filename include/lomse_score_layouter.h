@@ -45,7 +45,6 @@ namespace lomse
 {
 
 //forward declarations
-class InternalModel;
 class FontStorage;
 class GraphicModel;
 class ImoContentObj;

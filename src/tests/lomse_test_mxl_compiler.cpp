@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,16 +82,16 @@ SUITE(MxlCompilerTest)
             "<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><type>whole</type></note>"
             "</measure>"
             "</part></score-partwise>";
-        InternalModel* pIModel = compiler.compile_string(src);
+        ImoObj* pRoot =  compiler.compile_string(src);
         CHECK( compiler.get_file_locator() == "string:" );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != nullptr );
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlCompilerTestFixture, MxlCompilerFromFile_100)
@@ -100,9 +100,9 @@ SUITE(MxlCompilerTest)
         Document doc(m_libraryScope);
         MxlCompiler compiler(m_libraryScope, &doc);
         string path = m_scores_path + "50000-hello-world.xml";
-        InternalModel* pIModel = compiler.compile_file(path);
+        ImoObj* pRoot =  compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -121,7 +121,7 @@ SUITE(MxlCompilerTest)
 //        cout << "Test: MxlCompilerFromFile_100" << endl;
 //        cout << doc.to_string() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 };

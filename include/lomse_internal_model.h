@@ -848,26 +848,6 @@ protected:
     ImoSoundInfo* get_sound_info(int iSound);    //iSound = 0..n-1
 
 
-//=======================================================================================
-// InternalModel: A container for the root of the internal model
-//=======================================================================================
-
-class InternalModel
-{
-protected:
-    ImoObj* m_pRoot;
-
-public:
-    InternalModel(ImoObj* pRoot) : m_pRoot(pRoot) {}
-    ~InternalModel();
-
-    //getters
-    /// Returns the internal model root ImoObj object
-    inline ImoObj* get_root() { return m_pRoot; }
-
-};
-
-
 //************************************************************
 // Objects that form the content of the internal classes
 //************************************************************

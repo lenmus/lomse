@@ -40,7 +40,6 @@ namespace lomse
 
 //forward declarations
 class A;
-class InternalModel;
 
 
 //---------------------------------------------------------------------------------------

@@ -117,18 +117,18 @@ SUITE(MnxAnalyserTest)
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != NULL );
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != NULL );
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ clef -------------------------------------------------------------

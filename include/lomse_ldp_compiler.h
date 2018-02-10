@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,6 @@ class LdpAnalyser;
 class ModelBuilder;
 class DocumentScope;
 class LibraryScope;
-class InternalModel;
 class ImoDocument;
 class Document;
 
@@ -66,18 +65,18 @@ public:
     LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
 
     //compilation
-    InternalModel* compile_file(const std::string& filename);
-    InternalModel* compile_string(const std::string& source);
-    InternalModel* compile_input(LdpReader& reader);
-    InternalModel* create_empty();
-    InternalModel* create_with_empty_score();
+    ImoDocument* compile_file(const std::string& filename);
+    ImoDocument* compile_string(const std::string& source);
+    ImoDocument* compile_input(LdpReader& reader);
+    ImoDocument* create_empty();
+    ImoDocument* create_with_empty_score();
 
     ////info
     //int get_num_errors();
     //string get_file_locator() { return m_fileLocator; }
 
 protected:
-    InternalModel* compile_parsed_tree(LdpTree* tree);
+    ImoDocument* compile_parsed_tree(LdpTree* tree);
     LdpTree* wrap_score_in_lenmusdoc(LdpTree* pParseTree);
     void parse_empty_doc();
 

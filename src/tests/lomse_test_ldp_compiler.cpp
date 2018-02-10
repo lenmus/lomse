@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -67,20 +67,19 @@ SUITE(LdpCompilerTest)
     {
         Document doc(m_libraryScope);
         LdpCompiler compiler(m_libraryScope, &doc);
-        InternalModel* pIModel = compiler.create_empty();
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoObj* pRoot =  compiler.create_empty();
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 0 );
-        delete pIModel;
     }
 
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromString)
     {
         Document doc(m_libraryScope);
         LdpCompiler compiler(m_libraryScope, &doc);
-        InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
+        ImoObj* pRoot =  compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
         CHECK( compiler.get_file_locator() == "string:" );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -88,7 +87,7 @@ SUITE(LdpCompilerTest)
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != nullptr );
         CHECK( pScore->get_version_string() == "1.6" );
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromFile)
@@ -96,15 +95,15 @@ SUITE(LdpCompilerTest)
         Document doc(m_libraryScope);
         LdpCompiler compiler(m_libraryScope, &doc);
         string path = m_scores_path + "00011-empty-fill-page.lms";
-        InternalModel* pIModel = compiler.compile_file(path);
+        ImoObj* pRoot =  compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromInput)
@@ -113,15 +112,15 @@ SUITE(LdpCompilerTest)
         LdpCompiler compiler(m_libraryScope, &doc);
         string path = m_scores_path + "00011-empty-fill-page.lms";
         LdpFileReader reader(path);
-        InternalModel* pIModel = compiler.compile_input(reader);
+        ImoObj* pRoot =  compiler.compile_input(reader);
         CHECK( compiler.get_file_locator() == path );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 };

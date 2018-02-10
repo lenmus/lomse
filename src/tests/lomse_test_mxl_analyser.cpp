@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -234,19 +234,19 @@ SUITE(MxlAnalyserTest)
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( a.get_musicxml_version() == 300 );
-        CHECK( pIModel->get_root() != nullptr );
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_02)
@@ -261,17 +261,17 @@ SUITE(MxlAnalyserTest)
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
-        CHECK( pIModel->get_root() != nullptr );
-        CHECK( pIModel->get_root()->is_document() == true );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot->is_document() == true );
         CHECK( errormsg.str() == expected.str() );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_03)
@@ -286,18 +286,18 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<score-partwise version='3.0'><part-list/></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_04)
@@ -314,14 +314,14 @@ SUITE(MxlAnalyserTest)
                           "</part-list></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -335,7 +335,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_05)
@@ -351,14 +351,14 @@ SUITE(MxlAnalyserTest)
                           "</part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -371,7 +371,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_06)
@@ -387,20 +387,20 @@ SUITE(MxlAnalyserTest)
                           "</part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_07)
@@ -417,14 +417,14 @@ SUITE(MxlAnalyserTest)
                           "</part-list><part></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -434,7 +434,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_08)
@@ -450,14 +450,14 @@ SUITE(MxlAnalyserTest)
                           "</part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -470,7 +470,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_09)
@@ -487,15 +487,15 @@ SUITE(MxlAnalyserTest)
             "</part-list><part id='P1'></part></score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -514,7 +514,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD->get_num_items() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -531,15 +531,15 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<score-part id='P1'><part-name>Guitar</part-name></score-part>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_instrument() == true );
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_instrument() == true );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "Guitar" );
@@ -551,7 +551,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD->get_num_items() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -576,15 +576,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -604,7 +604,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_02)
@@ -626,15 +626,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -647,7 +647,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_03)
@@ -669,15 +669,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -690,7 +690,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_04)
@@ -712,15 +712,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -733,7 +733,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_05)
@@ -755,15 +755,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -776,7 +776,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_06)
@@ -798,15 +798,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -819,7 +819,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_07)
@@ -843,15 +843,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -871,7 +871,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_08)
@@ -896,15 +896,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -924,7 +924,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_09)
@@ -949,15 +949,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -977,7 +977,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_brace );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_10)
@@ -1003,15 +1003,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1032,7 +1032,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->join_barlines() == ImoInstrGroup::k_standard );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_11)
@@ -1058,15 +1058,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1087,7 +1087,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->join_barlines() == ImoInstrGroup::k_no );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_12)
@@ -1113,15 +1113,15 @@ SUITE(MxlAnalyserTest)
             "</score-partwise>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1146,7 +1146,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1175,14 +1175,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1203,7 +1203,7 @@ SUITE(MxlAnalyserTest)
         ++it;
         CHECK( (*it)->is_barline() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_02)
@@ -1220,16 +1220,16 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr);
+        CHECK( pRoot == nullptr);
         CHECK( a.current_divisions() == 7.0f );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_03)
@@ -1250,7 +1250,7 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "divisons:" << a.current_divisions() << endl;
@@ -1259,7 +1259,7 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( a.current_divisions() == 1.0f );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1275,21 +1275,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<barline><bar-style>light-light</bar-style></barline>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_barline() == true );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1307,19 +1307,19 @@ SUITE(MxlAnalyserTest)
 //        parser.parse_text("<backup><duration>18</duration></backup>");
 //        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 //        XmlNode* tree = parser.get_tree_root();
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pIModel->get_root() == nullptr);
+//        CHECK( pRoot == nullptr);
 //        //AWARE: initialy <divisions>==1 ==> duration is expressed in quarter notes
 //        CHECK( is_equal_time(a.get_current_time(), -18.0f*k_duration_64th) );
 //        cout << "420: timepos= " << a.get_current_time() << endl;
 //
 //        a.do_not_delete_instruments_in_destructor();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 
 
@@ -1335,21 +1335,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<clef><sign>G</sign><line>2</line></clef>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->get_staff() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_02)
@@ -1363,20 +1363,20 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<clef><sign>H</sign><line>2</line></clef>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_03)
@@ -1389,21 +1389,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<clef number='2'><sign>F</sign><line>4</line></clef>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_F4 );
         CHECK( pClef->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1422,15 +1422,15 @@ SUITE(MxlAnalyserTest)
             "</direction>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
@@ -1438,7 +1438,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pDM->get_mark_type() == "fp" );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_02)
@@ -1456,15 +1456,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
@@ -1478,7 +1478,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pAO->get_language() == "it" );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_03)
@@ -1495,15 +1495,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
@@ -1516,7 +1516,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pAO->get_language() == "it" );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_04)
@@ -1643,15 +1643,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
@@ -1663,7 +1663,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_coda_13)
@@ -1680,15 +1680,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
@@ -1700,7 +1700,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1717,21 +1717,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<key><fifths>2</fifths></key>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_key_signature() == true );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_D );
         CHECK( pKeySignature->get_staff() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_02)
@@ -1744,21 +1744,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<key><fifths>5</fifths><mode>minor</mode></key>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_key_signature() == true );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_gs );
         CHECK( pKeySignature->get_staff() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1783,14 +1783,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1834,7 +1834,7 @@ SUITE(MxlAnalyserTest)
 //             << "pan= " << pMidi->get_midi_pan() << endl
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ midi-instrument -----------------------------------------------------------------
@@ -1860,14 +1860,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1884,7 +1884,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_02)
@@ -1920,14 +1920,14 @@ SUITE(MxlAnalyserTest)
         );
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -1977,7 +1977,7 @@ SUITE(MxlAnalyserTest)
 //             << "pan= " << pMidi->get_midi_pan() << endl
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_03)
@@ -2002,14 +2002,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2023,7 +2023,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
         CHECK( pInfo->get_score_instr_name() == "Marimba" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -2041,15 +2041,15 @@ SUITE(MxlAnalyserTest)
             "<duration>4</duration><type>whole</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -2063,7 +2063,7 @@ SUITE(MxlAnalyserTest)
         CHECK( a.get_last_note() == pNote );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_01)
@@ -2078,15 +2078,15 @@ SUITE(MxlAnalyserTest)
             "<duration>4</duration><type>whole</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -2099,7 +2099,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_02)
@@ -2114,15 +2114,15 @@ SUITE(MxlAnalyserTest)
             "<duration>1</duration><type>quarter</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -2135,7 +2135,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_03)
@@ -2150,15 +2150,15 @@ SUITE(MxlAnalyserTest)
             "<duration>4</duration><type>eighth</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
@@ -2172,7 +2172,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_04)
@@ -2188,15 +2188,15 @@ SUITE(MxlAnalyserTest)
             "<accidental>sharp</accidental></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
         CHECK( pNote->get_notated_accidentals() == k_sharp );
@@ -2210,7 +2210,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_05)
@@ -2226,15 +2226,15 @@ SUITE(MxlAnalyserTest)
             "<staff>2</staff></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
@@ -2249,7 +2249,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_06)
@@ -2265,15 +2265,15 @@ SUITE(MxlAnalyserTest)
             "<stem>down</stem></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
@@ -2285,7 +2285,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_stem_direction() == k_stem_down );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_07)
@@ -2309,14 +2309,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -2339,7 +2339,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == true );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_08)
@@ -2365,14 +2365,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -2402,7 +2402,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == true );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_09)
@@ -2417,15 +2417,15 @@ SUITE(MxlAnalyserTest)
             "<duration>2</duration></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
@@ -2439,7 +2439,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_10)
@@ -2455,15 +2455,15 @@ SUITE(MxlAnalyserTest)
             "</note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_actual_accidentals() == k_acc_not_computed );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
@@ -2478,7 +2478,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -2496,15 +2496,15 @@ SUITE(MxlAnalyserTest)
             "<staff>2</staff></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_rest() == true );
-        ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_rest() == true );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 0 );
         CHECK( pRest->get_note_type() == k_quarter );
@@ -2512,7 +2512,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRest->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -2536,14 +2536,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2555,7 +2555,7 @@ SUITE(MxlAnalyserTest)
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo == nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_02)
@@ -2576,14 +2576,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2598,7 +2598,7 @@ SUITE(MxlAnalyserTest)
 //        cout << test_name() << endl;
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_03)
@@ -2618,14 +2618,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2642,7 +2642,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_04)
@@ -2663,14 +2663,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2687,7 +2687,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_05)
@@ -2709,14 +2709,14 @@ SUITE(MxlAnalyserTest)
             "</score-part></part-list><part id='P1'></part></score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -2737,7 +2737,7 @@ SUITE(MxlAnalyserTest)
 //             << ", abbrev= " << pInfo->get_score_instr_abbrev()
 //             << ", sound= " << pInfo->get_score_instr_sound() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -2765,19 +2765,19 @@ SUITE(MxlAnalyserTest)
             "</note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -2794,16 +2794,16 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<sound></sound>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr);
+        CHECK( pRoot == nullptr);
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_02)
@@ -2817,21 +2817,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<sound dacapo='yes'></sound>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_sound_change() == true );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
         CHECK( pSC->get_bool_attribute(k_attr_dacapo) == true );
         CHECK( pSC->get_bool_attribute(k_attr_pizzicato) == false );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_03)
@@ -2845,20 +2845,20 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<sound tempo='75'></sound>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_sound_change() == true );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
         CHECK( pSC->get_float_attribute(k_attr_tempo) == 75.0f );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_04)
@@ -2873,20 +2873,20 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<sound tempo='75,7'/>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_sound_change() == true );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
         CHECK( pSC->get_float_attribute(k_attr_tempo) == 70.0f );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_05)
@@ -2903,21 +2903,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<sound forward-repeat='no' tempo='72.5' />");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_sound_change() == true );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_sound_change() == true );
+        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
         CHECK( pSC->get_num_attributes() == 1 );
         CHECK( pSC->get_float_attribute(k_attr_tempo) == 72.5f );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_06)
@@ -2935,15 +2935,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_direction() == true );
-        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
         CHECK( pSO->get_placement() == k_placement_default );
@@ -2956,7 +2956,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_07)
@@ -2980,14 +2980,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3005,7 +3005,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote != nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_08)
@@ -3048,14 +3048,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3092,7 +3092,7 @@ SUITE(MxlAnalyserTest)
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_09)
@@ -3137,14 +3137,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3181,7 +3181,7 @@ SUITE(MxlAnalyserTest)
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -3197,15 +3197,15 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<time><beats>6</beats><beat-type>8</beat-type></time>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
@@ -3214,7 +3214,7 @@ SUITE(MxlAnalyserTest)
 //             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_02)
@@ -3228,21 +3228,21 @@ SUITE(MxlAnalyserTest)
         parser.parse_text("<time><beats>6</beats></time>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -3264,15 +3264,15 @@ SUITE(MxlAnalyserTest)
             "</note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -3285,7 +3285,7 @@ SUITE(MxlAnalyserTest)
 //             << ", time_modifier_bottom= " << pNote->get_time_modifier_bottom() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tuplet --------------------------------------------------------------------------
@@ -3319,15 +3319,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3353,7 +3353,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet2 == pTuplet );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_02)
@@ -3385,15 +3385,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3413,7 +3413,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet->get_id() == 141L );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_03)
@@ -3448,15 +3448,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3476,7 +3476,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTuplet->get_id() == 141L );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_04)
@@ -3546,15 +3546,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3595,7 +3595,7 @@ SUITE(MxlAnalyserTest)
 //             << ", normal=" << pTuplet->get_normal_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -3640,11 +3640,11 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3669,7 +3669,7 @@ SUITE(MxlAnalyserTest)
 //             << ", normal=" << pTuplet->get_normal_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -3710,15 +3710,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3763,7 +3763,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pVB1->get_volta_text() == "" );
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, volta_bracket_02)
@@ -3800,15 +3800,15 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -3855,7 +3855,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "Volta text = '" << pVB1->get_volta_text() << "'" << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_volta_bracket_03)
@@ -3927,14 +3927,14 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -3949,7 +3949,7 @@ SUITE(MxlAnalyserTest)
         ImoObj* pImo = pMD->get_first_child();
         CHECK( pImo->is_clef() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_misc_malformed_10)
@@ -3978,11 +3978,11 @@ SUITE(MxlAnalyserTest)
         );
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -4027,7 +4027,7 @@ SUITE(MxlAnalyserTest)
 //             << ", " << pNote2->get_beam_type(5) << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 }

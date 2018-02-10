@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -6811,11 +6811,10 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
+ImoObj* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 {
     m_fileLocator = locator;
-    ImoObj* pRoot = analyse_tree_and_get_object(tree);
-    return LOMSE_NEW InternalModel( pRoot );
+    return analyse_tree_and_get_object(tree);
 }
 
 //---------------------------------------------------------------------------------------

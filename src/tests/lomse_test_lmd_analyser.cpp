@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -121,15 +121,15 @@ SUITE(LmdAnalyserTest)
         MyLmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != nullptr );
-        CHECK( pIModel->get_root()->is_document() == true );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot->is_document() == true );
         CHECK( errormsg.str() == expected.str() );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ lenmusdoc -----------------------------------------------------------------------
@@ -145,18 +145,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "en" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_lenmusdoc)
@@ -170,15 +170,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<lenmusdoc vers='0.0' id='10'><content/></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_document() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_has_content)
@@ -194,15 +194,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_get_content_item)
@@ -215,13 +215,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_missing_vers)
@@ -237,14 +237,14 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         XmlNode* tree = parser.get_tree_root();
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         CHECK( errormsg.str() == expected.str() );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != nullptr );
+        CHECK( pRoot != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_language)
@@ -258,18 +258,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<lenmusdoc vers='0.0' language='zh_CN'><content/></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "zh_CN" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_7)
@@ -283,19 +283,19 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<lenmusdoc vers='0.0' language='zh_CN'><content/></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         ImoStyle* pStyle = pDoc->find_style("Table");
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Table" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ clef ----------------------------------------------------------------------------
@@ -311,16 +311,16 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<clef><type>G</type></clef>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, clef_02)
@@ -334,15 +334,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<clef><type>Fa4</type></clef>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, clef_03)
@@ -353,15 +353,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<clef><type>G</type><dx>70</dx></clef>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->is_visible() );
         CHECK( pClef->get_user_location_x() == 70.0f );
         CHECK( pClef->get_user_location_y() == 0.0f );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, clef_04)
@@ -372,8 +372,8 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<clef><type>C2</type><visible>no</visible></clef>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -381,7 +381,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pClef->is_visible() == false );
         CHECK( pClef->get_staff() == 0 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, clef_05)
@@ -398,8 +398,8 @@ SUITE(LmdAnalyserTest)
         );
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -408,7 +408,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pClef->get_staff() == 1 );
         CHECK( pClef->get_symbol_size() == k_size_default );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, clef_06)
@@ -423,13 +423,13 @@ SUITE(LmdAnalyserTest)
         );
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_id() == 12L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -507,13 +507,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<color>321700</color>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() == nullptr );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot == nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Color_Ok)
@@ -526,8 +526,8 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<color>#f0457f</color>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pRoot );
         CHECK( pColor != nullptr );
         CHECK( pColor->red() == 240 );
         CHECK( pColor->green() == 69 );
@@ -537,7 +537,7 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //    // group ----------------------------------------------------------------------------
@@ -565,13 +565,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->font_name() == "Arial" );
@@ -580,7 +580,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //    // title ----------------------------------------------------------------------------
@@ -602,16 +602,16 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<txt>This is a text</txt>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_text_item)
@@ -624,15 +624,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<txt id='10'>This is a text</txt>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_text_item() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_MissingText)
@@ -645,14 +645,14 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<txt></txt>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText == nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_Style)
@@ -672,13 +672,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
@@ -690,7 +690,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Title" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_whitespace_collapsed)
@@ -703,17 +703,17 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<txt> This is a         text        </txt>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == " This is a text " );
         //cout << "result: \"" << pText->get_text() << "\"";
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_whitespace_normal)
@@ -726,17 +726,17 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<txt> This is a\n         text\nwith newlines\n        </txt>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == " This is a text with newlines " );
         //cout << "result: \"" << pText->get_text() << "\"" << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ para ----------------------------------------------------------------------------
@@ -752,14 +752,14 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_paragraph() == true );
+        CHECK( pRoot->is_paragraph() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_paragraph)
@@ -772,15 +772,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<para id='10'>This is a paragraph</para>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_paragraph() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_paragraph() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_TextItemAdded)
@@ -793,17 +793,17 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<para>This is a paragraph</para>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "This is a paragraph" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_anonymous_text_whitespace)
@@ -816,18 +816,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<para>\n      This is a\n      paragraph\n       </para>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == " This is a paragraph " );
         //cout << "7102-result: \"" << pItem->get_text() << "\"" << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_LinkItemAdded)
@@ -841,12 +841,12 @@ SUITE(LmdAnalyserTest)
             "<para><link url='This is the url'>This is the link</link></para>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pPara->get_first_item() );
         CHECK( pLink != nullptr );
@@ -855,7 +855,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
         CHECK( pItem->get_text() == "This is the link" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_link)
@@ -869,15 +869,15 @@ SUITE(LmdAnalyserTest)
             "<link id='10' url='This is the url'>This is the link</link>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_link() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_ManyItems)
@@ -893,12 +893,12 @@ SUITE(LmdAnalyserTest)
         //    "(txt \" with two items.\") )");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pPara->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
@@ -907,7 +907,7 @@ SUITE(LmdAnalyserTest)
         pItem = dynamic_cast<ImoTextItem*>( *it );
         CHECK( pItem->get_text() == "with two items." );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_RecognizedAsContent)
@@ -918,15 +918,15 @@ SUITE(LmdAnalyserTest)
             "<para>Hello world!</para></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_Style)
@@ -951,8 +951,8 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
@@ -962,7 +962,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_DefaultStyle)
@@ -981,8 +981,8 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
@@ -991,7 +991,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_NoStyle)
@@ -1010,14 +1010,14 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style(false);
         CHECK( pStyle == nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ section -------------------------------------------------------------------------
@@ -1032,14 +1032,14 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<section level='1'>This is a header</section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_heading() == true );
+        CHECK( pRoot->is_heading() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_section)
@@ -1052,15 +1052,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<section id='10' level='1'>This is a header</section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_heading() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_heading() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_TextItemAdded)
@@ -1073,18 +1073,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<section level='3'>This is a header</section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 1 );
         CHECK( pH->get_level() == 3 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "This is a header" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_no_level)
@@ -1097,18 +1097,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<section>This is a header</section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 1 );
         CHECK( pH->get_level() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "This is a header" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_invalid_level)
@@ -1121,18 +1121,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<section level='apple'>This is a header</section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 1 );
         CHECK( pH->get_level() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "This is a header" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_ManyItems)
@@ -1146,12 +1146,12 @@ SUITE(LmdAnalyserTest)
             "<txt> with two items.</txt></section>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pH->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
@@ -1160,7 +1160,7 @@ SUITE(LmdAnalyserTest)
         pItem = dynamic_cast<ImoTextItem*>( *it );
         CHECK( pItem->get_text() == " with two items." );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_RecognizedAsContent)
@@ -1171,15 +1171,15 @@ SUITE(LmdAnalyserTest)
             "<section level='1'>Hello world!</section></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_Style)
@@ -1204,8 +1204,8 @@ SUITE(LmdAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
@@ -1214,7 +1214,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ styles --------------------------------------------------------------------------
@@ -1240,13 +1240,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pRoot );
         CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
@@ -1257,7 +1257,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
         CHECK( pStyle->font_size() == 14 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Styles_all_simple_properties)
@@ -1313,13 +1313,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pRoot );
         CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
@@ -1362,7 +1362,7 @@ SUITE(LmdAnalyserTest)
             //table
         CHECK( pStyle->table_col_width() == 38.0f );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Styles_all_compound_properties)
@@ -1384,13 +1384,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pRoot );
         CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
@@ -1411,7 +1411,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle->padding_bottom() == 12.0f );
         CHECK( pStyle->padding_left() == 12.0f );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ param ---------------------------------------------------------------------------
@@ -1423,14 +1423,14 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<param name='green'>this is green</param>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_param_info() == true );
-        ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_param_info() == true );
+        ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pRoot );
         CHECK( pParam != nullptr );
         CHECK( pParam->get_name() == "green" );
         CHECK( pParam->get_value() == "this is green" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, ParamInfo_MissingName)
@@ -1443,15 +1443,15 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<param>this is green</param>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -1467,19 +1467,19 @@ SUITE(LmdAnalyserTest)
         parser.parse_text("<dynamic classid='test' />");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_dynamic() == true );
-        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pIModel->get_root() );
+        CHECK( pRoot->is_dynamic() == true );
+        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn != nullptr );
         CHECK( pDyn->get_classid() == "test" );
         CHECK( pDyn->is_visible() );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_AddedToContent)
@@ -1490,12 +1490,12 @@ SUITE(LmdAnalyserTest)
             "<dynamic classid='test' /></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pDoc->get_content_item(0) );
         CHECK( pDyn != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_dynamic)
@@ -1512,15 +1512,15 @@ SUITE(LmdAnalyserTest)
         );
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoObj* pImo = pIModel->get_root();
+        ImoObj* pImo = pRoot;
         CHECK( pImo->is_dynamic() == true );
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_GeneratesRequest)
@@ -1534,14 +1534,14 @@ SUITE(LmdAnalyserTest)
             "<dynamic classid='test' /></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 
         CHECK( m_fRequestReceived == true );
         CHECK( m_requestType == k_dynamic_content_request );
         CHECK( m_pDoc == pDoc );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_WithParams)
@@ -1558,13 +1558,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pIModel->get_root() );
+        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn->get_classid() == "test" );
         std::list<ImoParamInfo*>& params = pDyn->get_params();
         CHECK( params.size() == 1 );
@@ -1572,7 +1572,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pParm->get_name() == "play" );
         CHECK( pParm->get_value() == "all notes" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ link ----------------------------------------------------------------------------
@@ -1588,21 +1588,21 @@ SUITE(LmdAnalyserTest)
             "<link url='#TheoryHarmony_ch3.lms'>Harmony exercise</link>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
+        CHECK( pRoot->is_link() == true );
+        ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "#TheoryHarmony_ch3.lms" );
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
         CHECK( pItem->get_text() == "Harmony exercise" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Link_MissingUrl)
@@ -1616,21 +1616,21 @@ SUITE(LmdAnalyserTest)
             "<link>Harmony exercise</link>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
+        CHECK( pRoot->is_link() == true );
+        ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "" );
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
         CHECK( pItem->get_text() == "Harmony exercise" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Link_Style)
@@ -1652,13 +1652,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
@@ -1670,7 +1670,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Button" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 ////    // image ----------------------------------------------------------------------------
@@ -1688,20 +1688,20 @@ SUITE(LmdAnalyserTest)
             "<listitem>This is the first item</listitem>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_listitem() == true );
-        ImoListItem* pLI = dynamic_cast<ImoListItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_listitem() == true );
+        ImoListItem* pLI = dynamic_cast<ImoListItem*>( pRoot );
         CHECK( pLI->get_num_content_items() == 1 );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_listitem)
@@ -1715,15 +1715,15 @@ SUITE(LmdAnalyserTest)
             "<listitem id='10'>This is the first item</listitem>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_listitem() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_listitem() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, List_created)
@@ -1740,14 +1740,14 @@ SUITE(LmdAnalyserTest)
             "</itemizedlist>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_list() == true );
-        ImoList* pList = dynamic_cast<ImoList*>( pIModel->get_root() );
+        CHECK( pRoot->is_list() == true );
+        ImoList* pList = dynamic_cast<ImoList*>( pRoot );
         CHECK( pList != nullptr );
         CHECK( pList->get_list_type() == ImoList::k_itemized );
         CHECK( pList->get_num_content_items() == 2 );
@@ -1757,7 +1757,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_list)
@@ -1774,15 +1774,15 @@ SUITE(LmdAnalyserTest)
             "</itemizedlist>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_list() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_list() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //    // graphic line  --------------------------------------------------------------------
@@ -1800,19 +1800,19 @@ SUITE(LmdAnalyserTest)
             "<scorePlayer/></content></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 60 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_score_player)
@@ -1827,17 +1827,17 @@ SUITE(LmdAnalyserTest)
         //parser.parse_text("<scorePlayer id='10' />");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, scorePlayer_metronome)
@@ -1853,19 +1853,19 @@ SUITE(LmdAnalyserTest)
             "</content></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 65 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, scorePlayer_label_play)
@@ -1885,12 +1885,12 @@ SUITE(LmdAnalyserTest)
             "</content></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
@@ -1899,7 +1899,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pSP->get_stop_label() == "Parar" );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tableCell -----------------------------------------------------------------------
@@ -1915,12 +1915,12 @@ SUITE(LmdAnalyserTest)
             "<tableCell>This is a cell</tableCell>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
@@ -1930,7 +1930,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is a cell" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_cell)
@@ -1944,15 +1944,15 @@ SUITE(LmdAnalyserTest)
             "<tableCell id='10'>This is a cell</tableCell>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_cell() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_cell() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_rowspan)
@@ -1966,12 +1966,12 @@ SUITE(LmdAnalyserTest)
             "<tableCell><rowspan>2</rowspan>This is a cell</tableCell>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 2 );
@@ -1981,7 +1981,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is a cell" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_colspan)
@@ -1995,12 +1995,12 @@ SUITE(LmdAnalyserTest)
             "<tableCell><colspan>2</colspan>This is a cell</tableCell>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
@@ -2010,7 +2010,7 @@ SUITE(LmdAnalyserTest)
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is a cell" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_whitespace)
@@ -2024,12 +2024,12 @@ SUITE(LmdAnalyserTest)
             "<tableCell>\n    This is\n   a cell\n    </tableCell>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
@@ -2038,7 +2038,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pText->get_text() == " This is a cell " );
         //cout << "8462-result: \"" << pText->get_text() << "\"" << endl;
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tableRow ------------------------------------------------------------------------
@@ -2058,18 +2058,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pIModel->get_root() );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pRoot );
         CHECK( pRow->is_table_row() == true );
         CHECK( pRow->get_num_cells() == 2 );
         ImoTableCell* pImo = dynamic_cast<ImoTableCell*>( pRow->get_cell(0) );
         CHECK( pImo->is_table_cell() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_row)
@@ -2086,15 +2086,15 @@ SUITE(LmdAnalyserTest)
             "</tableRow>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_row() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_row() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tableHead -----------------------------------------------------------------------
@@ -2114,19 +2114,19 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableHead* pHead = dynamic_cast<ImoTableHead*>( pIModel->get_root() );
+        ImoTableHead* pHead = dynamic_cast<ImoTableHead*>( pRoot );
         CHECK( pHead->is_table_head() == true );
         CHECK( pHead->get_num_items() == 2 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
         CHECK( pRow->is_table_row() == true );
         CHECK( pRow->get_num_cells() == 1 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_head)
@@ -2143,15 +2143,15 @@ SUITE(LmdAnalyserTest)
             "</tableHead>" );
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_head() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_head() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tableBody -----------------------------------------------------------------------
@@ -2171,18 +2171,18 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableBody* pBody = dynamic_cast<ImoTableBody*>( pIModel->get_root() );
+        ImoTableBody* pBody = dynamic_cast<ImoTableBody*>( pRoot );
         CHECK( pBody->is_table_body() == true );
         CHECK( pBody->get_num_items() == 2 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_body)
@@ -2199,15 +2199,15 @@ SUITE(LmdAnalyserTest)
             "</tableBody>" );
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_body() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_body() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ table ---------------------------------------------------------------------------
@@ -2226,12 +2226,12 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTable* pTable = dynamic_cast<ImoTable*>( pIModel->get_root() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pRoot );
         CHECK( pTable != nullptr );
 
         CHECK( pTable->get_head() == nullptr );
@@ -2242,7 +2242,7 @@ SUITE(LmdAnalyserTest)
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table)
@@ -2258,15 +2258,15 @@ SUITE(LmdAnalyserTest)
             "</tableBody></table>" );
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tableColumn ---------------------------------------------------------------------
@@ -2297,13 +2297,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -2314,7 +2314,7 @@ SUITE(LmdAnalyserTest)
         ++it;
         CHECK( (*it)->get_name() == "table1-col2" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, table_full_table)
@@ -2352,13 +2352,13 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -2377,7 +2377,7 @@ SUITE(LmdAnalyserTest)
         pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, table_added_to_content)
@@ -2406,17 +2406,17 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ ldpmusic ------------------------------------------------------------------------
@@ -2443,17 +2443,17 @@ SUITE(LmdAnalyserTest)
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ score ---------------------------------------------------------------------------
@@ -2471,18 +2471,18 @@ SUITE(LmdAnalyserTest)
             "<score><instrument><musicData/></instrument></score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_version_string() == "2.0" );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_20)
@@ -2504,18 +2504,18 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_21)
@@ -2537,18 +2537,18 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_22)
@@ -2571,18 +2571,18 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_23)
@@ -2608,18 +2608,18 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_24)
@@ -2638,17 +2638,17 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_25)
@@ -2672,14 +2672,14 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -2691,7 +2691,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_name_string() == "" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_26)
@@ -2718,14 +2718,14 @@ SUITE(LmdAnalyserTest)
             "</score>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -2737,7 +2737,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_name_string() == "" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 }

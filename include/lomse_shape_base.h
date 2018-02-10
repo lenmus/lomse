@@ -38,10 +38,6 @@ using namespace std;
 namespace lomse
 {
 
-////forward declarations
-//class InternalModel;
-
-
 ////---------------------------------------------------------------------------------------
 ////level of shape
 //enum lmEShapeLevel
