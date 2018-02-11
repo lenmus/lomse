@@ -105,7 +105,7 @@ SUITE(ListLayouterTest)
 //        ImoStyle* pDefStyle = doc.get_default_style();
 //        pDefStyle->vertical_align(ImoStyle::k_valign_top);
 //        ImoStyle* pListStyle = doc.create_style("list");
-//        ImoList* pList = doc.get_imodoc()->get_content()->add_list(ImoList::k_itemized, pListStyle);
+//        ImoList* pList = doc.get_im_root()->get_content()->add_list(ImoList::k_itemized, pListStyle);
 //        ImoListItem* pListitem = pList->add_listitem(pDefStyle);
 //        ImoTextItem* pText = static_cast<ImoTextItem*>(
 //                                    ImFactory::inject(k_imo_text_item, &doc) );
@@ -114,7 +114,7 @@ SUITE(ListLayouterTest)
 //        pListitem->append_content_item(pText);
 //
 //        GraphicModel model;
-//        ImoDocument* pDoc = doc.get_imodoc();
+//        ImoDocument* pDoc = doc.get_im_root();
 //        ImoStyles* pStyles = pDoc->get_styles();
 //        GmoBoxDocPage page(nullptr);
 //        GmoBoxDocPageContent box(nullptr);

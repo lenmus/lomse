@@ -337,7 +337,7 @@ SUITE(TableLayouterTest)
                 "(tableHead (tableRow (tableCell (txt \"This is a head cell\")) ))"
                 "(tableBody (tableRow (tableCell (txt \"This is a body cell\")) ))"
             ") ))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -368,7 +368,7 @@ SUITE(TableLayouterTest)
                 "              (tableCell (txt \"Cell 5\")) )"
                 ")"
             ")) )");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -403,7 +403,7 @@ SUITE(TableLayouterTest)
                 "              (tableCell (txt \"Cell 2,3\")) )"
                 ")"
             ")) )");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -438,7 +438,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -477,7 +477,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -500,7 +500,7 @@ SUITE(TableLayouterTest)
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -542,7 +542,7 @@ SUITE(TableLayouterTest)
                     "(tableCell (txt \"This is body cell 2\"))"
                 "))"
             ")) )");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -564,7 +564,7 @@ SUITE(TableLayouterTest)
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -585,7 +585,7 @@ SUITE(TableLayouterTest)
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -618,7 +618,7 @@ SUITE(TableLayouterTest)
             //  +---+---+---+---+---+
             //  | 5 | 6 | 7 | 8 | 9 +
             //  +---+---+---+---+---+
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -658,7 +658,7 @@ SUITE(TableLayouterTest)
         //  +----------+---------+----------+    37%   |
         //  | Garblos  |   315   |   187    |          |
         //  +----------+---------+----------+----------+
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -744,7 +744,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -812,7 +812,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -878,7 +878,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -942,7 +942,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = spDoc->get_imodoc();
+        ImoDocument* pDoc = spDoc->get_im_root();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;

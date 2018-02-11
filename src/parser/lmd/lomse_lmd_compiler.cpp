@@ -76,7 +76,7 @@ LmdCompiler::~LmdCompiler()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_file(const std::string& filename)
+ImoDocument* LmdCompiler::compile_file(const std::string& filename)
 {
     m_fileLocator = filename;
     DocLocator locator(m_fileLocator);
@@ -102,30 +102,22 @@ InternalModel* LmdCompiler::compile_file(const std::string& filename)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_string(const std::string& source)
+ImoDocument* LmdCompiler::compile_string(const std::string& source)
 {
     m_fileLocator = "string:";
     m_pXmlParser->parse_text(source);
     return compile_parsed_tree( m_pXmlParser->get_tree_root() );
 }
 
-////---------------------------------------------------------------------------------------
-//InternalModel* LmdCompiler::compile_input(LdpReader& reader)
-//{
-//    m_fileLocator = reader.get_locator();
-//    m_pFinalTree = m_pParser->parse_input(reader);
-//    return compile_parsed_tree(m_pFinalTree);
-//}
-
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::create_empty()
+ImoDocument* LmdCompiler::create_empty()
 {
     m_pParser->parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
     return compile_parsed_tree( m_pXmlParser->get_tree_root() );
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::create_with_empty_score()
+ImoDocument* LmdCompiler::create_with_empty_score()
 {
 //    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
 //    return compile_parsed_tree(m_pFinalTree);
@@ -133,33 +125,14 @@ InternalModel* LmdCompiler::create_with_empty_score()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
+ImoDocument* LmdCompiler::compile_parsed_tree(XmlNode* root)
 {
-    InternalModel* pIModel = m_pLmdAnalyser->analyse_tree(root, m_fileLocator);
-    if (pIModel)
-        m_pModelBuilder->build_model(pIModel);
-    return pIModel;
+    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(
+                                m_pLmdAnalyser->analyse_tree(root, m_fileLocator));
+    if (pDoc)
+        m_pModelBuilder->build_model(pDoc);
+    return pDoc;
 }
-
-////---------------------------------------------------------------------------------------
-//SpLdpTree LmdCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
-//{
-//    SpLdpTree pFinalTree = parse_empty_doc();
-//
-//    LdpTree::depth_first_iterator it = pFinalTree->begin();
-//    while (it != pFinalTree->end() && !(*it)->is_type(k_content))
-//        ++it;
-//    (*it)->append_child(pParseTree->get_root());
-//
-//    return pFinalTree;
-//}
-//
-////---------------------------------------------------------------------------------------
-//SpLdpTree LmdCompiler::parse_empty_doc()
-//{
-//    SpLdpTree pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
-//    return pTree;
-//}
 
 
 }  //namespace lomse

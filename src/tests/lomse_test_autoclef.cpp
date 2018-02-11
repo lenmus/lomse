@@ -123,7 +123,7 @@ SUITE(AutoClefTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument"
             "(musicData (metronome q 55) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == false );
@@ -142,7 +142,7 @@ SUITE(AutoClefTest)
            "(barline)"
            "(n a3 q p2 v2)(n e3 q v2) )))"
         );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == false );
@@ -155,7 +155,7 @@ SUITE(AutoClefTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument"
             "(musicData (n c4 q) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == true );
@@ -179,7 +179,7 @@ SUITE(AutoClefTest)
            "(barline)"
            "(n a3 q p2 v2)(n e3 q v2) )))"
         );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == true );
@@ -195,7 +195,7 @@ SUITE(AutoClefTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument"
             "(musicData (n * q) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == false );
@@ -223,7 +223,7 @@ SUITE(AutoClefTest)
             "</measure>"
             "</part></score-partwise>"
             , Document::k_format_mxl);
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == true );
@@ -252,7 +252,7 @@ SUITE(AutoClefTest)
             "</measure>"
             "</part></score-partwise>"
             , Document::k_format_mxl);
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         CHECK( ac.my_are_there_staves_needing_clef() == false );
@@ -265,7 +265,7 @@ SUITE(AutoClefTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument"
             "(musicData (n c4 q) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         ac.do_autoclef();
@@ -290,7 +290,7 @@ SUITE(AutoClefTest)
            "(barline)"
            "(n a3 q p2 v2)(n e3 q v2) )))"
         );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         ac.do_autoclef();
@@ -326,7 +326,7 @@ SUITE(AutoClefTest)
             "</measure>"
             "</part></score-partwise>"
             , Document::k_format_mxl);
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         MyAutoClef ac(pScore);
         ac.do_autoclef();

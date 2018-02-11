@@ -139,8 +139,8 @@ void ElementIterator::point_to(ImoObj* pObj)
 // DocIterator implementation
 //---------------------------------------------------------------------------------------
 DocIterator::DocIterator(Document* pDoc)
-    : ElementIterator(pDoc->get_imodoc())
-    , m_pDoc(pDoc->get_imodoc())
+    : ElementIterator(pDoc->get_im_root())
+    , m_pDoc(pDoc->get_im_root())
     //, m_pScoreElmIterator(nullptr)
 {
     m_numContentItems = m_pDoc->get_num_content_items();

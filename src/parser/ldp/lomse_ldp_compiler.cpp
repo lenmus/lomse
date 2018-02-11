@@ -74,7 +74,7 @@ LdpCompiler::~LdpCompiler()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::compile_file(const std::string& filename)
+ImoDocument* LdpCompiler::compile_file(const std::string& filename)
 {
     m_fileLocator = filename;
     m_pParser->parse_file(filename);
@@ -83,7 +83,7 @@ InternalModel* LdpCompiler::compile_file(const std::string& filename)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::compile_string(const std::string& source)
+ImoDocument* LdpCompiler::compile_string(const std::string& source)
 {
     m_fileLocator = "string:";
     m_pParser->parse_text(source);
@@ -92,7 +92,7 @@ InternalModel* LdpCompiler::compile_string(const std::string& source)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::compile_input(LdpReader& reader)
+ImoDocument* LdpCompiler::compile_input(LdpReader& reader)
 {
     m_fileLocator = reader.get_locator();
     m_pLdpParser->parse_input(reader);
@@ -101,7 +101,7 @@ InternalModel* LdpCompiler::compile_input(LdpReader& reader)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::create_empty()
+ImoDocument* LdpCompiler::create_empty()
 {
     parse_empty_doc();
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
@@ -109,7 +109,7 @@ InternalModel* LdpCompiler::create_empty()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::create_with_empty_score()
+ImoDocument* LdpCompiler::create_with_empty_score()
 {
     m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
@@ -117,7 +117,7 @@ InternalModel* LdpCompiler::create_with_empty_score()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::compile_parsed_tree(LdpTree* tree)
+ImoDocument* LdpCompiler::compile_parsed_tree(LdpTree* tree)
 {
     if (!tree)
         return create_empty();
@@ -125,10 +125,11 @@ InternalModel* LdpCompiler::compile_parsed_tree(LdpTree* tree)
     if (tree->get_root()->is_type(k_score))
         tree = wrap_score_in_lenmusdoc(tree);
 
-    InternalModel* pIModel = m_pLdpAnalyser->analyse_tree(tree, m_fileLocator);
-    m_pModelBuilder->build_model(pIModel);
+    ImoDocument* pRoot = dynamic_cast<ImoDocument*>(
+                                m_pLdpAnalyser->analyse_tree(tree, m_fileLocator));
+    m_pModelBuilder->build_model(pRoot);
     delete tree->get_root();
-    return pIModel;
+    return pRoot;
 }
 
 //---------------------------------------------------------------------------------------

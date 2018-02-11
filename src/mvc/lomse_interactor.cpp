@@ -143,11 +143,11 @@ void Interactor::create_graphic_model()
     {
         m_gmodelBuildStartTime = get_current_time();
 
-        InternalModel* pIModel = spDoc->get_im_model();
-        if (pIModel)
+        Document* pDoc = spDoc.get();
+        if (pDoc)
         {
             LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
-            DocLayouter layouter(pIModel, m_libScope);
+            DocLayouter layouter(pDoc, m_libScope);
             layouter.layout_document();
             m_pGraphicModel = layouter.get_graphic_model();
             m_pGraphicModel->build_main_boxes_table();
@@ -1758,7 +1758,7 @@ bool Interactor::is_operating_mode_allowed(int mode)
     {
         if (SpDocument spDoc = m_wpDoc.lock())
         {
-            ImoDocument* pImoDoc = spDoc->get_imodoc();
+            ImoDocument* pImoDoc = spDoc->get_im_root();
             int iMax = pImoDoc->get_num_content_items();
             for (int i=0; i < iMax; ++i)
             {

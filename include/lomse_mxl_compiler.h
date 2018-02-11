@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,7 +42,7 @@ namespace lomse
 class XmlParser;
 class MxlAnalyser;
 class LibraryScope;
-class InternalModel;
+class ImoDocument;
 class Document;
 
 
@@ -62,12 +62,11 @@ public:
     MxlCompiler(LibraryScope& libraryScope, Document* pDoc);
 
     //compilation
-    InternalModel* compile_file(const std::string& filename);
-    InternalModel* compile_string(const std::string& source);
-//    InternalModel* compile_input(LdpReader& reader);
+    ImoDocument* compile_file(const std::string& filename);
+    ImoDocument* compile_string(const std::string& source);
 
 protected:
-    InternalModel* compile_parsed_tree(XmlNode* root);
+    ImoDocument* compile_parsed_tree(XmlNode* root);
 
 };
 

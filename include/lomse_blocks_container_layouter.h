@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,8 +42,6 @@ namespace lomse
 {
 
 //forward declarations
-class InternalModel;
-//class ImoControl;
 class ImoContent;
 class ImoContentObj;
 class ImoDocument;

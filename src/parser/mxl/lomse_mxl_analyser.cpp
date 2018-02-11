@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1009,7 +1009,7 @@ protected:
 //            {
 //                //try to find it in document global styles
 //                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//                ImoDocument* pImoDoc = pDoc->get_imodoc();
+//                ImoDocument* pImoDoc = pDoc->get_im_root();
 //                if (pImoDoc)
 //                    pStyle = pImoDoc->find_style(styleName);
 //            }
@@ -5219,7 +5219,6 @@ public:
         pImoDoc->set_version("0.0");    //AWARE: This is lenmusdoc version!
         pImoDoc->set_language("en");    //TODO: analyse language
         m_pAnalyser->save_root_imo_document(pImoDoc);
-        pDoc->set_imo_doc(pImoDoc);
         m_pAnchor = pImoDoc;
 
         // attrb: version
@@ -6811,11 +6810,10 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
+ImoObj* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 {
     m_fileLocator = locator;
-    ImoObj* pRoot = analyse_tree_and_get_object(tree);
-    return LOMSE_NEW InternalModel( pRoot );
+    return analyse_tree_and_get_object(tree);
 }
 
 //---------------------------------------------------------------------------------------

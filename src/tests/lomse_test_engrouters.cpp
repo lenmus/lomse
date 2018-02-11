@@ -125,7 +125,7 @@ SUITE(EngroutersCreatorTest)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         pDoc->set_language("zh_CN");
         ImoParagraph* pPara = doc.add_paragraph();
         ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");

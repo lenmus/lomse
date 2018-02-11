@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -94,7 +94,7 @@ SUITE(LmdExporterTest)
 //
 //        Document doc(m_libraryScope);
 //        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
-//        ImoDocument* pRoot = doc.get_imodoc();
+//        ImoDocument* pRoot = doc.get_im_root();
 //
 //        LmdExporter exporter(m_libraryScope);
 //        exporter.set_score_format(LmdExporter::k_format_ldp);
@@ -113,8 +113,8 @@ SUITE(LmdExporterTest)
         parser.parse_text("<section level='1'>This is a header</section>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoObj* pImo = pIModel->get_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoObj* pImo = pRoot;
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -124,7 +124,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdExporterTestFixture, section_with_style)
@@ -140,8 +140,8 @@ SUITE(LmdExporterTest)
             "</lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pImo = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
 
         LmdExporter exporter(m_libraryScope);
@@ -152,7 +152,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdExporterTestFixture, section_many_items_simplify)
@@ -163,8 +163,8 @@ SUITE(LmdExporterTest)
             "<txt> with two items.</txt></section>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoObj* pImo = pIModel->get_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoObj* pImo = pRoot;
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -174,7 +174,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdExporterTestFixture, section_many_items_with_styles)
@@ -194,8 +194,8 @@ SUITE(LmdExporterTest)
             "</lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pImo = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
 
         LmdExporter exporter(m_libraryScope);
@@ -207,7 +207,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // style ----------------------------------------------------------------------------
@@ -228,8 +228,8 @@ SUITE(LmdExporterTest)
         parser.parse_text(src);
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoStyle* pImo = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoStyle* pImo = dynamic_cast<ImoStyle*>( pRoot );
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -239,7 +239,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // styles ---------------------------------------------------------------------------
@@ -255,8 +255,8 @@ SUITE(LmdExporterTest)
         parser.parse_text(src);
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoStyles* pImo = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoStyles* pImo = dynamic_cast<ImoStyles*>( pRoot );
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -266,7 +266,7 @@ SUITE(LmdExporterTest)
         //cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LmdExporterTestFixture, styles)
@@ -287,8 +287,8 @@ SUITE(LmdExporterTest)
         parser.parse_text(src);
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoStyles* pImo = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoStyles* pImo = dynamic_cast<ImoStyles*>( pRoot );
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -298,7 +298,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //    TEST_FIXTURE(LmdExporterTestFixture, ErrorNotImplemented)
@@ -321,7 +321,7 @@ SUITE(LmdExporterTest)
 //            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
 //            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
 //            ")))" );
-//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        LmdExporter exporter("0.12.5", "2012/12/21 13:10:27");
 //        string source = exporter.get_source(pScore);
 //        cout << "\"" << source << "\"" << endl;
@@ -412,7 +412,7 @@ SUITE(LmdExporterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("<lenmusdoc vers='2.3'><content/></lenmusdoc>", Document::k_format_lmd);
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
 
         MyLmdExporter exporter(m_libraryScope, "0.12.5", "2012/12/21 13:10:27");
         string source = exporter.get_source(pImoDoc);
@@ -432,7 +432,7 @@ SUITE(LmdExporterTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("<lenmusdoc vers='2.3'><content/></lenmusdoc>", Document::k_format_lmd);
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
 
         MyLmdExporter exporter(m_libraryScope, "0.12.5", "2012/12/21 13:10:27");
         exporter.set_add_id(true);
@@ -464,8 +464,8 @@ SUITE(LmdExporterTest)
             "</lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pImo = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pImo = dynamic_cast<ImoDocument*>( pRoot );
 
         LmdExporter exporter(m_libraryScope);
         exporter.set_remove_newlines(true);
@@ -484,7 +484,7 @@ SUITE(LmdExporterTest)
 //        cout << expected << endl;
         CHECK( source == expected );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 };

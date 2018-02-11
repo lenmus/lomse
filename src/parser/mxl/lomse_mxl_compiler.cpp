@@ -77,7 +77,7 @@ MxlCompiler::~MxlCompiler()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* MxlCompiler::compile_file(const std::string& filename)
+ImoDocument* MxlCompiler::compile_file(const std::string& filename)
 {
     m_fileLocator = filename;
     DocLocator locator(m_fileLocator);
@@ -103,28 +103,21 @@ InternalModel* MxlCompiler::compile_file(const std::string& filename)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* MxlCompiler::compile_string(const std::string& source)
+ImoDocument* MxlCompiler::compile_string(const std::string& source)
 {
     m_fileLocator = "string:";
     m_pXmlParser->parse_text(source);
     return compile_parsed_tree( m_pXmlParser->get_tree_root() );
 }
 
-////---------------------------------------------------------------------------------------
-//InternalModel* MxlCompiler::compile_input(LdpReader& reader)
-//{
-//    m_fileLocator = reader.get_locator();
-//    m_pFinalTree = m_pParser->parse_input(reader);
-//    return compile_parsed_tree(m_pFinalTree);
-//}
-
 //---------------------------------------------------------------------------------------
-InternalModel* MxlCompiler::compile_parsed_tree(XmlNode* root)
+ImoDocument* MxlCompiler::compile_parsed_tree(XmlNode* root)
 {
-    InternalModel* pIModel = m_pMxlAnalyser->analyse_tree(root, m_fileLocator);
-    if (pIModel)
-        m_pModelBuilder->build_model(pIModel);
-    return pIModel;
+    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(
+                            m_pMxlAnalyser->analyse_tree(root, m_fileLocator));
+    if (pDoc)
+        m_pModelBuilder->build_model(pDoc);
+    return pDoc;
 }
 
 

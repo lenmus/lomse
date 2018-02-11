@@ -60,7 +60,6 @@ public:
     string m_scores_path;
     int m_requestType;
     bool m_fRequestReceived;
-    ImoDocument* m_pDoc;
 
 
     LdpAnalyserTestFixture()     //SetUp fixture
@@ -68,7 +67,6 @@ public:
         , m_scores_path(TESTLIB_SCORES_PATH)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
-        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         m_libraryScope.set_unit_test(true);
@@ -87,12 +85,6 @@ public:
     {
         m_fRequestReceived = true;
         m_requestType = pRequest->get_request_type();
-        if (m_requestType == k_dynamic_content_request)
-        {
-            RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = pDyn->get_document();
-        }
     }
 
     inline const char* test_name()
@@ -119,14 +111,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != nullptr );
+        CHECK( pRoot != nullptr );
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserMissingMandatoryElementMoreElements)
@@ -140,15 +132,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << score->get_root()->to_string() << endl;
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != nullptr );
+        CHECK( pRoot != nullptr );
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserLanguageRemoved)
@@ -162,14 +154,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (language en utf-8))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        CHECK( pIModel->get_root() != nullptr );
+        CHECK( pRoot != nullptr );
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserHasMandatoryElement)
@@ -182,14 +174,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_version_string() == "1.6" );
         CHECK( pScore->get_num_instruments() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreMissingFirst)
@@ -202,17 +194,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << score->get_root()->to_string() << endl;
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentOne)
@@ -225,16 +217,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         //CHECK( pScore->get_num_instruments() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentMore)
@@ -247,15 +239,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, score_get_instr_number)
@@ -268,18 +260,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(1);
         CHECK( pScore->get_instr_number_for(pInstr) == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ articulation ------------------------------------------------------------------------
@@ -296,18 +288,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tenuto)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_articulation() == true );
-        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+        CHECK( pRoot->is_articulation() == true );
+        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_placement() == k_placement_default );
         CHECK( pImo->get_articulation_type() == k_articulation_tenuto );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_02)
@@ -322,18 +314,18 @@ SUITE(LdpAnalyserTest)
 //        parser.parse_text("(dyn#30 \"ppp\")");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
 //        CHECK( pImo->get_placement() == k_placement_default );
 //        CHECK( pImo->get_mark_type() == "ppp" );
 //        CHECK( pImo->get_id() == 30L );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_03)
@@ -348,17 +340,17 @@ SUITE(LdpAnalyserTest)
 //        parser.parse_text("(dyn \"sf\" above)");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
 //        CHECK( pImo->get_placement() == k_placement_above );
 //        CHECK( pImo->get_mark_type() == "sf" );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_04)
@@ -373,11 +365,11 @@ SUITE(LdpAnalyserTest)
 //        parser.parse_text("(dyn \"sf\" above (dx 70))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pIModel->get_root() );
+//        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
 //        CHECK( pImo->get_placement() == k_placement_above );
 //        CHECK( pImo->get_mark_type() == "sf" );
@@ -385,7 +377,7 @@ SUITE(LdpAnalyserTest)
 //        CHECK( pImo->get_user_location_y() == 0.0f );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_articulation_05)
@@ -400,8 +392,8 @@ SUITE(LdpAnalyserTest)
 //        parser.parse_text("(n c4 e (stem up)(dyn \"sf\" above (dx 70)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
 //        CHECK( pNote != nullptr );
 //        CHECK( pNote->is_stem_up() == true );
 //        CHECK( pNote->get_num_attachments() == 1 );
@@ -416,7 +408,7 @@ SUITE(LdpAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 
     //@ barline --------------------------------------------------------------------------
@@ -428,15 +420,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_barline() == true );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_simple );
         CHECK( pBarline->is_visible() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_OptionalElementPresent)
@@ -446,16 +438,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_barline() == true );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
         CHECK( pBarline->is_middle() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_InvalidType)
@@ -468,18 +460,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline invalid)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        CHECK( pRoot->is_barline() == true );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_simple );
         CHECK( pBarline->is_visible() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_Visible)
@@ -489,14 +481,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (visible yes))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_NoVisible)
@@ -506,14 +498,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_BadVisible)
@@ -526,17 +518,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double invisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_Middle)
@@ -546,15 +538,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double middle)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
         CHECK( pBarline->is_middle() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_LocationX)
@@ -564,8 +556,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -573,7 +565,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_LocationY)
@@ -583,8 +575,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dy 60.5))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -592,7 +584,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 60.5f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_LocationXY)
@@ -602,8 +594,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dx 70)(dy 20.3))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -611,7 +603,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 20.3f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_BadLocationX)
@@ -624,11 +616,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dx seven))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -636,7 +628,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_BadLocationY)
@@ -649,11 +641,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dy six))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -661,7 +653,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_LocationOrder)
@@ -674,11 +666,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (dy 70)(dx 20.3))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
@@ -686,7 +678,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->get_user_location_y() == 70.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_HasId)
@@ -698,16 +690,16 @@ SUITE(LdpAnalyserTest)
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(barline#7 double)");
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+//        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
 //        CHECK( pBarline != nullptr );
 //        CHECK( pBarline->get_id() == 7 );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         parser.parse_text("(barline#7 double)");
@@ -732,14 +724,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(instrument 3))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_music_data() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_music_data() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreOptionalAlternativesErrorRemoved)
@@ -752,13 +744,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(instrument 3)(n d4 e))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreOptionalAlternativesTwo)
@@ -771,13 +763,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(n d4 e.))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MusicData_AuxobjIsAnchored)
@@ -790,13 +782,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(text \"Hello world\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_musicData)
@@ -809,16 +801,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData#12 (n#10 c4 q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_music_data() == true );
-        ImoMusicData* pImo = static_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pRoot->is_music_data() == true );
+        ImoMusicData* pImo = static_cast<ImoMusicData*>( pRoot );
         CHECK( pImo->get_id() == 12L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, musicData_access_to_instrument)
@@ -831,18 +823,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (musicData (n c4 q)(n d4 e)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
         CHECK( pMD->get_instrument() == pInstr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ note -----------------------------------------------------------------------------
@@ -857,12 +849,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n +d3 e.)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_note() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_note() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_sharp );
         CHECK( pNote->get_dots() == 1 );
@@ -875,7 +867,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_end_of_chord() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_PitchError)
@@ -888,11 +880,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n j17 q)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -901,7 +893,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_DurationErrorLetter)
@@ -914,11 +906,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 j.)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -927,7 +919,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_DurationErrorDots)
@@ -940,11 +932,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e.1)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -953,7 +945,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Staff)
@@ -966,11 +958,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e p7)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -980,7 +972,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_staff() == 6 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StaffError)
@@ -993,11 +985,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e pz)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_staff() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
@@ -1005,7 +997,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Voice)
@@ -1018,11 +1010,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e v3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -1033,7 +1025,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_tied_next() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_VoiceError)
@@ -1046,11 +1038,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e vx)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_voice() == 1 );
         CHECK( pNote->get_dots() == 0 );
@@ -1059,7 +1051,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_note)
@@ -1072,16 +1064,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n#10 c4 q)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_note() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_note() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Attachment)
@@ -1094,11 +1086,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e v3 (text \"andante\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
@@ -1109,7 +1101,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->has_attachments() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_TieStart)
@@ -1122,8 +1114,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (tie 12 start))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pAnalyser = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pAnalyser->analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = pAnalyser->analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_tied_next() == false );
         CHECK( pNote->is_tied_prev() == false );
@@ -1133,7 +1125,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_TieStop)
@@ -1146,8 +1138,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (tie 12 stop))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1156,7 +1148,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_tied_prev() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Notes_Tied)
@@ -1169,13 +1161,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c4 e (tie 12 stop)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1194,7 +1186,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Notes_Tied_Impossible)
@@ -1207,13 +1199,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c3 e (tie 12 stop)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1229,7 +1221,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_tied_prev() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Several_Notes)
@@ -1242,13 +1234,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(n d4 q)(n e4 q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it;
         int numNotes;
@@ -1257,7 +1249,7 @@ SUITE(LdpAnalyserTest)
         CHECK( numNotes == 3 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ stem
@@ -1272,8 +1264,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (stem up))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_stem_up() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -1281,7 +1273,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StemDown)
@@ -1294,8 +1286,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (stem down))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_stem_down() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -1303,7 +1295,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StemError)
@@ -1316,8 +1308,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (stem no))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_stem_default() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -1329,7 +1321,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_stem_direction() == k_stem_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StemTie)
@@ -1342,13 +1334,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q (tie 12 start)(stem down)) (n c4 e (stem up)(tie 12 stop)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1366,7 +1358,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_stem_up() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_SeveralOldParams)
@@ -1379,12 +1371,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n +d3 e. g+ p2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_note() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_note() == true );
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_notated_accidentals() == k_sharp );
         CHECK( pNote->get_dots() == 1 );
@@ -1395,7 +1387,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_staff() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tie (old syntax) -----------------------------------------------------------------
@@ -1410,13 +1402,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 e l)(n c4 q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1441,7 +1433,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRelObjs->get_item(0) == pTie );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TieOld_Error1)
@@ -1454,13 +1446,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 e l)(n d4 q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1476,7 +1468,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_tied_prev() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TieOld_IntermediateNote)
@@ -1489,13 +1481,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q v1 l)(n e4 q v2)(n c4 e v1))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1515,7 +1507,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TieOld_IntermediateBarline)
@@ -1528,13 +1520,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q v1 l)(barline simple)(n c4 e v1))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1555,7 +1547,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TieOld_Several)
@@ -1568,13 +1560,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q l)(n c4 e l)(n c4 e))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1612,7 +1604,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRelObjs->get_item(0) == pTie2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tie ------------------------------------------------------------------------------
@@ -1627,12 +1619,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tie 12 stop)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_tie_dto() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_tie_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pIModel->get_root() );
+        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == false );
         CHECK( pInfo->get_tie_number() == 12 );
@@ -1640,7 +1632,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tie_ParsedStart)
@@ -1653,11 +1645,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tie 15 start)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pIModel->get_root() );
+        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == true );
         CHECK( pInfo->get_tie_number() == 15 );
@@ -1665,7 +1657,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tie_Bezier)
@@ -1678,11 +1670,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tie 15 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pIModel->get_root() );
+        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == true );
         CHECK( pInfo->get_tie_number() == 15 );
@@ -1699,7 +1691,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tie_ParsedError)
@@ -1712,13 +1704,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tie 15 end)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tie_Color)
@@ -1731,12 +1723,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tie 12 stop (color #00ff00))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_tie_dto() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_tie_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pIModel->get_root() );
+        ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == false );
         CHECK( pInfo->get_tie_number() == 12 );
@@ -1745,7 +1737,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ bezier ---------------------------------------------------------------------------
@@ -1760,12 +1752,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(bezier ctrol1-x:-25 (start-x 36.765) ctrol1-y:55)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_bezier_info() == true );
-        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_bezier_info() == true );
+        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pRoot );
         CHECK( pBezier != nullptr );
         //cout << "start.x = " << pBezier->get_point(ImoBezierInfo::k_start).x << endl;
         //cout << "start.y = " << pBezier->get_point(ImoBezierInfo::k_start).y << endl;
@@ -1785,7 +1777,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Bezier_Error)
@@ -1799,11 +1791,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(bezier (startx 36.765) ctrol1-x:-25 ctrol1-y:55)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pIModel->get_root() );
+        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pRoot );
         CHECK( pBezier != nullptr );
         //cout << "start.x = " << pBezier->get_point(ImoBezierInfo::k_start).x << endl;
         //cout << "start.y = " << pBezier->get_point(ImoBezierInfo::k_start).y << endl;
@@ -1823,7 +1815,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Bezier_MissingValues)
@@ -1836,12 +1828,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(bezier (start-x 36.765))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_bezier_info() == true );
-        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_bezier_info() == true );
+        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pRoot );
         CHECK( pBezier != nullptr );
         //cout << "start.x = " << pBezier->get_point(ImoBezierInfo::k_start).x << endl;
         //cout << "start.y = " << pBezier->get_point(ImoBezierInfo::k_start).y << endl;
@@ -1861,7 +1853,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // slur -----------------------------------------------------------------------------
@@ -1876,12 +1868,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 12 stop)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_slur_dto() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_slur_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pIModel->get_root() );
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == false );
         CHECK( pInfo->get_slur_number() == 12 );
@@ -1889,7 +1881,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Slur_ParsedStart)
@@ -1902,11 +1894,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 15 start)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pIModel->get_root() );
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == true );
         CHECK( pInfo->get_slur_number() == 15 );
@@ -1914,7 +1906,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Slur_ParsedContinue)
@@ -1927,11 +1919,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 15 continue)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pIModel->get_root() );
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         //TODO
         //CHECK( pInfo->is_continue() == true );
@@ -1940,7 +1932,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Slur_Bezier)
@@ -1953,11 +1945,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pIModel->get_root() );
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == true );
         CHECK( pInfo->get_slur_number() == 27 );
@@ -1974,7 +1966,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Slur_Color)
@@ -1987,12 +1979,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 12 start (color #00ff00))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_slur_dto() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_slur_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pIModel->get_root() );
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start() == true );
         CHECK( pInfo->get_slur_number() == 12 );
@@ -2001,7 +1993,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Slur_ParsedError)
@@ -2014,13 +2006,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(slur 15 end)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_NotesSlurred)
@@ -2033,13 +2025,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q (slur 12 start)) (n c4 e (slur 12 stop)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -2058,7 +2050,7 @@ SUITE(LdpAnalyserTest)
 
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // rest -----------------------------------------------------------------------------
@@ -2073,19 +2065,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(r e.)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_rest() == true );
-        ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
+        CHECK( pRoot->is_rest() == true );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 1 );
         CHECK( pRest->get_note_type() == k_eighth );
         CHECK( pRest->has_attachments() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_StaffNum)
@@ -2098,18 +2090,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(r e. p2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 1 );
         CHECK( pRest->get_note_type() == k_eighth );
         CHECK( pRest->get_staff() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_DefaultStaffNum)
@@ -2122,18 +2114,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(r e.)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 1 );
         CHECK( pRest->get_note_type() == k_eighth );
         CHECK( pRest->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_StaffNumInherited)
@@ -2146,7 +2138,7 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (r e. p2)(n c4 q)(n d4 e p3)(r q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2176,7 +2168,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->get_staff() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_rest)
@@ -2189,16 +2181,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(r#10 q)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_rest() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_rest() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_Attachment)
@@ -2211,18 +2203,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(r e. (text \"andante\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
+        ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 1 );
         CHECK( pRest->get_note_type() == k_eighth );
         CHECK( pRest->has_attachments() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ fermata -------------------------------------------------------------------------
@@ -2239,17 +2231,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pRoot->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_02)
@@ -2264,16 +2256,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata#10)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_fermata() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_fermata() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_03)
@@ -2288,17 +2280,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata below)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pRoot->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_below );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_04)
@@ -2313,18 +2305,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata short)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pRoot->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
         CHECK( pFerm->get_symbol() == ImoFermata::k_short );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_05)
@@ -2339,18 +2331,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata long)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        CHECK( pRoot->is_fermata() == true );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
         CHECK( pFerm->get_symbol() == ImoFermata::k_long );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_06)
@@ -2365,16 +2357,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata under)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_07)
@@ -2389,18 +2381,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata above (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_08)
@@ -2415,18 +2407,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(fermata above (dx 70)(fermata below))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
+        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_fermata_09)
@@ -2441,8 +2433,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (stem up)(fermata above (dx 70)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_stem_up() == true );
         CHECK( pNote->get_num_attachments() == 1 );
@@ -2456,7 +2448,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ dynamics ------------------------------------------------------------------------
@@ -2473,18 +2465,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dyn \"ppp\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_dynamics_mark() == true );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        CHECK( pRoot->is_dynamics_mark() == true );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_placement() == k_placement_default );
         CHECK( pImo->get_mark_type() == "ppp" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_02)
@@ -2499,18 +2491,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dyn#30 \"ppp\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_placement() == k_placement_default );
         CHECK( pImo->get_mark_type() == "ppp" );
         CHECK( pImo->get_id() == 30L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_03)
@@ -2525,17 +2517,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dyn \"sf\" above)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_placement() == k_placement_above );
         CHECK( pImo->get_mark_type() == "sf" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_04)
@@ -2550,11 +2542,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dyn \"sf\" above (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pIModel->get_root() );
+        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_placement() == k_placement_above );
         CHECK( pImo->get_mark_type() == "sf" );
@@ -2562,7 +2554,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_dynamics_05)
@@ -2577,8 +2569,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (stem up)(dyn \"sf\" above (dx 70)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->is_stem_up() == true );
         CHECK( pNote->get_num_attachments() == 1 );
@@ -2593,7 +2585,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ goFwd ---------------------------------------------------------------------------
@@ -2609,17 +2601,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goBack start)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_go_back_fwd() == true );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        CHECK( pRoot->is_go_back_fwd() == true );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( pGBF->is_to_start() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_goBack)
@@ -2632,16 +2624,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goBack#10 start)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_go_back_fwd() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_go_back_fwd() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoBackEnd)
@@ -2654,13 +2646,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goBack end)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoBackQ)
@@ -2673,18 +2665,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goBack q)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == -64.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoFwdEnd)
@@ -2697,16 +2689,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd end)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( pGBF->is_to_end() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_goFwd)
@@ -2719,16 +2711,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd#10 end)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_go_back_fwd() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_go_back_fwd() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoFwdStart)
@@ -2741,13 +2733,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd start)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoFwdH)
@@ -2760,18 +2752,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd h)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == 128.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoFwdNum)
@@ -2784,18 +2776,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd 128)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == 128.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoFwdBadNumber)
@@ -2808,13 +2800,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goFwd -128.3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoBackNum)
@@ -2827,18 +2819,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(goBack 21.3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
+        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == -21.3f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ goFwd 2.0 -----------------------------------------------------------------------
@@ -2855,19 +2847,19 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         a.set_score_version("2.0");
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_rest() == true );
-        ImoRest* pImo = static_cast<ImoRest*>( pIModel->get_root() );
+        CHECK( pRoot->is_rest() == true );
+        ImoRest* pImo = static_cast<ImoRest*>( pRoot );
         CHECK( pImo->is_go_fwd() == true );
         CHECK( pImo->get_duration() == 128.0 );
         CHECK( pImo->get_voice() == 3 );
         CHECK( pImo->is_visible() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ clef ----------------------------------------------------------------------------
@@ -2882,17 +2874,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef G)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_clef)
@@ -2905,16 +2897,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef#10 G)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_clef() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_clef() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_Error)
@@ -2927,16 +2919,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef Fa4)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_LocationX)
@@ -2946,8 +2938,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef G (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->is_visible() );
@@ -2955,7 +2947,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_NoVisible)
@@ -2965,8 +2957,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef C2 noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -2975,7 +2967,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_NoVisible_Staff2)
@@ -2985,8 +2977,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef C2 p2 noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -2996,7 +2988,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_SymbolSizeOk)
@@ -3006,8 +2998,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef C2 (symbolSize cue))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -3017,7 +3009,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_cue );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Clef_SymbolSizeError)
@@ -3030,8 +3022,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(clef C2 (symbolSize small))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -3045,7 +3037,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_full );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ instrument ----------------------------------------------------------------------
@@ -3060,18 +3052,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (staves 2)(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_instrument() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_instrument() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstrument != nullptr );
         //cout << "num.staves=" << pInstrument->get_num_staves() << endl;
         CHECK( pInstrument->get_num_staves() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_instrument)
@@ -3084,16 +3076,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument#10 (musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_instrument() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_instrument() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_StavesError)
@@ -3106,17 +3098,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (staves two)(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstrument != nullptr );
         //cout << "num.staves=" << pInstrument->get_num_staves() << endl;
         CHECK( pInstrument->get_num_staves() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_AddedToScore)
@@ -3129,12 +3121,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -3142,7 +3134,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_num_staves() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_Name)
@@ -3155,20 +3147,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (name \"Guitar\")(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "Guitar" );
         CHECK( pInstr->get_abbrev().get_text() == "" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_Abbrev)
@@ -3181,20 +3173,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (abbrev \"G.\")(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
         CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_NameAbbrev)
@@ -3207,20 +3199,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (name \"Guitar\")(abbrev \"G.\")(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "Guitar" );
         CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MidiInfo_InstrErrorValue)
@@ -3233,17 +3225,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(infoMIDI piano 1)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MidiInfo_InstrErrorRange)
@@ -3256,17 +3248,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(infoMIDI 315 1)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MidiInfo_InstrumentOk)
@@ -3279,21 +3271,21 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(infoMIDI 56)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_sound_info() == true );
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_sound_info() == true );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == -1 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MidiInfo_ChannelErrorValue)
@@ -3306,20 +3298,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(infoMIDI 56 25)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == -1 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MidiInfo_InstrumentChannelOk)
@@ -3332,20 +3324,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(infoMIDI 56 10)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pIModel->get_root() );
+        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == 10 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Instrument_MidiInfo)
@@ -3358,13 +3350,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(instrument (infoMIDI 56 12)(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
@@ -3377,7 +3369,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ key -----------------------------------------------------------------------------
@@ -3392,18 +3384,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(key G)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_key_signature() == true );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_key_signature() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_G );
         CHECK( pKeySignature->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_key)
@@ -3416,16 +3408,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(key#10 G)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_key_signature() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_key_signature() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKeyError)
@@ -3438,16 +3430,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(key Sol)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_LocationX)
@@ -3457,8 +3449,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(key d (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_d );
         CHECK( pKeySignature->get_staff() == 0 );
@@ -3467,7 +3459,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pKeySignature->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Key_NoVisible)
@@ -3477,8 +3469,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(key E- noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_Ef );
         CHECK( pKeySignature->get_user_location_x() == 0.0f );
@@ -3487,7 +3479,7 @@ SUITE(LdpAnalyserTest)
 
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ lyric ---------------------------------------------------------------------------
@@ -3504,12 +3496,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric \"te\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_number() == 1 );
         CHECK( pImo->get_placement() == k_placement_below );
@@ -3536,7 +3528,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_02)
@@ -3551,17 +3543,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric#37 \"te\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_id() == 37L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_03)
@@ -3576,12 +3568,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric \"De\" \"A\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_number() == 1 );
         CHECK( pImo->get_placement() == k_placement_below );
@@ -3614,7 +3606,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl->get_elision_text() == "" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_04)
@@ -3629,14 +3621,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric (melisma))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_05)
@@ -3651,12 +3643,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric \"De\" -)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_number() == 1 );
         CHECK( pImo->get_placement() == k_placement_below );
@@ -3682,7 +3674,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_06)
@@ -3697,12 +3689,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric \"De\" hyphen)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_number() == 1 );
         CHECK( pImo->get_placement() == k_placement_below );
@@ -3728,7 +3720,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_07)
@@ -3743,12 +3735,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lyric \"De\" (melisma))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pIModel->get_root() );
+        CHECK( pRoot->is_lyric() == true );
+        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
         CHECK( pImo->get_number() == 1 );
         CHECK( pImo->get_placement() == k_placement_below );
@@ -3774,7 +3766,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_08)
@@ -3791,11 +3783,11 @@ SUITE(LdpAnalyserTest)
             ")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3811,7 +3803,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_next_lyric() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_09)
@@ -3830,11 +3822,11 @@ SUITE(LdpAnalyserTest)
             ")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3877,7 +3869,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLyric3->get_next_lyric() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, LdpAnalyser_lyric_10)
@@ -3896,11 +3888,11 @@ SUITE(LdpAnalyserTest)
             ")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3959,7 +3951,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLyric32->get_next_lyric() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ metronome -----------------------------------------------------------------------
@@ -3977,12 +3969,12 @@ SUITE(LdpAnalyserTest)
                 "(musicData (metronome q 55) )))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << test_name() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3993,7 +3985,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImo->get_mark_type() == ImoMetronomeMark::k_note_value );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ time signature -------------------------------------------------------------------
@@ -4008,19 +4000,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time 6 8)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_time_signature)
@@ -4033,16 +4025,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time#10 2 4)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_time_signature() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_Error)
@@ -4055,18 +4047,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time 2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_LocationX)
@@ -4076,8 +4068,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time 3 4 (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 3 );
@@ -4087,7 +4079,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTimeSignature->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_NoVisible)
@@ -4097,8 +4089,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time 6 8 noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 6 );
@@ -4108,7 +4100,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTimeSignature->is_visible() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_common)
@@ -4121,19 +4113,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time common)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_common() );
         CHECK( pTimeSignature->get_top_number() == 4 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_cut)
@@ -4146,19 +4138,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time cut)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_cut() );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_type_error)
@@ -4173,19 +4165,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time novalid)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
         CHECK( pTimeSignature->is_normal() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, timeSignature_10)
@@ -4199,18 +4191,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(time single-number 10)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
+        CHECK( pRoot->is_time_signature() == true );
+        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_single_number() );
         CHECK( pTimeSignature->get_top_number() == 10 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // systemInfo -----------------------------------------------------------------------
@@ -4225,12 +4217,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(systemLayout third (systemMargins 0 0 0 2000))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_system_info() == true );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_system_info() == true );
+        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4239,7 +4231,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 2000.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserSystemInfoMissingMargins)
@@ -4252,11 +4244,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(systemLayout other)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pIModel->get_root() );
+        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( !pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4265,7 +4257,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserSystemMargins)
@@ -4278,12 +4270,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_system_info() == true );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_system_info() == true );
+        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( !pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4292,7 +4284,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 2000.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserSystemInfoOk)
@@ -4305,16 +4297,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSystemInfo* pSL = dynamic_cast<ImoSystemInfo*>( pIModel->get_root() );
+        ImoSystemInfo* pSL = dynamic_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSL != nullptr );
         CHECK( !pSL->is_first() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // text -----------------------------------------------------------------------------
@@ -4329,17 +4321,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(text \"This is a text\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score_text() == true );
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
+        CHECK( pRoot->is_score_text() == true );
+        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_text)
@@ -4352,16 +4344,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(text#10 \"This is a text\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score_text() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_score_text() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserTextMissingText)
@@ -4374,15 +4366,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(text)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
+        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
         CHECK( pText == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Text_AlignStyle)
@@ -4395,20 +4387,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(text \"Moonlight sonata\" (style \"Header1\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
+        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "Moonlight sonata" );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Text_Location)
@@ -4421,13 +4413,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(text \"F. Chopin\" (style \"Composer\")(dy 30)(dx 20))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
+        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "F. Chopin" );
         CHECK( pText->get_user_location_x() == 20.0f );
@@ -4436,7 +4428,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // metronome ------------------------------------------------------------------------
@@ -4451,12 +4443,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_metronome_mark() == true );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        CHECK( pRoot->is_metronome_mark() == true );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4464,7 +4456,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_metronome)
@@ -4477,16 +4469,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome#10 88)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_metronome_mark() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_metronome_mark() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error)
@@ -4499,11 +4491,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 60 );
@@ -4511,7 +4503,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteValue)
@@ -4524,11 +4516,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome e. 77)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
         CHECK( pMM->get_ticks_per_minute() == 77 );
@@ -4538,7 +4530,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteNote)
@@ -4551,11 +4543,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome e. s)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
         CHECK( pMM->get_left_note_type() == k_eighth );
@@ -4566,7 +4558,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error2)
@@ -4579,11 +4571,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome e. \"s\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 60 );
@@ -4591,7 +4583,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_LocationX)
@@ -4601,8 +4593,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88 (dx 70))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4613,7 +4605,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoVisible)
@@ -4623,8 +4615,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88 noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4634,7 +4626,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Parenthesis)
@@ -4644,8 +4636,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88 parenthesis (visible no))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4655,7 +4647,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Ordering)
@@ -4668,11 +4660,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88 parenthesis (dx 7) noVisible)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4682,7 +4674,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error3)
@@ -4695,11 +4687,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(metronome 88 parentesis (dx 7))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         CHECK( pMM != nullptr );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -4709,7 +4701,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // opt ------------------------------------------------------------------------------
@@ -4724,19 +4716,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt StaffLines.Hide true)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_option() == true );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
+        CHECK( pRoot->is_option() == true );
+        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_BoolErrorValue)
@@ -4749,13 +4741,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt StaffLines.Hide perhaps)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_ErrorName)
@@ -4768,13 +4760,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt StaffLines.Funny funny thing)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_LongOk)
@@ -4787,18 +4779,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt StaffLines.Truncate 2)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
+        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Truncate" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
         CHECK( pOpt->get_long_value() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_LongErrorValue)
@@ -4811,13 +4803,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt Render.SpacingValue perhaps)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_FloatOk)
@@ -4830,18 +4822,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt Render.SpacingFactor 0.536)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pIModel->get_root() );
+        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "Render.SpacingFactor" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
         CHECK( pOpt->get_float_value() == 0.536f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_FloatErrorValue)
@@ -4854,13 +4846,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt Render.SpacingFactor perhaps)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_ErrorMissingValue)
@@ -4873,13 +4865,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt Render.SpacingFactor)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Opt_AddedToScore)
@@ -4892,11 +4884,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(opt StaffLines.Hide true)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("StaffLines.Hide");
@@ -4906,7 +4898,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt->get_bool_value() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_DefaultOptReplaced)
@@ -4922,11 +4914,11 @@ SUITE(LdpAnalyserTest)
         );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingMethod");
@@ -4941,7 +4933,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt->get_float_value() == 30.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_LastDefaultOptReplaced)
@@ -4956,11 +4948,11 @@ SUITE(LdpAnalyserTest)
         );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
@@ -4970,7 +4962,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt->get_float_value() == 4.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -4986,18 +4978,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 q instrument)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_DeleteNode)
@@ -5010,11 +5002,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(opt StaffLines.Funny true)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // spacer ---------------------------------------------------------------------------
@@ -5029,18 +5021,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70.5)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_spacer() == true );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        CHECK( pRoot->is_spacer() == true );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_spacer)
@@ -5053,16 +5045,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer#10 88)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_spacer() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_spacer() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_MissingWidth)
@@ -5075,13 +5067,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_Staff)
@@ -5094,17 +5086,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70.5 p3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_ErrorStaff)
@@ -5117,17 +5109,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70.5 pan)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_ErrorMoreParams)
@@ -5140,17 +5132,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70.5 more)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_Attachment)
@@ -5163,18 +5155,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70 (text \"andante\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
         CHECK( pSp->has_attachments() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_ErrorAttachment)
@@ -5187,18 +5179,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70 (r q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
         CHECK( pSp->has_attachments() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_ErrorAttachment2)
@@ -5211,18 +5203,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(spacer 70 (r q)(text \"andante\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pIModel->get_root() );
+        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
         CHECK( pSp->has_attachments() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // lenmusdoc ------------------------------------------------------------------------
@@ -5237,18 +5229,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_lenmusdoc)
@@ -5261,16 +5253,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc#10 (vers 0.0)(content ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_document() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_language)
@@ -5283,17 +5275,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(language \"zh_CN\")(content ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         //cout << "language='" << pDoc->get_language() << "'" << endl;
         CHECK( pDoc->get_language() == "zh_CN" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_HasContent)
@@ -5306,16 +5298,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content (text \"hello world\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_GetContentItemText)
@@ -5325,14 +5317,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content (text \"hello world\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "hello world" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_GetContentItemScore)
@@ -5342,8 +5334,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content (score (vers 1.6)(instrument (musicData))) (text \"hello world\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 2 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -5353,7 +5345,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "hello world" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score)
@@ -5366,16 +5358,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc#11 (vers 0.0)(content (score#10 (vers 1.6)(instrument (musicData))) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoObj* pImo = pDoc->get_content_item(0);
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_content)
@@ -5388,16 +5380,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content#60 (score#9 (vers 1.6)(instrument (musicData))) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoObj* pImo = pDoc->get_content();
         CHECK( pImo->get_id() == 60L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, lenmusdoc_10)
@@ -5411,17 +5403,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (musicData))) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoStyle* pStyle = pDoc->find_style("Heading-1");
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Heading-1" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // TiesBuilder ----------------------------------------------------------------------
@@ -5583,13 +5575,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(instrument (musicData (n c4 q (tie 12 start))))(instrument (musicData (n d4 e (tie 12 stop)))))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -5615,7 +5607,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_tied_prev() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ beam ----------------------------------------------------------------------------
@@ -5630,9 +5622,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(beam 12 +)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_beam_dto() == true );
-        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_beam_dto() == true );
+        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_beam_number() == 12 );
         CHECK( pInfo->get_beam_type(0) == ImoBeam::k_begin );
@@ -5642,7 +5634,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Beam_TreeLevels)
@@ -5655,8 +5647,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(beam 12 ++f)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_beam_number() == 12 );
         CHECK( pInfo->get_beam_type(0) == ImoBeam::k_begin );
@@ -5670,7 +5662,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Beam_ErrorNum)
@@ -5683,14 +5675,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(beam +)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() == nullptr );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot == nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Beam_ErrorType)
@@ -5703,14 +5695,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(beam 34 empieza)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() == nullptr );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot == nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamsBuilder_Destructor)
@@ -5723,9 +5715,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (beam 14 +))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5735,7 +5727,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamsBuilder_BeamError)
@@ -5749,9 +5741,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 13 -)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5771,7 +5763,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamsBuilder_BeamOk)
@@ -5784,9 +5776,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 14 -b)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5810,7 +5802,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamsBuilder_InstrumentChangeError)
@@ -5823,12 +5815,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6) (instrument (musicData (n c4 q. (beam 14 +)))) (instrument (musicData (n c4 e))))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -5841,7 +5833,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, beam_10)
@@ -5857,9 +5849,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5883,7 +5875,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, beam_11)
@@ -5902,9 +5894,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -5929,7 +5921,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), k_duration_whole) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ beam (old syntax) ---------------------------------------------------------------
@@ -5944,19 +5936,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e g+7)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamOld_ErrorInvalidNote)
@@ -5969,11 +5961,11 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 w g+)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == 0 );
@@ -5981,7 +5973,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_beamed() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamOld_ErrorAlreadyOpen)
@@ -5994,16 +5986,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 s g+) (n e4 e g+))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamOld_SES)
@@ -6016,14 +6008,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 s g+)(n e4 e)(n c4 s g-))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -6060,7 +6052,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3->get_beam_type(5) == ImoBeam::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ AutoBeamer ----------------------------------------------------------------------
@@ -6154,15 +6146,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 5 start 3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_ActualNotes)
@@ -6175,13 +6167,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_tuplet_dto() == true );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pRoot->is_tuplet_dto() == true );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6189,7 +6181,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_ErrorNormalNumRequired)
@@ -6202,15 +6194,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 4 + 7)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletNormalNotes)
@@ -6223,12 +6215,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 2 + 7 4)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 7 );
@@ -6237,7 +6229,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_NoBracket)
@@ -6250,12 +6242,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 2 + 3 2 (displayBracket no))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6264,7 +6256,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_DisplayNormalNum)
@@ -6277,12 +6269,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 1 + 3 2 (displayNumber none))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6291,7 +6283,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_number() == ImoTuplet::k_number_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Tuplet_ErrorLabelParameter)
@@ -6304,12 +6296,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t 1 + 3 2 (displayBracket false))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6317,7 +6309,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_1)
@@ -6335,9 +6327,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6365,7 +6357,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), 21.3333) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_2)
@@ -6383,9 +6375,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6413,7 +6405,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_3)
@@ -6440,9 +6432,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text(src);
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6474,7 +6466,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTuplet2->get_normal_number() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ tuplet old full syntax ----------------------------------------------------------
@@ -6489,15 +6481,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t start 3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ActualNotes)
@@ -6510,13 +6502,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_tuplet_dto() == true );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pRoot->is_tuplet_dto() == true );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6524,7 +6516,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ErrorNormalNumRequired)
@@ -6537,15 +6529,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 7)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_NormalNotes)
@@ -6558,12 +6550,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 7 4)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 7 );
@@ -6571,7 +6563,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_NoBracket)
@@ -6584,12 +6576,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 3 noBracket)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6597,7 +6589,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ErrorLabelParameter)
@@ -6610,12 +6602,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 3 noBracket blue)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6623,7 +6615,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ErrorCompoundParameter)
@@ -6636,12 +6628,12 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(t + 3 (color blue) noBracket)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
@@ -6649,7 +6641,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletsBuilder_Destructor)
@@ -6662,9 +6654,9 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (t + 3))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -6672,7 +6664,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->find_attachment(k_imo_tuplet) == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletsBuilder_TupletOk)
@@ -6686,14 +6678,14 @@ SUITE(LdpAnalyserTest)
             "(n c4 e (t + 3)) (n e4 e) (n d4 e (t -)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6734,7 +6726,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3->find_relation(k_imo_tuplet) == pTuplet );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletsBuilder_InstrumentChangeError)
@@ -6748,12 +6740,12 @@ SUITE(LdpAnalyserTest)
             "(musicData (n c4 e (t + 3)))) (instrument (musicData (n c4 e))))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6765,7 +6757,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_first_tuplet() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -6781,18 +6773,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e t-7)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == 0 );
         CHECK( pNote->get_first_tuplet() == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ok)
@@ -6805,13 +6797,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e t3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ok2)
@@ -6824,14 +6816,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e t7/6)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete pA;
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_ErrorAlreadyOpen)
@@ -6844,13 +6836,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 s t3) (n d4 e) (n e4 e t3))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6859,7 +6851,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTuplet == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TupletOld_TupletOk)
@@ -6872,13 +6864,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 e t3) (n e4 e) (n d4 e t-))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6912,7 +6904,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3 == pNt3 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -6929,15 +6921,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tm 5)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, timeModification_1)
@@ -6950,20 +6942,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(tm 2 3)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_time_modification_dto() == true );
+        CHECK( pRoot->is_time_modification_dto() == true );
         ImoTimeModificationDto* pInfo =
-                dynamic_cast<ImoTimeModificationDto*>( pIModel->get_root() );
+                dynamic_cast<ImoTimeModificationDto*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_top_number() == 2 );
         CHECK( pInfo->get_bottom_number() == 3 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ voice (element) -----------------------------------------------------------------
@@ -6978,8 +6970,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (voice 7))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_voice() == 7 );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -6987,7 +6979,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_Voice_Error)
@@ -7000,8 +6992,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (voice no))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_voice() == 1 );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -7009,7 +7001,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ staffNum (element) --------------------------------------------------------------
@@ -7024,8 +7016,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (staffNum 2))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_staff() == 1 );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -7033,7 +7025,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note_StaffNum_Error)
@@ -7046,8 +7038,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (staffNum alpha))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->get_staff() == 0 );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -7055,7 +7047,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //@ rest (full) ---------------------------------------------------------------------
@@ -7071,13 +7063,13 @@ SUITE(LdpAnalyserTest)
             "(r e (t + 3)(voice 3)(staffNum 2)) (r e (text \"Hello\")) (r e (t -)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoRest* pRest = dynamic_cast<ImoRest*>( *it );
@@ -7117,7 +7109,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest3->get_staff() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // color ----------------------------------------------------------------------------
@@ -7176,14 +7168,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(color 321700)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() == nullptr );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot == nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Color_Ok)
@@ -7196,8 +7188,8 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(color #f0457f)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pRoot );
         CHECK( pColor != nullptr );
         CHECK( pColor->red() == 240 );
         CHECK( pColor->green() == 69 );
@@ -7208,7 +7200,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Color_SetInParent)
@@ -7221,13 +7213,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(n c4 e (color #f0457f))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         Color& color = pNote->get_color();
         CHECK( color.r == 240 );
@@ -7236,7 +7228,7 @@ SUITE(LdpAnalyserTest)
         CHECK( color.a == 255 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_Color)
@@ -7246,15 +7238,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline double (color #ff0000))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_double );
         CHECK( pBarline->is_visible() );
         CHECK( is_equal(pBarline->get_color(), Color(255,0,0)) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_barline)
@@ -7267,16 +7259,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(barline#10)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_barline() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_barline() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -7294,18 +7286,18 @@ SUITE(LdpAnalyserTest)
             "(parts (instrIds P1))(instrument (musicData)) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_02)
@@ -7321,19 +7313,19 @@ SUITE(LdpAnalyserTest)
             "(parts (instrIds P1))(instrument P1 (musicData)) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_03)
@@ -7350,19 +7342,19 @@ SUITE(LdpAnalyserTest)
             "(parts (instrIds P1))(instrument P2 (musicData)) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_04)
@@ -7379,19 +7371,19 @@ SUITE(LdpAnalyserTest)
             "(parts (instrIds P1 P1))(instrument P1 (musicData)) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_05)
@@ -7407,18 +7399,18 @@ SUITE(LdpAnalyserTest)
             "(parts)(instrument (musicData)) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_06)
@@ -7437,14 +7429,14 @@ SUITE(LdpAnalyserTest)
             ")" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7457,7 +7449,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_07)
@@ -7476,14 +7468,14 @@ SUITE(LdpAnalyserTest)
             ")" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7496,7 +7488,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_08)
@@ -7516,14 +7508,14 @@ SUITE(LdpAnalyserTest)
             ")" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7541,7 +7533,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_barline_layout() == ImoInstrument::k_nothing );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, parts_09)
@@ -7562,14 +7554,14 @@ SUITE(LdpAnalyserTest)
             ")" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->get_num_instruments() == 3 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7591,7 +7583,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_barline_layout() == ImoInstrument::k_isolated );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // group ----------------------------------------------------------------------------
@@ -7610,14 +7602,14 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        CHECK( pIModel->get_root()->is_instr_group() == true );
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        CHECK( pRoot->is_instr_group() == true );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
@@ -7631,7 +7623,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoName)
@@ -7648,13 +7640,13 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
@@ -7668,7 +7660,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoAbbrev)
@@ -7685,13 +7677,13 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7705,7 +7697,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoNameAbbrev)
@@ -7721,13 +7713,13 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7741,7 +7733,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorSymbol)
@@ -7757,16 +7749,16 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        CHECK( pIModel->get_root() == nullptr );
+//        CHECK( pRoot == nullptr );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorJoin)
@@ -7783,13 +7775,13 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7803,7 +7795,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorMissingInstruments)
@@ -7816,15 +7808,15 @@ SUITE(LdpAnalyserTest)
 //        parser.parse_text("(group (symbol brace)(joinBarlines yes))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pIModel->get_root() == nullptr );
+//        CHECK( pRoot == nullptr );
 //
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorInInstrument)
@@ -7840,13 +7832,13 @@ SUITE(LdpAnalyserTest)
 //                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
+//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7859,7 +7851,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(0);
 //        delete pGrp->get_instrument(1);
 //        delete tree->get_root();
-//        delete pIModel;
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 
     // chord ----------------------------------------------------------------------------
@@ -7874,13 +7866,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (chord (n c4 q)(n e4 q)(n g4 q)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -7907,7 +7899,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_NoteInChord_Ok)
@@ -7920,13 +7912,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(musicData (n c4 q)(na e4 q)(na g4 q))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -7953,7 +7945,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Chord_Beamed)
@@ -7968,13 +7960,13 @@ SUITE(LdpAnalyserTest)
             "(chord (n a3 e (beam 1 -))(n d3 e)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -8012,7 +8004,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->is_beamed() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // pageLayout -----------------------------------------------------------------------
@@ -8027,13 +8019,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoPageInfo* pInfo = dynamic_cast<ImoPageInfo*>( pIModel->get_root() );
+        ImoPageInfo* pInfo = dynamic_cast<ImoPageInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->is_page_info() == true );
         CHECK( pInfo->get_left_margin() == 1000.0f );
@@ -8046,7 +8038,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->is_portrait() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_PageLayout_AddedToScore)
@@ -8059,13 +8051,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         ImoPageInfo* pInfo = pScore->get_page_info();
         CHECK( pInfo != nullptr );
@@ -8080,7 +8072,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->is_portrait() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_PageLayout_AddedToDocument)
@@ -8093,13 +8085,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(lenmusdoc (vers 0.0)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(content))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         ImoPageInfo* pInfo = pDoc->get_page_info();
         CHECK( pInfo != nullptr );
@@ -8114,7 +8106,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->is_portrait() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // font -----------------------------------------------------------------------------
@@ -8129,13 +8121,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(font \"Trebuchet\" 12pt bold)" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pIModel->get_root() );
+        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8143,7 +8135,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 12 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Font_StyleError)
@@ -8156,13 +8148,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(font \"Trebuchet\" 8pt grey)" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pIModel->get_root() );
+        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8170,7 +8162,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 8 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Font_SizeError)
@@ -8183,13 +8175,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(font \"Trebuchet\" six bold)" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pIModel->get_root() );
+        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8197,7 +8189,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 12 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Font_SizeNew)
@@ -8210,13 +8202,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(font \"Trebuchet\" 17 normal)" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pIModel->get_root() );
+        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8224,7 +8216,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 17 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // defineStyle ----------------------------------------------------------------------
@@ -8240,13 +8232,13 @@ SUITE(LdpAnalyserTest)
             "(font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
@@ -8256,7 +8248,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_DefineStyle_StyleAdded)
@@ -8269,13 +8261,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(defineStyle \"Header1\" (font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f))(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         ImoStyle* pStyle = pScore->find_style("Header1");
         CHECK( pStyle != nullptr );
@@ -8287,7 +8279,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_MarginBottom)
@@ -8301,20 +8293,20 @@ SUITE(LdpAnalyserTest)
             "(color #00fe0f7f)(margin-bottom 2) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
         CHECK( pStyle->margin_bottom() == 2.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_FontProperties)
@@ -8329,13 +8321,13 @@ SUITE(LdpAnalyserTest)
             "(font-style italic)(font-weight bold) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->font_name() == "Arial" );
@@ -8344,7 +8336,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_FontFile)
@@ -8360,13 +8352,13 @@ SUITE(LdpAnalyserTest)
             "(font-style italic)(font-weight bold) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->font_file() == "wqy-zenhei.ttc" );
@@ -8376,7 +8368,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_MarginProperties)
@@ -8390,13 +8382,13 @@ SUITE(LdpAnalyserTest)
             "(margin-top 3)(margin-bottom 2)(margin-left 5)(margin-right 7) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->margin_top() == 3.0f );
@@ -8405,7 +8397,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->margin_right() == 7.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_Margin)
@@ -8419,13 +8411,13 @@ SUITE(LdpAnalyserTest)
             "(margin 0.5) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->margin_top() == 0.5f );
@@ -8434,7 +8426,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->margin_right() == 0.5f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_LineHeight)
@@ -8448,19 +8440,19 @@ SUITE(LdpAnalyserTest)
             "(line-height 1.2) )" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Composer" );
         CHECK( pStyle->line_height() == 1.2f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -8476,14 +8468,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_MissingString)
@@ -8496,14 +8488,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title center)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_Ok)
@@ -8516,19 +8508,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title center \"Moonlight sonata\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pIModel->get_root() );
+        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_title)
@@ -8541,16 +8533,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title#10 center \"Moonlight sonata\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score_title() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_score_title() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_AddedToScore)
@@ -8563,13 +8555,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(title center \"Moonlight sonata\")(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         std::list<ImoScoreTitle*>& titles = pScore->get_titles();
         std::list<ImoScoreTitle*>::iterator it = titles.begin();
@@ -8580,7 +8572,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTitle->get_h_align() == k_halign_center );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_Style)
@@ -8593,13 +8585,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title center \"Moonlight sonata\" (style \"Header1\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pIModel->get_root() );
+        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
@@ -8607,7 +8599,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_StyleAdded)
@@ -8623,13 +8615,13 @@ SUITE(LdpAnalyserTest)
             "(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         std::list<ImoScoreTitle*>& titles = pScore->get_titles();
         std::list<ImoScoreTitle*>::iterator it = titles.begin();
@@ -8648,7 +8640,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_Location)
@@ -8661,13 +8653,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(title right \"F. Chopin\" (style \"Composer\")(dy 30))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pIModel->get_root() );
+        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "F. Chopin" );
         CHECK( pTitle->get_h_align() == k_halign_right );
@@ -8677,7 +8669,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // line -----------------------------------------------------------------------------
@@ -8694,13 +8686,13 @@ SUITE(LdpAnalyserTest)
             "(lineCapStart arrowhead)(lineCapEnd none))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8713,7 +8705,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Line_OnlyMandatory)
@@ -8726,13 +8718,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8745,7 +8737,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 1.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_line)
@@ -8758,16 +8750,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(line#10 (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score_line() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_score_line() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Line_NoColor)
@@ -8780,13 +8772,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd diamond))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8799,7 +8791,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Line_ErrorCap)
@@ -8812,13 +8804,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle dot)(lineCapStart arrowhead)(lineCapEnd diamont))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8831,7 +8823,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Line_ErrorLineStyle)
@@ -8844,13 +8836,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle simple))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8863,7 +8855,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // textBox --------------------------------------------------------------------------
@@ -8881,13 +8873,13 @@ SUITE(LdpAnalyserTest)
             "(text \"This is a test of a textbox\" (style \"Textbox\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pIModel->get_root() );
+        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pRoot );
         CHECK( pTB != nullptr );
         CHECK( pTB->get_text() == "This is a test of a textbox" );
         CHECK( pTB->has_anchor_line() == false );
@@ -8903,7 +8895,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_border_style() == k_line_solid );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_text_box)
@@ -8918,16 +8910,16 @@ SUITE(LdpAnalyserTest)
             "(text \"This is a test of a textbox\" (style \"Textbox\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_box() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_text_box() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TextBox_Full)
@@ -8947,13 +8939,13 @@ SUITE(LdpAnalyserTest)
                         "(lineCapEnd arrowhead)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pIModel->get_root() );
+        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pRoot );
         CHECK( pTB != nullptr );
         CHECK( pTB->get_text() == "This is a test of a textbox" );
 
@@ -8983,7 +8975,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_width() == 3.5f );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TextBox_AddedToNote)
@@ -8998,13 +8990,13 @@ SUITE(LdpAnalyserTest)
             "(text \"This is a test of a textbox\" (style \"Textbox\"))))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote->has_attachments() == true );
         ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pNote->get_attachment(0) );
@@ -9025,7 +9017,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTB->has_anchor_line() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // cursor ---------------------------------------------------------------------------
@@ -9040,13 +9032,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(cursor 1 2 64.0 34)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoCursorInfo* pInfo = dynamic_cast<ImoCursorInfo*>( pIModel->get_root() );
+        ImoCursorInfo* pInfo = dynamic_cast<ImoCursorInfo*>( pRoot );
         CHECK( pInfo->is_cursor_info() == true );
         CHECK( pInfo->get_instrument() == 1 );
         CHECK( pInfo->get_staff() == 2 );
@@ -9054,7 +9046,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_id() == 34L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Cursor_AddedToScore)
@@ -9067,13 +9059,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(score (vers 1.6)(cursor 1 2 64.0 34)(instrument (musicData)))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore->is_score() == true );
         //CHECK( pScore->get_instrument() == 1 );
         //CHECK( pScore->get_staff() == 2 );
@@ -9081,7 +9073,7 @@ SUITE(LdpAnalyserTest)
         //CHECK( pScore->get_id() == 34L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Cursor_AddedToDocument)
@@ -9093,13 +9085,13 @@ SUITE(LdpAnalyserTest)
     //    parser.parse_text("(lenmusdoc (vers 0.0)"
     //        "(settings (cursor 1 2 64.0 34)) (content))");
     //    LdpAnalyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
+    //    ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
 
-    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
     //    CHECK( pDoc->is_document() == true );
     //    //CHECK( pScore->get_instrument() == 1 );
     //    //CHECK( pScore->get_staff() == 2 );
@@ -9107,7 +9099,7 @@ SUITE(LdpAnalyserTest)
     //    //CHECK( pScore->get_id() == 34L );
 
     //    delete tree->get_root();
-    //    delete pIModel;
+    //    if (pRoot && !pRoot->is_document()) delete pRoot;
     //}
 
     // figuredBass ----------------------------------------------------------------------
@@ -9122,19 +9114,19 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(figuredBass \"7 5 2\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFiguredBass* pFB = dynamic_cast<ImoFiguredBass*>( pIModel->get_root() );
+        ImoFiguredBass* pFB = dynamic_cast<ImoFiguredBass*>( pRoot );
         CHECK( pFB->is_figured_bass() == true );
         //cout << "FB ='" << pFB->get_figured_bass_string() << "'" << endl;
         CHECK( pFB->get_figured_bass_string() == "7 5 2" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // staff ----------------------------------------------------------------------------
@@ -9149,13 +9141,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(staff (staffType ossia))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() == nullptr );
-        //ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        CHECK( pRoot == nullptr );
+        //ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
         //CHECK( pMM != nullptr );
         //CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
         //CHECK( pMM->get_ticks_per_minute() == 88 );
@@ -9163,7 +9155,7 @@ SUITE(LdpAnalyserTest)
         //CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_InvalidType)
@@ -9176,13 +9168,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(staff 2 (staffType bonito))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_staff_number() == 1 );
         CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
@@ -9193,7 +9185,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_InvalidLines)
@@ -9206,13 +9198,13 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(staff 2 (staffType ossia)(staffLines 0))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_staff_number() == 1 );
         CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
@@ -9223,7 +9215,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_InvalidLinesSpacing)
@@ -9237,13 +9229,13 @@ SUITE(LdpAnalyserTest)
             "(staffSpacing five) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_staff_number() == 1 );
         CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
@@ -9254,7 +9246,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_LinesSpacing)
@@ -9268,13 +9260,13 @@ SUITE(LdpAnalyserTest)
             "(staffSpacing 200.0) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_staff_number() == 1 );
         CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
@@ -9285,7 +9277,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_Ok)
@@ -9299,13 +9291,13 @@ SUITE(LdpAnalyserTest)
             "(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_staff_number() == 1 );
         CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
@@ -9316,7 +9308,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 4 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Staff_AddedToInstrument)
@@ -9331,13 +9323,13 @@ SUITE(LdpAnalyserTest)
             "(musicData))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root() != nullptr );
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        CHECK( pRoot != nullptr );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         ImoStaffInfo* pInfo = pInstr->get_staff(1);
         CHECK( pInfo != nullptr );
@@ -9350,7 +9342,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_num_lines() == 4 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // textItem -------------------------------------------------------------------------
@@ -9365,17 +9357,17 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(txt \"This is a text\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_text_item)
@@ -9388,16 +9380,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(txt#10 \"This is a text\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_text_item() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_text_item() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_MissingText)
@@ -9408,15 +9400,15 @@ SUITE(LdpAnalyserTest)
     //    expected << "Line 0. text: missing mandatory element 'string'." << endl;
     //    parser.parse_text("(text)");
     //    LdpAnalyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
+    //    ImoObj* pRoot = a.analyse_tree(tree, "string:");
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
-    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
     //    CHECK( pText == nullptr );
 
     //    delete tree->get_root();
-    //    delete pIModel;
+    //    if (pRoot && !pRoot->is_document()) delete pRoot;
     //}
 
     TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_Style)
@@ -9429,44 +9421,37 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(txt (style \"Header1\") \"This is a text\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "This is a text" );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
-        //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+
+        ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
         CHECK( pItem->get_style() != nullptr );
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_Location)
@@ -9477,13 +9462,13 @@ SUITE(LdpAnalyserTest)
     //    //expected << "Line 0. " << endl;
     //    parser.parse_text("(text \"F. Chopin\" (style \"Composer\")(dy 30)(dx 20))");
     //    LdpAnalyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
+    //    ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
 
-    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
     //    CHECK( pText != nullptr );
     //    CHECK( pText->get_text() == "F. Chopin" );
     //    CHECK( pText->get_user_location_x() == 20.0f );
@@ -9492,7 +9477,7 @@ SUITE(LdpAnalyserTest)
     //    CHECK( pStyle == nullptr );
 
     //    delete tree->get_root();
-    //    delete pIModel;
+    //    if (pRoot && !pRoot->is_document()) delete pRoot;
     //}
 
     // para -----------------------------------------------------------------------------
@@ -9507,15 +9492,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(para (txt \"This is a paragraph\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_paragraph() == true );
+        CHECK( pRoot->is_paragraph() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_paragraph)
@@ -9528,16 +9513,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(para#10 (txt \"This is a paragraph\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_paragraph() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_paragraph() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_TextItemAdded)
@@ -9550,18 +9535,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(para (txt \"This is a paragraph\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "This is a paragraph" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_LinkItemAdded)
@@ -9575,12 +9560,12 @@ SUITE(LdpAnalyserTest)
             "(para (link (url \"This is the url\")(txt \"This is the link\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pPara->get_first_item() );
         CHECK( pLink != nullptr );
@@ -9590,7 +9575,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "This is the link" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_ManyItems)
@@ -9604,12 +9589,12 @@ SUITE(LdpAnalyserTest)
             "(txt \" with two items.\") )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pPara->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
@@ -9619,7 +9604,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == " with two items." );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_RecognizedAsContent)
@@ -9630,8 +9615,8 @@ SUITE(LdpAnalyserTest)
             "(para (txt \"Hello world!\")) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
@@ -9639,7 +9624,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_Style)
@@ -9658,8 +9643,8 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
@@ -9669,27 +9654,22 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
@@ -9697,9 +9677,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     // heading --------------------------------------------------------------------------
@@ -9714,15 +9691,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(heading 1 (txt \"This is a header\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_heading() == true );
+        CHECK( pRoot->is_heading() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_heading)
@@ -9735,16 +9712,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(heading#10 1 (txt \"This is a header\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_heading() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_heading() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_TextItemAdded)
@@ -9757,18 +9734,18 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(heading 1 (txt \"This is a header\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "This is a header" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_ManyItems)
@@ -9782,12 +9759,12 @@ SUITE(LdpAnalyserTest)
             "(txt \" with two items.\") )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoHeading* pH = dynamic_cast<ImoHeading*>( pIModel->get_root() );
+        ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pH->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
@@ -9797,7 +9774,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == " with two items." );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_RecognizedAsContent)
@@ -9808,8 +9785,8 @@ SUITE(LdpAnalyserTest)
             "(heading 1 (txt \"Hello world!\")) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         CHECK( pH->get_num_items() == 1 );
@@ -9817,7 +9794,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_Style)
@@ -9836,8 +9813,8 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
@@ -9847,27 +9824,22 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(heading 1 (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
@@ -9875,9 +9847,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     // styles ---------------------------------------------------------------------------
@@ -9893,13 +9862,13 @@ SUITE(LdpAnalyserTest)
             "(font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f)) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pIModel->get_root() );
+        ImoStyles* pStyles = dynamic_cast<ImoStyles*>( pRoot );
         CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
@@ -9911,7 +9880,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Styles_AddedToDocument)
@@ -9927,13 +9896,13 @@ SUITE(LdpAnalyserTest)
             "(content (text \"hello world\")) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "hello world" );
@@ -9948,7 +9917,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Styles_Default)
@@ -9962,13 +9931,13 @@ SUITE(LdpAnalyserTest)
             "(content (text \"hello world\")) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
         CHECK( pText->get_text() == "hello world" );
@@ -9978,7 +9947,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle->get_name() == "Default style" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // param ----------------------------------------------------------------------------
@@ -9990,15 +9959,15 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(param green \"this is green\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root()->is_param_info() == true );
-        ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        CHECK( pRoot->is_param_info() == true );
+        ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pRoot );
         CHECK( pParam != nullptr );
         CHECK( pParam->get_name() == "green" );
         CHECK( pParam->get_value() == "this is green" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, ParamInfo_MissingName)
@@ -10011,16 +9980,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(param \"green\" \"this is green\")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // dynamic --------------------------------------------------------------------------
@@ -10035,20 +10004,20 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dynamic (classid test))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_dynamic() == true );
-        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pIModel->get_root() );
+        CHECK( pRoot->is_dynamic() == true );
+        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn != nullptr );
         CHECK( pDyn->get_classid() == "test" );
         CHECK( pDyn->is_visible() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_dynamic)
@@ -10061,16 +10030,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(dynamic#10 (classid test))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_dynamic() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_dynamic() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_AddedToContent)
@@ -10081,13 +10050,13 @@ SUITE(LdpAnalyserTest)
             "(dynamic (classid test)) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pDoc->get_content_item(0) );
         CHECK( pDyn != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_GeneratesRequest)
@@ -10096,20 +10065,11 @@ SUITE(LdpAnalyserTest)
         pDoorway->set_request_callback(this, wrapper_lomse_request);
 
         Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(lenmusdoc (vers 0.0)(content "
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(dynamic (classid test)) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
 
         CHECK( m_fRequestReceived == true );
         CHECK( m_requestType == k_dynamic_content_request );
-        CHECK( m_pDoc == pDoc );
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_WithParams)
@@ -10123,13 +10083,13 @@ SUITE(LdpAnalyserTest)
             "(param play \"all notes\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pIModel->get_root() );
+        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRoot );
         CHECK( pDyn->get_classid() == "test" );
         std::list<ImoParamInfo*>& params = pDyn->get_params();
         CHECK( params.size() == 1 );
@@ -10138,7 +10098,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pParm->get_value() == "all notes" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // link -----------------------------------------------------------------------------
@@ -10154,14 +10114,14 @@ SUITE(LdpAnalyserTest)
             "(link (url \"#TheoryHarmony_ch3.lms\")(txt \"Harmony exercise\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
+        CHECK( pRoot->is_link() == true );
+        ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "#TheoryHarmony_ch3.lms" );
         CHECK( pLink->get_num_items() == 1 );
@@ -10169,7 +10129,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Harmony exercise" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_link)
@@ -10183,16 +10143,16 @@ SUITE(LdpAnalyserTest)
             "(link#10 (url \"#TheoryHarmony_ch3.lms\")(txt \"Harmony exercise\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_link() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Link_MissingUrl)
@@ -10206,14 +10166,14 @@ SUITE(LdpAnalyserTest)
             "(link (txt \"Harmony exercise\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_link() == true );
-        ImoLink* pLink = dynamic_cast<ImoLink*>( pIModel->get_root() );
+        CHECK( pRoot->is_link() == true );
+        ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
         CHECK( pLink->get_url() == "" );
         CHECK( pLink->get_num_items() == 1 );
@@ -10221,7 +10181,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pItem->get_text() == "Harmony exercise" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // image ----------------------------------------------------------------------------
@@ -10237,17 +10197,17 @@ SUITE(LdpAnalyserTest)
             "(image (file \"test-image-1.png\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, m_scores_path);
+        ImoObj* pRoot = a.analyse_tree(tree, m_scores_path);
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoImage* pImg = dynamic_cast<ImoImage*>( pIModel->get_root() );
+        ImoImage* pImg = dynamic_cast<ImoImage*>( pRoot );
         CHECK( pImg != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // list -----------------------------------------------------------------------------
@@ -10263,21 +10223,21 @@ SUITE(LdpAnalyserTest)
             "(listitem (txt \"This is the first item\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_listitem() == true );
-        ImoListItem* pLI = dynamic_cast<ImoListItem*>( pIModel->get_root() );
+        CHECK( pRoot->is_listitem() == true );
+        ImoListItem* pLI = dynamic_cast<ImoListItem*>( pRoot );
         CHECK( pLI->get_num_content_items() == 1 );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_listitem)
@@ -10291,16 +10251,16 @@ SUITE(LdpAnalyserTest)
             "(listitem#10 (txt \"This is the first item\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_listitem() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_listitem() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, List_created)
@@ -10314,14 +10274,14 @@ SUITE(LdpAnalyserTest)
             "(itemizedlist (listitem (txt \"This is the first item\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_list() == true );
-        ImoList* pList = dynamic_cast<ImoList*>( pIModel->get_root() );
+        CHECK( pRoot->is_list() == true );
+        ImoList* pList = dynamic_cast<ImoList*>( pRoot );
         CHECK( pList != nullptr );
         CHECK( pList->get_list_type() == ImoList::k_itemized );
         CHECK( pList->get_num_content_items() == 1 );
@@ -10332,7 +10292,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_list)
@@ -10346,16 +10306,16 @@ SUITE(LdpAnalyserTest)
             "(itemizedlist#10 (listitem (txt \"This is the first item\")))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_list() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_list() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // graphic line  --------------------------------------------------------------------
@@ -10370,16 +10330,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(graphic circle 0.0 0.67)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root() == nullptr );
+        CHECK( pRoot == nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, graphic_type_ok)
@@ -10392,14 +10352,14 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(graphic line 0.0 7.0 17.0 3.5)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        CHECK( pIModel->get_root()->is_score_line() == true );
-        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pIModel->get_root() );
+        CHECK( pRoot->is_score_line() == true );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_x_start() == 0.0f );
         CHECK( pLine->get_y_start() == 7.0f );
@@ -10417,7 +10377,7 @@ SUITE(LdpAnalyserTest)
         CHECK( color.a == 255 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_graphic_type)
@@ -10430,16 +10390,16 @@ SUITE(LdpAnalyserTest)
         parser.parse_text("(graphic#10 line 0.0 7.0 17.0 3.5)");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_score_line() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_score_line() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, graphic_is_anchored)
@@ -10453,12 +10413,12 @@ SUITE(LdpAnalyserTest)
             "(n c4 q)(graphic line 0.0 7.0 17.0 3.5) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -10474,7 +10434,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine != nullptr );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // scorePlayer ----------------------------------------------------------------------
@@ -10482,98 +10442,74 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_Creation)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 60 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_player)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer#10) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->get_id() == 10L );
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_metronome)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer (mm 65)) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 65 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_label_play)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer (mm 65)(playLabel \"Tocar\")(stopLabel \"Parar\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
@@ -10581,9 +10517,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pSP->get_play_label() == "Tocar" );
         CHECK( pSP->get_stop_label() == "Parar" );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        delete pIModel;
     }
 
     // tableCell ------------------------------------------------------------------------
@@ -10599,12 +10532,12 @@ SUITE(LdpAnalyserTest)
             "(tableCell (txt \"This is a cell\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
@@ -10615,7 +10548,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_cell)
@@ -10629,16 +10562,16 @@ SUITE(LdpAnalyserTest)
             "(tableCell#10 (txt \"This is a cell\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_cell() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_cell() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tableCell_rowspan)
@@ -10652,12 +10585,12 @@ SUITE(LdpAnalyserTest)
             "(tableCell (rowspan 2)(txt \"This is a cell\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 2 );
@@ -10668,7 +10601,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tableCell_colspan)
@@ -10682,12 +10615,12 @@ SUITE(LdpAnalyserTest)
             "(tableCell (colspan 2)(txt \"This is a cell\"))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pRoot );
         CHECK( pCell->is_table_cell() == true );
         CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
@@ -10698,7 +10631,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // tableRow -------------------------------------------------------------------------
@@ -10716,19 +10649,19 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pIModel->get_root() );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pRoot );
         CHECK( pRow->is_table_row() == true );
         CHECK( pRow->get_num_cells() == 2 );
         ImoTableCell* pImo = dynamic_cast<ImoTableCell*>( pRow->get_cell(0) );
         CHECK( pImo->is_table_cell() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_row)
@@ -10744,16 +10677,16 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_row() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_row() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -10772,12 +10705,12 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableHead* pHead = dynamic_cast<ImoTableHead*>( pIModel->get_root() );
+        ImoTableHead* pHead = dynamic_cast<ImoTableHead*>( pRoot );
         CHECK( pHead->is_table_head() == true );
         CHECK( pHead->get_num_items() == 2 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
@@ -10785,7 +10718,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->get_num_cells() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_head)
@@ -10801,16 +10734,16 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_head() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_head() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -10829,19 +10762,19 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTableBody* pBody = dynamic_cast<ImoTableBody*>( pIModel->get_root() );
+        ImoTableBody* pBody = dynamic_cast<ImoTableBody*>( pRoot );
         CHECK( pBody->is_table_body() == true );
         CHECK( pBody->get_num_items() == 2 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_body)
@@ -10857,16 +10790,16 @@ SUITE(LdpAnalyserTest)
             ")");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table_body() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table_body() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -10883,12 +10816,12 @@ SUITE(LdpAnalyserTest)
             "(table (tableBody (tableRow (tableCell (txt \"This is a cell\")) )))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTable* pTable = dynamic_cast<ImoTable*>( pIModel->get_root() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pRoot );
         CHECK( pTable != nullptr );
 
         CHECK( pTable->get_head() == nullptr );
@@ -10900,7 +10833,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table)
@@ -10914,16 +10847,16 @@ SUITE(LdpAnalyserTest)
             "(table#10 (tableBody (tableRow (tableCell (txt \"This is a cell\")) )))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pIModel->get_root()->is_table() == true );
-        ImoObj* pImo = pIModel->get_root();
+        CHECK( pRoot->is_table() == true );
+        ImoObj* pImo = pRoot;
         CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 
@@ -10951,13 +10884,13 @@ SUITE(LdpAnalyserTest)
             ")) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -10969,7 +10902,7 @@ SUITE(LdpAnalyserTest)
         CHECK( (*it)->get_name() == "table1-col2" );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, table_full_table)
@@ -10999,13 +10932,13 @@ SUITE(LdpAnalyserTest)
             ")) )");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -11025,7 +10958,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // other test to fix detected errors ------------------------------------------------
@@ -11051,13 +10984,13 @@ SUITE(LdpAnalyserTest)
         );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(1);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoClef* pClef = dynamic_cast<ImoClef*>( pMD->get_child(0) );
@@ -11065,7 +10998,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 }
 

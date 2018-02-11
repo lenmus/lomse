@@ -70,7 +70,7 @@ SUITE(ScoreMeterTest)
             "(instrument (staves 2)(musicData))"
             "(instrument (staves 3)(musicData))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ScoreMeter meter(pScore);
 
         CHECK( meter.num_instruments() == 2 );

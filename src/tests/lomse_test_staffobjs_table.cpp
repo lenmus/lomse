@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -121,14 +121,12 @@ public:
     LibraryScope m_libraryScope;
     Document* m_pDoc;
     LdpTree* m_pTree;
-    InternalModel* m_pIModel;
     LdpFactory* m_pLdpFactory;
 
     ColStaffObjsBuilderTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_pDoc(nullptr)
         , m_pTree(nullptr)
-        , m_pIModel(nullptr)
     {
         m_pLdpFactory = m_libraryScope.ldp_factory();
     }
@@ -538,8 +536,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -551,7 +549,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pColStaffObjs->num_lines() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ScoreIteratorPointsFirst)
@@ -561,8 +559,8 @@ SUITE(ColStaffObjsBuilderTest)
         LdpTree* tree = parser.get_ldp_tree();
         Document doc(m_libraryScope);
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -577,7 +575,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 0.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsChangeMeasure)
@@ -589,8 +587,8 @@ SUITE(ColStaffObjsBuilderTest)
         LdpTree* tree = parser.get_ldp_tree();
         Document doc(m_libraryScope);
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -621,7 +619,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->measure() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeInSequence)
@@ -633,8 +631,8 @@ SUITE(ColStaffObjsBuilderTest)
         LdpTree* tree = parser.get_ldp_tree();
         Document doc(m_libraryScope);
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -665,7 +663,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 128.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeGoBack)
@@ -677,8 +675,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 h)(n g4 q)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -715,7 +713,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 128.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, GoBack_StartTime)
@@ -728,8 +726,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n f4 q)(n g4 e.)(n a4 s)(goBack start)(n b4 q)(n c5 q)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -784,7 +782,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 240.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeGoFwd)
@@ -796,8 +794,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 q)(goFwd end)(barline)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -829,7 +827,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 128.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsStaffAssigned)
@@ -841,8 +839,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n c4 q p2)(n d4 e.)(n d4 s p3)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -868,7 +866,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->staff() == 2 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, Anacrusis)
@@ -880,8 +878,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(clef G)(time 3 4)(n c4 q)(barline)(n d4 e.)(n d4 s)) )) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -913,7 +911,7 @@ SUITE(ColStaffObjsBuilderTest)
         ++it;
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAddAnchor)
@@ -925,8 +923,8 @@ SUITE(ColStaffObjsBuilderTest)
                         "(n f4 q)(text \"Hello world\")(barline)))  )))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -956,7 +954,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->staff() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ChordAcrossTwoStaves)
@@ -969,8 +967,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n e4 w p1)(n c5 w p1))(barline)) )) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1016,7 +1014,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 256.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 //Additional test for ColStaffObjsIterator -------------------------------------
@@ -1031,8 +1029,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n d4 s v3 p2)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1075,7 +1073,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( it == pColStaffObjs->end() );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjs_Chord)
@@ -1088,8 +1086,8 @@ SUITE(ColStaffObjsBuilderTest)
             "))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1123,7 +1121,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 0.0f) );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjs_NoMusicData)
@@ -1137,8 +1135,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(vers 1.6) (instrument )) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1150,7 +1148,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pColStaffObjs->num_entries() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeInSequenceWhenDecimals)
@@ -1169,8 +1167,8 @@ SUITE(ColStaffObjsBuilderTest)
             ")) )))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1238,7 +1236,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsLineAssigned)
@@ -1250,8 +1248,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n c4 q v1)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1278,7 +1276,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToClef)
@@ -1290,8 +1288,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1322,7 +1320,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToKey)
@@ -1335,8 +1333,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n d4 s v3 p2)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1379,7 +1377,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 1 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToTime)
@@ -1392,8 +1390,8 @@ SUITE(ColStaffObjsBuilderTest)
             "(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
@@ -1417,7 +1415,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( (*it)->line() == 0 );
 
         delete tree->get_root();
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_12_v16)

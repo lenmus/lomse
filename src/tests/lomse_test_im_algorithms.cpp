@@ -98,7 +98,7 @@ public:
                 "(r q)(barline)(n d4 q)"
                 ")))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
     }
 
 //TODO: REVIEW SCORES, AS THEY HAVE BEEN CHANGED TO VERS. 2.0
@@ -125,7 +125,7 @@ public:
 //               "(n a3 q p2)(n e3 q)"
 //               "(barline) )))"
 //            "))" );
-//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
 //    }
 //
 //    void create_document_3()
@@ -141,7 +141,7 @@ public:
 //               "(barline)"
 //               "(n a3 q p2)(n e3 q) )))"
 //            "))" );
-//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
 //    }
 //
 //    void create_document_4()
@@ -162,7 +162,7 @@ public:
 //               "(n c3 e g+ p2)(n e3 e g-)(n g3 q)"
 //               "(barline) )))"
 //            "))" );
-//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
 ////        cout << m_pDoc->to_string(k_save_ids) << endl;
 //    }
 //
@@ -196,7 +196,7 @@ public:
 //               "(n g2 e p2 v4 (stem down))(n c3 e (stem down))(n c3 e (stem down))(n c3 e (stem down))(barline)"
 //               ")))"
 //            "))" );
-//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
 ////        cout << m_pDoc->to_string(k_save_ids) << endl;
 //    }
 
@@ -208,7 +208,7 @@ public:
                 "(instrument (musicData "
                 ")))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_content_item(0) );
     }
 
     void dump_score()

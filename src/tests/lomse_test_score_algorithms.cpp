@@ -87,7 +87,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         ImoNote* pNote = static_cast<ImoNote*>(
                             ScoreAlgorithms::find_noterest_at(pScore, 0, 1, 0.0) );
@@ -107,7 +107,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         list<OverlappedNoteRest*> overlaps =
             ScoreAlgorithms::find_and_classify_overlapped_noterests_at(
@@ -135,7 +135,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         list<OverlappedNoteRest*> overlaps =
             ScoreAlgorithms::find_and_classify_overlapped_noterests_at(
@@ -163,7 +163,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         list<OverlappedNoteRest*> overlaps =
             ScoreAlgorithms::find_and_classify_overlapped_noterests_at(
@@ -200,7 +200,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         list<OverlappedNoteRest*> overlaps =
             ScoreAlgorithms::find_and_classify_overlapped_noterests_at(
@@ -227,7 +227,7 @@ SUITE(ScoreAlgorithmsTest)
             "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
             ")))");
         ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 
         list<OverlappedNoteRest*> overlaps =
             ScoreAlgorithms::find_and_classify_overlapped_noterests_at(

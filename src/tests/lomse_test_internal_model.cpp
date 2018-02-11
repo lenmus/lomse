@@ -104,7 +104,7 @@ SUITE(InternalModelTest)
 
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
@@ -574,7 +574,7 @@ SUITE(InternalModelTest)
         //@ DocumentWithScore
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
 
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
@@ -1078,7 +1078,7 @@ SUITE(InternalModelTest)
         //@ DocumentHasDefaultStyle
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoStyle* pStyle = pDoc->get_style();
 
         CHECK( pStyle != nullptr );
@@ -1096,7 +1096,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(para (txt \"hello\")) ))" );
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
@@ -1118,7 +1118,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(para (txt \"hello\")) ))" );
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
@@ -1135,7 +1135,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(para (txt \"hello\")) ))" );
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
@@ -1159,7 +1159,7 @@ SUITE(InternalModelTest)
             "(content "
                 "(para (style \"para\")(txt \"hello\"))"
             "))" );
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
@@ -1173,7 +1173,7 @@ SUITE(InternalModelTest)
         //@ PrivateStyle_overrides_values
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         ImoStyle* pStyle = pDoc->create_private_style();
 
         CHECK( pStyle != nullptr );
@@ -1438,7 +1438,7 @@ SUITE(InternalModelTest)
 
         doc.add_paragraph();
 
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoContent* pContent = pImoDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
@@ -1450,7 +1450,7 @@ SUITE(InternalModelTest)
         //@ API_AddParagraphToContent
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoContent* pContent = pImoDoc->get_content();
 
         pContent->add_paragraph();
@@ -1483,7 +1483,7 @@ SUITE(InternalModelTest)
 
         doc.add_score();
 
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoContent* pContent = pImoDoc->get_content();
         CHECK( pContent->get_num_children() == 1 );
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
@@ -1501,7 +1501,7 @@ SUITE(InternalModelTest)
 
         pScore->add_instrument();
 
-        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoDocument* pImoDoc = doc.get_im_root();
         ImoContent* pContent = pImoDoc->get_content();
         CHECK( pContent->get_num_children() == 1 );
         CHECK( pScore->get_num_instruments() == 1 );
@@ -1671,7 +1671,7 @@ SUITE(InternalModelTest)
         //@ TextItem_default_language
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = doc.get_im_root();
         pDoc->set_language("zh_CN");
         ImoParagraph* pPara = doc.add_paragraph();
         ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");

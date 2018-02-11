@@ -205,7 +205,7 @@ SUITE(ImVisitorTest)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 2.3) (content))" );
-        ImoDocument* pRoot = doc.get_imodoc();
+        ImoDocument* pRoot = doc.get_im_root();
 
         MyObjVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
@@ -222,7 +222,7 @@ SUITE(ImVisitorTest)
     {
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "09002-ebook-example.lms" );
-        ImoDocument* pRoot = doc.get_imodoc();
+        ImoDocument* pRoot = doc.get_im_root();
 
         MyObjVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
@@ -240,7 +240,7 @@ SUITE(ImVisitorTest)
 //    {
 //        Document doc(m_libraryScope);
 //        doc.from_file(m_scores_path + "60005-ebook-three-pages.lms" );
-//        ImoDocument* pRoot = doc.get_imodoc();
+//        ImoDocument* pRoot = doc.get_im_root();
 //
 //        MyObjVisitor v(m_libraryScope);
 //        pRoot->accept_visitor(v);
@@ -257,7 +257,7 @@ SUITE(ImVisitorTest)
     {
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "09002-ebook-example.lms" );
-        ImoDocument* pRoot = doc.get_imodoc();
+        ImoDocument* pRoot = doc.get_im_root();
 
         MyParaVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
@@ -274,7 +274,7 @@ SUITE(ImVisitorTest)
     {
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "09002-ebook-example.lms" );
-        ImoDocument* pRoot = doc.get_imodoc();
+        ImoDocument* pRoot = doc.get_im_root();
 
         MyHPVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);

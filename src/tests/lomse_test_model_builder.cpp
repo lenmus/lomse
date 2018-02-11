@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -80,16 +80,16 @@ SUITE(ModelBuilderTest)
         Document doc(m_libraryScope);
         //ModelBuilder* builder = Injector::inject_ModelBuilder(doc.get_scope());
         LdpCompiler compiler(m_libraryScope, &doc);
-        InternalModel* pIModel = compiler.compile_string(
+        ImoObj* pRoot =  compiler.compile_string(
             "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
             "(instrument (musicData (n c4 q) (barline simple))))))" );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != nullptr );
 
-        delete pIModel;
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
 }
@@ -184,7 +184,7 @@ SUITE(PitchAssignerTest)
             "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
             "(instrument (musicData (clef G)(key D)(n f4 q)(n +d4 q)(n d4 q)(barline) ))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
         {
@@ -218,7 +218,7 @@ SUITE(PitchAssignerTest)
         CHECK( pNote2->get_fpitch() == k_undefined_fpitch );
         CHECK( pNote3->get_fpitch() == k_undefined_fpitch );
 
-        pScore->close();
+        pScore->end_of_changes();
 
         CHECK( pNote1->get_fpitch() == FPitch("+f4") );
         CHECK( pNote2->get_fpitch() == FPitch("+d4") );
@@ -234,7 +234,7 @@ SUITE(PitchAssignerTest)
             "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
             "(instrument (musicData (clef G)(key D)(n * q)(n * q)(n * q)(barline) ))"
             ")))" );
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         StaffObjsCursor cursor(pScore);
         while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
         {
@@ -325,10 +325,10 @@ SUITE(MidiAssignerTest)
             "</score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -369,10 +369,10 @@ SUITE(MidiAssignerTest)
             "</score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -429,10 +429,10 @@ SUITE(MidiAssignerTest)
             "</score-partwise>");
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -478,8 +478,8 @@ SUITE(MidiAssignerTest)
             "(musicData (metronome q 55) )))" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -517,8 +517,8 @@ SUITE(MidiAssignerTest)
             ")" );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -582,11 +582,10 @@ SUITE(MidiAssignerTest)
         );
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        CHECK( pIModel->get_root() != nullptr);
-        CHECK( pIModel->get_root()->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        CHECK( pDoc != nullptr );
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );

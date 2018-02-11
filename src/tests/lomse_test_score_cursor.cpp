@@ -103,7 +103,7 @@ public:
                 "(r q)(barline)(n d4 q)"
                 ")))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         //cout << m_pDoc->to_string(true) << endl;
     }
 
@@ -129,7 +129,7 @@ public:
                "(n a3 q p2 v2)(n e3 q v2)"
                "(barline) )))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void create_document_3()
@@ -145,7 +145,7 @@ public:
                "(barline)"
                "(n a3 q p2 v2)(n e3 q v2) )))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void create_document_4()
@@ -165,7 +165,7 @@ public:
                "(n c3 e g+ v2 p2)(n e3 e g- v2 p2)(n g3 q v2 p2)"
                "(barline) )))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         //cout << m_pDoc->to_string(true) << endl;
     }
 
@@ -193,7 +193,7 @@ public:
                "(n c4 e g+)(n e4 e)(n g4 e g-)"
                "(barline) )))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         //cout << m_pDoc->to_string(true) << endl;
     }
 
@@ -211,7 +211,7 @@ public:
                 "(chord (n c4 q)(n e4 q)(n g4 q))"
                 "(chord (n c4 q)(n e4 q)(n g4 q))"
                 ")))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void create_document_7()
@@ -257,7 +257,7 @@ public:
             "            (n c3 q v2 p2)(n g3 q v2 p2)"
             "            (barline)"
             "    )))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
 //        cout << test_name() << endl;
 //        cout << m_pDoc->to_string(true) << endl;
     }
@@ -286,7 +286,7 @@ public:
             "    (n c5 e v1 (stem up))"
             "    (n g4 q v2 (stem down))(n a4 e v2 (stem down))"
             ")))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void create_document_9()
@@ -299,7 +299,7 @@ public:
             "(score (vers 2.0)(instrument#101L (staves 2)(musicData "
             "    (clef G p1)(clef F4 p2)(key D)(time 4 4)"
             ")))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void create_document_empty_score()
@@ -310,7 +310,7 @@ public:
                 "(instrument#101L (musicData "
                 ")))"
             "))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
     }
 
     void dump_col_staff_objs()
@@ -401,7 +401,7 @@ SUITE(ScoreCursorTest)
         doc.from_string("(score (vers 2.0)(instrument#101L (staves 2)(musicData "
             "(clef F4 p2)(n e3 q v2 p2)"
             ")))" );
-        m_pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(&doc, m_pScore);
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 0, 0.0f);
         //cout << cursor.dump_cursor();
@@ -1187,7 +1187,7 @@ SUITE(ScoreCursorTest)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
         cursor.move_next();
@@ -1479,7 +1479,7 @@ SUITE(ScoreCursorTest)
         doc.from_string("(score (vers 2.0)(instrument#101L (musicData "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        m_pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(&doc, m_pScore);
         cursor.point_to(105L);   //last note
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 105L, 105L);
@@ -1949,7 +1949,7 @@ SUITE(ScoreCursorTest)
         doc.from_string("(score (vers 2.0)(instrument#101L (musicData "
             "(clef G)(n e4 e g+)(n g4 s g-)"
             ")))");
-        m_pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(&doc, m_pScore);
         cursor.point_to(105L);   //last note
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 32.0, 105L, 105L);
@@ -1982,7 +1982,7 @@ SUITE(ScoreCursorTest)
         ImoId id = pImo->get_id();
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         pInstr->insert_staffobj_at(nullptr /*at start*/, pImo);
-        m_pScore->close();
+        m_pScore->end_of_changes();
         //dump_col_staff_objs();
 
         cursor.reset_and_point_to(id);
@@ -2012,7 +2012,7 @@ SUITE(ScoreCursorTest)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
@@ -2023,7 +2023,7 @@ SUITE(ScoreCursorTest)
 
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         pInstr->delete_staffobj(pImo);
-        m_pScore->close();
+        m_pScore->end_of_changes();
 
         cursor.reset_and_point_after(idPrev);
 
@@ -2037,7 +2037,7 @@ SUITE(ScoreCursorTest)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)(instrument#101L (musicData (clef G)(key C))))))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);
@@ -2053,7 +2053,7 @@ SUITE(ScoreCursorTest)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 2.0)(instrument#101L (musicData (clef G))))))" );
-        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_im_root()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(103L);   //clef
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 103L, 103L);

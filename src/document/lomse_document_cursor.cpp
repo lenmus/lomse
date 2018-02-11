@@ -188,14 +188,14 @@ void DocContentCursor::point_to_current()
 //---------------------------------------------------------------------------------------
 bool DocContentCursor::parent_is_root_node()
 {
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    ImoDocument* pImoDoc = m_pDoc->get_im_root();
     return m_parent == pImoDoc->get_content();
 }
 
 //---------------------------------------------------------------------------------------
 bool DocContentCursor::is_at_start()
 {
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    ImoDocument* pImoDoc = m_pDoc->get_im_root();
     ImoContent* pContent = pImoDoc->get_content();
     return m_pCurItem == pContent->get_first_child();
 }
@@ -203,7 +203,7 @@ bool DocContentCursor::is_at_start()
 //---------------------------------------------------------------------------------------
 void DocContentCursor::start_of_content()
 {
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    ImoDocument* pImoDoc = m_pDoc->get_im_root();
     ImoContent* pContent = pImoDoc->get_content();
     m_pCurItem = pContent->get_first_child();
     m_parent = pContent;
@@ -212,7 +212,7 @@ void DocContentCursor::start_of_content()
 //---------------------------------------------------------------------------------------
 void DocContentCursor::last_of_content()
 {
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    ImoDocument* pImoDoc = m_pDoc->get_im_root();
     ImoContent* pContent = pImoDoc->get_content();
     m_pCurItem = pContent->get_last_child();
     down_to_last();
@@ -264,7 +264,7 @@ void DocContentCursor::find_parent()
 //---------------------------------------------------------------------------------------
 void DocContentCursor::to_end()
 {
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    ImoDocument* pImoDoc = m_pDoc->get_im_root();
     ImoContent* pContent = pImoDoc->get_content();
     m_pCurItem = pContent->get_last_child();
     m_pCurItem = nullptr;

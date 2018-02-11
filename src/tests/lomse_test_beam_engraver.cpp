@@ -109,7 +109,7 @@ public:
         ldp += ")))";
 
         doc.from_string(ldp);
-        m_pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(1) );

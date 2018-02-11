@@ -77,7 +77,7 @@ SUITE(PresenterTest)
         Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         CHECK( pPresenter != nullptr );
         Document* pDoc = pPresenter->get_document_raw_ptr();
-        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        ImoDocument* pImoDoc = pDoc->get_im_root();
         CHECK( pImoDoc->get_content_item(0) == nullptr );
         CHECK( pPresenter->get_num_interactors() == 1 );
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
