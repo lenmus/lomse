@@ -2413,7 +2413,6 @@ public:
         pImoDoc->set_version("0.0");    //AWARE: This is lenmusdoc version!
         pImoDoc->set_language("en");    //TODO: analyse language
         m_pAnalyser->save_root_imo_document(pImoDoc);
-        pDoc->set_imo_doc(pImoDoc);
         m_pAnchor = pImoDoc;
 
         // add default styles

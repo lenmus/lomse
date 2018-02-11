@@ -60,7 +60,6 @@ public:
     string m_scores_path;
     int m_requestType;
     bool m_fRequestReceived;
-    ImoDocument* m_pDoc;
 
 
     LdpAnalyserTestFixture()     //SetUp fixture
@@ -68,7 +67,6 @@ public:
         , m_scores_path(TESTLIB_SCORES_PATH)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
-        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         m_libraryScope.set_unit_test(true);
@@ -87,12 +85,6 @@ public:
     {
         m_fRequestReceived = true;
         m_requestType = pRequest->get_request_type();
-        if (m_requestType == k_dynamic_content_request)
-        {
-            RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = pDyn->get_document();
-        }
     }
 
     inline const char* test_name()
@@ -9448,25 +9440,18 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
-        //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+
+        ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
         CHECK( pItem->get_style() != nullptr );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_Location)
@@ -9675,21 +9660,16 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, Paragraph_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
@@ -9697,9 +9677,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // heading --------------------------------------------------------------------------
@@ -9853,21 +9830,16 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, Heading_DefaultStyle)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(heading 1 (txt \"Hello world!\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
@@ -9875,9 +9847,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // styles ---------------------------------------------------------------------------
@@ -10096,20 +10065,11 @@ SUITE(LdpAnalyserTest)
         pDoorway->set_request_callback(this, wrapper_lomse_request);
 
         Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(lenmusdoc (vers 0.0)(content "
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(dynamic (classid test)) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 
         CHECK( m_fRequestReceived == true );
         CHECK( m_requestType == k_dynamic_content_request );
-        CHECK( m_pDoc == pDoc );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_WithParams)
@@ -10482,98 +10442,74 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_Creation)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 60 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_player)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer#10) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->get_id() == 10L );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_metronome)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer (mm 65)) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 65 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_label_play)
     {
         stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        Document doc(m_libraryScope, errormsg);
         stringstream expected;
         //expected << "Line 0. " << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+        doc.from_string("(lenmusdoc (vers 0.0) (content "
             "(scorePlayer (mm 65)(playLabel \"Tocar\")(stopLabel \"Parar\")) ))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
         ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
@@ -10581,9 +10517,6 @@ SUITE(LdpAnalyserTest)
         CHECK( pSP->get_play_label() == "Tocar" );
         CHECK( pSP->get_stop_label() == "Parar" );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     // tableCell ------------------------------------------------------------------------

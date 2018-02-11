@@ -321,10 +321,13 @@ protected:
     friend class Control;
     void assign_id(Control* pControl);
 
+
+    //There is a design bug: ImoControl constructor needs to access ImoDocument for
+    //setting the language. But when the control is created (in LdpAnalyser or
+    //LmdAnalyser, the Document does not have yet the pointer to ImoDocument. To bypass
+    //this design error, this method is provided.
     friend class LenmusdocAnalyser;
     friend class LenmusdocLmdAnalyser;
-    friend class ScorePartwiseMxlAnalyser;
-    friend class MnxMnxAnalyser;
     void set_imo_doc(ImoDocument* pImoDoc);
 
 };
