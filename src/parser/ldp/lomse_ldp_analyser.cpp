@@ -6539,7 +6539,7 @@ ImoTie* LdpAnalyser::create_tie(ImoNote* pStart, ImoNote* pEnd)
 {
     //helper method for score edition
     //TODO: refactor. This method is here because it is necessary to use TiesBuilder.
-    //It is necessary to refactor so that TiesBuilder can be used without hanving to
+    //It is necessary to refactor so that TiesBuilder can be used without having to
     //create LdpAnalyser for this.
 
     m_pTiesBuilder = LOMSE_NEW TiesBuilder(m_reporter, this);
