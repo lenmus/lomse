@@ -9,6 +9,7 @@ var searchData=
   ['set_5fdefault_5ffonts_5fpath',['set_default_fonts_path',['../classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec',1,'LomseDoorway']]],
   ['set_5ffont_5ffullname',['set_font_fullname',['../classRequestFont.html#a84bfe5b1e2e2d2ee9f975166f94f917f',1,'RequestFont']]],
   ['set_5fglobal_5fmetronome_5fand_5freplace_5flocal',['set_global_metronome_and_replace_local',['../classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579',1,'LomseDoorway']]],
+  ['set_5flanguage',['set_language',['../classDocument.html#a7c34c93b34eacb936effd1063b44ba50',1,'Document']]],
   ['set_5fnotify_5fcallback',['set_notify_callback',['../classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15',1,'LomseDoorway']]],
   ['set_5fobject',['set_object',['../classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a',1,'RequestDynamic']]],
   ['set_5foperating_5fmode',['set_operating_mode',['../classInteractor.html#acb5d21578acde66c5da165f1fa808fb6',1,'Interactor']]],

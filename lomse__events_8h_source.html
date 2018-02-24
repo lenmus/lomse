@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a>;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keyword">typedef</span> WeakPtr&lt;Interactor&gt;     <a class="code" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keyword">class </span>Document;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keyword">class </span><a class="code" href="classDocument.html">Document</a>;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">typedef</span> WeakPtr&lt;Document&gt;       WpDocument;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
@@ -257,17 +257,17 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div class="line"><a name="l00192"></a><span class="lineno"><a class="line" href="classEventDoc.html">  192</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classEventDoc.html">EventDoc</a> : <span class="keyword">public</span> <a class="code" href="classEventInfo.html">EventInfo</a></div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;{</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;   Document* m_pDoc;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;   <a class="code" href="classDocument.html">Document</a>* m_pDoc;</div>
 <div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;</div>
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classEventDoc.html#a2c007512dbef8c1954640ddd6ff277e7">  199</a></span>&#160;    <a class="code" href="classEventDoc.html#a2c007512dbef8c1954640ddd6ff277e7">EventDoc</a>(<a class="code" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> type, Document* pDoc)</div>
+<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classEventDoc.html#a2c007512dbef8c1954640ddd6ff277e7">  199</a></span>&#160;    <a class="code" href="classEventDoc.html#a2c007512dbef8c1954640ddd6ff277e7">EventDoc</a>(<a class="code" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> type, <a class="code" href="classDocument.html">Document</a>* pDoc)</div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;        : <a class="code" href="classEventInfo.html">EventInfo</a>(type)</div>
 <div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        , m_pDoc(pDoc)</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;    {</div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    }</div>
 <div class="line"><a name="l00205"></a><span class="lineno"><a class="line" href="classEventDoc.html#af9f98135e28a2b0c78c94bd65c41ba66">  205</a></span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classEventDoc.html#af9f98135e28a2b0c78c94bd65c41ba66">~EventDoc</a>() {}</div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;</div>
-<div class="line"><a name="l00208"></a><span class="lineno"><a class="line" href="classEventDoc.html#a3b0ff4c840f150ca20ece7fcd9038889">  208</a></span>&#160;    <span class="keyword">inline</span> Document* <a class="code" href="classEventDoc.html#a3b0ff4c840f150ca20ece7fcd9038889">get_document</a>() { <span class="keywordflow">return</span> m_pDoc; }</div>
+<div class="line"><a name="l00208"></a><span class="lineno"><a class="line" href="classEventDoc.html#a3b0ff4c840f150ca20ece7fcd9038889">  208</a></span>&#160;    <span class="keyword">inline</span> <a class="code" href="classDocument.html">Document</a>* <a class="code" href="classEventDoc.html#a3b0ff4c840f150ca20ece7fcd9038889">get_document</a>() { <span class="keywordflow">return</span> m_pDoc; }</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;};</div>
 <div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;</div>
 <div class="line"><a name="l00215"></a><span class="lineno"><a class="line" href="group__typedefs.html#ga2aad79efa072ab62cd1d05e42ac050a6">  215</a></span>&#160;<span class="keyword">typedef</span> SharedPtr&lt;EventDoc&gt;  <a class="code" href="group__typedefs.html#ga2aad79efa072ab62cd1d05e42ac050a6">SpEventDoc</a>;</div>
@@ -616,11 +616,11 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div class="line"><a name="l01327"></a><span class="lineno"><a class="line" href="classRequestDynamic.html"> 1327</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classRequestDynamic.html">RequestDynamic</a> : <span class="keyword">public</span> <a class="code" href="classRequest.html">Request</a></div>
 <div class="line"><a name="l01328"></a><span class="lineno"> 1328</span>&#160;{</div>
 <div class="line"><a name="l01329"></a><span class="lineno"> 1329</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01330"></a><span class="lineno"> 1330</span>&#160;    Document* m_pDoc;</div>
+<div class="line"><a name="l01330"></a><span class="lineno"> 1330</span>&#160;    <a class="code" href="classDocument.html">Document</a>* m_pDoc;</div>
 <div class="line"><a name="l01331"></a><span class="lineno"> 1331</span>&#160;    ImoObj* m_pObj;</div>
 <div class="line"><a name="l01332"></a><span class="lineno"> 1332</span>&#160;</div>
 <div class="line"><a name="l01333"></a><span class="lineno"> 1333</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01335"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe"> 1335</a></span>&#160;    <a class="code" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe">RequestDynamic</a>(Document* pDoc, ImoObj* pObj)</div>
+<div class="line"><a name="l01335"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe"> 1335</a></span>&#160;    <a class="code" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe">RequestDynamic</a>(<a class="code" href="classDocument.html">Document</a>* pDoc, ImoObj* pObj)</div>
 <div class="line"><a name="l01336"></a><span class="lineno"> 1336</span>&#160;        : <a class="code" href="classRequest.html">Request</a>(k_dynamic_content_request)</div>
 <div class="line"><a name="l01337"></a><span class="lineno"> 1337</span>&#160;        , m_pDoc(pDoc)</div>
 <div class="line"><a name="l01338"></a><span class="lineno"> 1338</span>&#160;        , m_pObj(pObj)</div>
@@ -630,7 +630,7 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div class="line"><a name="l01342"></a><span class="lineno"> 1342</span>&#160;</div>
 <div class="line"><a name="l01346"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#a85bbea8d0d31254256b55629b06bdb29"> 1346</a></span>&#160;    <span class="keyword">inline</span> ImoObj* <a class="code" href="classRequestDynamic.html#a85bbea8d0d31254256b55629b06bdb29">get_object</a>() { <span class="keywordflow">return</span> m_pObj; }</div>
 <div class="line"><a name="l01347"></a><span class="lineno"> 1347</span>&#160;</div>
-<div class="line"><a name="l01349"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8"> 1349</a></span>&#160;    <span class="keyword">inline</span> Document* <a class="code" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8">get_document</a>() { <span class="keywordflow">return</span> m_pDoc; }</div>
+<div class="line"><a name="l01349"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8"> 1349</a></span>&#160;    <span class="keyword">inline</span> <a class="code" href="classDocument.html">Document</a>* <a class="code" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8">get_document</a>() { <span class="keywordflow">return</span> m_pDoc; }</div>
 <div class="line"><a name="l01350"></a><span class="lineno"> 1350</span>&#160;</div>
 <div class="line"><a name="l01352"></a><span class="lineno"><a class="line" href="classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a"> 1352</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a">set_object</a>(ImoObj* pObj) { m_pObj = pObj; }</div>
 <div class="line"><a name="l01353"></a><span class="lineno"> 1353</span>&#160;</div>
@@ -892,6 +892,7 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div class="ttc" id="classEventControlPointMoved_html_ac577e8905528c513952ddaafc6bde3ea"><div class="ttname"><a href="classEventControlPointMoved.html#ac577e8905528c513952ddaafc6bde3ea">EventControlPointMoved::get_gmo_type</a></div><div class="ttdeci">int get_gmo_type()</div><div class="ttdoc">Returns the type of graphic object owning the handler. </div><div class="ttdef"><b>Definition:</b> lomse_events.h:1254</div></div>
 <div class="ttc" id="classEventScoreHighlight_html_a806e298256b9f36e7e9cb80d3224c425a7c1b13a763961dcb06579171fc447d30"><div class="ttname"><a href="classEventScoreHighlight.html#a806e298256b9f36e7e9cb80d3224c425a7c1b13a763961dcb06579171fc447d30">EventScoreHighlight::k_end_of_higlight</a></div><div class="ttdoc">end of score play back. Remove all highlight. </div><div class="ttdef"><b>Definition:</b> lomse_events.h:1088</div></div>
 <div class="ttc" id="classEventInfo_html"><div class="ttname"><a href="classEventInfo.html">EventInfo</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:121</div></div>
+<div class="ttc" id="classDocument_html"><div class="ttname"><a href="classDocument.html">Document</a></div><div class="ttdef"><b>Definition:</b> lomse_document.h:98</div></div>
 <div class="ttc" id="group__enumerations_html_ggabfcf510bafec7c6429906a6ecaac656dac984f42eda573e88c436b2c0507509ec"><div class="ttname"><a href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dac984f42eda573e88c436b2c0507509ec">k_doc_modified_event</a></div><div class="ttdoc">Informs that the Document has been modified. </div><div class="ttdef"><b>Definition:</b> lomse_events.h:85</div></div>
 <div class="ttc" id="classEventNotifier_html_a09e980febe20825e3ed63ffe5f8a844c"><div class="ttname"><a href="classEventNotifier.html#a09e980febe20825e3ed63ffe5f8a844c">EventNotifier::EventNotifier</a></div><div class="ttdeci">EventNotifier(EventsDispatcher *dispatcher)</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> lomse_events.h:1735</div></div>
 <div class="ttc" id="classEventPaint_html_af832e3f40a3b04fb0648bb0b00ce4a9c"><div class="ttname"><a href="classEventPaint.html#af832e3f40a3b04fb0648bb0b00ce4a9c">EventPaint::~EventPaint</a></div><div class="ttdeci">virtual ~EventPaint()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> lomse_events.h:309</div></div>
@@ -939,7 +940,7 @@ $(document).ready(function(){initNavTree('lomse__events_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><b>lomse_events.h</b></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:27 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:00 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

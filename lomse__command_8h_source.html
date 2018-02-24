@@ -149,7 +149,7 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;{</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">//forward declarations</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="keyword">class </span>Document;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="keyword">class </span><a class="code" href="classDocument.html">Document</a>;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keyword">class </span>SelectionSet;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="keyword">class </span><a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
@@ -233,13 +233,13 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> mark_as_included_in_composite_cmd() { m_flags |= k_included_in_composite_cmd; }</div>
 <div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;</div>
 <div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    <span class="comment">//actions</span></div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)=0;</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor)=0;</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection)=0;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor)=0;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;</div>
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="keywordtype">void</span> create_checkpoint(Document* pDoc);</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keywordtype">void</span> log_forensic_data(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="keywordtype">void</span> create_checkpoint(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keywordtype">void</span> log_forensic_data(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    <span class="keywordtype">void</span> set_command_name(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name, ImoObj* pImo);</div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordtype">int</span> validate_source(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source);</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -285,9 +285,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00245"></a><span class="lineno"><a class="line" href="classDocCmdComposite.html#aa9962cb51059cd8999dd7f823ce60c81">  245</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classDocCmdComposite.html#aa9962cb51059cd8999dd7f823ce60c81">is_composite</a>() { <span class="keywordflow">return</span> <span class="keyword">true</span>; }</div>
 <div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;</div>
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    <span class="comment">//mandatory interface implementation</span></div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    <span class="comment">//operations delegated by DocCommandExecuter</span></div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <span class="keywordtype">void</span> update_cursor(DocCursor* pCursor, <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* pExecuter);</div>
@@ -324,12 +324,12 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00291"></a><span class="lineno"><a class="line" href="classDocCommandExecuter.html">  291</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a></div>
 <div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;{</div>
 <div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    Document*   m_pDoc;</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    <a class="code" href="classDocument.html">Document</a>*   m_pDoc;</div>
 <div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    UndoStack   m_stack;</div>
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;    <span class="keywordtype">string</span>      m_error;</div>
 <div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;</div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>(Document* target);</div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;    <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>(<a class="code" href="classDocument.html">Document</a>* target);</div>
 <div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>() {}</div>
 <div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;</div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> execute(DocCursor* pCursor, <a class="code" href="classDocCommand.html">DocCommand</a>* pCmd,</div>
@@ -375,8 +375,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00400"></a><span class="lineno"><a class="line" href="classCmdAddChordNote.html#ab71922b21742b86ae5d7b832aa62606d">  400</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddChordNote.html#ab71922b21742b86ae5d7b832aa62606d">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l00401"></a><span class="lineno"><a class="line" href="classCmdAddChordNote.html#ad1bba467f3173d906e0cd1ac7f333c9e">  401</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddChordNote.html#ad1bba467f3173d906e0cd1ac7f333c9e">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_command_specific; }</div>
 <div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;</div>
 <div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    <span class="keywordtype">void</span> update_selection(SelectionSet* pSelection);</div>
@@ -399,12 +399,12 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00475"></a><span class="lineno"><a class="line" href="classCmdAddNoteRest.html#af252bde35edae8e6d6fd8dd094f04086">  475</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddNoteRest.html#af252bde35edae8e6d6fd8dd094f04086">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l00476"></a><span class="lineno"><a class="line" href="classCmdAddNoteRest.html#ab7c56348b65a805e6f5142607e9556a2">  476</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddNoteRest.html#ab7c56348b65a805e6f5142607e9556a2">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_command_specific; }</div>
 <div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;</div>
 <div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    <span class="comment">//temporary data and helper methods using it</span></div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    Document* m_pDoc;</div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    <a class="code" href="classDocument.html">Document</a>* m_pDoc;</div>
 <div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;    DocCursor* m_pCursor;</div>
 <div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;    ImoScore* m_pScore;</div>
 <div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;    ImoInstrument* m_pInstr;</div>
@@ -456,9 +456,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00565"></a><span class="lineno"><a class="line" href="classCmdAddTie.html#a36c666ffe3067621e743a75c3d6f5be3">  565</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddTie.html#a36c666ffe3067621e743a75c3d6f5be3">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l00566"></a><span class="lineno"><a class="line" href="classCmdAddTie.html#af76b06103f5acc24247a08cdedea9831">  566</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddTie.html#af76b06103f5acc24247a08cdedea9831">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;</div>
 <div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;    <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -481,9 +481,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00633"></a><span class="lineno"><a class="line" href="classCmdAddTuplet.html#a0a03cedf1ef9d150766afb0fa41ac159">  633</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddTuplet.html#a0a03cedf1ef9d150766afb0fa41ac159">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l00634"></a><span class="lineno"><a class="line" href="classCmdAddTuplet.html#a18015b328366bd03af51b67848e1b9ea">  634</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdAddTuplet.html#a18015b328366bd03af51b67848e1b9ea">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;</div>
-<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00639"></a><span class="lineno">  639</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;</div>
 <div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;    <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -503,8 +503,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00691"></a><span class="lineno"><a class="line" href="classCmdBreakBeam.html#a7c293cea621acbd3d20a6ba4d1080989">  691</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdBreakBeam.html#a7c293cea621acbd3d20a6ba4d1080989">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l00692"></a><span class="lineno"><a class="line" href="classCmdBreakBeam.html#a24864c0094ffd24e3ecd04c4e17fc822">  692</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdBreakBeam.html#a24864c0094ffd24e3ecd04c4e17fc822">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;</div>
-<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;</div>
 <div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;    <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -526,9 +526,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00748"></a><span class="lineno"><a class="line" href="classCmdChangeAccidentals.html#abbf9d83a1d3428947b10ac4e641fc77a">  748</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeAccidentals.html#abbf9d83a1d3428947b10ac4e641fc77a">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l00749"></a><span class="lineno"><a class="line" href="classCmdChangeAccidentals.html#a710e61b64b70bf3d06b28076ffa5af5c">  749</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeAccidentals.html#a710e61b64b70bf3d06b28076ffa5af5c">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;</div>
-<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;</div>
 <div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00758"></a><span class="lineno">  758</span>&#160;    <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -581,9 +581,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00910"></a><span class="lineno"><a class="line" href="classCmdChangeAttribute.html#ad6ac831e4631b207b49ab21cb0d744d7">  910</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeAttribute.html#ad6ac831e4631b207b49ab21cb0d744d7">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l00911"></a><span class="lineno"><a class="line" href="classCmdChangeAttribute.html#a46c055b0463fbb3c09fc87831920d1e2">  911</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeAttribute.html#a46c055b0463fbb3c09fc87831920d1e2">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;</div>
-<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;</div>
 <div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;    <span class="keywordtype">void</span> set_default_name();</div>
@@ -608,9 +608,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l00970"></a><span class="lineno"><a class="line" href="classCmdChangeDots.html#a81596f8698ae2a0ccf5e9d495268f2ad">  970</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeDots.html#a81596f8698ae2a0ccf5e9d495268f2ad">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l00971"></a><span class="lineno"><a class="line" href="classCmdChangeDots.html#a6f775b7493b3358ecfbeebf2d2ad7876">  971</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdChangeDots.html#a6f775b7493b3358ecfbeebf2d2ad7876">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;</div>
-<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00974"></a><span class="lineno">  974</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l00975"></a><span class="lineno">  975</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;</div>
 <div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;};</div>
 <div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160;</div>
@@ -658,9 +658,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01263"></a><span class="lineno"><a class="line" href="classCmdCursor.html#a6e08c9e6335207228bdd9bc9746845cf"> 1263</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdCursor.html#a6e08c9e6335207228bdd9bc9746845cf">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l01264"></a><span class="lineno"><a class="line" href="classCmdCursor.html#a3b3653268195b7dc434d28e3bd3cf423"> 1264</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdCursor.html#a3b3653268195b7dc434d28e3bd3cf423">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01265"></a><span class="lineno"> 1265</span>&#160;</div>
-<div class="line"><a name="l01267"></a><span class="lineno"> 1267</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01268"></a><span class="lineno"> 1268</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01269"></a><span class="lineno"> 1269</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01267"></a><span class="lineno"> 1267</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01268"></a><span class="lineno"> 1268</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01269"></a><span class="lineno"> 1269</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01271"></a><span class="lineno"> 1271</span>&#160;</div>
 <div class="line"><a name="l01272"></a><span class="lineno"> 1272</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l01273"></a><span class="lineno"> 1273</span>&#160;    <span class="keywordtype">void</span> set_default_name();</div>
@@ -704,8 +704,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01330"></a><span class="lineno"><a class="line" href="classCmdDeleteBlockLevelObj.html#af1e8303d991c9f7922f02ebacb5beb44"> 1330</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteBlockLevelObj.html#af1e8303d991c9f7922f02ebacb5beb44">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_full_checkpoint; }</div>
 <div class="line"><a name="l01331"></a><span class="lineno"><a class="line" href="classCmdDeleteBlockLevelObj.html#ab375fe141603b376df7b82d39dad3570"> 1331</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteBlockLevelObj.html#ab375fe141603b376df7b82d39dad3570">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01332"></a><span class="lineno"> 1332</span>&#160;</div>
-<div class="line"><a name="l01334"></a><span class="lineno"> 1334</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01335"></a><span class="lineno"> 1335</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01334"></a><span class="lineno"> 1334</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01335"></a><span class="lineno"> 1335</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01337"></a><span class="lineno"> 1337</span>&#160;};</div>
 <div class="line"><a name="l01338"></a><span class="lineno"> 1338</span>&#160;</div>
 <div class="line"><a name="l01339"></a><span class="lineno"> 1339</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -725,11 +725,11 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01398"></a><span class="lineno"><a class="line" href="classCmdDeleteRelation.html#a13fb52c24007fc0eb2995d171c92b452"> 1398</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteRelation.html#a13fb52c24007fc0eb2995d171c92b452">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l01399"></a><span class="lineno"><a class="line" href="classCmdDeleteRelation.html#aeaac4fe5d230fd2f9ecfbf6fa40f2999"> 1399</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteRelation.html#aeaac4fe5d230fd2f9ecfbf6fa40f2999">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01400"></a><span class="lineno"> 1400</span>&#160;</div>
-<div class="line"><a name="l01402"></a><span class="lineno"> 1402</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01403"></a><span class="lineno"> 1403</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01402"></a><span class="lineno"> 1402</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01403"></a><span class="lineno"> 1403</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01405"></a><span class="lineno"> 1405</span>&#160;</div>
 <div class="line"><a name="l01406"></a><span class="lineno"> 1406</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l01407"></a><span class="lineno"> 1407</span>&#160;    <span class="keywordtype">int</span> set_score_id(Document* pDoc);</div>
+<div class="line"><a name="l01407"></a><span class="lineno"> 1407</span>&#160;    <span class="keywordtype">int</span> set_score_id(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
 <div class="line"><a name="l01408"></a><span class="lineno"> 1408</span>&#160;</div>
 <div class="line"><a name="l01409"></a><span class="lineno"> 1409</span>&#160;};</div>
 <div class="line"><a name="l01410"></a><span class="lineno"> 1410</span>&#160;</div>
@@ -750,8 +750,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01456"></a><span class="lineno"><a class="line" href="classCmdDeleteSelection.html#a069354c638bd5709ea1efac8446f2832"> 1456</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteSelection.html#a069354c638bd5709ea1efac8446f2832">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_full_checkpoint; }</div>
 <div class="line"><a name="l01457"></a><span class="lineno"><a class="line" href="classCmdDeleteSelection.html#aaceeb21928ecf4c08a13287b1ef6bb85"> 1457</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteSelection.html#aaceeb21928ecf4c08a13287b1ef6bb85">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01458"></a><span class="lineno"> 1458</span>&#160;</div>
-<div class="line"><a name="l01460"></a><span class="lineno"> 1460</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01461"></a><span class="lineno"> 1461</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01460"></a><span class="lineno"> 1460</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01461"></a><span class="lineno"> 1461</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01463"></a><span class="lineno"> 1463</span>&#160;</div>
 <div class="line"><a name="l01464"></a><span class="lineno"> 1464</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l01465"></a><span class="lineno"> 1465</span>&#160;    list&lt;ImoId&gt; m_relIds;   <span class="comment">//when the action is performed, all relations in deleted</span></div>
@@ -759,12 +759,12 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01467"></a><span class="lineno"> 1467</span>&#160;</div>
 <div class="line"><a name="l01468"></a><span class="lineno"> 1468</span>&#160;    <span class="keywordtype">void</span> prepare_cursor_for_deletion(DocCursor* pCursor);</div>
 <div class="line"><a name="l01469"></a><span class="lineno"> 1469</span>&#160;    <span class="keywordtype">bool</span> is_going_to_be_deleted(ImoId <span class="keywordtype">id</span>);</div>
-<div class="line"><a name="l01470"></a><span class="lineno"> 1470</span>&#160;    <span class="keywordtype">void</span> delete_staffobjs(Document* pDoc);</div>
-<div class="line"><a name="l01471"></a><span class="lineno"> 1471</span>&#160;    <span class="keywordtype">void</span> delete_relobjs(Document* pDoc);</div>
-<div class="line"><a name="l01472"></a><span class="lineno"> 1472</span>&#160;    <span class="keywordtype">void</span> delete_auxobjs(Document* pDoc);</div>
-<div class="line"><a name="l01473"></a><span class="lineno"> 1473</span>&#160;    <span class="keywordtype">void</span> delete_other(Document* pDoc);</div>
+<div class="line"><a name="l01470"></a><span class="lineno"> 1470</span>&#160;    <span class="keywordtype">void</span> delete_staffobjs(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
+<div class="line"><a name="l01471"></a><span class="lineno"> 1471</span>&#160;    <span class="keywordtype">void</span> delete_relobjs(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
+<div class="line"><a name="l01472"></a><span class="lineno"> 1472</span>&#160;    <span class="keywordtype">void</span> delete_auxobjs(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
+<div class="line"><a name="l01473"></a><span class="lineno"> 1473</span>&#160;    <span class="keywordtype">void</span> delete_other(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
 <div class="line"><a name="l01474"></a><span class="lineno"> 1474</span>&#160;    <span class="keywordtype">void</span> delete_staffobj(ImoStaffObj* pImo);</div>
-<div class="line"><a name="l01475"></a><span class="lineno"> 1475</span>&#160;    <span class="keywordtype">void</span> reorganize_relations(Document* pDoc);</div>
+<div class="line"><a name="l01475"></a><span class="lineno"> 1475</span>&#160;    <span class="keywordtype">void</span> reorganize_relations(<a class="code" href="classDocument.html">Document</a>* pDoc);</div>
 <div class="line"><a name="l01476"></a><span class="lineno"> 1476</span>&#160;</div>
 <div class="line"><a name="l01477"></a><span class="lineno"> 1477</span>&#160;};</div>
 <div class="line"><a name="l01478"></a><span class="lineno"> 1478</span>&#160;</div>
@@ -782,8 +782,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01528"></a><span class="lineno"><a class="line" href="classCmdDeleteStaffObj.html#a4e55abb412706a8599517eb29bbfef40"> 1528</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteStaffObj.html#a4e55abb412706a8599517eb29bbfef40">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l01529"></a><span class="lineno"><a class="line" href="classCmdDeleteStaffObj.html#a59ef6e6459c7373d7ec6b2723ff64f1a"> 1529</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdDeleteStaffObj.html#a59ef6e6459c7373d7ec6b2723ff64f1a">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01530"></a><span class="lineno"> 1530</span>&#160;</div>
-<div class="line"><a name="l01532"></a><span class="lineno"> 1532</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01533"></a><span class="lineno"> 1533</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01532"></a><span class="lineno"> 1532</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01533"></a><span class="lineno"> 1533</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01535"></a><span class="lineno"> 1535</span>&#160;};</div>
 <div class="line"><a name="l01536"></a><span class="lineno"> 1536</span>&#160;</div>
 <div class="line"><a name="l01537"></a><span class="lineno"> 1537</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -801,10 +801,10 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01551"></a><span class="lineno"> 1551</span>&#160;</div>
 <div class="line"><a name="l01559"></a><span class="lineno"><a class="line" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9"> 1559</a></span>&#160;    <span class="keyword">inline</span> ImoId <a class="code" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">last_inserted_id</a>() { <span class="keywordflow">return</span> m_lastInsertedId; }</div>
 <div class="line"><a name="l01560"></a><span class="lineno"> 1560</span>&#160;</div>
-<div class="line"><a name="l01562"></a><span class="lineno"> 1562</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01562"></a><span class="lineno"> 1562</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
 <div class="line"><a name="l01564"></a><span class="lineno"> 1564</span>&#160;</div>
 <div class="line"><a name="l01565"></a><span class="lineno"> 1565</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01566"></a><span class="lineno"> 1566</span>&#160;    <span class="keywordtype">void</span> remove_object(Document* pDoc, ImoId <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l01566"></a><span class="lineno"> 1566</span>&#160;    <span class="keywordtype">void</span> remove_object(<a class="code" href="classDocument.html">Document</a>* pDoc, ImoId <span class="keywordtype">id</span>);</div>
 <div class="line"><a name="l01567"></a><span class="lineno"> 1567</span>&#160;};</div>
 <div class="line"><a name="l01568"></a><span class="lineno"> 1568</span>&#160;</div>
 <div class="line"><a name="l01569"></a><span class="lineno"> 1569</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -824,12 +824,12 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01638"></a><span class="lineno"><a class="line" href="classCmdInsertBlockLevelObj.html#a73c6ac44709ae9c655b619ead9f5fd37"> 1638</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertBlockLevelObj.html#a73c6ac44709ae9c655b619ead9f5fd37">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l01639"></a><span class="lineno"><a class="line" href="classCmdInsertBlockLevelObj.html#ab306092197ae58d0aabe852966f1cbea"> 1639</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertBlockLevelObj.html#ab306092197ae58d0aabe852966f1cbea">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01640"></a><span class="lineno"> 1640</span>&#160;</div>
-<div class="line"><a name="l01642"></a><span class="lineno"> 1642</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01643"></a><span class="lineno"> 1643</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01642"></a><span class="lineno"> 1642</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01643"></a><span class="lineno"> 1643</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01645"></a><span class="lineno"> 1645</span>&#160;</div>
 <div class="line"><a name="l01646"></a><span class="lineno"> 1646</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01647"></a><span class="lineno"> 1647</span>&#160;    <span class="keywordtype">void</span> perform_action_from_source(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01648"></a><span class="lineno"> 1648</span>&#160;    <span class="keywordtype">void</span> perform_action_from_type(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01647"></a><span class="lineno"> 1647</span>&#160;    <span class="keywordtype">void</span> perform_action_from_source(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01648"></a><span class="lineno"> 1648</span>&#160;    <span class="keywordtype">void</span> perform_action_from_type(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01649"></a><span class="lineno"> 1649</span>&#160;</div>
 <div class="line"><a name="l01650"></a><span class="lineno"> 1650</span>&#160;};</div>
 <div class="line"><a name="l01651"></a><span class="lineno"> 1651</span>&#160;</div>
@@ -849,11 +849,11 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01685"></a><span class="lineno"><a class="line" href="classCmdInsertManyStaffObjs.html#a74187368b9b32ef149e789747770a6d1"> 1685</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertManyStaffObjs.html#a74187368b9b32ef149e789747770a6d1">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_partial_checkpoint; }</div>
 <div class="line"><a name="l01686"></a><span class="lineno"><a class="line" href="classCmdInsertManyStaffObjs.html#a1a8e2b420ec3ae69bcc347dad877a79e"> 1686</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertManyStaffObjs.html#a1a8e2b420ec3ae69bcc347dad877a79e">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01687"></a><span class="lineno"> 1687</span>&#160;</div>
-<div class="line"><a name="l01689"></a><span class="lineno"> 1689</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01690"></a><span class="lineno"> 1690</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01689"></a><span class="lineno"> 1689</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01690"></a><span class="lineno"> 1690</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01692"></a><span class="lineno"> 1692</span>&#160;</div>
 <div class="line"><a name="l01693"></a><span class="lineno"> 1693</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;    <span class="keywordtype">void</span> save_source_code_with_ids(Document* pDoc, <span class="keyword">const</span> list&lt;ImoStaffObj*&gt;&amp; objects);</div>
+<div class="line"><a name="l01694"></a><span class="lineno"> 1694</span>&#160;    <span class="keywordtype">void</span> save_source_code_with_ids(<a class="code" href="classDocument.html">Document</a>* pDoc, <span class="keyword">const</span> list&lt;ImoStaffObj*&gt;&amp; objects);</div>
 <div class="line"><a name="l01695"></a><span class="lineno"> 1695</span>&#160;</div>
 <div class="line"><a name="l01696"></a><span class="lineno"> 1696</span>&#160;};</div>
 <div class="line"><a name="l01697"></a><span class="lineno"> 1697</span>&#160;</div>
@@ -870,9 +870,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01747"></a><span class="lineno"><a class="line" href="classCmdInsertStaffObj.html#a36a967f5535406ba0a4c9a0e3654cd4e"> 1747</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertStaffObj.html#a36a967f5535406ba0a4c9a0e3654cd4e">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l01748"></a><span class="lineno"><a class="line" href="classCmdInsertStaffObj.html#a3ad18f931f4c9cb6b805caceac6859cc"> 1748</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdInsertStaffObj.html#a3ad18f931f4c9cb6b805caceac6859cc">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01749"></a><span class="lineno"> 1749</span>&#160;</div>
-<div class="line"><a name="l01751"></a><span class="lineno"> 1751</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01752"></a><span class="lineno"> 1752</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01753"></a><span class="lineno"> 1753</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01751"></a><span class="lineno"> 1751</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01752"></a><span class="lineno"> 1752</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01753"></a><span class="lineno"> 1753</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01755"></a><span class="lineno"> 1755</span>&#160;};</div>
 <div class="line"><a name="l01756"></a><span class="lineno"> 1756</span>&#160;</div>
 <div class="line"><a name="l01757"></a><span class="lineno"> 1757</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -889,8 +889,8 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01803"></a><span class="lineno"><a class="line" href="classCmdJoinBeam.html#a4ba93311ac3e6998c28488c204da9a48"> 1803</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdJoinBeam.html#a4ba93311ac3e6998c28488c204da9a48">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_full_checkpoint; }</div>
 <div class="line"><a name="l01804"></a><span class="lineno"><a class="line" href="classCmdJoinBeam.html#a20ec6e78316c71908f4fbda6f4e9a443"> 1804</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdJoinBeam.html#a20ec6e78316c71908f4fbda6f4e9a443">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01805"></a><span class="lineno"> 1805</span>&#160;</div>
-<div class="line"><a name="l01807"></a><span class="lineno"> 1807</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01808"></a><span class="lineno"> 1808</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01807"></a><span class="lineno"> 1807</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01808"></a><span class="lineno"> 1808</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01810"></a><span class="lineno"> 1810</span>&#160;</div>
 <div class="line"><a name="l01811"></a><span class="lineno"> 1811</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l01812"></a><span class="lineno"> 1812</span>&#160;    <span class="keywordtype">void</span> log_command(ofstream &amp;logger);</div>
@@ -914,9 +914,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01847"></a><span class="lineno"><a class="line" href="classCmdMoveObjectPoint.html#a9be091ce2db936c6b50f18633b789122"> 1847</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdMoveObjectPoint.html#a9be091ce2db936c6b50f18633b789122">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l01848"></a><span class="lineno"><a class="line" href="classCmdMoveObjectPoint.html#ae2a2dd0caeffe3e7f6151417038b3d12"> 1848</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdMoveObjectPoint.html#ae2a2dd0caeffe3e7f6151417038b3d12">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01849"></a><span class="lineno"> 1849</span>&#160;</div>
-<div class="line"><a name="l01851"></a><span class="lineno"> 1851</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01852"></a><span class="lineno"> 1852</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01853"></a><span class="lineno"> 1853</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01851"></a><span class="lineno"> 1851</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01852"></a><span class="lineno"> 1852</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01853"></a><span class="lineno"> 1853</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01855"></a><span class="lineno"> 1855</span>&#160;};</div>
 <div class="line"><a name="l01856"></a><span class="lineno"> 1856</span>&#160;</div>
 <div class="line"><a name="l01857"></a><span class="lineno"> 1857</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -947,9 +947,9 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="line"><a name="l01932"></a><span class="lineno"><a class="line" href="classCmdSelection.html#a803b22f82ca8949e7445837d6be7e25f"> 1932</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdSelection.html#a803b22f82ca8949e7445837d6be7e25f">get_undo_policy</a>() { <span class="keywordflow">return</span> k_undo_policy_specific; }</div>
 <div class="line"><a name="l01933"></a><span class="lineno"><a class="line" href="classCmdSelection.html#a10fc43547716eab76836ee701868296e"> 1933</a></span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classCmdSelection.html#a10fc43547716eab76836ee701868296e">get_selection_update_policy</a>() { <span class="keywordflow">return</span> k_sel_do_nothing; }</div>
 <div class="line"><a name="l01934"></a><span class="lineno"> 1934</span>&#160;</div>
-<div class="line"><a name="l01936"></a><span class="lineno"> 1936</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01937"></a><span class="lineno"> 1937</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01938"></a><span class="lineno"> 1938</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01936"></a><span class="lineno"> 1936</span>&#160;    <span class="keywordtype">int</span> set_target(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
+<div class="line"><a name="l01937"></a><span class="lineno"> 1937</span>&#160;    <span class="keywordtype">int</span> perform_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l01938"></a><span class="lineno"> 1938</span>&#160;    <span class="keywordtype">void</span> undo_action(<a class="code" href="classDocument.html">Document</a>* pDoc, DocCursor* pCursor);</div>
 <div class="line"><a name="l01940"></a><span class="lineno"> 1940</span>&#160;</div>
 <div class="line"><a name="l01941"></a><span class="lineno"> 1941</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l01942"></a><span class="lineno"> 1942</span>&#160;    <span class="keywordtype">void</span> set_default_name();</div>
@@ -1034,6 +1034,7 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="ttc" id="classCmdDeleteRelation_html_a66d46256fc625f6c38d01f676ba92b2f"><div class="ttname"><a href="classCmdDeleteRelation.html#a66d46256fc625f6c38d01f676ba92b2f">CmdDeleteRelation::get_cursor_update_policy</a></div><div class="ttdeci">int get_cursor_update_policy()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:1397</div></div>
 <div class="ttc" id="classCmdMoveObjectPoint_html"><div class="ttname"><a href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1823</div></div>
 <div class="ttc" id="classDocCmdSimple_html_ac016a50407fb24cd87e3a361e4fa31fd"><div class="ttname"><a href="classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd">DocCmdSimple::is_composite</a></div><div class="ttdeci">bool is_composite()</div><div class="ttdoc">Returns true if the command is composite. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:211</div></div>
+<div class="ttc" id="classDocument_html"><div class="ttname"><a href="classDocument.html">Document</a></div><div class="ttdef"><b>Definition:</b> lomse_document.h:98</div></div>
 <div class="ttc" id="classDocCommandExecuter_html_a3be9798a32af61136ae4eeab5583a580"><div class="ttname"><a href="classDocCommandExecuter.html#a3be9798a32af61136ae4eeab5583a580">DocCommandExecuter::get_error</a></div><div class="ttdeci">string get_error()</div><div class="ttdoc">In case and execute() operation Returns an string with the error message. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:317</div></div>
 <div class="ttc" id="classCmdAddTuplet_html"><div class="ttname"><a href="classCmdAddTuplet.html">CmdAddTuplet</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:583</div></div>
 <div class="ttc" id="classCmdDelete_html"><div class="ttname"><a href="classCmdDelete.html">CmdDelete</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1281</div></div>
@@ -1097,7 +1098,7 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><b>lomse_command.h</b></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:27 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:00 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

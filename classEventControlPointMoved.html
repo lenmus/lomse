@@ -128,7 +128,7 @@ Inheritance diagram for EventControlPointMoved:</div>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>EventControlPointMoved event is generated when a mouse action has been interpreted by Lomse as a command for moving an object control point (handler).</p>
-<p>Operating system raw mouse events can be passed to Lomse to be processed by the currently selected Task object (see <a class="el" href="page-tasks.html#tasks-overview">Task objects</a>). Once done, Lomse will generate relevant events of different types (normally <a class="el" href="classEventMouse.html">EventMouse</a>, <a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> and <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> events) with relevant information about affected Document objects or other.</p>
+<p>Operating system raw mouse events can be passed to Lomse to be processed by the currently selected Task object (see <a class="el" href="page-tasks.html#tasks-overview">Task objects</a>). Once done, Lomse will generate relevant events of different types (normally <a class="el" href="classEventMouse.html">EventMouse</a>, <a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> and <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> events) with relevant information about affected <a class="el" href="classDocument.html">Document</a> objects or other.</p>
 <p>In particular, an EventControlPointMoved event is generated when TaskMoveHandler is selected and the user releases the mouse button. For having a full view of the event generation process, imagine that your application has selected TaskSelection behavior; this is the default task when no specific task is assigned. This task is oriented to initiate actions related to selecting objects: drawing a section rectangle, displaying a contextual menu, generating on-click events, and initiating a '<em>move object</em>' action. In this situation a mouse left click down generates an <a class="el" href="classEventMouse.html">EventMouse</a> of type <code>k_on_click_event</code>. Your application receives this event and having determined that the pointed object is a handle, decides to select the clicked object and switch to TaskMoveObject. Now, Lomse will take care of moving the handle while the mouse moves, and when the mouse button is released, Lomse will generate the EventControlPointMoved to inform your application about the event and the final destination point of the handle.</p>
 <p>For processing this event, probably your application will issue an edition command for changing the object owning the moved handle. All relevant information for this is provided by the event. For example:</p>
 <div class="fragment"><div class="line"><span class="keyword">class </span>DocumentWindow : <span class="keyword">public</span> wxWindow</div>
@@ -450,7 +450,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:28 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

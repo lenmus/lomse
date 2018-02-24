@@ -1,6 +1,7 @@
 var searchData=
 [
   ['target',['target',['../classObserver.html#a7b64fb9806df6b102ba37a65c809c3ee',1,'Observer']]],
+  ['tie_5fnotes',['tie_notes',['../classDocument.html#ac958a0c23abacc24e6a49d3090b4bd3f',1,'Document']]],
   ['timing_5frepaint_5fdone',['timing_repaint_done',['../classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de',1,'Interactor']]],
   ['to_5fabs_5fldp_5fname',['to_abs_ldp_name',['../classFPitch.html#a82636adaae1bcaa2f2729b13d135abb1',1,'FPitch']]],
   ['to_5fdiatonic_5fpitch',['to_diatonic_pitch',['../classFPitch.html#a6327c48ddf58997811e8e510db1728ff',1,'FPitch']]],

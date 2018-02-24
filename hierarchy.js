@@ -1,5 +1,8 @@
 var hierarchy =
 [
+    [ "BlockLevelCreatorApi", null, [
+      [ "Document", "classDocument.html", null ]
+    ] ],
     [ "DiatonicPitch", "classDiatonicPitch.html", null ],
     [ "DocCommand", "classDocCommand.html", [
       [ "DocCmdComposite", "classDocCmdComposite.html", null ],
@@ -31,6 +34,7 @@ var hierarchy =
     ] ],
     [ "DocCommandExecuter", "classDocCommandExecuter.html", null ],
     [ "EnableSharedFromThis", null, [
+      [ "Document", "classDocument.html", null ],
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "EventHandler", "classEventHandler.html", [
@@ -52,6 +56,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "EventNotifier", "classEventNotifier.html", [
+      [ "Document", "classDocument.html", null ],
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "FPitch", "classFPitch.html", null ],
@@ -59,6 +64,7 @@ var hierarchy =
     [ "MidiPitch", "classMidiPitch.html", null ],
     [ "MusicXmlOptions", "classMusicXmlOptions.html", null ],
     [ "Observable", "classObservable.html", [
+      [ "Document", "classDocument.html", null ],
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "Observer", "classObserver.html", null ],

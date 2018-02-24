@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['license_20for_20code_20samples',['License for code samples',['../page-code-license.html',1,'']]],
-  ['library_20license',['Library license',['../page-library-license.html',1,'']]]
+  ['introduction',['Introduction',['../page-introduction.html',1,'index']]],
+  ['interaction_20with_20your_20application_20gui',['Interaction with your application GUI',['../page-tasks.html',1,'index']]]
 ];

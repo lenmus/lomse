@@ -50,6 +50,24 @@ var index =
         [ "TaskDataEntry class", "page-tasks.html#task-data-entry", null ]
       ] ]
     ] ],
+    [ "Document internal representation", "page-internal-model.html", [
+      [ "The internal model overview", "page-internal-model.html#internal-model-intro", null ],
+      [ "The structure of a document", "page-internal-model.html#internal-model-details", null ],
+      [ "Internal model objects hierarchy", "page-internal-model.html#internal-model-hierarchy", null ],
+      [ "The structure of a music score", "page-internal-model.html#internal-model-scores", [
+        [ "Auxiliary objects: classes ImoAuxObj and ImoRelObj", "page-internal-model.html#internal-model-scores-auxobjs", [
+          [ "Attachments: the ImoAuxObj class", "page-internal-model.html#internal-model-scores-attachments", null ],
+          [ "Relationships: the ImoRelObj class", "page-internal-model.html#internal-model-scores-relationships", null ]
+        ] ]
+      ] ]
+    ] ],
+    [ "The low level edition API", "page-im-modification.html", [
+      [ "Low level edition API overview", "page-im-modification.html#im-modification-intro", [
+        [ "1. The basics", "page-im-modification.html#im-modification-intro-example-1", null ],
+        [ "2. Editing an existing document", "page-im-modification.html#im-modification-intro-example-2", null ],
+        [ "3. Different ways for creating notes", "page-im-modification.html#im-modification-intro-example-3", null ]
+      ] ]
+    ] ],
     [ "File formats supoported by Lomse", "page-file-formats.html", [
       [ "Supported file formats", "page-file-formats.html#page-file-formats-overview", [
         [ "LDP format", "page-file-formats.html#ldp-format", null ],

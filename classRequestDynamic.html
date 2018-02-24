@@ -126,17 +126,17 @@ Inheritance diagram for RequestDynamic:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>While parsing an LDP document, a <code>(dynamic)</code> tag has been found. Lomse sends this request to the user application, asking for the content that must be inserted in the Document to replace the <code>(dynamic)</code> tag.</p>
-<p>The user application has to answer this request by invoking method <a class="el" href="classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a" title="for setting requested data ">RequestDynamic::set_object()</a> passing as argument a pointer to the ImoObj that must be inserted in the Document.</p>
+<div class="textblock"><p>While parsing an LDP document, a <code>(dynamic)</code> tag has been found. Lomse sends this request to the user application, asking for the content that must be inserted in the <a class="el" href="classDocument.html">Document</a> to replace the <code>(dynamic)</code> tag.</p>
+<p>The user application has to answer this request by invoking method <a class="el" href="classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a" title="for setting requested data ">RequestDynamic::set_object()</a> passing as argument a pointer to the ImoObj that must be inserted in the <a class="el" href="classDocument.html">Document</a>.</p>
 <p>See page-dynamic-content. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:afb0fb794229f74e45bcb74934237a3fe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe">RequestDynamic</a> (Document *pDoc, ImoObj *pObj)</td></tr>
+<tr class="memitem:afb0fb794229f74e45bcb74934237a3fe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#afb0fb794229f74e45bcb74934237a3fe">RequestDynamic</a> (<a class="el" href="classDocument.html">Document</a> *pDoc, ImoObj *pObj)</td></tr>
 <tr class="separator:afb0fb794229f74e45bcb74934237a3fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85bbea8d0d31254256b55629b06bdb29"><td class="memItemLeft" align="right" valign="top">ImoObj *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#a85bbea8d0d31254256b55629b06bdb29">get_object</a> ()</td></tr>
 <tr class="separator:a85bbea8d0d31254256b55629b06bdb29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5703b0ff106fbb935eda234ab73747b8"><td class="memItemLeft" align="right" valign="top">Document *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8">get_document</a> ()</td></tr>
+<tr class="memitem:a5703b0ff106fbb935eda234ab73747b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classDocument.html">Document</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#a5703b0ff106fbb935eda234ab73747b8">get_document</a> ()</td></tr>
 <tr class="separator:a5703b0ff106fbb935eda234ab73747b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab65a2fe9ac893cd7b97aad013205f63a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a">set_object</a> (ImoObj *pObj)</td></tr>
 <tr class="separator:ab65a2fe9ac893cd7b97aad013205f63a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +163,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
         <tr>
           <td class="memname">RequestDynamic::RequestDynamic </td>
           <td>(</td>
-          <td class="paramtype">Document *&#160;</td>
+          <td class="paramtype"><a class="el" href="classDocument.html">Document</a> *&#160;</td>
           <td class="paramname"><em>pDoc</em>, </td>
         </tr>
         <tr>
@@ -198,7 +198,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Document* RequestDynamic::get_document </td>
+          <td class="memname"><a class="el" href="classDocument.html">Document</a>* RequestDynamic::get_document </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -211,7 +211,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 </table>
 </div><div class="memdoc">
 
-<p>Returns a pointer to the Document to which this request refers to. */. </p>
+<p>Returns a pointer to the <a class="el" href="classDocument.html">Document</a> to which this request refers to. */. </p>
 
 </div>
 </div>
@@ -271,7 +271,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classRequestDynamic.html">RequestDynamic</a></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:28 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

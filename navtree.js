@@ -25,10 +25,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classEventInfo.html#a2b5d01176db6ed95e20413af386d7c8a",
-"classPresenter.html#af3935244d12adf2de9973953d7fa444b",
-"group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029acc2f401c9df3ff4d0611f9d467a2d936",
-"page-sound-generation.html#how-to-play-score"
+"classDocument.html#a85227f6f69da55806916270f64b908aa",
+"classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09",
+"group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa720db723fa19c8b4328c51f4a891428e",
+"group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

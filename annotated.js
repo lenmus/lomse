@@ -26,6 +26,7 @@ var annotated =
     [ "DocCmdSimple", "classDocCmdSimple.html", "classDocCmdSimple" ],
     [ "DocCommand", "classDocCommand.html", "classDocCommand" ],
     [ "DocCommandExecuter", "classDocCommandExecuter.html", "classDocCommandExecuter" ],
+    [ "Document", "classDocument.html", "classDocument" ],
     [ "EventAction", "classEventAction.html", "classEventAction" ],
     [ "EventControlPointMoved", "classEventControlPointMoved.html", "classEventControlPointMoved" ],
     [ "EventDoc", "classEventDoc.html", "classEventDoc" ],

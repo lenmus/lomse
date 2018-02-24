@@ -22,7 +22,11 @@ var searchData=
   ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'CmdJoinBeam'],['../classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd',1,'CmdJoinBeam::CmdJoinBeam()']]],
   ['cmdmoveobjectpoint',['CmdMoveObjectPoint',['../classCmdMoveObjectPoint.html',1,'CmdMoveObjectPoint'],['../classCmdMoveObjectPoint.html#a692914d9f368877de0f6e0de8ff089d2',1,'CmdMoveObjectPoint::CmdMoveObjectPoint()']]],
   ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'CmdSelection'],['../classCmdSelection.html#a9febfd6fdb356120b28f51758282db27',1,'CmdSelection::CmdSelection(int cmd, const string &amp;name=&quot;&quot;)'],['../classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788',1,'CmdSelection::CmdSelection(int cmd, ImoId id, const string &amp;name=&quot;&quot;)']]],
+  ['create_5fempty',['create_empty',['../classDocument.html#acc2ba25bf6cce524930f91e50f02082f',1,'Document']]],
+  ['create_5fprivate_5fstyle',['create_private_style',['../classDocument.html#a110f8e0e8ad2cc6339903ef431d604c7',1,'Document']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],
+  ['create_5fstyle',['create_style',['../classDocument.html#a8361dfe138c7ed8cf25227601c99beb6',1,'Document']]],
+  ['create_5fwith_5fempty_5fscore',['create_with_empty_score',['../classDocument.html#a9cfddc3181afd507ed67b80818c87c19',1,'Document']]],
   ['cursorstate',['cursorState',['../classUndoElement.html#aec4971967faed2df77dd11ce15284ce5',1,'UndoElement']]],
   ['coordinate_20systems_2c_20units_2c_20scaling_20and_20viewport',['Coordinate systems, units, scaling and viewport',['../page-coordinates-viewport.html',1,'index']]]
 ];

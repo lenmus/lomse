@@ -127,8 +127,8 @@ Inheritance diagram for EventUpdateUI:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>EventUpdateUI events are generated to inform about actions related to the Document that could require changes on the user application GUI, such as enabling or disabling tools, menu items and buttons.</p>
-<p>EventUpdateUI events of type <b>k_selection_set_change</b> are generated when Document objects are selected or deselected. The rationale is that some application tools should be enabled or disabled depending on the kind of selected objects.</p>
+<div class="textblock"><p>EventUpdateUI events are generated to inform about actions related to the <a class="el" href="classDocument.html">Document</a> that could require changes on the user application GUI, such as enabling or disabling tools, menu items and buttons.</p>
+<p>EventUpdateUI events of type <b>k_selection_set_change</b> are generated when <a class="el" href="classDocument.html">Document</a> objects are selected or deselected. The rationale is that some application tools should be enabled or disabled depending on the kind of selected objects.</p>
 <p>EventUpdateUI events of type <b>k_pointed_object_change</b> are generated when the document cursor is updated, as the object pointed by the cursor has changed. Again, the rationale is that some application tools should be enabled or disabled depending on the nature of the pointed object.</p>
 <p>EventUpdateUI events are sent directly to the application global handler (the one set by invoking <a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">LomseDoorway::set_notify_callback()</a> ). For handling these events you should generate application events, place them in the application events loop and return control to Lomse.</p>
 <p><b>Example</b></p>
@@ -366,7 +366,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventUpdateUI.html">EventUpdateUI</a></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:28 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

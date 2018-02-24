@@ -160,7 +160,7 @@ How to play an score</h1>
 <div class="line">ScorePlayer* pPlayer = m_lomse-&gt;<a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(pMidi);</div>
 </div><!-- fragment --><p>This can be done only once if your application saves the ScorePlayer instance in a global variable and ensures the appropriate life scope for your <code>MyAppMidiServer</code> object.</p>
 <p>Once you have the ScorePlayer instance, playback is just loading the score to play (by invoking ScorePlayer::load_score() method) and invoking the appropriate methods, such as ScorePlayer::play() or ScorePlayer::stop() or ScorePlayer::pause();</p>
-<p>The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to do get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:</p>
+<p>The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to do get this pointer depends on your application, but a simple way of doing it is by using the <a class="el" href="classDocument.html">Document</a> methods for traversing the document and accessing its components. One of these methods is <a class="el" href="classDocument.html#a07d8a430a6994f06b77ce2e2d6a87d98">Document::get_content_item()</a> that takes as argument the index to the desired content item. For instance:</p>
 <div class="fragment"><div class="line"><span class="comment">//get the score player you have set up for your application</span></div>
 <div class="line">ScorePlayer* pPlayer  = myAppGlobals-&gt;get_score_player();</div>
 <div class="line"></div>
@@ -194,7 +194,7 @@ How to play an score</h1>
 <div class="line">    <span class="comment">//start playback</span></div>
 <div class="line">    pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</div>
 <div class="line">}</div>
-</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Check example code: pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</dd></dl>
+</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Check example code: pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</dd></dl>
 <h1><a class="anchor" id="handling-highlight-events"></a>
 Handling highlight events</h1>
 <p>Apart from generating sound events, lomse also generates <em>highlight</em> events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.</p>
@@ -206,7 +206,7 @@ Handling highlight events</h1>
 <p><em>Highlight</em> events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a <em>highlight</em> event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:</p>
 <div class="fragment"><div class="line">pInteractor-&gt;<a class="code" href="classEventHandler.html#a298527266550615c0a3da8ec78687d91">handle_event</a>(pEvent);</div>
 </div><!-- fragment --><p>Lomse will handle the event and will send an <em>update window</em> event to your application, for updating the display.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
 <h1><a class="anchor" id="implementing-player-gui"></a>
 The PlayerGui object</h1>
 <p>For controlling playback some GUI controls (buttons, menu items, etc. to trigger start, stop, pause actions, sliders or other for setting tempo speed, etc.) are normally required.</p>
@@ -249,7 +249,7 @@ The PlayerGui object</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Tue Jan 9 2018 16:44:28 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
