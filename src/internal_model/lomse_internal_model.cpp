@@ -412,7 +412,7 @@ void ImoObj::remove_id()
     {
         Document* pDoc = get_the_document();
         if (pDoc)
-            pDoc->removed_from_model(this);
+            pDoc->on_removed_from_model(this);
     }
 }
 
@@ -3399,7 +3399,7 @@ void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
     if (pOldOpt)
     {
         ImoOptions* pColOpts = get_options();
-        m_pDoc->removed_from_model(pOldOpt);
+        m_pDoc->on_removed_from_model(pOldOpt);
         pColOpts->remove_child_imo(pOldOpt);
         delete pOldOpt;
     }

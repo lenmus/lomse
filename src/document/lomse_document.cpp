@@ -660,7 +660,7 @@ void Document::assign_id(Control* pControl)
 }
 
 //---------------------------------------------------------------------------------------
-void Document::removed_from_model(ImoObj* pImo)
+void Document::on_removed_from_model(ImoObj* pImo)
 {
     m_pIdAssigner->remove(pImo);
 }

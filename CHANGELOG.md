@@ -1,16 +1,44 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.22.0
+[Since last version] 0.23.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.22.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.23.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.23.0] (24/Feb/2018)
+==============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.22.0
+
+- While documenting class Document and starting to document the internal
+  model, some methods were renamed to use more meaningfull names:
+	- `Document::removed_from_model()` renamed to `Document::on_removed_from_model()`.
+	- `Document::get_imodoc()` renamed to `Document::get_im_root()`.
+	- `ImoScore::close()` renamed to `ImoScore::end_of_changes()`.
+
+- InternalModel class was removed. It was useless as it was just a wrapper
+  class without additional functionality.
+
+
+##### COMPATIBLE CHANGES
+
+- Make Document a facade for accessing some ImoDocument frequently used
+  methods.
+
+- Added more code to the MNX importer, for testing current
+  specification draft.
+
+- Created an MNX exporter, also for testing current specification draft
+and to prepare Lomse for fully supporting the MNX specification.
 
 
 
@@ -582,7 +610,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.22.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.23.0...HEAD
+[0.23.0]: https://github.com/lenmus/lomse/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/lenmus/lomse/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/lenmus/lomse/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/lenmus/lomse/compare/0.19.0...0.20.0

@@ -109,7 +109,7 @@ SUITE(IdAssignerTest)
         ImoObj* pImo = ImFactory::inject(k_imo_clef, &doc);
         CHECK( doc.get_pointer_to_imo(0L) == pImo );
 
-        doc.removed_from_model(pImo);
+        doc.on_removed_from_model(pImo);
         CHECK( doc.get_pointer_to_imo(0L) == nullptr );
         delete pImo;
     }
