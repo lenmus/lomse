@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 #include "lomse_pixel_formats.h"
 #include "lomse_events.h"
 
+
 #include <string>
 #include <iostream>
 using namespace std;
@@ -52,6 +53,7 @@ class View;
 class VerticalBookView;
 class HorizontalBookView;
 class SimpleView;
+class SingleSystemView;
 class Document;
 class Presenter;
 class ScorePlayer;
@@ -96,19 +98,6 @@ public:
         and its life scope should be as long as your application need to use Lomse.  */
     LomseDoorway();
     virtual ~LomseDoorway();
-
-    /** This enum describes the available view types for displaying a document.
-        - @b k_view_simple means that the document will be displayed not paginated.
-            For instance, for an score it will be displayed a single system and for
-            viewing the end the user will have to scroll to the right.
-        - @b k_view_vertical_book means that the document will be displayed as
-            book pages, one page after the other in a vertical layout. The user will
-            have to scroll down for advancing.
-        - @b k_view_horizontal_book means that the document will be displayed as
-            book pages, one page after the other in a horizontal layout. The user will
-            have to scroll right for advancing.
-    */
-    enum EViewType { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };
 
     //library initialization and configuration
 	/** Before using the library, method init_library() **must** be invoked for
@@ -405,11 +394,11 @@ public:
             LomseDoorway* pLomse = ...
             MusicXmlOptions* opt = pLomse->get_musicxml_options();
             opt->fix_beams(true);
-            Presenter* pPresenter = pLomse->open_document(ViewFactory::k_view_vertical_book,
+            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
                                                           "my_score.xml");
             ...
             opt->fix_beams(false);
-            Presenter* pPresenter = pLomse->open_document(ViewFactory::k_view_vertical_book,
+            Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
                                                           "other_score.xml");
 
         @endcode

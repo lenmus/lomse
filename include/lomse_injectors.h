@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -61,11 +61,11 @@ class Document;
 class LdpFactory;
 class FontStorage;
 class MusicGlyphs;
-//class UserCommandExecuter;
 class View;
 class SimpleView;
 class VerticalBookView;
 class HorizontalBookView;
+class SingleSystemView;
 class Interactor;
 class Presenter;
 class LomseDoorway;
@@ -296,13 +296,14 @@ public:
     static Document* inject_Document(LibraryScope& libraryScope,
                                      ostream& reporter = cout);
     static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
-//    static UserCommandExecuter* inject_UserCommandExecuter(Document* pDoc);
-    static View* inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc);  //UserCommandExecuter* pExec)
-    static SimpleView* inject_SimpleView(LibraryScope& libraryScope, Document* pDoc);  //UserCommandExecuter* pExec)
+    static View* inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc);
+    static SimpleView* inject_SimpleView(LibraryScope& libraryScope, Document* pDoc);
     static VerticalBookView* inject_VerticalBookView(LibraryScope& libraryScope,
-                                                     Document* pDoc);  //UserCommandExecuter* pExec)
+                                                     Document* pDoc);
     static HorizontalBookView* inject_HorizontalBookView(LibraryScope& libraryScope,
-                                                         Document* pDoc);  //UserCommandExecuter* pExec)
+                                                         Document* pDoc);
+    static SingleSystemView* inject_SingleSystemView(LibraryScope& libraryScope,
+                                                     Document* pDoc);
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
                                          WpDocument wpDoc, View* pView,
                                          DocCommandExecuter* pExec);

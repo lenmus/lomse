@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,8 +44,10 @@
 using namespace std;
 
 
+///@cond INTERNAL
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class ScreenDrawer;
@@ -78,6 +80,37 @@ typedef SharedPtr<GmoShape>  SpGmoShape;
 //};
 
 
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes the available view types for displaying a document.
+    - @b k_view_simple means that the document will be displayed not paginated,
+        in a single page. It was developed on to create small images for
+        controls (i.e. a combobox) by rendering small scores (just one measure)
+        without margins and grey areas (gaps between pages). **[DEPRECATED]**
+    - @b k_view_vertical_book means that the document will be displayed as
+        book pages, one page after the other in a vertical layout. The user will
+        have to scroll down for advancing.
+    - @b k_view_horizontal_book means that the document will be displayed as
+        book pages, one page after the other in a horizontal layout. The user will
+        have to scroll right for advancing.
+    - @b k_view_single_system is for rendering documents that only contain one
+        score (e.g. LDP files, LMD files with just one score, and score files imported
+        from other formats such as MusicXML). It will display the score in a single
+        system, as if the paper had infinite width. And for viewing the end of the score
+        the user will have to scroll to the right. See SingleSystemView.
+
+    @#include <lomse_graphic_view.h>
+*/
+enum EViewType {
+    k_view_simple=0,
+    k_view_vertical_book,
+    k_view_horizontal_book,
+    k_view_single_system,
+};
+
+
 //---------------------------------------------------------------------------------------
 // factory class to create views
 class ViewFactory
@@ -85,8 +118,6 @@ class ViewFactory
 public:
     ViewFactory();
     virtual ~ViewFactory();
-
-    enum { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };
 
     static View* create_view(LibraryScope& libraryScope, int viewType,
                              ScreenDrawer* pDrawer);
@@ -293,7 +324,9 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
+/** %SimpleView is a GraphicView for displaying the document in a single page, without
+    borders and margins.
+*/
 class LOMSE_EXPORT SimpleView : public GraphicView
 {
 public:
@@ -337,6 +370,35 @@ public:
     HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~HorizontalBookView() {}
 
+    void set_viewport_for_page_fit_full(Pixels screenWidth);
+    void get_view_size(Pixels* xWidth, Pixels* yHeight);
+
+protected:
+    void collect_page_bounds();
+
+};
+
+
+//---------------------------------------------------------------------------------------
+/** %SingleSystemView is a GraphicView for rendering documents that only contain one
+    score (e.g. LDP files, LMD files with just one score, and score files imported
+    from other formats such as MusicXML).
+
+    - This view will display the score in a single system, as if the paper had infinite
+        width. And for viewing the end of the score the user will have to scroll to the
+        right.
+    - This view will not display grey background when the viewport includes areas not
+        occupied by the score.
+    - If the document does not contains scores or contains more than one score, this
+        view will display a blank page.
+*/
+class LOMSE_EXPORT SingleSystemView : public GraphicView
+{
+public:
+    SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
+    virtual ~SingleSystemView() {}
+
+    virtual int page_at_screen_point(double x, double y);
     void set_viewport_for_page_fit_full(Pixels screenWidth);
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
 

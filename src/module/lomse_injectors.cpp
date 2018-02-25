@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -377,35 +377,34 @@ ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
 //}
 
 //---------------------------------------------------------------------------------------
-SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)  //UserCommandExecuter* pExec)
+SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)
 {
     return static_cast<SimpleView*>(
-                        inject_View(libraryScope,
-                                    ViewFactory::k_view_simple,
-                                    pDoc)
-                       );
+                        inject_View(libraryScope, k_view_simple, pDoc) );
 }
 
 //---------------------------------------------------------------------------------------
 VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
-                                                    Document* pDoc)  //UserCommandExecuter* pExec)
+                                                    Document* pDoc)
 {
     return static_cast<VerticalBookView*>(
-                        inject_View(libraryScope,
-                                    ViewFactory::k_view_vertical_book,
-                                    pDoc)
-                       );
+                        inject_View(libraryScope, k_view_vertical_book, pDoc) );
 }
 
 //---------------------------------------------------------------------------------------
 HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& libraryScope,
-                                                        Document* pDoc)  //UserCommandExecuter* pExec)
+                                                        Document* pDoc)
 {
     return static_cast<HorizontalBookView*>(
-                        inject_View(libraryScope,
-                                    ViewFactory::k_view_horizontal_book,
-                                    pDoc)
-                       );
+                        inject_View(libraryScope, k_view_horizontal_book, pDoc) );
+}
+
+//---------------------------------------------------------------------------------------
+SingleSystemView* Injector::inject_SingleSystemView(LibraryScope& libraryScope,
+                                                    Document* pDoc)
+{
+    return static_cast<SingleSystemView*>(
+                        inject_View(libraryScope, k_view_single_system, pDoc) );
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -78,6 +78,9 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
 
         case k_view_horizontal_book:
             return LOMSE_NEW HorizontalBookView(libraryScope, pDrawer);
+
+        case k_view_single_system:
+            return LOMSE_NEW SingleSystemView(libraryScope, pDrawer);
 
         default:
         {
@@ -1367,7 +1370,7 @@ bool GraphicView::is_valid_viewport()
 
 //=======================================================================================
 // SimpleView implementation
-// A graphic view with one page, no margins (i.e. LenMus SscoreAuxCtrol)
+// A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
 //=======================================================================================
 SimpleView::SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
@@ -1551,6 +1554,57 @@ void HorizontalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 
     *xWidth = m_pDrawer->LUnits_to_Pixels(width);
     *yHeight = m_pDrawer->LUnits_to_Pixels(height);
+}
+
+
+//=======================================================================================
+// SingleSystemView implementation
+//=======================================================================================
+SingleSystemView::SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDrawer)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::collect_page_bounds()
+{
+    GraphicModel* pGModel = get_graphic_model();
+    UPoint origin(0.0f, 0.0f);
+
+    m_pageBounds.clear();
+    GmoBoxDocPage* pPage = pGModel->get_page(0);
+    URect rect = pPage->get_bounds();
+    UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
+    m_pageBounds.push_back( URect(origin, bottomRight) );
+}
+
+//---------------------------------------------------------------------------------------
+int SingleSystemView::page_at_screen_point(double UNUSED(x), double UNUSED(y))
+{
+    return 0;       //single system view is only one page
+}
+
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::set_viewport_for_page_fit_full(Pixels screenWidth)
+{
+    set_viewport_at_page_center(screenWidth);
+}
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::get_view_size(Pixels* xWidth, Pixels* yHeight)
+{
+    *xWidth = 0;
+    *yHeight = 0;
+
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel && pGModel->get_num_pages() > 0)
+    {
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        URect rect = pPage->get_bounds();
+        *xWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+        *yHeight = m_pDrawer->LUnits_to_Pixels(rect.height);
+    }
 }
 
 

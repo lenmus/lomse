@@ -33,6 +33,7 @@
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
 #include "lomse_import_options.h"
+#include "lomse_graphic_view.h"
 
 #include "agg_basics.h"
 #include "agg_pixfmt_rgba.h"
