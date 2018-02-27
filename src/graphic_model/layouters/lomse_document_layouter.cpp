@@ -36,6 +36,8 @@
 #include "lomse_score_layouter.h"
 #include "lomse_calligrapher.h"
 
+    #include <lomse_document.h>
+
 namespace lomse
 {
 
@@ -47,19 +49,29 @@ namespace lomse
 //  delegates in specialized layouters.
 //---------------------------------------------------------------------------------------
 
-DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope)
+DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains)
     : Layouter(libraryScope)
     , m_pScoreLayouter(nullptr)
 {
     m_pDoc = pDoc->get_im_root();
     m_pStyles = m_pDoc->get_styles();
     m_pGModel = LOMSE_NEW GraphicModel();
+    m_pageWidth = pDoc->get_paper_width();
+    m_pageHeight = pDoc->get_paper_height();
+    m_constrains = constrains;
 }
 
 //---------------------------------------------------------------------------------------
 DocLayouter::~DocLayouter()
 {
     delete m_pScoreLayouter;
+}
+
+//---------------------------------------------------------------------------------------
+void DocLayouter::layout_empty_document()
+{
+    GmoBoxDocPage* pPage = create_document_page();
+    m_pItemMainBox = pPage;
 }
 
 //---------------------------------------------------------------------------------------
@@ -93,8 +105,11 @@ GmoBoxDocPage* DocLayouter::create_document_page()
 //---------------------------------------------------------------------------------------
 void DocLayouter::assign_paper_size_to(GmoBox* pBox)
 {
-    m_availableWidth = m_pDoc->get_paper_width();
-    m_availableHeight = m_pDoc->get_paper_height();
+    m_availableWidth = (m_constrains & k_infinite_width) ?
+                            LOMSE_INFINITE_LENGTH : m_pDoc->get_paper_width();
+
+    m_availableHeight = (m_constrains & k_infinite_height) ?
+                            LOMSE_INFINITE_LENGTH : m_pDoc->get_paper_height();
 
     pBox->set_width(m_availableWidth);
     pBox->set_height(m_availableHeight);
@@ -134,7 +149,7 @@ void DocLayouter::add_footers_to_page(GmoBoxDocPage* UNUSED(pPage))
 //---------------------------------------------------------------------------------------
 void DocLayouter::layout_content()
 {
-    layout_item( m_pDoc->get_content(), m_pItemMainBox );
+    layout_item(m_pDoc->get_content(), m_pItemMainBox, m_constrains);
 }
 
 //---------------------------------------------------------------------------------------

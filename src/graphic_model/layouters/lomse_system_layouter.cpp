@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -87,6 +87,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_yMax(0.0f)
     , m_barlinesInfo(0)
     , m_pSpAlgorithm(pSpAlgorithm)
+    , m_constrains(0)
 {
 }
 
@@ -417,6 +418,10 @@ bool SystemLayouter::system_must_be_justified()
 
     //if justification suppressed, for debugging, do not justify
     if (!m_libraryScope.justify_systems())
+        return false;
+
+    //if layout on infinite width, do not justify
+    if (m_constrains & k_infinite_width)
         return false;
 
     //if not last system or free space is negative, force justification

@@ -63,6 +63,21 @@ class ImoParagraph;
 class ImoTextItem;
 
 
+//---------------------------------------------------------------------------------------
+///@cond INTERNALS
+// This enum describes document layout options for DocLayouter, so that it can build a
+// @GM that satisfies the intended View needs. The options are set by the
+// Interactor by using the values provided by the View.
+enum EDocLayoutOptions
+{
+    k_use_paper_width       = 0x0001,   //Use paper width to determine constrains
+    k_use_paper_height      = 0x0002,   //Use paper height to determine constrains
+    k_infinite_width        = 0x0004,   //No width constrains
+    k_infinite_height       = 0x0008,   //No height constrains
+};
+///@endcond
+
+
 //------------------------------------------------------------------------------------
 /** The %Document class is a facade object that contains, basically, the @IM, a model
     similar to the DOM in HTML. By accessing and modifying this internal model you

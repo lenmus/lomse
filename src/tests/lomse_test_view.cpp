@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -579,7 +579,7 @@ SUITE(GraphicViewTest)
     //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-    //        Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc) );
+    //        Injector::inject_View(libraryScope, k_view_vertical_book, spDoc) );
     //    CHECK( m_platform.update_window_invoked() == false );
     //    pView->request_window_update();
     //    CHECK( m_platform.update_window_invoked() == true );
@@ -594,7 +594,7 @@ SUITE(GraphicViewTest)
     //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-    //        Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc) );
+    //        Injector::inject_View(libraryScope, k_view_vertical_book, spDoc) );
     //    pView->on_draw();
     //    CHECK( ????????????????????????? );
     //    delete pView;

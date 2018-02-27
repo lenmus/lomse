@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -74,7 +74,7 @@ SUITE(PresenterTest)
     {
         PresenterBuilder builder(m_libraryScope);
 
-        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+        Presenter* pPresenter = builder.new_document(k_view_simple);
         CHECK( pPresenter != nullptr );
         Document* pDoc = pPresenter->get_document_raw_ptr();
         ImoDocument* pImoDoc = pDoc->get_im_root();
@@ -92,7 +92,7 @@ SUITE(PresenterTest)
     TEST_FIXTURE(PresenterTestFixture, get_weak_ptr_to_document)
     {
         PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+        Presenter* pPresenter = builder.new_document(k_view_simple);
 
         WpDocument wpDoc = pPresenter->get_document_weak_ptr();
         CHECK( wpDoc.expired() == false );
@@ -104,7 +104,7 @@ SUITE(PresenterTest)
     TEST_FIXTURE(PresenterTestFixture, get_weak_ptr_to_interactor)
     {
         PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+        Presenter* pPresenter = builder.new_document(k_view_simple);
 
         WpInteractor wpIntor = pPresenter->get_interactor(0);
         CHECK( wpIntor.expired() == false );
@@ -116,7 +116,7 @@ SUITE(PresenterTest)
     //TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtEnd)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+    //    Presenter* pPresenter = builder.new_document(k_view_simple);
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
     //    //cout << (*cursor)->to_string() << endl;
@@ -127,7 +127,7 @@ SUITE(PresenterTest)
     //TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtStart)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,
+    //    Presenter* pPresenter = builder.new_document(k_view_simple,
     //              "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
@@ -141,7 +141,7 @@ SUITE(PresenterTest)
     //{
     //    PresenterBuilder builder(m_libraryScope);
 
-    //    Presenter* pPresenter = builder.open_document(ViewFactory::k_view_simple,
+    //    Presenter* pPresenter = builder.open_document(k_view_simple,
     //                            m_scores_path + "00011-empty-fill-page.lms");
     //    CHECK( pPresenter != nullptr );
     //    Document* pDoc = pPresenter->get_document();
@@ -160,7 +160,7 @@ SUITE(PresenterTest)
 //    TEST_FIXTURE(PresenterTestFixture, PresentersCollection_CloseDocumentByIndex)
 //    {
 //        PresenterBuilder builder(m_libraryScope);
-//        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+//        Presenter* pPresenter = builder.new_document(k_view_simple);
 //        PresentersCollection elements;
 //        elements.add(pPresenter);
 //        CHECK( elements.get_num_documents() == 1 );
@@ -172,7 +172,7 @@ SUITE(PresenterTest)
 //    TEST_FIXTURE(PresenterTestFixture, PresentersCollection_CloseDocumentByPointer)
 //    {
 //        PresenterBuilder builder(m_libraryScope);
-//        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+//        Presenter* pPresenter = builder.new_document(k_view_simple);
 //        PresentersCollection elements;
 //        elements.add(pPresenter);
 //        CHECK( elements.get_num_documents() == 1 );
@@ -186,7 +186,7 @@ SUITE(PresenterTest)
 ////    {
 ////        PresentersCollection elements;
 ////        PresenterBuilder builder(m_libraryScope);
-////        Document* pDoc = builder.new_document(ViewFactory::k_view_simple);
+////        Document* pDoc = builder.new_document(k_view_simple);
 ////        View* pView = LOMSE_NEW SimpleView(pDoc);
 ////        CHECK( elements.get_num_views(pDoc) == 0 );
 ////        elements.add_view(pDoc, pView);
@@ -204,7 +204,7 @@ SUITE(PresenterTest)
     //TEST_FIXTURE(PresenterTestFixture, MvcModel_ViewIsNotifiedWhenModifications)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,
+    //    Presenter* pPresenter = builder.new_document(k_view_simple,
     //              "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();

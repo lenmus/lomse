@@ -137,18 +137,31 @@ GraphicModel* Interactor::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void Interactor::create_graphic_model()
 {
+    //This method creates the @GM. The process is just to create a document layouter
+    //and to ask it to layout the document.
+    //As the @GM must suit the View needs, the document layouter must be informed
+    //of the requirements. The Interactor is the owner of the View.
+
+
     LOMSE_LOG_DEBUG(Logger::k_render, "");
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
         m_gmodelBuildStartTime = get_current_time();
 
+        GraphicView* pView = dynamic_cast<GraphicView*>(m_pView);
         Document* pDoc = spDoc.get();
-        if (pDoc)
+        if (pView && pDoc)
         {
             LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
-            DocLayouter layouter(pDoc, m_libScope);
-            layouter.layout_document();
+            int constrains = pView->get_layout_constrains();
+            DocLayouter layouter(pDoc, m_libScope, constrains);
+
+            if (pView->is_valid_for_this_view(pDoc))
+                layouter.layout_document();
+            else
+                layouter.layout_empty_document();
+
             m_pGraphicModel = layouter.get_graphic_model();
             m_pGraphicModel->build_main_boxes_table();
             m_pSelections->graphic_model_changed(m_pGraphicModel);

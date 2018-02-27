@@ -86,7 +86,7 @@ typedef SharedPtr<GmoShape>  SpGmoShape;
 
     This enum describes the available view types for displaying a document.
     - @b k_view_simple means that the document will be displayed not paginated,
-        in a single page. It was developed on to create small images for
+        in a single page. It was developed to create small images for
         controls (i.e. a combobox) by rendering small scores (just one measure)
         without margins and grey areas (gaps between pages). **[DEPRECATED]**
     - @b k_view_vertical_book means that the document will be displayed as
@@ -110,6 +110,7 @@ enum EViewType {
     k_view_single_system,
 };
 
+///@cond INTERNAL
 
 //---------------------------------------------------------------------------------------
 // factory class to create views
@@ -182,6 +183,9 @@ protected:
     RenderingBuffer* m_pPrintBuf;
     double           m_print_ppi;     //printer resolution in pixels per inch
 
+    //options
+    Color       m_backgroundColor;
+
 public:
     virtual ~GraphicView();
 
@@ -206,6 +210,7 @@ public:
     void draw_dragged_image();
     void draw_selected_objects();
     void draw_handler(Handler* pHandler);
+    void set_background(Color color) { m_backgroundColor = color; }
 
     //scrolling support
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
@@ -281,6 +286,10 @@ public:
     void set_box_to_draw(int boxType);
     void highlight_voice(int voice);
 
+    //layout constrains
+    virtual int get_layout_constrains() = 0;
+    virtual bool is_valid_for_this_view(Document* pDoc) = 0;
+
     //support for printing
     void set_print_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }
     void set_print_ppi(double ppi) { m_print_ppi = ppi; }
@@ -336,6 +345,8 @@ public:
     virtual int page_at_screen_point(double x, double y);
     void set_viewport_for_page_fit_full(Pixels screenWidth);
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
+    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
 
 protected:
     void collect_page_bounds();
@@ -353,6 +364,8 @@ public:
 
     void set_viewport_for_page_fit_full(Pixels screenWidth);
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
+    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
 
 protected:
     void collect_page_bounds();
@@ -372,6 +385,8 @@ public:
 
     void set_viewport_for_page_fit_full(Pixels screenWidth);
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
+    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
 
 protected:
     void collect_page_bounds();
@@ -399,8 +414,11 @@ public:
     virtual ~SingleSystemView() {}
 
     virtual int page_at_screen_point(double x, double y);
+
     void set_viewport_for_page_fit_full(Pixels screenWidth);
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
+    virtual int get_layout_constrains() { return k_infinite_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* pDoc);
 
 protected:
     void collect_page_bounds();
@@ -410,5 +428,6 @@ protected:
 
 
 }   //namespace lomse
+///@endcond
 
 #endif      //__LOMSE_GRAPHIC_VIEW_H__

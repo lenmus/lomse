@@ -111,6 +111,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pCaret(nullptr)
     , m_pCursor(nullptr)
     , m_fTempoLineVisible(false)
+    , m_backgroundColor( Color(145, 156, 166) )
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
     m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);
@@ -534,7 +535,7 @@ void GraphicView::draw_graphic_model()
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
-    m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
+    m_options.background_color = m_backgroundColor;
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
     m_options.draw_anchor_objects = m_libraryScope.draw_anchor_objects();
@@ -1563,6 +1564,8 @@ void HorizontalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 SingleSystemView::SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
 {
+    //m_backgroundColor = Color(255, 255, 255);   //white
+    m_backgroundColor = Color(15, 20, 35);   //for testing
 }
 
 //---------------------------------------------------------------------------------------
@@ -1605,6 +1608,13 @@ void SingleSystemView::get_view_size(Pixels* xWidth, Pixels* yHeight)
         *xWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
         *yHeight = m_pDrawer->LUnits_to_Pixels(rect.height);
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool SingleSystemView::is_valid_for_this_view(Document* pDoc)
+{
+    return pDoc->get_num_content_items() == 1
+            && pDoc->get_content_item(0)->is_score();
 }
 
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -285,6 +285,7 @@ void ScoreLayouter::create_system_layouter()
     m_pCurSysLyt = LOMSE_NEW SystemLayouter(this, m_libraryScope, m_pScoreMeter,
                                       m_pScore, m_shapesStorage, m_pShapesCreator,
                                       m_pPartsEngraver, m_pSpAlgorithm);
+    m_pCurSysLyt->set_constrains(m_constrains);
     m_sysLayouters.push_back(m_pCurSysLyt);
 }
 

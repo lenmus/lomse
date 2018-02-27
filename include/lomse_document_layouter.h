@@ -56,15 +56,18 @@ class DocLayouter : public Layouter
 {
 protected:
     ImoDocument* m_pDoc;
+    LUnits m_pageWidth;
+    LUnits m_pageHeight;
 
     //for unit tests: need to access ScoreLayouter.
     Layouter* m_pScoreLayouter;
 
 public:
-    DocLayouter(Document* pDoc, LibraryScope& libraryScope);
+    DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains=0);
     virtual ~DocLayouter();
 
     void layout_document();
+    void layout_empty_document();
 
     //implementation of virtual methods in Layouter base class
     void layout_in_box() {}
