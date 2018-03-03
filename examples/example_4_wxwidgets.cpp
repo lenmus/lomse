@@ -657,7 +657,7 @@ void MyCanvas::open_file(const wxString& fullname)
     //create a new View
     std::string filename( fullname.mb_str(wxConvUTF8) );
     delete m_pPresenter;
-    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_vertical_book,
+    m_pPresenter = m_lomse.open_document(k_view_vertical_book,
                                          filename);
 
     //get the pointer to the interactor, set the rendering buffer and register for
@@ -747,7 +747,7 @@ void MyCanvas::open_test_document()
     //all objects and relationships between the document, its views and the interactors
     //to interct with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
+    m_pPresenter = m_lomse.new_document(k_view_vertical_book,
         "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         "(instrument (staves 2) (musicData "
         "(clef G p1)(clef F4 p2)(key C)(time 4 4)"

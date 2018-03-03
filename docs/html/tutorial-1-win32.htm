@@ -283,7 +283,7 @@ void open_test_document()
     //all objects and relationships between the document, its views and the interactors
     //to interact with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
+    m_pPresenter = m_lomse.new_document(k_view_vertical_book,
         "(lenmusdoc (vers 0.0)"
             "(content "
                 "(para (txt \"Hello world!\"))"
@@ -308,7 +308,7 @@ void open_test_document()
 <p>For creating the Presenter (and associated objects) we invoke LomseDoorway method <code>new_document()</code>, passing as arguments, the type of View to create and the content for the document (note: there are other methods, oriented to create the View from a file or programatically, but we will not study them in this simple example).
 </p>
 
-<p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
+<p>The View type is just a Lomse enum. In this example, value <code>k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 </p>
 
 <p>The next parameter is a C string containing the score, and the last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.

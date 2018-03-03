@@ -143,7 +143,7 @@ void open_document()
     //and relationships between the document, its views and the interactors
     //to interct with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
+    m_pPresenter = m_lomse.new_document(k_view_vertical_book,
         "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
         "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"

@@ -158,7 +158,7 @@ void open_test_document()
     //all objects and relationships between the document, its views and the interactors
     //to interact with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
+    m_pPresenter = m_lomse.new_document(k_view_vertical_book,
         "(lenmusdoc (vers 0.0)"
             "(content "
                 "(para (txt \"Hello world!\"))"
