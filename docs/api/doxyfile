@@ -19,7 +19,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Lomse library. API documentation"
-PROJECT_NUMBER         = 0.23.0
+PROJECT_NUMBER         = 0.24.0
 PROJECT_BRIEF          =
 PROJECT_LOGO           = ./images/logo_100x195.png
 OUTPUT_DIRECTORY       = ../../../api-docs
@@ -698,7 +698,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = examples
+EXAMPLE_PATH           = ../../examples/
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -1804,7 +1804,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = 
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
