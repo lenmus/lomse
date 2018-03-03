@@ -257,7 +257,6 @@ protected:
     LUnits determine_top_space(int nInstr, bool fFirstSystemInScore=false,
                                bool fFirstSystemInPage=false);
 
-    //void determine_staff_lines_horizontal_position(int iInstr);
     LUnits space_used_by_prolog(int iSystem);
     LUnits distance_to_top_of_system(int iSystem, bool fFirstInPage);
 

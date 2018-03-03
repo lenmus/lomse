@@ -215,14 +215,18 @@ void SystemLayouter::truncate_current_system(LUnits indent)
     }
     else if (m_constrains & k_infinite_width)
     {
-        GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(m_iLastCol-1);
-        LUnits width = pSlice->get_right() - m_pBoxSystem->get_left()
-                        + pSlice->get_width();
-        m_pBoxSystem->set_width(width);
-        width -= indent;
-        m_pPartsEngraver->set_staves_width( width );
+        if (m_iLastCol > 0)
+        {
+            GmoBoxSlice* pSlice = m_pSpAlgorithm->get_slice_box(m_iLastCol-1);
+            LUnits width = pSlice->get_right() - m_pBoxSystem->get_left()
+                            + pSlice->get_width();
+            m_pBoxSystem->set_width(width);
+            width -= indent;
+            m_pPartsEngraver->set_staves_width( width );
+        }
+        else
+            m_pPartsEngraver->set_staves_width( 5000.0f );
     }
-
 }
 
 //---------------------------------------------------------------------------------------

@@ -1259,6 +1259,14 @@ void Interactor::set_rendering_option(int option, bool value)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::set_view_background(Color color)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_background(color);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::set_box_to_draw(int boxType)
 {
     m_fViewParamsChanged = true;

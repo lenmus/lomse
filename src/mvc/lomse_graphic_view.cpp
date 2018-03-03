@@ -1578,8 +1578,6 @@ void HorizontalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 SingleSystemView::SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
 {
-    //m_backgroundColor = Color(255, 255, 255);   //white
-    m_backgroundColor = Color(200, 200, 200);   //for testing
 }
 
 //---------------------------------------------------------------------------------------

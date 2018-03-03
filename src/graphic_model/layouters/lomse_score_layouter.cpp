@@ -530,15 +530,6 @@ LUnits ScoreLayouter::distance_to_top_of_system(int iSystem, bool fFirstInPage)
         return 0.0f;
 }
 
-////---------------------------------------------------------------------------------------
-//void ScoreLayouter::determine_staff_lines_horizontal_position(int iInstr)
-//{
-//    LUnits indent = get_system_indent();
-//    LUnits width = m_pCurBoxSystem->get_usable_width();
-//    m_pPartsEngraver->set_staves_horizontal_position(iInstr, m_cursor.x, width, indent);
-//    m_cursor.x += indent;
-//}
-
 //---------------------------------------------------------------------------------------
 LUnits ScoreLayouter::determine_top_space(int iInstr, bool fFirstSystemInScore,
                                           bool fFirstSystemInPage)
@@ -687,7 +678,9 @@ void ScoreLayouter::fill_page_with_empty_systems_if_required()
     if (!m_pCurSysLyt->system_must_be_truncated())
     {
         ImoOptionInfo* pOpt = m_pScore->get_option("Score.FillPageWithEmptyStaves");
-        bool fFillPage = pOpt->get_bool_value();
+       bool fFillPage = pOpt->get_bool_value()
+                         && !((m_constrains & k_infinite_height)
+                              || (m_constrains & k_infinite_width));
         if (fFillPage)
         {
             while(enough_space_for_empty_system())
