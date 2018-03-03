@@ -1,10 +1,5 @@
 var classLomseDoorway =
 [
-    [ "EViewType", "classLomseDoorway.html#a88195b52e6d777edd400609128759167", [
-      [ "k_view_simple", "classLomseDoorway.html#a88195b52e6d777edd400609128759167a417b96cf45bb2b11ea7c835dfa9cafea", null ],
-      [ "k_view_vertical_book", "classLomseDoorway.html#a88195b52e6d777edd400609128759167a33fb3c7a9b248b71d039e261a2f5ac43", null ],
-      [ "k_view_horizontal_book", "classLomseDoorway.html#a88195b52e6d777edd400609128759167a5b4845dc86802b6c2346f959ef04fbbd", null ]
-    ] ],
     [ "LomseDoorway", "classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05", null ],
     [ "~LomseDoorway", "classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b", null ],
     [ "create_score_player", "classLomseDoorway.html#a50dbce970b84945868887966a0708634", null ],

@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -108,7 +108,6 @@ $(document).ready(function(){initNavTree('classLomseDoorway.html','');});
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classLomseDoorway-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -123,13 +122,8 @@ $(document).ready(function(){initNavTree('classLomseDoorway.html','');});
 <li>For your application it is entry point for interacting with the library: the way for configuring Lomse, for accessing Lomse version information and for creating/opening documents and scores, which in turn provides accessors for managing the open documents.</li>
 <li>For the Lomse library, it is the way to access platform dependent information and methods, by using callbacks initialized by the user during Lomse configuration. </li>
 </ul>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_qt_8cpp-example.html#_a1">example_1_qt.cpp</a>, and <a class="el" href="example_1_qt_8h-example.html#_a0">example_1_qt.h</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_qt_8cpp-example.html#_a1">example_1_qt.cpp</a>, <a class="el" href="example_1_qt_8h-example.html#_a0">example_1_qt.h</a>, <a class="el" href="example_1_win32_8cpp-example.html#_a0">example_1_win32.cpp</a>, <a class="el" href="example_1_wxwidgets_8cpp-example.html#_a0">example_1_wxwidgets.cpp</a>, <a class="el" href="example_1_x11_8cpp-example.html#_a0">example_1_x11.cpp</a>, <a class="el" href="example_2_wxwidgets_8cpp-example.html#_a0">example_2_wxwidgets.cpp</a>, <a class="el" href="example_2_x11_8cpp-example.html#_a0">example_2_x11.cpp</a>, <a class="el" href="example_3_wxwidgets_8cpp-example.html#_a0">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#_a0">example_4_wxwidgets.cpp</a>.</dd>
 </dl></div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a88195b52e6d777edd400609128759167"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">EViewType</a> </td></tr>
-<tr class="separator:a88195b52e6d777edd400609128759167"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c49065371b1185e0d04b690c1cb6b05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a> ()</td></tr>
@@ -175,25 +169,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3a36010468381eb7f8bcd7cebdd2c152"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152">get_version_patch</a> ()</td></tr>
 <tr class="separator:a3a36010468381eb7f8bcd7cebdd2c152"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Enumeration Documentation</h2>
-<a class="anchor" id="a88195b52e6d777edd400609128759167"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">LomseDoorway::EViewType</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This enum describes the available view types for displaying a document.</p>
-<ul>
-<li><b>k_view_simple</b> means that the document will be displayed not paginated. For instance, for an score it will be displayed a single system and for viewing the end the user will have to scroll to the right.</li>
-<li><b>k_view_vertical_book</b> means that the document will be displayed as book pages, one page after the other in a vertical layout. The user will have to scroll down for advancing.</li>
-<li><b>k_view_horizontal_book</b> means that the document will be displayed as book pages, one page after the other in a horizontal layout. The user will have to scroll right for advancing. </li>
-</ul>
-
-</div>
-</div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a3c49065371b1185e0d04b690c1cb6b05"></a>
 <div class="memitem">
@@ -292,11 +267,11 @@ Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a>* pLomse = ...</div>
 <div class="line">MusicXmlOptions* opt = pLomse-&gt;<a class="code" href="classLomseDoorway.html#aeb47985078727df91ae5395c48b86ff8">get_musicxml_options</a>();</div>
 <div class="line">opt-&gt;<a class="code" href="classMusicXmlOptions.html#a5deb88f8d7aa69a1a658429e54bc9f5d">fix_beams</a>(<span class="keyword">true</span>);</div>
-<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(ViewFactory::k_view_vertical_book,</div>
+<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(k_view_vertical_book,</div>
 <div class="line">                                              <span class="stringliteral">&quot;my_score.xml&quot;</span>);</div>
 <div class="line">...</div>
 <div class="line">opt-&gt;fix_beams(<span class="keyword">false</span>);</div>
-<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(ViewFactory::k_view_vertical_book,</div>
+<div class="line"><a class="code" href="classPresenter.html">Presenter</a>* pPresenter = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(k_view_vertical_book,</div>
 <div class="line">                                              <span class="stringliteral">&quot;other_score.xml&quot;</span>);</div>
 </div><!-- fragment --><dl class="section see"><dt>See Also</dt><dd>class <a class="el" href="classMusicXmlOptions.html">MusicXmlOptions</a> </dd></dl>
 
@@ -833,7 +808,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

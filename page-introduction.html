@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -141,7 +141,7 @@ The Document and related classes</h1>
 <p>When a <a class="el" href="classDocument.html">Document</a> is created, additional objects for marshaling the actions between your application and the <a class="el" href="classDocument.html">Document</a> are created. These additional objects are part of the Lomse Model-View-Controller (MVC) architecture. The main objects associated to a <a class="el" href="classDocument.html">Document</a> are:</p>
 <ul>
 <li>The <a class="el" href="classInteractor.html">Interactor</a>: It is the interface for interacting with the <a class="el" href="classDocument.html">Document</a>. You can consider it as the controller in the MVC model.</li>
-<li>The View: It is an observer of the <a class="el" href="classDocument.html">Document</a>, and its main responsibility is to render it. The rendering type depends on the specific view class used. For instance, class <em>GraphicView</em> renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of <em>GraphicView</em> (<em>VerticalBookView</em>, <em>HorizontalBookView</em>, and <em>SimpleView</em> ). The Lomse MVC model supports having many simultaneous views for a document. The <a class="el" href="classInteractor.html">Interactor</a> is the owner of the View, and there is an <a class="el" href="classInteractor.html">Interactor</a> per View.</li>
+<li>The View: It is an observer of the <a class="el" href="classDocument.html">Document</a>, and its main responsibility is to render it. The rendering type depends on the specific view class used. For instance, class <em><a class="el" href="classGraphicView.html">GraphicView</a></em> renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of <a class="el" href="classGraphicView.html">GraphicView</a> (<a class="el" href="classVerticalBookView.html">VerticalBookView</a>, <a class="el" href="classHorizontalBookView.html">HorizontalBookView</a>, and <a class="el" href="classSingleSystemView.html">SingleSystemView</a>). The Lomse MVC model supports having many simultaneous views for a document. The <a class="el" href="classInteractor.html">Interactor</a> is the owner of the View, and there is an <a class="el" href="classInteractor.html">Interactor</a> per View.</li>
 <li>The <a class="el" href="classPresenter.html">Presenter</a> - It is the owner of the <a class="el" href="classDocument.html">Document</a> and of all its <a class="el" href="classInteractor.html">Interactor</a> objects. The <a class="el" href="classPresenter.html">Presenter</a>'s main responsibility is to build (and delete) the MVC model for a <a class="el" href="classDocument.html">Document</a>.</li>
 </ul>
 <p>All these issues are described in <a class="el" href="page-render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</p>
@@ -180,7 +180,7 @@ The sound engine</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

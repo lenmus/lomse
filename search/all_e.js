@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['public_20constants',['Public constants',['../group__constants.html',1,'']]],
   ['public_20enumerations',['Public enumerations',['../group__enumerations.html',1,'']]],
   ['printing_20documents_20overview',['Printing documents overview',['../page-printing.html',1,'index']]],
   ['page_5fat_5fscreen_5fpoint',['page_at_screen_point',['../classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce',1,'Interactor']]],

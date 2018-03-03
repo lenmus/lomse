@@ -37,5 +37,5 @@ var searchData=
   ['esteps',['ESteps',['../group__enumerations.html#gaeae8853f80e4ededd64180f81d0083fb',1,'lomse_pitch.h']]],
   ['etechnical',['ETechnical',['../group__enumerations.html#ga603173cd8f31b8852b951f52043d114a',1,'lomse_internal_model.h']]],
   ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
-  ['eviewtype',['EViewType',['../classLomseDoorway.html#a88195b52e6d777edd400609128759167',1,'LomseDoorway']]]
+  ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]]
 ];

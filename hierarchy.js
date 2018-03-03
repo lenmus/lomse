@@ -76,5 +76,12 @@ var hierarchy =
       [ "RequestFont", "classRequestFont.html", null ]
     ] ],
     [ "UndoElement", "classUndoElement.html", null ],
-    [ "UPitch", "classUPitch.html", null ]
+    [ "UPitch", "classUPitch.html", null ],
+    [ "View", null, [
+      [ "GraphicView", "classGraphicView.html", [
+        [ "HorizontalBookView", "classHorizontalBookView.html", null ],
+        [ "SingleSystemView", "classSingleSystemView.html", null ],
+        [ "VerticalBookView", "classVerticalBookView.html", null ]
+      ] ]
+    ] ]
 ];

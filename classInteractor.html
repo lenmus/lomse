@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -190,6 +190,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2494425c26d19946921e4b4e97f189f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab802d6e8a3fc482aa7f0fdf9029aecae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">set_rendering_option</a> (int option, bool value)</td></tr>
 <tr class="separator:ab802d6e8a3fc482aa7f0fdf9029aecae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa52bbd85b6670116c72876787e825159"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aa52bbd85b6670116c72876787e825159">set_view_background</a> (Color color)</td></tr>
+<tr class="separator:aa52bbd85b6670116c72876787e825159"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Coordinates conversion</div></td></tr>
 <tr class="memitem:aaa5e88bd7eaa484ae2f0c11ab29e34ff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff">screen_point_to_page_point</a> (double *x, double *y)</td></tr>
 <tr class="separator:aaa5e88bd7eaa484ae2f0c11ab29e34ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2096,6 +2098,29 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 
 </div>
 </div>
+<a class="anchor" id="aa52bbd85b6670116c72876787e825159"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::set_view_background </td>
+          <td>(</td>
+          <td class="paramtype">Color&#160;</td>
+          <td class="paramname"><em>color</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Changes the background color for the View. By default all Views have a gray background and the paper is white. Example, for suppressing the background: </p>
+<div class="fragment"><div class="line">m_pPresenter = lomse.open_document(k_view_single_system, filename);</div>
+<div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">{</div>
+<div class="line">    spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div>
+<div class="line">    spInteractor-&gt;set_view_background( Color(255,255,255) );  <span class="comment">//white</span></div>
+<div class="line">    ...</div>
+</div><!-- fragment --> 
+</div>
+</div>
 <a class="anchor" id="a81455e8a584d8dff982c3f43e92e7f34"></a>
 <div class="memitem">
 <div class="memproto">
@@ -2438,7 +2463,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

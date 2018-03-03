@@ -377,5 +377,6 @@ var group__enumerations =
       [ "k_technical_hole", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aaa608db30d2af9d50c2b3259c14d3386b", null ],
       [ "k_technical_handbell", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aad657cff681da0fb103237a1bcbff3002", null ],
       [ "k_max_technical", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aa58d72c835e5bd9d9b5ab22996e1babe1", null ]
-    ] ]
+    ] ],
+    [ "EViewType", "group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea", null ]
 ];

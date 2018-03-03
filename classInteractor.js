@@ -68,6 +68,7 @@ var classInteractor =
     [ "set_rendering_buffer", "classInteractor.html#a2494425c26d19946921e4b4e97f189f3", null ],
     [ "set_rendering_option", "classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae", null ],
     [ "set_scale", "classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37", null ],
+    [ "set_view_background", "classInteractor.html#aa52bbd85b6670116c72876787e825159", null ],
     [ "set_viewport_at_page_center", "classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34", null ],
     [ "should_enable_edit_redo", "classInteractor.html#a1fb104713775c65888909f3f1404faad", null ],
     [ "should_enable_edit_undo", "classInteractor.html#abd162053d322ad64eb94159e1437ce1e", null ],

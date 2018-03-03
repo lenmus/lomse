@@ -42,6 +42,8 @@ var annotated =
     [ "EventUpdateUI", "classEventUpdateUI.html", "classEventUpdateUI" ],
     [ "EventUpdateViewport", "classEventUpdateViewport.html", "classEventUpdateViewport" ],
     [ "FPitch", "classFPitch.html", "classFPitch" ],
+    [ "GraphicView", "classGraphicView.html", null ],
+    [ "HorizontalBookView", "classHorizontalBookView.html", null ],
     [ "Interactor", "classInteractor.html", "classInteractor" ],
     [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ],
     [ "MidiPitch", "classMidiPitch.html", "classMidiPitch" ],
@@ -52,6 +54,8 @@ var annotated =
     [ "Request", "classRequest.html", "classRequest" ],
     [ "RequestDynamic", "classRequestDynamic.html", "classRequestDynamic" ],
     [ "RequestFont", "classRequestFont.html", "classRequestFont" ],
+    [ "SingleSystemView", "classSingleSystemView.html", null ],
     [ "UndoElement", "classUndoElement.html", "classUndoElement" ],
-    [ "UPitch", "classUPitch.html", "classUPitch" ]
+    [ "UPitch", "classUPitch.html", "classUPitch" ],
+    [ "VerticalBookView", "classVerticalBookView.html", null ]
 ];

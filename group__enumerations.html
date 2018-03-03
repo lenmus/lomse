@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -118,6 +118,8 @@ Enumerations</h2></td></tr>
 <tr class="separator:gabfcf510bafec7c6429906a6ecaac656d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0dc84b6205af6b43ac7867cd9779dfcc"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc">ERequestType</a> </td></tr>
 <tr class="separator:ga0dc84b6205af6b43ac7867cd9779dfcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga27f5a7e67fbf1c82ab6217e6fec0ecea"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea">EViewType</a> </td></tr>
+<tr class="separator:ga27f5a7e67fbf1c82ab6217e6fec0ecea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6d2f4212f1b35b75797fd57153826029"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029">EImoAttribute</a> </td></tr>
 <tr class="separator:ga6d2f4212f1b35b75797fd57153826029"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd4d321bb9cc51030786d53d76b8b0bd"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gadd4d321bb9cc51030786d53d76b8b0bd">EDataType</a> </td></tr>
@@ -1562,12 +1564,32 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ga27f5a7e67fbf1c82ab6217e6fec0ecea"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea">EViewType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the available view types for displaying a document.</p>
+<ul>
+<li><b>k_view_simple</b> means that the document will be displayed not paginated, in a single page. It was developed to create small images for controls (i.e. a combobox) by rendering small scores (just one measure) without margins and grey areas (gaps between pages). **[DEPRECATED]**</li>
+<li><b>k_view_vertical_book</b> means that the document will be displayed as book pages, one page after the other in a vertical layout. The user will have to scroll down for advancing.</li>
+<li><b>k_view_horizontal_book</b> means that the document will be displayed as book pages, one page after the other in a horizontal layout. The user will have to scroll right for advancing.</li>
+<li><b>k_view_single_system</b> is for rendering documents that only contain one score (e.g. LDP files, LMD files with just one score, and score files imported from other formats such as MusicXML). It will display the score in a single system, as if the paper had infinite width. And for viewing the end of the score the user will have to scroll to the right. See <a class="el" href="classSingleSystemView.html">SingleSystemView</a>.</li>
+</ul>
+<p>#include &lt;<a class="el" href="lomse__graphic__view_8h_source.html">lomse_graphic_view.h</a>&gt; </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

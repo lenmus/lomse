@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -127,7 +127,7 @@ The Lomse Model-View-Controller</h1>
 <p>Lomse MVC model has four components: the <code>Model</code> (the document), the <code>View</code> (its visual representation), the <code><a class="el" href="classInteractor.html">Interactor</a></code> (a kind of Controller) and the <code><a class="el" href="classPresenter.html">Presenter</a></code> (the 'glue' to join all the pieces):</p>
 <ul>
 <li>The <a class="el" href="classDocument.html">Document</a> object (the Model) stores the document content (music scores, paragraphs, images, etc.) and notifies other objects when changes occur to the document.</li>
-<li>The View object takes care of rendering the document so that it can be displayed by your application. The View is responsible for providing the rendered document, usually by providing a bitmap, and it is your application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output). The rendering type depends on the specific View class used. For instance, class GraphicView renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of GraphicView (VerticalBookView, HorizontalBookView, and SimpleView).</li>
+<li>The View object takes care of rendering the document so that it can be displayed by your application. The View is responsible for providing the rendered document, usually by providing a bitmap, and it is your application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output). The rendering type depends on the specific View class used. For instance, class <a class="el" href="classGraphicView.html">GraphicView</a> renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of <a class="el" href="classGraphicView.html">GraphicView</a> (<a class="el" href="classVerticalBookView.html">VerticalBookView</a>, <a class="el" href="classHorizontalBookView.html">HorizontalBookView</a>, and <a class="el" href="classSingleSystemView.html">SingleSystemView</a>).</li>
 <li>A <a class="el" href="classDocument.html">Document</a> can have many View objects. For instance, your application can display two windows, one for presenting a music score as a music sheet, and another window for displaying the same music score but as MusicXML source code. This behaviour can be achived by associating two simultaneous views to the document.</li>
 <li>The <a class="el" href="classInteractor.html">Interactor</a> object plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is the interface between your application, the associated View and the Document. It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions.</li>
 <li>Finally, the <a class="el" href="classPresenter.html">Presenter</a> object (short for <em>document presenter</em>) is the glue that links all objects in the MVC model. It maintains the life cycle and relationships between Views, Interactors, Commands, Selections, and the Document.</li>
@@ -269,7 +269,7 @@ Displaying the document</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:53 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

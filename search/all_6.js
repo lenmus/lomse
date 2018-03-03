@@ -83,5 +83,6 @@ var searchData=
   ['get_5fview_5fsize',['get_view_size',['../classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65',1,'Interactor']]],
   ['get_5fviewport',['get_viewport',['../classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905',1,'Interactor']]],
   ['get_5fx',['get_x',['../classEventMouse.html#af79fd6811e3033cd08276eb3f68a7500',1,'EventMouse']]],
-  ['get_5fy',['get_y',['../classEventMouse.html#a7df79bb4129b6a67936c0e8f26162b7b',1,'EventMouse']]]
+  ['get_5fy',['get_y',['../classEventMouse.html#a7df79bb4129b6a67936c0e8f26162b7b',1,'EventMouse']]],
+  ['graphicview',['GraphicView',['../classGraphicView.html',1,'']]]
 ];

@@ -54,7 +54,7 @@ var searchData=
   ['eventscorehighlight',['EventScoreHighlight',['../classEventScoreHighlight.html',1,'EventScoreHighlight'],['../classEventScoreHighlight.html#a1278a52addae7df76d324a2d64a3959a',1,'EventScoreHighlight::EventScoreHighlight(WpInteractor wpInteractor, ImoId nScoreID)'],['../classEventScoreHighlight.html#a6aa4e469f5c10af0d8e22d0d4a04904b',1,'EventScoreHighlight::EventScoreHighlight(const EventScoreHighlight &amp;event)']]],
   ['eventupdateui',['EventUpdateUI',['../classEventUpdateUI.html',1,'EventUpdateUI'],['../classEventUpdateUI.html#ad14ccf680bcde7ce310d214e44d6eab2',1,'EventUpdateUI::EventUpdateUI()']]],
   ['eventupdateviewport',['EventUpdateViewport',['../classEventUpdateViewport.html',1,'EventUpdateViewport'],['../classEventUpdateViewport.html#a1c5259503f469af796d9fc6934cdbdd4',1,'EventUpdateViewport::EventUpdateViewport()']]],
-  ['eviewtype',['EViewType',['../classLomseDoorway.html#a88195b52e6d777edd400609128759167',1,'LomseDoorway']]],
+  ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]],
   ['exec_5fcommand',['exec_command',['../classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291',1,'Interactor']]],
   ['exec_5fredo',['exec_redo',['../classInteractor.html#a6571c803f6a3626793756119821101e8',1,'Interactor']]],
   ['exec_5fundo',['exec_undo',['../classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa',1,'Interactor']]],

@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.22.0</span>
+   &#160;<span id="projectnumber">0.24.0</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,7 @@ $(document).ready(function(){initNavTree('example_1_qt_8cpp-example.html','');})
 <div class="title">example_1_qt.cpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<p>Code for Qt example-1: How to display a music score</p>
+<p>Code for Qt (platform independent). Example-1: How to display a music score</p>
 <div class="fragment"><div class="line"><span class="comment">//---------------------------------------------------------------------------------------</span></div>
 <div class="line"><span class="comment">// This is free and unencumbered software released into the public domain.</span></div>
 <div class="line"><span class="comment">//</span></div>
@@ -307,7 +307,7 @@ $(document).ready(function(){initNavTree('example_1_qt_8cpp-example.html','');})
 <div class="line">    <span class="comment">//and maintaining all objects and relationships between the document, </span></div>
 <div class="line">    <span class="comment">//its views and the interactors to interact with the view</span></div>
 <div class="line">    <span class="keyword">delete</span> m_pPresenter;</div>
-<div class="line">    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,</div>
+<div class="line">    m_pPresenter = m_lomse.new_document(k_view_vertical_book,</div>
 <div class="line">        <span class="stringliteral">&quot;(lenmusdoc (vers 0.0)&quot;</span></div>
 <div class="line">            <span class="stringliteral">&quot;(content &quot;</span></div>
 <div class="line">                <span class="stringliteral">&quot;(para (txt \&quot;Hello world!\&quot;))&quot;</span></div>
@@ -373,13 +373,14 @@ $(document).ready(function(){initNavTree('example_1_qt_8cpp-example.html','');})
 <div class="line"></div>
 <div class="line">    m_view_needs_redraw = <span class="keyword">true</span>;</div>
 <div class="line">}</div>
-</div><!-- fragment --><div class="fragment"><div class="line"></div>
+<div class="line"></div>
+<div class="line"></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Feb 24 2018 16:37:00 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 3 2018 17:06:52 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
