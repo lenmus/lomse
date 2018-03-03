@@ -59,11 +59,11 @@ namespace lomse
     LomseDoorway* pLomse = ...
     MusicXmlOptions* opt = pLomse->get_musicxml_options();
     opt->fix_beams(true);
-    Presenter* pPresenter = pLomse->open_document(ViewFactory::k_view_vertical_book,
+    Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
                                                   "my_score.xml");
     ...
     opt->fix_beams(false);
-    Presenter* pPresenter = pLomse->open_document(ViewFactory::k_view_vertical_book,
+    Presenter* pPresenter = pLomse->open_document(k_view_vertical_book,
                                                   "other_score.xml");
 	@endcode
 

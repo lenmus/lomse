@@ -101,6 +101,7 @@ protected:
     int m_barlinesInfo;     //info about barlines at end of this system
 
     SpacingAlgorithm* m_pSpAlgorithm;
+    int m_constrains;
 
 public:
     SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& libraryScope,
@@ -114,6 +115,7 @@ public:
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
     void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos);
     void on_origin_shift(LUnits yShift);
+    inline void set_constrains(int constrains) { m_constrains = constrains; }
 
         //Access to information
     inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }

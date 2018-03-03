@@ -64,7 +64,7 @@ void ContentLayouter::layout_in_box()
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pContent->begin(); it != m_pContent->end(); ++it)
     {
-        layout_item( dynamic_cast<ImoContentObj*>( *it ), m_pItemMainBox );
+        layout_item(dynamic_cast<ImoContentObj*>( *it ), m_pItemMainBox, m_constrains);
     }
     set_layout_is_finished(true);
 }
@@ -250,7 +250,7 @@ void BlocksContainerLayouter::layout_in_box()
     TreeNode<ImoObj>::children_iterator it;
     for (it = pContent->begin(); it != pContent->end(); ++it)
     {
-        layout_item( dynamic_cast<ImoContentObj*>( *it ), m_pItemMainBox );
+        layout_item(dynamic_cast<ImoContentObj*>( *it ), m_pItemMainBox, m_constrains);
     }
     set_layout_is_finished(true);
 }

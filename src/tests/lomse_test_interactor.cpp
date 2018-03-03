@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -191,7 +191,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
                                             spDoc.get());
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
 
@@ -206,7 +206,7 @@ SUITE(InteractorTest)
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
                                             spDoc.get());
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
@@ -309,7 +309,7 @@ SUITE(InteractorTest)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
                                             spDoc.get());
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
@@ -323,7 +323,7 @@ SUITE(InteractorTest)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+        View* pView = Injector::inject_View(m_libraryScope, k_view_simple,
                                             spDoc.get());
         SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
@@ -347,7 +347,7 @@ SUITE(InteractorTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         SpDocument spDoc( LOMSE_NEW Document(libraryScope) );
         spDoc->create_empty();
-        View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
+        View* pView = Injector::inject_View(libraryScope, k_view_simple,
                                             spDoc.get());
         SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr));
         pView->set_interactor(pIntor.get());
@@ -518,7 +518,7 @@ SUITE(InteractorTest)
     //    SpDocument spDoc( new Document(m_libraryScope) );
     //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   ViewFactory::k_view_simple, spDoc.get());
+    //                                                   k_view_simple, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
     //    spDoc->notify_that_document_has_been_modified();
 

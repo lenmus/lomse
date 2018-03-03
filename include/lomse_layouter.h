@@ -42,6 +42,9 @@ class GraphicModel;
 class GmoBox;
 class ImoStyles;
 
+
+#define LOMSE_INFINITE_LENGTH   11000000.0f //1.1x10^7 LU = 110 m = 523 DIN A4 vertical pages
+
 //----------------------------------------------------------------------------------
 // Layouter
 // Abstract class to implement the layout algorithm for any document content item.
@@ -57,6 +60,7 @@ protected:
     Layouter* m_pCurLayouter;
     ImoContentObj* m_pItem;
     bool m_fAddShapesToModel;
+    int m_constrains;
 
     //position (relative to page origin) and available space in current box
     LUnits m_availableWidth;
@@ -82,6 +86,7 @@ public:
     virtual void save_score_layouter(Layouter* pLayouter) {
         m_pParentLayouter->save_score_layouter(pLayouter);
     }
+    inline void set_constrains(int constrains) { m_constrains = constrains; }
 
     inline GraphicModel* get_graphic_model() { return m_pGModel; }
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
@@ -96,8 +101,8 @@ public:
 protected:
     virtual GmoBox* start_new_page();
 
-    Layouter* create_layouter(ImoContentObj* pItem);
-    void layout_item(ImoContentObj* pItem, GmoBox* pParentBox);
+    Layouter* create_layouter(ImoContentObj* pItem, int constrains=0);
+    void layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains);
 
     void set_cursor_and_available_space();
 

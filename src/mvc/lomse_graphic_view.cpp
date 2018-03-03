@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -79,6 +79,9 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
         case k_view_horizontal_book:
             return LOMSE_NEW HorizontalBookView(libraryScope, pDrawer);
 
+        case k_view_single_system:
+            return LOMSE_NEW SingleSystemView(libraryScope, pDrawer);
+
         default:
         {
             LOMSE_LOG_ERROR("[ViewFactory::create_view] invalid view type");
@@ -108,6 +111,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pCaret(nullptr)
     , m_pCursor(nullptr)
     , m_fTempoLineVisible(false)
+    , m_backgroundColor( Color(145, 156, 166) )
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
     m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);
@@ -267,6 +271,7 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     //AWARE: This code is executed in the sound thread
 
     std::lock_guard<std::mutex> lock(m_viewportMutex);
+    static Pixels m_xNew = 0;
     static Pixels m_yNew = 0;
 
     GraphicModel* pGModel = get_graphic_model();
@@ -283,66 +288,79 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     GmoBoxDocPage* pBoxPage = pBoxSystem->get_parent_doc_page();
 
     int iPage = pBoxPage->get_number() - 1;
-    double xSysLeft = double(pBoxSystem->get_left());
+    double xSliceLeft = double(pBS->get_left());
+    double xSliceRight = double(pBS->get_right());
     double ySysTop = double(pBoxSystem->get_top());
+    //double xSysRight = double(pBoxSystem->get_right());
+    double ySysBottom = ySysTop + double(pBoxSystem->get_height());
 
     //model point to screen returns shift from current viewport origin
-    double xPos = xSysLeft;
+    double xLeft = xSliceLeft;
     double yTop = ySysTop;
-    model_point_to_screen(&xPos, &yTop, iPage);
-    //Pixels vxSys = Pixels(xPos);
+    model_point_to_screen(&xLeft, &yTop, iPage);
+    //double xRight = xSysRight;
+    double xRight = xSliceRight;
+    double yBottom = ySysBottom;
+    model_point_to_screen(&xRight, &yBottom, iPage);
+    //AWARE: The next variables are relative: shift from current viewport origin
+    Pixels vxSliceLeft = Pixels(xLeft);
+    Pixels vxSliceRight = Pixels(xRight);
     Pixels vySysTop = Pixels(yTop);
+    //Pixels vxSysRight = Pixels(xRight);
+    Pixels vySysBottom = Pixels(yBottom);
 
 //    stringstream s;
 //    s << "vySysTop=" << vySysTop << ", vp.height=" << m_viewportSize.height
+//      << "vxSliceLeft=" << vxSliceLeft << ", vp.widtht=" << m_viewportSize.width
 //      << ", iPage=" << iPage << ", id=" << id;
 //    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
 
     //determine if scroll needed
-    Pixels xNew = 0;
-    Pixels yNew = 0;
-    bool fDoScroll = false;
-    //AWARE: vySystop is shift from current viewport origin
-    if (vySysTop < 0 || vySysTop > m_viewportSize.height)
-    {
-        //top of system before or after viewport. Move top of system to top of view
-        xNew = m_vxOrg;
-        yNew = m_vyOrg + vySysTop;
-        fDoScroll = true;
-    }
-    else
-    {
-        double xPos = xSysLeft;
-        double yBottom = ySysTop + double(pBoxSystem->get_height());
-        model_point_to_screen(&xPos, &yBottom, iPage);
-        //Pixels vxSys = Pixels(xPos);
-        Pixels vySysBottom = Pixels(yBottom);
+    Pixels xNew = m_vxOrg;
+    Pixels yNew = m_vyOrg;
 
-//        stringstream s;
-//        s << "vySysBottom=" << vySysBottom << ", vp.height=" << m_viewportSize.height;
-//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+    //Check if vertical movement needed:
+    bool fVerticalScroll = false;
+    // 1. Top of system must be visible
+    fVerticalScroll |= (vySysTop < 0);
+    fVerticalScroll |= (vySysTop > m_viewportSize.height);
+    // 2. Bottom of system not visible but enough height for the system
+    fVerticalScroll |= ((vySysBottom > m_viewportSize.height)
+                        && ((vySysBottom-vySysTop) < m_viewportSize.height));
 
-        //AWARE: vySysBottom is shift from current viewport origin
-        if (vySysBottom > m_viewportSize.height && vySysTop > 0)
-        {
-            //bottom of system out of sight. Move top of system to top of view
-            xNew = m_vxOrg;
-            yNew = m_vyOrg + vySysTop;
-            fDoScroll = true;
-        }
-    }
+    if (fVerticalScroll)
+        yNew += vySysTop;
+
+    //Check if horizontal movement needed:
+    Pixels leftMargin = 100.0;
+    bool fHorizontalScroll = false;
+    // 1. left of measure must be visible
+    fHorizontalScroll |= (vxSliceLeft < 0);
+    fHorizontalScroll |= (vxSliceLeft > (m_viewportSize.width-leftMargin));
+//    // 2. Move left of measure to left of screen unless end of system visible
+//    fHorizontalScroll |= (vxSysRight > m_viewportSize.width);
+    // 2. Right of measure not visible but enough width for the measure
+    fVerticalScroll |= ((vxSliceRight > (m_viewportSize.width-leftMargin))
+                        && ((vxSliceRight-vxSliceLeft) < (m_viewportSize.width-leftMargin)));
+
+    if (fHorizontalScroll)
+        xNew += vxSliceLeft - leftMargin;
+
 
     //request scroll if required
-    if (fDoScroll)
+    if (fVerticalScroll || fHorizontalScroll)
     {
 //        stringstream s;
 //        s << "Requesting scroll to yNew=" << yNew << ", m_vyOrg=" << m_vyOrg;
 //        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
-        if (m_yNew != yNew)
+        if (m_yNew != yNew || m_xNew != xNew)
+        {
             m_pInteractor->request_viewport_change(xNew, yNew);
+            m_xNew = xNew;
+            m_yNew = yNew;
+        }
 //        else
 //            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Optimization: no request");
-        m_yNew = yNew;
     }
 //    else
 //    {
@@ -531,7 +549,7 @@ void GraphicView::draw_graphic_model()
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
-    m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
+    m_options.background_color = m_backgroundColor;
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
     m_options.draw_anchor_objects = m_libraryScope.draw_anchor_objects();
@@ -1367,7 +1385,7 @@ bool GraphicView::is_valid_viewport()
 
 //=======================================================================================
 // SimpleView implementation
-// A graphic view with one page, no margins (i.e. LenMus SscoreAuxCtrol)
+// A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
 //=======================================================================================
 SimpleView::SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
@@ -1551,6 +1569,64 @@ void HorizontalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 
     *xWidth = m_pDrawer->LUnits_to_Pixels(width);
     *yHeight = m_pDrawer->LUnits_to_Pixels(height);
+}
+
+
+//=======================================================================================
+// SingleSystemView implementation
+//=======================================================================================
+SingleSystemView::SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDrawer)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::collect_page_bounds()
+{
+    GraphicModel* pGModel = get_graphic_model();
+    UPoint origin(0.0f, 0.0f);
+
+    m_pageBounds.clear();
+    GmoBoxDocPage* pPage = pGModel->get_page(0);
+    URect rect = pPage->get_bounds();
+    UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
+    m_pageBounds.push_back( URect(origin, bottomRight) );
+}
+
+//---------------------------------------------------------------------------------------
+int SingleSystemView::page_at_screen_point(double UNUSED(x), double UNUSED(y))
+{
+    return 0;       //single system view is only one page
+}
+
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::set_viewport_for_page_fit_full(Pixels screenWidth)
+{
+    set_viewport_at_page_center(screenWidth);
+}
+
+//---------------------------------------------------------------------------------------
+void SingleSystemView::get_view_size(Pixels* xWidth, Pixels* yHeight)
+{
+    *xWidth = 0;
+    *yHeight = 0;
+
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel && pGModel->get_num_pages() > 0)
+    {
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        URect rect = pPage->get_bounds();
+        *xWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+        *yHeight = m_pDrawer->LUnits_to_Pixels(rect.height);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool SingleSystemView::is_valid_for_this_view(Document* pDoc)
+{
+    return pDoc->get_num_content_items() == 1
+            && pDoc->get_content_item(0)->is_score();
 }
 
 

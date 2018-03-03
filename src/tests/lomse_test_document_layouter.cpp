@@ -455,14 +455,35 @@ SUITE(DocLayouterTest)
         delete pGModel;
     }
 
-    //TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasMainSizer)
-    //{
-    //    Document doc(m_libraryScope);
-    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-    //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-    //    MyDocLayouter dl(&doc );
-    //    CHECK( dl.get_main_sizer() != nullptr );
-    //}
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_fix_infinite_width)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(content (score (vers 2.0) "
+            "(instrument (musicData (clef G) )) )))" );
+        DocLayouter dl(&doc, m_libraryScope, k_infinite_width);
+
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_graphic_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_size().width != LOMSE_INFINITE_LENGTH );
+        CHECK( pPage->get_num_boxes() == 1 );
+
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        Pixels height = pBDPC->get_size().height;
+        CHECK( pBDPC->get_num_boxes() == 1 );
+
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_size().height == height );
+        CHECK( pBSP->get_num_boxes() == 1 );
+
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_size().height == height );
+
+        delete pGModel;
+    }
 
 
 };

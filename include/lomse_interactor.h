@@ -476,6 +476,20 @@ public:
     */
     virtual void set_rendering_option(int option, bool value);
 
+
+    /** Changes the background color for the View. By default all Views have a gray
+        background and the paper is white. Example, for suppressing the background:
+        @code
+            m_pPresenter = lomse.open_document(k_view_single_system, filename);
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+                spInteractor->set_rendering_buffer(&m_rbuf_window);
+                spInteractor->set_view_background( Color(255,255,255) );  //white
+                ...
+        @endcode
+    */
+    void set_view_background(Color color);
+
         //@}    //interface to GraphicView. Rederization
 
 

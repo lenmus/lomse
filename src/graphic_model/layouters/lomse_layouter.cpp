@@ -54,6 +54,7 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
     , m_pItemMainBox(nullptr)
     , m_pItem(pItem)
     , m_fAddShapesToModel(fAddShapesToModel)
+    , m_constrains(0)
 {
 }
 
@@ -87,12 +88,13 @@ GmoBox* Layouter::start_new_page()
 }
 
 //---------------------------------------------------------------------------------------
-void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
+void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains)
 {
     LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
         "Laying out id %d %s") % pItem->get_id() % pItem->get_name() ));
 
     m_pCurLayouter = create_layouter(pItem);
+    m_pCurLayouter->set_constrains(constrains);
 
     m_pCurLayouter->prepare_to_start_layout();
     while (!m_pCurLayouter->is_item_layouted())
@@ -162,11 +164,14 @@ void Layouter::add_end_margins()
 }
 
 //---------------------------------------------------------------------------------------
-Layouter* Layouter::create_layouter(ImoContentObj* pItem)
+Layouter* Layouter::create_layouter(ImoContentObj* pItem, int constrains)
 {
     Layouter* pLayouter = LayouterFactory::create_layouter(pItem, this);
     if (pItem->is_score())
+    {
         save_score_layouter(pLayouter);
+        pLayouter->set_constrains(constrains);
+    }
     return pLayouter;
 }
 

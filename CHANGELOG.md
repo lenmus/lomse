@@ -1,16 +1,34 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.23.0
+[Since last version] 0.24.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.23.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.24.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.24.0] (4/Mar/2018)
+=============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.23.0
+
+Removed enum in ViewFactory. All values 'ViewFactory::k_view_xxxxx' must
+be replaced by just 'k_view_xxxxx'.
+
+
+##### COMPATIBLE CHANGES
+
+	* Added a new View (SingeSystemView) to display scores as a single
+	  system.
+	* Added method Interactor::set_view_background() for customizing
+	  the background color in all views.
 
 
 
@@ -610,7 +628,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.23.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.24.0...HEAD
+[0.24.0]: https://github.com/lenmus/lomse/compare/0.23.0...0.24.0
 [0.23.0]: https://github.com/lenmus/lomse/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/lenmus/lomse/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/lenmus/lomse/compare/0.20.0...0.21.0
