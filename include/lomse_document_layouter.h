@@ -81,6 +81,7 @@ public:
 
 protected:
     void layout_content();
+    void fix_document_size();
 
     GmoBoxDocPage* create_document_page();
     void assign_paper_size_to(GmoBox* pBox);

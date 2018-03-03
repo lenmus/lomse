@@ -530,14 +530,14 @@ LUnits ScoreLayouter::distance_to_top_of_system(int iSystem, bool fFirstInPage)
         return 0.0f;
 }
 
-//---------------------------------------------------------------------------------------
-void ScoreLayouter::determine_staff_lines_horizontal_position(int iInstr)
-{
-    LUnits indent = get_system_indent();
-    LUnits width = m_pCurBoxSystem->get_usable_width();
-    m_pPartsEngraver->set_staves_horizontal_position(iInstr, m_cursor.x, width, indent);
-    m_cursor.x += indent;
-}
+////---------------------------------------------------------------------------------------
+//void ScoreLayouter::determine_staff_lines_horizontal_position(int iInstr)
+//{
+//    LUnits indent = get_system_indent();
+//    LUnits width = m_pCurBoxSystem->get_usable_width();
+//    m_pPartsEngraver->set_staves_horizontal_position(iInstr, m_cursor.x, width, indent);
+//    m_cursor.x += indent;
+//}
 
 //---------------------------------------------------------------------------------------
 LUnits ScoreLayouter::determine_top_space(int iInstr, bool fFirstSystemInScore,

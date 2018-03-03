@@ -308,15 +308,15 @@ void PartsEngraver::engrave_names_and_brackets(bool fDrawStafflines, GmoBoxSyste
 
 //---------------------------------------------------------------------------------------
 void PartsEngraver::set_position_and_width_for_staves(LUnits indent, UPoint org,
-                                                      GmoBoxSystem* pBox)
+                                                      GmoBoxSystem* pBoxSystem)
 {
     //For engraving staffobjs it is necessary to know the staves position.
     //Now, once the system box is created, instrument engravers will compute
     //staves position, width and vertical distance between staves. The
     //vertical distance is standard, based only on staves margins.
 
-    LUnits width = pBox->get_usable_width();
-    LUnits left = pBox->get_left();
+    LUnits width = pBoxSystem->get_usable_width();
+    LUnits left = pBoxSystem->get_left();
 
     std::vector<GroupEngraver*>::iterator itG;
     for (itG = m_groupEngravers.begin(); itG != m_groupEngravers.end(); ++itG)

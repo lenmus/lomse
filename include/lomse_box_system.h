@@ -75,6 +75,7 @@ public:
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
     void add_num_staves_for_instrument(int staves);
+    inline vector<GmoShapeStaff*>& get_staff_shapes() { return m_staffShapes; }
 
     //hit tests related
     int nearest_staff_to_point(LUnits y);

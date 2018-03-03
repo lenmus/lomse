@@ -271,6 +271,7 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     //AWARE: This code is executed in the sound thread
 
     std::lock_guard<std::mutex> lock(m_viewportMutex);
+    static Pixels m_xNew = 0;
     static Pixels m_yNew = 0;
 
     GraphicModel* pGModel = get_graphic_model();
@@ -287,66 +288,79 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
     GmoBoxDocPage* pBoxPage = pBoxSystem->get_parent_doc_page();
 
     int iPage = pBoxPage->get_number() - 1;
-    double xSysLeft = double(pBoxSystem->get_left());
+    double xSliceLeft = double(pBS->get_left());
+    double xSliceRight = double(pBS->get_right());
     double ySysTop = double(pBoxSystem->get_top());
+    //double xSysRight = double(pBoxSystem->get_right());
+    double ySysBottom = ySysTop + double(pBoxSystem->get_height());
 
     //model point to screen returns shift from current viewport origin
-    double xPos = xSysLeft;
+    double xLeft = xSliceLeft;
     double yTop = ySysTop;
-    model_point_to_screen(&xPos, &yTop, iPage);
-    //Pixels vxSys = Pixels(xPos);
+    model_point_to_screen(&xLeft, &yTop, iPage);
+    //double xRight = xSysRight;
+    double xRight = xSliceRight;
+    double yBottom = ySysBottom;
+    model_point_to_screen(&xRight, &yBottom, iPage);
+    //AWARE: The next variables are relative: shift from current viewport origin
+    Pixels vxSliceLeft = Pixels(xLeft);
+    Pixels vxSliceRight = Pixels(xRight);
     Pixels vySysTop = Pixels(yTop);
+    //Pixels vxSysRight = Pixels(xRight);
+    Pixels vySysBottom = Pixels(yBottom);
 
 //    stringstream s;
 //    s << "vySysTop=" << vySysTop << ", vp.height=" << m_viewportSize.height
+//      << "vxSliceLeft=" << vxSliceLeft << ", vp.widtht=" << m_viewportSize.width
 //      << ", iPage=" << iPage << ", id=" << id;
 //    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
 
     //determine if scroll needed
-    Pixels xNew = 0;
-    Pixels yNew = 0;
-    bool fDoScroll = false;
-    //AWARE: vySystop is shift from current viewport origin
-    if (vySysTop < 0 || vySysTop > m_viewportSize.height)
-    {
-        //top of system before or after viewport. Move top of system to top of view
-        xNew = m_vxOrg;
-        yNew = m_vyOrg + vySysTop;
-        fDoScroll = true;
-    }
-    else
-    {
-        double xPos = xSysLeft;
-        double yBottom = ySysTop + double(pBoxSystem->get_height());
-        model_point_to_screen(&xPos, &yBottom, iPage);
-        //Pixels vxSys = Pixels(xPos);
-        Pixels vySysBottom = Pixels(yBottom);
+    Pixels xNew = m_vxOrg;
+    Pixels yNew = m_vyOrg;
 
-//        stringstream s;
-//        s << "vySysBottom=" << vySysBottom << ", vp.height=" << m_viewportSize.height;
-//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+    //Check if vertical movement needed:
+    bool fVerticalScroll = false;
+    // 1. Top of system must be visible
+    fVerticalScroll |= (vySysTop < 0);
+    fVerticalScroll |= (vySysTop > m_viewportSize.height);
+    // 2. Bottom of system not visible but enough height for the system
+    fVerticalScroll |= ((vySysBottom > m_viewportSize.height)
+                        && ((vySysBottom-vySysTop) < m_viewportSize.height));
 
-        //AWARE: vySysBottom is shift from current viewport origin
-        if (vySysBottom > m_viewportSize.height && vySysTop > 0)
-        {
-            //bottom of system out of sight. Move top of system to top of view
-            xNew = m_vxOrg;
-            yNew = m_vyOrg + vySysTop;
-            fDoScroll = true;
-        }
-    }
+    if (fVerticalScroll)
+        yNew += vySysTop;
+
+    //Check if horizontal movement needed:
+    Pixels leftMargin = 100.0;
+    bool fHorizontalScroll = false;
+    // 1. left of measure must be visible
+    fHorizontalScroll |= (vxSliceLeft < 0);
+    fHorizontalScroll |= (vxSliceLeft > (m_viewportSize.width-leftMargin));
+//    // 2. Move left of measure to left of screen unless end of system visible
+//    fHorizontalScroll |= (vxSysRight > m_viewportSize.width);
+    // 2. Right of measure not visible but enough width for the measure
+    fVerticalScroll |= ((vxSliceRight > (m_viewportSize.width-leftMargin))
+                        && ((vxSliceRight-vxSliceLeft) < (m_viewportSize.width-leftMargin)));
+
+    if (fHorizontalScroll)
+        xNew += vxSliceLeft - leftMargin;
+
 
     //request scroll if required
-    if (fDoScroll)
+    if (fVerticalScroll || fHorizontalScroll)
     {
 //        stringstream s;
 //        s << "Requesting scroll to yNew=" << yNew << ", m_vyOrg=" << m_vyOrg;
 //        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
-        if (m_yNew != yNew)
+        if (m_yNew != yNew || m_xNew != xNew)
+        {
             m_pInteractor->request_viewport_change(xNew, yNew);
+            m_xNew = xNew;
+            m_yNew = yNew;
+        }
 //        else
 //            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Optimization: no request");
-        m_yNew = yNew;
     }
 //    else
 //    {
@@ -1565,7 +1579,7 @@ SingleSystemView::SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDr
     : GraphicView(libraryScope, pDrawer)
 {
     //m_backgroundColor = Color(255, 255, 255);   //white
-    m_backgroundColor = Color(15, 20, 35);   //for testing
+    m_backgroundColor = Color(200, 200, 200);   //for testing
 }
 
 //---------------------------------------------------------------------------------------

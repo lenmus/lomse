@@ -36,7 +36,6 @@
 #include "lomse_score_layouter.h"
 #include "lomse_calligrapher.h"
 
-    #include <lomse_document.h>
 
 namespace lomse
 {
@@ -79,6 +78,7 @@ void DocLayouter::layout_document()
 {
     start_new_page();
     layout_content();
+    fix_document_size();
 }
 
 //---------------------------------------------------------------------------------------
@@ -144,6 +144,37 @@ void DocLayouter::add_headers_to_page(GmoBoxDocPage* UNUSED(pPage))
 void DocLayouter::add_footers_to_page(GmoBoxDocPage* UNUSED(pPage))
 {
     //TODO: DocLayouter::add_footers_to_page
+}
+
+//---------------------------------------------------------------------------------------
+void DocLayouter::fix_document_size()
+{
+    if (m_constrains & k_infinite_width)
+    {
+        GmoBoxDocPage* pPage = static_cast<GmoBoxDocPage*>(m_pItemMainBox);
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);     //System
+
+        //View height is determined by BoxDocPageContent.
+        //It is only necessary to fix BoxDocPage
+        LUnits height = pBDPC->get_size().height + 2.0 * pBDPC->get_origin().y;
+        pPage->set_height(height);
+
+        //View width is determined by BoxSystem.
+        //It is necessary to fix width in BoxDocPage, BoxDocPageContent and BoxScorePage
+        LUnits width = pBSys->get_size().width+ pBSys->get_origin().x;
+        pBSys->set_width(width);
+        pBSP->set_width(width);
+        pBDPC->set_width(width);
+        width += pBSP->get_origin().x;
+        pPage->set_width(width);
+    }
+
+    if (m_constrains & k_infinite_height)
+    {
+        //TODO: free flow view
+    }
 }
 
 //---------------------------------------------------------------------------------------
