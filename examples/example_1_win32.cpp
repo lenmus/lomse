@@ -135,7 +135,7 @@ void create_bitmap_for_the_rendering_buffer(unsigned width, unsigned height)
     m_rbuf_window.attach(m_bitmap.buf(), 
                          m_bitmap.width(),
                          m_bitmap.height(),
-                         -m_bitmap.stride()
+                         m_bitmap.stride()
                         );
     m_view_needs_redraw = true;
 }
@@ -582,6 +582,8 @@ void Bitmap::draw(HDC h_dc, const RECT *device_rect, const RECT *bmp_rect) const
         dvc_width  = device_rect->right  - device_rect->left;
         dvc_height = device_rect->bottom - device_rect->top;
     }
+
+	m_bmp->bmiHeader.biHeight = -abs(m_bmp->bmiHeader.biHeight);
 
     if(dvc_width != bmp_width || dvc_height != bmp_height)
     {
