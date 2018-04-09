@@ -376,7 +376,7 @@ void SpAlgGourlay::do_spacing(int iCol, bool fTrace)
 
     if (fTrace || m_libraryScope.dump_column_tables())
     {
-        dbgLogger << endl << to_simple_string( microsec_clock::local_time() )
+        dbgLogger << endl << boost::posix_time::to_simple_string( boost::posix_time::microsec_clock::local_time() )
                   << " ******************* Before spacing" << endl;
         m_columns[iCol]->dump(dbgLogger);
     }
