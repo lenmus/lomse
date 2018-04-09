@@ -479,7 +479,7 @@ void ColumnsBuilder::determine_staves_vertical_position()
 {
     int numInstrs = m_pScore->get_num_instruments();
 
-    m_SliceInstrHeights.reserve(numInstrs);
+    m_SliceInstrHeights.resize(numInstrs);
 
     LUnits yPos = 0.0f;
     for (int iInstr = 0; iInstr < numInstrs; iInstr++)
@@ -607,12 +607,8 @@ ColumnData::~ColumnData()
 //---------------------------------------------------------------------------------------
 void ColumnData::reserve_space_for_prolog_clefs_keys(int numStaves)
 {
-    m_prologClefs.clear();
-    m_prologClefs.reserve(numStaves);
     m_prologClefs.assign(numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
 
-    m_prologKeys.clear();
-    m_prologKeys.reserve(numStaves);
     m_prologKeys.assign(numStaves, (ColStaffObjsEntry*)nullptr);
 }
 

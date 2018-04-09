@@ -204,7 +204,7 @@ void TableLayouter::determine_width_for_columns()
 {
     //TODO: For now width will be assigned based on column style.
 
-    m_columnsWidth.reserve(m_numCols);
+    m_columnsWidth.resize(m_numCols);
     m_tableWidth = 0.0f;
     std::list<ImoStyle*>& cols = m_pTable->get_column_styles();
     std::list<ImoStyle*>::iterator it;

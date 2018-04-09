@@ -109,7 +109,7 @@ void SoundEventsTable::create_table()
 void SoundEventsTable::program_sounds_for_instruments()
 {
 	int numInstruments = m_pScore->get_num_instruments();
-    m_channels.reserve(numInstruments);
+    m_channels.resize(numInstruments);
 
     for (int iInstr = 0; iInstr < numInstruments; iInstr++)
     {

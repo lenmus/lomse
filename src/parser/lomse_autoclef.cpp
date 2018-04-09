@@ -69,23 +69,13 @@ void AutoClef::find_staves_needing_clef()
     int staves = m_pCursor->get_num_staves();
     int stavesWithNotes = 0;
 
-    m_fNeedsClef.reserve(staves);
     m_fNeedsClef.assign(staves, false);
-
-    m_pAt.reserve(staves);
     m_pAt.assign(staves, (ImoStaffObj*)nullptr);
-
-    m_maxPitch.reserve(staves);
     m_maxPitch.assign(staves, k_undefined_fpitch);
-
-    m_minPitch.reserve(staves);
     m_minPitch.assign(staves, k_undefined_fpitch);
-
-    m_numNotes.reserve(staves);
     m_numNotes.assign(staves, 0);
 
     vector<bool> fHasNotes;         //true if staff i has pitched notes
-    fHasNotes.reserve(staves);
     fHasNotes.assign(staves, false);
 
     while(!m_pCursor->is_end())

@@ -1477,7 +1477,6 @@ protected:
     {
         m_fNewMeasure = true;
         m_curMeasure = 0;
-        m_rCurTime.reserve(k_max_voices);
         m_rCurTime.assign(k_max_voices, 0.0);
     }
 

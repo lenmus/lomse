@@ -57,7 +57,7 @@ StaffObjsCursor::~StaffObjsCursor()
 //---------------------------------------------------------------------------------------
 void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
 {
-    m_staffIndex.reserve(m_numInstruments);
+    m_staffIndex.resize(m_numInstruments);
     m_numStaves = 0;
     for (int i=0; i < m_numInstruments; ++i)
     {
@@ -65,13 +65,8 @@ void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
         m_numStaves += pScore->get_instrument(i)->get_num_staves();
     }
 
-    m_clefs.reserve(m_numStaves);
     m_clefs.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
-
-    m_keys.reserve(m_numStaves);
     m_keys.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);
-
-    m_times.reserve(m_numInstruments);
     m_times.assign(m_numInstruments, (ColStaffObjsEntry*)nullptr);
 }
 
