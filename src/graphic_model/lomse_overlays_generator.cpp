@@ -145,7 +145,7 @@ void OverlaysGenerator::save_rendering_buffer()
     unsigned w = m_pCanvasBuffer->width();
     unsigned h = m_pCanvasBuffer->height();
     int stride = m_pCanvasBuffer->stride();
-    size_t bytes = h * stride;
+    size_t bytes = h * abs(stride);
     if (m_pSaveBytes == nullptr || bytes != m_savedBuffer.height() * m_savedBuffer.stride())
     {
         delete m_pSaveBytes;
