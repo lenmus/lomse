@@ -241,7 +241,7 @@ $(document).ready(function(){initNavTree('example_1_win32_8cpp-example.html','')
 <div class="line">    m_rbuf_window.attach(m_bitmap.buf(), </div>
 <div class="line">                         m_bitmap.width(),</div>
 <div class="line">                         m_bitmap.height(),</div>
-<div class="line">                         -m_bitmap.stride()</div>
+<div class="line">                         m_bitmap.stride()</div>
 <div class="line">                        );</div>
 <div class="line">    m_view_needs_redraw = <span class="keyword">true</span>;</div>
 <div class="line">}</div>
@@ -689,6 +689,8 @@ $(document).ready(function(){initNavTree('example_1_win32_8cpp-example.html','')
 <div class="line">        dvc_height = device_rect-&gt;bottom - device_rect-&gt;top;</div>
 <div class="line">    }</div>
 <div class="line"></div>
+<div class="line">    m_bmp-&gt;bmiHeader.biHeight = -abs(m_bmp-&gt;bmiHeader.biHeight);</div>
+<div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span>(dvc_width != bmp_width || dvc_height != bmp_height)</div>
 <div class="line">    {</div>
 <div class="line">        ::SetStretchBltMode(h_dc, COLORONCOLOR);</div>
@@ -753,7 +755,7 @@ $(document).ready(function(){initNavTree('example_1_win32_8cpp-example.html','')
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Mar 3 2018 17:06:52 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Apr 10 2018 11:43:55 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
