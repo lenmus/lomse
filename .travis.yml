@@ -30,7 +30,3 @@ script:
 after_success:
   - ./bin/testlib
 
-notifications:
-  email:
-    - s.cecilio@gmail.com
-
