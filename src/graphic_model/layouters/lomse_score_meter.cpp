@@ -72,7 +72,7 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
     , m_maxLineSpace(0.0f)
     , m_pScore(pScore)
 {
-    m_staffIndex.reserve(numInstruments);
+    m_staffIndex.resize(numInstruments);
     int staves = 0;
     for (int iInstr=0; iInstr < numInstruments; ++iInstr)
     {
@@ -127,7 +127,7 @@ void ScoreMeter::get_options(ImoScore* pScore)
 void ScoreMeter::get_staff_spacing(ImoScore* pScore)
 {
     int instruments = pScore->get_num_instruments();
-    m_staffIndex.reserve(instruments);
+    m_staffIndex.resize(instruments);
     int staves = 0;
     for (int iInstr=0; iInstr < instruments; ++iInstr)
     {

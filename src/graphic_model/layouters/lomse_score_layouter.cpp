@@ -762,11 +762,8 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
     , m_lastBreakTime(0.0f)
 {
     m_numLines = pSysCursor->get_num_lines();
-    m_measures.reserve(numInstruments);
     m_measures.assign(numInstruments, 0.0f);
-    m_beamed.reserve(m_numLines);
     m_beamed.assign(m_numLines, false);
-    m_tied.reserve(m_numLines);
     m_tied.assign(m_numLines, false);
 
     determine_measure_mean_time(pSysCursor);
@@ -1571,7 +1568,6 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
     }
 
     int numBreaks = m_entries[i].system;
-    m_breaks.reserve(numBreaks);
     m_breaks.assign(numBreaks, 0);
 
     while (m_entries[i].predecessor > 0)

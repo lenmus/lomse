@@ -297,14 +297,8 @@ void SpAlgGourlay::new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColu
     if (entryType == TimeSlice::k_prolog)
     {
         int numStaves = m_pScoreMeter->num_staves();
-        m_prologClefs.clear();
-        m_prologClefs.reserve(numStaves);
         m_prologClefs.assign(numStaves, false);
-        m_prologKeys.clear();
-        m_prologKeys.reserve(numStaves);
         m_prologKeys.assign(numStaves, false);
-        m_prologTimes.clear();
-        m_prologTimes.reserve(numStaves);
         m_prologTimes.assign(numStaves, false);
 
         m_lastPrologTime = pEntry->time();
@@ -1077,7 +1071,7 @@ int TimeSlice::collect_barlines_information(int numInstruments)
 
     //vector: one entry per instrument. Value = barline type or -1 if no barline
     vector<int> barlines;
-    barlines.reserve(numInstruments);
+    barlines.resize(numInstruments);
 
     ColStaffObjsEntry* pEntry = m_firstEntry;
     for (int i=0; i < m_numEntries; ++i, pEntry = pEntry->get_next())
@@ -1446,7 +1440,6 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     //vector for widths
     int numStaves = pMeter->num_staves();
     m_numStaves = numStaves;
-    m_widths.reserve(numStaves);
     m_widths.assign(numStaves, 0.0f);
 
     //loop for computing widths
@@ -1554,7 +1547,6 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
 {
     //vector for current position on each staff
     vector<LUnits> positions;
-    positions.reserve(m_numStaves);
     positions.assign(m_numStaves, 0.0f);
     for (int i=0; i < m_numStaves; ++i)
         positions[i] = xPos - m_widths[i] + m_xLeft;
@@ -1643,7 +1635,6 @@ void ColumnDataGourlay::dump(ostream& outStream, bool fOrdered)
 //---------------------------------------------------------------------------------------
 void ColumnDataGourlay::set_num_entries(int numSlices)
 {
-    m_orderedSlices.reserve(numSlices);
     m_orderedSlices.assign(numSlices, (TimeSlice*)nullptr);   //GCC 4.8.4 complains if nullptr not casted
 }
 

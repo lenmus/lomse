@@ -87,10 +87,10 @@ void PartsEngraver::create_group_engravers()
                 LOMSE_NEW GroupEngraver(m_libraryScope, m_pMeter, pGroup, m_pScore, this) );
         }
 
-        m_iGrpName.reserve(numGrps);
-        m_iGrpBracketFirst.reserve(numGrps);
-        m_iGrpAbbrev.reserve(numGrps);
-        m_iGrpBracketOther.reserve(numGrps);
+        m_iGrpName.resize(numGrps);
+        m_iGrpBracketFirst.resize(numGrps);
+        m_iGrpAbbrev.resize(numGrps);
+        m_iGrpBracketOther.resize(numGrps);
     }
 }
 
@@ -121,10 +121,10 @@ void PartsEngraver::create_instrument_engravers()
         pPrevEngrv = pEngrv;
     }
 
-    m_iInstrName.reserve(numInstr);
-    m_iInstrBracketFirst.reserve(numInstr);
-    m_iInstrAbbrev.reserve(numInstr);
-    m_iInstrBracketOther.reserve(numInstr);
+    m_iInstrName.resize(numInstr);
+    m_iInstrBracketFirst.resize(numInstr);
+    m_iInstrAbbrev.resize(numInstr);
+    m_iInstrBracketOther.resize(numInstr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -551,9 +551,9 @@ InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
     , m_pNextInstrEngr(nullptr)
 {
     int numStaves = m_pInstr->get_num_staves();
-    m_staffTop.reserve(numStaves);
-    m_staffTopLine.reserve(numStaves);
-    m_lineThickness.reserve(numStaves);
+    m_staffTop.resize(numStaves);
+    m_staffTopLine.resize(numStaves);
+    m_lineThickness.resize(numStaves);
 }
 
 //---------------------------------------------------------------------------------------
