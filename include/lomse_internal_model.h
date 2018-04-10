@@ -49,7 +49,6 @@ typedef int TIntAttribute;
 using namespace std;
 
 #include <boost/variant.hpp>
-using namespace boost;
 
 ///@cond INTERNALS
 namespace lomse

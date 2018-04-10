@@ -42,7 +42,6 @@
 #if (LOMSE_USE_BOOST_ASIO == 1)
     #include <boost/asio.hpp>
 #endif
-using namespace boost;
 
 #include <queue>
 using namespace std;

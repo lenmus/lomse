@@ -55,9 +55,6 @@ using namespace std;
 #include "boost/date_time/local_time/local_time.hpp"
 
 using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
-using namespace boost::local_time;
 
 
 namespace lomse
