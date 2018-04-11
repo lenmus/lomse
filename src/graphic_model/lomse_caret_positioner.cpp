@@ -115,7 +115,7 @@ DocCursorState CaretPositioner::click_point_to_cursor_state(GraphicModel* pGMode
         return DocCursorState(topId, innerState);
     }
 	else
-        return DocCursorState(pTopImo->get_id(), SharedPtr<ElementCursorState>());
+        return DocCursorState(pTopImo->get_id(), std::shared_ptr<ElementCursorState>());
 }
 
 
@@ -528,7 +528,7 @@ SpElementCursorState ScoreCaretPositioner::click_point_to_cursor_state(int iPage
     }
 
     //other cases: ignore click
-    return SharedPtr<ElementCursorState>();
+    return std::shared_ptr<ElementCursorState>();
 }
 
 

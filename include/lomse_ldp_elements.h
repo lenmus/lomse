@@ -31,13 +31,12 @@
 #define __LOMSE_LDP_ELEMENTS_H__
 
 #include <vector>
+#include <cassert>
 
 #include "lomse_build_options.h"
 #include "lomse_tree.h"
 #include "lomse_visitor.h"
 #include "lomse_basic.h"
-
-#include <boost/shared_ptr.hpp>
 
 
 namespace lomse
@@ -277,7 +276,7 @@ enum ELdpElement
 //forward declarations
 class LdpElement;
 class ImoObj;
-typedef SharedPtr<LdpElement>    SpLdpElement;
+typedef std::shared_ptr<LdpElement>    SpLdpElement;
 
 //---------------------------------------------------------------------------------------
 // A generic LDP element representation.
@@ -376,9 +375,9 @@ class LdpObject : public LdpElement
 
 // A tree of LdpElements
 typedef Tree<LdpElement>  LdpTree;
-typedef SharedPtr<LdpTree> SpLdpTree;
+typedef std::shared_ptr<LdpTree> SpLdpTree;
 typedef TreeNode<LdpElement> LdpNode;
-typedef SharedPtr<LdpNode> SpLdpNode;
+typedef std::shared_ptr<LdpNode> SpLdpNode;
 
 
 }   //namespace lomse

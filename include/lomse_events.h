@@ -55,10 +55,10 @@ class SelectionSet;
 class GmoObj;
 
 class Interactor;
-typedef WeakPtr<Interactor>     WpInteractor;
+typedef std::weak_ptr<Interactor>     WpInteractor;
 
 class Document;
-typedef WeakPtr<Document>       WpDocument;
+typedef std::weak_ptr<Document>       WpDocument;
 
 
 //observer pattern
@@ -167,7 +167,7 @@ protected:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventInfo>  SpEventInfo;
+typedef std::shared_ptr<EventInfo>  SpEventInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -212,7 +212,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventDoc>  SpEventDoc;
+typedef std::shared_ptr<EventDoc>  SpEventDoc;
 
 
 //---------------------------------------------------------------------------------------
@@ -320,7 +320,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventPaint>  SpEventPaint;
+typedef std::shared_ptr<EventPaint>  SpEventPaint;
 
 
 //---------------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventAction>  SpEventAction;
+typedef std::shared_ptr<EventAction>  SpEventAction;
 
 
 //---------------------------------------------------------------------------------------
@@ -394,7 +394,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventPlayback>  SpEventPlayback;
+typedef std::shared_ptr<EventPlayback>  SpEventPlayback;
 
 
 //---------------------------------------------------------------------------------------
@@ -504,7 +504,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventUpdateViewport>  SpEventUpdateViewport;
+typedef std::shared_ptr<EventUpdateViewport>  SpEventUpdateViewport;
 
 
 //---------------------------------------------------------------------------------------
@@ -621,7 +621,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventUpdateUI>  SpEventUpdateUI;
+typedef std::shared_ptr<EventUpdateUI>  SpEventUpdateUI;
 
 
 //---------------------------------------------------------------------------------------
@@ -768,7 +768,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventMouse>  SpEventMouse;
+typedef std::shared_ptr<EventMouse>  SpEventMouse;
 
 
 //---------------------------------------------------------------------------------------
@@ -901,7 +901,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventPlayCtrl>  SpEventPlayCtrl;
+typedef std::shared_ptr<EventPlayCtrl>  SpEventPlayCtrl;
 
 
 //---------------------------------------------------------------------------------------
@@ -983,7 +983,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventEndOfPlayback>  SpEventEndOfPlayback;
+typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 
 
 
@@ -1113,7 +1113,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventScoreHighlight>  SpEventScoreHighlight;
+typedef std::shared_ptr<EventScoreHighlight>  SpEventScoreHighlight;
 
 
 //---------------------------------------------------------------------------------------
@@ -1259,7 +1259,7 @@ public:
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef SharedPtr<EventControlPointMoved>  SpEventControlPointMoved;
+typedef std::shared_ptr<EventControlPointMoved>  SpEventControlPointMoved;
 
 
 //=======================================================================================

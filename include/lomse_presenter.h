@@ -50,21 +50,21 @@ class View;
 class LibraryScope;
 
 class Document;
-typedef SharedPtr<Document>     SpDocument;
-typedef WeakPtr<Document>       WpDocument;
+typedef std::shared_ptr<Document>     SpDocument;
+typedef std::weak_ptr<Document>       WpDocument;
 
 class Interactor;
 /** A shared pointer for an Interactor.
     @ingroup typedefs
     @#include <lomse_presenter.h>
 */
-typedef SharedPtr<Interactor>   SpInteractor;
+typedef std::shared_ptr<Interactor>   SpInteractor;
 
 /** A weak pointer for an Interactor.
     @ingroup typedefs
     @#include <lomse_presenter.h>
 */
-typedef WeakPtr<Interactor>     WpInteractor;
+typedef std::weak_ptr<Interactor>     WpInteractor;
 
 
 //---------------------------------------------------------------------------------------

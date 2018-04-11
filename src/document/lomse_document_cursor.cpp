@@ -274,7 +274,7 @@ void DocContentCursor::to_end()
 SpElementCursorState DocContentCursor::get_state()
 {
     //TODO: Not needed. Perhaps DocContentCursor should not derive from ElementCursor?
-    return SharedPtr<ElementCursorState>();
+    return std::shared_ptr<ElementCursorState>();
 }
 
 //---------------------------------------------------------------------------------------
@@ -287,7 +287,7 @@ void DocContentCursor::restore_state(SpElementCursorState UNUSED(spState))
 SpElementCursorState DocContentCursor::find_previous_pos_state()
 {
     //TODO: Not needed. Perhaps DocContentCursor should not derive from ElementCursor?
-    return SharedPtr<ElementCursorState>();
+    return std::shared_ptr<ElementCursorState>();
 }
 
 
@@ -558,7 +558,7 @@ DocCursorState DocCursor::find_previous_pos_state()
 		return DocCursorState(id, m_pInnerCursor->find_previous_pos_state());
 	else
 		return DocCursorState(m_outerCursor.get_prev_id(),
-                              SharedPtr<ElementCursorState>());
+                              std::shared_ptr<ElementCursorState>());
 }
 
 //---------------------------------------------------------------------------------------
@@ -632,7 +632,7 @@ DocCursorState DocCursor::get_state()
     if (is_inside_terminal_node())
 		return DocCursorState(get_parent_id(), m_pInnerCursor->get_state());
 	else
-        return DocCursorState(get_pointee_id(), SharedPtr<ElementCursorState>());
+        return DocCursorState(get_pointee_id(), std::shared_ptr<ElementCursorState>());
 }
 
 //---------------------------------------------------------------------------------------
