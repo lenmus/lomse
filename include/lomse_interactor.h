@@ -64,11 +64,11 @@ class Task;
 class Handler;
 
 class Document;
-typedef SharedPtr<Document>     SpDocument;
-typedef WeakPtr<Document>       WpDocument;
+typedef std::shared_ptr<Document>     SpDocument;
+typedef std::weak_ptr<Document>       WpDocument;
 
 class GmoShape;
-typedef SharedPtr<GmoShape>  SpGmoShape;
+typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
 //some constants for improving code legibillity
 #define k_no_redraw     false   //do not force view redraw
@@ -140,7 +140,7 @@ enum EEventFlag
 class Interactor : public EventHandler
                  , public EventNotifier
                  , public Observable
-                 , public EnableSharedFromThis<Interactor>
+                 , public std::enable_shared_from_this<Interactor>
 {
 protected:
     LibraryScope&   m_libScope;
@@ -1283,7 +1283,7 @@ public:
                DocCommandExecuter* pExec);
     virtual ~Interactor();
 
-    inline SharedPtr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
+    inline std::shared_ptr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
 
     //mandatory override required by EventHandler
 	void handle_event(SpEventInfo pEvent);
@@ -1377,8 +1377,8 @@ protected:
 
 };
 
-typedef SharedPtr<Interactor>   SpInteractor;
-typedef WeakPtr<Interactor>     WpInteractor;
+typedef std::shared_ptr<Interactor>   SpInteractor;
+typedef std::weak_ptr<Interactor>     WpInteractor;
 
 ////---------------------------------------------------------------------------------------
 ////A view to edit the document in full page

@@ -36,7 +36,6 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 
-//#include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition_variable.hpp>
 #if (LOMSE_USE_BOOST_ASIO == 1)

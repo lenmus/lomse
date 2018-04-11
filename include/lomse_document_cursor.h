@@ -137,7 +137,7 @@ public:
 
 };
 
-typedef SharedPtr<ElementCursorState>  SpElementCursorState;
+typedef std::shared_ptr<ElementCursorState>  SpElementCursorState;
 
 
 //---------------------------------------------------------------------------------------
@@ -234,7 +234,7 @@ public:
     }
 };
 
-typedef SharedPtr<ScoreCursorState>  SpScoreCursorState;
+typedef std::shared_ptr<ScoreCursorState>  SpScoreCursorState;
 
 
 //---------------------------------------------------------------------------------------

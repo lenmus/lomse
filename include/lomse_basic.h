@@ -34,6 +34,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 using namespace std;
 
 
@@ -49,30 +50,6 @@ using namespace std;
     #define UNUSED(x) /* x */
 #endif
 
-
-//---------------------------------------------------------------------------------------
-//if it is a C++11 compliant compiler use std shared_ptr, else use boost shared_ptr
-#if __cplusplus > 199711L
-    #include <memory>
-    namespace lomse
-    {
-        #define LOMSE_IS_USING_STD_SHARED_PTRS  1
-        #define SharedPtr std::shared_ptr
-        #define WeakPtr std::weak_ptr
-        #define EnableSharedFromThis  std::enable_shared_from_this
-    }
-#else
-    #include <boost/shared_ptr.hpp>
-    #include <boost/weak_ptr.hpp>
-    #include <boost/enable_shared_from_this.hpp>
-    namespace lomse
-    {
-        #define LOMSE_IS_USING_STD_SHARED_PTRS  0
-        #define SharedPtr boost::shared_ptr
-        #define WeakPtr boost::weak_ptr
-        #define EnableSharedFromThis  boost::enable_shared_from_this
-    }
-#endif
 
 namespace lomse
 {

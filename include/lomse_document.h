@@ -113,7 +113,7 @@ enum EDocLayoutOptions
 class LOMSE_EXPORT Document : public BlockLevelCreatorApi
                             , public EventNotifier
                             , public Observable
-                            , public EnableSharedFromThis<Document>
+                            , public std::enable_shared_from_this<Document>
 {
 protected:
     LibraryScope&   m_libraryScope;
@@ -528,7 +528,7 @@ public:
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
     /** Returns a shared pointer for this %Document. */
-    inline SharedPtr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
+    inline std::shared_ptr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
 
     //properties
     /** Returns @true if the %Document is editable.
@@ -645,8 +645,8 @@ protected:
 
 };
 
-typedef SharedPtr<Document>  SpDocument;
-typedef WeakPtr<Document>  WpDocument;
+typedef std::shared_ptr<Document>  SpDocument;
+typedef std::weak_ptr<Document>  WpDocument;
 
 
 }   //namespace lomse

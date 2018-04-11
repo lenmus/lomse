@@ -69,7 +69,7 @@ class SelectionHighlight;
 class SelectionSet;
 class AreaInfo;
 
-typedef SharedPtr<GmoShape>  SpGmoShape;
+typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
 
 ////---------------------------------------------------------------------------------------

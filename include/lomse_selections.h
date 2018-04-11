@@ -47,8 +47,8 @@ class ImoNoteRest;
 class ImoStaffObj;
 class SelectionSet;
 class Document;
-typedef SharedPtr<Document>     SpDocument;
-typedef WeakPtr<Document>       WpDocument;
+typedef std::shared_ptr<Document>     SpDocument;
+typedef std::weak_ptr<Document>       WpDocument;
 
 
 //---------------------------------------------------------------------------------------

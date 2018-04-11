@@ -33,8 +33,6 @@
 #include "lomse_basic.h"
 #include "lomse_pixel_formats.h"
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 using namespace std;
 
@@ -88,7 +86,7 @@ protected:
 
 };
 
-typedef SharedPtr<Image>     SpImage;
+typedef std::shared_ptr<Image>     SpImage;
 
 
 }   //namespace lomse

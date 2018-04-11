@@ -29,6 +29,8 @@
 
 #include "lomse_right_aligner.h"
 
+#include <algorithm>
+
 using namespace std;
 
 namespace lomse

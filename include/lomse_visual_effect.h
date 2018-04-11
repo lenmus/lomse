@@ -48,7 +48,7 @@ class GmoShape;
 class GmoObj;
 class SelectionSet;
 
-typedef SharedPtr<GmoShape>  SpGmoShape;
+typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
 
 //---------------------------------------------------------------------------------------
