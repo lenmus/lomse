@@ -342,8 +342,8 @@ void ChordEngraver::layout_accidentals()
             {
                 GmoShapeNotehead* pHead = (*itCur)->pNoteShape->get_notehead_shape();
                 shift_acc_if_confict_with_shape(pCurAcc, pHead);
+                ++itCur;
             }
-            ++itCur;
             if (itCur != m_notes.rend())
             {
                 GmoShapeNotehead* pHead = (*itCur)->pNoteShape->get_notehead_shape();
