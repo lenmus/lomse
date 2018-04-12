@@ -114,10 +114,8 @@ endif()
 # compiler
 if(MSVC)
     set( LOMSE_COMPILER_MSVC  "1")
-    set( LOMSE_COMPILER_GCC   "0")
-elseif(CMAKE_COMPILER_IS_GNUCC)
+else()
     set( LOMSE_COMPILER_MSVC  "0")
-    set( LOMSE_COMPILER_GCC   "1")
 endif()
 
 

@@ -59,7 +59,7 @@ extern ofstream dbgLogger;
         #define LOMSE_LOG_TRACE(area, msg)
     #endif
 
-#elif (LOMSE_COMPILER_GCC == 1)
+#else
     #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
     #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
     #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
