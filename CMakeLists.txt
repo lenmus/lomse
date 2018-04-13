@@ -152,6 +152,7 @@ set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )
 set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
 
 # define build options and create the include file "lomse_config.h"
+# note that the file will be updated later when all variables are defined
 include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 
 
@@ -170,6 +171,22 @@ if (LOMSE_BUILD_TESTS)
         link_directories( ${UNITTEST++_LIBRARY} )
         #message("UnitTest++ found: library: ${UNITTEST++_LIBRARY}" )
         #message("UnitTest++ found: include: ${UNITTEST++_INCLUDE_DIR}" )
+        # Check if UnitTest++'s class "Test" has a member named "next",
+        # that would mean UnitTest++ v1.4 or older
+        message(STATUS "Detecting UnitTest++ version")
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unittest++-version-test.cpp"
+            "#include <UnitTest++.h>\n"
+            "int main() { UnitTest::Test* test; test->next = 0; return 0; }")
+        try_compile(LOMSE_UNITTEST_HAS_NEXT ${CMAKE_CURRENT_BINARY_DIR} "${CMAKE_CURRENT_BINARY_DIR}/unittest++-version-test.cpp"
+            CMAKE_FLAGS -DINCLUDE_DIRECTORIES=${UNITTEST++_INCLUDE_DIR})
+        file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/unittest++-version-test.cpp")
+        if(LOMSE_UNITTEST_HAS_NEXT)
+            message(STATUS "Detecting UnitTest++ version - done (<1.5)")
+            set(LOMSE_UNITTEST_OLD "1")
+        else()
+            message(STATUS "Detecting UnitTest++ version - done (>=1.5)")
+            set(LOMSE_UNITTEST_OLD "0")
+        endif()
     else()
         message(STATUS "UnitTest++ package not found. Test program will not be built" )
         set (LOMSE_BUILD_TESTS OFF)
@@ -627,6 +644,19 @@ install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/liblomse.pc
         DESTINATION ${LOMSE_PKG_CONFIG_INSTALL} )
 
 message(STATUS "pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
+
+
+###############################################################################
+#
+# Configuration of library and testlib is completed. Updating config file.
+#
+###############################################################################
+
+# update include file "lomse_config.h"
+configure_file(
+    "${LOMSE_ROOT_DIR}/lomse_config.h.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
+)
 
 
 ###############################################################################

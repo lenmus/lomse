@@ -86,8 +86,14 @@ int main(int argc, char** argv)
                     selectedTests.Add( p );
             }
             Test* q = p;
+
+#if (LOMSE_UNITTEST_OLD == 1)
             p = p->next;
             q->next = nullptr;
+#else
+            p = p->m_nextTest;
+            q->m_nextTest = nullptr;
+#endif
         }
 
         //run selected test(s) only
