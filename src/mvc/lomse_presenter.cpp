@@ -58,14 +58,18 @@ public:
         if (length < 5)
             return Document::k_format_unknown;
 
-        string ext = fullpath.substr(length - 4);
-        if (ext == ".lms")
+        size_t i = fullpath.rfind('.', length);
+        if (i == string::npos)
+            return Document::k_format_unknown;
+
+        string ext = fullpath.substr(i+1, length - i);
+        if (ext == "lms")
             return Document::k_format_ldp;
-        else if (ext == ".lmd")
+        else if (ext == "lmd")
             return Document::k_format_lmd;
-        else if (ext == ".xml")
+        else if (ext == "xml" || ext == "musicxml")
             return Document::k_format_mxl;
-        else if (ext == ".mnx")
+        else if (ext == "mnx")
             return Document::k_format_mnx;
         else
             return Document::k_format_unknown;
