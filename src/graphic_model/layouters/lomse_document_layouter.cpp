@@ -163,12 +163,25 @@ void DocLayouter::fix_document_size()
 
         //View width is determined by BoxSystem.
         //It is necessary to fix width in BoxDocPage, BoxDocPageContent and BoxScorePage
-        LUnits width = pBSys->get_size().width+ pBSys->get_origin().x;
-        pBSys->set_width(width);
-        pBSP->set_width(width);
-        pBDPC->set_width(width);
-        width += pBSP->get_origin().x;
-        pPage->set_width(width);
+        //BoxSystem do not exist when error: not enough space in page
+        if (pBSys)
+        {
+            LUnits width = pBSys->get_size().width+ pBSys->get_origin().x;
+            pBSys->set_width(width);
+            pBSP->set_width(width);
+            pBDPC->set_width(width);
+            width += pBSP->get_origin().x;
+            pPage->set_width(width);
+        }
+        else
+        {
+            //an arbitrary with
+            LUnits width = 21000.0f;
+            pBSP->set_width(width);
+            pBDPC->set_width(width);
+            width += pBSP->get_origin().x;
+            pPage->set_width(width);
+        }
     }
 
     if (m_constrains & k_infinite_height)
