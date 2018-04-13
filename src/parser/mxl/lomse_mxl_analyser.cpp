@@ -825,13 +825,12 @@ protected:
 //        const string value = m_childToAnalyse.value();
 //        int size = static_cast<int>(value.size()) - 2;
 //        string points = value.substr(0, size);
-//        string number = m_childToAnalyse.value();
 //        float rNumber;
-//        std::istringstream iss(number);
+//        std::istringstream iss(points);
 //        if ((iss >> std::dec >> rNumber).fail())
 //        {
 //            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Invalid size '" + number + "'. Replaced by '12'.");
+//                "Invalid size '" + value + "'. Replaced by '12'.");
 //            return 12.0f;
 //        }
 //        else
