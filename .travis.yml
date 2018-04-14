@@ -19,14 +19,9 @@ addons:
       - gcc-4.9
       - g++-4.9
 
-before_script:
+script:
   - mkdir build
   - cd build
   - cmake -G "Unix Makefiles"  ..
-
-script:
   - make
-
-after_success:
   - ./bin/testlib
-
