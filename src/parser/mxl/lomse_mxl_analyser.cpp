@@ -2806,7 +2806,7 @@ bool mxl_is_valid_ending_number(const string& num)
 
     //XSD regex is  "([ ]*)|([1-9][0-9]*(, ?[1-9][0-9]*)*)"
     //but Lomse will be permissive with blank space errors such as :  "1,2", "1, 2 "
-    std::regex regexValid("([ ]*)|([1-9][0-9]*(, *[1-9][0-9]*)* *)");
+    std::regex regexValid("^([ ]*)$|^([1-9][0-9]*(, *[1-9][0-9]*)* *)$");
     return std::regex_match(num, regexValid);
 }
 
@@ -6647,14 +6647,14 @@ int mxl_type_of_repetion_mark(const string& value)
     //by default, regex uses modified ECMAScript syntax
     //See:  http://www.cplusplus.com/reference/regex/ECMAScript/
     //See:  http://en.cppreference.com/w/cpp/regex/ecmascript
-    std::regex regexDaCapo(" *(d|d\\.) *(c|c\\.) *| *da *capo *");    //d\\.? *c\\.? Fails!
-    std::regex regexDaCapoAlFine(" *(d|d\\.) *(c|c\\.) *al *fine *| *da *capo *al *fine *");
-    std::regex regexDaCapoAlCoda(" *(d|d\\.) *(c|c\\.) *al *coda *| *da *capo *al *coda *");
-    std::regex regexDalSegno(" *(d|d\\.) *(s|s\\.) *| *d(a|e)l *segno *");
-    std::regex regexDalSegnoAlFine(" *(d|d\\.) *(s|s\\.) *al *fine *| *d(a|e)l *segno *al *fine *");
-    std::regex regexDalSegnoAlCoda(" *(d|d\\.) *(s|s\\.) *al *coda *| *d(a|e)l *segno *al *coda *");
-    std::regex regexFine(" *fine *");
-    std::regex regexToCoda(" *to *coda *");
+    std::regex regexDaCapo("^ *(d|d\\.) *(c|c\\.) *$|^ *da *capo *$");    //d\\.? *c\\.? Fails!
+    std::regex regexDaCapoAlFine("^ *(d|d\\.) *(c|c\\.) *al *fine *$|^ *da *capo *al *fine *$");
+    std::regex regexDaCapoAlCoda("^ *(d|d\\.) *(c|c\\.) *al *coda *$|^ *da *capo *al *coda *$");
+    std::regex regexDalSegno("^ *(d|d\\.) *(s|s\\.) *$|^ *d(a|e)l *segno *$");
+    std::regex regexDalSegnoAlFine("^ *(d|d\\.) *(s|s\\.) *al *fine *$|^ *d(a|e)l *segno *al *fine *$");
+    std::regex regexDalSegnoAlCoda("^ *(d|d\\.) *(s|s\\.) *al *coda *$|^ *d(a|e)l *segno *al *coda *$");
+    std::regex regexFine("^ *fine *$");
+    std::regex regexToCoda("^ *to *coda *$");
 
     if (std::regex_match(text, regexDaCapo))
         return k_repeat_da_capo;
