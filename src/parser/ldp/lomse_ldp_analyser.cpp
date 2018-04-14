@@ -363,13 +363,12 @@ protected:
         const string& value = m_pParamToAnalyse->get_value();
         int size = static_cast<int>(value.size()) - 2;
         string points = value.substr(0, size);
-        string number = m_pParamToAnalyse->get_value();
         float rNumber;
-        std::istringstream iss(number);
+        std::istringstream iss(points);
         if ((iss >> std::dec >> rNumber).fail())
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
-                "Invalid size '" + number + "'. Replaced by '12'.");
+                "Invalid size '" + value + "'. Replaced by '12'.");
             return 12.0f;
         }
         else
