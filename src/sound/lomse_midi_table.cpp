@@ -39,8 +39,6 @@
 #include "lomse_score_utilities.h"
 #include "lomse_im_attributes.h"
 
-#include <boost/format.hpp>
-
 using namespace std;
 
 namespace lomse
@@ -538,8 +536,8 @@ string SoundEventsTable::dump_events_table()
 
             //list current entry
             SoundEvent* pSE = m_events[i];
-            msg += str( boost::format("%4d:\t%d\t\t%d\t%d\t") %
-                        i % pSE->DeltaTime % pSE->Channel % pSE->Measure );
+            msg += format("%4d:\t%ld\t\t%d\t%d\t",
+                       i, pSE->DeltaTime, pSE->Channel, pSE->Measure );
 
             bool fAddData = true;
             switch (pSE->EventType)
@@ -571,11 +569,11 @@ string SoundEventsTable::dump_events_table()
                     fAddData = false;
                     break;
                 default:
-                    msg += str( boost::format("?? %d") % pSE->EventType );
+                    msg += format("?? %d", pSE->EventType );
             }
             if (fAddData)
-                msg += str( boost::format("\t%d\t%d\t%d\n") %
-                            pSE->NotePitch % pSE->NoteStep % pSE->Volume );
+                msg += format("\t%d\t%d\t%d\n",
+                           pSE->NotePitch, pSE->NoteStep, pSE->Volume );
         }
 
     return msg;
@@ -589,9 +587,8 @@ string SoundEventsTable::dump_measures_table()
 
     // measures start time table and first event for each measure
     int num = int(m_measures.size()) - 2;
-    string msg =
-        str( boost::format("\n\nMeasures start times and first event (%d measures)\n\n")
-                           % num );
+    string msg = format("\n\nMeasures start times and first event (%d measures)\n\n",
+                     num );
     msg += "Num.\tTime\tEvent\n";
     for(int i=1; i < int(m_measures.size()); i++)
     {
@@ -603,10 +600,10 @@ string SoundEventsTable::dump_measures_table()
         if (nEntry >= 0)
         {
             SoundEvent* pSE = m_events[nEntry];
-            msg += str( boost::format("%4d:\t%d\t%d\n") % i % pSE->DeltaTime % nEntry );
+            msg += format("%4d:\t%ld\t%d\n", i, pSE->DeltaTime, nEntry );
         }
         else
-            msg += str( boost::format("%4d:\tEmpty entry\n") % i );
+            msg += format("%4d:\tEmpty entry\n", i );
     }
 
     return msg;
