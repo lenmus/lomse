@@ -39,9 +39,6 @@
 #include "lomse_blocks_container_layouter.h"
 #include "lomse_logger.h"
 
-//other
-#include <boost/format.hpp>
-
 namespace lomse
 {
 
@@ -144,8 +141,10 @@ void InlinesContainerLayouter::prepare_line()
 
     bool fBreak = false;
 
-    LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format("available space=%.02f")
-                                          % m_availableSpace ));
+    stringstream ss;
+    ss.precision(2);
+    ss << "available space=" << fixed << m_availableSpace;
+    LOMSE_LOG_TRACE(Logger::k_layout, ss.str());
 
     bool fSomethingAdded = false;
     bool fFirstEngrouterOfLine = true;

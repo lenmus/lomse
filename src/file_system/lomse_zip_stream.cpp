@@ -35,6 +35,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <cstring>
+#include <algorithm>  //min()
 using namespace std;
 
 namespace lomse

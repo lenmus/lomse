@@ -37,10 +37,8 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <sstream>
 using namespace std;
-
-//other
-#include <boost/format.hpp>
 
 namespace lomse
 {

@@ -37,8 +37,6 @@
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
 
-#include <boost/format.hpp>
-
 namespace lomse
 {
 
@@ -114,12 +112,17 @@ void ProgressBarCtrl::set_value(float value)
     else
         m_percent = 0.0f;
 
-    if (m_fDisplayPercentage)
-        m_label = str( boost::format("%.01f%%") % (m_percent * 100.0f));
-    else
-        m_label = str( boost::format("%.0f") % value);
+	stringstream ss;
+	if (m_fDisplayPercentage)
+	{
+		ss.precision(1);
+		ss << fixed << (m_percent * 100.0f) << "%";
+	}
+	else
+        ss << fixed << value;
+	m_label = ss.str();
 
-    if (m_pMainBox)
+	if (m_pMainBox)
         m_pMainBox->set_dirty(true);
 }
 

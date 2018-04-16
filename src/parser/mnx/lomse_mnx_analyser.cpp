@@ -2225,12 +2225,11 @@ protected:
 
                 default:
                 {
-                    string msg = str( boost::format(
-                                        "Invalid number of fifths %d")
-                                        % fifths );
-                    error_msg(msg);
-    //                LOMSE_LOG_ERROR(msg);
-    //                throw runtime_error(msg);
+					stringstream ss;
+					ss << "Invalid number of fifths " << fifths;
+                    error_msg(ss.str());
+    //                LOMSE_LOG_ERROR(ss.str());
+    //                throw runtime_error(ss.str());
                     return k_key_C;
                 }
             }
@@ -2276,12 +2275,11 @@ protected:
 
                 default:
                 {
-                    string msg = str( boost::format(
-                                        "Invalid number of fifths %d")
-                                        % fifths );
-                    error_msg(msg);
-    //                LOMSE_LOG_ERROR(msg);
-    //                throw runtime_error(msg);
+					stringstream ss;
+					ss << "Invalid number of fifths " << fifths;
+                    error_msg(ss.str());
+    //                LOMSE_LOG_ERROR(ss.str());
+    //                throw runtime_error(ss.str());
                     return k_key_a;
                 }
             }

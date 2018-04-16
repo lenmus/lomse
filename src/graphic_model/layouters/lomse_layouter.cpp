@@ -90,8 +90,9 @@ GmoBox* Layouter::start_new_page()
 //---------------------------------------------------------------------------------------
 void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains)
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
-        "Laying out id %d %s") % pItem->get_id() % pItem->get_name() ));
+    stringstream ss;
+    ss << "Laying out id " << pItem->get_id() << " " << pItem->get_name();
+    LOMSE_LOG_DEBUG(Logger::k_layout, ss.str());
 
     m_pCurLayouter = create_layouter(pItem);
     m_pCurLayouter->set_constrains(constrains);
@@ -132,9 +133,11 @@ void Layouter::set_cursor_and_available_space()
     m_availableWidth = m_pItemMainBox->get_content_width();
     m_availableHeight = m_pItemMainBox->get_content_height();
 
-    LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
-        "cursor at(%.2f, %.2f), available space(%.2f, %.2f)")
-        % m_pageCursor.x % m_pageCursor.y % m_availableWidth % m_availableHeight ));
+    stringstream ss;
+    ss.precision(2);
+    ss << fixed << "cursor at(" << m_pageCursor.x << ", " << m_pageCursor.y <<
+        "), available space(" << m_availableWidth << ", " << m_availableHeight << ")";
+    LOMSE_LOG_DEBUG(Logger::k_layout, ss.str());
 }
 
 //---------------------------------------------------------------------------------------
