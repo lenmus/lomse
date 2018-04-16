@@ -104,7 +104,7 @@ GmoBoxControl* HyperlinkCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint 
 //---------------------------------------------------------------------------------------
 void HyperlinkCtrl::handle_event(SpEventInfo pEvent)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format("label: %s") % m_label));
+    LOMSE_LOG_DEBUG(Logger::k_events, format("label: %s", m_label.c_str()));
 
     if (m_fEnabled)
     {

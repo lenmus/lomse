@@ -76,9 +76,9 @@ GmoShape* TimeEngraver::create_shape(ImoTimeSignature* pCreatorImo, UPoint uPos,
     }
     else
     {
-        string msg = str( boost::format(
-                        "[TimeEngraver::create_shape] unsupported time signature type %d")
-                        % pCreatorImo->get_type() );
+        string msg = format(
+                        "[TimeEngraver::create_shape] unsupported time signature type %d",
+                        pCreatorImo->get_type() );
         LOMSE_LOG_ERROR(msg);
         throw runtime_error(msg);
     }

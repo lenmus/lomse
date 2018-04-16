@@ -2225,9 +2225,9 @@ protected:
 
                 default:
                 {
-                    string msg = str( boost::format(
-                                        "Invalid number of fifths %d")
-                                        % fifths );
+                    string msg = format(
+                                     "Invalid number of fifths %d",
+                                     fifths );
                     error_msg(msg);
     //                LOMSE_LOG_ERROR(msg);
     //                throw runtime_error(msg);
@@ -2276,9 +2276,9 @@ protected:
 
                 default:
                 {
-                    string msg = str( boost::format(
-                                        "Invalid number of fifths %d")
-                                        % fifths );
+                    string msg = format(
+                                     "Invalid number of fifths %d",
+                                     fifths );
                     error_msg(msg);
     //                LOMSE_LOG_ERROR(msg);
     //                throw runtime_error(msg);

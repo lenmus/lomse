@@ -39,9 +39,6 @@
 #include <string>
 using namespace std;
 
-//other
-#include <boost/format.hpp>
-
 namespace lomse
 {
 
@@ -71,6 +68,14 @@ extern ofstream dbgLogger;
         #define LOMSE_LOG_TRACE(area, msg)
     #endif
 
+#endif
+
+#ifdef __GNUC__
+// GCC and Clang support error detection of format arguments in compile time
+std::string format(const char* fmtstr, ...) __attribute__((format(printf, 1, 2)));
+#else
+// This compiler does not support error detection of format arguments in compile time
+std::string format(const char* fmtstr, ...);
 #endif
 
 

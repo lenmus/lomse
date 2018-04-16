@@ -148,8 +148,8 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
         }
         else
         {
-            LOMSE_LOG_WARN(str(boost::format("Unknown event received. Type=%d")
-                            % pEvent->get_event_type()) );
+            LOMSE_LOG_WARN(format("Unknown event received. Type=%d",
+                               pEvent->get_event_type() ));
         }
     }
 }

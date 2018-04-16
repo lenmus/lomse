@@ -29,6 +29,8 @@
 
 #include "lomse_logger.h"
 
+#include <algorithm> // min
+#include <stdarg.h> // va_start, va_end
 using namespace std;
 
 
@@ -107,5 +109,27 @@ void Logger::log_trace(const string& file, int line, const string& prettyFunctio
         log_message(file, line, prettyFunction, "TRACE: ", msg);
 }
 
+std::string format(const char* fmtstr, ...)
+{
+    va_list ap;
+    va_start(ap, fmtstr);
+
+    va_list ap2;
+    va_copy(ap2, ap);
+
+    int newLen = vsnprintf(nullptr, 0, fmtstr, ap);
+    if (newLen < 0)
+    {
+        throw std::invalid_argument("Invalid argument to format-function");
+    }
+
+    vector<char> data(newLen + 1);
+    vsnprintf(data.data(), newLen + 1, fmtstr, ap2);
+
+    va_end(ap2);
+    va_end(ap);
+
+    return string(data.data());
+}
 
 }   //namespace lomse
