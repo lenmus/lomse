@@ -175,9 +175,10 @@ void GraphicModel::add_to_map_imo_to_box(GmoBox* pBox)
         map<ImoId, GmoBox*>::const_iterator it = m_imoToBox.find(id);
         if (it != m_imoToBox.end())
         {
-            LOMSE_LOG_ERROR( str( boost::format(
-                "Duplicated Imo id %d. Existing Gmo: %s. Adding Gmo: %s")
-                % id % (it->second)->get_name() % pBox->get_name()) );
+			stringstream ss;
+			ss << "Duplicated Imo id " << id << ". Existing Gmo: " <<
+				(it->second)->get_name() << ". Adding Gmo: " << pBox->get_name();
+            LOMSE_LOG_ERROR(ss.str());
             //TO_INVESTIGATE: This is nor an error. An Imo can create two
             //boxes (currently DocPage and DocPageContent boxes). Maybe the
             //error is in the implications if this is accepted.
@@ -193,8 +194,9 @@ void GraphicModel::add_to_map_ref_to_box(GmoBox* pBox)
     GmoRef gref = pBox->get_ref();
     if (gref != k_no_gmo_ref)
     {
-        LOMSE_LOG_TRACE(Logger::k_gmodel, str(boost::format("Added (%d, %d) %s")
-            % gref.first % gref.second % pBox->get_name() ));
+        stringstream ss;
+        ss << "Added (" << gref.first << ", " << gref.second << ") " << pBox->get_name();
+        LOMSE_LOG_TRACE(Logger::k_gmodel, ss.str());
         m_ctrolToPtr[gref] = pBox;
     }
 }
@@ -223,8 +225,9 @@ GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
         return it->second;
     else
     {
-        LOMSE_LOG_DEBUG(Logger::k_score_player, str(boost::format(
-            "No shape found for Imo id: %d") % id) );
+        stringstream ss;
+        ss << "No shape found for Imo id: " << id;
+        LOMSE_LOG_DEBUG(Logger::k_score_player, ss.str());
         return nullptr;
     }
 }

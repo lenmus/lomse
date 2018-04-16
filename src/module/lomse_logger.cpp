@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#include <algorithm>
 #include "lomse_logger.h"
 
 using namespace std;
