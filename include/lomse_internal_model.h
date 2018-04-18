@@ -48,8 +48,6 @@ typedef int TIntAttribute;
 
 using namespace std;
 
-#include <boost/variant.hpp>
-
 ///@cond INTERNALS
 namespace lomse
 {
@@ -791,7 +789,128 @@ private:
 //---------------------------------------------------------------------------------------
 // Auxiliary class: An attribute
 
-typedef boost::variant<int, string, bool, float, double, Color> AttribValue;
+// AttribValue can hold one of <int, float, double, bool, string, Color>.
+// In C++17 it could be declared as simple as:
+//     typedef std::variant<int, float, double, bool, string, Color> AttribValue;
+// But we implement it manually to support older compilers.
+class AttribValue
+{
+private:
+    union
+    {
+        int intValue;
+        string stringValue;
+        bool boolValue;
+        float floatValue;
+        double doubleValue;
+        Color colorValue;
+    };
+
+    enum AttribType { vt_empty, vt_int, vt_string, vt_bool, vt_float, vt_double, vt_color };
+    AttribType m_type = vt_empty;
+
+public:
+    AttribValue() {}
+    ~AttribValue() { Cleanup(); }
+
+    explicit operator int() const
+    {
+        CheckType(vt_int);
+        return intValue;
+    }
+    explicit operator float() const
+    {
+        CheckType(vt_float);
+        return floatValue;
+    }
+    explicit operator double() const
+    {
+        CheckType(vt_double);
+        return doubleValue;
+    }
+    explicit operator bool() const
+    {
+        CheckType(vt_bool);
+        return boolValue;
+    }
+    explicit operator string() const
+    {
+        CheckType(vt_string);
+        return stringValue;
+    }
+    explicit operator Color() const
+    {
+        CheckType(vt_color);
+        return colorValue;
+    }
+
+    void operator=(int value)
+    {
+        Cleanup();
+        intValue = value;
+        m_type = vt_int;
+    }
+    void operator=(float value)
+    {
+        Cleanup();
+        floatValue = value;
+        m_type = vt_float;
+    }
+    void operator=(double value)
+    {
+        Cleanup();
+        doubleValue = value;
+        m_type = vt_double;
+    }
+    void operator=(bool value)
+    {
+        Cleanup();
+        boolValue = value;
+        m_type = vt_bool;
+    }
+    void operator=(const string& value)
+    {
+        Cleanup();
+        // placement new (http://en.cppreference.com/w/cpp/language/union)
+        new (&stringValue) string(value);
+        m_type = vt_string;
+    }
+    void operator=(const Color& value)
+    {
+        Cleanup();
+        // placement new (http://en.cppreference.com/w/cpp/language/union)
+        new (&colorValue) Color(value);
+        m_type = vt_color;
+    }
+
+private:
+    void Cleanup()
+    {
+        if (m_type == vt_string)
+        {
+            // explicit destructor call (http://en.cppreference.com/w/cpp/language/union)
+            stringValue.~string();
+        }
+        else if (m_type == vt_color)
+        {
+            // explicit destructor call (http://en.cppreference.com/w/cpp/language/union)
+            colorValue.~Color();
+        }
+        m_type = vt_empty;
+    }
+
+    void CheckType(AttribType type) const
+    {
+        if (type != m_type)
+        {
+            stringstream ss;
+            ss << "[AttribValue::operator(<type>)]. Type mismatch. Expected type=" <<
+                type << ", real type=" << m_type;
+            LOMSE_LOG_ERROR(ss.str());
+            throw std::runtime_error(ss.str());
+        }
+    }
+};
 
 class ImoAttr
 {
@@ -814,27 +933,27 @@ public:
 
     inline int get_int_value()
     {
-        return boost::get<int>(m_value);
+        return static_cast<int>(m_value);
     }
     inline double get_double_value()
     {
-        return boost::get<double>(m_value);
+        return static_cast<double>(m_value);
     }
     inline string get_string_value()
     {
-        return boost::get<string>(m_value);
+        return static_cast<string>(m_value);
     }
     inline bool get_bool_value()
     {
-        return boost::get<bool>(m_value);
+        return static_cast<bool>(m_value);
     }
     inline float get_float_value()
     {
-        return boost::get<float>(m_value);
+        return static_cast<float>(m_value);
     }
     inline Color get_color_value()
     {
-        return boost::get<Color>(m_value);
+        return static_cast<Color>(m_value);
     }
 
     inline void set_string_value(const string& value)
