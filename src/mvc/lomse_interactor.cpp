@@ -54,9 +54,6 @@
 #include <sstream>
 using namespace std;
 
-//other
-#include <boost/format.hpp>
-
 namespace lomse
 {
 
@@ -117,9 +114,7 @@ Interactor::~Interactor()
 //---------------------------------------------------------------------------------------
 void Interactor::switch_task(int taskType)
 {
-    stringstream s;
-    s << "new task type=" << taskType;
-    LOMSE_LOG_DEBUG(Logger::k_mvc, s.str());
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "new task type=%d", taskType);
 
     delete m_pTask;
     m_pTask = Injector::inject_Task(taskType, this);
@@ -171,9 +166,7 @@ void Interactor::create_graphic_model()
         timing_graphic_model_build_end();
 
         double buildTime = get_elapsed_time_since(m_gmodelBuildStartTime);
-        stringstream msg;
-        msg << "gmodel build time = " << buildTime << " ms.";
-        LOMSE_LOG_INFO(msg.str());
+        LOMSE_LOG_INFO("gmodel build time = %d ms.", (int)buildTime);
     }
 //    m_idLastMouseOver = k_no_imoid;
 }
@@ -471,25 +464,25 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 
     GmoRef gref = find_event_originator_gref(pGmo);
 
-    LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-        "Gmo %d, %s / gref(%d, %d) -------------------")
-         % pGmo->get_gmobj_type() % pGmo->get_name()
-         % gref.first % gref.second ));
+    LOMSE_LOG_DEBUG(Logger::k_events,
+        "Gmo %d, %s / gref(%d, %d) -------------------",
+         pGmo->get_gmobj_type(), pGmo->get_name().c_str(),
+         gref.first, gref.second );
 
     if (m_grefLastMouseOver != k_no_gmo_ref && m_grefLastMouseOver != gref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-            "Mouse out. gref(%d %d)")
-            % m_grefLastMouseOver.first % m_grefLastMouseOver.second ));
+        LOMSE_LOG_DEBUG(Logger::k_events,
+            "Mouse out. gref(%d %d)",
+            m_grefLastMouseOver.first, m_grefLastMouseOver.second );
         send_mouse_out_event(m_grefLastMouseOver, x, y);
         m_grefLastMouseOver = k_no_gmo_ref;
     }
 
     if (m_grefLastMouseOver == k_no_gmo_ref && gref != k_no_gmo_ref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-            "Mouse in. gref(%d %d)")
-            % gref.first % gref.second ));
+        LOMSE_LOG_DEBUG(Logger::k_events,
+            "Mouse in. gref(%d %d)",
+            gref.first, gref.second );
         send_mouse_in_event(gref, x, y);
         m_grefLastMouseOver = gref;
     }
@@ -1356,10 +1349,10 @@ bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighligh
 
     if (!pScore || !pScore->is_score())
     {
-        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-            "Highlight discarded: score id: %d, pScore? %s")
-             % pEvent->get_score_id()
-             % (pScore ? "not null" : "null") ));
+        LOMSE_LOG_DEBUG(Logger::k_events,
+            "Highlight discarded: score id: %d, pScore? %s",
+            pEvent->get_score_id(),
+            (pScore ? "not null" : "null") );
 
         discard_all_highlight();
         return true;
@@ -1424,10 +1417,11 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 
                 default:
                 {
-                    string msg = str( boost::format("Unknown event type %d.")
-                                    % (*it).first );
-                    LOMSE_LOG_ERROR(msg);
-                    throw runtime_error(msg);
+                    stringstream msg;
+                    msg << "Unknown event type " <<
+                           (*it).first << "." ;
+                    LOMSE_LOG_ERROR(msg.str());
+                    throw runtime_error(msg.str());
                 }
             }
         }
@@ -1596,8 +1590,8 @@ void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoOb
 {
     while(pGmo && !pGmo->is_box_link())
     {
-        LOMSE_LOG_DEBUG(Logger::k_events, str( boost::format("Gmo type: %d, %s")
-                    % pGmo->get_gmobj_type() % pGmo->get_name() ) );
+        LOMSE_LOG_DEBUG(Logger::k_events, "Gmo type: %d, %s",
+                    pGmo->get_gmobj_type(), pGmo->get_name().c_str() );
         pGmo = pGmo->get_owner_box();
     }
 

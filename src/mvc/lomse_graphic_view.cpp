@@ -693,16 +693,16 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
     GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
     if (!pShape)
     {
-        LOMSE_LOG_ERROR(str(boost::format("No shape found for Imo id: %d")
-                            % pSO->get_id()) );
+        LOMSE_LOG_ERROR("No shape found for Imo id: %d",
+                        pSO->get_id() );
         return;
     }
     if (! (pShape->is_shape_notehead()
            || pShape->is_shape_note()
            || pShape->is_shape_rest()) )
-        LOMSE_LOG_ERROR(str(boost::format("Shape is neither note nor rest. Shape type: %s, Imo id=%d")
-                            % pShape->get_name()
-                            % pSO->get_id() ));
+        LOMSE_LOG_ERROR("Shape is neither note nor rest. Shape type: %s, Imo id=%d",
+                        pShape->get_name().c_str(),
+                        pSO->get_id() );
 
     m_pHighlighted->add_highlight( pShape );
 }

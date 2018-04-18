@@ -39,40 +39,32 @@
 #include <string>
 using namespace std;
 
-//other
-#include <boost/format.hpp>
-
 namespace lomse
 {
 
 extern ofstream dbgLogger;
 
 #if (LOMSE_COMPILER_MSVC == 1)
-    #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__FUNCTION__, msg);
-    #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__FUNCTION__, msg);
-    #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__FUNCTION__, msg);
-    #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
-        #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__FUNCTION__, area, msg);
-        #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__FUNCTION__, area, msg);
-    #else
-        #define LOMSE_LOG_DEBUG(area, msg)
-        #define LOMSE_LOG_TRACE(area, msg)
-    #endif
-
-#else
-    #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
-    #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
-    #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
-    #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
-        #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
-        #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
-    #else
-        #define LOMSE_LOG_DEBUG(area, msg)
-        #define LOMSE_LOG_TRACE(area, msg)
-    #endif
-
+    #define __PRETTY_FUNCTION__       __FUNCTION__
 #endif
 
+#ifdef __GNUC__
+// GCC and Clang support error detection of format arguments in compile time
+#define PRINTF_SYNTAX(strindex) __attribute__((format(printf, strindex, strindex+1)))
+#else
+#define PRINTF_SYNTAX(strindex)
+#endif
+
+#define LOMSE_LOG_ERROR(...)            logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#define LOMSE_LOG_WARN(...)             logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#define LOMSE_LOG_INFO(...)             logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__,__VA_ARGS__)
+#if (LOMSE_ENABLE_DEBUG_LOGS == 1)
+    #define LOMSE_LOG_DEBUG(area, ...)  logger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
+    #define LOMSE_LOG_TRACE(area, ...)  logger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__,area,__VA_ARGS__)
+#else
+    #define LOMSE_LOG_DEBUG(area, ...)  do {} while(0)
+    #define LOMSE_LOG_TRACE(area, ...)  do {} while(0)
+#endif
 
 //---------------------------------------------------------------------------------------
 //trace levels, for all spacing algorithms
@@ -147,20 +139,23 @@ public:
     };
 
     void log_error(const string& file, int line, const string& prettyFunction,
-                   const string& msg);
+                   const char* fmtstr, ...) PRINTF_SYNTAX(5);
+    void log_error(const string& file, int line, const string& prettyFunction,
+                   const string& msg)
+        { log_error(file, line, prettyFunction, "%s", msg.c_str()); }
     void log_warn(const string& file, int line, const string& prettyFunction,
-                  const string& msg);
+                  const char* fmtstr, ...) PRINTF_SYNTAX(5);
     void log_info(const string& file, int line, const string& prettyFunction,
-                  const string& msg);
+                  const char* fmtstr, ...) PRINTF_SYNTAX(5);
     void log_debug(const string& file, int line, const string& prettyFunction,
-                   uint_least32_t area, const string& msg);
+                   uint_least32_t area, const char* fmtstr, ...) PRINTF_SYNTAX(6);
     void log_trace(const string& file, int line, const string& prettyFunction,
-                   uint_least32_t area, const string& msg);
+                   uint_least32_t area, const char* fmtstr, ...) PRINTF_SYNTAX(6);
 
 protected:
     void log_message(const string& file, int line, const string& prettyFunction,
-                     const string& prefix, const string& msg);
-
+                     const string& prefix, const char* fmtstr, va_list args);
+    string format(const char* fmtstr, va_list args);
 };
 
 extern Logger logger;

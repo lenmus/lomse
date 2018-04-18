@@ -39,8 +39,6 @@
 #include "lomse_score_utilities.h"
 #include "lomse_im_attributes.h"
 
-#include <boost/format.hpp>
-
 using namespace std;
 
 namespace lomse
@@ -527,58 +525,57 @@ string SoundEventsTable::dump_events_table()
         return "Midi events table is empty";
 
     //headers
-    string msg = "Num.\tTime\t\tCh.\tMeas.\tEvent\t\tPitch\tStep\tVolume\n";
+    stringstream msg;
+    msg << "Num.\tTime\t\tCh.\tMeas.\tEvent\t\tPitch\tStep\tVolume\n";
 
         for(int i=0; i < int(m_events.size()); i++)
         {
             //division line every four entries
             if (i % 4 == 0) {
-                msg += "-------------------------------------------------------------\n";
+                msg << "-------------------------------------------------------------\n";
             }
 
             //list current entry
             SoundEvent* pSE = m_events[i];
-            msg += str( boost::format("%4d:\t%d\t\t%d\t%d\t") %
-                        i % pSE->DeltaTime % pSE->Channel % pSE->Measure );
+            msg << i << ":\t" << pSE->DeltaTime << "\t\t" << pSE->Channel << "\t" << pSE->Measure << "\t";
 
             bool fAddData = true;
             switch (pSE->EventType)
             {
                 case SoundEvent::k_note_on:
-                    msg += "ON        ";
+                    msg << "ON        ";
                     break;
                 case SoundEvent::k_note_off:
-                    msg += "OFF       ";
+                    msg << "OFF       ";
                     break;
                 case SoundEvent::k_visual_on:
-                    msg += "VISUAL ON ";
+                    msg << "VISUAL ON ";
                     break;
                 case SoundEvent::k_visual_off:
-                    msg += "VISUAL OFF";
+                    msg << "VISUAL OFF";
                     break;
                 case SoundEvent::k_end_of_score:
-                    msg += "END TABLE ";
+                    msg << "END TABLE ";
                     break;
                 case SoundEvent::k_rhythm_change:
-                    msg += "RITHM CHG ";
+                    msg << "RITHM CHG ";
                     break;
                 case SoundEvent::k_prog_instr:
-                    msg += "PRG INSTR ";
+                    msg << "PRG INSTR ";
                     break;
                 case SoundEvent::k_jump:
-                    msg += "JUMP      ";
-                    msg += pSE->pJump->dump_entry();
+                    msg << "JUMP      ";
+                    msg << pSE->pJump->dump_entry();
                     fAddData = false;
                     break;
                 default:
-                    msg += str( boost::format("?? %d") % pSE->EventType );
+                    msg << "?? " << pSE->EventType;
             }
             if (fAddData)
-                msg += str( boost::format("\t%d\t%d\t%d\n") %
-                            pSE->NotePitch % pSE->NoteStep % pSE->Volume );
+                msg << "\t" << pSE->NotePitch << "\t" << pSE->NoteStep << "\t" << pSE->Volume << "\n";
         }
 
-    return msg;
+    return msg.str();
 }
 
 //---------------------------------------------------------------------------------------
@@ -587,29 +584,29 @@ string SoundEventsTable::dump_measures_table()
     if (m_measures.size() == 0)
         return "Measures table is empty";
 
+    stringstream msg;
+
     // measures start time table and first event for each measure
     int num = int(m_measures.size()) - 2;
-    string msg =
-        str( boost::format("\n\nMeasures start times and first event (%d measures)\n\n")
-                           % num );
-    msg += "Num.\tTime\tEvent\n";
+    msg << "\n\nMeasures start times and first event (" << num << " measures)\n\n";
+    msg << "Num.\tTime\tEvent\n";
     for(int i=1; i < int(m_measures.size()); i++)
     {
         //division line every four entries
         if (i % 4 == 0)
-            msg += "-------------------------------------------------------------\n";
+            msg << "-------------------------------------------------------------\n";
 
         int nEntry = m_measures[i];
         if (nEntry >= 0)
         {
             SoundEvent* pSE = m_events[nEntry];
-            msg += str( boost::format("%4d:\t%d\t%d\n") % i % pSE->DeltaTime % nEntry );
+            msg << i << ":\t" << pSE->DeltaTime << "\t" << nEntry << "\n";
         }
         else
-            msg += str( boost::format("%4d:\tEmpty entry\n") % i );
+            msg << i << ":\tEmpty entry\n";
     }
 
-    return msg;
+    return msg.str();
 }
 
 //---------------------------------------------------------------------------------------

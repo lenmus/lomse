@@ -29,6 +29,8 @@
 
 #include "lomse_logger.h"
 
+#include <algorithm> // min
+#include <stdarg.h> // va_start, va_end
 using namespace std;
 
 
@@ -56,7 +58,7 @@ Logger::~Logger()
 
 //---------------------------------------------------------------------------------------
 void Logger::log_message(const string& file, int line, const string& prettyFunction,
-                         const string& prefix, const string& msg)
+                         const string& prefix, const char* fmtstr, va_list args)
 {
     size_t end = prettyFunction.rfind("(");
     size_t begin = prettyFunction.substr(0,end).rfind(" ") + 1;
@@ -66,46 +68,86 @@ void Logger::log_message(const string& file, int line, const string& prettyFunct
     size_t fileStartWindows = file.rfind("\\") + 1;
     size_t fileStart = max(fileStartLinux, fileStartWindows);
 
+    string msg = format(fmtstr, args);
+
     dbgLogger << file.substr(fileStart) << ", line " << line << ". " << prefix << "["
             << prettyFunction.substr(begin,end) << "] " << msg << endl;
 }
 
 //---------------------------------------------------------------------------------------
 void Logger::log_error(const string& file, int line, const string& prettyFunction,
-                       const string& msg)
+                       const char* fmtstr, ...)
 {
-    log_message(file, line, prettyFunction, "ERROR: ", msg);
+    va_list args;
+    va_start(args, fmtstr);
+    log_message(file, line, prettyFunction, "ERROR: ", fmtstr, args);
+    va_end(args);
 }
 
 //---------------------------------------------------------------------------------------
 void Logger::log_warn(const string& file, int line, const string& prettyFunction,
-                      const string& msg)
+                      const char* fmtstr, ...)
 {
-    log_message(file, line, prettyFunction, "WARNING: ", msg);
+    va_list args;
+    va_start(args, fmtstr);
+    log_message(file, line, prettyFunction, "WARNING: ", fmtstr, args);
+    va_end(args);
 }
 
 //---------------------------------------------------------------------------------------
 void Logger::log_info(const string& file, int line, const string& prettyFunction,
-                      const string& msg)
+                      const char* fmtstr, ...)
 {
-    log_message(file, line, prettyFunction, "INFO: ", msg);
+    va_list args;
+    va_start(args, fmtstr);
+    log_message(file, line, prettyFunction, "INFO: ", fmtstr, args);
+    va_end(args);
 }
 
 //---------------------------------------------------------------------------------------
 void Logger::log_debug(const string& file, int line, const string& prettyFunction,
-                       uint_least32_t area, const string& msg)
+                       uint_least32_t area, const char* fmtstr, ...)
 {
     if ((m_mode == k_debug_mode || m_mode == k_trace_mode) && ((m_areas & area) != 0))
-        log_message(file, line, prettyFunction, "DEBUG: ", msg);
+    {
+        va_list args;
+        va_start(args, fmtstr);
+        log_message(file, line, prettyFunction, "DEBUG: ", fmtstr, args);
+        va_end(args);
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void Logger::log_trace(const string& file, int line, const string& prettyFunction,
-                       uint_least32_t area, const string& msg)
+                       uint_least32_t area, const char* fmtstr, ...)
 {
     if (m_mode == k_trace_mode && ((m_areas & area) != 0))
-        log_message(file, line, prettyFunction, "TRACE: ", msg);
+    {
+        va_list args;
+        va_start(args, fmtstr);
+        log_message(file, line, prettyFunction, "TRACE: ", fmtstr, args);
+        va_end(args);
+    }
 }
 
+//---------------------------------------------------------------------------------------
+string Logger::format(const char* fmtstr, va_list args)
+{
+    va_list args2;
+    va_copy(args2, args);
+
+    int len = vsnprintf(nullptr, 0, fmtstr, args);
+    if (len < 0)
+    {
+        throw std::invalid_argument("Invalid argument to format-function");
+    }
+
+    vector<char> data(len + 1);
+    vsnprintf(data.data(), len + 1, fmtstr, args2);
+
+    va_end(args2);
+
+    return string(data.data());
+}
 
 }   //namespace lomse
