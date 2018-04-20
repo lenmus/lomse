@@ -41,11 +41,6 @@
 #include <vector>
 using namespace std;
 
-//For performance measurements (timing)
-#include <ctime>   //clock
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-
 namespace lomse
 {
 

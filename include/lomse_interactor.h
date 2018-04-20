@@ -39,10 +39,8 @@
 #include "lomse_pitch.h"
 
 #include <iostream>
-#include <ctime>   //clock
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <chrono>
 using namespace std;
-using namespace boost::posix_time;
 
 ///@cond INTERNALS
 namespace lomse
@@ -94,6 +92,15 @@ enum EEventFlag
     k_kbd_shift   = 8,      ///< 0x08. Keyboard Shift key pressed while mouse event
     k_kbd_ctrl    = 16,     ///< 0x10. Keyboard Ctrol key pressed while mouse event
     k_kbd_alt     = 32,     ///< 0x20. Keyboard Alt key pressed while mouse event
+};
+
+struct ptime
+{
+    ptime(bool init_with_now = false) { if (init_with_now) init_now(); }
+    void init_now() { timepoint = chrono::high_resolution_clock::now(); }
+    chrono::time_point<chrono::high_resolution_clock> timepoint;
+    typedef double duration;
+    duration operator-(const ptime rhs);
 };
 
 //---------------------------------------------------------------------------------------
@@ -1369,7 +1376,6 @@ protected:
     void update_caret_and_view();
     void redraw_caret();
     void send_update_UI_event(EEventType type);
-    ptime get_current_time() const;
     double get_elapsed_time_since(ptime startTime) const;
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();

@@ -32,6 +32,8 @@
 
 #include "lomse_basic.h"
 
+#include <chrono>
+
 namespace lomse
 {
 
@@ -47,6 +49,7 @@ extern bool is_greater_time(TimeUnits t1, TimeUnits t2);
 
 TimeUnits round_half_up(TimeUnits num);
 
+string to_simple_string(chrono::time_point<chrono::system_clock> time, bool microsec = false);
 
 }   //namespace lomse
 
