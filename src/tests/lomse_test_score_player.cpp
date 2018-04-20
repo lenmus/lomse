@@ -102,7 +102,7 @@ public:
         {
             boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
         }
-        delete m_pThread;
+        //delete m_pThread;
         m_pThread = nullptr;
     }
 
@@ -125,7 +125,7 @@ public:
         {
             boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
         }
-        delete m_pThread;
+        //delete m_pThread;
         m_pThread = nullptr;
     }
 };
