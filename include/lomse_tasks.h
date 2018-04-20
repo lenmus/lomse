@@ -34,7 +34,6 @@
 #include "lomse_injectors.h"
 
 #include <iostream>
-#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace std;
 
 namespace lomse

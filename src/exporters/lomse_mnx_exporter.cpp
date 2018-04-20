@@ -35,13 +35,9 @@
 #include "lomse_im_note.h"
 #include "lomse_mnx_exporter.h"
 #include "lomse_logger.h"
+#include "lomse_time.h"
 
 #include <stack>
-#include <ctime>   //clock
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include "boost/date_time/local_time/local_time.hpp"
-
 using namespace std;
 
 namespace lomse
@@ -1676,11 +1672,7 @@ MnxExporter::MnxExporter(LibraryScope& libScope)
     , m_fProcessingChord(false)
 {
     m_lomseVersion = libScope.get_version_string();
-
-    boost::local_time::local_date_time currentTime(
-        boost::posix_time::second_clock::local_time(),
-        boost::local_time::time_zone_ptr());
-    m_exportTime = to_simple_string( currentTime.local_time() );
+    m_exportTime = to_simple_string(chrono::system_clock::now());
 }
 
 //---------------------------------------------------------------------------------------

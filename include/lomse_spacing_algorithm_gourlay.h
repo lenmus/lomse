@@ -36,11 +36,6 @@
 #include "lomse_time.h"
 #include "lomse_timegrid_table.h"
 
-//For performance measurements (timing)
-#include <ctime>   //clock
-#include <boost/date_time/posix_time/posix_time.hpp>
-
-
 namespace lomse
 {
 

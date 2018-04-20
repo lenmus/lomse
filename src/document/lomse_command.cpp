@@ -45,17 +45,8 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_internal_model.h"
 
-
 #include <sstream>
 using namespace std;
-
-
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include "boost/date_time/local_time/local_time.hpp"
-
-using namespace std;
-
 
 namespace lomse
 {
@@ -86,13 +77,10 @@ void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     ofstream logger;
     logger.open("forensic_log.txt", std::ofstream::out | std::ofstream::app);
 
-    boost::local_time::local_date_time currentTime(
-        boost::posix_time::second_clock::local_time(),
-        boost::local_time::time_zone_ptr());
     logger << "---------------------------------------------"
            << "---------------------------------------------" << endl;
     logger << "Before Undo, time="
-           << to_simple_string( currentTime.local_time() ) << endl;
+           << to_simple_string(chrono::system_clock::now()) << endl;
     if (get_undo_policy() == k_undo_policy_partial_checkpoint)
         logger << "Undo policy: Partial checkpoint. Obj: " << m_idChk << endl;
     else
@@ -118,13 +106,10 @@ void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* pCursor)
     ofstream logger;
     logger.open("forensic_log.txt", std::ofstream::out | std::ofstream::app);
 
-    boost::local_time::local_date_time currentTime(
-        boost::posix_time::second_clock::local_time(),
-        boost::local_time::time_zone_ptr());
     logger << "---------------------------------------------"
            << "---------------------------------------------" << endl;
     logger << "Before executing command, time="
-           << to_simple_string( currentTime.local_time() ) << endl;
+           << to_simple_string(chrono::system_clock::now()) << endl;
     log_command(logger);
     logger << "Cursor: " << pCursor->dump_cursor();
     logger << "Checkpoint data (last id " << m_idChk << "):" << endl;

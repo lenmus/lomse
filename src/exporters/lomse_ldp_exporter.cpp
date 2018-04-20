@@ -39,14 +39,6 @@
 #include <sstream>
 using namespace std;
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include "boost/date_time/local_time/local_time.hpp"
-
-using namespace std;
-
-
-
 namespace lomse
 {
 
@@ -1287,12 +1279,8 @@ protected:
             string& version = m_pExporter->get_library_version();
             if (!version.empty())
                 m_source << ", version " << version;
-            m_source << ". Date: ";
-
-            boost::local_time::local_date_time currentTime(
-                boost::posix_time::second_clock::local_time(),
-                boost::local_time::time_zone_ptr());
-            m_source << to_simple_string( currentTime.local_time() );
+            m_source << ". Date: "
+                     << to_simple_string(chrono::system_clock::now());
             end_comment();
         }
     }

@@ -52,10 +52,17 @@
 #include "lomse_shape_staff.h"
 
 #include <sstream>
+#include <chrono>
 using namespace std;
 
 namespace lomse
 {
+
+ptime::duration ptime::operator-(const ptime rhs)
+{
+    long long millis = chrono::duration_cast<chrono::milliseconds>(timepoint - rhs.timepoint).count();
+	return millis;
+}
 
 //=======================================================================================
 // Interactor implementation
@@ -142,7 +149,7 @@ void Interactor::create_graphic_model()
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        m_gmodelBuildStartTime = get_current_time();
+        m_gmodelBuildStartTime.init_now();
 
         GraphicView* pView = dynamic_cast<GraphicView*>(m_pView);
         Document* pDoc = spDoc.get();
@@ -1620,19 +1627,13 @@ void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoOb
 }
 
 //---------------------------------------------------------------------------------------
-ptime Interactor::get_current_time() const
-{
-    return microsec_clock::universal_time();
-}
-
-//---------------------------------------------------------------------------------------
 double Interactor::get_elapsed_time_since(ptime startTime) const
 {
     //millisecods
 
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - startTime;
-    return double( diff.total_milliseconds() );
+    ptime now(true);
+    ptime::duration diff = now - startTime;
+    return double( diff );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1643,7 +1644,7 @@ void Interactor::timing_start_measurements()
     for (int i=0; i < k_timing_max_value; ++i)
         m_elapsedTimes[i] = 0.0;
 
-    m_renderStartTime = microsec_clock::universal_time();
+    m_renderStartTime.init_now();
     m_visualEffectsStartTime = m_renderStartTime;
 }
 
@@ -1652,9 +1653,9 @@ void Interactor::timing_graphic_model_build_end()
 {
     //gmodel_build ends. gmodel_build = now - render_star
 
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_renderStartTime;
-    m_elapsedTimes[k_timing_gmodel_build_time] = double( diff.total_milliseconds() );
+    ptime now(true);
+    ptime::duration diff = now - m_renderStartTime;
+    m_elapsedTimes[k_timing_gmodel_build_time] = double( diff );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1662,10 +1663,10 @@ void Interactor::timing_graphic_model_render_end()
 {
     //draw gmodel ends. gmodel_draw = (now - render_start) - gmodel_build
 
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_renderStartTime;
+    ptime now(true);
+    ptime::duration diff = now - m_renderStartTime;
     m_elapsedTimes[k_timing_gmodel_draw_time] =
-        double( diff.total_milliseconds() ) - m_elapsedTimes[k_timing_gmodel_build_time];
+        double( diff ) - m_elapsedTimes[k_timing_gmodel_build_time];
 }
 
 //---------------------------------------------------------------------------------------
@@ -1673,7 +1674,7 @@ void Interactor::timing_visual_effects_start()
 {
     //draw visual effects start. visual_start = now
 
-    m_visualEffectsStartTime = microsec_clock::universal_time();
+    m_visualEffectsStartTime.init_now();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1682,14 +1683,14 @@ void Interactor::timing_renderization_end()
     //draw end. visual_draw = now - visual_start; total_render = now - render_start;
     //repaint_start=now
 
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_visualEffectsStartTime;
+    ptime now(true);
+    ptime::duration diff = now - m_visualEffectsStartTime;
     m_elapsedTimes[k_timing_visual_effects_draw_time] =
-        double( diff.total_milliseconds() );
+        double( diff );
 
     diff = now - m_renderStartTime;
     m_elapsedTimes[k_timing_total_render_time] =
-        double( diff.total_milliseconds() );
+        double( diff );
 
     m_repaintStartTime = now;
 }
@@ -1699,9 +1700,9 @@ void Interactor::timing_repaint_done()
 {
     //repaint_time = (now - repaint_start)
 
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_repaintStartTime;
-    m_elapsedTimes[k_timing_repaint_time] =  double( diff.total_milliseconds() );
+    ptime now(true);
+    ptime::duration diff = now - m_repaintStartTime;
+    m_elapsedTimes[k_timing_repaint_time] =  double( diff );
 }
 
 //---------------------------------------------------------------------------------------
