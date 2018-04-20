@@ -155,7 +155,7 @@ void SoundEventsTable::create_events()
             reset_accidentals(pKey);
 
             //only repetitions and volta brackets in first instrument are taken into
-            //consideration. Otherwise redundant invalid jumps will be created.
+            //consideration. Otherwise redundant invalid jumps would be created.
             if (cursor.num_instrument() == 0)
             {
                 ImoBarline* pBar = static_cast<ImoBarline*>(pSO);
@@ -295,6 +295,7 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                     {
                         //First volta bracket of a repetition set starts here.
                         //Add all jumps for voltas in this set
+                        m_pending.clear();
 
                         //jump for first volta
                         int times = pVB->get_number_of_repetitions();
@@ -311,7 +312,6 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                             m_pending.push_back(pJump);
                         }
                         m_iJump = 0;
-                        m_pending.clear();
                     }
                     else
                     {
