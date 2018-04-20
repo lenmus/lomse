@@ -378,7 +378,7 @@ void TableSectionLayouter::create_cell_layouters()
         //if last processed cell doesn't fill row and next cell is not used, assume last
         //processed cell has implicit colspan
         iRow++;
-        if (freeCell[iCell])
+        if (iCell < numCells && freeCell[iCell])
         {
             int colSpan = 0;
             int iStart = iCell;
