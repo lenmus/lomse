@@ -10062,7 +10062,7 @@ SUITE(LdpAnalyserTest)
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_GeneratesRequest)
     {
         LomseDoorway* pDoorway = m_libraryScope.platform_interface();
-        pDoorway->set_request_callback(this, wrapper_lomse_request);
+        pDoorway->set_request_callback(static_cast<LdpAnalyserTestFixture*>(this), wrapper_lomse_request);
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
