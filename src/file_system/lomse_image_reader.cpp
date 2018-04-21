@@ -49,6 +49,7 @@ namespace lomse
 //declaration of some internal functions, to avoid compiler warnings
 void read_callback(png_structp png, png_bytep data, png_size_t length);
 void error_callback (png_structp, png_const_charp);
+void warning_callback (png_structp, png_const_charp);
 
 
 //=======================================================================================
@@ -131,6 +132,12 @@ void error_callback (png_structp, png_const_charp)
     throw "error reading png image";
 }
 
+//---------------------------------------------------------------------------------------
+void warning_callback (png_structp, png_const_charp msg)
+{
+    LOMSE_LOG_WARN("warning reading png image: %s", msg);
+}
+
 //=======================================================================================
 // PngImageDecoder members implementation
 //=======================================================================================
@@ -178,7 +185,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     }
 
 
-    png_set_error_fn(pReadStruct, 0, error_callback, error_callback );
+    png_set_error_fn(pReadStruct, 0, error_callback, warning_callback);
 
 
     png_uint_32 width, height;
