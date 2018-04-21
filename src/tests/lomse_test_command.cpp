@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -162,6 +162,7 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to end of score
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( pCmd->get_cursor_update_policy() == DocCommand::k_refresh );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -677,8 +678,8 @@ SUITE(DocCommandTest)
         //                     |
         //                     +-- add t=32 (n a4 e v2)
         //  (clef G)(n e4 e v1)(goFwd e v2)(n a4 e v2)(n f4 e v1)(n g4 e v1)
-        //                                                       |
-        //                                 t=64, v=1, obj=g4 e --+
+        //                                            |
+        //                      t=32, v=1, obj=f4 e --+
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
@@ -719,8 +720,8 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( pSC->is_at_empty_place() == false );
-        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1 p1)" );
-        CHECK( is_equal_time(pSC->time(), 64.0) );
+        CHECK( pSC->staffobj_internal()->to_string() == "(n f4 e v1 p1)" );
+        CHECK( is_equal_time(pSC->time(), 32.0) );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0301_ur)
@@ -768,8 +769,8 @@ SUITE(DocCommandTest)
         CHECK( doc.is_dirty() == true );
         //cursor points after inserted note
         CHECK( pSC->is_at_empty_place() == false );
-        CHECK( pSC->staffobj_internal()->to_string() == "(n g4 e v1 p1)" );
-        CHECK( is_equal_time(pSC->time(), 64.0) );
+        CHECK( pSC->staffobj_internal()->to_string() == "(n f4 e v1 p1)" );
+        CHECK( is_equal_time(pSC->time(), 32.0) );
     }
 
 //    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0302)

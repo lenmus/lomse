@@ -82,6 +82,7 @@ protected:
     string m_name;          //displayable name for undo/redo actions display
     string m_checkpoint;    //checkpoint data
     ImoId m_idChk;          //id for target object in case of partial checkpoint
+    ImoId m_idRefresh;      //id for cursor object, for k_refresh policy
     string m_error;
     uint_least16_t m_flags;
 
@@ -92,7 +93,13 @@ protected:
         k_included_in_composite_cmd     = 0x0008,
     };
 
-    DocCommand(const string& name) : m_name(name), m_idChk(k_no_imoid), m_flags(0) {}
+    DocCommand(const string& name)
+        : m_name(name)
+        , m_idChk(k_no_imoid)
+        , m_idRefresh(k_no_imoid)
+        , m_flags(0)
+    {
+    }
 
 public:
     /// Destructor.
@@ -175,6 +182,8 @@ public:
     inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
 
     virtual void update_selection(SelectionSet* UNUSED(pSelection)) {}
+    inline void set_final_cursor_pos(ImoId id) { m_idRefresh = id; }
+    inline ImoId get_final_cursor_pos() { return m_idRefresh; }
 
     //settings
     inline void mark_as_included_in_composite_cmd() { m_flags |= k_included_in_composite_cmd; }
@@ -471,7 +480,7 @@ public:
     CmdAddNoteRest(const string& source, int editMode, const string& name="");
     virtual ~CmdAddNoteRest() {};
 
-    int get_cursor_update_policy() { return k_do_nothing; }
+    int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_command_specific; }
 
@@ -507,7 +516,6 @@ protected:
     void remove_fully_overlapped();
     void insert_new_content();
     void reduce_duration_of_overlapped_at_start();
-    void update_cursor();
     void update_selection(SelectionSet* pSelection);
     void clear_temporary_objects();
     void add_go_fwd_if_needed();
@@ -942,7 +950,7 @@ public:
         @param name The displayable name for the command. If not specified will default to "Change dots".
 
         <b>Remarks</b>
-            - If the selection is empy or does not contain notes or rests, the command
+            - If the selection is empty or does not contain notes or rests, the command
                 will not be executed and will return a failure code.
             - After executing the command:
                 - the selection will not be changed.
@@ -1634,7 +1642,7 @@ public:
     CmdInsertBlockLevelObj(const string& source, const string& name="");
     virtual ~CmdInsertBlockLevelObj() {};
 
-    int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
+    int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
 
