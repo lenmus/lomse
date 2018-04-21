@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -370,7 +370,7 @@ void DocCommandExecuter::update_cursor(DocCursor* pCursor, DocCommand* pCmd)
             }
             case DocCommand::k_refresh:
             {
-                pCursor->reset_and_point_to( pCursor->get_pointee_id() );
+                pCursor->reset_and_point_to( pCmd->get_final_cursor_pos() );
                 break;
             }
             default:
@@ -537,6 +537,7 @@ int CmdAddChordNote::perform_action(Document* pDoc, DocCursor* pCursor)
                                 pDoc->get_pointer_to_imo(m_baseId) );
     ImoInstrument* pInstr = pBaseNote->get_instrument();
     ImoScore* pScore = pInstr->get_score();
+    set_final_cursor_pos( pCursor->get_pointee_id() );
 
     //create note to insert
     ImoNote* pNewNote = static_cast<ImoNote*>( ImFactory::inject(k_imo_note, pDoc) );
@@ -630,7 +631,7 @@ int CmdAddNoteRest::perform_action(Document* pDoc, DocCursor* pCursor)
         add_go_fwd_if_needed();
         insert_new_content();
     }
-    update_cursor();
+    set_final_cursor_pos( pCursor->get_pointee_id() );
     clear_temporary_objects();
 
     //force to rebuild ColStaffObjs table
@@ -799,20 +800,6 @@ void CmdAddNoteRest::add_new_note_to_existing_beam_if_necessary()
             m_pDoc->add_beam(notes);
         }
     }
-}
-
-//---------------------------------------------------------------------------------------
-void CmdAddNoteRest::update_cursor()
-{
-    if (!m_insertedObjs.empty())
-    {
-        //point to inserted object and move next
-        ImoStaffObj* pSO = m_insertedObjs.back();
-        m_pCursor->reset_and_point_to(pSO->get_id());
-        m_pCursor->move_next();
-    }
-    else
-        m_pCursor->reset_and_point_to(m_idAt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1459,6 +1446,7 @@ int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
     }
 
     //rebuild StaffObjs collection
+    set_final_cursor_pos( pCursor->get_pointee_id() );
     ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
     pScore->end_of_changes();
 
@@ -2177,6 +2165,8 @@ int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     //Undo strategy: direct undo, as it only implies to delete the inserted object
 
+    set_final_cursor_pos( pCursor->get_pointee_id() );
+
     if (m_fFromSource)
         perform_action_from_source(pDoc, pCursor);
     else
@@ -2359,6 +2349,7 @@ int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
     if (pInstr)
     {
         //insert the created object at desired point
+        set_final_cursor_pos( pCursor->get_pointee_id() );
         stringstream errormsg;
         ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>(
                                     pDoc->get_pointer_to_imo(m_idAt) );
