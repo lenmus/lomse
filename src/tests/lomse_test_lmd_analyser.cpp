@@ -1526,7 +1526,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_GeneratesRequest)
     {
         LomseDoorway* pDoorway = m_libraryScope.platform_interface();
-        pDoorway->set_request_callback(this, wrapper_lomse_request);
+        pDoorway->set_request_callback(static_cast<LmdAnalyserTestFixture*>(this), wrapper_lomse_request);
 
         Document doc(m_libraryScope);
         XmlParser parser;
