@@ -1007,11 +1007,12 @@ SUITE(LdpExporterTest)
 
     // ScoreTextLdpGenerator ------------------------------------------------------------
 
+#if LOMSE_COMPATIBILITY_LDP_1_5
     TEST_FIXTURE(LdpExporterTestFixture, score_text_0)
     {
         //text
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)"
+        doc.from_string("(score (vers 1.5)"
             "(defineStyle \"Notations\" (font \"Times New Roman\" 10pt bold) (color #000000))"
             "(instrument (musicData (clef G)"
             "(text \"Largo\" (style \"Notations\")(dx -20)(dy -45)) ))"
@@ -1030,6 +1031,7 @@ SUITE(LdpExporterTest)
 
         CHECK( source == expected );
     }
+#endif
 
     // Slur -----------------------------------------------------------------
 
