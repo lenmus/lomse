@@ -325,11 +325,12 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pTable->min_note_duration() == 256.0 );
     }
 
+#if LOMSE_COMPATIBILITY_LDP_1_5
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_7)
     {
         //anchor staffobjs
         ImoScore* pScore = create_score(
-            "(score (vers 2.0) (instrument (musicData "
+            "(score (vers 1.5) (instrument (musicData "
             "(clef G)(key C)(n f4 q)(text \"Hello world\")(barline)"
             ")))"
         );
@@ -351,6 +352,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 64.0 );
     }
+#endif
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_8)
     {
@@ -914,11 +916,12 @@ SUITE(ColStaffObjsBuilderTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+#if LOMSE_COMPATIBILITY_LDP_1_5
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAddAnchor)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
-        parser.parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
+        parser.parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.5)"
                         "(instrument (musicData (clef G)(key C)"
                         "(n f4 q)(text \"Hello world\")(barline)))  )))" );
         LdpTree* tree = parser.get_ldp_tree();
@@ -956,6 +959,7 @@ SUITE(ColStaffObjsBuilderTest)
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+#endif
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ChordAcrossTwoStaves)
     {

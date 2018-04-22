@@ -772,6 +772,7 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+#if LOMSE_COMPATIBILITY_LDP_1_5
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_MusicData_AuxobjIsAnchored)
     {
         stringstream errormsg;
@@ -783,13 +784,14 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+#endif
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_musicData)
     {
@@ -10318,6 +10320,7 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+#if LOMSE_COMPATIBILITY_LDP_1_5
     // graphic line  --------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, graphic_type_error)
@@ -10436,6 +10439,7 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+#endif
 
     // scorePlayer ----------------------------------------------------------------------
 

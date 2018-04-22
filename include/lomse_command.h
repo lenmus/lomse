@@ -443,11 +443,15 @@ public:
             to "Add note" or "Add rest" depending on object to insert.
 
         <b>Remarks</b>
-        - The new note or rest will be inserted @b before the object currently pointed by the cursor.
+        - In ripple mode, the new note or rest will be inserted @b before the object currently
+          pointed by the cursor. In replace mode, the new note or rest will replace the object
+          currently pointed by the cursor.
         - After executing the command:
             - the selection will be cleared and the added note or rest will be
                 selected. That is, the selection will contain only the new added note or rest.
-            - the cursor will not change its position. The inserted note/rest will be just behind the cursor.
+            - In ripple mode, the cursor will not change its position. The inserted note/rest
+              will be just behind the cursor. In replace mode the cursor will be pointing
+              after the inserted note/rest.
 
         <b>Example</b>
 
@@ -516,6 +520,7 @@ protected:
     void remove_fully_overlapped();
     void insert_new_content();
     void reduce_duration_of_overlapped_at_start();
+    void update_cursor();
     void update_selection(SelectionSet* pSelection);
     void clear_temporary_objects();
     void add_go_fwd_if_needed();
