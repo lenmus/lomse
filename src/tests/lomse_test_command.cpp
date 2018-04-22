@@ -247,6 +247,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to e4 e
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 e v1 p1)" );
 
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
@@ -722,6 +724,9 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_empty_place() == false );
         CHECK( pSC->staffobj_internal()->to_string() == "(n f4 e v1 p1)" );
         CHECK( is_equal_time(pSC->time(), 32.0) );
+//        cout << "cursor points to " << pSC->staffobj_internal()->to_string()
+//             << " at timepos " << pSC->time() << endl;
+
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0301_ur)

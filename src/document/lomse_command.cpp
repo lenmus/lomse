@@ -244,6 +244,9 @@ int DocCmdComposite::perform_action(Document* pDoc, DocCursor* pCursor)
     list<DocCommand*>::iterator it;
     for (it=m_commands.begin(); it != m_commands.end(); ++it)
     {
+        if ((*it)->get_cursor_update_policy() == DocCommand::k_refresh)
+            (*it)->set_final_cursor_pos( pCursor->get_pointee_id() );
+
         result &= (*it)->perform_action(pDoc, pCursor);
     }
 
@@ -314,6 +317,9 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
                                         pCursor->get_state(),
                                         pSelection->get_state()
                                        );
+
+        if (pCmd->get_cursor_update_policy() == DocCommand::k_refresh)
+            pCmd->set_final_cursor_pos( pCursor->get_pointee_id() );
 
         result = pCmd->perform_action(m_pDoc, pCursor);
         m_error = pCmd->get_error();
@@ -537,7 +543,6 @@ int CmdAddChordNote::perform_action(Document* pDoc, DocCursor* pCursor)
                                 pDoc->get_pointer_to_imo(m_baseId) );
     ImoInstrument* pInstr = pBaseNote->get_instrument();
     ImoScore* pScore = pInstr->get_score();
-    set_final_cursor_pos( pCursor->get_pointee_id() );
 
     //create note to insert
     ImoNote* pNewNote = static_cast<ImoNote*>( ImFactory::inject(k_imo_note, pDoc) );
@@ -631,13 +636,35 @@ int CmdAddNoteRest::perform_action(Document* pDoc, DocCursor* pCursor)
         add_go_fwd_if_needed();
         insert_new_content();
     }
-    set_final_cursor_pos( pCursor->get_pointee_id() );
+
     clear_temporary_objects();
 
-    //force to rebuild ColStaffObjs table
+    //rebuild ColStaffObjs table, as there are objects added/removed
     m_pScore->end_of_changes();
+    update_cursor();
 
     return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdAddNoteRest::update_cursor()
+{
+    //AWARE: For now, command CmdAddNoteRest is working only in replace mode. Therefore,
+    //depending on voice and insertion point, the pointed object could have been replaced
+    //and thus no longer exist.
+    //Therefore, it is necessary to update the cursor refresh information
+
+    m_pCursor->reset_and_point_to(m_idAt);
+    if (m_pCursor->get_pointee_id() != m_idAt)
+    {
+        //object replaced. Point to last inserted object and move next
+        ImoStaffObj* pSO = m_insertedObjs.back();
+        m_pCursor->reset_and_point_to(pSO->get_id());
+        m_pCursor->move_next();
+        set_final_cursor_pos( m_pCursor->get_pointee_id() );
+    }
+    else
+        set_final_cursor_pos(m_idAt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1445,8 +1472,8 @@ int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
         pNR->set_dirty(true);
     }
 
-    //rebuild StaffObjs collection
-    set_final_cursor_pos( pCursor->get_pointee_id() );
+    //rebuild StaffObjs collection, as duration of some objects have changed and this
+    //affects to timepos of objects after them
     ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_parent_object() );
     pScore->end_of_changes();
 
@@ -2165,8 +2192,6 @@ int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     //Undo strategy: direct undo, as it only implies to delete the inserted object
 
-    set_final_cursor_pos( pCursor->get_pointee_id() );
-
     if (m_fFromSource)
         perform_action_from_source(pDoc, pCursor);
     else
@@ -2349,7 +2374,6 @@ int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
     if (pInstr)
     {
         //insert the created object at desired point
-        set_final_cursor_pos( pCursor->get_pointee_id() );
         stringstream errormsg;
         ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>(
                                     pDoc->get_pointer_to_imo(m_idAt) );
