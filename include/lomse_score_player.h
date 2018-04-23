@@ -34,9 +34,8 @@
 
 
 #include <vector>
-
-#include <boost/thread/thread.hpp>
-#include <boost/thread/condition_variable.hpp>
+#include <thread>
+#include <condition_variable>
 
 namespace lomse
 {
@@ -60,11 +59,8 @@ class Metronome;
 #define k_play_metronome        true
 
 //---------------------------------------------------------------------------------------
-typedef boost::thread SoundThread;
-//typedef boost::mutex SoundMutex;
-//typedef boost::unique_lock<boost::mutex> SoundLock;
-typedef boost::condition_variable SoundFlag;
-
+typedef std::thread SoundThread;
+typedef std::condition_variable SoundFlag;
 
 
 //---------------------------------------------------------------------------------------

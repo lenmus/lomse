@@ -34,6 +34,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <sstream>
 #include "lomse_visitor.h"
 #include "lomse_tree.h"
 #include "lomse_basic.h"

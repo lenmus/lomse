@@ -201,17 +201,10 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
                               long nMM, Interactor* pInteractor)
 {
     LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::thread_main]");
-    try
-    {
-        if (pInteractor && !m_fPostEvents)
-            pInteractor->enable_forced_view_updates(false);
-        fVisualTracking &= (pInteractor != nullptr);
-        do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
-    }
-    catch (boost::thread_interrupted&)
-    {
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::thread_main] catching interrupt");
-    }
+    if (pInteractor && !m_fPostEvents)
+        pInteractor->enable_forced_view_updates(false);
+    fVisualTracking &= (pInteractor != nullptr);
+    do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
 
     end_of_playback_housekeeping(fVisualTracking, pInteractor);
     m_fPlaying = false;
@@ -249,18 +242,7 @@ void ScorePlayer::stop()
     if (m_pThread)
     {
         m_fShouldStop = true;
-
-        //wait 500 ms for termination
-        if(!m_pThread->timed_join(boost::posix_time::milliseconds(500)))
-        {
-            LOMSE_LOG_DEBUG(Logger::k_score_player, "Not finished in 500ms. Force interrupt");
-            m_pThread->interrupt();
-            if(!m_pThread->timed_join(boost::posix_time::seconds(2)))
-            {
-                LOMSE_LOG_ERROR("Interrupt failed. Force terminate");
-                //throw runtime_error("[ScorePlayer::stop] Thread interrupt failed");
-            }
-        }
+        m_pThread->join();
 
         m_pTable->reset_jumps();
 
@@ -334,9 +316,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     long nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
     long nMeasureDuration = m_nMtrPulseDuration * 4;                   //in TU. Assume 4/4 time signature
     long nMtrNumPulses = 4;                                          //assume 4/4 time signature
-
-    //boost::this_thread::disable_interruption di;
-    //from this point, interruptions disabled -------------------------------------------
 
     //Execute control events that take place before the segment to play, so that
     //instruments and tempo are properly programmed. Continue in the loop while
@@ -477,10 +456,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         {
             //generate click
             m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
-            boost::posix_time::milliseconds waitTime(m_nMtrClickIntval/2L);
-            boost::this_thread::sleep(waitTime);
+            std::chrono::milliseconds waitTime(m_nMtrClickIntval/2L);
+            std::this_thread::sleep_for(waitTime);
             m_pMidi->note_off(m_MtrChannel, m_MtrTone2, 127);
-            boost::this_thread::sleep(waitTime);
+            std::this_thread::sleep_for(waitTime);
         }
         //generate final click
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
@@ -538,8 +517,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 long waitT = nEvTime - curTime - elapsed;
                 if (waitT > 0L)
                 {
-                    boost::posix_time::milliseconds waitTime(waitT);
-                    boost::this_thread::sleep(waitTime);
+                    std::chrono::milliseconds waitTime(waitT);
+                    std::this_thread::sleep_for(waitTime);
                 }
                 curTime = nEvTime;
             }
@@ -604,8 +583,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 long waitT = nEvTime - curTime - elapsed;
                 if (waitT > 0L)
                 {
-                    boost::posix_time::milliseconds waitTime(waitT);
-                    boost::this_thread::sleep(waitTime);
+                    std::chrono::milliseconds waitTime(waitT);
+                    std::this_thread::sleep_for(waitTime);
                 }
             }
 
@@ -761,7 +740,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         }
         while(m_fPaused)
         {
-            boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
+            std::this_thread::sleep_for( std::chrono::milliseconds(200) );
             if (m_fShouldStop)
             {
                 LOMSE_LOG_DEBUG(Logger::k_score_player, "Going to finish 2");

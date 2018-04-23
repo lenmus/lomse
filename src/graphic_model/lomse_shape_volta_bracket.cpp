@@ -35,6 +35,7 @@
 #include "lomse_drawer.h"
 #include "lomse_shape_barline.h"
 
+#include <cmath>   //abs
 
 namespace lomse
 {

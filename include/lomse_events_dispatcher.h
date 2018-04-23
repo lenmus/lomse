@@ -36,12 +36,12 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 
-#include <boost/thread/thread.hpp>
-#include <boost/thread/condition_variable.hpp>
 #if (LOMSE_USE_BOOST_ASIO == 1)
     #include <boost/asio.hpp>
 #endif
 
+#include <thread>
+#include <mutex>
 #include <queue>
 using namespace std;
 
@@ -52,9 +52,9 @@ namespace lomse
 
 
 //---------------------------------------------------------------------------------------
-typedef boost::thread EventsThread;
-typedef boost::mutex QueueMutex;
-typedef boost::unique_lock<boost::mutex> QueueLock;
+typedef std::thread EventsThread;
+typedef std::mutex QueueMutex;
+typedef std::unique_lock<std::mutex> QueueLock;
 
 
 

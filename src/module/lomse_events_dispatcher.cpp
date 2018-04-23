@@ -29,7 +29,6 @@
 
 #include "lomse_events_dispatcher.h"
 
-#include <boost/thread/thread.hpp>
 #if (LOMSE_USE_BOOST_ASIO == 1)
     #include <boost/asio.hpp>
     #include <boost/bind.hpp>
@@ -107,13 +106,7 @@ void EventsDispatcher::stop_events_loop()
 void EventsDispatcher::thread_main()
 {
 #if (LOMSE_DIRECT_INVOCATION == 0)
-    try
-    {
-        run_events_loop();
-    }
-    catch (boost::thread_interrupted&)
-    {
-    }
+    run_events_loop();
 #endif
 }
 
@@ -145,14 +138,14 @@ void EventsDispatcher::post_event(Observer* pObserver, SpEventInfo pEvent)
 
 void EventsDispatcher::run_events_loop()
 {
-    boost::posix_time::milliseconds waitTime(5);   //5ms
+    std::chrono::milliseconds waitTime(5);   //5ms
 
     while (!stop_event_received())
     {
         if (pending_events())
             dispatch_next_event();
         else
-            boost::this_thread::sleep(waitTime);
+            std::this_thread::sleep_for(waitTime);
     }
 }
 

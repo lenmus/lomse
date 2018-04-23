@@ -100,7 +100,7 @@ public:
         //force to wait until the score if fully played
         while (m_fPlaying)
         {
-            boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
+            std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
         //delete m_pThread;
         m_pThread = nullptr;
@@ -123,7 +123,7 @@ public:
         //force to wait until the score if fully played
         while (m_fPlaying)
         {
-            boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
+            std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
         //delete m_pThread;
         m_pThread = nullptr;
