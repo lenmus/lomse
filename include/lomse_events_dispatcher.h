@@ -30,15 +30,9 @@
 #ifndef __LOMSE_EVENTS_DISPATCHER_H__
 #define __LOMSE_EVENTS_DISPATCHER_H__
 
-#define LOMSE_USE_BOOST_ASIO        0
-
 #include "lomse_build_options.h"
 #include "lomse_injectors.h"
 #include "lomse_events.h"
-
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    #include <boost/asio.hpp>
-#endif
 
 #include <thread>
 #include <mutex>
@@ -69,11 +63,6 @@ protected:
     QueueMutex m_mutex;             //to control queue access
     bool m_fStopLoop;
     queue< pair<SpEventInfo, Observer*> > m_events;
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    boost::asio::io_service m_ioService;
-    boost::asio::io_service::work* m_pFakeWork;
-    boost::thread_group m_threads;
-#endif
 
 public:
     EventsDispatcher();
@@ -83,9 +72,6 @@ public:
     void stop_events_loop();
 
     void post_event(Observer* pObserver, SpEventInfo pEvent);
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    inline boost::asio::io_service& get_io_service() { return m_ioService; }
-#endif
 
 protected:
     inline bool stop_event_received() { return m_fStopLoop; }

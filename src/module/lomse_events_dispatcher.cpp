@@ -29,11 +29,6 @@
 
 #include "lomse_events_dispatcher.h"
 
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    #include <boost/asio.hpp>
-    #include <boost/bind.hpp>
-#endif
-
 namespace lomse
 {
 
@@ -46,21 +41,12 @@ namespace lomse
 EventsDispatcher::EventsDispatcher()
     : m_pThread(nullptr)
     , m_fStopLoop(false)
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    , m_pFakeWork(nullptr)
-#endif
 {
 }
 
 //---------------------------------------------------------------------------------------
 EventsDispatcher::~EventsDispatcher()
 {
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    m_ioService.stop();
-    m_threads.join_all();   //join all the threads and wait for them to exit
-
-    delete m_pFakeWork;
-#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -76,18 +62,6 @@ void EventsDispatcher::start_events_loop()
 #if (LOMSE_DIRECT_INVOCATION == 0)
     delete m_pThread;
     m_pThread = LOMSE_NEW EventsThread(&EventsDispatcher::thread_main, this);
-#endif
-
-#if (LOMSE_USE_BOOST_ASIO == 1)
-     // create some fake work to keep the io_service live forever.
-    m_pFakeWork = LOMSE_NEW boost::asio::io_service::work(m_ioService);
-
-    //create the worker threads
-//    for(size_t t = 0; t < boost::thread::hardware_concurrency(); t++)
-    {
-        //m_threads.create_thread([&]() { m_ioService.run(); } );
-        m_threads.create_thread(boost::bind(&asio::io_service::run, &m_ioService));
-    }
 #endif
 }
 
@@ -122,15 +96,6 @@ void EventsDispatcher::post_event(Observer* pObserver, SpEventInfo pEvent)
     }
 #endif
 }
-
-////---------------------------------------------------------------------------------------
-//void EventsDispatcher::post_timed_event(Observer* pObserver, SpEventInfo pEvent)
-//{
-//#if (LOMSE_USE_BOOST_ASIO == 1)
-//    // this will be executed in one of the threads
-//    m_ioService.post(boost::bind(a_long_running_task, 123));
-//#endif
-//}
 
 //---------------------------------------------------------------------------------------
 // Methods to be executed in the thread

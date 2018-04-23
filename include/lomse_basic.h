@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>   //min
 using namespace std;
 
 

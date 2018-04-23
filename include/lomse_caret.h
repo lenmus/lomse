@@ -39,10 +39,6 @@
 using namespace std;
 
 #include "lomse_events_dispatcher.h"
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    #include <boost/asio.hpp>
-    #include <boost/bind.hpp>
-#endif
 
 namespace lomse
 {
@@ -67,10 +63,6 @@ protected:
     USize m_size;           //caret size
     int m_type;
     string m_timecode;      //timecode for current position
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    int m_blinkTime;            //milliseconds.
-    boost::asio::deadline_timer m_timer;
-#endif
     GmoBoxSystem* m_pBoxSystem;     //active system: the one on which the caret is placed
     URect m_bounds;         //the real bounds of the caret drawing
 
@@ -111,12 +103,6 @@ public:
     //properties
     inline bool is_blink_enabled() const { return m_fBlinkEnabled; }
     inline bool is_displayed() const { return m_fBlinkStateOn; }
-
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    inline int get_blink_time() { return m_blinkTime; }
-    inline void set_blink_time(int milliseconds) { m_blinkTime = milliseconds; }
-    void handle_timeout(boost::system::error_code const& cError);
-#endif
 
 protected:
     void schedule_the_timer();
