@@ -105,7 +105,6 @@ public:
     inline bool is_displayed() const { return m_fBlinkStateOn; }
 
 protected:
-    void schedule_the_timer();
     void draw_caret(ScreenDrawer* pDrawer);
 
     void draw_caret_as_top_level(ScreenDrawer* pDrawer);

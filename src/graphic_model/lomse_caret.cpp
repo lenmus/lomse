@@ -51,12 +51,6 @@ Caret::Caret(GraphicView* view, LibraryScope& libraryScope)
     , m_timecode("1.0.0.0")
     , m_pBoxSystem(nullptr)
 {
-    schedule_the_timer();
-}
-
-//---------------------------------------------------------------------------------------
-void Caret::schedule_the_timer()
-{
 }
 
 //---------------------------------------------------------------------------------------
