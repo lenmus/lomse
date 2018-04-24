@@ -88,7 +88,6 @@ void OverlaysGenerator::update_all_visual_effects(ScreenDrawer* pDrawer)
         m_pCanvasBuffer->copy_from(m_savedBuffer);
 
     m_damagedRect = URect(0.0, 0.0, 0.0, 0.0);
-    stringstream msg;
     int overlays = 0;
     list<VisualEffect*>::const_iterator it;
     for (it = m_effects.begin(); it != m_effects.end(); ++it)

@@ -82,13 +82,6 @@
 # LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
 #       Enables backwards compatibility for scores in LDP v1.5
 #
-# LOMSE_USE_STATIC_BOOST	(Default value: ON for Windows, OFF for other OS)
-#		When OFF, Lomse will link agains boost dynamic libraries.
-#		When OFF, boost static libraries will be used.
-#
-# LOMSE_USE_MULTITHREADED_BOOST		(Default value: ON)
-#		Can be set to OFF to use the non-multithreaded boost libraries.
-#
 #-------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8.10)
@@ -166,77 +159,19 @@ include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 if (LOMSE_BUILD_TESTS)
     find_package(UnitTest++)
     if(UNITTEST++_FOUND)
+        get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
         include_directories(${UNITTEST++_INCLUDE_DIR})
-        link_directories( ${UNITTEST++_LIBRARY} )
-        #message("UnitTest++ found: library: ${UNITTEST++_LIBRARY}" )
-        #message("UnitTest++ found: include: ${UNITTEST++_INCLUDE_DIR}" )
+        link_libraries( ${UNITTEST++_LIBRARY} )
+        link_directories( ${UNITTEST++_LINK_DIR} )        
+        message(STATUS "UnitTest++ found: libraries= ${UNITTEST++_LIBRARY}" )
+        message(STATUS "UnitTest++ found: include= ${UNITTEST++_INCLUDE_DIR}" )
+        message(STATUS "UnitTest++ found: libdir= ${UNITTEST++_LINK_DIR}" )
     else()
         message(STATUS "UnitTest++ package not found. Test program will not be built" )
         set (LOMSE_BUILD_TESTS OFF)
     endif()
 endif(LOMSE_BUILD_TESTS)
 
-# Check for Boost >= 1.42.0
-set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
-    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0"
-    "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0"
-    "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0"
-    "1.60" "1.60.0" "1.61" "1.61.0" )
-set(Boost_USE_STATIC_LIBS       ${LOMSE_USE_STATIC_BOOST})
-set(Boost_USE_MULTITHREADED     ${LOMSE_USE_MULTITHREADED_BOOST})
-set(Boost_USE_STATIC_RUNTIME    OFF)
-#set(Boost_DEBUG                 TRUE)
-unset(Boost_INCLUDE_DIR CACHE)
-unset(Boost_LIBRARY_DIRS CACHE)
-find_package(Boost 1.42.0 COMPONENTS date_time thread REQUIRED)
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    link_libraries( ${Boost_LIBRARIES} )
-    link_directories( ${Boost_LIBRARY_DIRS} )
-    set(BOOST_VERSION   "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}" )
-    if (NOT ".${Boost_SUBMINOR_VERSION}" STREQUAL "." )
-	    set(BOOST_VERSION   "${BOOST_VERSION}.${Boost_SUBMINOR_VERSION}" )
-	endif()
-    message(STATUS "Boost found: lib version= ${Boost_LIB_VERSION}, version=${BOOST_VERSION}" )
-    #string(REGEX REPLACE "_" "." Boost_LIB_VERSION "${Boost_LIB_VERSION}" )
-    set(BOOST_DEPENDENCIES 
-        "libboost-thread${BOOST_VERSION}, libboost-date-time${BOOST_VERSION}")
-    message(STATUS "Boost found: libraries: ${Boost_LIBRARIES}" )
-    message(STATUS "Boost found: include= ${Boost_INCLUDE_DIRS}" )
-    message(STATUS "Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
-    message(STATUS "Boost dependencies: ${BOOST_DEPENDENCIES}" )
-
-	if ((NOT Boost_USE_STATIC_LIBS) AND WIN32)
-		# Setting Boost_USE_STATIC_LIBS to OFF is NOT enough to get you dynamic
-		# linking when using MSVC & Borland compilers. By default, they use
-		# automatic linking when including things in Boost. So, the following
-		# is necessary. See:
-		# https://stackoverflow.com/questions/6646405/how-do-you-add-boost-libraries-in-cmakelists-txt
-
-	  	# disable autolinking with boost
-	  	add_definitions( -DBOOST_ALL_NO_LIB )
-
-	  	# force all boost libraries to dynamic link.
-	  	add_definitions( -DBOOST_ALL_DYN_LINK )
-	endif()
-
-else()
-    message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
-endif()
-
-
-#Additional Boost libraries required for unit tests
-if (LOMSE_BUILD_TESTS)
-    find_package(Boost 1.42.0 COMPONENTS system REQUIRED)
-    if(Boost_FOUND)
-        include_directories(${Boost_INCLUDE_DIRS})
-        link_libraries( ${Boost_LIBRARIES} )
-        link_directories( ${Boost_LIBRARY_DIRS} )
-    else()
-        message(SEND_ERROR "Boost 'system' package not found. Reason: ${Boost_ERROR_REASON}. Test program will not be built" )
-        set (LOMSE_BUILD_TESTS OFF)
-    endif()
-endif(LOMSE_BUILD_TESTS)
 
 # Check for FreeType
 find_package(Freetype REQUIRED)                    
@@ -283,7 +218,7 @@ endif()
 
 #dependencies for building and for pkg-config file
 set(LOMSE_REQUIRES "freetype2, libpng, zlib")
-set(LOMSE_DEPENDENCIES "libfreetype6, libpng12-0 (>=1.2.42), zlib1g (>= ${ZLIB_VERSION_STRING}), ${BOOST_DEPENDENCIES} ")
+set(LOMSE_DEPENDENCIES "libfreetype6, libpng12-0 (>=1.2.42), zlib1g (>= ${ZLIB_VERSION_STRING})")
 
 
 # include directories to be installed
@@ -384,11 +319,14 @@ if(LOMSE_BUILD_TESTS)
     file(GLOB TESTLIB_SRC "${LOMSE_SRC_DIR}/tests/*.cpp" )
     add_executable(${TESTLIB} ${TESTLIB_SRC})
 
+    # Check for pthreads
+    find_package (Threads)
+    
     # libraries to link
     if (BUILD_SHARED_LIB)
-        target_link_libraries ( ${TESTLIB} lomse-shared libunittest++.a )
+        target_link_libraries ( ${TESTLIB} lomse-shared libunittest++.a ${CMAKE_THREAD_LIBS_INIT} )
     else()      
-        target_link_libraries ( ${TESTLIB} lomse.so libunittest++.a )
+        target_link_libraries ( ${TESTLIB} lomse.so libunittest++.a ${CMAKE_THREAD_LIBS_INIT} )
     endif()
 
     # dependencies
@@ -442,7 +380,6 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries( ${EXAMPLE1}
             lomse.lib
-            ${Boost_LIBRARIES}
             ${FREETYPE_LIBRARIES}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
@@ -463,7 +400,6 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries ( ${EXAMPLE1} 
             liblomse.so
-            ${Boost_LIBRARIES}
             ${FREETYPE_LIBRARIES}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}

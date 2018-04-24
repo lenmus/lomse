@@ -41,6 +41,7 @@
 #include "lomse_calligrapher.h"
 
 #include <vector>
+#include <cmath>   //abs
 using namespace std;
 
 

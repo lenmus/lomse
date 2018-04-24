@@ -183,15 +183,6 @@ EventsDispatcher* LibraryScope::get_events_dispatcher()
     return m_pDispatcher;
 }
 
-#if (LOMSE_USE_BOOST_ASIO == 1)
-//---------------------------------------------------------------------------------------
-boost::asio::io_service& LibraryScope::get_io_service()
-{
-    EventsDispatcher* pDispatcher = get_events_dispatcher();
-    return pDispatcher->get_io_service();
-}
-#endif
-
 //---------------------------------------------------------------------------------------
 double LibraryScope::get_screen_ppi() const
 {

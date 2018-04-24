@@ -33,14 +33,12 @@
 #include "lomse_ldp_factory.h"
 #include "lomse_build_options.h"
 #include "lomse_events.h"
-#include "lomse_events_dispatcher.h"    // LOMSE_USE_BOOST_ASIO
+#include "lomse_events_dispatcher.h"
 #include "lomse_import_options.h"
 
 
 #include <iostream>
 using namespace std;
-
-//#include <boost/asio.hpp>
 
 namespace lomse
 {
@@ -158,9 +156,6 @@ public:
     FontStorage* font_storage();
     inline string& fonts_path() { return m_sFontsPath; }
     EventsDispatcher* get_events_dispatcher();
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    boost::asio::io_service& get_io_service();
-#endif
 
     //callbacks
     void post_event(SpEventInfo pEvent);

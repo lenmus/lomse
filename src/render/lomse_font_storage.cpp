@@ -41,8 +41,7 @@
 
 #include "lomse_build_options.h"
 
-#include <boost/algorithm/string.hpp>   //to upper conversion
-
+#include <locale>   //to upper conversion
 using namespace agg;
 
 namespace lomse
@@ -193,7 +192,10 @@ std::string FontSelector::find_font(const std::string& language,
         return fullpath + fontFile;
 
     //transform name to capital letters for comparisons
-    string fontname = boost::to_upper_copy(name);
+    const locale& loc = locale();
+    string fontname;
+    for (string::value_type a : name)
+        fontname += std::toupper(a, loc);
 
     //music font
     if (fontname == "BRAVURA")

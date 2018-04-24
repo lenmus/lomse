@@ -31,22 +31,6 @@ else()
     option( LOMSE_COMPATIBILITY_LDP_1_5  "Enable compatibility for LDP v1.5" ON)
 endif()
 
-if(DEFINED LOMSE_USE_STATIC_BOOST)
-    option( LOMSE_USE_STATIC_BOOST  "Link agains boost static libraries" ${LOMSE_USE_STATIC_BOOST})
-else()
-	if (WIN32)
-    	option( LOMSE_USE_STATIC_BOOST  "Link agains boost static libraries" ON)
-	else()
-    	option( LOMSE_USE_STATIC_BOOST  "Link agains boost static libraries" OFF)
-	endif()
-endif()
-
-if(DEFINED LOMSE_USE_MULTITHREADED_BOOST)
-    option( LOMSE_USE_MULTITHREADED_BOOST  "Use the multithreaded boost libraries" ${LOMSE_USE_MULTITHREADED_BOOST})
-else()
-    option( LOMSE_USE_MULTITHREADED_BOOST  "Use the multithreaded boost libraries" ON)
-endif()
-
 
 #libraries to build
 option(LOMSE_BUILD_STATIC_LIB "Build the static library" OFF)
@@ -72,8 +56,6 @@ message(STATUS "Run tests after building = ${LOMSE_RUN_TESTS}")
 message(STATUS "Create Debug build = ${LOMSE_DEBUG}")
 message(STATUS "Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
 message(STATUS "Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
-message(STATUS "Link agains boost static libraries = ${LOMSE_USE_STATIC_BOOST}")
-message(STATUS "Use the multithreaded boost libraries = ${LOMSE_USE_MULTITHREADED_BOOST}")
 
 
 

@@ -49,41 +49,8 @@ Caret::Caret(GraphicView* view, LibraryScope& libraryScope)
     , m_fBlinkEnabled(false)
     , m_type(k_top_level)
     , m_timecode("1.0.0.0")
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    , m_blinkTime(500)              //500 milliseconds
-    , m_timer( libraryScope.get_io_service() )
-#endif
     , m_pBoxSystem(nullptr)
 {
-    schedule_the_timer();
-}
-
-#if (LOMSE_USE_BOOST_ASIO == 1)
-//---------------------------------------------------------------------------------------
-void Caret::handle_timeout(boost::system::error_code const& cError)
-{
-    if (cError.value() == boost::asio::error::operation_aborted)
-        return;
-
-    if (cError && cError.value() != boost::asio::error::operation_aborted)
-        return;     //TODO: throw an exception?
-
-    //repaint/erase the caret
-    m_fBlinkStateOn = !m_fBlinkStateOn;
-
-    // Schedule the timer again...
-    schedule_the_timer();
-}
-#endif
-
-//---------------------------------------------------------------------------------------
-void Caret::schedule_the_timer()
-{
-#if (LOMSE_USE_BOOST_ASIO == 1)
-    m_timer.expires_from_now(boost::posix_time::milliseconds(m_blinkTime));
-    m_timer.async_wait(boost::bind(&Caret::handle_timeout, this,
-                       boost::asio::placeholders::error));
-#endif
 }
 
 //---------------------------------------------------------------------------------------
