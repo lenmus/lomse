@@ -27,6 +27,9 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#include "lomse_config.h"
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+
 #include "lomse_zip_stream.h"
 
 #include "lomse_logger.h"
@@ -415,3 +418,5 @@ unsigned char* ZipInputStream::get_as_string()
 
 
 }  //namespace lomse
+
+#endif  // LOMSE_ENABLE_COMPRESSION

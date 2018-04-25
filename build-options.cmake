@@ -48,6 +48,13 @@ endif()
 #Build the example-1 program that uses the library
 option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
 
+#optional dependencies
+option(LOMSE_ENABLE_COMPRESSION "Enable compressed formats (requires zlib)" ON)
+option(LOMSE_ENABLE_PNG "Enable png format (requires pnglib and zlib)" ON)
+if (LOMSE_ENABLE_PNG)
+    set(LOMSE_ENABLE_COMPRESSION ON)
+endif()      
+
 
 message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
 message(STATUS "Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
@@ -56,6 +63,8 @@ message(STATUS "Run tests after building = ${LOMSE_RUN_TESTS}")
 message(STATUS "Create Debug build = ${LOMSE_DEBUG}")
 message(STATUS "Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
 message(STATUS "Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
+message(STATUS "Enable compressed formats = ${LOMSE_ENABLE_COMPRESSION}")
+message(STATUS "Enable png format = ${LOMSE_ENABLE_PNG}")
 
 
 

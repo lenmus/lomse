@@ -81,6 +81,8 @@ SUITE(ImageReaderTest)
 //        doc.from_file(m_scores_path + "08041-read-jpg-image.lms");
 //    }
 
+#if (LOMSE_ENABLE_PNG == 1)
+
     TEST_FIXTURE(ImageReaderTestFixture, ImageReader_can_decode_png_1)
     {
         string path = m_scores_path + "test-image-1.png";
@@ -98,5 +100,7 @@ SUITE(ImageReaderTest)
         CHECK( dec.can_decode(file) == false );
         delete file;
     }
+
+#endif // LOMSE_ENABLE_PNG
 
 }

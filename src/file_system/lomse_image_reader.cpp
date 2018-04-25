@@ -31,8 +31,10 @@
 
 #include "lomse_logger.h"
 
-#include <png.h>
-#include <pngconf.h>
+#if (LOMSE_ENABLE_PNG == 1)
+	#include <png.h>
+	#include <pngconf.h>
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -46,11 +48,12 @@ using ::free;
 namespace lomse
 {
 
+#if (LOMSE_ENABLE_PNG == 1)
 //declaration of some internal functions, to avoid compiler warnings
 void read_callback(png_structp png, png_bytep data, png_size_t length);
 void error_callback (png_structp, png_const_charp);
 void warning_callback (png_structp, png_const_charp);
-
+#endif
 
 //=======================================================================================
 // ImageReader implementation
@@ -62,6 +65,7 @@ SpImage ImageReader::load_image(const string& locator)
     {
         pFile = FileSystem::open_input_stream(locator);
         //find a reader that can decode the file
+#if (LOMSE_ENABLE_PNG == 1)
         {
             //PNG Format
             PngImageDecoder decoder;
@@ -72,6 +76,7 @@ SpImage ImageReader::load_image(const string& locator)
                 return img;
             }
         }
+#endif
         {
             //JPG Format
             JpgImageDecoder decoder;
@@ -107,6 +112,9 @@ SpImage ImageReader::load_image(const string& locator)
     }
     return SpImage( LOMSE_NEW Image() );   //compiler happy
 }
+
+
+#if (LOMSE_ENABLE_PNG == 1)
 
 //=======================================================================================
 // PngImageDecoder implementation
@@ -282,6 +290,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     return SpImage(pImage);
 }
 
+#endif // LOMSE_ENABLE_PNG
 
 
 //=======================================================================================
