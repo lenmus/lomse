@@ -76,6 +76,12 @@
 // Enable debug logs. It is independent of build mode: debug or release
 #define LOMSE_ENABLE_DEBUG_LOGS     @LOMSE_ENABLE_DEBUG_LOGS@
 
+// Enable compressed formats (requires zlib)
+#define LOMSE_ENABLE_COMPRESSION    @LOMSE_ENABLE_COMPRESSION@
+
+// Enable png format (requires pnglib and zlib)
+#define LOMSE_ENABLE_PNG    @LOMSE_ENABLE_PNG@
+
 
 #endif  // __LOMSE_CONFIG_H__
 

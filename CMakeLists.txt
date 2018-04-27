@@ -155,6 +155,25 @@ include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 #
 ###############################################################################
 
+#dependencies for building and for pkg-config file (intitially empty but will be enhanced)
+set(LOMSE_REQUIRES "")
+set(LOMSE_DEPENDENCIES "")
+
+# include directories to be installed
+set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
+set( INCLUDES_AGG  ${LOMSE_ROOT_DIR}/src/agg/include )
+set( INCLUDES_UTFCPP  ${LOMSE_ROOT_DIR}/packages/utfcpp )
+set( INCLUDES_MINIZIP  ${LOMSE_ROOT_DIR}/packages/minizip )
+set( INCLUDES_PUGIXML  ${LOMSE_ROOT_DIR}/packages )
+include_directories(
+    ${INCLUDES_LOMSE}
+    ${INCLUDES_AGG}
+    ${LOMSE_ROOT_DIR}/src/agg/font_freetype
+    ${INCLUDES_UTFCPP}
+    ${INCLUDES_PUGIXML}
+)
+
+
 # Check for UnitTest++. Required for unit test
 if (LOMSE_BUILD_TESTS)
     find_package(UnitTest++)
@@ -182,60 +201,54 @@ if( FREETYPE_FOUND )
     message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
     message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
     message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
+    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
+    set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libfreetype6")
 else()
     message(SEND_ERROR "FreeType package not found.")
 endif()
 
 
 # Check for libpng
-find_package(PNG REQUIRED)                    
-if( PNG_FOUND )
-    include_directories( ${PNG_INCLUDE_DIRS} )
-    link_libraries( ${PNG_LIBRARIES} )
-    link_directories( ${PNG_LINK_DIR} )        
-    message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
-    message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
-    message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
-else()
-    message(SEND_ERROR "libpng package not found.")
+if( LOMSE_ENABLE_PNG )
+    find_package(PNG REQUIRED)                    
+    if( PNG_FOUND )
+        include_directories( ${PNG_INCLUDE_DIRS} )
+        link_libraries( ${PNG_LIBRARIES} )
+        link_directories( ${PNG_LINK_DIR} )        
+        message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
+        message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
+        message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
+        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
+        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libpng12-0 (>=1.2.42)")
+    else()
+        message(SEND_ERROR "libpng package not found.")
+    endif()
 endif()
 
 
-# Check for zlib
-find_package(ZLIB REQUIRED)
-if( ZLIB_FOUND )
-    include_directories( ${ZLIB_INCLUDE_DIR} )
-    link_libraries( ${ZLIB_LIBRARIES} )
-    link_directories( ${ZLIB_LINK_DIR} )        
-    message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
-    message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
-    message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
-    message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
-else()
-    message(SEND_ERROR "zlib package not found.")
+if( LOMSE_ENABLE_COMPRESSION )
+    # Check for zlib
+    find_package(ZLIB REQUIRED)
+    if( ZLIB_FOUND )
+        include_directories( ${ZLIB_INCLUDE_DIR} )
+        link_libraries( ${ZLIB_LIBRARIES} )
+        link_directories( ${ZLIB_LINK_DIR} )        
+        message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
+        message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+        message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
+        message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
+        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
+        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, zlib1g (>= ${ZLIB_VERSION_STRING})")
+        include_directories( ${INCLUDES_MINIZIP} )
+    else()
+        message(SEND_ERROR "zlib package not found.")
+    endif()
 endif()
 
 
-#dependencies for building and for pkg-config file
-set(LOMSE_REQUIRES "freetype2, libpng, zlib")
-set(LOMSE_DEPENDENCIES "libfreetype6, libpng12-0 (>=1.2.42), zlib1g (>= ${ZLIB_VERSION_STRING})")
-
-
-# include directories to be installed
-set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
-set( INCLUDES_AGG  ${LOMSE_ROOT_DIR}/src/agg/include )
-set( INCLUDES_UTFCPP  ${LOMSE_ROOT_DIR}/packages/utfcpp )
-set( INCLUDES_MINIZIP  ${LOMSE_ROOT_DIR}/packages/minizip )
-set( INCLUDES_PUGIXML  ${LOMSE_ROOT_DIR}/packages )
-include_directories(
-    ${INCLUDES_LOMSE}
-    ${INCLUDES_AGG}
-    ${LOMSE_ROOT_DIR}/src/agg/font_freetype
-    ${INCLUDES_UTFCPP}
-    ${INCLUDES_MINIZIP}
-    ${INCLUDES_PUGIXML}
-)
-
+# strip leading commas from LOMSE_REQUIRES and LOMSE_DEPENDENCIES
+string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
+string( REGEX REPLACE "^, " "" LOMSE_DEPENDENCIES ${LOMSE_DEPENDENCIES})
 
 link_directories( ${LIBRARY_OUTPUT_PATH} )
 
@@ -459,11 +472,13 @@ if( UNIX )
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
-    # copy minizip includes
-    install(DIRECTORY "${INCLUDES_MINIZIP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
+    if( LOMSE_ENABLE_COMPRESSION )
+        # copy minizip includes
+        install(DIRECTORY "${INCLUDES_MINIZIP}/"
+                DESTINATION "${LOMSE_INCLUDEDIR}"
+                FILES_MATCHING PATTERN "*.h"
+                            PATTERN ".svn" EXCLUDE )
+    endif()
 
     # copy utfcpp includes
     install(DIRECTORY "${INCLUDES_UTFCPP}/"
@@ -507,11 +522,13 @@ elseif( WIN32 )
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
-    # copy minizip includes
-    install(DIRECTORY "${INCLUDES_MINIZIP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
+    if( LOMSE_ENABLE_COMPRESSION )
+        # copy minizip includes
+        install(DIRECTORY "${INCLUDES_MINIZIP}/"
+                DESTINATION "${LOMSE_INCLUDEDIR}"
+                FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
+    endif()
 
     # copy utfcpp includes
     install(DIRECTORY "${INCLUDES_UTFCPP}/"

@@ -10186,6 +10186,7 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+#if (LOMSE_ENABLE_PNG == 1)
     // image ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Image_Ok)
@@ -10211,6 +10212,7 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+#endif // LOMSE_ENABLE_PNG
 
     // list -----------------------------------------------------------------------------
 
