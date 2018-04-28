@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
-# Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+# Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -49,38 +49,75 @@
 #
 #   cmake -G "CodeBlocks - Unix Makefiles"  ...
 #
-# Installation options
-# ---------------------
 #
-# The default installation prefix is "/usr/local". Therefore, libraries (binaries)
-# will be installed at "/usr/local/lib" and include files at
-# "/usr/local/include/lomse". You can change the default location 
-# by specifying option CMAKE_INSTALL_PREFIX. For instance:
+#---------------------------------------------------------------------------
+# Build options
+#---------------------------------------------------------------------------
 #
-#   cmake -DCMAKE_INSTALL_PREFIX=/usr  ...
-#
-# Also, a pkg-config file, liblomse.pc, will be installed. The default
-# location is "/usr/lib/pkgconfig". You can change this default location
-# by using the option -DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path.
-# For instance:
-#
-#   cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ...
+# Please note that default values can be changed directly in the CMake GUI or
+# through the command line by prefixing the option's name with '-D':
+# i.e.:    cmake -DLOMSE_DEBUG=ON  ....
 #
 #
-# Additional build options (ON / OFF values):
+# a) Installation options
 # --------------------------------------------
-# Values can be changed directly in the CMake GUI or through
-# the command line by prefixing a variable's name with '-D':
-# i.e.:    cmake -DLOMSE_DEBUG=ON  ...
+#
+# MAKE_INSTALL_PREFIX  (Default: "/usr/local")
+# 	The default installation prefix is "/usr/local". Therefore, libraries
+#	(binaries) will be installed at "/usr/local/lib" and include files at
+# 	"/usr/local/include/lomse". You can change the default location 
+# 	by specifying option CMAKE_INSTALL_PREFIX. For instance:
+#   	cmake -DCMAKE_INSTALL_PREFIX=/usr  ....
+#
+# LOMSE_PKG_CONFIG_INSTALL  (Default "/usr/lib/pkgconfig")
+# 	As part of the Lomse instalation process, a pkg-config file, named
+#	liblomse.pc, is installed. The default location is "/usr/lib/pkgconfig".
+#	You can change this default location by using the option
+#	-DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path. For instance:
+#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ....
+#
+#
+# b) Debug options (ON / OFF values):
+# --------------------------------------------
 #
 # LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
-#       Enable debug logs (performance loss). Doesn't require a debug build.
+#	Enable debug logs (performance loss). Doesn't require a debug build.
 #
 # LOMSE_DEBUG   (Default value: OFF)      
-#       Force to create a debug build, with debug symbols.
+#	Force to create a debug build, with debug symbols.
 #
+#
+# c) Options to reduce dependencies from other libraries (ON / OFF values):
+# --------------------------------------------------------------------------
+#
+# If your application will not deal with compressed files or with scores
+# containing png images, it is possible to reduce dependencies from third
+# party librraries by removing the code that deals with compressed files
+# or with PNG images.
+#
+# LOMSE_ENABLE_PNG   (Default value: ON)
+#	Build with support for PNG images. This requires libpng library.
+#	By setting this to OFF Lomse will ignore any png image embedded in the
+#	documents. But Lomse will not fail in those cases, just will log error
+#	messages. For instance:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_PNG=OFF ....
+#
+# LOMSE_ENABLE_COMPRESSION   (Default value: ON)
+#	Build with support for compressed files. This requires zlib library.
+#	By setting this to OFF Lomse will not be able to deal with compressed files,
+#	such as MusicXML files in compressed format, or with png images embedded in
+#	the documents. But Lomse will not fail in those cases, just will log error
+#	messages. For instance:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF ....
+#
+#	**Important**: deactivating compression will also deactivate support for
+#	PNG images because libpng depends on zlib.
+#
+#
+# d) Other options (ON / OFF values):
+# --------------------------------------------
 # LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
-#       Enables backwards compatibility for scores in LDP v1.5
+#       Enables backwards compatibility for accepting scores in LDP v1.5 syntax
 #
 #-------------------------------------------------------------------------------------
 
