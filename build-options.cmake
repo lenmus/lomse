@@ -52,7 +52,10 @@ option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
 option(LOMSE_ENABLE_COMPRESSION "Enable compressed formats (requires zlib)" ON)
 option(LOMSE_ENABLE_PNG "Enable png format (requires pnglib and zlib)" ON)
 if (LOMSE_ENABLE_PNG)
-    set(LOMSE_ENABLE_COMPRESSION ON)
+	if (NOT LOMSE_ENABLE_COMPRESSION)
+        message(STATUS "**WARNING**: Enabling PNG requires enabling compression. LOMSE_ENABLE_COMPRESSION set to ON" )
+    	set(LOMSE_ENABLE_COMPRESSION ON)
+	endif()
 endif()      
 
 
