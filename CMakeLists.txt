@@ -110,8 +110,9 @@
 #	messages. For instance:
 #		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF ....
 #
-#	**Important**: deactivating compression will also deactivate support for
-#	PNG images because libpng depends on zlib.
+#	**Important**: trying to disable compression without also disabling png
+#   has no effect because libpng depends on zlib. Therefore, when png is
+#   active (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
 #
 #
 # d) Other options (ON / OFF values):
