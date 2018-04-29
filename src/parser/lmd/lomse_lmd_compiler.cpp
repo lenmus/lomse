@@ -94,7 +94,9 @@ ImoDocument* LmdCompiler::compile_file(const std::string& filename)
         delete pFile;
         delete buffer;
 #else
-		throw runtime_error("Could not open compressed file: Lomse was compiled without compression support");
+        LOMSE_LOG_ERROR("Could not open compressed file '%s'. Lomse was "
+                        "compiled without compression support.", filename.c_str());
+        return nullptr;
 #endif
     }
     else //k_file

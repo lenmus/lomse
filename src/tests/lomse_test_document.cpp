@@ -375,6 +375,32 @@ SUITE(DocumentTest)
               "(barline simple))))))" );
     }
 
+    TEST_FIXTURE(DocumentTestFixture, creation_011)
+    {
+        //Opening compressed file (LMB)
+
+        stringstream errormsg;
+        Document doc(m_libraryScope, errormsg);
+        doc.from_file(m_scores_path + "10014-compressed-flat-lmd.zip#zip:lenmusdoc-example.lmd",
+                      Document::k_format_lmd);
+        ImoDocument* pImoDoc = doc.get_im_root();
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+        //@011. Compression enabled. Compressed LMB file read ok
+        CHECK( pImoDoc != nullptr );
+        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( doc.is_dirty() == true );
+        //cout << doc.to_string() << endl;
+        CHECK( doc.to_string().compare(0, 36, "(lenmusdoc (vers 0.0)(content (TODO:") == 0 );
+#else
+        //@011. Compression disabled. Error when opening LMB compressed file
+        CHECK( pImoDoc != nullptr );
+        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( doc.is_dirty() == true );
+//        cout << doc.to_string() << endl;
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content))" );
+#endif
+    }
+
     TEST_FIXTURE(DocumentTestFixture, get_score_100)
     {
         //100. in empty doc returns nullptr
