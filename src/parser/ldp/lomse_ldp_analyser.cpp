@@ -6093,7 +6093,7 @@ bool ElementAnalyser::get_mandatory(ELdpElement type)
     if (!more_params_to_analyse())
     {
         error_missing_element(type);
-        return nullptr;
+        return false;
     }
 
     m_pParamToAnalyse = get_param_to_analyse();

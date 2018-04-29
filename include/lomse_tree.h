@@ -99,7 +99,9 @@ public:
             depth_first_iterator& operator ++()
             {
                 if (m_currentNode == nullptr)
+                {
                     return *this;   //we are at end and will remain there
+                }
 
 	            if (m_currentNode->get_first_child() != nullptr)
                 {

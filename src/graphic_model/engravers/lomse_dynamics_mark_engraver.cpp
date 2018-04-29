@@ -81,10 +81,13 @@ GmoShapeDynamicsMark* DynamicsMarkEngraver::create_shape(ImoDynamicsMark* pDynam
 UPoint DynamicsMarkEngraver::compute_location(UPoint pos)
 {
     if (m_fAbove)
+    {
         pos.y -= tenths_to_logical(30.0f);
+    }
     else
+    {
         pos.y += tenths_to_logical(80.0f);
-
+    }
 	return pos;
 }
 
