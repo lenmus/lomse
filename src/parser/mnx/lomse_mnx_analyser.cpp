@@ -648,7 +648,7 @@ bool MnxElementAnalyser::get_mandatory(const string& tag)
     if (!more_children_to_analyse())
     {
         error_missing_element(tag);
-        return nullptr;
+        return false;
     }
 
     m_childToAnalyse = get_child_to_analyse();
@@ -712,7 +712,9 @@ bool MnxElementAnalyser::analyse_content(const string& tag, ImoObj* pAnchor)
 string MnxElementAnalyser::analyze_mandatory_child_pcdata(const string& name)
 {
     if (get_mandatory(name))
+    {
         return m_childToAnalyse.value();
+    }
 
 	return "";
 }
@@ -722,7 +724,9 @@ string MnxElementAnalyser::analyze_optional_child_pcdata(const string& name,
                                                          const string& sDefault)
 {
     if (get_optional(name))
+    {
         return m_childToAnalyse.value();
+    }
 
 	return sDefault;
 }
@@ -2475,7 +2479,7 @@ public:
         // attrib: pitch
         string pitch = get_mandatory_string_attribute("pitch", "", "note");
         if (pitch == "")
-            return nullptr;
+            return false;
 
         // attrib: staff
         int defStaff = m_pAnalyser->get_current_staff() + 1;

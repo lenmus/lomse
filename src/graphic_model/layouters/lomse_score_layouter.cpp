@@ -871,16 +871,16 @@ bool ColumnBreaker::is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime)
         //not suitable if breaks a beam or a tie
         for (int i=0; i < m_numLines; ++i)
         {
-            fBreak &= ~m_beamed[i];
-            fBreak &= ~m_tied[i];
+            fBreak &= !m_beamed[i];
+            fBreak &= !m_tied[i];
         }
 
         //not suitable if is tied to prev note
         if (pSO->is_note())
-            fBreak &= ~static_cast<ImoNote*>(pSO)->is_tied_prev();
+            fBreak &= !static_cast<ImoNote*>(pSO)->is_tied_prev();
 
         //not suitable if next note is within a previous voice duration
-        fBreak &= ~is_lower_time(rTime, m_targetBreakTime);
+        fBreak &= !is_lower_time(rTime, m_targetBreakTime);
 
         return fBreak;
     }
