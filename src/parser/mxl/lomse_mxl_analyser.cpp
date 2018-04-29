@@ -1236,7 +1236,7 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
     if (!more_children_to_analyse())
     {
         error_missing_element(tag);
-        return nullptr;
+        return false;
     }
 
     m_childToAnalyse = get_child_to_analyse();
@@ -1289,7 +1289,9 @@ bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 string MxlElementAnalyser::analyze_mandatory_child_pcdata(const string& name)
 {
     if (get_mandatory(name))
+    {
         return m_childToAnalyse.value();
+    }
 
 	return "";
 }
@@ -1299,7 +1301,9 @@ string MxlElementAnalyser::analyze_optional_child_pcdata(const string& name,
                                                          const string& sDefault)
 {
     if (get_optional(name))
+    {
         return m_childToAnalyse.value();
+    }
 
 	return sDefault;
 }
