@@ -74,6 +74,7 @@ public:
     SpImage decode_file(InputStream* file);
 };
 
+#if (LOMSE_ENABLE_PNG == 1)
 //---------------------------------------------------------------------------------------
 // PngImageDecoder: knows how to read a PNG image
 class PngImageDecoder : public ImageDecoder
@@ -87,7 +88,7 @@ public:
     SpImage decode_file(InputStream* file);
 
 };
-
+#endif // LOMSE_ENABLE_PNG
 
 }   //namespace lomse
 

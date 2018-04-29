@@ -32,6 +32,8 @@
 #include "lomse_config.h"
 #include "lomse_build_options.h"
 
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_zip_stream.h"
@@ -400,3 +402,5 @@ SUITE(ZipInputStreamTest)
     }
 
 }
+
+#endif // LOMSE_ENABLE_COMPRESSION

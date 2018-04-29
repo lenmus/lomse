@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
-# Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+# Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -49,38 +49,76 @@
 #
 #   cmake -G "CodeBlocks - Unix Makefiles"  ...
 #
-# Installation options
-# ---------------------
 #
-# The default installation prefix is "/usr/local". Therefore, libraries (binaries)
-# will be installed at "/usr/local/lib" and include files at
-# "/usr/local/include/lomse". You can change the default location 
-# by specifying option CMAKE_INSTALL_PREFIX. For instance:
+#---------------------------------------------------------------------------
+# Build options
+#---------------------------------------------------------------------------
 #
-#   cmake -DCMAKE_INSTALL_PREFIX=/usr  ...
-#
-# Also, a pkg-config file, liblomse.pc, will be installed. The default
-# location is "/usr/lib/pkgconfig". You can change this default location
-# by using the option -DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path.
-# For instance:
-#
-#   cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ...
+# Please note that default values can be changed directly in the CMake GUI or
+# through the command line by prefixing the option's name with '-D':
+# i.e.:    cmake -DLOMSE_DEBUG=ON  ....
 #
 #
-# Additional build options (ON / OFF values):
+# a) Installation options
 # --------------------------------------------
-# Values can be changed directly in the CMake GUI or through
-# the command line by prefixing a variable's name with '-D':
-# i.e.:    cmake -DLOMSE_DEBUG=ON  ...
+#
+# MAKE_INSTALL_PREFIX  (Default: "/usr/local")
+# 	The default installation prefix is "/usr/local". Therefore, libraries
+#	(binaries) will be installed at "/usr/local/lib" and include files at
+# 	"/usr/local/include/lomse". You can change the default location 
+# 	by specifying option CMAKE_INSTALL_PREFIX. For instance:
+#   	cmake -DCMAKE_INSTALL_PREFIX=/usr  ....
+#
+# LOMSE_PKG_CONFIG_INSTALL  (Default "/usr/lib/pkgconfig")
+# 	As part of the Lomse instalation process, a pkg-config file, named
+#	liblomse.pc, is installed. The default location is "/usr/lib/pkgconfig".
+#	You can change this default location by using the option
+#	-DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path. For instance:
+#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ....
+#
+#
+# b) Debug options (ON / OFF values):
+# --------------------------------------------
 #
 # LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
-#       Enable debug logs (performance loss). Doesn't require a debug build.
+#	Enable debug logs (performance loss). Doesn't require a debug build.
 #
 # LOMSE_DEBUG   (Default value: OFF)      
-#       Force to create a debug build, with debug symbols.
+#	Force to create a debug build, with debug symbols.
 #
+#
+# c) Options to reduce dependencies from other libraries (ON / OFF values):
+# --------------------------------------------------------------------------
+#
+# If your application will not deal with compressed files or with scores
+# containing png images, it is possible to reduce dependencies from third
+# party librraries by removing the code that deals with compressed files
+# or with PNG images.
+#
+# LOMSE_ENABLE_PNG   (Default value: ON)
+#	Build with support for PNG images. This requires libpng library.
+#	By setting this to OFF Lomse will ignore any png image embedded in the
+#	documents. But Lomse will not fail in those cases, just will log error
+#	messages. For instance:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_PNG=OFF ....
+#
+# LOMSE_ENABLE_COMPRESSION   (Default value: ON)
+#	Build with support for compressed files. This requires zlib library.
+#	By setting this to OFF Lomse will not be able to deal with compressed files,
+#	such as MusicXML files in compressed format, or with png images embedded in
+#	the documents. But Lomse will not fail in those cases, just will log error
+#	messages. For instance:
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF ....
+#
+#	**Important**: trying to disable compression without also disabling png
+#   has no effect because libpng depends on zlib. Therefore, when png is
+#   active (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
+#
+#
+# d) Other options (ON / OFF values):
+# --------------------------------------------
 # LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
-#       Enables backwards compatibility for scores in LDP v1.5
+#       Enables backwards compatibility for accepting scores in LDP v1.5 syntax
 #
 #-------------------------------------------------------------------------------------
 
@@ -155,6 +193,25 @@ include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 #
 ###############################################################################
 
+#dependencies for building and for pkg-config file (intitially empty but will be enhanced)
+set(LOMSE_REQUIRES "")
+set(LOMSE_DEPENDENCIES "")
+
+# include directories to be installed
+set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
+set( INCLUDES_AGG  ${LOMSE_ROOT_DIR}/src/agg/include )
+set( INCLUDES_UTFCPP  ${LOMSE_ROOT_DIR}/packages/utfcpp )
+set( INCLUDES_MINIZIP  ${LOMSE_ROOT_DIR}/packages/minizip )
+set( INCLUDES_PUGIXML  ${LOMSE_ROOT_DIR}/packages )
+include_directories(
+    ${INCLUDES_LOMSE}
+    ${INCLUDES_AGG}
+    ${LOMSE_ROOT_DIR}/src/agg/font_freetype
+    ${INCLUDES_UTFCPP}
+    ${INCLUDES_PUGIXML}
+)
+
+
 # Check for UnitTest++. Required for unit test
 if (LOMSE_BUILD_TESTS)
     find_package(UnitTest++)
@@ -182,60 +239,54 @@ if( FREETYPE_FOUND )
     message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
     message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
     message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
+    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
+    set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libfreetype6")
 else()
     message(SEND_ERROR "FreeType package not found.")
 endif()
 
 
 # Check for libpng
-find_package(PNG REQUIRED)                    
-if( PNG_FOUND )
-    include_directories( ${PNG_INCLUDE_DIRS} )
-    link_libraries( ${PNG_LIBRARIES} )
-    link_directories( ${PNG_LINK_DIR} )        
-    message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
-    message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
-    message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
-else()
-    message(SEND_ERROR "libpng package not found.")
+if( LOMSE_ENABLE_PNG )
+    find_package(PNG REQUIRED)                    
+    if( PNG_FOUND )
+        include_directories( ${PNG_INCLUDE_DIRS} )
+        link_libraries( ${PNG_LIBRARIES} )
+        link_directories( ${PNG_LINK_DIR} )        
+        message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
+        message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
+        message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
+        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
+        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libpng12-0 (>=1.2.42)")
+    else()
+        message(SEND_ERROR "libpng package not found.")
+    endif()
 endif()
 
 
-# Check for zlib
-find_package(ZLIB REQUIRED)
-if( ZLIB_FOUND )
-    include_directories( ${ZLIB_INCLUDE_DIR} )
-    link_libraries( ${ZLIB_LIBRARIES} )
-    link_directories( ${ZLIB_LINK_DIR} )        
-    message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
-    message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
-    message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
-    message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
-else()
-    message(SEND_ERROR "zlib package not found.")
+if( LOMSE_ENABLE_COMPRESSION )
+    # Check for zlib
+    find_package(ZLIB REQUIRED)
+    if( ZLIB_FOUND )
+        include_directories( ${ZLIB_INCLUDE_DIR} )
+        link_libraries( ${ZLIB_LIBRARIES} )
+        link_directories( ${ZLIB_LINK_DIR} )        
+        message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
+        message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+        message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
+        message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
+        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
+        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, zlib1g (>= ${ZLIB_VERSION_STRING})")
+        include_directories( ${INCLUDES_MINIZIP} )
+    else()
+        message(SEND_ERROR "zlib package not found.")
+    endif()
 endif()
 
 
-#dependencies for building and for pkg-config file
-set(LOMSE_REQUIRES "freetype2, libpng, zlib")
-set(LOMSE_DEPENDENCIES "libfreetype6, libpng12-0 (>=1.2.42), zlib1g (>= ${ZLIB_VERSION_STRING})")
-
-
-# include directories to be installed
-set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
-set( INCLUDES_AGG  ${LOMSE_ROOT_DIR}/src/agg/include )
-set( INCLUDES_UTFCPP  ${LOMSE_ROOT_DIR}/packages/utfcpp )
-set( INCLUDES_MINIZIP  ${LOMSE_ROOT_DIR}/packages/minizip )
-set( INCLUDES_PUGIXML  ${LOMSE_ROOT_DIR}/packages )
-include_directories(
-    ${INCLUDES_LOMSE}
-    ${INCLUDES_AGG}
-    ${LOMSE_ROOT_DIR}/src/agg/font_freetype
-    ${INCLUDES_UTFCPP}
-    ${INCLUDES_MINIZIP}
-    ${INCLUDES_PUGIXML}
-)
-
+# strip leading commas from LOMSE_REQUIRES and LOMSE_DEPENDENCIES
+string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
+string( REGEX REPLACE "^, " "" LOMSE_DEPENDENCIES ${LOMSE_DEPENDENCIES})
 
 link_directories( ${LIBRARY_OUTPUT_PATH} )
 
@@ -459,11 +510,13 @@ if( UNIX )
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
-    # copy minizip includes
-    install(DIRECTORY "${INCLUDES_MINIZIP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
+    if( LOMSE_ENABLE_COMPRESSION )
+        # copy minizip includes
+        install(DIRECTORY "${INCLUDES_MINIZIP}/"
+                DESTINATION "${LOMSE_INCLUDEDIR}"
+                FILES_MATCHING PATTERN "*.h"
+                            PATTERN ".svn" EXCLUDE )
+    endif()
 
     # copy utfcpp includes
     install(DIRECTORY "${INCLUDES_UTFCPP}/"
@@ -507,11 +560,13 @@ elseif( WIN32 )
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
-    # copy minizip includes
-    install(DIRECTORY "${INCLUDES_MINIZIP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
+    if( LOMSE_ENABLE_COMPRESSION )
+        # copy minizip includes
+        install(DIRECTORY "${INCLUDES_MINIZIP}/"
+                DESTINATION "${LOMSE_INCLUDEDIR}"
+                FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
+    endif()
 
     # copy utfcpp includes
     install(DIRECTORY "${INCLUDES_UTFCPP}/"

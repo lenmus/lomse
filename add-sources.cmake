@@ -199,10 +199,16 @@ set(SOUND_FILES
 )
 
 set(LOMSE_PACKAGES_FILES
-    ${LOMSE_PKG_DIR}/minizip/unzip.c
-    ${LOMSE_PKG_DIR}/minizip/ioapi.c
     ${LOMSE_PKG_DIR}/pugixml/pugixml.cpp
 )
+
+if( LOMSE_ENABLE_COMPRESSION )
+    set(LOMSE_PACKAGES_FILES
+        ${LOMSE_PACKAGES_FILES}
+        ${LOMSE_PKG_DIR}/minizip/unzip.c
+        ${LOMSE_PKG_DIR}/minizip/ioapi.c
+    )
+endif()
 
 set(ALL_LOMSE_SOURCES 
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}

@@ -28,9 +28,11 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_file_system.h"
-
-#include "lomse_zip_stream.h"
 #include "lomse_logger.h"
+
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+	#include "lomse_zip_stream.h"
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -207,8 +209,10 @@ InputStream* FileSystem::open_input_stream(const string& filelocator)
             {
                 case DocLocator::k_none:
                     return LOMSE_NEW LocalInputStream(filelocator);
+#if (LOMSE_ENABLE_COMPRESSION == 1)
                 case DocLocator::k_zip:
                     return LOMSE_NEW ZipInputStream(filelocator);
+#endif
                 default:
                 {
                     LOMSE_LOG_ERROR("Invalid file locator protocol");

@@ -37,8 +37,11 @@
 #include "lomse_internal_model.h"
 #include "lomse_document.h"
 #include "lomse_file_system.h"
-#include "lomse_zip_stream.h"
 #include "lomse_ldp_compiler.h"
+
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+	#include "lomse_zip_stream.h"
+#endif
 
 
 using namespace std;
@@ -83,6 +86,7 @@ ImoDocument* MxlCompiler::compile_file(const std::string& filename)
     DocLocator locator(m_fileLocator);
     if (locator.get_inner_protocol() == DocLocator::k_zip)
     {
+#if (LOMSE_ENABLE_COMPRESSION == 1)
         InputStream* pFile = FileSystem::open_input_stream(m_fileLocator);
         ZipInputStream* zip  = static_cast<ZipInputStream*>(pFile);
 
@@ -91,6 +95,9 @@ ImoDocument* MxlCompiler::compile_file(const std::string& filename)
 
         delete pFile;
         delete buffer;
+#else
+		throw runtime_error("Could not open compressed file: Lomse was compiled without compression support");
+#endif
     }
     else //k_file
         m_pParser->parse_file(filename);
