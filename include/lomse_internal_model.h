@@ -1071,7 +1071,7 @@ public:
     void set_children_dirty(bool value);
 
     //edition flags
-    inline bool is_terminal()
+    inline bool is_edit_terminal()
     {
         return (m_flags & k_edit_terminal) != 0;
     }
