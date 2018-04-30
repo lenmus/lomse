@@ -94,7 +94,7 @@ public:
 	Linkable<T>* get_link_target(int i)
 	{
         typename std::list<Linkable<T>*>::iterator itT;
-		for(itT = m_linkedTo.begin(); itT != m_linkedTo.end() && i > 0; ++itT, --i);
+        for(itT = m_linkedTo.begin(); itT != m_linkedTo.end() && i > 0; ++itT, --i) {}
         return *itT;
 	}
 
