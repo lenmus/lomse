@@ -3082,7 +3082,7 @@ ImoScore::ImoScore(Document* pDoc)
     , m_systemInfoOther()
     , m_pageInfo()
 {
-    set_terminal(true);
+    set_edit_terminal(true);
     m_pDoc = pDoc;
     append_child_imo( ImFactory::inject(k_imo_options, pDoc) );
     append_child_imo( ImFactory::inject(k_imo_instruments, pDoc) );

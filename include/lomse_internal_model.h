@@ -1075,7 +1075,7 @@ public:
     {
         return (m_flags & k_edit_terminal) != 0;
     }
-    inline void set_terminal(bool value)
+    inline void set_edit_terminal(bool value)
     {
         value ? m_flags |= k_edit_terminal
                            : m_flags &= ~k_edit_terminal;
@@ -5840,7 +5840,7 @@ protected:
     ImoParagraph()
         : ImoInlinesContainer(k_imo_para)
     {
-        set_terminal(true);
+        set_edit_terminal(true);
     }
 
 public:
@@ -5897,7 +5897,7 @@ protected:
         : ImoInlinesContainer(k_imo_heading)
         , m_level(1)
     {
-        set_terminal(true);
+        set_edit_terminal(true);
     }
 
 public:

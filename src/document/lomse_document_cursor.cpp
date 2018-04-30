@@ -170,7 +170,7 @@ void DocContentCursor::do_move_prev()
 //---------------------------------------------------------------------------------------
 void DocContentCursor::down_to_last()
 {
-    while(m_pCurItem && m_pCurItem->has_children())
+    while(m_pCurItem && !m_pCurItem->is_edit_terminal())
     {
         m_pCurItem = m_pCurItem->get_last_child();
     }
