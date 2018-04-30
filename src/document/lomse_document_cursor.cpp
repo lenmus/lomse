@@ -58,7 +58,7 @@ void DocContentCursor::move_next()
     if (m_pCurItem)
     {
         do_move_next();
-        while (m_pCurItem && !m_pCurItem->is_terminal())
+        while (m_pCurItem && !m_pCurItem->is_edit_terminal())
         {
             do_move_next();
         }
@@ -116,7 +116,7 @@ void DocContentCursor::move_prev()
     if (m_pCurItem)
     {
         do_move_prev();
-        while (m_pCurItem && !m_pCurItem->is_terminal())
+        while (m_pCurItem && !m_pCurItem->is_edit_terminal())
         {
             do_move_prev();
         }
@@ -170,7 +170,7 @@ void DocContentCursor::do_move_prev()
 //---------------------------------------------------------------------------------------
 void DocContentCursor::down_to_last()
 {
-    while(m_pCurItem && m_pCurItem->has_children())
+    while(m_pCurItem && !m_pCurItem->is_edit_terminal())
     {
         m_pCurItem = m_pCurItem->get_last_child();
     }
@@ -387,7 +387,7 @@ void DocCursor::enter_element()
     if (!is_inside_terminal_node())
     {
         ImoObj* pImo = get_pointee();
-        if (pImo && pImo->is_terminal())
+        if (pImo && pImo->is_edit_terminal())
             start_delegation();
     }
 }
@@ -655,7 +655,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
     if (id >= 0)
     {
         ImoObj* pImo = m_pDoc->get_pointer_to_imo(id);
-        if (pImo && pImo->is_terminal())
+        if (pImo && pImo->is_edit_terminal())
         {
             m_idJailer = id;
             do_point_to(pImo);

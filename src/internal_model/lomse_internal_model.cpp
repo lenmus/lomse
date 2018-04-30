@@ -400,7 +400,7 @@ ImoObj::~ImoObj()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoObj::initialize(Document* UNUSED(pDoc))
+void ImoObj::initialize_object(Document* UNUSED(pDoc))
 {
 
 }
@@ -3082,7 +3082,7 @@ ImoScore::ImoScore(Document* pDoc)
     , m_systemInfoOther()
     , m_pageInfo()
 {
-    set_terminal(true);
+    set_edit_terminal(true);
     m_pDoc = pDoc;
     append_child_imo( ImFactory::inject(k_imo_options, pDoc) );
     append_child_imo( ImFactory::inject(k_imo_instruments, pDoc) );
@@ -3805,7 +3805,7 @@ ImoSoundInfo::ImoSoundInfo()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoSoundInfo::initialize(Document* pDoc)
+void ImoSoundInfo::initialize_object(Document* pDoc)
 {
     ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
                                 ImFactory::inject(k_imo_midi_info, pDoc) );
@@ -4987,7 +4987,7 @@ ImoTableRow::ImoTableRow(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
-ImoStyle* ImoTableRow::get_style()
+ImoStyle* ImoTableRow::get_style(bool fInherit)
 {
     if (m_pStyle)
         return m_pStyle;
@@ -4998,7 +4998,7 @@ ImoStyle* ImoTableRow::get_style()
         {
             pParent = pParent->get_parent();
             if (pParent && pParent->is_table())
-                return (static_cast<ImoContentObj*>(pParent))->get_style();
+                return (static_cast<ImoContentObj*>(pParent))->get_style(fInherit);
             else
             {
                 LOMSE_LOG_ERROR("[ImoTableRow::get_style] No parent or table row not in table!");

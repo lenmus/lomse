@@ -152,7 +152,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         pDoc->assign_id(pObj);
     }
     pObj->set_owner_document(pDoc);
-    pObj->initialize(pDoc);
+    pObj->initialize_object(pDoc);
     return pObj;
 }
 

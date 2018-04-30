@@ -1042,7 +1042,7 @@ protected:
     {
         m_pDoc = pDoc;
     }
-    virtual void initialize(Document* pDoc);
+    virtual void initialize_object(Document* pDoc);
 
 public:
     virtual ~ImoObj();
@@ -1071,11 +1071,11 @@ public:
     void set_children_dirty(bool value);
 
     //edition flags
-    inline bool is_terminal()
+    inline bool is_edit_terminal()
     {
         return (m_flags & k_edit_terminal) != 0;
     }
-    inline void set_terminal(bool value)
+    inline void set_edit_terminal(bool value)
     {
         value ? m_flags |= k_edit_terminal
                            : m_flags &= ~k_edit_terminal;
@@ -3761,7 +3761,7 @@ protected:
     friend class ImFactory;
     friend class ImoInstrument;
     ImoSoundInfo();
-    void initialize(Document* pDoc) override;
+    void initialize_object(Document* pDoc) override;
 
 public:
     virtual ~ImoSoundInfo() {}
@@ -5840,7 +5840,7 @@ protected:
     ImoParagraph()
         : ImoInlinesContainer(k_imo_para)
     {
-        set_terminal(true);
+        set_edit_terminal(true);
     }
 
 public:
@@ -5897,7 +5897,7 @@ protected:
         : ImoInlinesContainer(k_imo_heading)
         , m_level(1)
     {
-        set_terminal(true);
+        set_edit_terminal(true);
     }
 
 public:
@@ -6819,7 +6819,7 @@ public:
 
     //overrides: as ImoTableRow is stored in an ImoCollection, some general methods
     //doesn't work and must be overrinden
-    ImoStyle* get_style();
+    ImoStyle* get_style(bool fInherit=true) override;
 
 protected:
     friend class BlockLevelCreatorApi;

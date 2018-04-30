@@ -248,19 +248,21 @@ public:
     void add_child_command(DocCommand* pCmd);
 
     //overrides
-    int get_cursor_update_policy() { return k_do_nothing; }
-    int get_undo_policy() { return m_undoPolicy; }
-    int get_selection_update_policy() { return k_sel_do_nothing; }
-    bool is_composite() { return true; }
+    int get_cursor_update_policy() override { return k_do_nothing; }
+    int get_undo_policy() override { return m_undoPolicy; }
+    int get_selection_update_policy() override { return k_sel_do_nothing; }
+    bool is_composite() override { return true; }
 
     ///@cond INTERNALS
     //mandatory interface implementation
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection) override;
+    int perform_action(Document* pDoc, DocCursor* pCursor) override;
+    void undo_action(Document* pDoc, DocCursor* pCursor) override;
 
     //operations delegated by DocCommandExecuter
     void update_cursor(DocCursor* pCursor, DocCommandExecuter* pExecuter);
+    using DocCommand::update_selection; //tell the compiler that we want both, the
+                                        //update_selection() from DocCommand and next one
     void update_selection(SelectionSet* pSelection, DocCommandExecuter* pExecuter);
     ///@endcond
 
