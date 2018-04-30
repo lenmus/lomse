@@ -400,7 +400,7 @@ ImoObj::~ImoObj()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoObj::initialize(Document* UNUSED(pDoc))
+void ImoObj::initialize_object(Document* UNUSED(pDoc))
 {
 
 }
@@ -3805,7 +3805,7 @@ ImoSoundInfo::ImoSoundInfo()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoSoundInfo::initialize(Document* pDoc)
+void ImoSoundInfo::initialize_object(Document* pDoc)
 {
     ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
                                 ImFactory::inject(k_imo_midi_info, pDoc) );

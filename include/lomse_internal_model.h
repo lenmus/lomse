@@ -1042,7 +1042,7 @@ protected:
     {
         m_pDoc = pDoc;
     }
-    virtual void initialize(Document* pDoc);
+    virtual void initialize_object(Document* pDoc);
 
 public:
     virtual ~ImoObj();
@@ -3761,7 +3761,7 @@ protected:
     friend class ImFactory;
     friend class ImoInstrument;
     ImoSoundInfo();
-    void initialize(Document* pDoc) override;
+    void initialize_object(Document* pDoc) override;
 
 public:
     virtual ~ImoSoundInfo() {}
