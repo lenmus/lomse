@@ -4987,7 +4987,7 @@ ImoTableRow::ImoTableRow(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
-ImoStyle* ImoTableRow::get_style()
+ImoStyle* ImoTableRow::get_style(bool fInherit)
 {
     if (m_pStyle)
         return m_pStyle;
@@ -4998,7 +4998,7 @@ ImoStyle* ImoTableRow::get_style()
         {
             pParent = pParent->get_parent();
             if (pParent && pParent->is_table())
-                return (static_cast<ImoContentObj*>(pParent))->get_style();
+                return (static_cast<ImoContentObj*>(pParent))->get_style(fInherit);
             else
             {
                 LOMSE_LOG_ERROR("[ImoTableRow::get_style] No parent or table row not in table!");

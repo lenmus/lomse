@@ -6819,7 +6819,7 @@ public:
 
     //overrides: as ImoTableRow is stored in an ImoCollection, some general methods
     //doesn't work and must be overrinden
-    ImoStyle* get_style();
+    ImoStyle* get_style(bool fInherit=true) override;
 
 protected:
     friend class BlockLevelCreatorApi;
