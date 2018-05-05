@@ -33,8 +33,22 @@ endif()
 
 
 #libraries to build
-option(LOMSE_BUILD_STATIC_LIB "Build the static library" OFF)
-option(LOMSE_BUILD_SHARED_LIB "Build the shared library" ON)
+if (WIN32)
+    set(LOMSE_BUILD_STATIC_LIB ON)
+    set(LOMSE_BUILD_SHARED_LIB OFF)
+else()
+    set(LOMSE_BUILD_STATIC_LIB OFF)
+    set(LOMSE_BUILD_SHARED_LIB ON)
+endif()
+
+option(LOMSE_BUILD_STATIC_LIB "Build the static library" ${LOMSE_BUILD_STATIC_LIB})
+option(LOMSE_BUILD_SHARED_LIB "Build the shared library" ${LOMSE_BUILD_SHARED_LIB})
+
+if (WIN32)
+    if (LOMSE_BUILD_SHARED_LIB AND MSVC)
+        message(FATAL_ERROR "Shared C++ libraries (C++ DLL) are not supported by MSVC")
+    endif()
+endif()
 
 #Build the test units runner program 'testlib'
 option(LOMSE_BUILD_TESTS "Build testlib program" ON)
