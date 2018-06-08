@@ -712,11 +712,9 @@ bool MnxElementAnalyser::analyse_content(const string& tag, ImoObj* pAnchor)
 string MnxElementAnalyser::analyze_mandatory_child_pcdata(const string& name)
 {
     if (get_mandatory(name))
-    {
         return m_childToAnalyse.value();
-    }
 
-	return "";
+    return "";
 }
 
 //---------------------------------------------------------------------------------------
@@ -724,11 +722,9 @@ string MnxElementAnalyser::analyze_optional_child_pcdata(const string& name,
                                                          const string& sDefault)
 {
     if (get_optional(name))
-    {
         return m_childToAnalyse.value();
-    }
 
-	return sDefault;
+    return sDefault;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1633,7 +1629,7 @@ protected:
 //@Content Model:
 //@    Metadata content.
 //@    Stylesheet definitions.
-//@    Exactly one global element - measure content that is common to all parts within the score
+//@    One or more global elements - measure content shared by sets of parts within the score
 //@    One or more part elements - description and measure content of each part in the score.
 //@Attributes:
 //@    profile — profile describing constraints on the contents of this score
@@ -1656,8 +1652,9 @@ public:
             return false;
         }
 
-        // global
+        // global*
         analyse_mandatory("global");
+        while (analyse_optional("global")) mark_score_as_polymetric_polytonal();
 
         // part*
         analyse_mandatory("part", m_pAnchor);
@@ -1665,6 +1662,13 @@ public:
 
         set_result(nullptr);
         return true;    //success
+    }
+
+protected:
+
+    void mark_score_as_polymetric_polytonal()
+    {
+        //TODO: mark the score
     }
 };
 
@@ -2059,7 +2063,7 @@ public:
 //@Content Model:
 //@    Measure content, which must not include any sequence content
 //@Attributes:
-//@    None
+//@    parts - an optional set of IDs of parts to which this global applies
 //
 class GlobalMnxAnalyser : public MnxElementAnalyser
 {
@@ -2073,6 +2077,9 @@ public:
 
     bool do_analysis()
     {
+        // attrib: parts
+        string parts = get_optional_string_attribute("parts", "");
+
 		//TODO: implement Analyser
         set_result(nullptr);
         return true;    //success
@@ -2081,16 +2088,13 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <head>
-//@ <!ELEMENT head (identification?, style?
-//@     (sequence)* ) >
-//@ <!ATTLIST head
-//@>
-
 //@Contexts:
 //@    Any.
 //@Content Model:
-//@    Metadata content.
-//@    Stylesheet definitions.
+//@    Metadata content:
+//@     <title> <subtitle> <creator>+ <rights>
+//@    Stylesheet definitions:
+//@     (style-class | style-selector)+
 //@Attributes:
 //@    None.
 //
