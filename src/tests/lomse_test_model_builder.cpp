@@ -44,6 +44,7 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_xml_parser.h"
 #include "lomse_mxl_analyser.h"
+#include "lomse_measures_table.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -679,4 +680,213 @@ SUITE(MidiAssignerTest)
 
 
 
+//=======================================================================================
+// MeasuresTableBuilder tests
+//=======================================================================================
+
+//---------------------------------------------------------------------------------------
+//Derived class to access protected members
+class MyMeasuresTableBuilder : public MeasuresTableBuilder
+{
+protected:
+
+public:
+    MyMeasuresTableBuilder()
+        : MeasuresTableBuilder()
+    {
+    }
+    virtual ~MyMeasuresTableBuilder() {}
+
+    //access to protected member methods
+    ImMeasuresTableEntry* my_get_current_measure(int iInstr) { return m_measures[iInstr]; }
+};
+
+//---------------------------------------------------------------------------------------
+// MeasuresTableBuilder test fixture
+//---------------------------------------------------------------------------------------
+class MeasuresTableBuilderTestFixture
+{
+public:
+    LibraryScope m_libraryScope;
+    Document* m_pDoc;
+    LdpTree* m_pTree;
+    LdpFactory* m_pLdpFactory;
+
+    MeasuresTableBuilderTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
+        , m_pDoc(nullptr)
+        , m_pTree(nullptr)
+    {
+        m_pLdpFactory = m_libraryScope.ldp_factory();
+    }
+
+    ~MeasuresTableBuilderTestFixture()    //TearDown fixture
+    {
+        delete m_pDoc;
+    }
+
+    ImoScore* create_score(const string &ldp)
+    {
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text(ldp);
+        LdpTree* pTree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, m_pDoc);
+        ImoObj* pImo = a.analyse_tree_and_get_object(pTree);
+        delete pTree->get_root();
+        return dynamic_cast<ImoScore*>(pImo);
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+};
+
+SUITE(MeasuresTableBuilderTest)
+{
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_001)
+    {
+        //@001. empty score doesn't create table
+
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            ")))" );
+        ColStaffObjsBuilder csoBuilder;
+        csoBuilder.build(pScore);
+        MeasuresTableBuilder builder;
+
+        builder.build(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+
+        CHECK( pTable == nullptr );
+    }
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_002)
+    {
+        //@002. one staffobj creates the table
+
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData (clef G)"
+            ")))"
+        );
+        ColStaffObjsBuilder csoBuilder;
+        ColStaffObjs* pCSO = csoBuilder.build(pScore);
+//        cout << test_name() << endl;
+//        cout << pCSO->dump();
+        MyMeasuresTableBuilder builder;
+
+        builder.build(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 1 );
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( builder.my_get_current_measure(0) == pMeasure );
+    }
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_003)
+    {
+        //@003. first measure created for all instruments
+
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(key C)(time 2 4) ))"
+            "(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
+            ")))"
+        );
+        ColStaffObjsBuilder csoBuilder;
+        ColStaffObjs* pCSO = csoBuilder.build(pScore);
+//        cout << test_name() << endl;
+//        cout << pCSO->dump();
+        MyMeasuresTableBuilder builder;
+
+        builder.build(pScore);
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 1 );
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_entry() == pCSO->front() );
+        CHECK( builder.my_get_current_measure(0) == pMeasure );
+
+        pInstr = pScore->get_instrument(1);
+        pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 1 );
+
+        pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( builder.my_get_current_measure(1) == pMeasure );
+    }
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_004)
+    {
+        //@004. barline finish measure
+
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 3 4)(n c4 q)(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder csoBuilder;
+        ColStaffObjs* pCSO = csoBuilder.build(pScore);
+//        cout << test_name() << endl;
+//        cout << pCSO->dump();
+        MyMeasuresTableBuilder builder;
+
+        builder.build(pScore);
+
+        CHECK( builder.my_get_current_measure(0) == nullptr );
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 1 );
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_entry() == pCSO->front() );
+    }
+
+    TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_005)
+    {
+        //@005. object after barline starts a new measure
+
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 3 4)(n c4 q)(barline)(n e4 q)"
+            ")))"
+        );
+        ColStaffObjsBuilder csoBuilder;
+        ColStaffObjs* pCSO = csoBuilder.build(pScore);
+//        cout << test_name() << endl;
+//        cout << pCSO->dump();
+        MyMeasuresTableBuilder builder;
+
+        builder.build(pScore);
+
+        CHECK( builder.my_get_current_measure(0) != nullptr );
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 2 );
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_entry() == pCSO->front() );
+
+        pMeasure = pTable->get_measure(1);
+        CHECK( pMeasure != nullptr );
+        CHECK( builder.my_get_current_measure(0) == pMeasure );
+    }
+
+};
 

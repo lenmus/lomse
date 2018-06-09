@@ -65,6 +65,8 @@ class Control;
 class ScorePlayerCtrl;
 class ButtonCtrl;
 class AttribsContainer;
+class ImMeasuresTable;
+class ImMeasuresTableEntry;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -4033,7 +4035,8 @@ protected:
     int m_winged;       //indicates whether the barline has winged extensions above and
     //below. The k_winged_none value indicates no wings.
 
-
+    ImMeasuresTableEntry* m_pMeasure;   //ptr to measure ending with this barline.
+                                        //nullptr when middle barline
 
 
     friend class ImFactory;
@@ -4043,6 +4046,7 @@ protected:
         , m_fMiddle(false)
         , m_times(0)
         , m_winged(k_wings_none)
+        , m_pMeasure(nullptr)
     {
     }
 
@@ -4050,46 +4054,22 @@ public:
     virtual ~ImoBarline() {}
 
     //getters
-    inline int get_type()
-    {
-        return m_barlineType;
-    }
-    inline bool is_middle()
-    {
-        return m_fMiddle;
-    }
-    inline int get_num_repeats()
-    {
-        return m_times;
-    }
-    inline int get_winged()
-    {
-        return m_winged;
-    }
+    inline int get_type() { return m_barlineType; }
+    inline bool is_middle() { return m_fMiddle; }
+    inline int get_num_repeats() { return m_times; }
+    inline int get_winged() { return m_winged; }
+    inline ImMeasuresTableEntry* get_measure() { return m_pMeasure; }
+
 
     //setters
-    inline void set_type(int barlineType)
-    {
-        m_barlineType = barlineType;
-    }
-    inline void set_middle(bool value)
-    {
-        m_fMiddle = value;
-    }
-    inline void set_num_repeats(int times)
-    {
-        m_times = times;
-    }
-    inline void set_winged(int wingsType)
-    {
-        m_winged = wingsType;
-    }
+    inline void set_type(int barlineType) { m_barlineType = barlineType; }
+    inline void set_middle(bool value) { m_fMiddle = value; }
+    inline void set_num_repeats(int times) { m_times = times; }
+    inline void set_winged(int wingsType) { m_winged = wingsType; }
+    inline void set_measure(ImMeasuresTableEntry* pEntry) { m_pMeasure = pEntry; }
 
     //overrides: barlines always in staff 0
-    void set_staff(int UNUSED(staff))
-    {
-        m_staff = 0;
-    }
+    void set_staff(int UNUSED(staff)) { m_staff = 0; }
 
     //IM attributes interface
     virtual void set_int_attribute(TIntAttribute attrib, int value);
@@ -5339,16 +5319,14 @@ protected:
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //enum EBarlineLayout
+    ImMeasuresTable*  m_pMeasures;
 
     friend class ImFactory;
     ImoInstrument();
 
     friend class ImoScore;
     friend class ImoInstrGroup;
-    inline void set_owner_score(ImoScore* pScore)
-    {
-        m_pScore = pScore;
-    }
+    inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
 public:
     virtual ~ImoInstrument();
@@ -5359,29 +5337,15 @@ public:
     LOMSE_DECLARE_IMOSOUNDS_INTERFACE;
 
     //getters
-    inline int get_num_staves()
-    {
-        return static_cast<int>(m_staves.size());
-    }
-    inline ImoScoreText& get_name()
-    {
-        return m_name;
-    }
-    inline ImoScoreText& get_abbrev()
-    {
-        return m_abbrev;
-    }
+    inline int get_num_staves() const { return static_cast<int>(m_staves.size()); }
+    inline ImoScoreText& get_name() { return m_name; }
+    inline ImoScoreText& get_abbrev() { return m_abbrev; }
     ImoMusicData* get_musicdata();
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
-    inline const string& get_instr_id()
-    {
-        return m_partId;
-    }
-    inline int get_barline_layout()
-    {
-        return m_barlineLayout;
-    }
+    inline const string& get_instr_id() const { return m_partId; }
+    inline int get_barline_layout() const { return m_barlineLayout; }
+    inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -5390,29 +5354,14 @@ public:
     void set_name(const string& value);
     void set_abbrev(const string& value);
     void replace_staff_info(ImoStaffInfo* pInfo);
-    inline void set_instr_id(const string& id)
-    {
-        m_partId = id;
-    }
-    inline void set_barline_layout(int value)
-    {
-        m_barlineLayout = value;
-    }
+    inline void set_instr_id(const string& id) { m_partId = id; }
+    inline void set_barline_layout(int value) { m_barlineLayout = value; }
 
     //info
-    inline bool has_name()
-    {
-        return m_name.get_text() != "";
-    }
-    inline bool has_abbrev()
-    {
-        return m_abbrev.get_text() != "";
-    }
+    inline bool has_name() { return m_name.get_text() != ""; }
+    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
-    inline ImoScore* get_score()
-    {
-        return m_pScore;
-    }
+    inline ImoScore* get_score() const { return m_pScore; }
 
     //direct creation API
     ImoBarline* add_barline(int type, bool fVisible=true);
@@ -5442,6 +5391,9 @@ protected:
 
     //FIX: For lyrics space
     void reserve_space_for_lyrics(int iStaff, LUnits space);
+
+    friend class MeasuresTableBuilder;
+    inline void set_measures_table(ImMeasuresTable* pTable) { m_pMeasures = pTable; }
 
 };
 
