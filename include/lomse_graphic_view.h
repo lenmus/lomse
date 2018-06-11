@@ -64,6 +64,7 @@ class DraggedImage;
 class SelectionRectangle;
 class PlaybackHighlight;
 class TimeGrid;
+class TempoLine;
 class Handler;
 class SelectionHighlight;
 class SelectionSet;
@@ -175,10 +176,7 @@ protected:
     TimeGrid*           m_pTimeGrid;
     list<Handler*>      m_handlers;
     SelectionHighlight* m_pSelObjects;
-//    TempoLine* m_pTempoLine;
-    //line to highlight tempo when playing back a score
-    bool                m_fTempoLineVisible;
-    Rectangle<Pixels>   m_tempoLine;
+    TempoLine*          m_pTempoLine;
 
     //bounds for each displayed page
     std::list<URect> m_pageBounds;
@@ -232,6 +230,7 @@ public:
     ///@{
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
     virtual void change_viewport_if_necessary(ImoId id);
+    virtual void scroll_to_measure(int iMeasure, int iBeat, int iInstr);
 
     ///@}    //Scrolling support
 
@@ -247,9 +246,7 @@ public:
 
     /// @name Tempo line
     ///@{
-    void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
-    void hide_tempo_line();
-    void update_tempo_line(Pixels x2, Pixels y2);
+    void advance_tempo_line(ImoStaffObj* pSO);
 
     ///@}    //Tempo line
 
@@ -367,7 +364,6 @@ protected:
 
     void draw_all();
     void draw_graphic_model();
-    void draw_tempo_line();
     void draw_time_grid();
     void generate_paths();
     virtual void collect_page_bounds() = 0;

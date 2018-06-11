@@ -69,6 +69,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_sizers.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_tempo_line.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_time_grid.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_timegrid_table.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_visual_effect.cpp

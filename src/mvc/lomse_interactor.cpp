@@ -1069,22 +1069,6 @@ void Interactor::task_action_update_selection_rectangle(Pixels x2, Pixels y2)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->show_tempo_line(x1, y1, x2, y2);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::hide_tempo_line()
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->hide_tempo_line();
-}
-
-//---------------------------------------------------------------------------------------
 void Interactor::remove_all_highlight()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1093,11 +1077,11 @@ void Interactor::remove_all_highlight()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::update_tempo_line(Pixels x2, Pixels y2)
+void Interactor::advance_tempo_line(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->update_tempo_line(x2, y2);
+        pGView->advance_tempo_line(pSO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1133,6 +1117,15 @@ void Interactor::change_viewport_if_necessary(ImoId id)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->change_viewport_if_necessary(id);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure(int iMeasure, int iBeat, int iInstr)
+{
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->scroll_to_measure(iMeasure, iBeat, iInstr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1384,8 +1377,6 @@ bool Interactor::is_valid_play_score_event(SpEventPlayCtrl UNUSED(pEvent))
 //---------------------------------------------------------------------------------------
 void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 {
-    static Pixels xPos = 100;
-
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (!pGView)
         return;
@@ -1403,7 +1394,6 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
             switch ((*it).first)
             {
                 case EventScoreHighlight::k_end_of_higlight:
-                    hide_tempo_line();
                     remove_all_highlight();
                     break;
 
@@ -1418,8 +1408,8 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
                     break;
 
                 case EventScoreHighlight::k_advance_tempo_line:
-                    xPos += 20;
-                    show_tempo_line(xPos, 150, xPos+1, 200);
+                    advance_tempo_line( static_cast<ImoStaffObj*>(
+                                            spDoc->get_pointer_to_imo((*it).second) ));
                     break;
 
                 default:

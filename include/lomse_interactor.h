@@ -681,6 +681,24 @@ public:
     */
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
+    /** Sets a new origin for the viewport so that requested score location is visible
+        in the viewport.
+        @param iMeasure The index to the desired measure. First measure in the
+            instrument, including a possible anacrusis start measure, is always measure 0.
+        @param iBeat The index to the desired beat in the measure. First beat is 0.
+        @param iInstr The index to the instrument to which the measure refers. If not
+            specified, iInstr 0 is assumed. Normally,
+            all instruments in the score use the same time signature. In these cases all
+            score parts have the same number of measures and iInstr is not needed.
+            But in polymetric music not all instruments use the same time signature and
+            this implies that the instruments have different number of measures; in these
+            cases the measure number alone is not enough for determining
+            the location.
+
+        See @ref viewport-concept
+    */
+    virtual void scroll_to_measure(int iMeasure, int iBeat=0, int iInstr=0);
+
     //@}    //interface to GraphicView. Viewport / scroll
 
 
@@ -791,9 +809,7 @@ public:
         @todo Tempo line methods and Playback effects explanation
     */
     //@{
-    virtual void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
-    virtual void hide_tempo_line();
-    virtual void update_tempo_line(Pixels x2, Pixels y2);
+    virtual void advance_tempo_line(ImoStaffObj* pSO);
 
     //@}    //tempo line
 

@@ -40,6 +40,7 @@
 #include "lomse_logger.h"
 #include "lomse_time_grid.h"
 #include "lomse_visual_effect.h"
+#include "lomse_tempo_line.h"
 #include "lomse_overlays_generator.h"
 #include "lomse_handler.h"
 #include "lomse_box_slice.h"
@@ -110,7 +111,6 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vyOrg(0)
     , m_pCaret(nullptr)
     , m_pCursor(nullptr)
-    , m_fTempoLineVisible(false)
     , m_backgroundColor( Color(145, 156, 166) )
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
@@ -118,6 +118,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     m_pSelRect = LOMSE_NEW SelectionRectangle(this, libraryScope);
     m_pHighlighted = LOMSE_NEW PlaybackHighlight(this, libraryScope);
     m_pTimeGrid = LOMSE_NEW TimeGrid(this, m_libraryScope);
+    m_pTempoLine = LOMSE_NEW TempoLine(this, m_libraryScope);
 
     m_pOverlaysGenerator = LOMSE_NEW OverlaysGenerator(this, libraryScope);
 
@@ -126,6 +127,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     add_visual_effect(m_pHighlighted);
     add_visual_effect(m_pSelRect);
     //add_visual_effect(m_pTimeGrid);
+    add_visual_effect(m_pTempoLine);
 }
 
 //---------------------------------------------------------------------------------------
@@ -134,13 +136,9 @@ GraphicView::~GraphicView()
     delete m_pDrawer;
     delete m_pOverlaysGenerator;
 
-    //ownership of VisualEffects is transferred to OverlaysGenerator
-//    delete m_pCaret;
-//    delete m_pDragImg;
-//    delete m_pHighlighted;
-//    delete m_pSelRect;
-//    delete m_pTimeGrid;
-//    delete_all_handlers();
+    //AWARE: ownership of all VisualEffects (m_pCaret, m_pDragImg, m_pHighlighted,
+    //       m_pTimeGrid & m_pTempoLine) is transferred to OverlaysGenerator.
+    //       Do not delete them here!
 }
 
 //---------------------------------------------------------------------------------------
@@ -175,7 +173,7 @@ void GraphicView::set_visual_effects_for_mode(int mode)
 
     //effects only visible in playback mode:
     m_pHighlighted->set_visible(fPlaybackMode);
-    //m_pTempoLine->set_visible(fPlaybackMode);
+    m_pTempoLine->set_visible(fPlaybackMode);
 
     //effects dynamically controlled
     m_pSelRect->set_visible(false);
@@ -368,6 +366,109 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
 //        s << "No scroll required. m_vyOrg=" << m_vyOrg;
 //        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
 //    }
+
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::scroll_to_measure(int iMeasure, int iBeat, int iInstr)
+{
+//    static Pixels m_xNew = 0;
+//    static Pixels m_yNew = 0;
+//
+//    GraphicModel* pGModel = get_graphic_model();
+//    if (!pGModel)
+//        return;
+//
+//    GmoShape* pShape = pGModel->get_main_shape_for_imo(id);
+//    if (!pShape)
+//        return;
+//
+//    GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
+//    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
+//    GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
+//    GmoBoxDocPage* pBoxPage = pBoxSystem->get_parent_doc_page();
+//
+//    int iPage = pBoxPage->get_number() - 1;
+//    double xSliceLeft = double(pBS->get_left());
+//    double xSliceRight = double(pBS->get_right());
+//    double ySysTop = double(pBoxSystem->get_top());
+//    //double xSysRight = double(pBoxSystem->get_right());
+//    double ySysBottom = ySysTop + double(pBoxSystem->get_height());
+//
+//    //model point to screen returns shift from current viewport origin
+//    double xLeft = xSliceLeft;
+//    double yTop = ySysTop;
+//    model_point_to_screen(&xLeft, &yTop, iPage);
+//    //double xRight = xSysRight;
+//    double xRight = xSliceRight;
+//    double yBottom = ySysBottom;
+//    model_point_to_screen(&xRight, &yBottom, iPage);
+//    //AWARE: The next variables are relative: shift from current viewport origin
+//    Pixels vxSliceLeft = Pixels(xLeft);
+//    Pixels vxSliceRight = Pixels(xRight);
+//    Pixels vySysTop = Pixels(yTop);
+//    //Pixels vxSysRight = Pixels(xRight);
+//    Pixels vySysBottom = Pixels(yBottom);
+//
+////    stringstream s;
+////    s << "vySysTop=" << vySysTop << ", vp.height=" << m_viewportSize.height
+////      << "vxSliceLeft=" << vxSliceLeft << ", vp.widtht=" << m_viewportSize.width
+////      << ", iPage=" << iPage << ", id=" << id;
+////    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+//
+//    //determine if scroll needed
+//    Pixels xNew = m_vxOrg;
+//    Pixels yNew = m_vyOrg;
+//
+//    //Check if vertical movement needed:
+//    bool fVerticalScroll = false;
+//    // 1. Top of system must be visible
+//    fVerticalScroll |= (vySysTop < 0);
+//    fVerticalScroll |= (vySysTop > m_viewportSize.height);
+//    // 2. Bottom of system not visible but enough height for the system
+//    fVerticalScroll |= ((vySysBottom > m_viewportSize.height)
+//                        && ((vySysBottom-vySysTop) < m_viewportSize.height));
+//
+//    if (fVerticalScroll)
+//        yNew += vySysTop;
+//
+//    //Check if horizontal movement needed:
+//    Pixels leftMargin = 100.0;
+//    bool fHorizontalScroll = false;
+//    // 1. left of measure must be visible
+//    fHorizontalScroll |= (vxSliceLeft < 0);
+//    fHorizontalScroll |= (vxSliceLeft > (m_viewportSize.width-leftMargin));
+////    // 2. Move left of measure to left of screen unless end of system visible
+////    fHorizontalScroll |= (vxSysRight > m_viewportSize.width);
+//    // 2. Right of measure not visible but enough width for the measure
+//    fVerticalScroll |= ((vxSliceRight > (m_viewportSize.width-leftMargin))
+//                        && ((vxSliceRight-vxSliceLeft) < (m_viewportSize.width-leftMargin)));
+//
+//    if (fHorizontalScroll)
+//        xNew += vxSliceLeft - leftMargin;
+//
+//
+//    //request scroll if required
+//    if (fVerticalScroll || fHorizontalScroll)
+//    {
+////        stringstream s;
+////        s << "Requesting scroll to yNew=" << yNew << ", m_vyOrg=" << m_vyOrg;
+////        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+//        if (m_yNew != yNew || m_xNew != xNew)
+//        {
+//            m_pInteractor->request_viewport_change(xNew, yNew);
+//            m_xNew = xNew;
+//            m_yNew = yNew;
+//        }
+////        else
+////            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Optimization: no request");
+//    }
+////    else
+////    {
+////        stringstream s;
+////        s << "No scroll required. m_vyOrg=" << m_vyOrg;
+////        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, s.str());
+////    }
 
 }
 
@@ -567,40 +668,6 @@ void GraphicView::draw_graphic_model()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::draw_tempo_line()
-{
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
-
-    if (m_fTempoLineVisible)
-    {
-        //m_pInteractor->timing_start_measurements();
-        double x1 = double( m_tempoLine.left() );
-        double y1 = double( m_tempoLine.top() );
-        double x2 = double( m_tempoLine.right() );
-        double y2 = double( m_tempoLine.bottom() );
-
-        m_pDrawer->screen_point_to_model(&x1, &y1);
-        m_pDrawer->screen_point_to_model(&x2, &y2);
-
-        double line_width = double( m_pDrawer->Pixels_to_LUnits(1) );
-
-        m_pDrawer->begin_path();
-        m_pDrawer->fill( Color(0, 255, 0) );        //solid green
-        m_pDrawer->stroke( Color(0, 255, 0) );      //solid green
-        m_pDrawer->stroke_width(line_width);
-        m_pDrawer->move_to(x1, y1);
-        m_pDrawer->hline_to(x2);
-        m_pDrawer->vline_to(y2);
-        m_pDrawer->hline_to(x1);
-        m_pDrawer->vline_to(y1);
-        m_pDrawer->end_path();
-
-        m_pDrawer->render();
-        //m_pInteractor->timing_renderization_end();
-    }
-}
-
-//---------------------------------------------------------------------------------------
 void GraphicView::draw_all_visual_effects()
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
@@ -628,6 +695,7 @@ void GraphicView::draw_playback_highlight()
 
     m_pInteractor->timing_start_measurements();
     m_pOverlaysGenerator->update_visual_effect(m_pHighlighted, m_pDrawer);
+    m_pOverlaysGenerator->update_visual_effect(m_pTempoLine, m_pDrawer);
     m_pInteractor->timing_renderization_end();
 }
 
@@ -689,7 +757,6 @@ VRect GraphicView::get_damaged_rectangle()
 void GraphicView::highlight_object(ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();
-    m_pHighlighted->set_visible(true);
     GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
     if (!pShape)
     {
@@ -704,6 +771,7 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
                         pShape->get_name().c_str(),
                         pSO->get_id() );
 
+    m_pHighlighted->set_visible(true);
     m_pHighlighted->add_highlight( pShape );
 }
 
@@ -711,7 +779,8 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
 void GraphicView::remove_highlight_from_object(ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();
-    m_pHighlighted->remove_highlight( pGModel->get_main_shape_for_imo(pSO->get_id()) );
+    GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
+    m_pHighlighted->remove_highlight(pShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -719,6 +788,7 @@ void GraphicView::remove_all_highlight()
 {
     m_pHighlighted->set_visible(false);
     m_pHighlighted->remove_all_highlight();
+    m_pTempoLine->set_visible(false);
 }
 
 //---------------------------------------------------------------------------------------
@@ -754,26 +824,31 @@ void GraphicView::update_selection_rectangle(LUnits x2, LUnits y2)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
+void GraphicView::advance_tempo_line(ImoStaffObj* pSO)
 {
-    m_fTempoLineVisible = true;
-    m_tempoLine.left(x1);
-    m_tempoLine.top(y1);
-    m_tempoLine.right(x2);
-    m_tempoLine.bottom(y2);
-}
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return;
+    GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
+    if (!pShape)
+    {
+        LOMSE_LOG_ERROR("No shape found for Imo id: %d",
+                        pSO->get_id() );
+        return;
+    }
+    if (! (pShape->is_shape_notehead()
+           || pShape->is_shape_note()
+           || pShape->is_shape_rest()) )
+        LOMSE_LOG_ERROR("Shape is neither note nor rest. Shape type: %s, Imo id=%d",
+                        pShape->get_name().c_str(),
+                        pSO->get_id() );
 
-//---------------------------------------------------------------------------------------
-void GraphicView::hide_tempo_line()
-{
-    m_fTempoLineVisible = false;
-}
+    GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
+    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
+    GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
 
-//---------------------------------------------------------------------------------------
-void GraphicView::update_tempo_line(Pixels x2, Pixels y2)
-{
-    m_tempoLine.right(x2);
-    m_tempoLine.bottom(y2);
+    m_pTempoLine->set_visible(true);
+    m_pTempoLine->move_to(pShape, pBoxSystem);
 }
 
 //---------------------------------------------------------------------------------------
