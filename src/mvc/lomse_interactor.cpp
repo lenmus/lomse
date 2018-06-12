@@ -1069,6 +1069,14 @@ void Interactor::task_action_update_selection_rectangle(Pixels x2, Pixels y2)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::set_highlight_mode(int mode)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_highlight_mode(mode);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::remove_all_highlight()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);

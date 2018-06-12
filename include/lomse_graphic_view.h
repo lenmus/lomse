@@ -177,6 +177,7 @@ protected:
     list<Handler*>      m_handlers;
     SelectionHighlight* m_pSelObjects;
     TempoLine*          m_pTempoLine;
+    int                 m_highlightEffect;
 
     //bounds for each displayed page
     std::list<URect> m_pageBounds;
@@ -244,20 +245,26 @@ public:
     ///@}    //Selection rectangle
 
 
-    /// @name Tempo line
+    /// @name Visual effects for tracking during playback
     ///@{
     void advance_tempo_line(ImoStaffObj* pSO);
-
-    ///@}    //Tempo line
-
-
-    /// @name Highlighting notes and rests
-    ///@{
     void highlight_object(ImoStaffObj* pSO);
     void remove_highlight_from_object(ImoStaffObj* pSO);
     void remove_all_highlight();
 
-    ///@}    //Highlighting notes and rests
+    /** Select the visual effect to use for visual tracking during playback.
+        By default, if this method is not invoked, k_highlight_notes_rests is used.
+        @param mode It is a value from enum EHighlightEffect. Several visual effects
+        can be en effect simultaneously by combining values
+        with the OR ('|') operator. Example:
+
+        @code
+        set_highlight_mode(k_highlight_tempo_line | k_highlight_notes_rests);
+        @endcode
+    */
+	inline void set_highlight_mode(int mode) { m_highlightEffect = mode; }
+
+    ///@}    //Visual effects for tracking during playback
 
 
     /** The View is requested to re-paint itself onto the window */

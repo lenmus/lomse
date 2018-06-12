@@ -111,6 +111,13 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vyOrg(0)
     , m_pCaret(nullptr)
     , m_pCursor(nullptr)
+    , m_pDragImg(nullptr)
+    , m_pSelRect(nullptr)
+    , m_pHighlighted(nullptr)
+    , m_pTimeGrid(nullptr)
+    , m_pSelObjects(nullptr)
+    , m_pTempoLine(nullptr)
+    , m_highlightEffect(k_highlight_notes_rests)
     , m_backgroundColor( Color(145, 156, 166) )
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);

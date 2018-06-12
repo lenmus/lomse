@@ -94,6 +94,23 @@ enum EEventFlag
     k_kbd_alt     = 32,     ///< 0x20. Keyboard Alt key pressed while mouse event
 };
 
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes the valid highlight modes for visual tracking during playback.
+
+	@#include <lomse_interactor.h>
+*/
+enum EHighlightEffect
+{
+    k_highlight_notes_rests =	0x0001, ///<
+    k_highlight_tempo_line =	0x0002, ///<
+    k_highlight_tempo_block =	0x0004, ///<
+};
+
+
+///@cond INTERNALS
+//For performance measurements
 struct ptime
 {
     ptime(bool init_with_now = false) { if (init_with_now) init_now(); }
@@ -102,6 +119,8 @@ struct ptime
     typedef double duration;
     duration operator-(const ptime rhs);
 };
+///@endcond
+
 
 //---------------------------------------------------------------------------------------
 // Interactor
@@ -400,7 +419,7 @@ public:
 
 
         //interface to GraphicView. Renderization
-        /// @name Interface to GraphicView. Rederization
+        /// @name Interface to GraphicView. Rendering
         //@{
 
 
@@ -497,7 +516,7 @@ public:
     */
     void set_view_background(Color color);
 
-        //@}    //interface to GraphicView. Rederization
+        //@}    //interface to GraphicView. Rendering
 
 
 
@@ -803,31 +822,55 @@ public:
 
 
 
-    //tempo line
+    // Visual effects during playback
     /** @name Interface to GraphicView. Playback effects: tempo line
 
-        @todo Tempo line methods and Playback effects explanation
+        @todo Visual playback effects explanation
+        @todo Remove remove_all_highlight() or discard_all_highlight()
+
     */
     //@{
+
+    /** Select the visual effect to use for visual tracking during playback.
+        By default, if this method is not invoked, k_highlight_notes_rests is used.
+
+        @param mode It is a value from enum EHighlightEffect. Several visual effects
+        can be en effect simultaneously by combining values
+        with the OR ('|') operator. Example:
+
+        @code
+        spInteractor->set_highlight_mode(k_highlight_tempo_line | k_highlight_notes_rests);
+        @endcode
+    */
+	virtual void set_highlight_mode(int mode);
+
+    /** @param pSO The tempo line will be placed at this note or rest.
+        @todo Document Interactor::advance_tempo_line()
+    */
     virtual void advance_tempo_line(ImoStaffObj* pSO);
 
-    //@}    //tempo line
-
-
-
-    //highlight
-    /** @name Interface to GraphicView. Playback effects: highlight played notes/rests
-
-        @todo Highlight methods and Playback effects explanation
-    */
-    //@{
+    /** @param pSO This note or rest will be highlighted
+        @todo Document Interactor::highlight_object    */
     virtual void highlight_object(ImoStaffObj* pSO);
+
+    /** @param pSO Highlight will be removed from this note or rest.
+        @todo Document Interactor::remove_highlight_from_object    */
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
+
+    /// Remove all visual tracking visual effects.
     virtual void remove_all_highlight();
+
+    /** Remove all visual tracking visual effects. It does the same than
+        remove_all_highlight() but has a different name!! One of them should be
+        removed.
+    */
     virtual void discard_all_highlight();
+
+    /** @param pEvent The Highlight event to be processed.
+        @todo Document Interactor::on_visual_highlight    */
     virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
 
-    //@}    //highlight
+    //@}    //Visual effects during playback
 
 
 

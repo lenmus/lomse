@@ -72,7 +72,7 @@ This can be done only once if your application saves the ScorePlayer instance in
 
 Once you have the ScorePlayer instance, playback is just loading the score to play (by invoking ScorePlayer::load_score() method) and invoking the appropriate methods, such as ScorePlayer::play() or ScorePlayer::stop() or ScorePlayer::pause();
 
-The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to do get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:
+The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:
 
 
 @code
@@ -102,17 +102,14 @@ The only tricky issue, when starting to learn how to use lomse, is that method S
 
         //settings for playback. Probably you would get settings from GUI controls
         bool fVisualTracking = true;    //generate visual tracking effects
-        bool fCountOff = false          //no count off before start play
         long nMM = 60;                  //beats per minute
         Interactor* pInteractor = ...   //get the interactor for this document
 
         //start playback
-        pPlayer->play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);
+        pPlayer->play(fVisualTracking, nMM, pInteractor);
     }
 
 @endcode
-
-@todo Check example code: pPlayer->play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);
 
 
 

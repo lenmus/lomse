@@ -650,6 +650,7 @@ INPUT     = mainpages \
 			../../include/lomse_pitch.h \
 			../../include/lomse_pixel_formats.h \
 			../../include/lomse_presenter.h \
+			../../include/lomse_score_player.h \
 			../../include/lomse_view.h \
 			examples \
             groups
