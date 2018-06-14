@@ -190,9 +190,11 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
     //Create a new thread. It starts inmediately to execute do_play()
     delete m_pThread;
     m_fPlaying = true;
+    m_startMutex.lock();
     m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
                                 nEvStart, nEvEnd, m_fVisualTracking,
                                 m_nMM, m_pInteractor);
+    m_startMutex.unlock();
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::play_segment]");
 }
 
@@ -201,6 +203,11 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
                               long nMM, Interactor* pInteractor)
 {
     LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::thread_main]");
+
+    // waiting for "play_segment" to initialize "m_pThread" 
+    m_startMutex.lock();
+    m_startMutex.unlock();
+
     if (pInteractor && !m_fPostEvents)
         pInteractor->enable_forced_view_updates(false);
     fVisualTracking &= (pInteractor != nullptr);
