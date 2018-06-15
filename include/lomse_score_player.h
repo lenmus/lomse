@@ -169,6 +169,7 @@ class ScorePlayer
 protected:
     LibraryScope&       m_libScope;
     SoundThread*        m_pThread;      //execution thread
+    std::mutex          m_startMutex;   //mutex so synchronize thread start
     MidiServerBase*     m_pMidi;        //MIDI server to receive MIDI events
     bool                m_fPaused;      //execution is paused
     bool                m_fShouldStop;  //request to stop playback
