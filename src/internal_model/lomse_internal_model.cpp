@@ -44,6 +44,7 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
+#include "lomse_measures_table.h"
 
 
 using namespace std;
@@ -2421,6 +2422,7 @@ ImoInstrument::ImoInstrument()
     , m_abbrev()
     , m_partId("")
     , m_barlineLayout(k_isolated)
+    , m_pMeasures(nullptr)
 {
     add_staff();
 //	m_midiChannel = g_pMidi->DefaultVoiceChannel();
@@ -2434,6 +2436,8 @@ ImoInstrument::~ImoInstrument()
     for (it = m_staves.begin(); it != m_staves.end(); ++it)
         delete *it;
     m_staves.clear();
+
+    delete m_pMeasures;
 }
 
 //---------------------------------------------------------------------------------------

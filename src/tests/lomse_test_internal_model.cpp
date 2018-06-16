@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -131,23 +131,27 @@ SUITE(InternalModelTest)
     }
 
 
-    //@ instrument -----------------------------------------------------------------------
+    //@ ImoInstrument -------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_OneStaff)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0100)
     {
+        //@0100. Default: no music data, one staff, partId="", no measures table
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
         CHECK( pInstr->get_musicdata() == nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
-//        CHECK( pInstr->is_in_group() == false );
         CHECK( pInstr->get_instr_id() == "" );
+        CHECK( pInstr->get_measures_table() == nullptr );
 
         delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, Instrument_set_part_id)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0101)
     {
+        //@0101. set_part_id()
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
@@ -157,8 +161,10 @@ SUITE(InternalModelTest)
         delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_AddStaff)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0102)
     {
+        //@0102. add a second staff
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
@@ -169,8 +175,10 @@ SUITE(InternalModelTest)
         delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, Instrument_SetNumStaves)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0103)
     {
+        //@0103. add several staves. All will have default values
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
@@ -194,8 +202,10 @@ SUITE(InternalModelTest)
         delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InstrumentWithContent)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0104)
     {
+        //@0104. add empty music data
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
@@ -204,11 +214,14 @@ SUITE(InternalModelTest)
         pInstr->append_child_imo(pMD);
         CHECK( pInstr->get_musicdata() == pMD );
         CHECK( pMD->get_instrument() == pInstr );
+        CHECK( pInstr->get_measures_table() == nullptr );
         delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, Instrument_ReplaceStaffInfo)
+    TEST_FIXTURE(InternalModelTestFixture, ImoInstrument_0105)
     {
+        //@0105. change one staff info
+
         Document doc(m_libraryScope);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));

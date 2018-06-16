@@ -48,8 +48,6 @@ using namespace std;
 namespace lomse
 {
 
-#define LOMSE_NO_DURATION   100000000000000.0f  //any too high value for a note duration
-#define LOMSE_NO_TIME       100000000000000.0   //any impossible high value for a timepos
 #define LOMSE_NO_POSITION   100000000000000.0f  //any impossible high value
 #define LOMSE_MAX_FORCE     100000000000000.0f  //any impossible high value
 

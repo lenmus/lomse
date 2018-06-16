@@ -76,8 +76,6 @@
 namespace lomse
 {
 
-#define LOMSE_NO_TIME       100000000000000.0   //any impossible high value for a timepos
-
 
 //=======================================================================================
 // ScoreLayouter implementation

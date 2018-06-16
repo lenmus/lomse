@@ -859,6 +859,29 @@ void GraphicView::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicView::move_tempo_line(int iMeasure, TimeUnits location, int iInstr)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return;
+
+//    //get system for measure
+//    TimeUnits time = location;
+//    int iSystem = m_pGModel->get_system_for(m_pScore->get_id(),
+//                                            m_pScoreCursor->instrument(),
+//                                            m_pScoreCursor->measure(),
+//                                            location);
+//    GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
+//
+//    //determine x position based on TimeGridTable
+//    TimeGridTable* pTimeGrid = pBoxSystem->get_time_grid_table();
+//    bounds.x = pTimeGrid->get_x_for_time(time);
+//
+//    m_pTempoLine->set_visible(true);
+//    m_pTempoLine->move_to(pShape, pBoxSystem);
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::zoom_in(Pixels x, Pixels y)
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");

@@ -187,7 +187,7 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
     m_fQuit = false;
     m_fFinalEventSent = false;
 
-    //Create a new thread. It starts inmediately to execute do_play()
+    //Create a new thread. It starts immediately to execute do_play()
     delete m_pThread;
     m_fPlaying = true;
     m_startMutex.lock();
@@ -307,7 +307,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
     //-----------------------------------------------------------------------------------
     //Naming convention for variables:
-    //  DeltaTime:  content is LenMus Time Units (TU). One quarte note = 64TU.
+    //  DeltaTime:  content is LenMus Time Units (TU). One quarter note = 64TU.
     //  Time: content is absolute time (milliseconds)
     //-----------------------------------------------------------------------------------
 
@@ -370,7 +370,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //Here i points to the first event of desired measure that is not a control event,
     //that is, to first event to play
 
-    //Define and initialize time counter. If playback starts not at the begining but
+    //Define and initialize time counter. If playback starts not at the beginning but
 	//in another measure, advance time counter to that measure
     long curTime = 0L;
 	if (nEvStart > 1)
@@ -379,7 +379,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     // get metronome interval duration, in milliseconds
     //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
     //was specified in method load_score(). Nevertheless, metronome speed can be
-    //overriden to force a predefined speed by specifying a non-zero value for
+    //overridden to force a predefined speed by specifying a non-zero value for
     //parameter nMM.
     if (nMM == 0)
         m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
@@ -468,7 +468,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             m_pMidi->note_off(m_MtrChannel, m_MtrTone2, 127);
             std::this_thread::sleep_for(waitTime);
         }
-        //generate final click
+        //generate final metronome click before real events
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
         if (fVisualTracking)
         {
@@ -556,8 +556,21 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
+//                if (fVisualTracking)
+//                    pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, nMtrEvDeltaTime);
                 if (fVisualTracking && events[i]->pSO != nullptr)
-                    pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
+                {
+                    //locate first Note On / Visual On in this timepos
+                    for (int j = i; j <= nEvEnd && nMtrEvDeltaTime == events[j]->DeltaTime; ++j)
+                    {
+                        if (events[j]->EventType == SoundEvent::k_note_on
+                            || events[j]->EventType == SoundEvent::k_visual_on)
+                        {
+                            pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[j]->pSO->get_id());
+                            break;
+                        }
+                    }
+                }
 
                 fMtrOn = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;

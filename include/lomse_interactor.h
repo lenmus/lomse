@@ -844,10 +844,23 @@ public:
     */
 	virtual void set_highlight_mode(int mode);
 
-    /** @param pSO The tempo line will be placed at this note or rest.
-        @todo Document Interactor::advance_tempo_line()
+    /** Move the tempo line to the given note/rest.
+        @param pSO The tempo line will be placed at this note or rest.
     */
     virtual void advance_tempo_line(ImoStaffObj* pSO);
+
+    /** Move the tempo line to the given measure location.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param location Time units after the start of the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location=0.0f,
+                                 int iInstr=0);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */

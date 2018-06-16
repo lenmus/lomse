@@ -36,6 +36,9 @@
 
 namespace lomse
 {
+//some constants
+#define LOMSE_NO_DURATION   100000000000000.0f  //any too high value for a note duration
+#define LOMSE_NO_TIME       100000000000000.0f  //any impossible high value for a timepos
 
 //helper functions to compare times (two floating point numbers)
 

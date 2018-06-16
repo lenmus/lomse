@@ -247,10 +247,34 @@ public:
 
     /// @name Visual effects for tracking during playback
     ///@{
-    void advance_tempo_line(ImoStaffObj* pSO);
-    void highlight_object(ImoStaffObj* pSO);
-    void remove_highlight_from_object(ImoStaffObj* pSO);
-    void remove_all_highlight();
+
+    /** Move the tempo line to the given note/rest.
+        @param pSO The tempo line will be placed at this note or rest.
+    */
+    virtual void advance_tempo_line(ImoStaffObj* pSO);
+
+    /** Move the tempo line to the given measure location.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param location Time units after the start of the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line(int iMeasure, TimeUnits location=0.0f, int iInstr=0);
+
+    /** @param pSO This note or rest will be highlighted
+        @todo Document Interactor::highlight_object    */
+    virtual void highlight_object(ImoStaffObj* pSO);
+
+    /** @param pSO Highlight will be removed from this note or rest.
+        @todo Document Interactor::remove_highlight_from_object    */
+    virtual void remove_highlight_from_object(ImoStaffObj* pSO);
+
+    /// Remove all visual tracking visual effects.
+    virtual void remove_all_highlight();
 
     /** Select the visual effect to use for visual tracking during playback.
         By default, if this method is not invoked, k_highlight_notes_rests is used.

@@ -1093,6 +1093,15 @@ void Interactor::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location,
+                                 int iInstr)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->move_tempo_line(iMeasure, location, iInstr);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::highlight_object(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
