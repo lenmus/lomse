@@ -374,14 +374,13 @@ if(LOMSE_BUILD_TESTS)
     find_package (Threads)
     
     # libraries to link
-    if (BUILD_SHARED_LIB)
+    if (LOMSE_BUILD_SHARED_LIB)
         target_link_libraries ( ${TESTLIB} lomse-shared libunittest++.a ${CMAKE_THREAD_LIBS_INIT} )
+        add_dependencies(testlib lomse-shared)
     else()      
-        target_link_libraries ( ${TESTLIB} lomse.so libunittest++.a ${CMAKE_THREAD_LIBS_INIT} )
+        target_link_libraries ( ${TESTLIB} lomse unittest++ ${CMAKE_THREAD_LIBS_INIT} )
+        add_dependencies(testlib lomse-static)
     endif()
-
-    # dependencies
-    add_dependencies(testlib lomse-shared)
 
     # once generated, run tests
     if (LOMSE_RUN_TESTS)
