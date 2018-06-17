@@ -862,6 +862,11 @@ public:
     virtual void move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location=0.0f,
                                  int iInstr=0);
 
+    /** Move the tempo line to the given time position.
+        @param timepos Time units from the start of the score.
+    */
+    virtual void move_tempo_line(TimeUnits timepos);
+
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */
     virtual void highlight_object(ImoStaffObj* pSO);
@@ -882,6 +887,10 @@ public:
     /** @param pEvent The Highlight event to be processed.
         @todo Document Interactor::on_visual_highlight    */
     virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
+
+    /** @param pEvent The move tempo line event to be processed.
+        @todo Document Interactor::on_move_tempo_line    */
+    virtual void on_move_tempo_line(SpEventTempoLine pEvent);
 
     //@}    //Visual effects during playback
 
@@ -1443,7 +1452,7 @@ protected:
     void do_force_redraw();
     ImoObj* find_event_originator_imo(GmoObj* pGmo);
     GmoRef find_event_originator_gref(GmoObj* pGmo);
-    bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
+    bool discard_score_highlight_event_if_not_valid(ImoId scoreId);
     bool is_valid_play_score_event(SpEventPlayCtrl pEvent);
     void update_caret_and_view();
     void redraw_caret();

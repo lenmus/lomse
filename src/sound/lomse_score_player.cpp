@@ -204,7 +204,7 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
 {
     LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::thread_main]");
 
-    // waiting for "play_segment" to initialize "m_pThread" 
+    // waiting for "play_segment" to initialize "m_pThread"
     m_startMutex.lock();
     m_startMutex.unlock();
 
@@ -472,8 +472,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
         if (fVisualTracking)
         {
-            if (events[i]->pSO)
-                pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
+//            if (events[i]->pSO)
+//                pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
             if (nMtrEvDeltaTime < events[i]->DeltaTime)
             {
                 //last metronome click is previous to first event from table.
@@ -556,21 +556,32 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
+
+                if (fVisualTracking)
+                {
+                    SpEventTempoLine event(
+                        LOMSE_NEW EventTempoLine(wpInteractor,
+                                                 m_pScore->get_id(), nMtrEvDeltaTime) );
+                    if (m_fPostEvents)
+                        m_libScope.post_event(event);
+                    else if (pInteractor)
+                        pInteractor->handle_event(event);
+                }
 //                if (fVisualTracking)
 //                    pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, nMtrEvDeltaTime);
-                if (fVisualTracking && events[i]->pSO != nullptr)
-                {
-                    //locate first Note On / Visual On in this timepos
-                    for (int j = i; j <= nEvEnd && nMtrEvDeltaTime == events[j]->DeltaTime; ++j)
-                    {
-                        if (events[j]->EventType == SoundEvent::k_note_on
-                            || events[j]->EventType == SoundEvent::k_visual_on)
-                        {
-                            pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[j]->pSO->get_id());
-                            break;
-                        }
-                    }
-                }
+//                if (fVisualTracking && events[i]->pSO != nullptr)
+//                {
+//                    //locate first Note On / Visual On in this timepos
+//                    for (int j = i; j <= nEvEnd && nMtrEvDeltaTime == events[j]->DeltaTime; ++j)
+//                    {
+//                        if (events[j]->EventType == SoundEvent::k_note_on
+//                            || events[j]->EventType == SoundEvent::k_visual_on)
+//                        {
+//                            pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[j]->pSO->get_id());
+//                            break;
+//                        }
+//                    }
+//                }
 
                 fMtrOn = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;

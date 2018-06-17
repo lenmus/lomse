@@ -108,9 +108,11 @@ enum EEventType
         //EventScoreHighlight
         k_highlight_event,              ///< Wrapper event containing a list of real events
         //EventUpdateViewport
-        k_update_viewport_event,        ///< Suggest to change viewport
+        k_update_viewport_event,        ///< Suggest to change viewport.
         //EventEndOfPlayback
         k_end_of_playback_event,        ///< Playback ended.
+        //EventTempoLine
+        k_move_tempo_line_event,        ///< Move tempo line to a new beat.
 
 
 };
@@ -505,6 +507,107 @@ public:
     @#include <lomse_events.h>
 */
 typedef std::shared_ptr<EventUpdateViewport>  SpEventUpdateViewport;
+
+
+//---------------------------------------------------------------------------------------
+// EventTempoLine
+/**	An event to signal the need to move the tempo line visual effect while the score
+    is being played back.
+
+	@warning This event is sent to your application from the Lomse sound thread.
+			 For processing it, do not retain control: generate an application
+			 event, place it on the application events loop, and return control to Lomse.
+
+	For handling all events related to score playback it is **very important** to
+	return control to Lomse as soon
+	as possible. This is because, currently, Lomse does not implement an event
+	subsystem with its own thread. Instead Lomse sends events to your application
+	by invoking a callback. This implies that your application code for handling
+	the event is processed by the Lomse sound thread. As this thread is dealing
+	with sound generation, your application **must** return control to Lomse as
+	soon as possible, so that the sound thread can continue processing sound events.
+	Otherwise, sound can be stalled! The suggested way for handling
+	EventTempoLine events is to generate an application
+	event and to enqueue it in the application events system.
+
+	For instance, in an application written using the wxWidgets framework you
+	could have a global method for receiving all Lomse events, convert them in
+	application events, and return control to Lomse:
+
+	@code
+	void MainFrame::on_lomse_event(SpEventInfo pEvent)
+	{
+		DocumentWindow* pCanvas = get_active_document_window();
+
+		switch (pEvent->get_event_type())
+		{
+			case k_move_tempo_line_event:
+			{
+			    if (pCanvas)
+			    {
+					//generate move tempo line event
+			        SpEventTempoLine pEv(
+			            static_pointer_cast<EventTempoLine>(pEvent) );
+			        MyEventTempoLine event(pEv);
+			        ::wxPostEvent(pCanvas, event);
+			    }
+			    break;
+			}
+		...
+	@endcode
+
+	Later, your application will just process the application event as convenient.
+	The recommended action is to use the Interactor for requesting to
+	process the event and update the rendering bitmap. For instance:
+
+	@code
+	void DocumentWindow::on_move_tempo_line(MyEventTempoLine& event)
+	{
+		SpEventTempoLine pEv = event.get_lomse_event();
+		WpInteractor wpInteractor = pEv->get_interactor();
+		if (SpInteractor sp = wpInteractor.lock())
+		    sp->on_move_tempo_line(pEv);
+	}
+	@endcode
+*/
+class EventTempoLine : public EventPlayback
+{
+protected:
+    ImoId m_nID;            //ID of the target score for the event
+    TimeUnits m_timepos;    //new timepos
+
+public:
+    /// Constructor
+    EventTempoLine(WpInteractor wpInteractor, ImoId nScoreID, TimeUnits timepos)
+        : EventPlayback(k_move_tempo_line_event, wpInteractor)
+        , m_nID(nScoreID)
+        , m_timepos(timepos)
+    {
+    }
+
+    /// Copy constructor
+    EventTempoLine(const EventTempoLine& event)
+        : EventPlayback(k_move_tempo_line_event, event.m_wpInteractor)
+        , m_nID(event.m_nID)
+        , m_timepos(event.m_timepos)
+    {
+    }
+
+    /// Destructor
+    virtual ~EventTempoLine() {}
+
+    /** Returns the requested time position for the new location of the tempo line. */
+    inline TimeUnits get_timepos() { return m_timepos; }
+
+    /// Returns ID of the score affected by the event
+    inline ImoId get_score_id() { return m_nID; }
+};
+
+/** A shared pointer for an EventTempoLine.
+    @ingroup typedefs
+    @#include <lomse_events.h>
+*/
+typedef std::shared_ptr<EventTempoLine>  SpEventTempoLine;
 
 
 //---------------------------------------------------------------------------------------
@@ -998,13 +1101,11 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 			 event, place it on the application events loop, and return control to Lomse.
 
 	The %EventScoreHighlight event, derived from EventPlayback, signals the need to do
-	several actions related to highlighting / unhighlighting notes and to moving
-	the tempo line while the score is being played back. It contains a list of
-	sub-events and affected objects:
+	several actions related to highlighting / unhighlighting notes. It contains a list
+	of sub-events and affected objects:
 	- <b>k_highlight_on</b>. Add highlight to a note/rest.
 	- <b>k_highlight_off</b>. Remove highlight from a note/rest.
 	- <b>k_end_of_higlight</b>. End of score play back. Remove all highlight.
-	- <b>k_advance_tempo_line</b>. Advance visual tempo line to next beat.
 
 	For handling all events related to score playback it is **very important** to
 	return control to Lomse as soon
@@ -1086,7 +1187,6 @@ public:
         k_highlight_on,           ///< add highlight to a note/rest
         k_highlight_off,          ///< remove highlight from a note/rest
         k_end_of_higlight,        ///< end of score play back. Remove all highlight.
-        k_advance_tempo_line,     ///< advance visual tempo line to next beat
     };
 
     /// Returns ID of the score affected by the event

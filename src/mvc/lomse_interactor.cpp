@@ -1093,6 +1093,15 @@ void Interactor::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line(TimeUnits timepos)
+{
+        //TODO
+//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+//    if (pGView)
+//        pGView->move_tempo_line(iMeasure, location, iInstr);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location,
                                  int iInstr)
 {
@@ -1356,19 +1365,19 @@ int Interactor::get_num_pages()
 //}
 
 //---------------------------------------------------------------------------------------
-bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent)
+bool Interactor::discard_score_highlight_event_if_not_valid(ImoId scoreId)
 {
     //returns true if event discarded
 
     ImoObj* pScore = nullptr;
     if (SpDocument spDoc = m_wpDoc.lock())
-        pScore = spDoc->get_pointer_to_imo( pEvent->get_score_id() );
+        pScore = spDoc->get_pointer_to_imo(scoreId);
 
     if (!pScore || !pScore->is_score())
     {
         LOMSE_LOG_DEBUG(Logger::k_events,
             "Highlight discarded: score id: %d, pScore? %s",
-            pEvent->get_score_id(),
+            scoreId,
             (pScore ? "not null" : "null") );
 
         discard_all_highlight();
@@ -1400,7 +1409,7 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        if (discard_score_highlight_event_if_not_valid(pEvent))
+        if (discard_score_highlight_event_if_not_valid( pEvent->get_score_id() ))
             return;
 
         LOMSE_LOG_DEBUG(Logger::k_events, "Processing higlight event");
@@ -1424,11 +1433,6 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
                                             spDoc->get_pointer_to_imo((*it).second) ));
                     break;
 
-                case EventScoreHighlight::k_advance_tempo_line:
-                    advance_tempo_line( static_cast<ImoStaffObj*>(
-                                            spDoc->get_pointer_to_imo((*it).second) ));
-                    break;
-
                 default:
                 {
                     stringstream msg;
@@ -1439,6 +1443,26 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
                 }
             }
         }
+
+        pGView->draw_playback_highlight();
+        request_window_update();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::on_move_tempo_line(SpEventTempoLine pEvent)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (!pGView)
+        return;
+
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        if (discard_score_highlight_event_if_not_valid( pEvent->get_score_id() ))
+            return;
+
+        LOMSE_LOG_DEBUG(Logger::k_events, "Processing tempo line event");
+        move_tempo_line( pEvent->get_timepos() );
 
         pGView->draw_playback_highlight();
         request_window_update();
