@@ -557,7 +557,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
 
-                if (fVisualTracking)
+                if (fVisualTracking && nMtrEvDeltaTime >= 0L)
                 {
                     SpEventTempoLine event(
                         LOMSE_NEW EventTempoLine(wpInteractor,
@@ -793,13 +793,17 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
     } while (i <= nEvEnd);
 
+    //TODO: Last Highlight event (note off) is not send because loop is break at line
+    // 770 without sending last event. It is not important as next event will remove all
+    // highlight but should be studied and decided. Can be sent here.
+
     //ensure that all visual highlight is removed
     if (fVisualTracking && !m_fQuit)
     {
         m_fFinalEventSent = true;
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
+        pEvent->add_item(EventScoreHighlight::k_end_of_highlight, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
@@ -828,7 +832,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
             wpInteractor = WpInteractor();
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
+        pEvent->add_item(EventScoreHighlight::k_end_of_highlight, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)

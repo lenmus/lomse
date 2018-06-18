@@ -1105,7 +1105,7 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 	of sub-events and affected objects:
 	- <b>k_highlight_on</b>. Add highlight to a note/rest.
 	- <b>k_highlight_off</b>. Remove highlight from a note/rest.
-	- <b>k_end_of_higlight</b>. End of score play back. Remove all highlight.
+	- <b>k_end_of_highlight</b>. End of score play back. Remove all highlight.
 
 	For handling all events related to score playback it is **very important** to
 	return control to Lomse as soon
@@ -1186,7 +1186,7 @@ public:
     {
         k_highlight_on,           ///< add highlight to a note/rest
         k_highlight_off,          ///< remove highlight from a note/rest
-        k_end_of_higlight,        ///< end of score play back. Remove all highlight.
+        k_end_of_highlight,       ///< end of score play back. Remove all highlight.
     };
 
     /// Returns ID of the score affected by the event

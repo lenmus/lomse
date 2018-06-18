@@ -1419,7 +1419,7 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
         {
             switch ((*it).first)
             {
-                case EventScoreHighlight::k_end_of_higlight:
+                case EventScoreHighlight::k_end_of_highlight:
                     remove_all_highlight();
                     break;
 
