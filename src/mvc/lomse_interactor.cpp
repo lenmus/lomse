@@ -50,6 +50,7 @@
 #include "lomse_visual_effect.h"
 #include "lomse_score_utilities.h"
 #include "lomse_shape_staff.h"
+#include "lomse_score_algorithms.h"
 
 #include <sstream>
 #include <chrono>

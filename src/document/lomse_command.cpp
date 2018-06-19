@@ -44,6 +44,7 @@
 #include "lomse_staffobjs_table.h"      //class ScoreAlgorithms
 #include "lomse_ldp_exporter.h"
 #include "lomse_internal_model.h"
+#include "lomse_score_algorithms.h"
 
 #include <sstream>
 using namespace std;
