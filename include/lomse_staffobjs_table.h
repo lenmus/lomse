@@ -416,9 +416,9 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// ScoreAlgorithms
-//  General methods for dealing with the staffobjs collection
-//---------------------------------------------------------------------------------------
+/** ScoreAlgorithms
+    General static methods for dealing with the staffobjs collection
+**/
 class ScoreAlgorithms
 {
 protected:
@@ -427,22 +427,33 @@ public:
     ScoreAlgorithms() {}
     ~ScoreAlgorithms() {}
 
-    ///try to find a note that can be tied (as end of tie) with pStartNote
+    /** Look for a note that can be tied (as end of tie) with pStartNote
+    */
     static ImoNote* find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
                                              ImoNote* pStartNote);
 
-    ///finds applicable clef at specified timepos
+    /** Look for applicable clef at specified timepos
+    */
     static int get_applicable_clef_for(ImoScore* pScore,
                                        int iInstr, int iStaff, TimeUnits time);
 
-    ///
+    /** Look for a note starting at specified timepos
+        @param pScore
+        @param instr
+        @param voice
+        @param time
+    */
     static ImoNoteRest* find_noterest_at(ImoScore* pScore,
                                          int instr, int voice, TimeUnits time);
+
+    /**
+    */
     static list<OverlappedNoteRest*>
             find_and_classify_overlapped_noterests_at(ImoScore* pScore,
                          int instr, int voice, TimeUnits time, TimeUnits duration);
 
-    ///finds end timepos for given voice, lower or equal than maxTime
+    /** finds end timepos for given voice, lower or equal than maxTime
+    */
     static TimeUnits find_end_time_for_voice(ImoScore* pScore,
                                              int instr, int voice, TimeUnits maxTime);
 
