@@ -99,7 +99,13 @@ public:
     static ImoNoteRest* find_noterest_at(ImoScore* pScore,
                                          int instr, int voice, TimeUnits time);
 
-    /**
+    /** Find all notes/rest that are in the range from the given timepos and
+        given duration, and classify the overlap for each found note/rest.
+        @param pScore
+        @param instr
+        @param voice
+        @param time
+        @param duration
     */
     static list<OverlappedNoteRest*>
             find_and_classify_overlapped_noterests_at(ImoScore* pScore,
@@ -109,6 +115,14 @@ public:
     */
     static TimeUnits find_end_time_for_voice(ImoScore* pScore,
                                              int instr, int voice, TimeUnits maxTime);
+
+    /** Return a measure locator for the specified instrument and timepos.
+        @param pScore
+        @param instr
+        @param timepos
+    */
+    static MeasureLocator get_locator_for(ImoScore* pScore, TimeUnits timepos,
+                                          int iInstr=0);
 
 protected:
     static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,

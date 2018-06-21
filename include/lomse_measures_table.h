@@ -108,6 +108,9 @@ public:
     ImMeasuresTableEntry* back() { return m_theTable.back(); }
     ImMeasuresTableEntry* front() { return m_theTable.front(); }
 
+    //search
+    ImMeasuresTableEntry* get_measure_at(TimeUnits timepos);
+
     //debug
     string dump();
 

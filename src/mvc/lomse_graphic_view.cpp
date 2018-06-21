@@ -859,18 +859,14 @@ void GraphicView::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::move_tempo_line(int iMeasure, TimeUnits location, int iInstr)
+void GraphicView::move_tempo_line(ImoId scoreId, MeasureLocator ml)
 {
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)
         return;
 
-//    //get system for measure
-//    TimeUnits time = location;
-//    int iSystem = m_pGModel->get_system_for(m_pScore->get_id(),
-//                                            m_pScoreCursor->instrument(),
-//                                            m_pScoreCursor->measure(),
-//                                            location);
+    int iSystem = pGModel->get_system_for(scoreId, ml.iInstr, ml.iMeasure,
+                                            ml.location);
 //    GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
 //
 //    //determine x position based on TimeGridTable

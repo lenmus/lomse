@@ -850,6 +850,7 @@ public:
     virtual void advance_tempo_line(ImoStaffObj* pSO);
 
     /** Move the tempo line to the given measure location.
+        @param scoreId  Id. of the score to which all other parameters refer.
         @param iMeasure Measure number (0..n) in instrument iInstr.
         @param location Time units after the start of the measure.
         @param iInstr Number of the instrument (0..m) to which the measures refer to.
@@ -863,9 +864,10 @@ public:
                                  int iInstr=0);
 
     /** Move the tempo line to the given time position.
+        @param scoreId  Id. of the score to which all other parameters refer.
         @param timepos Time units from the start of the score.
     */
-    virtual void move_tempo_line(TimeUnits timepos);
+    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */

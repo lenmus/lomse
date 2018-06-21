@@ -308,6 +308,21 @@ const GmoRef k_no_gmo_ref = make_pair(-1, -1);
 
 typedef double TimeUnits;           //time units (TU). Relative, depends on metronome speed
 
+
+//---------------------------------------------------------------------------------------
+// For describing the measure location of a musical event or other.
+struct MeasureLocator
+{
+    int iInstr;             //instrument number (0..n)
+    int iMeasure;           //measure number (0..m), for the instrument
+    TimeUnits location;     //TimeUnits from start of measure
+
+    MeasureLocator() : iInstr(0), iMeasure(0), location(0.0) {}
+    MeasureLocator(int i, int m, int l) : iInstr(i), iMeasure(m), location(l) {}
+
+};
+
+
 //---------------------------------------------------------------------------------------
 // Units comparison (LUnits, Tenths)
 inline bool is_equal(float c1, float c2) {

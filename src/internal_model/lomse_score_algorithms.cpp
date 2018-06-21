@@ -29,18 +29,17 @@
 
 #include "lomse_score_algorithms.h"
 
-#include <algorithm>
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-//#include "lomse_ldp_exporter.h"
 #include "lomse_time.h"
-//#include "lomse_im_factory.h"
 #include "lomse_staffobjs_table.h"
+#include "lomse_measures_table.h"
 
 //specific for ScoreAlgorithms
 #include "lomse_pitch.h"
 
 
+#include <algorithm>
 #include <sstream>
 using namespace std;
 
@@ -268,6 +267,25 @@ ColStaffObjsIterator ScoreAlgorithms::find_barline_with_time_lower_or_equal(
         }
     }
     return itLastBarline;
+}
+
+//---------------------------------------------------------------------------------------
+MeasureLocator ScoreAlgorithms::get_locator_for(ImoScore* pScore, TimeUnits timepos,
+                                                int iInstr)
+{
+    MeasureLocator ml;
+    ml.iInstr = iInstr;
+
+    ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+    ImMeasuresTable* pTable = pInstr->get_measures_table();
+    ImMeasuresTableEntry* measure = pTable->get_measure_at(timepos);
+    if (measure)
+    {
+        ml.iMeasure = measure->get_table_index();
+        ml.location = timepos - measure->get_timepos();
+    }
+
+    return ml;
 }
 
 

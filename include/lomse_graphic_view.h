@@ -254,16 +254,10 @@ public:
     virtual void advance_tempo_line(ImoStaffObj* pSO);
 
     /** Move the tempo line to the given measure location.
-        @param iMeasure Measure number (0..n) in instrument iInstr.
-        @param location Time units after the start of the measure.
-        @param iInstr Number of the instrument (0..m) to which the measures refer to.
-            Take into account that for polymetric music (music in which not all
-            instruments have the same time signature), the measure number is not an
-            absolute value, common to all the score instruments (score parts), but it
-            is relative to an instrument. For normal scores, just providing measure
-            number and location will do the job.
+        @param scoreId  Id. of the score to which the measure location refers.
+        @param ml The location to move the tempo line to.
     */
-    virtual void move_tempo_line(int iMeasure, TimeUnits location=0.0f, int iInstr=0);
+    virtual void move_tempo_line(ImoId scoreId, MeasureLocator ml);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */

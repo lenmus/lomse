@@ -127,5 +127,50 @@ string ImMeasuresTable::dump()
     return s.str();
 }
 
+//---------------------------------------------------------------------------------------
+ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
+{
+    //Binary search in table for measure containing the requested timepos.
+    //Returns nullptr if no measures or negative timepos.
+    //If timepos > las measure time, always returns last measure.
+
+    if (m_theTable.size() == 0 || timepos < 0.0)
+        return nullptr;
+
+    int first = 0;
+    int last = m_theTable.size() - 1;
+    int const max = last;
+    //cout << "looking for=" << timepos << "--------------------------------------" << endl;
+    while (first <= last)
+    {
+        int guess = (first + last) / 2;
+        //cout << "first=" << first << ", last=" << last << ", guess=" << guess << endl;
+        ImMeasuresTableEntry* pEntry = m_theTable[guess];
+        if (timepos >= pEntry->get_timepos())
+        {
+            if (guess < max)
+            {
+                ImMeasuresTableEntry* pNext = m_theTable[guess+1];
+                if (timepos < pNext->get_timepos())
+                {
+                    //cout << "Found: in measure " << guess << endl;
+                    return pEntry;
+                }
+            }
+            else
+            {
+                //cout << "Found: in last measure " << guess << " or above" << endl;
+                return pEntry;
+            }
+        }
+        if (timepos < pEntry->get_timepos())
+            last = guess - 1;
+        else
+            first = guess + 1;
+    }
+
+    return nullptr;
+}
+
 
 }  //namespace lomse

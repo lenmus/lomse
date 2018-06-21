@@ -1094,12 +1094,22 @@ void Interactor::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::move_tempo_line(TimeUnits timepos)
+void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 {
-        //TODO
-//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-//    if (pGView)
-//        pGView->move_tempo_line(iMeasure, location, iInstr);
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            MeasureLocator ml = ScoreAlgorithms::get_locator_for(score, timepos);
+            pGView->move_tempo_line(scoreId, ml);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1108,7 +1118,7 @@ void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->move_tempo_line(iMeasure, location, iInstr);
+        pGView->move_tempo_line(scoreId, MeasureLocator(iInstr, iMeasure, location));
 }
 
 //---------------------------------------------------------------------------------------
@@ -1463,7 +1473,7 @@ void Interactor::on_move_tempo_line(SpEventTempoLine pEvent)
             return;
 
         LOMSE_LOG_DEBUG(Logger::k_events, "Processing tempo line event");
-        move_tempo_line( pEvent->get_timepos() );
+        move_tempo_line(pEvent->get_score_id(), pEvent->get_timepos());
 
         pGView->draw_playback_highlight();
         request_window_update();
