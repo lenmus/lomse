@@ -57,6 +57,13 @@ void TempoLine::move_to(GmoShape* pShape, GmoBoxSystem* pBoxSystem)
 }
 
 //---------------------------------------------------------------------------------------
+void TempoLine::move_to(LUnits xPos, GmoBoxSystem* pBoxSystem)
+{
+    m_pBoxSystem = pBoxSystem;
+    m_bounds.left(xPos);
+}
+
+//---------------------------------------------------------------------------------------
 void TempoLine::on_draw(ScreenDrawer* pDrawer)
 {
     if (!m_pBoxSystem)
@@ -71,12 +78,15 @@ void TempoLine::on_draw(ScreenDrawer* pDrawer)
         yTop -= double(pStyle->margin_top());
         yBottom -= double(pStyle->margin_bottom());
     }
+    m_bounds.top(yTop);
+    m_bounds.bottom(yBottom);
+    m_bounds.width = 15.0;      //0.15 mm
 
     //draw the tempo line
     pDrawer->begin_path();
     pDrawer->fill(m_color);
     pDrawer->stroke(m_color);
-    pDrawer->stroke_width(15.0);    //0.15 mm
+    pDrawer->stroke_width(m_bounds.width);
 
     double xLeft = m_bounds.get_x();
     pDrawer->move_to(xLeft, yTop);

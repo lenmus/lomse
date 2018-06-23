@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -94,7 +94,7 @@ string TimeGridTable::dump()
 //---------------------------------------------------------------------------------------
 TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
 {
-    //timepos = 0 if measure is empty
+    //timepos = 0 if table is empty
     if (m_PosTimes.size() == 0)
         return 0.0;
 
@@ -112,6 +112,35 @@ TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
 
     //if not found return last entry timepos
     return m_PosTimes.back().rTimepos;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TimeGridTable::get_x_for_time(TimeUnits timepos)
+{
+    //xPos = 0 if table is empty or timepos < first entry timepos
+    if (m_PosTimes.size() == 0 || timepos <= m_PosTimes.front().rTimepos)
+        return 0.0;
+
+    //otherwise find in table
+    std::vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
+    for (++it; it != m_PosTimes.end(); ++it)
+    {
+        if (timepos <= (*it).rTimepos)
+            return (*it).uxPos;
+    }
+
+    //if not found return last entry xPos
+    return m_PosTimes.back().uxPos;
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits TimeGridTable::end_time()
+{
+    //end time == 0 if table is empty
+    if (m_PosTimes.size() == 0)
+        return 0.0;
+
+    return m_PosTimes.back().rTimepos + m_PosTimes.back().rDuration;
 }
 
 

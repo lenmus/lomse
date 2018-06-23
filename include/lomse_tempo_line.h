@@ -64,6 +64,7 @@ public:
 
     //operations
     void move_to(GmoShape* pShape, GmoBoxSystem* pBoxSystem);
+    void move_to(LUnits xPos, GmoBoxSystem* pBoxSystem);
 
     //mandatory overrides from VisualEffect
     void on_draw(ScreenDrawer* pDrawer);

@@ -286,12 +286,13 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId sco
 }
 
 //---------------------------------------------------------------------------------------
-int GraphicModel::get_system_for(ImoId UNUSED(scoreId), int UNUSED(instr),
-                                 int UNUSED(measure), TimeUnits UNUSED(time))
+int GraphicModel::get_system_for(ImoId scoreId, int instr,
+                                 int measure, TimeUnits time)
 {
     //if not found returns -1
 
-//    ScoreStub* pStub = get_stub_for(scoreId);
+    ScoreStub* pStub = get_stub_for(scoreId);
+    GmoBoxScorePage* pPage = pStub->get_page_for(time);
 //    vector<GmoBoxScorePage*>& pages = pStub->get_pages();
 
 //    //find page with end time greater or equal than requested time
@@ -302,6 +303,20 @@ int GraphicModel::get_system_for(ImoId UNUSED(scoreId), int UNUSED(instr),
 //        if (!is_lower_time(pPage->end_time(), time)
 //            break;
 //    }
+
+    //find system in this page
+    //TODO
+
+    return -1;
+}
+
+//---------------------------------------------------------------------------------------
+int GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos)
+{
+    //if not found returns -1
+
+    ScoreStub* pStub = get_stub_for(scoreId);
+    GmoBoxScorePage* pPage = pStub->get_page_for(timepos);
 
     //find system in this page
     //TODO

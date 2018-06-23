@@ -1099,16 +1099,17 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
-        ImoObj* pScore = nullptr;
-        if (SpDocument spDoc = m_wpDoc.lock())
-            pScore = spDoc->get_pointer_to_imo(scoreId);
-
-        if (pScore && pScore->is_score())
-        {
-            ImoScore* score = static_cast<ImoScore*>(pScore);
-            MeasureLocator ml = ScoreAlgorithms::get_locator_for(score, timepos);
-            pGView->move_tempo_line(scoreId, ml);
-        }
+//        ImoObj* pScore = nullptr;
+//        if (SpDocument spDoc = m_wpDoc.lock())
+//            pScore = spDoc->get_pointer_to_imo(scoreId);
+//
+//        if (pScore && pScore->is_score())
+//        {
+//            ImoScore* score = static_cast<ImoScore*>(pScore);
+//            MeasureLocator ml = ScoreAlgorithms::get_locator_for(score, timepos);
+//            pGView->move_tempo_line(scoreId, ml);
+        pGView->move_tempo_line(scoreId, timepos);
+//        }
     }
 }
 

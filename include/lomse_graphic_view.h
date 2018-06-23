@@ -258,6 +258,7 @@ public:
         @param ml The location to move the tempo line to.
     */
     virtual void move_tempo_line(ImoId scoreId, MeasureLocator ml);
+    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */

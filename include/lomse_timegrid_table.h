@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,9 +48,22 @@ typedef struct
 TimeGridTableEntry;
 
 //---------------------------------------------------------------------------------------
-//TimeGridTable:
-//  A table with occupied times and durations, and connecting time with position
-//---------------------------------------------------------------------------------------
+/** %TimeGridTable object is responsible for storing and managing a table with
+    the relation timepos <-> position for all occupied times in the score.
+
+    The table is, in practice, split in several %TimeGridTable objects, and there is
+    one %TimeGridTable object stored in each GmoBoxSystem object, to contain and
+    manage the timepos <-> position for each system.
+
+    The recorded positions are for the center of note heads or rests. The last position
+    is for the barline (if exists).
+
+    This object is responsible for supplying all valid timepos and their positions
+    so that other objects could, for instance:
+        a) Determine the timepos to assign to a mouse click in a certain position.
+        b) Draw a grid of valid timepos
+        c) To determine the position for a beat.
+*/
 class TimeGridTable
 {
 protected:
@@ -58,6 +71,7 @@ protected:
 
 public:
     TimeGridTable();
+    ///Destructor
     ~TimeGridTable();
 
     //creation
@@ -66,6 +80,7 @@ public:
 
     //info
     inline int get_size() { return (int)m_PosTimes.size(); }
+    TimeUnits end_time();
 
     //access to an entry values
     inline TimeUnits get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
@@ -76,6 +91,9 @@ public:
 
     //access by position
     TimeUnits get_time_for_position(LUnits uxPos);
+
+    //access by time
+    LUnits get_x_for_time(TimeUnits timepos);
 
     //debug
     string dump();

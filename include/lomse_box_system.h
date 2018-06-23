@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,6 +63,8 @@ public:
     //grid table: xPositions/timepos
     inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
     inline TimeGridTable* get_time_grid_table() { return m_pGridTable; }
+    TimeUnits end_time();
+    LUnits get_x_for_time(TimeUnits timepos);
 
 	//miscellaneous info
     GmoShapeStaff* get_staff_shape(int absStaff);

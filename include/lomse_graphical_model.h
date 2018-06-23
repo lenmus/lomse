@@ -180,6 +180,7 @@ public:
 
     //active and pointed elements
     int get_system_for(ImoId scoreId, int instr, int measure, TimeUnits time);
+    int get_system_for(ImoId scoreId, TimeUnits timepos);
     GmoBoxSystem* get_system_box(int iSystem);
 
     //tests

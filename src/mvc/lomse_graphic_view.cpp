@@ -866,15 +866,34 @@ void GraphicView::move_tempo_line(ImoId scoreId, MeasureLocator ml)
         return;
 
     int iSystem = pGModel->get_system_for(scoreId, ml.iInstr, ml.iMeasure,
-                                            ml.location);
-//    GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
+                                          ml.location);
+    //TODO
+//    if (iSystem > 0)
+//    {
+//        GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
+//        LUnits xPos = pBoxSystem->get_x_for_time(??????????);
 //
-//    //determine x position based on TimeGridTable
-//    TimeGridTable* pTimeGrid = pBoxSystem->get_time_grid_table();
-//    bounds.x = pTimeGrid->get_x_for_time(time);
-//
-//    m_pTempoLine->set_visible(true);
-//    m_pTempoLine->move_to(pShape, pBoxSystem);
+//        m_pTempoLine->set_visible(true);
+//        m_pTempoLine->move_to(xPos, pBoxSystem);
+//    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::move_tempo_line(ImoId scoreId, TimeUnits timepos)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return;
+
+    int iSystem = pGModel->get_system_for(scoreId, timepos);
+    if (iSystem > 0)
+    {
+        GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
+        LUnits xPos = pBoxSystem->get_x_for_time(timepos);
+
+        m_pTempoLine->set_visible(true);
+        m_pTempoLine->move_to(xPos, pBoxSystem);
+    }
 }
 
 //---------------------------------------------------------------------------------------

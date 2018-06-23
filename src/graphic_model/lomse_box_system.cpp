@@ -138,5 +138,17 @@ int GmoBoxSystem::nearest_staff_to_point(LUnits y)
     return maxStaff-1;
 }
 
+//---------------------------------------------------------------------------------------
+TimeUnits GmoBoxSystem::end_time()
+{
+    return  m_pGridTable->end_time();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoBoxSystem::get_x_for_time(TimeUnits timepos)
+{
+    return m_pGridTable->get_x_for_time(timepos);
+}
+
 
 }  //namespace lomse

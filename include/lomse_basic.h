@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -318,7 +318,7 @@ struct MeasureLocator
     TimeUnits location;     //TimeUnits from start of measure
 
     MeasureLocator() : iInstr(0), iMeasure(0), location(0.0) {}
-    MeasureLocator(int i, int m, int l) : iInstr(i), iMeasure(m), location(l) {}
+    MeasureLocator(int i, int m, TimeUnits l) : iInstr(i), iMeasure(m), location(l) {}
 
 };
 
