@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -147,12 +147,12 @@ Inheritance diagram for EventPlayCtrl:</div>
 <div class="line">    ...</div>
 <div class="line">}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> DocumentWindow::wrapper_play_score(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="line"><span class="keywordtype">void</span> DocumentWindow::wrapper_play_score(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keyword">static_cast&lt;</span>DocumentWindow*<span class="keyword">&gt;</span>(pThis)-&gt;on_play_score(pEvent);</div>
 <div class="line">}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> DocumentWindow::on_play_score(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="line"><span class="keywordtype">void</span> DocumentWindow::on_play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">switch</span> (pEvent-&gt;get_event_type())</div>
 <div class="line">    {</div>
@@ -171,31 +171,31 @@ Inheritance diagram for EventPlayCtrl:</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div>
 <div class="line"></div>
-<div class="line">        <a class="code" href="group__typedefs.html#gac2ffab95dd1ac6d2d5dff62c5ead5c42">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div>
+<div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div>
 <div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a5c96615117cca5bfd3b8490efb0645dc">get_score</a>();</div>
-<div class="line">        ScorePlayer* pPlayer  = m_appScope.get_score_player();</div>
+<div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div>
 <div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div>
 <div class="line"></div>
-<div class="line">        pPlayer-&gt;load_score(pScore, pEv-&gt;get_player());</div>
+<div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, pEv-&gt;get_player());</div>
 <div class="line"></div>
 <div class="line">        <span class="comment">//initialize with default options</span></div>
 <div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div>
 <div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div>
 <div class="line"></div>
-<div class="line">        pPlayer-&gt;play(fVisualTracking, nMM, spInteractor.get());</div>
+<div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> DocumentWindow::play_stop()</div>
 <div class="line">{</div>
-<div class="line">    ScorePlayer* pPlayer  = m_appScope.get_score_player();</div>
-<div class="line">    pPlayer-&gt;stop();</div>
+<div class="line">    <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div>
+<div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">stop</a>();</div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
@@ -206,13 +206,13 @@ Inheritance diagram for EventPlayCtrl:</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> DocumentWindow::play_pause()</div>
 <div class="line">{</div>
-<div class="line">    ScorePlayer* pPlayer  = m_appScope.get_score_player();</div>
-<div class="line">    pPlayer-&gt;pause();</div>
+<div class="line">    <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div>
+<div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#ae619442884736eafe2734dcf0301875b">pause</a>();</div>
 <div class="line">}</div>
 </div><!-- fragment --> </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a414ca70ecc0379c30e52579f83500c90"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayCtrl.html#a414ca70ecc0379c30e52579f83500c90">EventPlayCtrl</a> (<a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> evType, <a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a> wpInteractor, WpDocument wpDoc, ImoScore *pScore, PlayerGui *pPlayer)</td></tr>
+<tr class="memitem:a414ca70ecc0379c30e52579f83500c90"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayCtrl.html#a414ca70ecc0379c30e52579f83500c90">EventPlayCtrl</a> (<a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> evType, <a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a> wpInteractor, WpDocument wpDoc, ImoScore *pScore, PlayerGui *pPlayer)</td></tr>
 <tr class="separator:a414ca70ecc0379c30e52579f83500c90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c96615117cca5bfd3b8490efb0645dc"><td class="memItemLeft" align="right" valign="top">ImoScore *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayCtrl.html#a5c96615117cca5bfd3b8490efb0645dc">get_score</a> () const </td></tr>
 <tr class="separator:a5c96615117cca5bfd3b8490efb0645dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,7 +221,7 @@ Public Member Functions</h2></td></tr>
 <tr class="inherit_header pub_methods_classEventAction"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventAction')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventAction.html">EventAction</a></td></tr>
 <tr class="memitem:ae6a6a992ce24a5244b5e7b9a7adab9fa inherit pub_methods_classEventAction"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventAction.html#ae6a6a992ce24a5244b5e7b9a7adab9fa">~EventAction</a> ()</td></tr>
 <tr class="separator:ae6a6a992ce24a5244b5e7b9a7adab9fa inherit pub_methods_classEventAction"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba593872b029fcf3dd56d9442f7ef399 inherit pub_methods_classEventAction"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventAction.html#aba593872b029fcf3dd56d9442f7ef399">get_interactor</a> ()</td></tr>
+<tr class="memitem:aba593872b029fcf3dd56d9442f7ef399 inherit pub_methods_classEventAction"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventAction.html#aba593872b029fcf3dd56d9442f7ef399">get_interactor</a> ()</td></tr>
 <tr class="separator:aba593872b029fcf3dd56d9442f7ef399 inherit pub_methods_classEventAction"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c2e8045d57cabd3e646f9a6eb3bec18 inherit pub_methods_classEventAction"><td class="memItemLeft" align="right" valign="top">WpDocument&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventAction.html#a1c2e8045d57cabd3e646f9a6eb3bec18">get_document</a> ()</td></tr>
 <tr class="separator:a1c2e8045d57cabd3e646f9a6eb3bec18 inherit pub_methods_classEventAction"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -273,9 +273,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab436c81c0fbdd1e53f0338935c7cb869"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_tracking_event</b> ()</td></tr>
+<tr class="separator:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
 <tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,7 +300,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td>
           <td class="paramname"><em>wpInteractor</em>, </td>
         </tr>
         <tr>
@@ -395,7 +395,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventPlayCtrl.html">EventPlayCtrl</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -48,7 +48,7 @@ var classDocument =
     [ "get_pointer_to_control", "classDocument.html#a03a925f3dc89b38d1d1f8928bc213ca5", null ],
     [ "get_pointer_to_imo", "classDocument.html#a56ed5987a3f4a3d85438c2d3c962e00c", null ],
     [ "get_scope", "classDocument.html#a2ec18992351a28c8c3924c8b30baf40c", null ],
-    [ "get_shared_ptr_from_this", "classDocument.html#a152d0191777eb23130f885745464dbad", null ],
+    [ "get_shared_ptr_from_this", "classDocument.html#a8c3cdebeba1affc24e85651536b458df", null ],
     [ "get_style_or_default", "classDocument.html#aea742d98d0b104e7975cc881fd6483a1", null ],
     [ "get_styles", "classDocument.html#a2d6e21d12cdf9fb52e3e035300909347", null ],
     [ "get_version", "classDocument.html#ac5a47af90f14d70e7185622d9b56d72a", null ],

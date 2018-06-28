@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -153,13 +153,13 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keyword">class </span>LibraryScope;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">class </span><a class="code" href="classDocument.html">Document</a>;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keyword">typedef</span> SharedPtr&lt;Document&gt;     SpDocument;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keyword">typedef</span> WeakPtr&lt;Document&gt;       WpDocument;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keyword">typedef</span> std::shared_ptr&lt;Document&gt;     SpDocument;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keyword">typedef</span> std::weak_ptr&lt;Document&gt;       WpDocument;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">   56</a></span>&#160;<span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a>;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">typedef</span> SharedPtr&lt;Interactor&gt;   <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>;</div>
+<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="group__typedefs.html#gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1">   56</a></span>&#160;<span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a>;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="keyword">typedef</span> std::shared_ptr&lt;Interactor&gt;   <a class="code" href="group__typedefs.html#gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1">SpInteractor</a>;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">   67</a></span>&#160;<span class="keyword">typedef</span> WeakPtr&lt;Interactor&gt;     <a class="code" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>;</div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">   67</a></span>&#160;<span class="keyword">typedef</span> std::weak_ptr&lt;Interactor&gt;     <a class="code" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>;</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
@@ -270,15 +270,15 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;</div>
 <div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;<span class="preprocessor">#endif      //__LOMSE_PRESENTER_H__</span></div>
 <div class="ttc" id="classPresenter_html_aedd747e959be4ba2ba249f9078623ac9"><div class="ttname"><a href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">Presenter::get_document_raw_ptr</a></div><div class="ttdeci">Document * get_document_raw_ptr()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:156</div></div>
-<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:140</div></div>
-<div class="ttc" id="group__typedefs_html_ga1da4093c649c02ee8666c17353aa3602"><div class="ttname"><a href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a></div><div class="ttdeci">WeakPtr&lt; Interactor &gt; WpInteractor</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:67</div></div>
+<div class="ttc" id="group__typedefs_html_gaf1d748d59c2da4e6eb1dfcf60df340f4"><div class="ttname"><a href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a></div><div class="ttdeci">std::weak_ptr&lt; Interactor &gt; WpInteractor</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:67</div></div>
+<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:167</div></div>
 <div class="ttc" id="classPresenter_html"><div class="ttname"><a href="classPresenter.html">Presenter</a></div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:109</div></div>
 <div class="ttc" id="classPresenter_html_a8eb9209a170a3d2877d4a1b763236d9d"><div class="ttname"><a href="classPresenter.html#a8eb9209a170a3d2877d4a1b763236d9d">Presenter::get_num_interactors</a></div><div class="ttdeci">int get_num_interactors()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:131</div></div>
-<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdoc">Keeps the stack of executed commands and performs undo/redo. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:291</div></div>
+<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdoc">Keeps the stack of executed commands and performs undo/redo. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:303</div></div>
+<div class="ttc" id="group__typedefs_html_gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1"><div class="ttname"><a href="group__typedefs.html#gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1">SpInteractor</a></div><div class="ttdeci">std::shared_ptr&lt; Interactor &gt; SpInteractor</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:56</div></div>
 <div class="ttc" id="classDocument_html"><div class="ttname"><a href="classDocument.html">Document</a></div><div class="ttdef"><b>Definition:</b> lomse_document.h:113</div></div>
 <div class="ttc" id="classPresenter_html_ae3bea16ee1a9c3194525d433ec56cc9f"><div class="ttname"><a href="classPresenter.html#ae3bea16ee1a9c3194525d433ec56cc9f">Presenter::get_user_data</a></div><div class="ttdeci">void * get_user_data()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:176</div></div>
 <div class="ttc" id="classPresenter_html_acd6f651583829e92d4d2d3566c94adad"><div class="ttname"><a href="classPresenter.html#acd6f651583829e92d4d2d3566c94adad">Presenter::set_user_data</a></div><div class="ttdeci">void set_user_data(void *pData)</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:170</div></div>
-<div class="ttc" id="group__typedefs_html_ga4d5b8da041fe9443104697bc6444363e"><div class="ttname"><a href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a></div><div class="ttdeci">SharedPtr&lt; Interactor &gt; SpInteractor</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:56</div></div>
 <div class="ttc" id="classDocument_html_a0af272723339cb2f42e33aeadeb55b24ac888097c4afab75aec8b5a6e53373a06"><div class="ttname"><a href="classDocument.html#a0af272723339cb2f42e33aeadeb55b24ac888097c4afab75aec8b5a6e53373a06">Document::k_format_lmd</a></div><div class="ttdoc">LenMus Document (LMD, XML syntax) </div><div class="ttdef"><b>Definition:</b> lomse_document.h:140</div></div>
 <div class="ttc" id="classPresenter_html_a1d7ee74efa842fc99274ee0f6abb5ba8"><div class="ttname"><a href="classPresenter.html#a1d7ee74efa842fc99274ee0f6abb5ba8">Presenter::get_document_shared_ptr</a></div><div class="ttdeci">SpDocument get_document_shared_ptr()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:150</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -287,7 +287,7 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><b>lomse_presenter.h</b></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

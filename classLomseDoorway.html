@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -130,7 +130,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3c49065371b1185e0d04b690c1cb6b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01e4f12682054e5a96afa236501ac80f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a> (int pixel_format, int ppi, bool reverse_y_axis, ostream &amp;reporter=cout)</td></tr>
 <tr class="separator:a01e4f12682054e5a96afa236501ac80f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a>))</td></tr>
+<tr class="memitem:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a>))</td></tr>
 <tr class="separator:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a747d3488b15dfda96c5f7477a28525da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">set_request_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="classRequest.html">Request</a> *))</td></tr>
 <tr class="separator:a747d3488b15dfda96c5f7477a28525da"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -138,7 +138,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a080627915c615fa809fc0d78561ac9ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27e0f90ab48d79d5ad464e1461411579"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579">set_global_metronome_and_replace_local</a> (Metronome *pMtr)</td></tr>
 <tr class="separator:a27e0f90ab48d79d5ad464e1461411579"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50dbce970b84945868887966a0708634"><td class="memItemLeft" align="right" valign="top">ScorePlayer *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a> (MidiServerBase *pSoundServer)</td></tr>
+<tr class="memitem:a50dbce970b84945868887966a0708634"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classScorePlayer.html">ScorePlayer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a> (<a class="el" href="classMidiServerBase.html">MidiServerBase</a> *pSoundServer)</td></tr>
 <tr class="separator:a50dbce970b84945868887966a0708634"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b00546f591c2041df5ed86ea0681948"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classPresenter.html">Presenter</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a> (int viewType)</td></tr>
 <tr class="separator:a1b00546f591c2041df5ed86ea0681948"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -192,9 +192,9 @@ Public Member Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ScorePlayer* LomseDoorway::create_score_player </td>
+          <td class="memname"><a class="el" href="classScorePlayer.html">ScorePlayer</a>* LomseDoorway::create_score_player </td>
           <td>(</td>
-          <td class="paramtype">MidiServerBase *&#160;</td>
+          <td class="paramtype"><a class="el" href="classMidiServerBase.html">MidiServerBase</a> *&#160;</td>
           <td class="paramname"><em>pSoundServer</em></td><td>)</td>
           <td></td>
         </tr>
@@ -203,7 +203,7 @@ Public Member Functions</h2></td></tr>
 <p>Method <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player()</a> informs Lomse about the MIDI server that will be used for scores play back.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pSoundServer</td><td>Pointer to an instance of a class derived from MidiServerBase. Once this method is invoked, Lomse will route all midi events originated in score play back to this object.</td></tr>
+    <tr><td class="paramname">pSoundServer</td><td>Pointer to an instance of a class derived from <a class="el" href="classMidiServerBase.html">MidiServerBase</a>. Once this method is invoked, Lomse will route all midi events originated in score play back to this object.</td></tr>
   </table>
   </dd>
 </dl>
@@ -668,7 +668,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>This method is used for informing Lomse about the metronome control to use to determine tempo in playback. By default, Lomse takes metronome settings from ?. But your application can specify another metronome control, normally a global metronome for the all your application.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Clarify the purpose and usage of this method</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Clarify the purpose and usage of this method</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pMtr</td><td>Pointer to the Metronome object to be used. </td></tr>
@@ -691,7 +691,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void(*)(void *, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a>)&#160;</td>
+          <td class="paramtype">void(*)(void *, <a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a>)&#160;</td>
           <td class="paramname"><em>pt2Func</em>&#160;</td>
         </tr>
         <tr>
@@ -710,19 +710,19 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <p>See <a class="el" href="page-callbacks.html">How Lomse callbacks work</a>.</p>
-<p>For example, to prepare our application for handling <em>score</em> <em>highlight</em> events we could define a callback method:</p>
+<p>For example, to prepare our application for handling visual tracking events during score playback we could define a callback method:</p>
 <div class="fragment"><div class="line"><span class="keyword">class </span>MyApp</div>
 <div class="line">{</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    <span class="comment">//callback wrapper</span></div>
-<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_event_handler(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_for_lomse_event_handler(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keyword">static_cast&lt;</span>MyApp*<span class="keyword">&gt;</span>(pThis)-&gt;on_lomse_event(pEvent);</div>
 <div class="line">    }</div>
 <div class="line">    ...</div>
 <div class="line"></div>
 <div class="line">protected:</div>
-<div class="line">    <span class="keywordtype">void</span> on_lomse_event(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent);</div>
+<div class="line">    <span class="keywordtype">void</span> on_lomse_event(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent);</div>
 <div class="line">    ...</div>
 <div class="line">};</div>
 </div><!-- fragment --><p>And inform lomse about it. We do it at lomse initialization:</p>
@@ -808,7 +808,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

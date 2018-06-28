@@ -115,7 +115,7 @@ var group__enumerations =
       [ "k_do_play_score_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398", null ],
       [ "k_pause_score_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a", null ],
       [ "k_stop_playback_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa", null ],
-      [ "k_highlight_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017", null ],
+      [ "k_tracking_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656dabb75be7cf08ecbc2bfbfa90047239347", null ],
       [ "k_update_viewport_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51", null ],
       [ "k_end_of_playback_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daddaeb68131c02cdfa6b88deaa7c6a89b", null ]
     ] ],
@@ -378,5 +378,11 @@ var group__enumerations =
       [ "k_technical_handbell", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aad657cff681da0fb103237a1bcbff3002", null ],
       [ "k_max_technical", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aa58d72c835e5bd9d9b5ab22996e1babe1", null ]
     ] ],
-    [ "EViewType", "group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea", null ]
+    [ "EViewType", "group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea", null ],
+    [ "EVisualTrackingMode", "group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9", [
+      [ "k_tracking_none", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a5a9a08498fdc5cac9b5b32fc56e8b57e", null ],
+      [ "k_tracking_highlight_notes", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a79da3a4bf6cc26fc683d2085e559a780", null ],
+      [ "k_tracking_tempo_line", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497", null ],
+      [ "k_tracking_tempo_block", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ab97b0b9ccf8cfc9c1d6aa0b2a2f26294", null ]
+    ] ]
 ];

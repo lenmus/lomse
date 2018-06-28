@@ -2,11 +2,12 @@ var searchData=
 [
   ['init_5flibrary',['init_library',['../classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f',1,'LomseDoorway']]],
   ['insert_5fblock_5flevel_5fobj',['insert_block_level_obj',['../classDocument.html#a2d917f0c4bd82ff944a27f0d858e8d45',1,'Document']]],
-  ['is_5fcomposite',['is_composite',['../classDocCommand.html#ab5d4341275844b9a597064effc09442b',1,'DocCommand::is_composite()'],['../classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd',1,'DocCmdSimple::is_composite()'],['../classDocCmdComposite.html#aa9962cb51059cd8999dd7f823ce60c81',1,'DocCmdComposite::is_composite()']]],
+  ['is_5fcomposite',['is_composite',['../classDocCommand.html#ab5d4341275844b9a597064effc09442b',1,'DocCommand::is_composite()'],['../classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd',1,'DocCmdSimple::is_composite()'],['../classDocCmdComposite.html#a3a91a0c793395377a4ec95e9d3273ba4',1,'DocCmdComposite::is_composite()']]],
   ['is_5fdirty',['is_dirty',['../classDocument.html#a89876730919eaea7a497fcfda63e83ec',1,'Document']]],
   ['is_5fdocument_5feditable',['is_document_editable',['../classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b',1,'Interactor']]],
   ['is_5feditable',['is_editable',['../classDocument.html#af6fa50c1bc66a6cc0516af29fbece700',1,'Document']]],
   ['is_5fnatural_5fnote_5ffor',['is_natural_note_for',['../classMidiPitch.html#ab883bf5b7182b75b78980b7db0d79f5c',1,'MidiPitch::is_natural_note_for()'],['../classFPitch.html#a187fe6a750dabc9dd1e824b6a00790e6',1,'FPitch::is_natural_note_for()']]],
+  ['is_5fplaying',['is_playing',['../classScorePlayer.html#ae0cce1824911d20d139117ea0f685a13',1,'ScorePlayer']]],
   ['is_5frecordable',['is_recordable',['../classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf',1,'DocCommand']]],
   ['is_5fredo_5fpossible',['is_redo_possible',['../classDocCommandExecuter.html#a4b0e2a24ffe21e2b4ec5440543d10127',1,'DocCommandExecuter']]],
   ['is_5freversible',['is_reversible',['../classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d',1,'DocCommand']]],

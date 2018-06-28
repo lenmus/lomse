@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -146,7 +146,7 @@ Events and how are they notified</h1>
 <li>All events created during playback in the Lomse sound thread:<ul>
 <li><a class="el" href="classEventUpdateViewport.html">EventUpdateViewport</a> (type <code>k_update_viewport_event</code>) - Ask user app to update viewport origin using provided coordinates.</li>
 <li><a class="el" href="classEventEndOfPlayback.html">EventEndOfPlayback</a> (type <code>k_end_of_playback_event</code>) - End of playback.</li>
-<li><a class="el" href="classEventScoreHighlight.html">EventScoreHighlight</a> (type <code>k_highlight_event</code>) - Event containing mainly a list of notes/rests to highlight or unhighlight</li>
+<li>EventScoreHighlight (type <code>k_highlight_event</code>) - Event containing mainly a list of notes/rests to highlight or unhighlight</li>
 </ul>
 </li>
 <li>Mouse clicks on links (ImoLink objects):<ul>
@@ -205,10 +205,10 @@ How to register an event handler</h1>
 </ul>
 <p>The parameters for the <code>add_event_handler()</code> method depends on the type of handler method. There are three possibilities:</p>
 <p>a) The handler is a C function: </p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span> (*pt2Func)(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event) );</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span> (*pt2Func)(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event) );</div>
 </div><!-- fragment --><p>b) The handler is a C++ method: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <span class="keywordtype">void</span>* pThis,</div>
-<div class="line">                 <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>* pObj, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event) );</div>
+<div class="line">                 <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>* pObj, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event) );</div>
 </div><!-- fragment --><p>c) The handler is a C++ object derived form lomse::EventHandler: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> add_handler(<span class="keywordtype">int</span> eventType, <a class="code" href="classEventHandler.html">EventHandler</a>* pHandler);</div>
 </div><!-- fragment --><p>The parameters for these methods are:</p>
@@ -297,7 +297,7 @@ Handling requests</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

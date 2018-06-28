@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -134,7 +134,7 @@ Inheritance diagram for EventUpdateViewport:</div>
 update" event, place it on the application events loop, and return control to Lomse. Later, when the application event is processed, the user application should invoke method <code>Interactor.new_viewport(xPos, yPos)</code> and, if necessary, update any GUI objects, such as scrollbars or other.</p>
 <p><b>Example</b></p>
 <p>For instance, in an application written using the wxWidgets framework you could have a global method for receiving all Lomse events, convert them in application events, and return control to Lomse:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> MainFrame::on_lomse_event(<a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> MainFrame::on_lomse_event(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">{</div>
 <div class="line">    DocumentWindow* pCanvas = get_active_document_window();</div>
 <div class="line"></div>
@@ -146,7 +146,7 @@ update" event, place it on the application events loop, and return control to Lo
 <div class="line">            <span class="keywordflow">if</span> (pCanvas)</div>
 <div class="line">            {</div>
 <div class="line">                <span class="comment">//generate update viewport event</span></div>
-<div class="line">                <a class="code" href="group__typedefs.html#ga88ca7b51aaf310e9a22a82e2a6639742">SpEventUpdateViewport</a> pEv(</div>
+<div class="line">                <a class="code" href="group__typedefs.html#gaff7479a518c7017d5be9b4fdc1e33af3">SpEventUpdateViewport</a> pEv(</div>
 <div class="line">                    static_pointer_cast&lt;EventUpdateViewport&gt;(pEvent) );</div>
 <div class="line">                MyUpdateViewportEvent event(pEv);</div>
 <div class="line">                ::wxPostEvent(pCanvas, event);</div>
@@ -157,7 +157,7 @@ update" event, place it on the application events loop, and return control to Lo
 </div><!-- fragment --><p>Later, your application should just process the application event as convenient. The recommended action is to use the <a class="el" href="classInteractor.html">Interactor</a> for requesting to change the viewport to the new origin provided by the Lomse event. This will generate later an <a class="el" href="classEventPaint.html">EventPaint</a> for updating the View. In addition your application should to update scrollbars and other information or widgets used by the application. For instance:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::on_update_viewport(MyUpdateViewportEvent&amp; event)</div>
 <div class="line">{</div>
-<div class="line">    <a class="code" href="group__typedefs.html#ga88ca7b51aaf310e9a22a82e2a6639742">SpEventUpdateViewport</a> pEv = <span class="keyword">event</span>.get_lomse_event();</div>
+<div class="line">    <a class="code" href="group__typedefs.html#gaff7479a518c7017d5be9b4fdc1e33af3">SpEventUpdateViewport</a> pEv = <span class="keyword">event</span>.get_lomse_event();</div>
 <div class="line">    WpInteractor wpInteractor = pEv-&gt;get_interactor();</div>
 <div class="line">    <span class="keywordtype">int</span> xPos = pEv-&gt;get_new_viewport_x();</div>
 <div class="line">    <span class="keywordtype">int</span> yPos = pEv-&gt;get_new_viewport_y();</div>
@@ -173,7 +173,7 @@ update" event, place it on the application events loop, and return control to Lo
 </div><!-- fragment --> </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1c5259503f469af796d9fc6934cdbdd4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventUpdateViewport.html#a1c5259503f469af796d9fc6934cdbdd4">EventUpdateViewport</a> (<a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a> wpInteractor, Pixels x, Pixels y)</td></tr>
+<tr class="memitem:a1c5259503f469af796d9fc6934cdbdd4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventUpdateViewport.html#a1c5259503f469af796d9fc6934cdbdd4">EventUpdateViewport</a> (<a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a> wpInteractor, Pixels x, Pixels y)</td></tr>
 <tr class="separator:a1c5259503f469af796d9fc6934cdbdd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae899f66b38f5be080cf98f1b2c746a20"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventUpdateViewport.html#ae899f66b38f5be080cf98f1b2c746a20">~EventUpdateViewport</a> ()</td></tr>
 <tr class="separator:ae899f66b38f5be080cf98f1b2c746a20"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,7 +186,7 @@ Public Member Functions</h2></td></tr>
 <tr class="inherit_header pub_methods_classEventPlayback"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventPlayback')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventPlayback.html">EventPlayback</a></td></tr>
 <tr class="memitem:ad09dcb7b8c4d0ec4001533e8c8386a20 inherit pub_methods_classEventPlayback"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#ad09dcb7b8c4d0ec4001533e8c8386a20">~EventPlayback</a> ()</td></tr>
 <tr class="separator:ad09dcb7b8c4d0ec4001533e8c8386a20 inherit pub_methods_classEventPlayback"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ef9125d12e94a6ed4cfdbc6a5a38402 inherit pub_methods_classEventPlayback"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#a7ef9125d12e94a6ed4cfdbc6a5a38402">get_interactor</a> ()</td></tr>
+<tr class="memitem:a7ef9125d12e94a6ed4cfdbc6a5a38402 inherit pub_methods_classEventPlayback"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#a7ef9125d12e94a6ed4cfdbc6a5a38402">get_interactor</a> ()</td></tr>
 <tr class="separator:a7ef9125d12e94a6ed4cfdbc6a5a38402 inherit pub_methods_classEventPlayback"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventInfo"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventInfo')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventInfo.html">EventInfo</a></td></tr>
 <tr class="memitem:a0334d24f1097988d5320a90309815104 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a0334d24f1097988d5320a90309815104">~EventInfo</a> ()</td></tr>
@@ -234,9 +234,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab436c81c0fbdd1e53f0338935c7cb869"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_tracking_event</b> ()</td></tr>
+<tr class="separator:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
 <tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -255,7 +255,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
         <tr>
           <td class="memname">EventUpdateViewport::EventUpdateViewport </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td>
           <td class="paramname"><em>wpInteractor</em>, </td>
         </tr>
         <tr>
@@ -402,7 +402,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventUpdateViewport.html">EventUpdateViewport</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

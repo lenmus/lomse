@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Inheritance diagram for EventPaint:</div>
 <div class="line"><span class="keyword">public</span>:</div>
 <div class="line">    ...</div>
 <div class="line">    <span class="comment">//callback wrappers</span></div>
-<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_update_window(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent);</div>
+<div class="line">    <span class="keyword">static</span> <span class="keywordtype">void</span> wrapper_update_window(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent);</div>
 <div class="line">    ...</div>
 <div class="line">};</div>
 <div class="line"></div>
@@ -153,11 +153,11 @@ Inheritance diagram for EventPaint:</div>
 <div class="line">    ...</div>
 <div class="line">}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> DocumentWindow::wrapper_update_window(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent)</div>
+<div class="line"><span class="keywordtype">void</span> DocumentWindow::wrapper_update_window(<span class="keywordtype">void</span>* pThis, <a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">if</span> (pEvent-&gt;get_event_type() == <a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>)</div>
 <div class="line">    {</div>
-<div class="line">        <a class="code" href="group__typedefs.html#gaa814c308416e1dc4480e760c0ec291ae">SpEventPaint</a> pEv( static_pointer_cast&lt;EventPaint&gt;(pEvent) );</div>
+<div class="line">        <a class="code" href="group__typedefs.html#gaa26d9b2a22e2723ae27f9029a14f1822">SpEventPaint</a> pEv( static_pointer_cast&lt;EventPaint&gt;(pEvent) );</div>
 <div class="line">        <span class="keyword">static_cast&lt;</span>DocumentWindow*<span class="keyword">&gt;</span>(pThis)-&gt;update_window(pEv-&gt;get_damaged_rectangle());</div>
 <div class="line">    }</div>
 <div class="line">}</div>
@@ -178,11 +178,11 @@ Inheritance diagram for EventPaint:</div>
 </div><!-- fragment --> </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab20187c151b22b7bda952795209991c9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#ab20187c151b22b7bda952795209991c9">EventPaint</a> (<a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a> wpInteractor, VRect damagedRectangle)</td></tr>
+<tr class="memitem:ab20187c151b22b7bda952795209991c9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#ab20187c151b22b7bda952795209991c9">EventPaint</a> (<a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a> wpInteractor, VRect damagedRectangle)</td></tr>
 <tr class="separator:ab20187c151b22b7bda952795209991c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af832e3f40a3b04fb0648bb0b00ce4a9c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#af832e3f40a3b04fb0648bb0b00ce4a9c">~EventPaint</a> ()</td></tr>
 <tr class="separator:af832e3f40a3b04fb0648bb0b00ce4a9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae31e10e7d8b903890743c7ae4242eb16"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#ae31e10e7d8b903890743c7ae4242eb16">get_interactor</a> ()</td></tr>
+<tr class="memitem:ae31e10e7d8b903890743c7ae4242eb16"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#ae31e10e7d8b903890743c7ae4242eb16">get_interactor</a> ()</td></tr>
 <tr class="separator:ae31e10e7d8b903890743c7ae4242eb16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa42b2e4985ee7fe0c5873abd52bef3fd"><td class="memItemLeft" align="right" valign="top">VRect&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPaint.html#aa42b2e4985ee7fe0c5873abd52bef3fd">get_damaged_rectangle</a> ()</td></tr>
 <tr class="separator:aa42b2e4985ee7fe0c5873abd52bef3fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -232,9 +232,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab436c81c0fbdd1e53f0338935c7cb869"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_tracking_event</b> ()</td></tr>
+<tr class="separator:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
 <tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -253,7 +253,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
         <tr>
           <td class="memname">EventPaint::EventPaint </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td>
           <td class="paramname"><em>wpInteractor</em>, </td>
         </tr>
         <tr>
@@ -337,7 +337,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a> EventPaint::get_interactor </td>
+          <td class="memname"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a> EventPaint::get_interactor </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -359,7 +359,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventPaint.html">EventPaint</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

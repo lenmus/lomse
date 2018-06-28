@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -126,6 +126,8 @@ Enumerations</h2></td></tr>
 <tr class="separator:gadd4d321bb9cc51030786d53d76b8b0bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a> </td></tr>
 <tr class="separator:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5428193fc11653b86ce227a4c89bb2b9"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9">EVisualTrackingMode</a> </td></tr>
+<tr class="separator:ga5428193fc11653b86ce227a4c89bb2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga314c59562f7d4c993a0e5330fa59df50"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga314c59562f7d4c993a0e5330fa59df50">EPlacement</a> </td></tr>
 <tr class="separator:ga314c59562f7d4c993a0e5330fa59df50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf83282bb42049f07a2a478ed4ce27da7"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gaf83282bb42049f07a2a478ed4ce27da7">EOrientation</a> </td></tr>
@@ -601,7 +603,7 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa"></a>k_stop_playback_event</em>&#160;</td><td class="fielddoc">
 <p><a class="el" href="classRequest.html">Request</a> to stop playback. </p>
 </td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da702967e44ed27f33f954de7a7abcc017"></a>k_highlight_event</em>&#160;</td><td class="fielddoc">
+<tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656dabb75be7cf08ecbc2bfbfa90047239347"></a>k_tracking_event</em>&#160;</td><td class="fielddoc">
 <p>Wrapper event containing a list of real events. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51"></a>k_update_viewport_event</em>&#160;</td><td class="fielddoc">
@@ -1584,12 +1586,40 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ga5428193fc11653b86ce227a4c89bb2b9"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9">EVisualTrackingMode</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the valid modes for visual tracking during playback.</p>
+<p>#include &lt;<a class="el" href="lomse__interactor_8h_source.html">lomse_interactor.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="gga5428193fc11653b86ce227a4c89bb2b9a5a9a08498fdc5cac9b5b32fc56e8b57e"></a>k_tracking_none</em>&#160;</td><td class="fielddoc">
+<p>Do not add any visual tracking effect. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga5428193fc11653b86ce227a4c89bb2b9a79da3a4bf6cc26fc683d2085e559a780"></a>k_tracking_highlight_notes</em>&#160;</td><td class="fielddoc">
+<p>Highlight the notes and rest being played back. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497"></a>k_tracking_tempo_line</em>&#160;</td><td class="fielddoc">
+<p>Display a vertical line at beat start. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga5428193fc11653b86ce227a4c89bb2b9ab97b0b9ccf8cfc9c1d6aa0b2a2f26294"></a>k_tracking_tempo_block</em>&#160;</td><td class="fielddoc">
+<p>Draw a rectangle surrounding all notes/rests in current beat. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

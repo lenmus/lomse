@@ -15,7 +15,6 @@ var searchData=
   ['eeventflag',['EEventFlag',['../group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107',1,'lomse_interactor.h']]],
   ['eeventtype',['EEventType',['../group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d',1,'lomse_events.h']]],
   ['efileformat',['EFileFormat',['../classDocument.html#a0af272723339cb2f42e33aeadeb55b24',1,'Document']]],
-  ['ehighlighttype',['EHighlightType',['../classEventScoreHighlight.html#a806e298256b9f36e7e9cb80d3224c425',1,'EventScoreHighlight']]],
   ['eimoattribute',['EImoAttribute',['../group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029',1,'lomse_im_attributes.h']]],
   ['eimoobjtype',['EImoObjType',['../group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f',1,'lomse_internal_model.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
@@ -37,5 +36,7 @@ var searchData=
   ['esteps',['ESteps',['../group__enumerations.html#gaeae8853f80e4ededd64180f81d0083fb',1,'lomse_pitch.h']]],
   ['etechnical',['ETechnical',['../group__enumerations.html#ga603173cd8f31b8852b951f52043d114a',1,'lomse_internal_model.h']]],
   ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
-  ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]]
+  ['etrackingevent',['ETrackingEvent',['../classEventVisualTracking.html#a62388a1f4bdf67d6146471807251f721',1,'EventVisualTracking']]],
+  ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]],
+  ['evisualtrackingmode',['EVisualTrackingMode',['../group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9',1,'lomse_interactor.h']]]
 ];

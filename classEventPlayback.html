@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -124,8 +124,8 @@ Inheritance diagram for EventPlayback:</div>
   <map id="EventPlayback_map" name="EventPlayback_map">
 <area href="classEventInfo.html" alt="EventInfo" shape="rect" coords="143,0,276,24"/>
 <area href="classEventEndOfPlayback.html" alt="EventEndOfPlayback" shape="rect" coords="0,112,133,136"/>
-<area href="classEventScoreHighlight.html" alt="EventScoreHighlight" shape="rect" coords="143,112,276,136"/>
-<area href="classEventUpdateViewport.html" alt="EventUpdateViewport" shape="rect" coords="286,112,419,136"/>
+<area href="classEventUpdateViewport.html" alt="EventUpdateViewport" shape="rect" coords="143,112,276,136"/>
+<area href="classEventVisualTracking.html" alt="EventVisualTracking" shape="rect" coords="286,112,419,136"/>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -135,7 +135,7 @@ Inheritance diagram for EventPlayback:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ad09dcb7b8c4d0ec4001533e8c8386a20"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#ad09dcb7b8c4d0ec4001533e8c8386a20">~EventPlayback</a> ()</td></tr>
 <tr class="separator:ad09dcb7b8c4d0ec4001533e8c8386a20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ef9125d12e94a6ed4cfdbc6a5a38402"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#a7ef9125d12e94a6ed4cfdbc6a5a38402">get_interactor</a> ()</td></tr>
+<tr class="memitem:a7ef9125d12e94a6ed4cfdbc6a5a38402"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventPlayback.html#a7ef9125d12e94a6ed4cfdbc6a5a38402">get_interactor</a> ()</td></tr>
 <tr class="separator:a7ef9125d12e94a6ed4cfdbc6a5a38402"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classEventInfo"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classEventInfo')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classEventInfo.html">EventInfo</a></td></tr>
 <tr class="memitem:a0334d24f1097988d5320a90309815104 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventInfo.html#a0334d24f1097988d5320a90309815104">~EventInfo</a> ()</td></tr>
@@ -183,9 +183,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab436c81c0fbdd1e53f0338935c7cb869"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_tracking_event</b> ()</td></tr>
+<tr class="separator:ab436c81c0fbdd1e53f0338935c7cb869 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
 <tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361 inherit pub_methods_classEventInfo"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -228,7 +228,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602">WpInteractor</a> EventPlayback::get_interactor </td>
+          <td class="memname"><a class="el" href="group__typedefs.html#gaf1d748d59c2da4e6eb1dfcf60df340f4">WpInteractor</a> EventPlayback::get_interactor </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -250,7 +250,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventPlayback.html">EventPlayback</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

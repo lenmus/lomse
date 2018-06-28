@@ -11,7 +11,7 @@ var searchData=
   ['eventpaint',['EventPaint',['../classEventPaint.html',1,'']]],
   ['eventplayback',['EventPlayback',['../classEventPlayback.html',1,'']]],
   ['eventplayctrl',['EventPlayCtrl',['../classEventPlayCtrl.html',1,'']]],
-  ['eventscorehighlight',['EventScoreHighlight',['../classEventScoreHighlight.html',1,'']]],
   ['eventupdateui',['EventUpdateUI',['../classEventUpdateUI.html',1,'']]],
-  ['eventupdateviewport',['EventUpdateViewport',['../classEventUpdateViewport.html',1,'']]]
+  ['eventupdateviewport',['EventUpdateViewport',['../classEventUpdateViewport.html',1,'']]],
+  ['eventvisualtracking',['EventVisualTracking',['../classEventVisualTracking.html',1,'']]]
 ];

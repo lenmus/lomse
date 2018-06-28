@@ -15,5 +15,6 @@ var searchData=
   ['add_5fstaff_5fobjects',['add_staff_objects',['../classDocument.html#a621039709d6f958cbb2807ac6ecb2705',1,'Document']]],
   ['add_5fstyle',['add_style',['../classDocument.html#a8e0bd11bca9b7133d3e5aeecb68eff86',1,'Document']]],
   ['add_5ftuplet',['add_tuplet',['../classDocument.html#ae0a7e0444bf1a62dd4a76e19cf717016',1,'Document']]],
+  ['all_5fsounds_5foff',['all_sounds_off',['../classMidiServerBase.html#a873f21029420df344a2dd9212ac27c5d',1,'MidiServerBase']]],
   ['append_5fcontent_5fitem',['append_content_item',['../classDocument.html#a9c94b64b944837e73fdc1b8a3daf0948',1,'Document']]]
 ];

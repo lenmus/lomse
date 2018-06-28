@@ -8,6 +8,7 @@ var searchData=
   ['on_5fmouse_5fenter_5fwindow',['on_mouse_enter_window',['../classInteractor.html#a730f04bba76db217ff36512f63600470',1,'Interactor']]],
   ['on_5fmouse_5fleave_5fwindow',['on_mouse_leave_window',['../classInteractor.html#afbfb111029c260532f849362bf3b15f9',1,'Interactor']]],
   ['on_5fmouse_5fmove',['on_mouse_move',['../classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471',1,'Interactor']]],
+  ['on_5fvisual_5ftracking',['on_visual_tracking',['../classInteractor.html#a8a7a86e9ee94e50bc319f9cd02c25902',1,'Interactor']]],
   ['open_5fdocument',['open_document',['../classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e',1,'LomseDoorway::open_document(int viewType, const string &amp;filename, ostream &amp;reporter=cout)'],['../classLomseDoorway.html#a2dad5f6bcce3d56e363d176bfc60f3f9',1,'LomseDoorway::open_document(int viewType, LdpReader &amp;reader, ostream &amp;reporter=cout)']]],
   ['operator_20int',['operator int',['../classDiatonicPitch.html#acd082331431e568eb035b520c261a6be',1,'DiatonicPitch::operator int()'],['../classMidiPitch.html#a12b7bba5f3b4d3c66f0d4784a1e4d45a',1,'MidiPitch::operator int()'],['../classFPitch.html#ad5961a1af9d30102e5316bf9a1802985',1,'FPitch::operator int()']]],
   ['operator_21_3d',['operator!=',['../classDiatonicPitch.html#a9ae3b6872bdc85b82c58a37d7bff5c34',1,'DiatonicPitch::operator!=()'],['../classFPitch.html#a24c9755a2e578125043e2b3881c6d286',1,'FPitch::operator!=()']]],

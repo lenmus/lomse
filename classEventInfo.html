@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -132,8 +132,8 @@ Inheritance diagram for EventInfo:</div>
 <area href="classEventPlayCtrl.html" alt="EventPlayCtrl" shape="rect" coords="324,112,476,136"/>
 <area href="classEventUpdateUI.html" alt="EventUpdateUI" shape="rect" coords="486,112,638,136"/>
 <area href="classEventEndOfPlayback.html" alt="EventEndOfPlayback" shape="rect" coords="648,112,800,136"/>
-<area href="classEventScoreHighlight.html" alt="EventScoreHighlight" shape="rect" coords="810,112,962,136"/>
-<area href="classEventUpdateViewport.html" alt="EventUpdateViewport" shape="rect" coords="972,112,1124,136"/>
+<area href="classEventUpdateViewport.html" alt="EventUpdateViewport" shape="rect" coords="810,112,962,136"/>
+<area href="classEventVisualTracking.html" alt="EventVisualTracking" shape="rect" coords="972,112,1124,136"/>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -187,9 +187,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_pause_score_event<
 <tr class="memitem:a6063de63918a8e6fdb4cd0df74ac8aa6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6063de63918a8e6fdb4cd0df74ac8aa6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_stop_playback_event</b> ()</td></tr>
 <tr class="separator:a6063de63918a8e6fdb4cd0df74ac8aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2354ec63d8e49fa3696bd778b91adc2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_highlight_event</b> ()</td></tr>
-<tr class="separator:ac2354ec63d8e49fa3696bd778b91adc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab436c81c0fbdd1e53f0338935c7cb869"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab436c81c0fbdd1e53f0338935c7cb869"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_tracking_event</b> ()</td></tr>
+<tr class="separator:ab436c81c0fbdd1e53f0338935c7cb869"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3a602cd33472edbe1ad3e4f747dcc361"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_update_viewport_event</b> ()</td></tr>
 <tr class="separator:a3a602cd33472edbe1ad3e4f747dcc361"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -275,7 +275,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Interactor</b></td><
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a pointer to the <a class="el" href="classObservable.html">Observable</a> object (an ImoContentObj) related to the event. It is either the mouse pointed object or the first ancestor of type ImoContentObj in the internal model hierarchy. If the event is not related to an <a class="el" href="classObservable.html">Observable</a> object it returns nullptr. </p>
+<p>Returns a pointer to the <a class="el" href="classObservable.html">Observable</a> object (an ImoContentObj) related to the event. It is either the mouse pointed object or the first ancestor of type ImoContentObj in the internal model hierarchy. If the event is not related to an <a class="el" href="classObservable.html">Observable</a> object it returns <span class="literal">nullptr</span>. </p>
 
 <p>Reimplemented in <a class="el" href="classEventMouse.html#aef97b3490945ff7774d95b9388d0ea34">EventMouse</a>.</p>
 
@@ -287,7 +287,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Interactor</b></td><
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventInfo.html">EventInfo</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -33,7 +33,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "DocCommandExecuter", "classDocCommandExecuter.html", null ],
-    [ "EnableSharedFromThis", null, [
+    [ "enable_shared_from_this", null, [
       [ "Document", "classDocument.html", null ],
       [ "Interactor", "classInteractor.html", null ]
     ] ],
@@ -51,8 +51,8 @@ var hierarchy =
       [ "EventPaint", "classEventPaint.html", null ],
       [ "EventPlayback", "classEventPlayback.html", [
         [ "EventEndOfPlayback", "classEventEndOfPlayback.html", null ],
-        [ "EventScoreHighlight", "classEventScoreHighlight.html", null ],
-        [ "EventUpdateViewport", "classEventUpdateViewport.html", null ]
+        [ "EventUpdateViewport", "classEventUpdateViewport.html", null ],
+        [ "EventVisualTracking", "classEventVisualTracking.html", null ]
       ] ]
     ] ],
     [ "EventNotifier", "classEventNotifier.html", [
@@ -62,6 +62,7 @@ var hierarchy =
     [ "FPitch", "classFPitch.html", null ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
     [ "MidiPitch", "classMidiPitch.html", null ],
+    [ "MidiServerBase", "classMidiServerBase.html", null ],
     [ "MusicXmlOptions", "classMusicXmlOptions.html", null ],
     [ "Observable", "classObservable.html", [
       [ "Document", "classDocument.html", null ],
@@ -75,6 +76,7 @@ var hierarchy =
       [ "RequestDynamic", "classRequestDynamic.html", null ],
       [ "RequestFont", "classRequestFont.html", null ]
     ] ],
+    [ "ScorePlayer", "classScorePlayer.html", null ],
     [ "UndoElement", "classUndoElement.html", null ],
     [ "UPitch", "classUPitch.html", null ],
     [ "View", null, [

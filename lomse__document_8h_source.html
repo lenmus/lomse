@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -183,7 +183,7 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="classDocument.html">  113</a></span>&#160;<span class="comment"></span><span class="keyword">class </span>LOMSE_EXPORT <a class="code" href="classDocument.html">Document</a> : <span class="keyword">public</span> BlockLevelCreatorApi</div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                            , <span class="keyword">public</span> <a class="code" href="classEventNotifier.html">EventNotifier</a></div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                            , <span class="keyword">public</span> <a class="code" href="classObservable.html">Observable</a></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                            , <span class="keyword">public</span> EnableSharedFromThis&lt;Document&gt;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                            , <span class="keyword">public</span> std::enable_shared_from_this&lt;Document&gt;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;{</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="keyword">protected</span>:</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    LibraryScope&amp;   m_libraryScope;</div>
@@ -340,7 +340,7 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;</div>
 <div class="line"><a name="l00528"></a><span class="lineno"><a class="line" href="classDocument.html#ae93ac07ab31db6fd9abe293dde5b1cd3">  528</a></span>&#160;    <span class="keyword">inline</span> LibraryScope&amp; <a class="code" href="classDocument.html#ae93ac07ab31db6fd9abe293dde5b1cd3">get_library_scope</a>() { <span class="keywordflow">return</span> m_libraryScope; }</div>
 <div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;</div>
-<div class="line"><a name="l00531"></a><span class="lineno"><a class="line" href="classDocument.html#a152d0191777eb23130f885745464dbad">  531</a></span>&#160;    <span class="keyword">inline</span> SharedPtr&lt;Document&gt; <a class="code" href="classDocument.html#a152d0191777eb23130f885745464dbad">get_shared_ptr_from_this</a>() { <span class="keywordflow">return</span> shared_from_this(); }</div>
+<div class="line"><a name="l00531"></a><span class="lineno"><a class="line" href="classDocument.html#a8c3cdebeba1affc24e85651536b458df">  531</a></span>&#160;    <span class="keyword">inline</span> std::shared_ptr&lt;Document&gt; <a class="code" href="classDocument.html#a8c3cdebeba1affc24e85651536b458df">get_shared_ptr_from_this</a>() { <span class="keywordflow">return</span> shared_from_this(); }</div>
 <div class="line"><a name="l00532"></a><span class="lineno">  532</span>&#160;</div>
 <div class="line"><a name="l00533"></a><span class="lineno">  533</span>&#160;    <span class="comment">//properties</span></div>
 <div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;<span class="comment"></span>    <span class="keywordtype">bool</span> is_editable();</div>
@@ -427,8 +427,8 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;</div>
 <div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;};</div>
 <div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;</div>
-<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;<span class="keyword">typedef</span> SharedPtr&lt;Document&gt;  SpDocument;</div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;<span class="keyword">typedef</span> WeakPtr&lt;Document&gt;  WpDocument;</div>
+<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;<span class="keyword">typedef</span> std::shared_ptr&lt;Document&gt;  SpDocument;</div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;<span class="keyword">typedef</span> std::weak_ptr&lt;Document&gt;  WpDocument;</div>
 <div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;</div>
 <div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;</div>
 <div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;}   <span class="comment">//namespace lomse</span></div>
@@ -436,16 +436,16 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;<span class="preprocessor">#endif      //__LOMSE_DOCUMENT_H__</span></div>
 <div class="ttc" id="classDocument_html_a6e2beda9fb318f2f830a337f95207cfa"><div class="ttname"><a href="classDocument.html#a6e2beda9fb318f2f830a337f95207cfa">Document::add_page_info</a></div><div class="ttdeci">void add_page_info(ImoPageInfo *pPI)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:299</div></div>
 <div class="ttc" id="classDocument_html_a0af272723339cb2f42e33aeadeb55b24a3fa4be6109b7087f168bfeb340a8bdda"><div class="ttname"><a href="classDocument.html#a0af272723339cb2f42e33aeadeb55b24a3fa4be6109b7087f168bfeb340a8bdda">Document::k_format_mxl</a></div><div class="ttdoc">MusicXML format. </div><div class="ttdef"><b>Definition:</b> lomse_document.h:141</div></div>
-<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:140</div></div>
+<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:167</div></div>
 <div class="ttc" id="classDocument_html_a66c601acb924a3ab43d7268e7d6b44f1"><div class="ttname"><a href="classDocument.html#a66c601acb924a3ab43d7268e7d6b44f1">Document::get_content</a></div><div class="ttdeci">ImoContent * get_content()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:456</div></div>
 <div class="ttc" id="classDocument_html_aea742d98d0b104e7975cc881fd6483a1"><div class="ttname"><a href="classDocument.html#aea742d98d0b104e7975cc881fd6483a1">Document::get_style_or_default</a></div><div class="ttdeci">ImoStyle * get_style_or_default(const std::string &amp;name)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:507</div></div>
-<div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:79</div></div>
-<div class="ttc" id="classEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1727</div></div>
+<div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:80</div></div>
+<div class="ttc" id="classEventNotifier_html"><div class="ttname"><a href="classEventNotifier.html">EventNotifier</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1738</div></div>
 <div class="ttc" id="classDocument_html_ae93ac07ab31db6fd9abe293dde5b1cd3"><div class="ttname"><a href="classDocument.html#ae93ac07ab31db6fd9abe293dde5b1cd3">Document::get_library_scope</a></div><div class="ttdeci">LibraryScope &amp; get_library_scope()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:528</div></div>
 <div class="ttc" id="classDocument_html_a8e0bd11bca9b7133d3e5aeecb68eff86"><div class="ttname"><a href="classDocument.html#a8e0bd11bca9b7133d3e5aeecb68eff86">Document::add_style</a></div><div class="ttdeci">void add_style(ImoStyle *pStyle)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:515</div></div>
 <div class="ttc" id="classDocument_html_a97ecb5212223586d0febccb98fadd6ab"><div class="ttname"><a href="classDocument.html#a97ecb5212223586d0febccb98fadd6ab">Document::get_paper_width</a></div><div class="ttdeci">LUnits get_paper_width()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:286</div></div>
 <div class="ttc" id="classDocument_html_afa62f74e7cfb0aff76b2f172f9c2ccdc"><div class="ttname"><a href="classDocument.html#afa62f74e7cfb0aff76b2f172f9c2ccdc">Document::add_paragraph</a></div><div class="ttdeci">ImoParagraph * add_paragraph(ImoStyle *pStyle=nullptr)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:318</div></div>
-<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdoc">Keeps the stack of executed commands and performs undo/redo. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:291</div></div>
+<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdoc">Keeps the stack of executed commands and performs undo/redo. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:303</div></div>
 <div class="ttc" id="classDocument_html_a53a0136a1f17e228c36c7cd7357736e6"><div class="ttname"><a href="classDocument.html#a53a0136a1f17e228c36c7cd7357736e6">Document::add_list</a></div><div class="ttdeci">ImoList * add_list(int type, ImoStyle *pStyle=nullptr)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:322</div></div>
 <div class="ttc" id="classDocument_html_a0e6c184b6275c49696b644750ec29e6b"><div class="ttname"><a href="classDocument.html#a0e6c184b6275c49696b644750ec29e6b">Document::get_language</a></div><div class="ttdeci">string get_language()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:251</div></div>
 <div class="ttc" id="classDocument_html_a9c94b64b944837e73fdc1b8a3daf0948"><div class="ttname"><a href="classDocument.html#a9c94b64b944837e73fdc1b8a3daf0948">Document::append_content_item</a></div><div class="ttdeci">void append_content_item(ImoBlockLevelObj *pItem)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:326</div></div>
@@ -455,12 +455,12 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="ttc" id="classDocument_html_a2d917f0c4bd82ff944a27f0d858e8d45"><div class="ttname"><a href="classDocument.html#a2d917f0c4bd82ff944a27f0d858e8d45">Document::insert_block_level_obj</a></div><div class="ttdeci">void insert_block_level_obj(ImoBlockLevelObj *pAt, ImoBlockLevelObj *pImoNew)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:331</div></div>
 <div class="ttc" id="classDocument_html_adcd57e522593c0b810d6233e0cbdb3f6"><div class="ttname"><a href="classDocument.html#adcd57e522593c0b810d6233e0cbdb3f6">Document::EDocumentFlags</a></div><div class="ttdeci">EDocumentFlags</div><div class="ttdoc">Values for flags. </div><div class="ttdef"><b>Definition:</b> lomse_document.h:133</div></div>
 <div class="ttc" id="classDocument_html_aa26dcafd3c5cd6f6d597893c49755309"><div class="ttname"><a href="classDocument.html#aa26dcafd3c5cd6f6d597893c49755309">Document::add_score</a></div><div class="ttdeci">ImoScore * add_score(ImoStyle *pStyle=nullptr)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:314</div></div>
-<div class="ttc" id="classDocument_html_a152d0191777eb23130f885745464dbad"><div class="ttname"><a href="classDocument.html#a152d0191777eb23130f885745464dbad">Document::get_shared_ptr_from_this</a></div><div class="ttdeci">SharedPtr&lt; Document &gt; get_shared_ptr_from_this()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:531</div></div>
 <div class="ttc" id="classDocument_html"><div class="ttname"><a href="classDocument.html">Document</a></div><div class="ttdef"><b>Definition:</b> lomse_document.h:113</div></div>
 <div class="ttc" id="classDocument_html_a2ec18992351a28c8c3924c8b30baf40c"><div class="ttname"><a href="classDocument.html#a2ec18992351a28c8c3924c8b30baf40c">Document::get_scope</a></div><div class="ttdeci">DocumentScope &amp; get_scope()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:525</div></div>
 <div class="ttc" id="classDocument_html_ab268c2f895a87eb071fd7d6056d5cac8"><div class="ttname"><a href="classDocument.html#ab268c2f895a87eb071fd7d6056d5cac8">Document::get_last_content_item</a></div><div class="ttdeci">ImoBlockLevelObj * get_last_content_item()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:473</div></div>
 <div class="ttc" id="classDocument_html_a85227f6f69da55806916270f64b908aa"><div class="ttname"><a href="classDocument.html#a85227f6f69da55806916270f64b908aa">Document::get_first_content_item</a></div><div class="ttdeci">ImoBlockLevelObj * get_first_content_item()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:469</div></div>
 <div class="ttc" id="classDocument_html_a0af272723339cb2f42e33aeadeb55b24ac888097c4afab75aec8b5a6e53373a06"><div class="ttname"><a href="classDocument.html#a0af272723339cb2f42e33aeadeb55b24ac888097c4afab75aec8b5a6e53373a06">Document::k_format_lmd</a></div><div class="ttdoc">LenMus Document (LMD, XML syntax) </div><div class="ttdef"><b>Definition:</b> lomse_document.h:140</div></div>
+<div class="ttc" id="classDocument_html_a8c3cdebeba1affc24e85651536b458df"><div class="ttname"><a href="classDocument.html#a8c3cdebeba1affc24e85651536b458df">Document::get_shared_ptr_from_this</a></div><div class="ttdeci">std::shared_ptr&lt; Document &gt; get_shared_ptr_from_this()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:531</div></div>
 <div class="ttc" id="classDocument_html_a0af272723339cb2f42e33aeadeb55b24a64607017dcf5feba1dfe8107b4875e6e"><div class="ttname"><a href="classDocument.html#a0af272723339cb2f42e33aeadeb55b24a64607017dcf5feba1dfe8107b4875e6e">Document::k_format_mnx</a></div><div class="ttdoc">W3C MNX format. </div><div class="ttdef"><b>Definition:</b> lomse_document.h:142</div></div>
 <div class="ttc" id="classDocument_html_a89876730919eaea7a497fcfda63e83ec"><div class="ttname"><a href="classDocument.html#a89876730919eaea7a497fcfda63e83ec">Document::is_dirty</a></div><div class="ttdeci">bool is_dirty()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:548</div></div>
 <div class="ttc" id="classDocument_html_a98a79d4aea9c1f457891a1cbc86fd139"><div class="ttname"><a href="classDocument.html#a98a79d4aea9c1f457891a1cbc86fd139">Document::get_num_content_items</a></div><div class="ttdeci">int get_num_content_items()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:459</div></div>
@@ -468,7 +468,7 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div class="ttc" id="classDocument_html_a7c34c93b34eacb936effd1063b44ba50"><div class="ttname"><a href="classDocument.html#a7c34c93b34eacb936effd1063b44ba50">Document::set_language</a></div><div class="ttdeci">void set_language(const string &amp;language)</div><div class="ttdef"><b>Definition:</b> lomse_document.h:264</div></div>
 <div class="ttc" id="classDocument_html_a2d6e21d12cdf9fb52e3e035300909347"><div class="ttname"><a href="classDocument.html#a2d6e21d12cdf9fb52e3e035300909347">Document::get_styles</a></div><div class="ttdeci">ImoStyles * get_styles()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:512</div></div>
 <div class="ttc" id="classDocument_html_ac5a47af90f14d70e7185622d9b56d72a"><div class="ttname"><a href="classDocument.html#ac5a47af90f14d70e7185622d9b56d72a">Document::get_version</a></div><div class="ttdeci">std::string &amp; get_version()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:231</div></div>
-<div class="ttc" id="classObservable_html"><div class="ttname"><a href="classObservable.html">Observable</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1620</div></div>
+<div class="ttc" id="classObservable_html"><div class="ttname"><a href="classObservable.html">Observable</a></div><div class="ttdef"><b>Definition:</b> lomse_events.h:1631</div></div>
 <div class="ttc" id="classDocument_html_a0af272723339cb2f42e33aeadeb55b24"><div class="ttname"><a href="classDocument.html#a0af272723339cb2f42e33aeadeb55b24">Document::EFileFormat</a></div><div class="ttdeci">EFileFormat</div><div class="ttdoc">Supported file formats. </div><div class="ttdef"><b>Definition:</b> lomse_document.h:138</div></div>
 <div class="ttc" id="classDocument_html_a320c343a0a0925f4a2d24c21265ec552"><div class="ttname"><a href="classDocument.html#a320c343a0a0925f4a2d24c21265ec552">Document::get_page_info</a></div><div class="ttdeci">ImoPageInfo * get_page_info()</div><div class="ttdef"><b>Definition:</b> lomse_document.h:282</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -477,7 +477,7 @@ $(document).ready(function(){initNavTree('lomse__document_8h_source.html','');})
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><b>lomse_document.h</b></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:42 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

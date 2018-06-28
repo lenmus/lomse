@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -108,7 +108,7 @@ $(document).ready(function(){initNavTree('page-sound-generation.html','');});
 <li class="level1"><a href="#playback-summary">Your application set-up: summary</a></li>
 <li class="level1"><a href="#handling-sound-events">How to handle sound events</a></li>
 <li class="level1"><a href="#how-to-play-score">How to play an score</a></li>
-<li class="level1"><a href="#handling-highlight-events">Handling highlight events</a></li>
+<li class="level1"><a href="#handling-visual-tracking-events">Handling visual tracking events</a></li>
 <li class="level1"><a href="#implementing-player-gui">The PlayerGui object</a></li>
 </ul>
 </div>
@@ -120,7 +120,7 @@ How Lomse playback works</h1>
 <li>The score internal model is parsed to build the sound model.</li>
 <li>The sound model is then traversed and three kind of events are generated:<ol type="1">
 <li>Sound events, for generating sounds.</li>
-<li>Highlight events, for adding visual tracking effects to the displayed score. For instance, highlighting notes as they are being played or displaying a vertical line at current beat position.</li>
+<li>Visual tracking events, for adding visual tracking effects to the displayed score during playback. For instance, highlighting notes as they are being played or displaying a vertical line at current beat position.</li>
 <li>End of playback events, oriented to facilitate GUI controls synchronization and housekeeping.</li>
 </ol>
 </li>
@@ -130,21 +130,21 @@ How Lomse playback works</h1>
 Your application set-up: summary</h1>
 <p>For playing back an score your application has to:</p>
 <ul>
-<li>Define a class, derived from <code>MidiServerBase</code>. This class will receive the sound events and will have the responsibility for generating the sounds. See <a class="el" href="page-sound-generation.html#handling-sound-events">How to handle sound events</a>.</li>
-<li><p class="startli">Create an instance of class <code>ScorePlayer</code>. This class takes care of most of the work to do. By using it, playing an score is just two tasks:</p>
+<li>Define a class, derived from <code><a class="el" href="classMidiServerBase.html">MidiServerBase</a></code>. This class will receive the sound events and will have the responsibility for generating the sounds. See <a class="el" href="page-sound-generation.html#handling-sound-events">How to handle sound events</a>.</li>
+<li><p class="startli">Create an instance of class <code><a class="el" href="classScorePlayer.html">ScorePlayer</a></code>. This class takes care of most of the work to do. By using it, playing an score is just two tasks:</p>
 <ol type="1">
-<li>Load the score to play in the <code>ScorePlayer</code> instance.</li>
-<li>Ask <code>ScorePlayer</code> to play it, specifying the desired options (i.e. visual tracking, metronome settings, count-off, etc).</li>
+<li>Load the score to play in the <code><a class="el" href="classScorePlayer.html">ScorePlayer</a></code> instance.</li>
+<li>Ask <code><a class="el" href="classScorePlayer.html">ScorePlayer</a></code> to play it, specifying the desired options (i.e. visual tracking, metronome settings, count-off, etc).</li>
 </ol>
 <p class="startli">See <a class="el" href="page-sound-generation.html#how-to-play-score">How to play an score</a>.</p>
 </li>
-<li>Deal with <em>highlight</em> events. All <em>highlight</em> events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_highlight_event(). See <a class="el" href="page-sound-generation.html#handling-highlight-events">Handling highlight events</a>.</li>
+<li>Deal with <em>visual</em> <em>tracking</em> events. All <em>visual</em> <em>tracking</em> events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_visual_tracking_event(). See <a class="el" href="page-sound-generation.html#handling-visual-tracking-events">Handling visual tracking events</a>.</li>
 <li>Optionally, you should create a class derived from "PlayerGui". This will allow you to link your application playback controls to lomse, so that lomse can collect current settings when needed. See <a class="el" href="page-sound-generation.html#implementing-player-gui">The PlayerGui object</a>.</li>
 </ul>
 <p>As you can see, implementing score playback in an application is not complex, and the only burden for your application is coding a <code>MidiServer</code> class for generating the sounds.</p>
 <h1><a class="anchor" id="handling-sound-events"></a>
 How to handle sound events</h1>
-<p>For playing back an score your application has just to define a class, derived from MidiServerBase. This class defines the interface for processing sound events. Your application has to define a derived class (i.e. <code>MyMidiServer</code>) and implement the following virtual methods:</p>
+<p>For playing back an score your application has just to define a class, derived from <a class="el" href="classMidiServerBase.html">MidiServerBase</a>. This class defines the interface for processing sound events. Your application has to define a derived class (i.e. <code>MyMidiServer</code>) and implement the following virtual methods:</p>
 <div class="fragment"><div class="line"><span class="keyword">virtual</span> <span class="keywordtype">void</span> program_change(<span class="keywordtype">int</span> channel, <span class="keywordtype">int</span> instr) {}</div>
 <div class="line"><span class="keyword">virtual</span> <span class="keywordtype">void</span> voice_change(<span class="keywordtype">int</span> channel, <span class="keywordtype">int</span> instr) {}</div>
 <div class="line"><span class="keyword">virtual</span> <span class="keywordtype">void</span> note_on(<span class="keywordtype">int</span> channel, <span class="keywordtype">int</span> pitch, <span class="keywordtype">int</span> volume) {}</div>
@@ -155,14 +155,14 @@ How to handle sound events</h1>
 <dl class="section attention"><dt>Attention</dt><dd>As playback is a real-time task, your code must return quickly. If it needs to do some significant amount of work then you must schedule this work asynchronously, for example by posting a windows message, or you should use a separate thread. Your application should not retain control for much time as this would result in freezing lomse playback thread.</dd></dl>
 <h1><a class="anchor" id="how-to-play-score"></a>
 How to play an score</h1>
-<p>Class ScorePlayer provides the necessary methods for controlling all playback (start, stop, pause, etc.). Your application will have to request lomse the instance of ScorePlayer by invoking <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">LomseDoorway::create_score_player()</a> method and passing the <code>MidiServer</code> to use:</p>
+<p>Class <a class="el" href="classScorePlayer.html">ScorePlayer</a> provides the necessary methods for controlling all playback (start, stop, pause, etc.). Your application will have to request lomse the instance of <a class="el" href="classScorePlayer.html">ScorePlayer</a> by invoking <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">LomseDoorway::create_score_player()</a> method and passing the <code>MidiServer</code> to use:</p>
 <div class="fragment"><div class="line">MyAppMidiServer* pMidi = <span class="keyword">new</span> MyAppMidiServer();</div>
-<div class="line">ScorePlayer* pPlayer = m_lomse-&gt;<a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(pMidi);</div>
-</div><!-- fragment --><p>This can be done only once if your application saves the ScorePlayer instance in a global variable and ensures the appropriate life scope for your <code>MyAppMidiServer</code> object.</p>
-<p>Once you have the ScorePlayer instance, playback is just loading the score to play (by invoking ScorePlayer::load_score() method) and invoking the appropriate methods, such as ScorePlayer::play() or ScorePlayer::stop() or ScorePlayer::pause();</p>
-<p>The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to do get this pointer depends on your application, but a simple way of doing it is by using the <a class="el" href="classDocument.html">Document</a> methods for traversing the document and accessing its components. One of these methods is <a class="el" href="classDocument.html#a07d8a430a6994f06b77ce2e2d6a87d98">Document::get_content_item()</a> that takes as argument the index to the desired content item. For instance:</p>
+<div class="line"><a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer = m_lomse-&gt;<a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(pMidi);</div>
+</div><!-- fragment --><p>This can be done only once if your application saves the <a class="el" href="classScorePlayer.html">ScorePlayer</a> instance in a global variable and ensures the appropriate life scope for your <code>MyAppMidiServer</code> object.</p>
+<p>Once you have the <a class="el" href="classScorePlayer.html">ScorePlayer</a> instance, playback is just loading the score to play (by invoking <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">ScorePlayer::load_score()</a> method) and invoking the appropriate methods, such as <a class="el" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">ScorePlayer::play()</a> or <a class="el" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">ScorePlayer::stop()</a> or <a class="el" href="classScorePlayer.html#ae619442884736eafe2734dcf0301875b">ScorePlayer::pause()</a>;</p>
+<p>The only tricky issue, when starting to learn how to use lomse, is that method <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">ScorePlayer::load_score()</a> requires a pointer to the score to play. How to get this pointer depends on your application, but a simple way of doing it is by using the <a class="el" href="classDocument.html">Document</a> methods for traversing the document and accessing its components. One of these methods is <a class="el" href="classDocument.html#a07d8a430a6994f06b77ce2e2d6a87d98">Document::get_content_item()</a> that takes as argument the index to the desired content item. For instance:</p>
 <div class="fragment"><div class="line"><span class="comment">//get the score player you have set up for your application</span></div>
-<div class="line">ScorePlayer* pPlayer  = myAppGlobals-&gt;get_score_player();</div>
+<div class="line"><a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = myAppGlobals-&gt;get_score_player();</div>
 <div class="line"></div>
 <div class="line"><span class="comment">//get the first score</span></div>
 <div class="line">ImoScore* pScore = NULL;</div>
@@ -183,34 +183,37 @@ How to play an score</h1>
 <div class="line"><span class="comment">//load the score and start playback</span></div>
 <div class="line"><span class="keywordflow">if</span> (pScore)</div>
 <div class="line">{</div>
-<div class="line">    pPlayer-&gt;load_score(pScore, NULL);</div>
+<div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, NULL);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">//settings for playback. Probably you would get settings from GUI controls</span></div>
 <div class="line">    <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;    <span class="comment">//generate visual tracking effects</span></div>
-<div class="line">    <span class="keywordtype">bool</span> fCountOff = <span class="keyword">false</span>          <span class="comment">//no count off before start play</span></div>
 <div class="line">    <span class="keywordtype">long</span> nMM = 60;                  <span class="comment">//beats per minute</span></div>
 <div class="line">    <a class="code" href="classInteractor.html">Interactor</a>* pInteractor = ...   <span class="comment">//get the interactor for this document</span></div>
 <div class="line"></div>
+<div class="line">    <span class="comment">//select desired visual tracking effect</span></div>
+<div class="line">    pInteractor-&gt;<a class="code" href="classInteractor.html#a6f0200c891ae22c32050be6ac415c292">set_visual_tracking_mode</a>(<a class="code" href="group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497">k_tracking_tempo_line</a>);</div>
+<div class="line"></div>
 <div class="line">    <span class="comment">//start playback</span></div>
-<div class="line">    pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</div>
+<div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, pInteractor);</div>
 <div class="line">}</div>
-</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Check example code: pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</dd></dl>
-<h1><a class="anchor" id="handling-highlight-events"></a>
-Handling highlight events</h1>
-<p>Apart from generating sound events, lomse also generates <em>highlight</em> events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.</p>
+</div><!-- fragment --><h1><a class="anchor" id="handling-visual-tracking-events"></a>
+Handling visual tracking events</h1>
+<p>Apart from generating sound events, lomse also generates <em>visual</em> <em>tracking</em> events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.</p>
 <p>For generating visual effects you have two options, either do it yourself by modifying the lomse graphical model as desired or, simpler, delegate in lomse for generating standard visual effects. Lomse offers two type of visual effects:</p>
 <ul>
-<li>Coloring notes as they are being played. This is currently fully operational.</li>
-<li>Displaying a vertical colored tempo line across the system, positioned at current beat. This is not yet finished and, therefore, is not yet available.</li>
+<li>Highlighting notes as they are being played.</li>
+<li>Displaying a vertical colored tempo line across the system, positioned at current beat.</li>
 </ul>
-<p><em>Highlight</em> events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a <em>highlight</em> event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:</p>
+<p>The type of visual tracking event to generate is controlled by method <a class="el" href="classInteractor.html#a6f0200c891ae22c32050be6ac415c292">Interactor::set_visual_tracking_mode()</a>. Valid values for visual tracking effects are defined in enum EVisualTrackingMode. By default, if method <a class="el" href="classInteractor.html#a6f0200c891ae22c32050be6ac415c292">Interactor::set_visual_tracking_mode()</a> is not invoked, Lomse will highlight_notes and rests as they are played back. Several visual effects can be used simultaneously by combining values with the OR ('|') operator. For example:</p>
+<div class="fragment"><div class="line">spInteractor-&gt;set_visual_tracking_mode(<a class="code" href="group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497">k_tracking_tempo_line</a> | <a class="code" href="group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a79da3a4bf6cc26fc683d2085e559a780">k_tracking_highlight_notes</a>);</div>
+</div><!-- fragment --><p><em>Visual</em> <em>tracking</em> events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a <em>visual</em> <em>tracking</em> event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:</p>
 <div class="fragment"><div class="line">pInteractor-&gt;<a class="code" href="classEventHandler.html#a298527266550615c0a3da8ec78687d91">handle_event</a>(pEvent);</div>
 </div><!-- fragment --><p>Lomse will handle the event and will send an <em>update window</em> event to your application, for updating the display.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
 <h1><a class="anchor" id="implementing-player-gui"></a>
 The PlayerGui object</h1>
 <p>For controlling playback some GUI controls (buttons, menu items, etc. to trigger start, stop, pause actions, sliders or other for setting tempo speed, etc.) are normally required.</p>
-<p>The simplest way for passing the value of a playback option (i.e. the tempo speed) is to pass the value directly to lomse when asking to play the score in method ScorePlayer::play(). But this approach has a drawback: if the user changes, for instance, the tempo slider, lomse will not be informed of the change.</p>
+<p>The simplest way for passing the value of a playback option (i.e. the tempo speed) is to pass the value directly to lomse when asking to play the score in method <a class="el" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">ScorePlayer::play()</a>. But this approach has a drawback: if the user changes, for instance, the tempo slider, lomse will not be informed of the change.</p>
 <p>For solving these kind of problems, the solution is to link your application playback controls to lomse, so that lomse can be informed when changes take place or can collect current settings when needed. For doing this linking your application will have to define a class derived from PlayerGui (it can be your main window) and implement a few virtual methods to allow lomse to access the current values of your application playback controls:</p>
 <div class="fragment"><div class="line"><span class="keyword">virtual</span> <span class="keywordtype">int</span> get_play_mode() = 0;</div>
 <div class="line"><span class="keyword">virtual</span> <span class="keywordtype">int</span> get_metronome_mm() = 0;</div>
@@ -232,24 +235,24 @@ The PlayerGui object</h1>
 <div class="fragment"><div class="line"><span class="comment">//load the score and start playback</span></div>
 <div class="line"><span class="keywordflow">if</span> (pScore)</div>
 <div class="line">{</div>
-<div class="line">    pPlayer-&gt;load_score(pScore, NULL);</div>
+<div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, NULL);</div>
 </div><!-- fragment --><p>the second parameter for load_score is NULL, meaning that no PlayerGui is used. As you can deduce, the way of informing lomse of the GUI proxy to use is by passing a pointer to the PlayerGui in this method:</p>
 <div class="fragment"><div class="line"><span class="comment">//get your PlayerGui object</span></div>
 <div class="line">MyPlayerGui* pGui = ... </div>
 <div class="line"></div>
 <div class="line"><span class="comment">//load the score and link playback options to your MyPlayerGui object</span></div>
-<div class="line">pPlayer-&gt;load_score(pScore, pGui);</div>
+<div class="line">pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, pGui);</div>
 <div class="line"></div>
 <div class="line"><span class="comment">//setting tempo to 0 forces lomse to use the tempo returned by your MyPlayerGui object.</span></div>
 <div class="line"><span class="comment">//a value different from 0 forces lomse to use that tempo</span></div>
-<div class="line">pPlayer-&gt;play(fVisualTracking, 0, pInteractor);</div>
+<div class="line">pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, 0, pInteractor);</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

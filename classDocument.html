@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.24.0</span>
+   &#160;<span id="projectnumber">0.25.0</span>
    </div>
   </td>
  </tr>
@@ -124,8 +124,8 @@ Inheritance diagram for Document:</div>
  <div class="center">
   <img src="classDocument.png" usemap="#Document_map" alt=""/>
   <map id="Document_map" name="Document_map">
-<area href="classEventNotifier.html" alt="EventNotifier" shape="rect" coords="234,0,458,24"/>
-<area href="classObservable.html" alt="Observable" shape="rect" coords="468,0,692,24"/>
+<area href="classEventNotifier.html" alt="EventNotifier" shape="rect" coords="266,0,522,24"/>
+<area href="classObservable.html" alt="Observable" shape="rect" coords="532,0,788,24"/>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -141,7 +141,7 @@ Inheritance diagram for Document:</div>
 </ul>
 <p>A Document can also be created and modified by program. Edition commands operating on the Document and direct manipulation of the <em>Internal Model</em> give full flexibility for this.</p>
 <p>When using the LDP format, an special LDP tag &lt;dynamic&gt; instructs Lomse to require from your application the content to be inserted at that point. This is something analogous to the HTML &lt;object&gt; tag. </p>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_3_wxwidgets_8cpp-example.html#_a11">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#_a12">example_4_wxwidgets.cpp</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_3_wxwidgets_8cpp-example.html#_a13">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#_a14">example_4_wxwidgets.cpp</a>.</dd>
 </dl></div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -249,8 +249,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2ec18992351a28c8c3924c8b30baf40c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae93ac07ab31db6fd9abe293dde5b1cd3"><td class="memItemLeft" align="right" valign="top">LibraryScope &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#ae93ac07ab31db6fd9abe293dde5b1cd3">get_library_scope</a> ()</td></tr>
 <tr class="separator:ae93ac07ab31db6fd9abe293dde5b1cd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a152d0191777eb23130f885745464dbad"><td class="memItemLeft" align="right" valign="top">SharedPtr&lt; <a class="el" href="classDocument.html">Document</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a152d0191777eb23130f885745464dbad">get_shared_ptr_from_this</a> ()</td></tr>
-<tr class="separator:a152d0191777eb23130f885745464dbad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c3cdebeba1affc24e85651536b458df"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="classDocument.html">Document</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a8c3cdebeba1affc24e85651536b458df">get_shared_ptr_from_this</a> ()</td></tr>
+<tr class="separator:a8c3cdebeba1affc24e85651536b458df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6fa50c1bc66a6cc0516af29fbece700"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#af6fa50c1bc66a6cc0516af29fbece700">is_editable</a> ()</td></tr>
 <tr class="separator:af6fa50c1bc66a6cc0516af29fbece700"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89876730919eaea7a497fcfda63e83ec"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a89876730919eaea7a497fcfda63e83ec">is_dirty</a> ()</td></tr>
@@ -262,7 +262,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a09e980febe20825e3ed63ffe5f8a844c inherit pub_methods_classEventNotifier"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad34e980358eea3218183bdb49bcfac64 inherit pub_methods_classEventNotifier"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#ad34e980358eea3218183bdb49bcfac64">~EventNotifier</a> ()</td></tr>
 <tr class="separator:ad34e980358eea3218183bdb49bcfac64 inherit pub_methods_classEventNotifier"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4e1b9225b3ea84cb88cef2aa468ea09 inherit pub_methods_classEventNotifier"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#aa4e1b9225b3ea84cb88cef2aa468ea09">notify_observers</a> (<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> pEvent, <a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
+<tr class="memitem:aa4e1b9225b3ea84cb88cef2aa468ea09 inherit pub_methods_classEventNotifier"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#aa4e1b9225b3ea84cb88cef2aa468ea09">notify_observers</a> (<a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent, <a class="el" href="classObservable.html">Observable</a> *target)</td></tr>
 <tr class="separator:aa4e1b9225b3ea84cb88cef2aa468ea09 inherit pub_methods_classEventNotifier"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d6c570059b544f93f194d193dd67c78 inherit pub_methods_classEventNotifier"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEventNotifier.html#a8d6c570059b544f93f194d193dd67c78">remove_observer</a> (<a class="el" href="classObserver.html">Observer</a> *observer)</td></tr>
 <tr class="separator:a8d6c570059b544f93f194d193dd67c78 inherit pub_methods_classEventNotifier"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,15 +277,15 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1e08e4890d93e0932401b062c9a0cced inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa350bb80a827421d21cb68ee3131f61f inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aa350bb80a827421d21cb68ee3131f61f">add_event_handler</a> (int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
 <tr class="separator:aa350bb80a827421d21cb68ee3131f61f inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ab7b17ee247743097ba03b5b71188b9 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a9ab7b17ee247743097ba03b5b71188b9">add_event_handler</a> (int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="memitem:a9ab7b17ee247743097ba03b5b71188b9 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a9ab7b17ee247743097ba03b5b71188b9">add_event_handler</a> (int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event))</td></tr>
 <tr class="separator:a9ab7b17ee247743097ba03b5b71188b9 inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0869e9051c399e3a80782dec852c5393 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a0869e9051c399e3a80782dec852c5393">add_event_handler</a> (int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="memitem:a0869e9051c399e3a80782dec852c5393 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a0869e9051c399e3a80782dec852c5393">add_event_handler</a> (int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event))</td></tr>
 <tr class="separator:a0869e9051c399e3a80782dec852c5393 inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d2baa5abf0de7c2dfe7c1df9b93ea9b inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a8d2baa5abf0de7c2dfe7c1df9b93ea9b">add_event_handler</a> (int childType, ImoId childId, int eventType, <a class="el" href="classEventHandler.html">EventHandler</a> *pHandler)</td></tr>
 <tr class="separator:a8d2baa5abf0de7c2dfe7c1df9b93ea9b inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf457b8237c92af44e8c336cc1602e31 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aaf457b8237c92af44e8c336cc1602e31">add_event_handler</a> (int childType, ImoId childId, int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="memitem:aaf457b8237c92af44e8c336cc1602e31 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aaf457b8237c92af44e8c336cc1602e31">add_event_handler</a> (int childType, ImoId childId, int eventType, void *pThis, void(*pt2Func)(void *pObj, <a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event))</td></tr>
 <tr class="separator:aaf457b8237c92af44e8c336cc1602e31 inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef775f227ab270e6b6e4f8cec0d69243 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aef775f227ab270e6b6e4f8cec0d69243">add_event_handler</a> (int childType, ImoId childId, int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4d059e9b3deace601d55c1d9e51e0ed9">SpEventInfo</a> event))</td></tr>
+<tr class="memitem:aef775f227ab270e6b6e4f8cec0d69243 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#aef775f227ab270e6b6e4f8cec0d69243">add_event_handler</a> (int childType, ImoId childId, int eventType, void(*pt2Func)(<a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> event))</td></tr>
 <tr class="separator:aef775f227ab270e6b6e4f8cec0d69243 inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a993a493e3b27bf8113dd2e40a534f7d9 inherit pub_methods_classObservable"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classObservable.html">Observable</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classObservable.html#a993a493e3b27bf8113dd2e40a534f7d9">get_observable_child</a> (int UNUSED(childType), ImoId UNUSED(childId))</td></tr>
 <tr class="separator:a993a493e3b27bf8113dd2e40a534f7d9 inherit pub_methods_classObservable"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1024,8 +1024,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
   </table>
   </dd>
 </dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_3_wxwidgets_8cpp-example.html#a12">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#a13">example_4_wxwidgets.cpp</a>.</dd>
-</dl>
+
 </div>
 </div>
 <a class="anchor" id="aea52c369d30f8dd83bdee284aecd4fd7"></a>
@@ -1089,7 +1088,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 </table>
 </div><div class="memdoc">
 <p>Returns a pointer to the root object of the internal model. It is always an ImoDocument object. Access to this object is not always necessary as Document provides facade methods for the most common operations. </p>
-
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_3_wxwidgets_8cpp-example.html#a14">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#a15">example_4_wxwidgets.cpp</a>.</dd>
+</dl>
 </div>
 </div>
 <a class="anchor" id="a0e6c184b6275c49696b644750ec29e6b"></a>
@@ -1325,7 +1325,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 
 </div>
 </div>
-<a class="anchor" id="a152d0191777eb23130f885745464dbad"></a>
+<a class="anchor" id="a8c3cdebeba1affc24e85651536b458df"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1333,7 +1333,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">SharedPtr&lt;<a class="el" href="classDocument.html">Document</a>&gt; Document::get_shared_ptr_from_this </td>
+          <td class="memname">std::shared_ptr&lt;<a class="el" href="classDocument.html">Document</a>&gt; Document::get_shared_ptr_from_this </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -1599,7 +1599,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocument.html">Document</a></li>
-    <li class="footer">Generated on Tue Apr 10 2018 11:43:56 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Jun 28 2018 19:10:43 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
