@@ -29,6 +29,8 @@
 
 #include "lomse_timegrid_table.h"
 
+#include "lomse_time.h"
+
 //std
 #include <sstream>
 #include <iomanip>
@@ -77,15 +79,15 @@ void TimeGridTable::add_entry(TimeGridTableEntry& entry)
 string TimeGridTable::dump()
 {
     stringstream s;
-                //...........+..........+..........
-    s << endl << "     timepos        Dur       Pos" << endl;
+                //...........+..........+.............
+    s << endl << "     timepos        Dur          Pos" << endl;
     vector<TimeGridTableEntry>::iterator it;
     for (it = m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
     {
         s << fixed << setprecision(2) << setfill(' ')
                    << setw(11) << (*it).rTimepos
                    << setw(11) << (*it).rDuration
-                   << setw(11) << (*it).uxPos
+                   << setw(14) << setprecision(5) << (*it).uxPos
                    << endl;
     }
     return s.str();
@@ -115,22 +117,58 @@ TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits TimeGridTable::get_x_for_time(TimeUnits timepos)
+LUnits TimeGridTable::get_x_for_time(TimeUnits timepos, bool fEventAligned)
 {
     //xPos = 0 if table is empty or timepos < first entry timepos
-    if (m_PosTimes.size() == 0 || timepos <= m_PosTimes.front().rTimepos)
-        return 0.0;
+    if (m_PosTimes.size() == 0 || is_lower_time(timepos, m_PosTimes.front().rTimepos))
+        return 0.0;       //<--------------------------- T100
 
     //otherwise find in table
-    std::vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
-    for (++it; it != m_PosTimes.end(); ++it)
+    vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
+    if (fEventAligned)
     {
-        if (timepos <= (*it).rTimepos)
-            return (*it).uxPos;
+        for (; it != m_PosTimes.end(); ++it)
+        {
+            if (is_lower_time(timepos, (*it).rTimepos))
+                return (*it).uxPos;       //<---------------- T104 Interpolate?
+            else if (is_equal_time(timepos, (*it).rTimepos))
+            {
+                if ((*it).rDuration > 0.0)
+                    return (*it).uxPos;       //<--------------------------- T102
+
+                //try next entry
+                vector<TimeGridTableEntry>::iterator itNext = it;
+                ++itNext;
+                if (is_equal_time(timepos, (*itNext).rTimepos))
+                    return (*itNext).uxPos;            //<-------------- T103
+                    //<--------- missing case: no next entry. Is this possible?
+                    //           It would imply a barline followed by another barline
+//                else
+//                    return (*it).uxPos;
+            }
+        }
+    }
+    else
+    {
+        for (; it != m_PosTimes.end(); ++it)
+        {
+            if (!is_greater_time(timepos, (*it).rTimepos))//<--------------- T101 (case =)
+                return (*it).uxPos;       //<--------------- T105 (case <) Interpolate?
+        }
     }
 
-    //if not found return last entry xPos
-    return m_PosTimes.back().uxPos;
+    //if not found return last entry xPos. Or should return system xRight?
+    return m_PosTimes.back().uxPos;       //<--------------------------- T106
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits TimeGridTable::start_time()
+{
+    //start time == 0 if table is empty
+    if (m_PosTimes.size() == 0)
+        return 0.0;
+
+    return m_PosTimes.front().rTimepos;
 }
 
 //---------------------------------------------------------------------------------------

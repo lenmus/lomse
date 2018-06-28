@@ -324,8 +324,15 @@ struct MeasureLocator
 
 
 //---------------------------------------------------------------------------------------
-// Units comparison (LUnits, Tenths)
-inline bool is_equal(float c1, float c2) {
+// Logical Units comparison (LUnits, Tenths)
+inline bool is_equal_pos(float c1, float c2) {
+    return fabs(c1-c2) < 0.001f;
+}
+
+
+//---------------------------------------------------------------------------------------
+// float comparison
+inline bool is_equal_float(float c1, float c2) {
     return fabs(c1-c2) < 0.001f;
 }
 

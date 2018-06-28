@@ -186,7 +186,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     //determine if a new slice should be created
     TimeUnits curTime = pCurEntry->time();
     bool fCreateNewSlice = false;
-    if (curType != m_prevType || !is_equal(m_prevTime, curTime) )
+    if (curType != m_prevType || !is_equal_time(m_prevTime, curTime) )
         fCreateNewSlice = true;
 
     //avoid re-using current prolog slice if object is not clef, key or time
@@ -203,7 +203,7 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
     //avoid starting a new prolog slice when non-timed after prolog
     if (fCreateNewSlice && curType == TimeSlice::k_prolog)
     {
-        if (is_equal(m_lastPrologTime, curTime) && m_prevType == TimeSlice::k_non_timed)
+        if (is_equal_time(m_lastPrologTime, curTime) && m_prevType == TimeSlice::k_non_timed)
         {
             fCreateNewSlice = !m_pCurSlice;
             curType = TimeSlice::k_non_timed;

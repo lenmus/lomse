@@ -148,8 +148,8 @@ public:
 
         See @subpage page-callbacks.
 
-        For example, to prepare our application for handling @em score @em highlight
-        events we could define a callback method:
+        For example, to prepare our application for handling visual tracking events
+        during score playback we could define a callback method:
 
         @code
         class MyApp

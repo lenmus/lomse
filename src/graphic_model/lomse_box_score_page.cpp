@@ -95,6 +95,13 @@ TimeUnits GmoBoxScorePage::end_time()
     return pLastSystem->end_time();
 }
 
+//---------------------------------------------------------------------------------------
+TimeUnits GmoBoxScorePage::start_time()
+{
+    GmoBoxSystem* pFirstSystem = static_cast<GmoBoxSystem*>(m_childBoxes.front());
+    return pFirstSystem->start_time();
+}
+
 
 }  //namespace lomse
 

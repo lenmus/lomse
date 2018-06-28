@@ -179,8 +179,25 @@ public:
     void build_main_boxes_table();
 
     //active and pointed elements
-    int get_system_for(ImoId scoreId, int instr, int measure, TimeUnits time);
-    int get_system_for(ImoId scoreId, TimeUnits timepos);
+    GmoBoxSystem* get_system_for(ImoId scoreId, int instr, int measure, TimeUnits time);
+
+    /** Returns pointer to GmoBoxSystem containing the requested timepos. If pointer
+        @c iPage is not @nullptr, it also updates its
+        content with the index of the GmoBoxScorePage in which the system is
+        contained. If there is no system for the given timepos, returns @nullptr and
+        iPage is set to -1.
+
+        This method gives preference to finding a system containing an event at the
+        given @c tiempos instead of non-timed staff objects. For example, the last
+        barline in one system has the same @c timepos than the first event in next
+        system. Therefore, this method will return the second system.
+
+        @param scoreId
+        @param time The time position (absolute time units) for the requested system.
+        @param iPage Pointer to an int that will be updated with the page index in
+            which the returned system is included.
+    */
+    GmoBoxSystem* get_system_for(ImoId scoreId, TimeUnits timepos, int* iPage=nullptr);
     GmoBoxSystem* get_system_box(int iSystem);
 
     //tests

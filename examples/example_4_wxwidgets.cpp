@@ -83,45 +83,45 @@ class MidiServer;
 
 
 //---------------------------------------------------------------------------------------
-// MyScoreHighlightEvent
+// MyVisualTrackingEvent
 //      An event to signal different actions related to
-//      highlighting / unhighlighting notes while they are being played.
+//      score visual tracking while it is being played back.
 //---------------------------------------------------------------------------------------
 
-DECLARE_EVENT_TYPE( MY_EVT_SCORE_HIGHLIGHT_TYPE, -1 )
+DECLARE_EVENT_TYPE( MY_EVT_VISUAL_TRACKING_TYPE, -1 )
 
-class MyScoreHighlightEvent : public wxEvent
+class MyVisualTrackingEvent : public wxEvent
 {
 private:
-    SpEventScoreHighlight m_pEvent;   //lomse event
+    SpEventVisualTracking m_pEvent;   //lomse event
 
 public:
-    MyScoreHighlightEvent(SpEventScoreHighlight pEvent, int id = 0)
-        : wxEvent(id, MY_EVT_SCORE_HIGHLIGHT_TYPE)
+    MyVisualTrackingEvent(SpEventVisualTracking pEvent, int id = 0)
+        : wxEvent(id, MY_EVT_VISUAL_TRACKING_TYPE)
         , m_pEvent(pEvent)
     {
     }
 
     // copy constructor
-    MyScoreHighlightEvent(const MyScoreHighlightEvent& event)
+    MyVisualTrackingEvent(const MyVisualTrackingEvent& event)
         : wxEvent(event)
         , m_pEvent( event.m_pEvent )
     {
     }
 
     // clone constructor. Required for sending with wxPostEvent()
-    virtual wxEvent *Clone() const { return new MyScoreHighlightEvent(*this); }
+    virtual wxEvent *Clone() const { return new MyVisualTrackingEvent(*this); }
 
     // accessors
-    SpEventScoreHighlight get_lomse_event() { return m_pEvent; }
+    SpEventVisualTracking get_lomse_event() { return m_pEvent; }
 };
 
-typedef void (wxEvtHandler::*ScoreHighlightEventFunction)(MyScoreHighlightEvent&);
+typedef void (wxEvtHandler::*VisualTrackingEventFunction)(MyVisualTrackingEvent&);
 
-#define MY_EVT_SCORE_HIGHLIGHT(fn) \
-    DECLARE_EVENT_TABLE_ENTRY( MY_EVT_SCORE_HIGHLIGHT_TYPE, wxID_ANY, -1, \
+#define MY_EVT_VISUAL_TRACKING(fn) \
+    DECLARE_EVENT_TABLE_ENTRY( MY_EVT_VISUAL_TRACKING_TYPE, wxID_ANY, -1, \
     (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
-    wxStaticCastEvent( ScoreHighlightEventFunction, & fn ), (wxObject *) NULL ),
+    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) NULL ),
 
 
 
@@ -206,7 +206,7 @@ protected:
     void OnSize(wxSizeEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnMouseEvent(wxMouseEvent& event);
-    void on_visual_highlight(MyScoreHighlightEvent& event);
+    void on_visual_tracking(MyVisualTrackingEvent& event);
 
     void delete_rendering_buffer();
     void create_rendering_buffer(int width, int height);
@@ -298,7 +298,7 @@ bool MyApp::OnInit()
 //=======================================================================================
 // MyEvents implementation
 //=======================================================================================
-DEFINE_EVENT_TYPE( MY_EVT_SCORE_HIGHLIGHT_TYPE )
+DEFINE_EVENT_TYPE( MY_EVT_VISUAL_TRACKING_TYPE )
 
 
 
@@ -479,13 +479,13 @@ void MyFrame::on_lomse_event(SpEventInfo pEvent)
 
     switch (pEvent->get_event_type())
     {
-        case k_highlight_event:
+        case k_tracking_event:
         {
             if (pCanvas)
             {
-                SpEventScoreHighlight pEv(
-                    static_pointer_cast<EventScoreHighlight>(pEvent) );
-                MyScoreHighlightEvent event(pEv);
+                SpEventVisualTracking pEv(
+                    static_pointer_cast<EventVisualTracking>(pEvent) );
+                MyVisualTrackingEvent event(pEv);
                 ::wxPostEvent(pCanvas, event);
             }
             break;
@@ -623,7 +623,7 @@ BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
     EVT_MOUSE_EVENTS(MyCanvas::OnMouseEvent)
     EVT_SIZE(MyCanvas::OnSize)
     EVT_PAINT(MyCanvas::OnPaint)
-    MY_EVT_SCORE_HIGHLIGHT(MyCanvas::on_visual_highlight)
+    MY_EVT_VISUAL_TRACKING(MyCanvas::on_visual_tracking)
 END_EVENT_TABLE()
 
 
@@ -1007,12 +1007,12 @@ void MyCanvas::play_pause()
 }
 
 //---------------------------------------------------------------------------------------
-void MyCanvas::on_visual_highlight(MyScoreHighlightEvent& event)
+void MyCanvas::on_visual_tracking(MyVisualTrackingEvent& event)
 {
-    SpEventScoreHighlight pEv = event.get_lomse_event();
+    SpEventVisualTracking pEv = event.get_lomse_event();
     WpInteractor wpInteractor = pEv->get_interactor();
     if (SpInteractor sp = wpInteractor.lock())
-        sp->on_visual_highlight(pEv);
+        sp->on_visual_tracking(pEv);
 }
 
 

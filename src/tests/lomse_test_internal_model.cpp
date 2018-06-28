@@ -1122,7 +1122,7 @@ SUITE(InternalModelTest)
         CHECK( pStyle->font_style() == ImoStyle::k_font_style_normal );
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_normal );
         CHECK( pStyle->font_size() == 12.0f );
-        CHECK( is_equal( pStyle->margin_bottom(), 300.0f ) );
+        CHECK( is_equal_pos( pStyle->margin_bottom(), 300.0f ) );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, ObjectHasNoStyle)

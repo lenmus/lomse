@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -118,9 +118,10 @@ public:
         list<SpEventInfo>::iterator itN = m_notifications.begin();
         while (itN != m_notifications.end())
         {
-            cout << "notif.type = " << (*itN)->get_event_type() << endl << endl;
+            cout << "notif.type = " << (*itN)->get_event_type() << endl;
             ++itN;
         }
+        cout << endl;
     }
 
 };
@@ -347,51 +348,41 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_note_on );
         CHECK( *(it++) == MyMidiServer::k_note_off );
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
-        //player.dump_notifications();
-        CHECK( int(m_notifications.size()) == 5 );
 
-        //1. move_tempo_line, t=0
+        //player.dump_notifications();
+        CHECK( int(m_notifications.size()) == 3 );
+
+        //1. move_tempo_line, t=0 + highlight on: note c4 q
         std::list<SpEventInfo>::iterator itN = m_notifications.begin();
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_move_tempo_line_event );
-        SpEventTempoLine pTLEv( static_pointer_cast<EventTempoLine>(*itN) );
-        //cout << "timepos = " << pTLEv->get_timepos() << endl;
-        CHECK( pTLEv->get_timepos() == 0.0f);
-        ++itN;
-
-        //2. highlight on: note c4 q
-        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        SpEventScoreHighlight pEv = static_pointer_cast<EventScoreHighlight>(*itN);
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        SpEventVisualTracking pEv( static_pointer_cast<EventVisualTracking>(*itN) );
         //cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 1);
+        CHECK( pEv->get_num_items() == 2);
         list< pair<int, ImoId> >& items = pEv->get_items();
         list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
+        CHECK( (*itItem).first == EventVisualTracking::k_move_tempo_line );
+        //cout << "item type: " << (*itItem).first << endl;
+        //cout << "timepos = " << pEv->get_timepos() << endl;
+        CHECK( pEv->get_timepos() == 0.0f);
+        ++itItem;
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
-        //3. move_tempo_line, t=64
+        //2. k_end_of_visual_tracking
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_move_tempo_line_event );
-        pTLEv = static_pointer_cast<EventTempoLine>(*itN);
-        //cout << "timepos = " << pTLEv->get_timepos() << endl;
-        CHECK( pTLEv->get_timepos() == 64.0f);
-        ++itN;
-
-        //4. highlight: k_end_of_highlight
-        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        pEv = static_pointer_cast<EventVisualTracking>(*itN);
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_highlight );
+        CHECK( (*itItem).first == EventVisualTracking::k_end_of_visual_tracking );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
-        //5. end_of_playback
+        //3. end_of_playback
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_end_of_playback_event );
     }
@@ -429,56 +420,45 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
 
         //player.dump_notifications();
-        CHECK( m_notifications.size() == 5 );
+        CHECK( m_notifications.size() == 3 );
 
-        //1. move_tempo_line, t=0
+        //1. move_tempo_line, t=0 + highlight on: the three notes
         std::list<SpEventInfo>::iterator itN = m_notifications.begin();
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_move_tempo_line_event );
-        SpEventTempoLine pTLEv( static_pointer_cast<EventTempoLine>(*itN) );
-        //cout << "timepos = " << pTLEv->get_timepos() << endl;
-        CHECK( pTLEv->get_timepos() == 0.0f);
-        ++itN;
-
-        //2. highlight on: the three notes
-        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        SpEventScoreHighlight pEv = static_pointer_cast<EventScoreHighlight>(*itN);
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        SpEventVisualTracking pEv( static_pointer_cast<EventVisualTracking>(*itN) );
         //cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 3);
+        CHECK( pEv->get_num_items() == 4);
         list< pair<int, ImoId> >& items = pEv->get_items();
         list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
+        CHECK( (*itItem).first == EventVisualTracking::k_move_tempo_line );
+        //cout << "item type: " << (*itItem).first << endl;
+        //cout << "timepos = " << pEv->get_timepos() << endl;
+        CHECK( pEv->get_timepos() == 0.0f);
+        ++itItem;
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
-        //3. move_tempo_line, t=64
+        //2. k_end_of_visual_tracking
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_move_tempo_line_event );
-        pTLEv = static_pointer_cast<EventTempoLine>(*itN);
-        //cout << "timepos = " << pTLEv->get_timepos() << endl;
-        CHECK( pTLEv->get_timepos() == 64.0f);
-        ++itN;
-
-        //4. highlight: k_end_of_highlight
-        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        pEv = static_pointer_cast<EventVisualTracking>(*itN);
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_highlight );
+        CHECK( (*itItem).first == EventVisualTracking::k_end_of_visual_tracking );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
-        //5. end_of_playback
+        //3. end_of_playback
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_end_of_playback_event );
     }

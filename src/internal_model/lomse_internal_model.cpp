@@ -3868,7 +3868,7 @@ bool ImoStyle::is_default_style_with_default_values()
     if (m_name == "Heading-1")
         return font_size() == 21.0f
             && font_weight() == k_font_weight_bold
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -3888,39 +3888,39 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     if (m_name == "Heading-2")
         return font_size() == 17.0f
             && font_weight() == k_font_weight_bold
-            && is_equal( margin_top(), 400.0f )
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_top(), 400.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -3940,39 +3940,39 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     if (m_name == "Heading-3")
         return font_size() == 14.0f
             && font_weight() == k_font_weight_bold
-            && is_equal( margin_top(), 400.0f )
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_top(), 400.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -3992,39 +3992,39 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     if (m_name == "Heading-4")
         return font_size() == 12.0f
             && font_weight() == k_font_weight_bold
-            && is_equal( margin_top(), 400.0f )
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_top(), 400.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -4044,39 +4044,39 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     if (m_name == "Heading-5")
         return font_style() == k_font_style_italic
             && font_weight() == k_font_weight_bold
-            && is_equal( margin_top(), 400.0f )
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_top(), 400.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -4096,38 +4096,38 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     if (m_name == "Heading-6")
         return font_style() == k_font_style_italic
-            && is_equal( margin_top(), 400.0f )
-            && is_equal( margin_bottom(), 300.0f )
+            && is_equal_pos( margin_top(), 400.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -4147,41 +4147,41 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //table
     if (m_name == "Table")
-        return is_equal( border_width_top(), 20.0f )
-            && is_equal( border_width_bottom(), 20.0f )
-            && is_equal( border_width_left(), 20.0f )
-            && is_equal( border_width_right(), 20.0f )
-            && is_equal( margin_bottom(), 300.0f )
+        return is_equal_pos( border_width_top(), 20.0f )
+            && is_equal_pos( border_width_bottom(), 20.0f )
+            && is_equal_pos( border_width_left(), 20.0f )
+            && is_equal_pos( border_width_right(), 20.0f )
+            && is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -4201,37 +4201,37 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            //&& is_equal( border_width_top(), k_default_border_width_top )
-            //&& is_equal( border_width_bottom(), k_default_border_width_bottom )
-            //&& is_equal( border_width_left(), k_default_border_width_left )
-            //&& is_equal( border_width_right(), k_default_border_width_right )
+            //&& is_equal_pos( border_width_top(), k_default_border_width_top )
+            //&& is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            //&& is_equal_pos( border_width_left(), k_default_border_width_left )
+            //&& is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //paragraph
     if (m_name == "Paragraph")
-        return is_equal( margin_bottom(), 300.0f )
+        return is_equal_pos( margin_bottom(), 300.0f )
             //inherited defaults:
                //font
             && font_file() == ""
@@ -4251,32 +4251,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            //&& is_equal( margin_top(), k_default_margin_top )
-            //&& is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            //&& is_equal_pos( margin_top(), k_default_margin_top )
+            //&& is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //Tuplets numbers
@@ -4302,32 +4302,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            && is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
                ;
 
     //Instrument names
@@ -4352,32 +4352,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            && is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //Metronome marks
@@ -4402,32 +4402,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            && is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //Lyrics
@@ -4452,32 +4452,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            && is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     //Lyrics
@@ -4503,32 +4503,32 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal(color(), Color(0,0,0))
             && is_equal(background_color(), Color(255,255,255))
                //margin
-            && is_equal( margin_top(), k_default_margin_top )
-            && is_equal( margin_bottom(), k_default_margin_bottom )
-            && is_equal( margin_left(), k_default_margin_left )
-            && is_equal( margin_right(), k_default_margin_right )
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
                //padding
-            && is_equal( padding_top(), k_default_padding_top )
-            && is_equal( padding_bottom(), k_default_padding_bottom )
-            && is_equal( padding_left(), k_default_padding_left )
-            && is_equal( padding_right(), k_default_padding_right )
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
                ////border
             //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
             //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
             //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
             //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
                //border width
-            && is_equal( border_width_top(), k_default_border_width_top )
-            && is_equal( border_width_bottom(), k_default_border_width_bottom )
-            && is_equal( border_width_left(), k_default_border_width_left )
-            && is_equal( border_width_right(), k_default_border_width_right )
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
                //size
-            && is_equal( min_height(), k_default_min_height )
-            && is_equal( max_height(), k_default_max_height )
-            && is_equal( height(), k_default_height )
-            && is_equal( min_width(), k_default_min_width )
-            && is_equal( max_width(), k_default_max_width )
-            && is_equal( width(), k_default_width )
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
             ;
 
     return false;

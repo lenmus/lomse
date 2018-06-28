@@ -138,7 +138,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// PlaybackHighlight: an effect for highlighting note/rests during playback
+// PlaybackHighlight: a visual tracking effect for highlighting note/rests during playback
 class PlaybackHighlight : public VisualEffect
 {
 protected:

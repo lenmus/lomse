@@ -97,15 +97,16 @@ enum EEventFlag
 //---------------------------------------------------------------------------------------
 /** @ingroup enumerations
 
-    This enum describes the valid highlight modes for visual tracking during playback.
+    This enum describes the valid modes for visual tracking during playback.
 
 	@#include <lomse_interactor.h>
 */
-enum EHighlightEffect
+enum EVisualTrackingMode
 {
-    k_highlight_notes_rests =	0x0001, ///<
-    k_highlight_tempo_line =	0x0002, ///<
-    k_highlight_tempo_block =	0x0004, ///<
+    k_tracking_none =               0x0000, ///< Do not add any visual tracking effect
+    k_tracking_highlight_notes =    0x0001, ///< Highlight the notes and rest being played back
+    k_tracking_tempo_line =	        0x0002, ///< Display a vertical line at beat start
+    k_tracking_tempo_block =	    0x0004, ///< Draw a rectangle surrounding all notes/rests in current beat
 };
 
 
@@ -823,36 +824,38 @@ public:
 
 
     // Visual effects during playback
-    /** @name Interface to GraphicView. Playback effects: tempo line
-
-        @todo Visual playback effects explanation
-        @todo Remove remove_all_highlight() or discard_all_highlight()
-
+    /** @name Interface to GraphicView. Visual tracking effects during playback
     */
     //@{
 
     /** Select the visual effect to use for visual tracking during playback.
-        By default, if this method is not invoked, k_highlight_notes_rests is used.
+        By default, if this method is not invoked, k_tracking_highlight_notes is used.
 
-        @param mode It is a value from enum EHighlightEffect. Several visual effects
+        @param mode It is a value from enum EVisualTrackingMode. Several visual effects
         can be en effect simultaneously by combining values
         with the OR ('|') operator. Example:
 
         @code
-        spInteractor->set_highlight_mode(k_highlight_tempo_line | k_highlight_notes_rests);
+        spInteractor->set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highlight_notes);
         @endcode
     */
-	virtual void set_highlight_mode(int mode);
+	virtual void set_visual_tracking_mode(int mode);
 
     /** Move the tempo line to the given note/rest.
         @param pSO The tempo line will be placed at this note or rest.
     */
-    virtual void advance_tempo_line(ImoStaffObj* pSO);
+    virtual void move_tempo_line(ImoStaffObj* pSO);
 
-    /** Move the tempo line to the given measure location.
+    /** Move the tempo line to the given time position.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param timepos Time units from the start of the score.
+    */
+    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
+
+    /** Move the tempo line to the given measure and beat.
         @param scoreId  Id. of the score to which all other parameters refer.
         @param iMeasure Measure number (0..n) in instrument iInstr.
-        @param location Time units after the start of the measure.
+        @param iBeat Beat number (0..m) relative to the measure.
         @param iInstr Number of the instrument (0..m) to which the measures refer to.
             Take into account that for polymetric music (music in which not all
             instruments have the same time signature), the measure number is not an
@@ -860,14 +863,7 @@ public:
             is relative to an instrument. For normal scores, just providing measure
             number and location will do the job.
     */
-    virtual void move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location=0.0f,
-                                 int iInstr=0);
-
-    /** Move the tempo line to the given time position.
-        @param scoreId  Id. of the score to which all other parameters refer.
-        @param timepos Time units from the start of the score.
-    */
-    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
+    virtual void move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */
@@ -878,21 +874,11 @@ public:
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
 
     /// Remove all visual tracking visual effects.
-    virtual void remove_all_highlight();
-
-    /** Remove all visual tracking visual effects. It does the same than
-        remove_all_highlight() but has a different name!! One of them should be
-        removed.
-    */
-    virtual void discard_all_highlight();
+    virtual void remove_all_visual_tracking();
 
     /** @param pEvent The Highlight event to be processed.
-        @todo Document Interactor::on_visual_highlight    */
-    virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
-
-    /** @param pEvent The move tempo line event to be processed.
-        @todo Document Interactor::on_move_tempo_line    */
-    virtual void on_move_tempo_line(SpEventTempoLine pEvent);
+        @todo Document Interactor::on_visual_tracking    */
+    virtual void on_visual_tracking(SpEventVisualTracking pEvent);
 
     //@}    //Visual effects during playback
 
@@ -1454,7 +1440,7 @@ protected:
     void do_force_redraw();
     ImoObj* find_event_originator_imo(GmoObj* pGmo);
     GmoRef find_event_originator_gref(GmoObj* pGmo);
-    bool discard_score_highlight_event_if_not_valid(ImoId scoreId);
+    bool discard_visual_tracking_event_if_not_valid(ImoId scoreId);
     bool is_valid_play_score_event(SpEventPlayCtrl pEvent);
     void update_caret_and_view();
     void redraw_caret();

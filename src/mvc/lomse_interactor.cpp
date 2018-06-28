@@ -201,14 +201,14 @@ void Interactor::handle_event(SpEventInfo pEvent)
             force_redraw();
             break;
 
-        case k_highlight_event:
+        case k_tracking_event:
         {
-            //AWARE: It sould never arrive here as on_visual_highlight() must
+            //AWARE: It sould never arrive here as on_visual_tracking() must
             //be invoked directly by user application to save time
-            LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] Higlight event received");
-            SpEventScoreHighlight pEv(
-                static_pointer_cast<EventScoreHighlight>(pEvent) );
-            on_visual_highlight(pEv);
+            LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] Tracking event received");
+            SpEventVisualTracking pEv(
+                static_pointer_cast<EventVisualTracking>(pEvent) );
+            on_visual_tracking(pEv);
             break;
         }
 
@@ -1070,27 +1070,27 @@ void Interactor::task_action_update_selection_rectangle(Pixels x2, Pixels y2)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_highlight_mode(int mode)
+void Interactor::set_visual_tracking_mode(int mode)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->set_highlight_mode(mode);
+        pGView->set_visual_tracking_mode(mode);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::remove_all_highlight()
+void Interactor::remove_all_visual_tracking()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->remove_all_highlight();
+        pGView->remove_all_visual_tracking();
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::advance_tempo_line(ImoStaffObj* pSO)
+void Interactor::move_tempo_line(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->advance_tempo_line(pSO);
+        pGView->move_tempo_line(pSO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1099,27 +1099,28 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
-//        ImoObj* pScore = nullptr;
-//        if (SpDocument spDoc = m_wpDoc.lock())
-//            pScore = spDoc->get_pointer_to_imo(scoreId);
-//
-//        if (pScore && pScore->is_score())
-//        {
-//            ImoScore* score = static_cast<ImoScore*>(pScore);
-//            MeasureLocator ml = ScoreAlgorithms::get_locator_for(score, timepos);
-//            pGView->move_tempo_line(scoreId, ml);
         pGView->move_tempo_line(scoreId, timepos);
-//        }
     }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location,
-                                 int iInstr)
+void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->move_tempo_line(scoreId, MeasureLocator(iInstr, iMeasure, location));
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
+                                                                 iBeat, iInstr);
+            pGView->move_tempo_line(scoreId, timepos);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1138,14 +1139,6 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->remove_highlight_from_object(pSO);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::discard_all_highlight()
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->remove_all_highlight();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1377,7 +1370,7 @@ int Interactor::get_num_pages()
 //}
 
 //---------------------------------------------------------------------------------------
-bool Interactor::discard_score_highlight_event_if_not_valid(ImoId scoreId)
+bool Interactor::discard_visual_tracking_event_if_not_valid(ImoId scoreId)
 {
     //returns true if event discarded
 
@@ -1388,11 +1381,11 @@ bool Interactor::discard_score_highlight_event_if_not_valid(ImoId scoreId)
     if (!pScore || !pScore->is_score())
     {
         LOMSE_LOG_DEBUG(Logger::k_events,
-            "Highlight discarded: score id: %d, pScore? %s",
+            "Visual tracking event discarded: score id: %d, pScore? %s",
             scoreId,
             (pScore ? "not null" : "null") );
 
-        discard_all_highlight();
+        remove_all_visual_tracking();
         return true;
     }
     return false;
@@ -1413,7 +1406,7 @@ bool Interactor::is_valid_play_score_event(SpEventPlayCtrl UNUSED(pEvent))
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
+void Interactor::on_visual_tracking(SpEventVisualTracking pEvent)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (!pGView)
@@ -1421,28 +1414,36 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        if (discard_score_highlight_event_if_not_valid( pEvent->get_score_id() ))
+        if (discard_visual_tracking_event_if_not_valid( pEvent->get_score_id() ))
             return;
 
-        LOMSE_LOG_DEBUG(Logger::k_events, "Processing higlight event");
+        LOMSE_LOG_DEBUG(Logger::k_events, "Processing visual tracking event");
         std::list< pair<int, ImoId> >& items = pEvent->get_items();
         std::list< pair<int, ImoId> >::iterator it;
         for (it = items.begin(); it != items.end(); ++it)
         {
             switch ((*it).first)
             {
-                case EventScoreHighlight::k_end_of_highlight:
-                    remove_all_highlight();
+                case EventVisualTracking::k_end_of_visual_tracking:
+                    //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_end_of_visual_tracking");
+                    remove_all_visual_tracking();
                     break;
 
-                case EventScoreHighlight::k_highlight_off:
+                case EventVisualTracking::k_highlight_off:
+                    //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_off");
                     remove_highlight_from_object( static_cast<ImoStaffObj*>(
                                                 spDoc->get_pointer_to_imo((*it).second) ));
                     break;
 
-                case EventScoreHighlight::k_highlight_on:
+                case EventVisualTracking::k_highlight_on:
+                    //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_on");
                     highlight_object( static_cast<ImoStaffObj*>(
                                             spDoc->get_pointer_to_imo((*it).second) ));
+                    break;
+
+                case EventVisualTracking::k_move_tempo_line:
+                    //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_move_tempo_line");
+                    move_tempo_line(pEvent->get_score_id(), pEvent->get_timepos());
                     break;
 
                 default:
@@ -1456,27 +1457,7 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
             }
         }
 
-        pGView->draw_playback_highlight();
-        request_window_update();
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::on_move_tempo_line(SpEventTempoLine pEvent)
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (!pGView)
-        return;
-
-    if (SpDocument spDoc = m_wpDoc.lock())
-    {
-        if (discard_score_highlight_event_if_not_valid( pEvent->get_score_id() ))
-            return;
-
-        LOMSE_LOG_DEBUG(Logger::k_events, "Processing tempo line event");
-        move_tempo_line(pEvent->get_score_id(), pEvent->get_timepos());
-
-        pGView->draw_playback_highlight();
+        pGView->draw_visual_tracking();
         request_window_update();
     }
 }

@@ -49,14 +49,17 @@ class GmoBoxSystem;
 
 
 //---------------------------------------------------------------------------------------
-// TempoLine: A playback highlight VisualEffect to display a vertical line at the location
-// of the note/rest being played back.
+/** %TempoLine is a playback visual tracking effect to display a vertical line at the
+    location of the beat being played back.
+*/
 class TempoLine : public VisualEffect
 {
 protected:
     Color m_color;
+    LUnits m_width;
     GmoBoxSystem* m_pBoxSystem;
     URect m_bounds;
+    int m_iPage;
 
 public:
     TempoLine(GraphicView* view, LibraryScope& libraryScope);
@@ -64,7 +67,8 @@ public:
 
     //operations
     void move_to(GmoShape* pShape, GmoBoxSystem* pBoxSystem);
-    void move_to(LUnits xPos, GmoBoxSystem* pBoxSystem);
+    void move_to(LUnits xPos, GmoBoxSystem* pBoxSystem, int iPage);
+    void remove_tempo_line();
 
     //mandatory overrides from VisualEffect
     void on_draw(ScreenDrawer* pDrawer);
@@ -72,9 +76,11 @@ public:
 
     //getters
     inline Color get_color() const { return m_color; }
+    inline LUnits get_width() const { return m_width; }
 
     //set properties
     inline void set_color(Color color) { m_color = color; }
+    inline void set_width(LUnits width) { m_width = width; }
 
 protected:
 

@@ -63,6 +63,7 @@ public:
     //grid table: xPositions/timepos
     inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
     inline TimeGridTable* get_time_grid_table() { return m_pGridTable; }
+    TimeUnits start_time();
     TimeUnits end_time();
     LUnits get_x_for_time(TimeUnits timepos);
 

@@ -118,11 +118,30 @@ public:
 
     /** Return a measure locator for the specified instrument and timepos.
         @param pScore
-        @param instr
         @param timepos
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
     */
     static MeasureLocator get_locator_for(ImoScore* pScore, TimeUnits timepos,
                                           int iInstr=0);
+
+    /** Return the time position for the specified measure and beat.
+        @param pScore
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param iBeat Beat number (0..m) relative to the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    static TimeUnits get_timepos_for(ImoScore* pScore, int iMeasure, int iBeat,
+                                     int iInstr=0);
 
 protected:
     static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,

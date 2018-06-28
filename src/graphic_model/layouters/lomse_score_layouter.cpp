@@ -222,6 +222,7 @@ void ScoreLayouter::initialice_score_layouter()
                                             m_pShapesCreator, m_pPartsEngraver);
 
     get_score_renderization_options();
+    create_stub();
 
     //For debugging:
     //ColStaffObjs* pCol = m_pScore->get_staffobjs_table();
@@ -434,7 +435,6 @@ void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxScorePage(m_pScore);
     pParentBox->add_child_box(m_pItemMainBox);
-    create_stub();
     m_pStub->add_page( static_cast<GmoBoxScorePage*>(m_pItemMainBox) );
 
     m_pItemMainBox->set_origin(pos);

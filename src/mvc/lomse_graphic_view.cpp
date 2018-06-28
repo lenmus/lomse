@@ -46,6 +46,7 @@
 #include "lomse_box_slice.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_system.h"
+#include "lomse_timegrid_table.h"
 
 using namespace std;
 
@@ -117,7 +118,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pTimeGrid(nullptr)
     , m_pSelObjects(nullptr)
     , m_pTempoLine(nullptr)
-    , m_highlightEffect(k_highlight_notes_rests)
+    , m_trackingEffect(k_tracking_highlight_notes)
     , m_backgroundColor( Color(145, 156, 166) )
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
@@ -179,8 +180,10 @@ void GraphicView::set_visual_effects_for_mode(int mode)
     m_pSelObjects->set_visible(fEditionMode);
 
     //effects only visible in playback mode:
-    m_pHighlighted->set_visible(fPlaybackMode);
-    m_pTempoLine->set_visible(fPlaybackMode);
+    if (m_trackingEffect & k_tracking_highlight_notes)
+        m_pHighlighted->set_visible(fPlaybackMode);
+    if (m_trackingEffect & k_tracking_tempo_line)
+        m_pTempoLine->set_visible(fPlaybackMode);
 
     //effects dynamically controlled
     m_pSelRect->set_visible(false);
@@ -696,13 +699,15 @@ void GraphicView::draw_selection_rectangle()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::draw_playback_highlight()
+void GraphicView::draw_visual_tracking()
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
     m_pInteractor->timing_start_measurements();
-    m_pOverlaysGenerator->update_visual_effect(m_pHighlighted, m_pDrawer);
-    m_pOverlaysGenerator->update_visual_effect(m_pTempoLine, m_pDrawer);
+    if (m_trackingEffect & k_tracking_highlight_notes)
+        m_pOverlaysGenerator->update_visual_effect(m_pHighlighted, m_pDrawer);
+    if (m_trackingEffect & k_tracking_tempo_line)
+        m_pOverlaysGenerator->update_visual_effect(m_pTempoLine, m_pDrawer);
     m_pInteractor->timing_renderization_end();
 }
 
@@ -763,6 +768,9 @@ VRect GraphicView::get_damaged_rectangle()
 //---------------------------------------------------------------------------------------
 void GraphicView::highlight_object(ImoStaffObj* pSO)
 {
+    if (!(m_trackingEffect & k_tracking_highlight_notes))
+        return;
+
     GraphicModel* pGModel = get_graphic_model();
     GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
     if (!pShape)
@@ -785,17 +793,28 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 void GraphicView::remove_highlight_from_object(ImoStaffObj* pSO)
 {
+    if (!(m_trackingEffect & k_tracking_highlight_notes))
+        return;
+
     GraphicModel* pGModel = get_graphic_model();
     GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
     m_pHighlighted->remove_highlight(pShape);
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::remove_all_highlight()
+void GraphicView::remove_all_visual_tracking()
 {
-    m_pHighlighted->set_visible(false);
-    m_pHighlighted->remove_all_highlight();
-    m_pTempoLine->set_visible(false);
+    if (m_trackingEffect & k_tracking_highlight_notes)
+    {
+        m_pHighlighted->set_visible(false);
+        m_pHighlighted->remove_all_highlight();
+    }
+
+    if (m_trackingEffect & k_tracking_tempo_line)
+    {
+        m_pTempoLine->set_visible(false);
+        m_pTempoLine->remove_tempo_line();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -831,8 +850,11 @@ void GraphicView::update_selection_rectangle(LUnits x2, LUnits y2)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::advance_tempo_line(ImoStaffObj* pSO)
+void GraphicView::move_tempo_line(ImoStaffObj* pSO)
 {
+    if (!(m_trackingEffect & k_tracking_tempo_line))
+        return;
+
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)
         return;
@@ -859,40 +881,37 @@ void GraphicView::advance_tempo_line(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::move_tempo_line(ImoId scoreId, MeasureLocator ml)
-{
-    GraphicModel* pGModel = get_graphic_model();
-    if (!pGModel)
-        return;
-
-    int iSystem = pGModel->get_system_for(scoreId, ml.iInstr, ml.iMeasure,
-                                          ml.location);
-    //TODO
-//    if (iSystem > 0)
-//    {
-//        GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
-//        LUnits xPos = pBoxSystem->get_x_for_time(??????????);
-//
-//        m_pTempoLine->set_visible(true);
-//        m_pTempoLine->move_to(xPos, pBoxSystem);
-//    }
-}
-
-//---------------------------------------------------------------------------------------
 void GraphicView::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 {
+    if (!(m_trackingEffect & k_tracking_tempo_line))
+        return;
+
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)
         return;
 
-    int iSystem = pGModel->get_system_for(scoreId, timepos);
-    if (iSystem > 0)
+    int iPage;
+    GmoBoxSystem* pBoxSystem = pGModel->get_system_for(scoreId, timepos, &iPage);
+    LOMSE_LOG_DEBUG(Logger::k_events, "move_tempo_line(%d, %f), system=%s",
+                    scoreId, timepos, (pBoxSystem != nullptr ? "found" : "not found"));
+    if (pBoxSystem)
     {
-        GmoBoxSystem* pBoxSystem = pGModel->get_system_box(iSystem);
         LUnits xPos = pBoxSystem->get_x_for_time(timepos);
+        LOMSE_LOG_DEBUG(Logger::k_events, "moving tempo line to %f", xPos);
+
+        //DEBUG --------------------------------------------------------------
+        static GmoBoxSystem* pPrevSystem = nullptr;
+        if (pPrevSystem != pBoxSystem)
+        {
+            pPrevSystem = pBoxSystem;
+            TimeGridTable* pTable = pBoxSystem->get_time_grid_table();
+            LOMSE_LOG_DEBUG(Logger::k_events, "time grid table\n%s",
+                            pTable->dump().c_str());
+        }
+        //END DEBUG ----------------------------------------------------------
 
         m_pTempoLine->set_visible(true);
-        m_pTempoLine->move_to(xPos, pBoxSystem);
+        m_pTempoLine->move_to(xPos, pBoxSystem, iPage);
     }
 }
 
@@ -1456,7 +1475,12 @@ void GraphicView::draw_visible_pages(int minPage, int maxPage)
 UPoint GraphicView::get_page_origin_for(GmoObj* pGmo)
 {
     GraphicModel* pGModel = get_graphic_model();
-    int iPage = pGModel->get_page_number_containing(pGmo);
+    return get_page_origin_for( pGModel->get_page_number_containing(pGmo) );
+}
+
+//---------------------------------------------------------------------------------------
+UPoint GraphicView::get_page_origin_for(int iPage)
+{
     if (iPage < 0)
         return UPoint(0.0, 0.0);
 

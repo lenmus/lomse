@@ -177,7 +177,7 @@ protected:
     list<Handler*>      m_handlers;
     SelectionHighlight* m_pSelObjects;
     TempoLine*          m_pTempoLine;
-    int                 m_highlightEffect;
+    int                 m_trackingEffect;
 
     //bounds for each displayed page
     std::list<URect> m_pageBounds;
@@ -215,9 +215,10 @@ public:
     ///@{
     VRect get_damaged_rectangle();
     UPoint get_page_origin_for(GmoObj* pGmo);
+    UPoint get_page_origin_for(int iPage);
     void draw_all_visual_effects();
     void draw_selection_rectangle();
-    void draw_playback_highlight();
+    void draw_visual_tracking();
     void draw_caret();
     void draw_dragged_image();
     void draw_selected_objects();
@@ -251,13 +252,12 @@ public:
     /** Move the tempo line to the given note/rest.
         @param pSO The tempo line will be placed at this note or rest.
     */
-    virtual void advance_tempo_line(ImoStaffObj* pSO);
+    virtual void move_tempo_line(ImoStaffObj* pSO);
 
-    /** Move the tempo line to the given measure location.
-        @param scoreId  Id. of the score to which the measure location refers.
-        @param ml The location to move the tempo line to.
+    /** Move the tempo line to the given time position.
+        @param scoreId  Id. of the score to which the operation refers.
+        @param timepos The time position to move the tempo line to.
     */
-    virtual void move_tempo_line(ImoId scoreId, MeasureLocator ml);
     virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
 
     /** @param pSO This note or rest will be highlighted
@@ -269,19 +269,19 @@ public:
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
 
     /// Remove all visual tracking visual effects.
-    virtual void remove_all_highlight();
+    virtual void remove_all_visual_tracking();
 
     /** Select the visual effect to use for visual tracking during playback.
-        By default, if this method is not invoked, k_highlight_notes_rests is used.
-        @param mode It is a value from enum EHighlightEffect. Several visual effects
+        By default, if this method is not invoked, k_tracking_highlight_notes is used.
+        @param mode It is a value from enum EVisualTrackingMode. Several visual effects
         can be en effect simultaneously by combining values
         with the OR ('|') operator. Example:
 
         @code
-        set_highlight_mode(k_highlight_tempo_line | k_highlight_notes_rests);
+        set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highlight_notes);
         @endcode
     */
-	inline void set_highlight_mode(int mode) { m_highlightEffect = mode; }
+	inline void set_visual_tracking_mode(int mode) { m_trackingEffect = mode; }
 
     ///@}    //Visual effects for tracking during playback
 

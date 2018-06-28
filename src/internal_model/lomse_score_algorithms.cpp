@@ -288,5 +288,13 @@ MeasureLocator ScoreAlgorithms::get_locator_for(ImoScore* pScore, TimeUnits time
     return ml;
 }
 
+//---------------------------------------------------------------------------------------
+TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int iBeat,
+                                           int iInstr)
+{
+    //TODO
+    return 0.0;
+}
+
 
 }  //namespace lomse

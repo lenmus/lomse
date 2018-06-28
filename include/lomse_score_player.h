@@ -228,8 +228,8 @@ public:
         Before invoking this method, an score must have been loaded in the player by
         invoking the load_score() method.
 
-        @param fVisualTracking Flag to signal if visual tracking effects (playback
-            highlight) are desired. Default value is @FALSE (k_no_visual_tracking).
+        @param fVisualTracking Flag to signal if visual tracking effects
+            are desired. Default value is @FALSE (k_no_visual_tracking).
         @param nMM Tempo speed for playback. Value 0 (default) means that tempo will
             be controlled by the metronome control (in PlayerGui object) that
             was specified in method load_score(). A non-zero value for @c nMM forces
@@ -246,8 +246,8 @@ public:
         invoking the load_score() method.
 
         @param nMeasure Number of measure to play (1..n).
-        @param fVisualTracking Flag to signal if visual tracking effects (playback
-            highlight) are desired. Default value is @FALSE (k_no_visual_tracking).
+        @param fVisualTracking Flag to signal if visual tracking effects
+            are desired. Default value is @FALSE (k_no_visual_tracking).
         @param nMM Tempo speed for playback. Value 0 (default) means that tempo will
             be controlled by the metronome control (in PlayerGui object) that
             was specified in method load_score(). A non-zero value for @c nMM forces
@@ -264,8 +264,8 @@ public:
         invoking the load_score() method.
 
         @param nMeasure Number of measure to play (1..n).
-        @param fVisualTracking Flag to signal if visual tracking effects (playback
-            highlight) are desired. Default value is @FALSE (k_no_visual_tracking).
+        @param fVisualTracking Flag to signal if visual tracking effects
+            are desired. Default value is @FALSE (k_no_visual_tracking).
         @param nMM Tempo speed for playback. Value 0 (default) means that tempo will
             be controlled by the metronome control (in PlayerGui object) that
             was specified in method load_score(). A non-zero value for @c nMM forces
@@ -284,8 +284,8 @@ public:
 
         @param startMeasure Number of measure to start playback (1..n).
         @param numMeasures Number of measures to play.
-        @param fVisualTracking Flag to signal if visual tracking effects (playback
-            highlight) are desired. Default value is @FALSE (k_no_visual_tracking).
+        @param fVisualTracking Flag to signal if visual tracking effects
+            are desired. Default value is @FALSE (k_no_visual_tracking).
         @param nMM Tempo speed for playback. Value 0 (default) means that tempo will
             be controlled by the metronome control (in PlayerGui object) that
             was specified in method load_score(). A non-zero value for @c nMM forces
@@ -328,7 +328,7 @@ public:
 //excluded from public API. Only for internal use.
 
     //For selecting method to send events to user application
-    inline void post_highlight_events(bool value) { m_fPostEvents = value; }
+    inline void post_tracking_events(bool value) { m_fPostEvents = value; }
 
     //only to be used by SoundThread
     void do_play(int nEvStart, int nEvEnd, bool fVisualTracking,

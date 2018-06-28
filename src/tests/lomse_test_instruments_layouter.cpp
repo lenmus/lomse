@@ -78,11 +78,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
     void cout_rectangle(URect rect)
     {
         cout << UnitTest::CurrentTest::Details()->testName << ": x=" << rect.get_x()
@@ -429,13 +424,13 @@ SUITE(RightAlignerTest)
     {
         //021. boder function is empty. get right border.
         MyRightAligner a;
-        CHECK( is_equal(a.my_get_width(), 0.0f) );
-        CHECK( is_equal(a.get_total_height(), 0.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 0.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 0.0f) );
         a.my_set_width(77.0f);
 
         LUnits x = a.my_get_touch_x_pos(20.0f, 30.0f);
 
-        CHECK( is_equal(x, 77.0f) );
+        CHECK( is_equal_pos(x, 77.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -451,7 +446,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(50.0f, 60.0f);
 
-        CHECK( is_equal(x, 45.0f) );
+        CHECK( is_equal_pos(x, 45.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -467,7 +462,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(140.0f, 150.0f);
 
-        CHECK( is_equal(x, 77.0f) );
+        CHECK( is_equal_pos(x, 77.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -483,7 +478,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(30.0f, 60.0f);
 
-        CHECK( is_equal(x, 15.0f) );
+        CHECK( is_equal_pos(x, 15.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -499,7 +494,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(10.0f, 140.0f);
 
-        CHECK( is_equal(x, 15.0f) );
+        CHECK( is_equal_pos(x, 15.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -515,7 +510,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(10.0f, 15.0f);
 
-        CHECK( is_equal(x, 77.0f) );
+        CHECK( is_equal_pos(x, 77.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -531,7 +526,7 @@ SUITE(RightAlignerTest)
 
         LUnits x = a.my_get_touch_x_pos(80.0f, 120.0f);
 
-        CHECK( is_equal(x, 55.0f) );
+        CHECK( is_equal_pos(x, 55.0f) );
         //cout << "x for border = " << x << endl;
     }
 
@@ -541,8 +536,8 @@ SUITE(RightAlignerTest)
     {
         //041. first box determines initial composite box (= Case 3)
         MyRightAligner a;
-        CHECK( is_equal(a.my_get_width(), 0.0f) );
-        CHECK( is_equal(a.get_total_height(), 0.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 0.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 0.0f) );
         URect box1(10.0f, 0.0f, 10.0f, 50.0f);
 
         int iBox = a.add_box(box1);
@@ -550,8 +545,8 @@ SUITE(RightAlignerTest)
         CHECK( iBox == 0 );
         CHECK( a.my_get_box(0) == URect(0.0f, 0.0f, 10.0f, 50.0f) );
         //cout_rectangle(a.my_get_box(0));
-        CHECK( is_equal(a.my_get_width(), 10.0f) );
-        CHECK( is_equal(a.get_total_height(), 50.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 10.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 50.0f) );
         //cout << "RightAligner_041" << ": h=" << a.get_total_height()
         //     << ": w=" << a.my_get_width() << endl;
 
@@ -570,8 +565,8 @@ SUITE(RightAlignerTest)
     {
         //042. case 1: move existing boxes to the right
         MyRightAligner a;
-        CHECK( is_equal(a.my_get_width(), 0.0f) );
-        CHECK( is_equal(a.get_total_height(), 0.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 0.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 0.0f) );
         URect box1(0.0f, 0.0f, 10.0f, 50.0f);
         a.add_box(box1);
         //dump_border(a.my_get_border_points());
@@ -583,8 +578,8 @@ SUITE(RightAlignerTest)
         CHECK( a.my_get_box(0) == URect(45.0f, 0.0f, 10.0f, 50.0f) );
         CHECK( a.my_get_box(1) == URect(0.0f, 20.0f, 45.0f, 10.0f) );
         //cout_rectangle(a.my_get_box(0));
-        CHECK( is_equal(a.my_get_width(), 55.0f) );
-        CHECK( is_equal(a.get_total_height(), 50.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 55.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 50.0f) );
 
         list<UPoint>& border = a.my_get_border_points();
         CHECK( border.size() == 5 );
@@ -618,8 +613,8 @@ SUITE(RightAlignerTest)
         CHECK( a.my_get_box(1) == URect(0.0f, 20.0f, 45.0f, 10.0f) );
         CHECK( a.my_get_box(2) == URect(23.0f, 40.0f, 22.0f, 10.0f) );
         //cout_rectangle(a.my_get_box(2));
-        CHECK( is_equal(a.my_get_width(), 55.0f) );
-        CHECK( is_equal(a.get_total_height(), 50.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 55.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 50.0f) );
 
         list<UPoint>& border = a.my_get_border_points();
         CHECK( border.size() == 6 );
@@ -655,8 +650,8 @@ SUITE(RightAlignerTest)
         CHECK( a.my_get_box(1) == URect(10.0f, 50.0f, 45.0f, 10.0f) );
         CHECK( a.my_get_box(2) == URect(0.0f, 10.0f, 65.0f, 10.0f) );
         //cout_rectangle(a.my_get_box(2));
-        CHECK( is_equal(a.my_get_width(), 65.0f) );
-        CHECK( is_equal(a.get_total_height(), 80.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 65.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 80.0f) );
 
         list<UPoint>& border = a.my_get_border_points();
         CHECK( border.size() == 8 );
@@ -696,8 +691,8 @@ SUITE(RightAlignerTest)
         CHECK( a.my_get_box(1) == URect(0.0f, 50.0f, 45.0f, 10.0f) );
         CHECK( a.my_get_box(2) == URect(23.0f, 10.0f, 32.0f, 10.0f) );
         //cout_rectangle(a.my_get_box(2));
-        CHECK( is_equal(a.my_get_width(), 55.0f) );
-        CHECK( is_equal(a.get_total_height(), 80.0f) );
+        CHECK( is_equal_pos(a.my_get_width(), 55.0f) );
+        CHECK( is_equal_pos(a.get_total_height(), 80.0f) );
 
         list<UPoint>& border = a.my_get_border_points();
         CHECK( border.size() == 8 );

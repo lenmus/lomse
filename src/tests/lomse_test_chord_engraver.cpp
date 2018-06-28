@@ -105,11 +105,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
     void create_chord(int step1, int octave1, int step2, int octave2,
                      int step3=-1, int octave3=-1, int noteType=k_eighth)
     {
@@ -386,10 +381,10 @@ SUITE(ChordEngraverTest)
         m_pChordEngrv->my_decide_on_stem_direction();
         m_pChordEngrv->my_align_noteheads();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         //cout << "note1. left=" << m_pShape1->get_notehead_left() << endl;
         //cout << "note2. left=" << m_pShape2->get_notehead_left() << endl;
@@ -406,11 +401,11 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_arrange_notheads_to_avoid_collisions();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pChordEngrv->my_get_stem_width(), 21.6f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pChordEngrv->my_get_stem_width(), 21.6f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -427,10 +422,10 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_add_stem_and_flag();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -448,15 +443,15 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_set_anchor_offset();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
 
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape2->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -468,19 +463,19 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->create_shapes();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
 
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape2->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         //cout << m_pShape1->get_stem_left() << endl;
-        CHECK ( is_equal(m_pShape1->get_stem_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape1->get_stem_width(), 21.6f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_width(), 21.6f) );
 
         delete_chord();
     }
@@ -499,10 +494,10 @@ SUITE(ChordEngraverTest)
         m_pChordEngrv->my_decide_on_stem_direction();
         m_pChordEngrv->my_align_noteheads();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         //cout << "note1. left=" << m_pShape1->get_notehead_left() << endl;
         //cout << "note2. left=" << m_pShape2->get_notehead_left() << endl;
@@ -521,11 +516,11 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_arrange_notheads_to_avoid_collisions();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 207.4f) );
-        CHECK ( is_equal(m_pChordEngrv->my_get_stem_width(), 21.6f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pChordEngrv->my_get_stem_width(), 21.6f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -542,11 +537,11 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_add_stem_and_flag();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 207.4f) );
-        CHECK ( is_equal(m_pChordEngrv->my_get_stem_width(), 21.6f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pChordEngrv->my_get_stem_width(), 21.6f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -564,16 +559,16 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->my_set_anchor_offset();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
 
         //cout << "anchor offset: " << m_pShape2->get_anchor_offset() << endl;
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape2->get_anchor_offset(), 197.4f) );
-        CHECK ( is_equal(m_pShape2->get_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_anchor_offset(), 197.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
         delete_chord();
     }
@@ -585,18 +580,18 @@ SUITE(ChordEngraverTest)
 
         m_pChordEngrv->create_shapes();
 
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 219.0f) );
 
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape2->get_anchor_offset(), 197.4f) );
-        CHECK ( is_equal(m_pShape2->get_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 219.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_anchor_offset(), 197.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 219.0f) );
 
-        CHECK ( is_equal(m_pShape1->get_stem_left(), 207.4f) );
-        CHECK ( is_equal(m_pShape1->get_stem_width(), 21.6f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_left(), 207.4f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_width(), 21.6f) );
 
         delete_chord();
     }
@@ -609,23 +604,23 @@ SUITE(ChordEngraverTest)
         m_pChordEngrv->create_shapes();
 
         //cout << "notehead width: " << m_pShape1->get_notehead_width() << endl;
-        CHECK ( is_equal(m_pShape1->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape1->get_notehead_width(), 313.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_notehead_width(), 313.0f) );
 
-        CHECK ( is_equal(m_pShape2->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape2->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape2->get_notehead_width(), 313.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape2->get_notehead_width(), 313.0f) );
 
-        CHECK ( is_equal(m_pShape3->get_notehead_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape3->get_anchor_offset(), 0.0f) );
-        CHECK ( is_equal(m_pShape3->get_left(), 10.0f) );
-        CHECK ( is_equal(m_pShape3->get_notehead_width(), 313.0f) );
+        CHECK ( is_equal_pos(m_pShape3->get_notehead_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape3->get_anchor_offset(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape3->get_left(), 10.0f) );
+        CHECK ( is_equal_pos(m_pShape3->get_notehead_width(), 313.0f) );
 
-        CHECK ( is_equal(m_pShape1->get_stem_left(), 0.0f) );
-        CHECK ( is_equal(m_pShape1->get_stem_width(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_left(), 0.0f) );
+        CHECK ( is_equal_pos(m_pShape1->get_stem_width(), 0.0f) );
 
         //cout << "note1. left=" << m_pShape1->get_notehead_left()
         //     << ", width=" << m_pShape1->get_notehead_width() << endl;

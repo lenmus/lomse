@@ -1,16 +1,44 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.24.0
+[Since last version] 0.25.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.24.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.25.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.25.0] (29/Jun/2018)
+=============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.24.0
+
+* Until now all visual tracking effects were named score highlight effects due to the fact that highlighting notes/rests was the first programmed visual effect. But, currently, Lomse supports more visual tracking effects and, for coherence and to use more descriptive names, all references to score highlight effects have been changed, when appropriate, to 'visual tracking' effects. In particular, the more important changes that will affect your code are:
+	- Class `EventScoreHighlight` changed to `EventVisualTracking`.
+	- Type `SpEventcoreHighlight` changed to `SpEventVisualTracking`.
+	- Enum item `k_highlight_event` changed to `k_tracking_event`.
+	- Method `Interactor::on_visual_highlight` changed to `Interactor::on_visual_tracking`.
+	- Enum item `k_end_of_higlight` changed to `k_end_of_visual_tracking`.
+	- Enum item `k_advance_tempo_line` changed to `k_move_tempo_line`.
+	- Enum item `k_highlight_event` changed to `k_tracking_event`.
+
+
+##### COMPATIBLE CHANGES
+
+* Added method `Interactor::set_visual_tracking_mode(int mode)` for selecting the visual trackin effect to use. A new enum `EVisualTrackingMode` defines valid modes.
+* Changes to allow extension '.musicxml' for uncompressed MusicXML files.
+* Added some initial code to deal with `global` elements in experimental MNX importer.
+* Changes to allow compilers other than GCC and MSVC.
+* Several fixes to make Lomse buildable in macOS with clang compiler.
+* Several changes for trying to reduce or eliminate dependencies from other libraries. In particular:
+	- PR #144 Replaced boost::format with standard functions
+	- PR #146 Replaced boost::variant with union class
 
 
 
@@ -628,7 +656,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.24.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.25.0...HEAD
+[0.25.0]: https://github.com/lenmus/lomse/compare/0.24.0...0.25.0
 [0.24.0]: https://github.com/lenmus/lomse/compare/0.23.0...0.24.0
 [0.23.0]: https://github.com/lenmus/lomse/compare/0.22.0...0.23.0
 [0.22.0]: https://github.com/lenmus/lomse/compare/0.21.0...0.22.0

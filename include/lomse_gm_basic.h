@@ -90,7 +90,11 @@ public:
     inline vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
 
     /** Returns the GmoBoxScorePage containing timepos @c time. If @c time is not in
-        the score, returns nullptr.
+        the score, returns @nullptr. This method gives preference to find pages for
+        events instead of non-timed staff objects. For example, the last
+        barline in one page has the same timepos than the first event in next page.
+        Therefore, as there exist two pages containing the same timepos, this method
+        will return the second page.
         @param time The time position (absolute time units) for the requested page.
     */
     GmoBoxScorePage* get_page_for(TimeUnits time);
@@ -551,6 +555,7 @@ public:
 
 	//systems
     void add_system(GmoBoxSystem* pSystem, int iSystem);
+    inline int get_num_first_system() const { return m_iFirstSystem; }
     inline int get_num_last_system() const { return m_iLastSystem; }
     inline int get_num_systems() {
         return (m_iFirstSystem == -1 ? 0 : m_iLastSystem - m_iFirstSystem + 1);
@@ -560,6 +565,7 @@ public:
 
 	//timepos information
 	TimeUnits end_time();
+	TimeUnits start_time();
 
     //hit tests related
     int nearest_system_to_point(LUnits y);

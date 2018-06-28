@@ -139,6 +139,12 @@ int GmoBoxSystem::nearest_staff_to_point(LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
+TimeUnits GmoBoxSystem::start_time()
+{
+    return  m_pGridTable->start_time();
+}
+
+//---------------------------------------------------------------------------------------
 TimeUnits GmoBoxSystem::end_time()
 {
     return  m_pGridTable->end_time();
