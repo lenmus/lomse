@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2018/01/11 -->
+<!-- $Updated: 2018/06/28 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -23,8 +23,8 @@ In this tutorial we are going to learn how to do this. You can download the full
 <!--====================================================-->
 
 <ol>
-<li><a href="#highlight">Lomse playback: score highlight events</li></a>
-<li><a href="#receiving">Changes for receiving score highlight events</li></a>
+<li><a href="#tracking">Lomse playback: visual tracking events</li></a>
+<li><a href="#receiving">Changes for receiving visual tracking events</li></a>
 <li><a href="#handling">Defining our application events</li></a>
 <li><a href="#mycanvas">Changes for handling our application events</a></li>
 <li><a href="#compile">Compiling your code and building</a></li>
@@ -35,25 +35,25 @@ In this tutorial we are going to learn how to do this. You can download the full
 
 
 
-<h2><a name="highlight">1. Lomse playback: score highlight events</h2></a>
+<h2><a name="tracking">1. Lomse playback: visual tracking events</h2></a>
 <!--====================================================-->
 
 <p>
-As we learn in previous tutorial, invocation of <tt>ScorePlayer::play()</tt> method will trigger all the playback machinery. As a consequence, Lomse will start playback and will generate two types of events: <i>sound</i> events and <i>score highlight</i> events. Sound event must always be handled by your application code, but handling <i>score highlight</i> events is optional.
+As we learn in previous tutorial, invocation of <tt>ScorePlayer::play()</tt> method will trigger all the playback machinery. As a consequence, Lomse will start playback and will generate two types of events: <i>sound</i> events and <i>visual tracking</i> events. Sound event must always be handled by your application code, but handling <i>visual tracking</i> events is optional.
 </p>
 
 <div class="warning">
 <p>
-When your application handles <i>score highlight</i> events it is important to return control to Lomse as soon as possible. This is because, currently, Lomse does not implement an event subsystem with its own thread. Instead Lomse sends events to your application by invoking a callback. This implies that your application code for handling the event is processed by the Lomse thread. As this thread is dealing with sound generation, any delay will cause delays in the music tempo, which will be unacceptable. Therefore, to avoid delays, the suggested way for handling <i>score highlight</i> events is to generate an application event and to enqueue it in the application events system.
+When your application handles <i>visual tracking</i> events it is important to return control to Lomse as soon as possible. This is because, currently, Lomse does not implement an event subsystem with its own thread. Instead Lomse sends events to your application by invoking a callback. This implies that your application code for handling the event is processed by the Lomse thread. As this thread is dealing with sound generation, any delay will cause delays in the music tempo, which will be unacceptable. Therefore, to avoid delays, the suggested way for handling <i>visual tracking</i> events is to generate an application event and to enqueue it in the application events system.
 </p>
 </div>
 
 <p>
-In your application, processing an <i>score highlight</i> event can be as complex as needed for generating any fancy visual feedback. Alternatively, it can be a trivial task, as Lomse provides standard event handlers for creating standard visual effects (coloured notes, tempo line or both). If you would like to use Lomse standard visual effects, your application code should just pass the event to the interactor, and it will take care of all necessary tasks. Finally, your application will receive an <i>update view</i> event, and all you have to do is to copy the already updated rendering bitmap onto the window.
+In your application, processing an <i>visual tracking</i> event can be as complex as needed for generating any fancy visual feedback. Alternatively, it can be a trivial task, as Lomse provides standard event handlers for creating standard visual effects (coloured notes, tempo line or both). If you would like to use Lomse standard visual effects, your application code should just pass the event to the interactor, and it will take care of all necessary tasks. Finally, your application will receive an <i>update view</i> event, and all you have to do is to copy the already updated rendering bitmap onto the window.
 </p>
 
 <p>
-As you can see, handling <i>score highlight</i> events in your application is a round trip to, finally, delegate its handling on Lomse! But this round trip has an important gain: the code for implementing visual highlight is executed in your application thread instead of in Lomse playback thread. As a consequence, all concurrency problems automatically disappear!
+As you can see, handling <i>visual tracking</i> events in your application is a round trip to, finally, delegate its handling on Lomse! But this round trip has an important gain: the code for implementing visual highlight is executed in your application thread instead of in Lomse playback thread. As a consequence, all concurrency problems automatically disappear!
 </p>
 
 <p>
@@ -63,11 +63,11 @@ To avoid this burden in your application, probably the best solution will be to 
 
 
 
-<h2><a name="receiving">2. Changes for receiving score highlight events</h2></a>
+<h2><a name="receiving">2. Changes for receiving visual tracking events</h2></a>
 <!--====================================================-->
 
 <p>
-In this tutorial we will use the code from tutorial 3 and modify it for handling <i>score highlight</i> events.
+In this tutorial we will use the code from tutorial 3 and modify it for handling <i>visual tracking</i> events.
 First step is to prepare our application to handle these events. For this, we will define a callback method in <tt>MyFrame</tt>. This is the standard procedure for handling events, of any type, sent by Lomse. As explained in tutorial 2 (see section <a href="tutorial-2-wx.htm#paint" target="_blank">Events sent by Lomse</a>) setting a callback requires defining two methods: an static one (the wrapper method) and the real one that will do the job. Here is our definition:
 </p>
 
@@ -111,7 +111,7 @@ void MyFrame::wrapper_lomse_event(void* pThis, SpEventInfo pEvent)
 </pre>
 
 <p>
-As to the method doing the real work, it has to create an application event and to enqueue it in the application events system, as explained in <a href="highlight">Lomse playback: score highlight events</a>. Therefore, before coding this method we have to define our own application event. 
+As to the method doing the real work, it has to create an application event and to enqueue it in the application events system, as explained in <a href="highlight">Lomse playback: visual tracking events</a>. Therefore, before coding this method we have to define our own application event. 
 </p>
 
 
@@ -120,50 +120,50 @@ As to the method doing the real work, it has to create an application event and 
 <!--====================================================-->
 
 <p>
-As we have to deal with Lomse events of type <tt>k_highlight_event</tt>, we will define an equivalent wxWidgets event: <tt>MyScoreHighlightEvent</tt>. It will wrap the Lomse event. As this is standard wxWidgets coding, I will not enter into details. Here is the declaration:
+As we have to deal with Lomse events of type <tt>k_tracking_event</tt>, we will define an equivalent wxWidgets event: <tt>MyVisualTrackingEvent</tt>. It will wrap the Lomse event. As this is standard wxWidgets coding, I will not enter into details. Here is the declaration:
 </p>
 
 <pre class="code">
 //---------------------------------------------------------------------------------------
-// MyScoreHighlightEvent
+// MyVisualTrackingEvent
 //      An event to signal different actions related to
-//      highlighting / unhighlighting notes while they are being played.
+//      visual tracking effects for score playback.
 //---------------------------------------------------------------------------------------
 
-DECLARE_EVENT_TYPE( MY_EVT_SCORE_HIGHLIGHT_TYPE, -1 )
+DECLARE_EVENT_TYPE( MY_EVT_VISUAL_TRACKING_TYPE, -1 )
 
-class MyScoreHighlightEvent : public wxEvent
+class MyVisualTrackingEvent : public wxEvent
 {
 private:
-    SpEventScoreHighlight m_pEvent;   //lomse event
+    SpEventVisualTracking m_pEvent;   //lomse event
 
 public:
-    MyScoreHighlightEvent(SpEventScoreHighlight pEvent, int id = 0)
-        : wxEvent(id, MY_EVT_SCORE_HIGHLIGHT_TYPE)
+    MyVisualTrackingEvent(SpEventVisualTracking pEvent, int id = 0)
+        : wxEvent(id, MY_EVT_VISUAL_TRACKING_TYPE)
         , m_pEvent(pEvent)
     {
     }
 
     // copy constructor
-    MyScoreHighlightEvent(const MyScoreHighlightEvent& event)
+    MyVisualTrackingEvent(const MyVisualTrackingEvent& event)
         : wxEvent(event)
         , m_pEvent( event.m_pEvent )
     {
     }
 
     // clone constructor. Required for sending with wxPostEvent()
-    virtual wxEvent *Clone() const { return new MyScoreHighlightEvent(*this); }
+    virtual wxEvent *Clone() const { return new MyVisualTrackingEvent(*this); }
 
     // accessors
-    SpEventScoreHighlight get_lomse_event() { return m_pEvent; }
+    SpEventVisualTracking get_lomse_event() { return m_pEvent; }
 };
 
-typedef void (wxEvtHandler::*ScoreHighlightEventFunction)(MyScoreHighlightEvent&);
+typedef void (wxEvtHandler::*VisualTrackingEventFunction)(MyVisualTrackingEvent&);
 
-#define MY_EVT_SCORE_HIGHLIGHT(fn) \
-    DECLARE_EVENT_TABLE_ENTRY( MY_EVT_SCORE_HIGHLIGHT_TYPE, wxID_ANY, -1, \
+#define MY_EVT_VISUAL_TRACKING(fn) \
+    DECLARE_EVENT_TABLE_ENTRY( MY_EVT_VISUAL_TRACKING_TYPE, wxID_ANY, -1, \
     (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
-    wxStaticCastEvent( ScoreHighlightEventFunction, & fn ), (wxObject *) NULL ),
+    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) NULL ),
 </pre>
 
 <p>
@@ -171,7 +171,7 @@ And the definition:
 </p>
 
 <pre class="code">
-DEFINE_EVENT_TYPE( MY_EVT_SCORE_HIGHLIGHT_TYPE )
+DEFINE_EVENT_TYPE( MY_EVT_VISUAL_TRACKING_TYPE )
 </pre>
 
 
@@ -187,13 +187,13 @@ void MyFrame::on_lomse_event(SpEventInfo pEvent)
 
     switch (pEvent->get_event_type())
     {
-        case k_highlight_event:
+        case k_tracking_event:
         {
             if (pCanvas)
             {
-                SpEventScoreHighlight pEv(
-                    static_pointer_cast<EventScoreHighlight>(pEvent) );
-                MyScoreHighlightEvent event(pEv);
+                SpEventVisualTracking pEv(
+                    static_pointer_cast<EventVisualTracking>(pEvent) );
+                MyVisualTrackingEvent event(pEv);
                 ::wxPostEvent(pCanvas, event);
             }
             break;
@@ -211,7 +211,7 @@ As you can see, what we do is to transform the Lomse event into a wxWidgets even
 
 
 
-<h2><a name="mycanvas">4. Changes for handling score highlight events</h2></a>
+<h2><a name="mycanvas">4. Changes for handling visual tracking events</h2></a>
 <!--====================================================-->
 
 <p>
@@ -221,7 +221,7 @@ Our playback events will be processed in <tt>MyCanvas</tt>. For this, first thin
 <pre class="code">
 BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
     ...
-    MY_EVT_SCORE_HIGHLIGHT(MyCanvas::on_visual_highlight)
+    MY_EVT_VISUAL_TRACKING(MyCanvas::on_visual_tracking)
 END_EVENT_TABLE()
 </pre>
 
@@ -236,7 +236,7 @@ class MyCanvas : public wxWindow, public PlayerNoGui
 protected:
     //event handlers
     ...
-    void on_visual_highlight(MyScoreHighlightEvent& event);
+    void on_visual_tracking(MyVisualTrackingEvent& event);
 </pre>
 
 <p>
@@ -244,14 +244,18 @@ As we will implement standard visual effects, the implementation of this method 
 </p>
 
 <pre class="code">
-void MyCanvas::on_visual_highlight(MyScoreHighlightEvent& event)
+void MyCanvas::on_visual_tracking(MyVisualTrackingEvent& event)
 {
-    SpEventScoreHighlight pEv = event.get_lomse_event();
+    SpEventVisualTracking pEv = event.get_lomse_event();
     WpInteractor wpInteractor = pEv->get_interactor();
     if (SpInteractor sp = wpInteractor.lock())
-        sp->on_visual_highlight(pEv);
+        sp->on_visual_tracking(pEv);
 }
 </pre>
+
+<p>
+By default, the visual tracking effect that Lomse uses is to highlight the notes and rests being played back. But you can select the effect to use by invoking method <tt>Interactor::set:visual_tracking_mode(int mode)</tt>.
+</p>
 
 <p>
 And this is all. Our code is now finished and our application is ready for building and testing. You can download the full source code for this example from

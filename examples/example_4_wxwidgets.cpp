@@ -984,7 +984,7 @@ void MyCanvas::play_start()
         //the score to play is the first element in the document.
         //In a real application, as the document could contain texts, images and many
         //scores, you shoud get the pointer to the score to play in a suitable way.
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_im_root()->get_content_item(0) );
 
         if (pScore)
         {
