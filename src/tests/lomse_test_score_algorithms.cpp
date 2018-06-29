@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,6 +38,8 @@
 #include "lomse_im_note.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_document_cursor.h"
+#include "lomse_score_algorithms.h"
+#include "lomse_measures_table.h"
 
 
 using namespace UnitTest;
@@ -74,6 +76,11 @@ public:
         }
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
 };
 
 SUITE(ScoreAlgorithmsTest)
@@ -96,9 +103,9 @@ SUITE(ScoreAlgorithmsTest)
         CHECK( pNote->get_fpitch() == FPitch("e4") );
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_1)
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_021)
     {
-        //inserted note starts and ends at same time than existing note
+        //@021. requested interval starts and ends at same time than existing note
         // 1 case: nrT == t (full)
         //  (clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)
         //          0--------32
@@ -124,9 +131,9 @@ SUITE(ScoreAlgorithmsTest)
         delete_overlaps(overlaps);
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_2)
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_022)
     {
-        //inserted note starts after and ends at same time than existing note
+        //@022. requested interval starts after and ends at same time than existing note
         // 1 case: nrT < t (at_end)
         //  (clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)
         //               24--32
@@ -152,9 +159,9 @@ SUITE(ScoreAlgorithmsTest)
         delete_overlaps(overlaps);
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_3)
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_023)
     {
-        //inserted note starts before and ends at same time than existing note
+        //@023. requested interval starts before and ends at same time than existing note
         // 2 cases: nrT < t (at end) & t < nrT (full)
         //  (clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)
         //               24-------------64
@@ -189,9 +196,9 @@ SUITE(ScoreAlgorithmsTest)
         delete_overlaps(overlaps);
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_4)
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_024)
     {
-        //inserted note starts at same time than existing note, but ends before
+        //@024. requested interval starts at same time than existing note, but ends before
         // 1 case: nrT == t (at_start)
         //  (clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)
         //          0----24
@@ -217,9 +224,9 @@ SUITE(ScoreAlgorithmsTest)
         delete_overlaps(overlaps);
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_5)
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, find_and_classify_025)
     {
-        //inserted note starts before and ends at same time than existing note
+        //@025. requested interval starts before and ends at same time than existing note
         //  (clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)
         //               24----------56
         Document doc(m_libraryScope);
@@ -251,6 +258,219 @@ SUITE(ScoreAlgorithmsTest)
         CHECK( is_equal_time(pOV->overlap, 24.0) );
 
         delete_overlaps(overlaps);
+    }
+
+
+
+    // using the measures table ---------------------------------------------------------
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_001)
+    {
+        //@001. Found in first guess. At start of measure
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(384.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 384.0f );
+        CHECK( pMeasure->get_table_index() == 3 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_002)
+    {
+        //@002. Found in first guess. At middle
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(400.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 384.0f );
+        CHECK( pMeasure->get_table_index() == 3 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_003)
+    {
+        //@003. First guess is low
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(660.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 640.0f );
+        CHECK( pMeasure->get_table_index() == 5 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_004)
+    {
+        //@004. First guess is high
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(150.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 128.0f );
+        CHECK( pMeasure->get_table_index() == 1 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_005)
+    {
+        //@005. Lowest value
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(0.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 0.0f );
+        CHECK( pMeasure->get_table_index() == 0 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, measures_table_006)
+    {
+        //@006. Higher than max
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImMeasuresTable* pTable = pInstr->get_measures_table();
+        CHECK( pTable->num_entries() == 8 );
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        ImMeasuresTableEntry* pMeasure = pTable->get_measure_at(1000.0);
+
+        CHECK( pMeasure != nullptr );
+        CHECK( pMeasure->get_timepos() == 896.0f );
+        CHECK( pMeasure->get_table_index() == 7 );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_locator_for_100)
+    {
+        //@100. just check that ImMeasuresTable::get_measure_at() is invoked
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))");
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        MeasureLocator ml = ScoreAlgorithms::get_locator_for(pScore, 160.0);
+
+//        cout << test_name() << endl;
+//        cout << "instr=" << ml.iInstr << ", meas=" << ml.iMeasure << ", loc=" << ml.location << endl;
+        CHECK( ml.iInstr == 0 );
+        CHECK( ml.iMeasure == 1 );      //measure 1 starts at 128
+        CHECK( ml.location == 32.0 );   //160 - 128 = 32
     }
 
 }

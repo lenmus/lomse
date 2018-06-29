@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,7 +70,13 @@ class GraphicModel;
 
 
 //---------------------------------------------------------------------------------------
-// Helper class: contains information related to graphical model for one score
+/** %ScoreStub is a helper class containing information related to graphical model for
+    one score.
+    As the graphic model is a general model, it has no specific information about the
+    details for each score graphic model. Therefore, to store and manage tables and
+    other information related to each score graphic model, this helper class
+    is used.
+*/
 class ScoreStub
 {
 protected:
@@ -82,6 +88,16 @@ public:
 
     inline void add_page(GmoBoxScorePage* pPage) { m_pages.push_back(pPage); }
     inline vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
+
+    /** Returns the GmoBoxScorePage containing timepos @c time. If @c time is not in
+        the score, returns @nullptr. This method gives preference to find pages for
+        events instead of non-timed staff objects. For example, the last
+        barline in one page has the same timepos than the first event in next page.
+        Therefore, as there exist two pages containing the same timepos, this method
+        will return the second page.
+        @param time The time position (absolute time units) for the requested page.
+    */
+    GmoBoxScorePage* get_page_for(TimeUnits time);
 
 };
 
@@ -527,8 +543,8 @@ public:
 class GmoBoxScorePage : public GmoBox
 {
 protected:
-    int m_nFirstSystem;     //0..n-1
-    int m_nLastSystem;      //0..n-1
+    int m_iFirstSystem;     //0..n-1
+    int m_iLastSystem;      //0..n-1
     int m_iPage;            //0..n-1        number of this score page
 
 public:
@@ -539,12 +555,17 @@ public:
 
 	//systems
     void add_system(GmoBoxSystem* pSystem, int iSystem);
-    inline int get_num_last_system() const { return m_nLastSystem; }
+    inline int get_num_first_system() const { return m_iFirstSystem; }
+    inline int get_num_last_system() const { return m_iLastSystem; }
     inline int get_num_systems() {
-        return (m_nFirstSystem == -1 ? 0 : m_nLastSystem - m_nFirstSystem + 1);
+        return (m_iFirstSystem == -1 ? 0 : m_iLastSystem - m_iFirstSystem + 1);
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
 	inline int get_page_number() { return m_iPage; }
+
+	//timepos information
+	TimeUnits end_time();
+	TimeUnits start_time();
 
     //hit tests related
     int nearest_system_to_point(LUnits y);

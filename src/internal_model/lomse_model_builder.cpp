@@ -37,6 +37,7 @@
 #include "lomse_score_utilities.h"
 #include "lomse_logger.h"
 #include "lomse_im_factory.h"
+#include "lomse_measures_table.h"
 
 #include <algorithm>
 using namespace std;
@@ -98,6 +99,9 @@ void ModelBuilder::structurize(ImoObj* pImo)
 
         ColStaffObjsBuilder builder;
         builder.build(pScore);
+
+        MeasuresTableBuilder measures;
+        measures.build(pScore);
 
         MidiAssigner assigner;
         assigner.assign_midi_data(pScore);
@@ -290,7 +294,7 @@ void MidiAssigner::assign_score_instr_id()
 void MidiAssigner::assign_port_and_channel()
 {
     //Algorithm:
-    //- each port has 16 channels, assume infinite number of ports
+    //- each port (p) has 16 channels (c), assume infinite number of ports
     //- mapping index: p*16+c
     //- initial default index: idx=0
     // Rules:
@@ -374,6 +378,100 @@ void MidiAssigner::assign_port_and_channel()
             }
         }
     }
+}
+
+
+//=======================================================================================
+// MeasuresTableBuilder implementation
+//=======================================================================================
+MeasuresTableBuilder::MeasuresTableBuilder()
+{
+}
+
+//---------------------------------------------------------------------------------------
+MeasuresTableBuilder::~MeasuresTableBuilder()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void MeasuresTableBuilder::build(ImoScore* pScore)
+{
+    ColStaffObjs* pCSO = pScore->get_staffobjs_table();
+    if (pCSO->num_entries() == 0)
+        return;
+
+    int numInstrs = pScore->get_num_instruments();
+    m_instruments.assign(numInstrs, nullptr);
+    m_measures.assign(numInstrs, nullptr);
+
+    ColStaffObjsIterator it = pCSO->begin();
+    while (it != pCSO->end())
+    {
+        ColStaffObjsEntry* pCsoEntry = *it;
+        int iInstr = pCsoEntry->num_instrument();
+        ImoStaffObj* pSO = pCsoEntry->imo_object();
+
+        //if first entry for the instrument create measures table and first measure
+        if (m_instruments[iInstr] == nullptr)
+        {
+            ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+            start_measures_table_for(iInstr, pInstr, pCsoEntry);
+        }
+
+        //start new measure if no current measure
+        if (m_measures[iInstr] == nullptr)
+            start_new_measure(iInstr, pCsoEntry);
+
+        //if Time Signature update beat duration
+        if (pSO->is_time_signature())
+        {
+            ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(pSO);
+            m_measures[iInstr]->set_beat_duration( pTS->get_beat_duration() );
+        }
+
+        //if not intermediate barline finish current measure
+        if (pSO->is_barline())
+        {
+            ImoBarline* pBL = static_cast<ImoBarline*>(pSO);
+            if (!pBL->is_middle())
+                finish_current_measure(iInstr);
+        }
+
+        //advance to next entry
+        ++it;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MeasuresTableBuilder::start_measures_table_for(int iInstr, ImoInstrument* pInstr,
+                                                    ColStaffObjsEntry* pCsoEntry)
+{
+    m_instruments[iInstr] = pInstr;
+
+    //create measures table
+    ImMeasuresTable* pTable = LOMSE_NEW ImMeasuresTable();
+    pInstr->set_measures_table(pTable);
+
+    //add first measure
+    m_measures[iInstr] = pTable->add_entry(pCsoEntry);
+}
+
+//---------------------------------------------------------------------------------------
+void MeasuresTableBuilder::finish_current_measure(int iInstr)
+{
+    m_measures[iInstr] = nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+void MeasuresTableBuilder::start_new_measure(int iInstr, ColStaffObjsEntry* pCsoEntry)
+{
+    ImoInstrument* pInstr = m_instruments[iInstr];
+    ImMeasuresTable* pTable = pInstr->get_measures_table();
+    ImMeasuresTableEntry* prevMeasure = pTable->back();
+    m_measures[iInstr] = pTable->add_entry(pCsoEntry);
+
+    if (prevMeasure != nullptr)
+        m_measures[iInstr]->set_beat_duration( prevMeasure->get_beat_duration() );
 }
 
 

@@ -1062,4 +1062,38 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
 }
 
 
+//=======================================================================================
+// ScoreStub implementation
+//=======================================================================================
+GmoBoxScorePage* ScoreStub::get_page_for(TimeUnits timepos)
+{
+    //find page with end time greater or equal than requested time
+
+    int maxPage = int(m_pages.size());
+    int i=0;
+    for (; i < maxPage; ++i)
+    {
+//        LOMSE_LOG_DEBUG(Logger::k_events, "page %d. End time = %f",
+//                        i, m_pages[i]->end_time());
+        if (is_lower_time(timepos, m_pages[i]->end_time()))
+            break;
+        else if(is_equal_time(timepos, m_pages[i]->end_time()))
+        {
+            //look in next page
+            int iNext = i + 1;
+            if (iNext < maxPage)
+            {
+                if (is_equal_time(timepos, m_pages[iNext]->start_time()))
+                    ++i;
+            }
+            break;
+        }
+    }
+    if (i == maxPage)
+        return nullptr;
+    else
+        return m_pages[i];
+}
+
+
 }  //namespace lomse

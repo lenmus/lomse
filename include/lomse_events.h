@@ -105,10 +105,10 @@ enum EEventType
         k_stop_playback_event,          ///< Request to stop playback
 
     //EventPlayback
-        //EventScoreHighlight
-        k_highlight_event,              ///< Wrapper event containing a list of real events
+        //EventVisualTracking
+        k_tracking_event,              ///< Wrapper event containing a list of real events
         //EventUpdateViewport
-        k_update_viewport_event,        ///< Suggest to change viewport
+        k_update_viewport_event,        ///< Suggest to change viewport.
         //EventEndOfPlayback
         k_end_of_playback_event,        ///< Playback ended.
 
@@ -132,7 +132,8 @@ public:
     /** Returns a pointer to the Observable object (an ImoContentObj) related to the
         event. It is either the mouse pointed object or the first ancestor of type
         ImoContentObj in the internal model hierarchy. If the event is not related
-        to an Observable object it returns nullptr. */
+        to an Observable object it returns @nullptr.
+    */
     virtual Observable* get_source() { return nullptr; }
 
     /// Returns the event type. It is a value from enmun #EEventType.
@@ -153,7 +154,7 @@ public:
     inline bool is_do_play_score_event() { return m_type == k_do_play_score_event; }
     inline bool is_pause_score_event() { return m_type == k_pause_score_event; }
     inline bool is_stop_playback_event() { return m_type == k_stop_playback_event; }
-    inline bool is_highlight_event() { return m_type == k_highlight_event; }
+    inline bool is_tracking_event() { return m_type == k_tracking_event; }
     inline bool is_update_viewport_event() { return m_type == k_update_viewport_event; }
     inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
     //@}
@@ -988,23 +989,22 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 
 
 //---------------------------------------------------------------------------------------
-// EventScoreHighlight
+// EventVisualTracking
 /**
     An event to signal different actions related to
-    highlighting / unhighlighting notes while they are being played.
+    visual tracking effects during score playback.
 
 	@warning This event is sent to your application from the Lomse sound thread.
 			 For processing it, do not retain control: generate an application
 			 event, place it on the application events loop, and return control to Lomse.
 
-	The %EventScoreHighlight event, derived from EventPlayback, signals the need to do
-	several actions related to highlighting / unhighlighting notes and to moving
-	the tempo line while the score is being played back. It contains a list of
-	sub-events and affected objects:
+	The %EventVisualTracking event, derived from EventPlayback, signals the need to do
+	several actions related to visual tracking effects during score playback. It contains
+	a list of sub-events and affected objects:
 	- <b>k_highlight_on</b>. Add highlight to a note/rest.
 	- <b>k_highlight_off</b>. Remove highlight from a note/rest.
-	- <b>k_end_of_higlight</b>. End of score play back. Remove all highlight.
-	- <b>k_advance_tempo_line</b>. Advance visual tempo line to next beat.
+	- <b>k_end_of_visual_tracking</b>. End of score playback. Remove all visual tracking effects.
+	- <b>k_move_tempo_line</b>. Advance visual tempo line to next beat.
 
 	For handling all events related to score playback it is **very important** to
 	return control to Lomse as soon
@@ -1015,7 +1015,7 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 	with sound generation, your application **must** return control to Lomse as
 	soon as possible, so that the sound thread can continue processing sound events.
 	Otherwise, sound can be stalled! The suggested way for handling
-	EventScoreHighlight events is to generate an application
+	EventVisualTracking events is to generate an application
 	event and to enqueue it in the application events system.
 
 	For instance, in an application written using the wxWidgets framework you
@@ -1029,14 +1029,14 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 
 		switch (pEvent->get_event_type())
 		{
-			case k_highlight_event:
+			case k_tracking_event:
 			{
 			    if (pCanvas)
 			    {
-					//generate score highlight event
-			        SpEventScoreHighlight pEv(
-			            static_pointer_cast<EventScoreHighlight>(pEvent) );
-			        MyScoreHighlightEvent event(pEv);
+					//generate visual tracking event
+			        SpEventVisualTracking pEv(
+			            static_pointer_cast<EventVisualTracking>(pEvent) );
+			        MyVisualTrackingEvent event(pEv);
 			        ::wxPostEvent(pCanvas, event);
 			    }
 			    break;
@@ -1049,44 +1049,47 @@ typedef std::shared_ptr<EventEndOfPlayback>  SpEventEndOfPlayback;
 	process the event and update the rendering bitmap. For instance:
 
 	@code
-	void DocumentWindow::on_visual_highlight(MyScoreHighlightEvent& event)
+	void DocumentWindow::on_visual_tracking(MyVisualTrackingEvent& event)
 	{
-		SpEventScoreHighlight pEv = event.get_lomse_event();
+		SpEventVisualTracking pEv = event.get_lomse_event();
 		WpInteractor wpInteractor = pEv->get_interactor();
 		if (SpInteractor sp = wpInteractor.lock())
-		    sp->on_visual_highlight(pEv);
+		    sp->on_visual_tracking(pEv);
 	}
 	@endcode
 */
-class EventScoreHighlight : public EventPlayback
+class EventVisualTracking : public EventPlayback
 {
 protected:
-    ImoId m_nID;             //ID of the target score for the event
+    ImoId m_nID;            //ID of the target score for the event
     std::list< pair<int, ImoId> > m_items;
+    TimeUnits m_timepos;    //for move tempo line sub-event
 
 public:
     /// Constructor
-    EventScoreHighlight(WpInteractor wpInteractor, ImoId nScoreID)
-        : EventPlayback(k_highlight_event, wpInteractor)
+    EventVisualTracking(WpInteractor wpInteractor, ImoId nScoreID)
+        : EventPlayback(k_tracking_event, wpInteractor)
         , m_nID(nScoreID)
+        , m_timepos(0.0)
     {
     }
 
     /// Copy constructor
-    EventScoreHighlight(const EventScoreHighlight& event)
+    EventVisualTracking(const EventVisualTracking& event)
         : EventPlayback(event.m_type, event.m_wpInteractor)
         , m_nID(event.m_nID)
         , m_items(event.m_items)
+        , m_timepos(event.m_timepos)
     {
     }
 
     ///Values for sub-events
-    enum EHighlightType
+    enum ETrackingEvent
     {
         k_highlight_on,           ///< add highlight to a note/rest
         k_highlight_off,          ///< remove highlight from a note/rest
-        k_end_of_higlight,        ///< end of score play back. Remove all highlight.
-        k_advance_tempo_line,     ///< advance visual tempo line to next beat
+        k_end_of_visual_tracking, ///< end of score playback. Remove all visual tracking effects.       ///< end of score play back. Remove all highlight.
+        k_move_tempo_line,        ///< advance visual tempo line to next beat
     };
 
     /// Returns ID of the score affected by the event
@@ -1096,9 +1099,12 @@ public:
     inline int get_num_items() { return int( m_items.size() ); }
 
 	/** Returns the list of notes & rests affected by the event. Each list item is a pair
-		of two values: the sub-event type (from enum #EHighlightType), and the ID of
+		of two values: the sub-event type (from enum #ETrackingEvent), and the ID of
 		the object (note / rest) to highlight or un-highlight. */
     inline std::list< pair<int, ImoId> >&  get_items() { return m_items; }
+
+	/// Returns the time position for the tempo line sub-event
+    inline TimeUnits get_timepos() { return m_timepos; }
 
 ///@cond INTERNAL
 	//construction
@@ -1106,14 +1112,19 @@ public:
     {
         m_items.push_back( make_pair(type, id) );
     }
+    void add_move_tempo_line_event(TimeUnits timepos)
+    {
+        m_items.push_back( make_pair(k_move_tempo_line, -1) );
+        m_timepos = timepos;
+    }
 ///@endcond
 };
 
-/** A shared pointer for an EventScoreHighlight.
+/** A shared pointer for an EventVisualTracking.
     @ingroup typedefs
     @#include <lomse_events.h>
 */
-typedef std::shared_ptr<EventScoreHighlight>  SpEventScoreHighlight;
+typedef std::shared_ptr<EventVisualTracking>  SpEventVisualTracking;
 
 
 //---------------------------------------------------------------------------------------

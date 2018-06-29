@@ -14,7 +14,7 @@ From Lomse internal point of view, playing back an score involves, basically, tw
 - The sound model is then traversed and three kind of events are generated:
 
   -# Sound events, for generating sounds.
-  -# Highlight events, for adding visual tracking effects to the displayed score. For instance, highlighting notes as they are being played or displaying a vertical line at current beat position.
+  -# Visual tracking events, for adding visual tracking effects to the displayed score during playback. For instance, highlighting notes as they are being played or displaying a vertical line at current beat position.
   -# End of playback events, oriented to facilitate GUI controls synchronization and housekeeping.
 
 It is responsibility of your application to handle these events and do whatever is necessary. But for visual effects, lomse provides an implementation for generating them so, if desired, your application can delegate in lomse for this task.
@@ -32,7 +32,7 @@ For playing back an score your application has to:
 
   See @ref how-to-play-score.
 
-- Deal with @a highlight events. All @a highlight events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_highlight_event(). See @ref handling-highlight-events.
+- Deal with @a visual @a tracking events. All @a visual @a tracking events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_visual_tracking_event(). See @ref handling-visual-tracking-events.
 
 - Optionally, you should create a class derived from "PlayerGui". This will allow you to link your application playback controls to lomse, so that lomse can collect current settings when needed. See @ref implementing-player-gui.
 
@@ -72,7 +72,7 @@ This can be done only once if your application saves the ScorePlayer instance in
 
 Once you have the ScorePlayer instance, playback is just loading the score to play (by invoking ScorePlayer::load_score() method) and invoking the appropriate methods, such as ScorePlayer::play() or ScorePlayer::stop() or ScorePlayer::pause();
 
-The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to do get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:
+The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:
 
 
 @code
@@ -102,30 +102,36 @@ The only tricky issue, when starting to learn how to use lomse, is that method S
 
         //settings for playback. Probably you would get settings from GUI controls
         bool fVisualTracking = true;    //generate visual tracking effects
-        bool fCountOff = false          //no count off before start play
         long nMM = 60;                  //beats per minute
         Interactor* pInteractor = ...   //get the interactor for this document
 
+		//select desired visual tracking effect
+        pInteractor->set_visual_tracking_mode(k_tracking_tempo_line);
+
         //start playback
-        pPlayer->play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);
+        pPlayer->play(fVisualTracking, nMM, pInteractor);
     }
 
 @endcode
 
-@todo Check example code: pPlayer->play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);
 
 
+@section handling-visual-tracking-events Handling visual tracking events
 
-@section handling-highlight-events Handling highlight events
-
-Apart from generating sound events, lomse also generates @a highlight events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.
+Apart from generating sound events, lomse also generates @a visual @a tracking events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.
 
 For generating visual effects you have two options, either do it yourself by modifying the lomse graphical model as desired or, simpler, delegate in lomse for generating standard visual effects. Lomse offers two type of visual effects:
 
-- Coloring notes as they are being played. This is currently fully operational.
-- Displaying a vertical colored tempo line across the system, positioned at current beat. This is not yet finished and, therefore, is not yet available.
+- Highlighting notes as they are being played.
+- Displaying a vertical colored tempo line across the system, positioned at current beat.
 
-@a Highlight events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a @a highlight event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:
+The type of visual tracking event to generate is controlled by method Interactor::set_visual_tracking_mode(). Valid values for visual tracking effects are defined in enum EVisualTrackingMode. By default, if method Interactor::set_visual_tracking_mode() is not invoked, Lomse will highlight_notes and rests as they are played back. Several visual effects can be used simultaneously by combining values with the OR ('|') operator. For example:
+
+@code
+spInteractor->set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highlight_notes);
+@endcode
+
+@a Visual @a tracking events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a @a visual @a tracking event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:
 
 @code
     pInteractor->handle_event(pEvent);

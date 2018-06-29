@@ -69,6 +69,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_sizers.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_tempo_line.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_time_grid.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_timegrid_table.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_visual_effect.cpp
@@ -131,7 +132,11 @@ set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_measures_table.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_model_builder.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_score_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_staffobjs_table.cpp
 )
 
 set(MODULE_FILES
@@ -161,9 +166,7 @@ set(PARSER_FILES
     ${LOMSE_SRC_DIR}/parser/lomse_ldp_elements.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_ldp_factory.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_linker.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_model_builder.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_reader.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_staffobjs_table.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_tokenizer.cpp
     ${LOMSE_SRC_DIR}/parser/lomse_xml_parser.cpp
 

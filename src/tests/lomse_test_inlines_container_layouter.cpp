@@ -115,7 +115,7 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
+    bool is_equal_pos(float x, float y)
     {
         return (fabs(x - y) < 0.1f);
     }
@@ -150,10 +150,10 @@ SUITE(InlinesContainerLayouterTest)
         lyt.my_set_cursor_and_available_space();
         lyt.my_page_initializations();
         lyt.my_set_first_line_indent(2000.0f);
-        CHECK( is_equal(lyt.my_get_available_space(), 10000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_available_space(), 10000.0f) );
 
         lyt.my_set_line_pos_and_width();
-        CHECK( is_equal(lyt.my_get_available_space(), 8000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_available_space(), 8000.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, prepare_line_adds_bullet)
@@ -181,10 +181,10 @@ SUITE(InlinesContainerLayouterTest)
         lyt.my_page_initializations();
         lyt.my_set_first_line_indent(2000.0f);
         lyt.my_set_first_line_prefix(L"*   ");
-        CHECK( is_equal(lyt.my_get_available_space(), 10000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_available_space(), 10000.0f) );
 
         lyt.my_prepare_line();
-        CHECK( is_equal(lyt.my_get_available_space(), 4659.22f) );
+        CHECK( is_equal_pos(lyt.my_get_available_space(), 4659.22f) );
 //        cout << "available = " << lyt.my_get_available_space() << endl;
     }
 
@@ -230,14 +230,14 @@ SUITE(InlinesContainerLayouterTest)
 //             << lyt.my_get_cursor().y << ")" << endl;
 //        cout << "word: org=(" << pWord->get_left() << ", "
 //             << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 635.0f) );
-        CHECK( is_equal(pWord->get_left(), 0.0f) );
-        CHECK( is_equal(pWord->get_top(), 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 635.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 0.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_TopMargin)
@@ -276,14 +276,14 @@ SUITE(InlinesContainerLayouterTest)
         //     << lyt.my_get_cursor().y << ")" << endl;
         //cout << "word: org=(" << pWord->get_left() << ", "
         //     << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 1635.0f) );
-        CHECK( is_equal(pWord->get_left(), 0.0f) );
-        CHECK( is_equal(pWord->get_top(), 1000.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 1635.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 0.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 1000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 1635.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_LeftMargin)
@@ -322,14 +322,14 @@ SUITE(InlinesContainerLayouterTest)
         //     << lyt.my_get_cursor().y << ")" << endl;
         //cout << "word: org=(" << pWord->get_left() << ", "
         //     << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 635.0f) );
-        CHECK( is_equal(pWord->get_left(), 1000.0f) );
-        CHECK( is_equal(pWord->get_top(), 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 635.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 1000.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 1000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 635.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_LeftBottomMargin)
@@ -369,14 +369,14 @@ SUITE(InlinesContainerLayouterTest)
         //     << lyt.my_get_cursor().y << ")" << endl;
         //cout << "word: org=(" << pWord->get_left() << ", "
         //     << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 1635.0f) );
-        CHECK( is_equal(pWord->get_left(), 1000.0f) );
-        CHECK( is_equal(pWord->get_top(), 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 1635.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 1000.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 1000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 1635.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_FirstLineIndent)
@@ -416,14 +416,14 @@ SUITE(InlinesContainerLayouterTest)
         //     << lyt.my_get_cursor().y << ")" << endl;
         //cout << "word: org=(" << pWord->get_left() << ", "
         //     << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 635.0f) );
-        CHECK( is_equal(pWord->get_left(), 3000.0f) );
-        CHECK( is_equal(pWord->get_top(), 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().x, 3000.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 635.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 3000.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 3000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 635.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_NotEnoughSpaceInPage)
@@ -488,12 +488,12 @@ SUITE(InlinesContainerLayouterTest)
 //             << endl;
 //        cout << "cursor=(" << lyt.my_get_cursor().x << ", "
 //             << lyt.my_get_cursor().y << ")" << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 1635.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 1635.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 1635.0f) );
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_text_larger_up)
@@ -511,13 +511,13 @@ SUITE(InlinesContainerLayouterTest)
 //             << ", base=" << refs.baseline << ", bottom=" << refs.textBottom
 //             << ", height=" << refs.lineHeight << endl;
 
-        CHECK( is_equal(refs.textTop, 160.0f) );        //mean(100+100, 120)
-        CHECK( is_equal(refs.middleline, 375.0f) );     //mean(100+300, 350)
-        CHECK( is_equal(refs.baseline, 500.0f) );       //max(100+400, 500)
-        CHECK( is_equal(refs.textBottom, 675.0f) );     //mean(100+600, 650)
-        CHECK( is_equal(refs.lineHeight, 800.0f) );     //max(100+700, 770)
-        CHECK( is_equal(refs.supperLine, 120.0f) );     //engr.top
-        CHECK( is_equal(refs.subLine, 500.0f) );        //engr.base
+        CHECK( is_equal_pos(refs.textTop, 160.0f) );        //mean(100+100, 120)
+        CHECK( is_equal_pos(refs.middleline, 375.0f) );     //mean(100+300, 350)
+        CHECK( is_equal_pos(refs.baseline, 500.0f) );       //max(100+400, 500)
+        CHECK( is_equal_pos(refs.textBottom, 675.0f) );     //mean(100+600, 650)
+        CHECK( is_equal_pos(refs.lineHeight, 800.0f) );     //max(100+700, 770)
+        CHECK( is_equal_pos(refs.supperLine, 120.0f) );     //engr.top
+        CHECK( is_equal_pos(refs.subLine, 500.0f) );        //engr.base
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_text_smaller_down)
@@ -535,13 +535,13 @@ SUITE(InlinesContainerLayouterTest)
 //             << ", base=" << refs.baseline << ", bottom=" << refs.textBottom
 //             << ", height=" << refs.lineHeight << endl;
 
-        CHECK( is_equal(refs.textTop, 160.0f) );        //mean(120, 100+100)
-        CHECK( is_equal(refs.middleline, 375.0f) );     //mean(350, 100+300)
-        CHECK( is_equal(refs.baseline, 500.0f) );       //max(500, 100+400)
-        CHECK( is_equal(refs.textBottom, 675.0f) );     //mean(650, 100+600)
-        CHECK( is_equal(refs.lineHeight, 800.0f) );     //max(770, 100+700)
-        CHECK( is_equal(refs.supperLine, 200.0f) );     //engr.top + shift
-        CHECK( is_equal(refs.subLine, 500.0f) );        //engr.base + shift
+        CHECK( is_equal_pos(refs.textTop, 160.0f) );        //mean(120, 100+100)
+        CHECK( is_equal_pos(refs.middleline, 375.0f) );     //mean(350, 100+300)
+        CHECK( is_equal_pos(refs.baseline, 500.0f) );       //max(500, 100+400)
+        CHECK( is_equal_pos(refs.textBottom, 675.0f) );     //mean(650, 100+600)
+        CHECK( is_equal_pos(refs.lineHeight, 800.0f) );     //max(770, 100+700)
+        CHECK( is_equal_pos(refs.supperLine, 200.0f) );     //engr.top + shift
+        CHECK( is_equal_pos(refs.subLine, 500.0f) );        //engr.base + shift
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_notext_larger_down)
@@ -559,13 +559,13 @@ SUITE(InlinesContainerLayouterTest)
 //             << ", base=" << refs.baseline << ", bottom=" << refs.textBottom
 //             << ", height=" << refs.lineHeight << endl;
 
-        CHECK( is_equal(refs.textTop, 100.0f) );        //no change
-        CHECK( is_equal(refs.middleline, 350.0f) );     //mean(300, 350+50)
-        CHECK( is_equal(refs.baseline, 400.0f) );       //no change
-        CHECK( is_equal(refs.textBottom, 600.0f) );     //no change
-        CHECK( is_equal(refs.lineHeight, 820.0f) );     //max(700, 770+50)
-        CHECK( is_equal(refs.supperLine, 100.0f) );     //no change
-        CHECK( is_equal(refs.subLine, 400.0f) );        //no change
+        CHECK( is_equal_pos(refs.textTop, 100.0f) );        //no change
+        CHECK( is_equal_pos(refs.middleline, 350.0f) );     //mean(300, 350+50)
+        CHECK( is_equal_pos(refs.baseline, 400.0f) );       //no change
+        CHECK( is_equal_pos(refs.textBottom, 600.0f) );     //no change
+        CHECK( is_equal_pos(refs.lineHeight, 820.0f) );     //max(700, 770+50)
+        CHECK( is_equal_pos(refs.supperLine, 100.0f) );     //no change
+        CHECK( is_equal_pos(refs.subLine, 400.0f) );        //no change
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_notext_smaller_up)
@@ -583,13 +583,13 @@ SUITE(InlinesContainerLayouterTest)
 //             << ", base=" << refs.baseline << ", bottom=" << refs.textBottom
 //             << ", height=" << refs.lineHeight << endl;
 
-        CHECK( is_equal(refs.textTop, 120.0f) );        //no change
-        CHECK( is_equal(refs.middleline, 415.0f) );     //mean(350+180, 300)
-        CHECK( is_equal(refs.baseline, 500.0f) );       //no change
-        CHECK( is_equal(refs.textBottom, 650.0f) );     //no change
-        CHECK( is_equal(refs.lineHeight, 950.0f) );     //max(770+180, 700)
-        CHECK( is_equal(refs.supperLine, 120.0f) );     //no change
-        CHECK( is_equal(refs.subLine, 500.0f) );        //no change
+        CHECK( is_equal_pos(refs.textTop, 120.0f) );        //no change
+        CHECK( is_equal_pos(refs.middleline, 415.0f) );     //mean(350+180, 300)
+        CHECK( is_equal_pos(refs.baseline, 500.0f) );       //no change
+        CHECK( is_equal_pos(refs.textBottom, 650.0f) );     //no change
+        CHECK( is_equal_pos(refs.lineHeight, 950.0f) );     //max(770+180, 700)
+        CHECK( is_equal_pos(refs.supperLine, 120.0f) );     //no change
+        CHECK( is_equal_pos(refs.subLine, 500.0f) );        //no change
     }
 
     TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_AlignBaseline)
@@ -632,14 +632,14 @@ SUITE(InlinesContainerLayouterTest)
 //             << pWord1->get_baseline() << endl;
 //        cout << "word2.top=(" << pWord2->get_top() << ", baseline="
 //             << pWord2->get_baseline() << endl;
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 740.833f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 740.833f) );
 //TODO: REVIEW THESE
 //        CHECK( pWord1->get_top() > 0.0f );
-//        CHECK( is_equal(pWord2->get_top(), 0.0f) );
-//        CHECK( is_equal(pWord1->get_baseline(), pWord2->get_baseline()) );
+//        CHECK( is_equal_pos(pWord2->get_top(), 0.0f) );
+//        CHECK( is_equal_pos(pWord1->get_baseline(), pWord2->get_baseline()) );
     }
 
 ////    //TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_TwoPagesCreated)
@@ -695,14 +695,14 @@ SUITE(InlinesContainerLayouterTest)
 //             << lyt.my_get_cursor().y << ")" << endl;
 //        cout << "word: org=(" << pWord->get_left() << ", "
 //             << pWord->get_top() << ")" << endl;
-        CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
-        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        CHECK( is_equal(pParaBox->get_size().height, 1200.0f) );
-        CHECK( is_equal(pWord->get_left(), 0.0f) );
-        CHECK( is_equal(pWord->get_top(), 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+        CHECK( is_equal_pos(lyt.my_get_cursor().y, 635.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal_pos(pParaBox->get_size().height, 1200.0f) );
+        CHECK( is_equal_pos(pWord->get_left(), 0.0f) );
+        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
     }
 
 };

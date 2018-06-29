@@ -94,6 +94,24 @@ enum EEventFlag
     k_kbd_alt     = 32,     ///< 0x20. Keyboard Alt key pressed while mouse event
 };
 
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes the valid modes for visual tracking during playback.
+
+	@#include <lomse_interactor.h>
+*/
+enum EVisualTrackingMode
+{
+    k_tracking_none =               0x0000, ///< Do not add any visual tracking effect
+    k_tracking_highlight_notes =    0x0001, ///< Highlight the notes and rest being played back
+    k_tracking_tempo_line =	        0x0002, ///< Display a vertical line at beat start
+    k_tracking_tempo_block =	    0x0004, ///< Draw a rectangle surrounding all notes/rests in current beat
+};
+
+
+///@cond INTERNALS
+//For performance measurements
 struct ptime
 {
     ptime(bool init_with_now = false) { if (init_with_now) init_now(); }
@@ -102,6 +120,8 @@ struct ptime
     typedef double duration;
     duration operator-(const ptime rhs);
 };
+///@endcond
+
 
 //---------------------------------------------------------------------------------------
 // Interactor
@@ -400,7 +420,7 @@ public:
 
 
         //interface to GraphicView. Renderization
-        /// @name Interface to GraphicView. Rederization
+        /// @name Interface to GraphicView. Rendering
         //@{
 
 
@@ -497,7 +517,7 @@ public:
     */
     void set_view_background(Color color);
 
-        //@}    //interface to GraphicView. Rederization
+        //@}    //interface to GraphicView. Rendering
 
 
 
@@ -681,6 +701,24 @@ public:
     */
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
+    /** Sets a new origin for the viewport so that requested score location is visible
+        in the viewport.
+        @param iMeasure The index to the desired measure. First measure in the
+            instrument, including a possible anacrusis start measure, is always measure 0.
+        @param iBeat The index to the desired beat in the measure. First beat is 0.
+        @param iInstr The index to the instrument to which the measure refers. If not
+            specified, iInstr 0 is assumed. Normally,
+            all instruments in the score use the same time signature. In these cases all
+            score parts have the same number of measures and iInstr is not needed.
+            But in polymetric music not all instruments use the same time signature and
+            this implies that the instruments have different number of measures; in these
+            cases the measure number alone is not enough for determining
+            the location.
+
+        See @ref viewport-concept
+    */
+    virtual void scroll_to_measure(int iMeasure, int iBeat=0, int iInstr=0);
+
     //@}    //interface to GraphicView. Viewport / scroll
 
 
@@ -785,33 +823,64 @@ public:
 
 
 
-    //tempo line
-    /** @name Interface to GraphicView. Playback effects: tempo line
-
-        @todo Tempo line methods and Playback effects explanation
+    // Visual effects during playback
+    /** @name Interface to GraphicView. Visual tracking effects during playback
     */
     //@{
-    virtual void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
-    virtual void hide_tempo_line();
-    virtual void update_tempo_line(Pixels x2, Pixels y2);
 
-    //@}    //tempo line
+    /** Select the visual effect to use for visual tracking during playback.
+        By default, if this method is not invoked, k_tracking_highlight_notes is used.
 
+        @param mode It is a value from enum EVisualTrackingMode. Several visual effects
+        can be en effect simultaneously by combining values
+        with the OR ('|') operator. Example:
 
-
-    //highlight
-    /** @name Interface to GraphicView. Playback effects: highlight played notes/rests
-
-        @todo Highlight methods and Playback effects explanation
+        @code
+        spInteractor->set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highlight_notes);
+        @endcode
     */
-    //@{
+	virtual void set_visual_tracking_mode(int mode);
+
+    /** Move the tempo line to the given note/rest.
+        @param pSO The tempo line will be placed at this note or rest.
+    */
+    virtual void move_tempo_line(ImoStaffObj* pSO);
+
+    /** Move the tempo line to the given time position.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param timepos Time units from the start of the score.
+    */
+    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
+
+    /** Move the tempo line to the given measure and beat.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param iBeat Beat number (0..m) relative to the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0);
+
+    /** @param pSO This note or rest will be highlighted
+        @todo Document Interactor::highlight_object    */
     virtual void highlight_object(ImoStaffObj* pSO);
-    virtual void remove_highlight_from_object(ImoStaffObj* pSO);
-    virtual void remove_all_highlight();
-    virtual void discard_all_highlight();
-    virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
 
-    //@}    //highlight
+    /** @param pSO Highlight will be removed from this note or rest.
+        @todo Document Interactor::remove_highlight_from_object    */
+    virtual void remove_highlight_from_object(ImoStaffObj* pSO);
+
+    /// Remove all visual tracking visual effects.
+    virtual void remove_all_visual_tracking();
+
+    /** @param pEvent The Highlight event to be processed.
+        @todo Document Interactor::on_visual_tracking    */
+    virtual void on_visual_tracking(SpEventVisualTracking pEvent);
+
+    //@}    //Visual effects during playback
 
 
 
@@ -1371,7 +1440,7 @@ protected:
     void do_force_redraw();
     ImoObj* find_event_originator_imo(GmoObj* pGmo);
     GmoRef find_event_originator_gref(GmoObj* pGmo);
-    bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
+    bool discard_visual_tracking_event_if_not_valid(ImoId scoreId);
     bool is_valid_play_score_event(SpEventPlayCtrl pEvent);
     void update_caret_and_view();
     void redraw_caret();

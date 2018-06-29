@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -387,68 +387,6 @@ private:
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     void prepare_for_next_instrument();
-
-};
-
-
-
-
-enum EOverlaps
-{                           //old note      ===========       overlap marked as ++++++
-    k_overlap_at_end=0,     //new note           ++++++...
-    k_overlap_full,         //new note   ...+++++++++++...
-    k_overlap_at_start,     //new note   ...+++++++
-};
-
-//---------------------------------------------------------------------------------------
-// OverlappedNoteRest. Helper struct with info about an overlapped note/rest
-class OverlappedNoteRest
-{
-public:
-    ImoNoteRest* pNR;
-    int          type;
-    TimeUnits    overlap;
-
-    OverlappedNoteRest(ImoNoteRest* p, int t, TimeUnits d)
-        : pNR(p), type(t), overlap(d) {}
-    OverlappedNoteRest(ImoNoteRest* p)
-        : pNR(p), type(-1), overlap(0.0) {}
-};
-
-//---------------------------------------------------------------------------------------
-// ScoreAlgorithms
-//  General methods for dealing with the staffobjs collection
-//---------------------------------------------------------------------------------------
-class ScoreAlgorithms
-{
-protected:
-
-public:
-    ScoreAlgorithms() {}
-    ~ScoreAlgorithms() {}
-
-    ///try to find a note that can be tied (as end of tie) with pStartNote
-    static ImoNote* find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
-                                             ImoNote* pStartNote);
-
-    ///finds applicable clef at specified timepos
-    static int get_applicable_clef_for(ImoScore* pScore,
-                                       int iInstr, int iStaff, TimeUnits time);
-
-    ///
-    static ImoNoteRest* find_noterest_at(ImoScore* pScore,
-                                         int instr, int voice, TimeUnits time);
-    static list<OverlappedNoteRest*>
-            find_and_classify_overlapped_noterests_at(ImoScore* pScore,
-                         int instr, int voice, TimeUnits time, TimeUnits duration);
-
-    ///finds end timepos for given voice, lower or equal than maxTime
-    static TimeUnits find_end_time_for_voice(ImoScore* pScore,
-                                             int instr, int voice, TimeUnits maxTime);
-
-protected:
-    static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,
-                                             int instr, TimeUnits maxTime);
 
 };
 

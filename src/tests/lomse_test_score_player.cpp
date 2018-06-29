@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -104,6 +104,24 @@ public:
         }
         //delete m_pThread;
         m_pThread = nullptr;
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
+    void dump_notifications()
+    {
+        cout << test_name() << endl;
+        cout << "notifications = " << m_notifications.size() << endl;
+        list<SpEventInfo>::iterator itN = m_notifications.begin();
+        while (itN != m_notifications.end())
+        {
+            cout << "notif.type = " << (*itN)->get_event_type() << endl;
+            ++itN;
+        }
+        cout << endl;
     }
 
 };
@@ -223,7 +241,7 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, PrepareToPlay)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MidiServerBase midi;
@@ -240,7 +258,7 @@ SUITE(ScorePlayerTest)
     TEST_FIXTURE(ScorePlayerTestFixture, PlaySegmentInvoked)
     {
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MidiServerBase midi;
@@ -258,7 +276,7 @@ SUITE(ScorePlayerTest)
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
         pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MyScorePlayer player(m_libraryScope, nullptr);
@@ -274,7 +292,7 @@ SUITE(ScorePlayerTest)
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
         pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MyMidiServer midi;
@@ -308,7 +326,7 @@ SUITE(ScorePlayerTest)
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
         pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MyMidiServer midi;
@@ -330,45 +348,43 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_note_on );
         CHECK( *(it++) == MyMidiServer::k_note_off );
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
-        //cout << "notifications = " << m_notifications.size() << endl;
-        CHECK( int(m_notifications.size()) == 4 );
+
+        //player.dump_notifications();
+        CHECK( int(m_notifications.size()) == 3 );
+
+        //1. move_tempo_line, t=0 + highlight on: note c4 q
         std::list<SpEventInfo>::iterator itN = m_notifications.begin();
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        SpEventInfo evt = *itN;
-        SpEventScoreHighlight pEv( static_pointer_cast<EventScoreHighlight>(evt) );
-        //cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 1);
-        std::list< pair<int, ImoId> >& items = pEv->get_items();
-        std::list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
-        //cout << "item type: " << (*itItem).first << endl;
-        ++itN;
-
-        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
-
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        SpEventVisualTracking pEv( static_pointer_cast<EventVisualTracking>(*itN) );
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 2);
-        items = pEv->get_items();
-        itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
+        list< pair<int, ImoId> >& items = pEv->get_items();
+        list< pair<int, ImoId> >::iterator itItem = items.begin();
+        CHECK( (*itItem).first == EventVisualTracking::k_move_tempo_line );
         //cout << "item type: " << (*itItem).first << endl;
+        //cout << "timepos = " << pEv->get_timepos() << endl;
+        CHECK( pEv->get_timepos() == 0.0f);
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
         //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
+        //2. k_end_of_visual_tracking
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        pEv = static_pointer_cast<EventVisualTracking>(*itN);
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_higlight );
+        CHECK( (*itItem).first == EventVisualTracking::k_end_of_visual_tracking );
         //cout << "item type: " << (*itItem).first << endl;
+        ++itN;
+
+        //3. end_of_playback
+        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
+        CHECK( (*itN)->get_event_type() == k_end_of_playback_event );
     }
 
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_HighlightChord)
@@ -376,7 +392,7 @@ SUITE(ScorePlayerTest)
         LomseDoorway* pLomse = m_libraryScope.platform_interface();
         pLomse->set_notify_callback(nullptr, MyScorePlayer::my_callback);
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MyMidiServer midi;
@@ -403,50 +419,48 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_note_off );
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
 
-        //cout << "notifications = " << m_notifications.size() << endl;
-        CHECK( m_notifications.size() == 4 );
+        //player.dump_notifications();
+        CHECK( m_notifications.size() == 3 );
+
+        //1. move_tempo_line, t=0 + highlight on: the three notes
         std::list<SpEventInfo>::iterator itN = m_notifications.begin();
-//        cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        SpEventScoreHighlight pEv(
-            static_pointer_cast<EventScoreHighlight>(*itN) );
-//        cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 1);
-        std::list< pair<int, ImoId> >& items = pEv->get_items();
-        std::list< pair<int, ImoId> >::iterator itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
-//        cout << "item type: " << (*itItem).first << endl;
-        ++itN;
-
-//        cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
-//        cout << "num.items = " << pEv->get_num_items() << endl;
+        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        SpEventVisualTracking pEv( static_pointer_cast<EventVisualTracking>(*itN) );
+        //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 4);
-        items = pEv->get_items();
-        itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_advance_tempo_line );
-//        cout << "item type: " << (*itItem).first << endl;
+        list< pair<int, ImoId> >& items = pEv->get_items();
+        list< pair<int, ImoId> >::iterator itItem = items.begin();
+        CHECK( (*itItem).first == EventVisualTracking::k_move_tempo_line );
+        //cout << "item type: " << (*itItem).first << endl;
+        //cout << "timepos = " << pEv->get_timepos() << endl;
+        CHECK( pEv->get_timepos() == 0.0f);
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
-//        cout << "item type: " << (*itItem).first << endl;
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
+        //cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
-//        cout << "item type: " << (*itItem).first << endl;
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
+        //cout << "item type: " << (*itItem).first << endl;
         ++itItem;
-        CHECK( (*itItem).first == EventScoreHighlight::k_highlight_on );
-//        cout << "item type: " << (*itItem).first << endl;
+        CHECK( (*itItem).first == EventVisualTracking::k_highlight_on );
+        //cout << "item type: " << (*itItem).first << endl;
         ++itN;
 
-//        cout << "notif.type = " << (*itN)->get_event_type() << endl;
-        CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
-//        cout << "num.items = " << pEv->get_num_items() << endl;
+        //2. k_end_of_visual_tracking
+        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
+        CHECK( (*itN)->get_event_type() == k_tracking_event );
+        pEv = static_pointer_cast<EventVisualTracking>(*itN);
+        //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == EventScoreHighlight::k_end_of_higlight );
-//        cout << "item type: " << (*itItem).first << endl;
+        CHECK( (*itItem).first == EventVisualTracking::k_end_of_visual_tracking );
+        //cout << "item type: " << (*itItem).first << endl;
+        ++itN;
+
+        //3. end_of_playback
+        //cout << "notif.type = " << (*itN)->get_event_type() << endl;
+        CHECK( (*itN)->get_event_type() == k_end_of_playback_event );
     }
 
     TEST_FIXTURE(ScorePlayerTestFixture, EndOfPlayEventReceived)
@@ -455,7 +469,7 @@ SUITE(ScorePlayerTest)
         MyEventHandlerCPP2 handler;
         pLomse->set_notify_callback(&handler, MyEventHandlerCPP2::wrapper_for_handler);
         SpDocument spDoc( new Document(m_libraryScope) );
-        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
         ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
         MyMidiServer midi;
@@ -471,41 +485,4 @@ SUITE(ScorePlayerTest)
         CHECK( handler.my_last_event_type() == k_end_of_playback_event );
     }
 
-
-//    TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_Metronme_Highlight)
-//    {
-//        LomseDoorway* pLomse = m_libraryScope.platform_interface();
-//        pLomse->set_notify_callback(MyScorePlayer::my_callback);
-//        SpDocument spDoc( new Document(m_libraryScope) );
-//        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q) )) )))" );
-//        ImoScore* pScore = static_cast<ImoScore*>( spDoc->get_im_root()->get_content_item(0) );
-//        MyMidiServer midi;
-//        MyScorePlayer player(m_libraryScope, &midi);
-//        player.load_score(pScore, nullptr);
-//        int nEvMax = player.my_get_table()->num_events() - 1;
-//        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
-//                          k_no_countoff, 60L, nullptr);
-//
-//        std::list<int>& events = midi.my_get_events();
-//        std::list<int>::iterator it = events.begin();
-//        CHECK( events.size() == 5 );
-////        cout << "midi events = " << events.size() << endl;
-//        CHECK( *(it++) == MyMidiServer::k_program_change );
-//        CHECK( *(it++) == MyMidiServer::k_voice_change );
-//        CHECK( *(it++) == MyMidiServer::k_note_on );
-//        CHECK( *(it++) == MyMidiServer::k_note_off );
-//        CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
-////        cout << "notifications = " << m_notifications.size() << endl;
-//        CHECK( m_notifications.size() == 4 );
-//        std::list<int>::iterator itN = m_notifications.begin();
-////        cout << "notif.type = " << *itN << endl;
-//        CHECK( *(itN++) == k_prepare_for_highlight_event );
-//        CHECK( *(itN++) == EventScoreHighlight::k_highlight_on );
-//        CHECK( *(itN++) == k_highlight_off_event );
-//        CHECK( *(itN++) == k_end_of_higlight_event );
-//    }
-
 }
-
-

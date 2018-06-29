@@ -151,11 +151,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
     void create_doc_0(SpDocument spDoc)
     {
         //     5000  4000
@@ -550,9 +545,9 @@ SUITE(TableLayouterTest)
         lyt.prepare_to_start_layout();
 
         CHECK( lyt.my_get_num_cols() == 2 );
-        CHECK( is_equal(lyt.my_get_column_width(0), 7000.0f) );
-        CHECK( is_equal(lyt.my_get_column_width(1), 8000.0f) );
-        CHECK( is_equal(lyt.my_get_table_width(), 15000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_column_width(0), 7000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_column_width(1), 8000.0f) );
+        CHECK( is_equal_pos(lyt.my_get_table_width(), 15000.0f) );
     }
 
     TEST_FIXTURE(TableLayouterTestFixture, body_layouter_created_1)
@@ -670,14 +665,14 @@ SUITE(TableLayouterTest)
         vector<TableCellLayouter*>& cellLytH = pSH->dbg_get_cell_layouters();
         CHECK( cellLytH.size() == 8 );
 
-        CHECK( is_equal(cellLytH[0]->get_cell_width(), 7000.0f) );
-        CHECK( is_equal(cellLytH[1]->get_cell_width(), 17000.0f) );
+        CHECK( is_equal_pos(cellLytH[0]->get_cell_width(), 7000.0f) );
+        CHECK( is_equal_pos(cellLytH[1]->get_cell_width(), 17000.0f) );
         CHECK( cellLytH[2] == nullptr );
-        CHECK( is_equal(cellLytH[3]->get_cell_width(), 7000.0f) );
+        CHECK( is_equal_pos(cellLytH[3]->get_cell_width(), 7000.0f) );
 
         CHECK( cellLytH[4] == nullptr );
-        CHECK( is_equal(cellLytH[5]->get_cell_width(), 8000.0f) );
-        CHECK( is_equal(cellLytH[6]->get_cell_width(), 9000.0f) );
+        CHECK( is_equal_pos(cellLytH[5]->get_cell_width(), 8000.0f) );
+        CHECK( is_equal_pos(cellLytH[6]->get_cell_width(), 9000.0f) );
         CHECK( cellLytH[7] == nullptr );
 
         TableSectionLayouter* pSB = lyt.my_get_body_layouter();
@@ -685,14 +680,14 @@ SUITE(TableLayouterTest)
         vector<TableCellLayouter*>& cellLytB = pSB->dbg_get_cell_layouters();
         CHECK( cellLytB.size() == 8 );
 
-        CHECK( is_equal(cellLytB[0]->get_cell_width(), 7000.0f) );
-        CHECK( is_equal(cellLytB[1]->get_cell_width(), 8000.0f) );
-        CHECK( is_equal(cellLytB[2]->get_cell_width(), 9000.0f) );
-        CHECK( is_equal(cellLytB[3]->get_cell_width(), 7000.0f) );
+        CHECK( is_equal_pos(cellLytB[0]->get_cell_width(), 7000.0f) );
+        CHECK( is_equal_pos(cellLytB[1]->get_cell_width(), 8000.0f) );
+        CHECK( is_equal_pos(cellLytB[2]->get_cell_width(), 9000.0f) );
+        CHECK( is_equal_pos(cellLytB[3]->get_cell_width(), 7000.0f) );
 
-        CHECK( is_equal(cellLytB[4]->get_cell_width(), 7000.0f) );
-        CHECK( is_equal(cellLytB[5]->get_cell_width(), 8000.0f) );
-        CHECK( is_equal(cellLytB[6]->get_cell_width(), 9000.0f) );
+        CHECK( is_equal_pos(cellLytB[4]->get_cell_width(), 7000.0f) );
+        CHECK( is_equal_pos(cellLytB[5]->get_cell_width(), 8000.0f) );
+        CHECK( is_equal_pos(cellLytB[6]->get_cell_width(), 9000.0f) );
         CHECK( cellLytB[7] == nullptr );
     }
 
@@ -1070,7 +1065,7 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
+    bool is_equal_pos(float x, float y)
     {
         return (fabs(x - y) < 0.1f);
     }
@@ -1205,10 +1200,10 @@ SUITE(TableCellSizerTest)
         sizer.my_create_rowspan_table();
         sizer.my_compute_heights();
 
-        CHECK( is_equal( sizer.my_get_height(0, 0), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(0, 1), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 0), 9.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 1), 9.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 0), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 1), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 0), 9.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 1), 9.0f) );
 
         delete_test_data();
     }
@@ -1220,23 +1215,23 @@ SUITE(TableCellSizerTest)
         sizer.my_create_rowspan_table();
         sizer.my_compute_heights();
 
-        CHECK( is_equal( sizer.my_get_height(0, 0), 10.0f) );
-        CHECK( is_equal( sizer.my_get_height(0, 1), 10.0f) );
-        CHECK( is_equal( sizer.my_get_height(0, 2), 10.0f) );
-        CHECK( is_equal( sizer.my_get_height(0, 3), 10.0f) );
-        CHECK( is_equal( sizer.my_get_height(0, 4), 10.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 0), 10.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 1), 10.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 2), 10.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 3), 10.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(0, 4), 10.0f) );
 
-        CHECK( is_equal( sizer.my_get_height(1, 0), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 1), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 2), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 3), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 4), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 0), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 1), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 2), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 3), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 4), 12.0f) );
 
-        CHECK( is_equal( sizer.my_get_height(2, 0), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(2, 1), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(2, 2), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(2, 3), 12.0f) );
-        CHECK( is_equal( sizer.my_get_height(2, 4), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(2, 0), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(2, 1), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(2, 2), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(2, 3), 12.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(2, 4), 12.0f) );
 
         delete_test_data();
     }
@@ -1248,8 +1243,8 @@ SUITE(TableCellSizerTest)
         sizer.my_create_rowspan_table();
         sizer.my_compute_heights();
 
-        CHECK( is_equal( sizer.my_get_height(1, 0), 9.0f) );
-        CHECK( is_equal( sizer.my_get_height(1, 1), 9.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 0), 9.0f) );
+        CHECK( is_equal_pos( sizer.my_get_height(1, 1), 9.0f) );
 
         CHECK( sizer.my_get_rowspan(0, 0) == 0 );
         CHECK( sizer.my_get_rowspan(0, 1) == 0 );

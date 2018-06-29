@@ -81,11 +81,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
 };
 
 
@@ -142,14 +137,14 @@ SUITE(ListLayouterTest)
 ////             << lyt.my_get_cursor().y << ")" << endl;
 ////        cout << "word: org=(" << pWord->get_left() << ", "
 ////             << pWord->get_top() << ")" << endl;
-//        CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
-//        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
-//        CHECK( is_equal(pListBox->get_origin().x, 1000.0f) );
-//        CHECK( is_equal(pListBox->get_origin().y, 0.0f) );
-//        CHECK( is_equal(pListBox->get_size().width, 9000.0f) );
-//        CHECK( is_equal(pListBox->get_size().height, 635.0f) );
-//        CHECK( is_equal(pWord->get_left(), 500.0f) );
-//        CHECK( is_equal(pWord->get_top(), 0.0f) );
+//        CHECK( is_equal_pos(lyt.my_get_cursor().x, 1000.0f) );
+//        CHECK( is_equal_pos(lyt.my_get_cursor().y, 635.0f) );
+//        CHECK( is_equal_pos(pListBox->get_origin().x, 1000.0f) );
+//        CHECK( is_equal_pos(pListBox->get_origin().y, 0.0f) );
+//        CHECK( is_equal_pos(pListBox->get_size().width, 9000.0f) );
+//        CHECK( is_equal_pos(pListBox->get_size().height, 635.0f) );
+//        CHECK( is_equal_pos(pWord->get_left(), 500.0f) );
+//        CHECK( is_equal_pos(pWord->get_top(), 0.0f) );
 //    }
 
 };

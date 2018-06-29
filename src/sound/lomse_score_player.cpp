@@ -187,7 +187,7 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
     m_fQuit = false;
     m_fFinalEventSent = false;
 
-    //Create a new thread. It starts inmediately to execute do_play()
+    //Create a new thread. It starts immediately to execute do_play()
     delete m_pThread;
     m_fPlaying = true;
     m_startMutex.lock();
@@ -204,7 +204,7 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
 {
     LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::thread_main]");
 
-    // waiting for "play_segment" to initialize "m_pThread" 
+    // waiting for "play_segment" to initialize "m_pThread"
     m_startMutex.lock();
     m_startMutex.unlock();
 
@@ -307,7 +307,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
     //-----------------------------------------------------------------------------------
     //Naming convention for variables:
-    //  DeltaTime:  content is LenMus Time Units (TU). One quarte note = 64TU.
+    //  DeltaTime:  content is LenMus Time Units (TU). One quarter note = 64TU.
     //  Time: content is absolute time (milliseconds)
     //-----------------------------------------------------------------------------------
 
@@ -370,7 +370,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //Here i points to the first event of desired measure that is not a control event,
     //that is, to first event to play
 
-    //Define and initialize time counter. If playback starts not at the begining but
+    //Define and initialize time counter. If playback starts not at the beginning but
 	//in another measure, advance time counter to that measure
     long curTime = 0L;
 	if (nEvStart > 1)
@@ -379,7 +379,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     // get metronome interval duration, in milliseconds
     //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
     //was specified in method load_score(). Nevertheless, metronome speed can be
-    //overriden to force a predefined speed by specifying a non-zero value for
+    //overridden to force a predefined speed by specifying a non-zero value for
     //parameter nMM.
     if (nMM == 0)
         m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
@@ -391,6 +391,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //lower pulse time
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     curTime = delta_to_milliseconds( nMtrEvDeltaTime );
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "At start: nMtrEvDeltaTime=%d, event=%d",
+                    nMtrEvDeltaTime, events[i]->DeltaTime);
 
     //prepare weak_ptr to interactor
     WpInteractor wpInteractor;
@@ -403,8 +405,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         wpInteractor = WpInteractor();
 
     //define and prepare highlight event
-    SpEventScoreHighlight pEvent(
-            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
+    SpEventVisualTracking pEvent(
+            LOMSE_NEW EventVisualTracking(wpInteractor, m_pScore->get_id()) );
 
     bool fFirstBeatInMeasure = true;    //first beat of a measure
     bool fCountOffPulseActive = false;
@@ -468,25 +470,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             m_pMidi->note_off(m_MtrChannel, m_MtrTone2, 127);
             std::this_thread::sleep_for(waitTime);
         }
-        //generate final click
+
+        //generate final metronome click before real events
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
-        if (fVisualTracking)
-        {
-            if (events[i]->pSO)
-                pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
-            if (nMtrEvDeltaTime < events[i]->DeltaTime)
-            {
-                //last metronome click is previous to first event from table.
-                //send highlight event
-                if (m_fPostEvents)
-                    m_libScope.post_event(pEvent);
-                else if (pInteractor)
-                    pInteractor->handle_event(pEvent);
-                pEvent = SpEventScoreHighlight(
-                            LOMSE_NEW EventScoreHighlight(wpInteractor,
-                                                          m_pScore->get_id()) );
-            }
-        }
 
         fMtrOn = true;
         nMtrEvDeltaTime += nMtrIntvalOff;
@@ -513,8 +499,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                         m_libScope.post_event(pEvent);
                     else if (pInteractor)
                         pInteractor->handle_event(pEvent);
-                    pEvent = SpEventScoreHighlight(
-                                LOMSE_NEW EventScoreHighlight(wpInteractor,
+                    pEvent = SpEventVisualTracking(
+                                LOMSE_NEW EventVisualTracking(wpInteractor,
                                                               m_pScore->get_id()) );
                     clock_t t2=clock();
                     elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
@@ -556,8 +542,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
-                if (fVisualTracking && events[i]->pSO != nullptr)
-                    pEvent->add_item(EventScoreHighlight::k_advance_tempo_line, events[i]->pSO->get_id());
+
+                if (fVisualTracking && nMtrEvDeltaTime >= 0L)
+                {
+                    pEvent->add_move_tempo_line_event(nMtrEvDeltaTime);
+                }
 
                 fMtrOn = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;
@@ -579,8 +568,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                         m_libScope.post_event(pEvent);
                     else if (pInteractor)
                         pInteractor->handle_event(pEvent);
-                    pEvent = SpEventScoreHighlight(
-                                LOMSE_NEW EventScoreHighlight(wpInteractor,
+                    pEvent = SpEventVisualTracking(
+                                LOMSE_NEW EventVisualTracking(wpInteractor,
                                                               m_pScore->get_id()) );
                     clock_t t2=clock();
                     elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
@@ -651,7 +640,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     m_pInteractor->change_viewport_if_necessary(id);
-                    pEvent->add_item(EventScoreHighlight::k_highlight_on, id);
+                    pEvent->add_item(EventVisualTracking::k_highlight_on, id);
                 }
 
             }
@@ -676,7 +665,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 //generate implicit visual off event
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(EventScoreHighlight::k_highlight_off, events[i]->pSO->get_id());
+                    pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
@@ -685,14 +674,14 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     m_pInteractor->change_viewport_if_necessary(id);
-                    pEvent->add_item(EventScoreHighlight::k_highlight_on, id);
+                    pEvent->add_item(EventVisualTracking::k_highlight_on, id);
                 }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {
                 //remove visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(EventScoreHighlight::k_highlight_off, events[i]->pSO->get_id());
+                    pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
 
             }
             else if (events[i]->EventType == SoundEvent::k_end_of_score)
@@ -769,13 +758,17 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
     } while (i <= nEvEnd);
 
+    //TODO: Last Highlight event (note off) is not send because loop break at line
+    // 690 without sending last event. It is not important as next event will remove all
+    // highlight but should be studied and decided. Can be sent here.
+
     //ensure that all visual highlight is removed
     if (fVisualTracking && !m_fQuit)
     {
         m_fFinalEventSent = true;
-        SpEventScoreHighlight pEvent(
-            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
+        SpEventVisualTracking pEvent(
+            LOMSE_NEW EventVisualTracking(wpInteractor, m_pScore->get_id()) );
+        pEvent->add_item(EventVisualTracking::k_end_of_visual_tracking, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
@@ -802,9 +795,9 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
         }
         else
             wpInteractor = WpInteractor();
-        SpEventScoreHighlight pEvent(
-            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(EventScoreHighlight::k_end_of_higlight, k_no_imoid);
+        SpEventVisualTracking pEvent(
+            LOMSE_NEW EventVisualTracking(wpInteractor, m_pScore->get_id()) );
+        pEvent->add_item(EventVisualTracking::k_end_of_visual_tracking, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)

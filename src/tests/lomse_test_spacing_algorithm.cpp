@@ -165,11 +165,6 @@ public:
         }
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
 
 };
 
@@ -257,27 +252,27 @@ SUITE(SpAlgGourlayTest)
         CHECK( slices.size() == 4 );
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_left_rod(), 0.0f) );
-        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal(pSlice->get_fixed_extent(), 1096.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_rod(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 1096.0f) );
         CHECK( pSlice->my_get_iData() == 0 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
-        CHECK( is_equal(pSlice->get_right_rod(), 212.0f) );
-        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 212.0f) );
+        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
         CHECK( pSlice->my_get_iData() == 2 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
-        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
         CHECK( pSlice->my_get_iData() == 4 );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_left_rod(), 219.0f) );
-        CHECK( is_equal(pSlice->get_right_rod(), 0.0f) );
-        CHECK( is_equal(pSlice->get_fixed_extent(), 45.0f) );
+        CHECK( is_equal_pos(pSlice->get_left_rod(), 219.0f) );
+        CHECK( is_equal_pos(pSlice->get_right_rod(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_fixed_extent(), 45.0f) );
         CHECK( pSlice->my_get_iData() == 5 );
 
 //        cout << test_name() << endl;
@@ -319,42 +314,42 @@ SUITE(SpAlgGourlayTest)
         //check di computation
         list<TimeSlice*>::iterator it = slices.begin();
         MyTimeSlice* pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 0.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 16.0f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 16.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 21.333f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_shortest_duration(), 64.0f) );
+        CHECK( is_equal_pos(pSlice->get_shortest_duration(), 64.0f) );
 
         //check ds computation
         it = slices.begin();
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 0.0f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 0.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 16.0f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 16.0f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 5.333f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 5.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 21.333f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 21.333f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 21.333f) );
         ++it;
         pSlice = static_cast<MyTimeSlice*>(*it);
-        CHECK( is_equal(pSlice->get_spring_duration(), 64.0f) );
+        CHECK( is_equal_pos(pSlice->get_spring_duration(), 64.0f) );
 
 //        cout << test_name() << endl;
 //        ColStaffObjs* pSOCol = pImoScore->get_staffobjs_table();

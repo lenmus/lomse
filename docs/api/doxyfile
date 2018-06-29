@@ -19,7 +19,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Lomse library. API documentation"
-PROJECT_NUMBER         = 0.24.0
+PROJECT_NUMBER         = 0.25.0
 PROJECT_BRIEF          =
 PROJECT_LOGO           = ./images/logo_100x195.png
 OUTPUT_DIRECTORY       = ../../../api-docs
@@ -650,6 +650,7 @@ INPUT     = mainpages \
 			../../include/lomse_pitch.h \
 			../../include/lomse_pixel_formats.h \
 			../../include/lomse_presenter.h \
+			../../include/lomse_score_player.h \
 			../../include/lomse_view.h \
 			examples \
             groups

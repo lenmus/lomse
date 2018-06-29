@@ -105,9 +105,9 @@ SUITE(MnxAnalyserTest)
 
     //@ mnx element ---------------------------------------------------------------------
 
-    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_mnx_01)
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_mnx_001)
     {
-        //@01 empty content: returns empty document
+        //@00001. empty content: returns empty document
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -131,12 +131,95 @@ SUITE(MnxAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-    //@ clef -------------------------------------------------------------
 
+    //@ global --------------------------------------------------------------------------
 
-    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_pitch_612)
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_100)
     {
-        //@00612. pitch_to_components() method
+        //@00100. Error: at least one global element is required.
+        //@       Doc with empty score returned
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><cwmnx profile='standard'>"
+                "<part>"
+                "</part>"
+            "</cwmnx></score>"
+            "</mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != NULL );
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pDoc->get_num_content_items() == 1 );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+//        pScore->end_of_changes();
+//        cout << pScore->to_string_with_ids() << endl;
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+//    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_101)
+//    {
+//
+//        //@00101. Error: at least one measure required in global
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        XmlParser parser;
+//        stringstream expected;
+//        expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
+//        parser.parse_text(
+//            "<mnx>"
+//            "<head></head>"
+//            "<score><cwmnx profile='standard'>"
+//                "<global></global>"
+//                "<part>"
+//                "</part>"
+//            "</cwmnx></score>"
+//            "</mnx>");
+//        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+//
+//        XmlNode* tree = parser.get_tree_root();
+//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+//
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( pRoot != NULL );
+//        CHECK( pRoot->is_document() == true );
+//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+//        CHECK( doc.is_dirty() == true );
+//        CHECK( pDoc->get_num_content_items() == 1 );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+//        pScore->end_of_changes();
+//        cout << pScore->to_string_with_ids() << endl;
+//
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
+//    }
+
+
+    //@ z. miscellaneous ----------------------------------------------------------------
+
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_pitch_99001)
+    {
+        //@99001. pitch_to_components() method
 
         int step;
         int octave;

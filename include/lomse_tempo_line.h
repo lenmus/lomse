@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,68 +27,66 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_BOX_SYSTEM_H__
-#define __LOMSE_BOX_SYSTEM_H__
+#ifndef __LOMSE_TEMPO_LINE_H__
+#define __LOMSE_TEMPO_LINE_H__
 
 #include "lomse_basic.h"
-#include "lomse_gm_basic.h"
+#include "lomse_injectors.h"
+#include "lomse_visual_effect.h"
 
-//using namespace std;
+//other
+#include <iostream>
+using namespace std;
+
 
 namespace lomse
 {
 
 //forward declarations
-class GmoBoxScorePage;
-class TimeGridTable;
+class ScreenDrawer;
+class GraphicView;
+class GmoBoxSystem;
+
 
 //---------------------------------------------------------------------------------------
-//GmoBoxSystem represents a line of music in the printed score.
-class GmoBoxSystem : public GmoBox
+/** %TempoLine is a playback visual tracking effect to display a vertical line at the
+    location of the beat being played back.
+*/
+class TempoLine : public VisualEffect
 {
 protected:
-	vector<GmoShapeStaff*> m_staffShapes;
-	vector<int> m_firstStaff;       //index to first staff for each instrument
-    TimeGridTable* m_pGridTable;
-    int m_iPage;        //number of score page (0..n-1) in which this system is contained
+    Color m_color;
+    LUnits m_width;
+    GmoBoxSystem* m_pBoxSystem;
+    URect m_bounds;
+    int m_iPage;
 
 public:
-    GmoBoxSystem(ImoObj* pCreatorImo);
-    ~GmoBoxSystem();
+    TempoLine(GraphicView* view, LibraryScope& libraryScope);
+    virtual ~TempoLine() {}
 
-    //slices
-	inline int get_num_slices() const { return (int)m_childBoxes.size(); }
-    inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
+    //operations
+    void move_to(GmoShape* pShape, GmoBoxSystem* pBoxSystem);
+    void move_to(LUnits xPos, GmoBoxSystem* pBoxSystem, int iPage);
+    void remove_tempo_line();
 
-    //grid table: xPositions/timepos
-    inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
-    inline TimeGridTable* get_time_grid_table() { return m_pGridTable; }
-    TimeUnits start_time();
-    TimeUnits end_time();
-    LUnits get_x_for_time(TimeUnits timepos);
+    //mandatory overrides from VisualEffect
+    void on_draw(ScreenDrawer* pDrawer);
+    URect get_bounds() { return m_bounds; }
 
-	//miscellaneous info
-    GmoShapeStaff* get_staff_shape(int absStaff);
-    GmoShapeStaff* get_staff_shape(int iInstr, int iStaff);
-    int instr_number_for_staff(int absStaff);
-    int staff_number_for(int absStaff, int iInstr);
-    inline void set_page_number(int iPage) { m_iPage = iPage; }
-	inline int get_page_number() { return m_iPage; }
+    //getters
+    inline Color get_color() const { return m_color; }
+    inline LUnits get_width() const { return m_width; }
 
-    //Staff shapes
-    GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
-    void add_num_staves_for_instrument(int staves);
-    inline vector<GmoShapeStaff*>& get_staff_shapes() { return m_staffShapes; }
-
-    //hit tests related
-    int nearest_staff_to_point(LUnits y);
+    //set properties
+    inline void set_color(Color color) { m_color = color; }
+    inline void set_width(LUnits width) { m_width = width; }
 
 protected:
 
 };
 
 
-
 }   //namespace lomse
 
-#endif      //__LOMSE_BOX_SYSTEM_H__
+#endif      //__LOMSE_TEMPO_LINE_H__

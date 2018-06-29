@@ -94,11 +94,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
 };
 
 
@@ -139,14 +134,14 @@ SUITE(MultiColumnLayouterTest)
         ////     << lyt.my_get_cursor().y << ")" << endl;
         ////cout << "word: org=(" << pWord->get_left() << ", "
         ////     << pWord->get_top() << ")" << endl;
-        //CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-        //CHECK( is_equal(lyt.my_get_cursor().y, 476.25f) );
-        //CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-        //CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-        //CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-        //CHECK( is_equal(pParaBox->get_size().height, 476.25f) );
-        //CHECK( is_equal(pWord->get_left(), 0.0f) );
-        //CHECK( is_equal(pWord->get_top(), 11.73f) );        //shift 11.729
+        //CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+        //CHECK( is_equal_pos(lyt.my_get_cursor().y, 476.25f) );
+        //CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+        //CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+        //CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+        //CHECK( is_equal_pos(pParaBox->get_size().height, 476.25f) );
+        //CHECK( is_equal_pos(pWord->get_left(), 0.0f) );
+        //CHECK( is_equal_pos(pWord->get_top(), 11.73f) );        //shift 11.729
     }
 
     //TEST_FIXTURE(MultiColumnLayouterTestFixture, Paragraph_TopMargin)
@@ -184,14 +179,14 @@ SUITE(MultiColumnLayouterTest)
     //    //     << lyt.my_get_cursor().y << ")" << endl;
     //    //cout << "word: org=(" << pWord->get_left() << ", "
     //    //     << pWord->get_top() << ")" << endl;
-    //    CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().height, 1476.25f) );
-    //    CHECK( is_equal(pWord->get_left(), 0.0f) );
-    //    CHECK( is_equal(pWord->get_top(), 1011.73f) );        //shift 11.729
-    //    CHECK( is_equal(lyt.my_get_cursor().x, 0.0f) );
-    //    CHECK( is_equal(lyt.my_get_cursor().y, 1476.25f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().height, 1476.25f) );
+    //    CHECK( is_equal_pos(pWord->get_left(), 0.0f) );
+    //    CHECK( is_equal_pos(pWord->get_top(), 1011.73f) );        //shift 11.729
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().x, 0.0f) );
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().y, 1476.25f) );
     //}
 
     //TEST_FIXTURE(MultiColumnLayouterTestFixture, Paragraph_LeftMargin)
@@ -229,14 +224,14 @@ SUITE(MultiColumnLayouterTest)
     //    //     << lyt.my_get_cursor().y << ")" << endl;
     //    //cout << "word: org=(" << pWord->get_left() << ", "
     //    //     << pWord->get_top() << ")" << endl;
-    //    CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().height, 476.25f) );
-    //    CHECK( is_equal(pWord->get_left(), 1000.0f) );
-    //    CHECK( is_equal(pWord->get_top(), 11.73f) );        //shift 11.729
-    //    CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
-    //    CHECK( is_equal(lyt.my_get_cursor().y, 476.25f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().height, 476.25f) );
+    //    CHECK( is_equal_pos(pWord->get_left(), 1000.0f) );
+    //    CHECK( is_equal_pos(pWord->get_top(), 11.73f) );        //shift 11.729
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().x, 1000.0f) );
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().y, 476.25f) );
     //}
 
     //TEST_FIXTURE(MultiColumnLayouterTestFixture, Paragraph_LeftBottomMargin)
@@ -275,14 +270,14 @@ SUITE(MultiColumnLayouterTest)
     //    //     << lyt.my_get_cursor().y << ")" << endl;
     //    //cout << "word: org=(" << pWord->get_left() << ", "
     //    //     << pWord->get_top() << ")" << endl;
-    //    CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
-    //    CHECK( is_equal(pParaBox->get_size().height, 1476.25f) );
-    //    CHECK( is_equal(pWord->get_left(), 1000.0f) );
-    //    CHECK( is_equal(pWord->get_top(), 11.73f) );        //shift 11.729
-    //    CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
-    //    CHECK( is_equal(lyt.my_get_cursor().y, 1476.25f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().x, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_origin().y, 0.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().width, 10000.0f) );
+    //    CHECK( is_equal_pos(pParaBox->get_size().height, 1476.25f) );
+    //    CHECK( is_equal_pos(pWord->get_left(), 1000.0f) );
+    //    CHECK( is_equal_pos(pWord->get_top(), 11.73f) );        //shift 11.729
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().x, 1000.0f) );
+    //    CHECK( is_equal_pos(lyt.my_get_cursor().y, 1476.25f) );
     //}
 
     //TEST_FIXTURE(MultiColumnLayouterTestFixture, Paragraph_NotEnoughSpaceInPage)

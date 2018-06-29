@@ -34,18 +34,24 @@
 
 #include <map>
 #include <list>
+#include <vector>
 using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
+class ImoBarline;
 class ImoDocument;
+class ImoInstrument;
 class ImoKeySignature;
 class ImoNote;
 class ImoObj;
 class ImoScore;
 class ImoSoundInfo;
+class ColStaffObjsEntry;
+class ImMeasuresTable;
+class ImMeasuresTableEntry;
 
 
 //---------------------------------------------------------------------------------------
@@ -105,6 +111,31 @@ protected:
     void collect_sounds_info(ImoScore* pScore);
     void assign_score_instr_id();
     void assign_port_and_channel();
+};
+
+
+//---------------------------------------------------------------------------------------
+// MeasuresTableBuilder. Implements the algorithm to traverse the ColStaffObjs table
+// and create the ImMeasuresTable for each instrument. If the measure entries already
+// exist (they could have been created by importers, e.g. MusicXML, MNX) in these cases
+// the algorithm just updates them to ensure they have valid content.
+class MeasuresTableBuilder
+{
+protected:
+    vector<ImoInstrument*> m_instruments;
+    vector<ImMeasuresTableEntry*> m_measures;   //current open measures
+
+public:
+    MeasuresTableBuilder();
+    virtual ~MeasuresTableBuilder();
+
+	void build(ImoScore* pScore);
+
+protected:
+    void start_measures_table_for(int iInstr, ImoInstrument* pInstr,
+                                  ColStaffObjsEntry* pCsoEntry);
+    void finish_current_measure(int iInstr);
+    void start_new_measure(int iInstr, ColStaffObjsEntry* pCsoEntry);
 };
 
 

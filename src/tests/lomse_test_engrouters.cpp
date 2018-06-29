@@ -90,11 +90,6 @@ public:
     {
     }
 
-    bool is_equal(float x, float y)
-    {
-        return (fabs(x - y) < 0.1f);
-    }
-
     string to_str(const wstring& wtext)
     {
         string utf8result;

@@ -49,6 +49,7 @@ namespace lomse
 class Document;
 class SelectionSet;
 class DocCommandExecuter;
+class OverlappedNoteRest;
 
 //---------------------------------------------------------------------------------------
 //edition modes

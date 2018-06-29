@@ -1811,7 +1811,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMidi->get_midi_channel() == -1 );
         CHECK( pMidi->get_midi_program() == 0 );
         CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal(pMidi->get_midi_volume(), 1.0f) );
+        CHECK( is_equal_float(pMidi->get_midi_volume(), 1.0f) );
         CHECK( pMidi->get_midi_pan() == 0.0 );
         CHECK( pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
@@ -1954,7 +1954,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMidi->get_midi_channel() == 0 );
         CHECK( pMidi->get_midi_program() == 0 );
         CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal(pMidi->get_midi_volume(), 0.8f) );
+        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.8f) );
         CHECK( pMidi->get_midi_pan() == -70.0 );
         CHECK( pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
@@ -2160,7 +2160,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
+        CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
@@ -2427,7 +2427,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( is_equal(pNote->get_actual_accidentals(), -1.0f) );
+        CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_half );
@@ -3075,7 +3075,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMidi->get_midi_channel() == 0 );
         CHECK( pMidi->get_midi_program() == 45 );
         CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal(pMidi->get_midi_volume(), 0.8f) );
+        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.8f) );
         CHECK( pMidi->get_midi_pan() == -70.0 );
         CHECK( pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
@@ -3164,7 +3164,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMidi->get_midi_channel() == 0 );
         CHECK( pMidi->get_midi_program() == 18 );
         CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal(pMidi->get_midi_volume(), 0.4f) );
+        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.4f) );
         CHECK( pMidi->get_midi_pan() == -70.0 );
         CHECK( pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;

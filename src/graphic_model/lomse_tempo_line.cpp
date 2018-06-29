@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,82 +27,87 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_gm_basic.h"
+#include "lomse_tempo_line.h"
 
-#include "lomse_internal_model.h"
+#include "lomse_screen_drawer.h"
+#include "lomse_graphic_view.h"
+#include "lomse_logger.h"
 #include "lomse_box_system.h"
+#include "lomse_timegrid_table.h"
+
 
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
-// GmoBoxScorePage implementation
-//---------------------------------------------------------------------------------------
-GmoBoxScorePage::GmoBoxScorePage(ImoScore* pScore)
-    : GmoBox(GmoObj::k_box_score_page, pScore)
-    , m_iFirstSystem(-1)
-    , m_iLastSystem(-1)
-    , m_iPage(0)
+//=======================================================================================
+// TempoLine implementation
+//=======================================================================================
+TempoLine::TempoLine(GraphicView* view, LibraryScope& libraryScope)
+    : VisualEffect(view, libraryScope)
+    , m_color( Color(0, 255, 0) )       // solid green
+    , m_width(100.0)                    // 1.00 mm
+    , m_pBoxSystem(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxScorePage::~GmoBoxScorePage()
+void TempoLine::move_to(GmoShape* pShape, GmoBoxSystem* pBoxSystem)
 {
+    m_pBoxSystem = pBoxSystem;
+    m_bounds = pShape->get_bounds();
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxScorePage::add_system(GmoBoxSystem* pSystem, int iSystem)
+void TempoLine::move_to(LUnits xPos, GmoBoxSystem* pBoxSystem, int iPage)
 {
-    //Update references
-    if (m_iFirstSystem == -1)
-        m_iFirstSystem = iSystem;
-    m_iLastSystem = iSystem;
-
-    add_child_box(pSystem);
+    m_pBoxSystem = pBoxSystem;
+    m_bounds.left(xPos);
+    m_iPage = iPage;
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
+void TempoLine::on_draw(ScreenDrawer* pDrawer)
 {
-	//returns pointer to GmoBoxSystem for system iSystem (0..n-1)
+    if (!m_pBoxSystem)
+        return;
 
-	int i = iSystem - m_iFirstSystem;
-	if (i < 0)
-		return nullptr;		//the system is not in this page
-	else
-		return static_cast<GmoBoxSystem*>(m_childBoxes[i]);
-}
-
-//---------------------------------------------------------------------------------------
-int GmoBoxScorePage::nearest_system_to_point(LUnits y)
-{
-    //returns sytem absolute number or -1 if not found
-
-    for (int i = m_iFirstSystem; i <= m_iLastSystem; ++i)
+    //determine system top/bottom limits
+    double yTop = double(m_pBoxSystem->get_top());
+    double yBottom = double(m_pBoxSystem->get_bottom());
+    double xLeft = m_bounds.get_x();
+    ImoStyle* pStyle = m_pBoxSystem->get_style();
+    if (pStyle)
     {
-        GmoBoxSystem* pBox = static_cast<GmoBoxSystem*>(m_childBoxes[i]);
-        if (y <= pBox->get_bottom() && y >= pBox->get_top())
-            return i;
+        yTop -= double(pStyle->margin_top());
+        yBottom -= double(pStyle->margin_bottom());
+        xLeft += double(pStyle->margin_left());
     }
-    return -1;
+    m_bounds.top(yTop);
+    m_bounds.bottom(yBottom);
+    m_bounds.width = m_width;
+
+    //draw the tempo line
+    pDrawer->begin_path();
+    pDrawer->fill(m_color);
+    pDrawer->stroke(m_color);
+    pDrawer->stroke_width(m_bounds.width);
+
+    UPoint org = m_pView->get_page_origin_for(m_iPage);
+    pDrawer->set_shift(-org.x, -org.y);
+
+    pDrawer->move_to(xLeft, yTop);
+    pDrawer->vline_to(yBottom);
+
+    pDrawer->end_path();
+    pDrawer->render();
+    pDrawer->remove_shift();
 }
 
 //---------------------------------------------------------------------------------------
-TimeUnits GmoBoxScorePage::end_time()
+void TempoLine::remove_tempo_line()
 {
-    GmoBoxSystem* pLastSystem = static_cast<GmoBoxSystem*>(m_childBoxes.back());
-    return pLastSystem->end_time();
-}
-
-//---------------------------------------------------------------------------------------
-TimeUnits GmoBoxScorePage::start_time()
-{
-    GmoBoxSystem* pFirstSystem = static_cast<GmoBoxSystem*>(m_childBoxes.front());
-    return pFirstSystem->start_time();
+    m_pBoxSystem = nullptr;
 }
 
 
 }  //namespace lomse
-
-
