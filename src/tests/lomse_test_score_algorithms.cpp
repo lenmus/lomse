@@ -473,5 +473,213 @@ SUITE(ScoreAlgorithmsTest)
         CHECK( ml.location == 32.0 );   //160 - 128 = 32
     }
 
+
+    // get timepos for measure/beat -----------------------------------------------------
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_200)
+    {
+        //@200. measure too high. Return 0.0.
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 22, beat 2
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 21, 1, 0);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_201)
+    {
+        //@201. measure negative. Return 0.0
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure -4
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, -4, 1, 0);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_202)
+    {
+        //@202. beat too high. Take as valid
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 2, beat 3
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 1, 2, 0);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 256.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_203)
+    {
+        //@203. beat negative. Assume beat = 0
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 3, beat -2
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 2, -1, 0);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 256.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_204)
+    {
+        //@204. instrument negative. Return 0.0
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 3, beat 2
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 2, 1, -3);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_205)
+    {
+        //@205. instrument too high. Return 0.0
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 3, beat 2
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 2, 1, 3);
+
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+    }
+
+    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_206)
+    {
+        //@206. valid parameters return correct values
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        ImoScore* pScore =
+            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        //measure 2, beat 2 ==> 128+64 = 192
+        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 1, 1, 0);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 192.0) );
+
+        //measure 1, beat 1 ==> 0
+        timepos = ScoreAlgorithms::get_timepos_for(pScore, 0, 0, 0);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+
+        //measure 8, beat 1 ==> 896
+        timepos = ScoreAlgorithms::get_timepos_for(pScore, 7, 0, 0);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 896.0) );
+
+        //measure 4, beat 2 ==> 384+64 = 448
+        timepos = ScoreAlgorithms::get_timepos_for(pScore, 3, 1, 0);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 448.0) );
+    }
+
 }
 

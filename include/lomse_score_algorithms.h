@@ -86,12 +86,13 @@ public:
                                              ImoNote* pStartNote);
 
     /** Look for applicable clef at specified timepos
+        @param pScore Pointer to the score to wich all other parameters refer.
     */
     static int get_applicable_clef_for(ImoScore* pScore,
                                        int iInstr, int iStaff, TimeUnits time);
 
     /** Look for a note starting at specified timepos
-        @param pScore
+        @param pScore Pointer to the score to wich all other parameters refer.
         @param instr
         @param voice
         @param time
@@ -101,7 +102,7 @@ public:
 
     /** Find all notes/rest that are in the range from the given timepos and
         given duration, and classify the overlap for each found note/rest.
-        @param pScore
+        @param pScore Pointer to the score to wich all other parameters refer.
         @param instr
         @param voice
         @param time
@@ -117,7 +118,7 @@ public:
                                              int instr, int voice, TimeUnits maxTime);
 
     /** Return a measure locator for the specified instrument and timepos.
-        @param pScore
+        @param pScore Pointer to the score to wich all other parameters refer.
         @param timepos
         @param iInstr Number of the instrument (0..m) to which the measures refer to.
             Take into account that for polymetric music (music in which not all
@@ -130,7 +131,7 @@ public:
                                           int iInstr=0);
 
     /** Return the time position for the specified measure and beat.
-        @param pScore
+        @param pScore Pointer to the score to wich all other parameters refer.
         @param iMeasure Measure number (0..n) in instrument iInstr.
         @param iBeat Beat number (0..m) relative to the measure.
         @param iInstr Number of the instrument (0..m) to which the measures refer to.

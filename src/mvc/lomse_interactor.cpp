@@ -1082,7 +1082,11 @@ void Interactor::remove_all_visual_tracking()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->remove_all_visual_tracking();
+        pGView->draw_visual_tracking();
+        request_window_update();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1100,6 +1104,8 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
     if (pGView)
     {
         pGView->move_tempo_line(scoreId, timepos);
+        pGView->draw_visual_tracking();
+        request_window_update();
     }
 }
 
@@ -1119,6 +1125,8 @@ void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iIn
             TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
                                                                  iBeat, iInstr);
             pGView->move_tempo_line(scoreId, timepos);
+            pGView->draw_visual_tracking();
+            request_window_update();
         }
     }
 }
@@ -1130,6 +1138,8 @@ void Interactor::highlight_object(ImoStaffObj* pSO)
     if (pGView)
     {
         pGView->highlight_object(pSO);
+        pGView->draw_visual_tracking();
+        request_window_update();
     }
 }
 
@@ -1138,7 +1148,11 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->remove_highlight_from_object(pSO);
+        pGView->draw_visual_tracking();
+        request_window_update();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1427,24 +1441,24 @@ void Interactor::on_visual_tracking(SpEventVisualTracking pEvent)
                 case EventVisualTracking::k_end_of_visual_tracking:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_end_of_visual_tracking");
                     remove_all_visual_tracking();
-                    break;
+                    return;
 
                 case EventVisualTracking::k_highlight_off:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_off");
                     remove_highlight_from_object( static_cast<ImoStaffObj*>(
                                                 spDoc->get_pointer_to_imo((*it).second) ));
-                    break;
+                    return;
 
                 case EventVisualTracking::k_highlight_on:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_on");
                     highlight_object( static_cast<ImoStaffObj*>(
                                             spDoc->get_pointer_to_imo((*it).second) ));
-                    break;
+                    return;
 
                 case EventVisualTracking::k_move_tempo_line:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_move_tempo_line");
                     move_tempo_line(pEvent->get_score_id(), pEvent->get_timepos());
-                    break;
+                    return;
 
                 default:
                 {
@@ -1456,9 +1470,6 @@ void Interactor::on_visual_tracking(SpEventVisualTracking pEvent)
                 }
             }
         }
-
-        pGView->draw_visual_tracking();
-        request_window_update();
     }
 }
 
