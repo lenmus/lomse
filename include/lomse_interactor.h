@@ -703,6 +703,7 @@ public:
 
     /** Sets a new origin for the viewport so that requested score location is visible
         in the viewport.
+        @param scoreId ID of the score to which all other parameters refer to.
         @param iMeasure The index to the desired measure. First measure in the
             instrument, including a possible anacrusis start measure, is always measure 0.
         @param iBeat The index to the desired beat in the measure. First beat is 0.
@@ -717,7 +718,8 @@ public:
 
         See @ref viewport-concept
     */
-    virtual void scroll_to_measure(int iMeasure, int iBeat=0, int iInstr=0);
+    virtual void scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0);
+    virtual void scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0);
 
     //@}    //interface to GraphicView. Viewport / scroll
 
@@ -864,6 +866,21 @@ public:
             number and location will do the job.
     */
     virtual void move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0);
+
+    /** Move the tempo line to the given measure and beat and change the viewport, if
+        necessary, for ensuring that the requested measure/beat is visible.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param iBeat Beat number (0..m) relative to the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
+                                                         int iBeat, int iInstr=0);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */
@@ -1449,6 +1466,11 @@ protected:
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();
     bool is_operating_mode_allowed(int mode);
+
+    //To select mode for do_move_tempo_line_and_scroll()
+    enum { k_only_tempo_line=0, k_scroll_and_tempo_line, k_only_scroll };
+    void do_move_tempo_line_and_scroll(ImoId scoreId, int iMeasure, int iBeat,
+                                       int iInstr, int mode);
 
 };
 

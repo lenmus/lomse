@@ -1112,6 +1112,26 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 //---------------------------------------------------------------------------------------
 void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
 {
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_only_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
+                                                         int iBeat, int iInstr)
+{
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_scroll_and_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
+{
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_only_scroll);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::do_move_tempo_line_and_scroll(ImoId scoreId, int iMeasure, int iBeat,
+                                               int iInstr, int mode)
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
@@ -1124,7 +1144,35 @@ void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iIn
             ImoScore* score = static_cast<ImoScore*>(pScore);
             TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
                                                                  iBeat, iInstr);
-            pGView->move_tempo_line(scoreId, timepos);
+            if (mode == k_only_tempo_line)
+                pGView->move_tempo_line(scoreId, timepos);
+            else if (mode == k_only_scroll)
+                pGView->change_viewport_if_necessary(scoreId, timepos);
+            else
+                pGView->move_tempo_line_and_change_viewport(scoreId, timepos);
+
+            pGView->draw_visual_tracking();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
+                                                                 iBeat, iInstr);
+            pGView->change_viewport_to(scoreId, timepos);
             pGView->draw_visual_tracking();
             request_window_update();
         }
@@ -1162,15 +1210,6 @@ void Interactor::change_viewport_if_necessary(ImoId id)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->change_viewport_if_necessary(id);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::scroll_to_measure(int iMeasure, int iBeat, int iInstr)
-{
-    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->scroll_to_measure(iMeasure, iBeat, iInstr);
 }
 
 //---------------------------------------------------------------------------------------

@@ -73,6 +73,50 @@ public:
 //forward declarations
 class MyCanvas;
 
+
+//---------------------------------------------------------------------------------------
+// MyUpdateViewportEvent
+//      An event to signal the need to repaint the window and to update scrollbars
+//      due to an auto-scroll while the score is being played back.
+//---------------------------------------------------------------------------------------
+
+DECLARE_EVENT_TYPE( MY_EVT_UPDATE_VIEWPORT_TYPE, -1 )
+
+class MyUpdateViewportEvent : public wxEvent
+{
+private:
+    SpEventUpdateViewport m_pEvent;   //lomse event
+
+public:
+    MyUpdateViewportEvent(SpEventUpdateViewport pEvent, int id = 0)
+        : wxEvent(id, MY_EVT_UPDATE_VIEWPORT_TYPE)
+        , m_pEvent(pEvent)
+    {
+    }
+
+    // copy constructor
+    MyUpdateViewportEvent(const MyUpdateViewportEvent& event)
+        : wxEvent(event)
+        , m_pEvent( event.m_pEvent )
+    {
+    }
+
+    // clone constructor. Required for sending with wxPostEvent()
+    virtual wxEvent *Clone() const { return new MyUpdateViewportEvent(*this); }
+
+    // accessors
+    SpEventUpdateViewport get_lomse_event() { return m_pEvent; }
+};
+
+typedef void (wxEvtHandler::*UpdateViewportEventFunction)(MyUpdateViewportEvent&);
+
+#define MY_EVT_UPDATE_VIEWPORT(fn) \
+    DECLARE_EVENT_TABLE_ENTRY( MY_EVT_UPDATE_VIEWPORT_TYPE, wxID_ANY, -1, \
+    (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
+    wxStaticCastEvent( UpdateViewportEventFunction, & fn ), (wxObject *) NULL ),
+
+
+
 //---------------------------------------------------------------------------------------
 // Define the main frame
 class MyFrame: public wxFrame
@@ -87,11 +131,16 @@ public:
     //event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
 
+    //callback wrappers
+    static void wrapper_lomse_event(void* pThis, SpEventInfo pEvent);
+
+
 protected:
     //accessors
     MyCanvas* get_active_canvas() const { return m_canvas; }
 
     //event handlers
+    void on_lomse_event(SpEventInfo pEvent);
     void on_test_start(wxCommandEvent& WXUNUSED(event));
     void on_test_stop(wxCommandEvent& WXUNUSED(event));
 
@@ -128,6 +177,7 @@ protected:
     //event handlers
     void OnPaint(wxPaintEvent& WXUNUSED(event));
     void OnSize(wxSizeEvent& event);
+    void on_update_viewport(MyUpdateViewportEvent& event);
     void on_tempo_line_timer(wxTimerEvent& event);
 
     void delete_rendering_buffer();
@@ -178,6 +228,16 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
+    logger.set_logging_mode(Logger::k_debug_mode); //k_normal_mode k_debug_mode k_trace_mode
+    logger.set_logging_areas(Logger::k_events | Logger::k_score_player);   //k_all  k_mvc | );
+
+	// For debugging: send wxWidgets log messages to a file
+    wxString sUserId = ::wxGetUserId();
+    wxString sLogFile = "Debug_log.txt";
+	wxLog *logger = new wxLogStderr( wxFopen(sLogFile.wx_str(), "w") );
+	wxLog::SetActiveTarget(logger);
+	wxLogMessage("[ApplicationScope::create_logger] Log messages derived to file.");
+
     MyFrame* frame = new MyFrame;
     frame->Show(true);
     SetTopWindow(frame);
@@ -186,6 +246,13 @@ bool MyApp::OnInit()
 
     return true;
 }
+
+
+//=======================================================================================
+// MyEvents implementation
+//=======================================================================================
+DEFINE_EVENT_TYPE( MY_EVT_UPDATE_VIEWPORT_TYPE )
+
 
 
 //=======================================================================================
@@ -291,6 +358,41 @@ void MyFrame::initialize_lomse()
 
     //initialize the library with these values
     m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+
+    //set required callbacks
+    m_lomse.set_notify_callback(this, wrapper_lomse_event);
+}
+
+//---------------------------------------------------------------------------------------
+void MyFrame::wrapper_lomse_event(void* pThis, SpEventInfo pEvent)
+{
+    static_cast<MyFrame*>(pThis)->on_lomse_event(pEvent);
+}
+
+//---------------------------------------------------------------------------------------
+void MyFrame::on_lomse_event(SpEventInfo pEvent)
+{
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "");
+
+    MyCanvas* pCanvas = get_active_canvas();
+
+    switch (pEvent->get_event_type())
+    {
+        case k_update_viewport_event:
+        {
+            if (pCanvas)
+            {
+                SpEventUpdateViewport pEv(
+                    static_pointer_cast<EventUpdateViewport>(pEvent) );
+                MyUpdateViewportEvent event(pEv);
+                ::wxPostEvent(pCanvas, event);
+            }
+            break;
+        }
+
+        default:
+            ;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -326,6 +428,7 @@ void MyFrame::on_test_stop(wxCommandEvent& WXUNUSED(event))
 BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
     EVT_SIZE(MyCanvas::OnSize)
     EVT_PAINT(MyCanvas::OnPaint)
+    MY_EVT_UPDATE_VIEWPORT(MyCanvas::on_update_viewport)
     EVT_TIMER(k_id_tempo_line_timer, MyCanvas::on_tempo_line_timer)
 END_EVENT_TABLE()
 
@@ -426,10 +529,70 @@ void MyCanvas::open_test_document()
     //all objects and relationships between the document, its views and the interactors
     //to interct with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(k_view_vertical_book,
+    m_pPresenter = m_lomse.new_document(k_view_single_system, //k_view_vertical_book,
         "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         "(instrument (staves 2) (musicData "
         "(clef G p1)(clef F4 p2)(key C)(time 4 4)"
+        "(n c4 s g+ p1)(n d4 s)(n c4 s)(n d4 s g-)"
+        "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
+        "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
+        "(n g4 s g+ p1)(n a4 s)(n g4 s)(n a4 s g-)"
+        "(goBack start)"
+        "(chord (n c3 q p2)(n e3 q)(n g3 q))"
+        "(r q)"
+        "(chord (n a2 q p2)(n c3 q)(n f3 q))"
+        "(r q)"
+        "(barline)"
+        "(chord (n g3 q p1)(n d4 q))"
+        "(r e)(n g5 e)"
+        "(n g5 s g+)(n f5 s)(n g5 e g-)"
+        "(n c4 q)"
+        "(goBack start)"
+        "(n g2 q p2)"
+        "(n d3 e g+)(n d3 e g-)"
+        "(n b3 e g+)(n a3 s)(n g3 s g-)"
+        "(chord (n g3 q)(n e3 q)(n c3 q))"
+        "(barline)"
+        "(n c4 s g+ p1)(n d4 s)(n c4 s)(n d4 s g-)"
+        "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
+        "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
+        "(n g4 s g+ p1)(n a4 s)(n g4 s)(n a4 s g-)"
+        "(goBack start)"
+        "(chord (n c3 q p2)(n e3 q)(n g3 q))"
+        "(r q)"
+        "(chord (n a2 q p2)(n c3 q)(n f3 q))"
+        "(r q)"
+        "(barline)"
+        "(chord (n g3 q p1)(n d4 q))"
+        "(r e)(n g5 e)"
+        "(n g5 s g+)(n f5 s)(n g5 e g-)"
+        "(n c4 q)"
+        "(goBack start)"
+        "(n g2 q p2)"
+        "(n d3 e g+)(n d3 e g-)"
+        "(n b3 e g+)(n a3 s)(n g3 s g-)"
+        "(chord (n g3 q)(n e3 q)(n c3 q))"
+        "(barline)"
+        "(n c4 s g+ p1)(n d4 s)(n c4 s)(n d4 s g-)"
+        "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
+        "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
+        "(n g4 s g+ p1)(n a4 s)(n g4 s)(n a4 s g-)"
+        "(goBack start)"
+        "(chord (n c3 q p2)(n e3 q)(n g3 q))"
+        "(r q)"
+        "(chord (n a2 q p2)(n c3 q)(n f3 q))"
+        "(r q)"
+        "(barline)"
+        "(chord (n g3 q p1)(n d4 q))"
+        "(r e)(n g5 e)"
+        "(n g5 s g+)(n f5 s)(n g5 e g-)"
+        "(n c4 q)"
+        "(goBack start)"
+        "(n g2 q p2)"
+        "(n d3 e g+)(n d3 e g-)"
+        "(n b3 e g+)(n a3 s)(n g3 s g-)"
+        "(chord (n g3 q)(n e3 q)(n c3 q))"
+        "(barline)"
         "(n c4 s g+ p1)(n d4 s)(n c4 s)(n d4 s g-)"
         "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
         "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
@@ -525,6 +688,24 @@ void MyCanvas::update_view_content()
 }
 
 //---------------------------------------------------------------------------------------
+void MyCanvas::on_update_viewport(MyUpdateViewportEvent& event)
+{
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "");
+
+    SpEventUpdateViewport pEv = event.get_lomse_event();
+    WpInteractor wpInteractor = pEv->get_interactor();
+    if (SpInteractor sp = wpInteractor.lock())
+    {
+        int xPos = pEv->get_new_viewport_x();
+        int yPos = pEv->get_new_viewport_y();
+
+        //change viewport
+        sp->new_viewport(xPos, yPos);
+    }
+    event.Skip(false);      //do not propagate event
+}
+
+//---------------------------------------------------------------------------------------
 void MyCanvas::start_test()
 {
     m_beat = -1;
@@ -560,6 +741,8 @@ void MyCanvas::on_tempo_line_timer(wxTimerEvent& WXUNUSED(event))
             m_beat = 0;
             ++m_measure;
         }
-        spInteractor->move_tempo_line(m_scoreId, m_measure, m_beat);
+        //spInteractor->move_tempo_line(m_scoreId, m_measure, m_beat);
+        //spInteractor->scroll_to_measure(m_scoreId, m_measure, m_beat);
+        spInteractor->move_tempo_line_and_scroll_if_necessary(m_scoreId, m_measure, m_beat);
     }
 }
