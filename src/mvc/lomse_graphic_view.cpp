@@ -355,27 +355,27 @@ bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnit
         return false;    //error
 
     m_pScrollSystem = pGModel->get_system_for(scoreId, timepos, &m_iScrollPage);
-    LOMSE_LOG_DEBUG(Logger::k_events,
-                    "scoreId=%d, timepos=%f, system=%s, m_iScrollPage=%d",
-                    scoreId, timepos, (m_pScrollSystem != nullptr ? "found" : "not found"));
+    //LOMSE_LOG_DEBUG(Logger::k_events,
+    //                "scoreId=%d, timepos=%f, system=%s, m_iScrollPage=%d",
+    //                scoreId, timepos, (m_pScrollSystem != nullptr ? "found" : "not found"));
     if (!m_pScrollSystem)
         return false;    //error
 
     m_xScrollLeft = m_pScrollSystem->get_x_for_time(timepos);
     m_xScrollRight = m_xScrollLeft + 10000;   //1 cm
 
-    LOMSE_LOG_DEBUG(Logger::k_events, "new scroll pos = %f, %f", m_xScrollLeft, m_xScrollRight);
+    //LOMSE_LOG_DEBUG(Logger::k_events, "new scroll pos = %f, %f", m_xScrollLeft, m_xScrollRight);
 
-    //DEBUG --------------------------------------------------------------
-    static GmoBoxSystem* pPrevSystem = nullptr;
-    if (pPrevSystem != m_pScrollSystem)
-    {
-        pPrevSystem = m_pScrollSystem;
-        TimeGridTable* pTable = m_pScrollSystem->get_time_grid_table();
-        LOMSE_LOG_DEBUG(Logger::k_events, "time grid table\n%s",
-                        pTable->dump().c_str());
-    }
-    //END DEBUG ----------------------------------------------------------
+//    //DEBUG --------------------------------------------------------------
+//    static GmoBoxSystem* pPrevSystem = nullptr;
+//    if (pPrevSystem != m_pScrollSystem)
+//    {
+//        pPrevSystem = m_pScrollSystem;
+//        TimeGridTable* pTable = m_pScrollSystem->get_time_grid_table();
+//        LOMSE_LOG_DEBUG(Logger::k_events, "time grid table\n%s",
+//                        pTable->dump().c_str());
+//    }
+//    //END DEBUG ----------------------------------------------------------
 
     return true;   //no error
 }
@@ -440,14 +440,19 @@ bool GraphicView::do_determine_if_scroll_needed()
     fHorizontalScroll |= ((m_vxScrollRight > (m_viewportSize.width-k_scrollLeftMargin))
                         && ((m_vxScrollRight-m_vxScrollLeft) < (m_viewportSize.width-k_scrollLeftMargin)));
 
+    if (!fVerticalScroll)
+        m_vyNew = m_vyLast;
+    if (!fHorizontalScroll)
+        m_vxNew = m_vxLast;
+
     return (fVerticalScroll || fHorizontalScroll);
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::do_change_viewport()
 {
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "Requesting scroll to m_vxNew=%d, m_vyNew=%d", m_vxNew, m_vyNew);
+//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+//        "Requesting scroll to m_vxNew=%d, m_vyNew=%d", m_vxNew, m_vyNew);
 
     if (m_vyLast != m_vyNew || m_vxLast != m_vxNew)
     {
@@ -455,9 +460,9 @@ void GraphicView::do_change_viewport()
         m_vxLast = m_vxNew;
         m_vyLast = m_vyNew;
     }
-    else
-        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                        "Optimization: no viewport change");
+//    else
+//        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+//                        "Optimization: no viewport change");
 }
 
 //---------------------------------------------------------------------------------------
@@ -488,47 +493,47 @@ void GraphicView::do_determine_new_scroll_position()
     //          m_vySysBottom
 
 
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "1. m_iScrollPage=%d, m_xScrollLeft=%f, m_xScrollRight=%f",
-        m_iScrollPage, m_xScrollLeft, m_xScrollRight);
-
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "2. vp.height=%d, vp.width=%d, m_iScrollPage=%d",
-        m_viewportSize.height, m_viewportSize.width, m_iScrollPage);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //    "1. m_iScrollPage=%d, m_xScrollLeft=%f, m_xScrollRight=%f",
+    //    m_iScrollPage, m_xScrollLeft, m_xScrollRight);
+    //
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //    "2. vp.height=%d, vp.width=%d, m_iScrollPage=%d",
+    //    m_viewportSize.height, m_viewportSize.width, m_iScrollPage);
 
     double xSliceLeft = double(m_xScrollLeft);
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                    "3. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f",
-                    m_iScrollPage, m_xScrollLeft, xSliceLeft);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //                "3. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f",
+    //                m_iScrollPage, m_xScrollLeft, xSliceLeft);
     double xSliceRight = double(m_xScrollRight);
     double ySysTop = double(m_pScrollSystem->get_top());
     double ySysBottom = ySysTop + double(m_pScrollSystem->get_height());
 
     //model point to screen returns shift from current viewport origin
     double xLeft = xSliceLeft;
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                    "4. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
-                    m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //                "4. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
+    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
     double yTop = ySysTop;
     model_point_to_screen(&xLeft, &yTop, m_iScrollPage);
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                    "5. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
-                    m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //                "5. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
+    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
     double xRight = xSliceRight;
     double yBottom = ySysBottom;
     model_point_to_screen(&xRight, &yBottom, m_iScrollPage);
     //AWARE: The next variables are relative: shift from current viewport origin
     m_vxScrollLeft = Pixels(xLeft);
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                    "6. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f, m_vxScrollLeft=%d",
-                    m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft, m_vxScrollLeft);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //                "6. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f, m_vxScrollLeft=%d",
+    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft, m_vxScrollLeft);
     m_vxScrollRight = Pixels(xRight);
     m_vySysTop = Pixels(yTop);
     m_vySysBottom = Pixels(yBottom);
 
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "7. m_vySysTop=%d, vp.height=%d, m_vxScrollLeft=%d, vp.width=%d, m_iScrollPage=%d",
-        m_vySysTop, m_viewportSize.height, m_vxScrollLeft, m_viewportSize.width, m_iScrollPage);
+    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+    //    "7. m_vySysTop=%d, vp.height=%d, m_vxScrollLeft=%d, vp.width=%d, m_iScrollPage=%d",
+    //    m_vySysTop, m_viewportSize.height, m_vxScrollLeft, m_viewportSize.width, m_iScrollPage);
 
     m_vxNew = m_vxOrg + m_vxScrollLeft - k_scrollLeftMargin;
     m_vyNew = m_vyOrg +  m_vySysTop;
@@ -820,6 +825,8 @@ VRect GraphicView::get_damaged_rectangle()
 //---------------------------------------------------------------------------------------
 void GraphicView::highlight_object(ImoStaffObj* pSO)
 {
+    //LOMSE_LOG_DEBUG(Logger::k_score_player, "Highlight %d", pSO->get_id());
+
     if (!(m_trackingEffect & k_tracking_highlight_notes))
         return;
 
@@ -845,6 +852,8 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 void GraphicView::remove_highlight_from_object(ImoStaffObj* pSO)
 {
+    //LOMSE_LOG_DEBUG(Logger::k_score_player, "Un-highlight %d", pSO->get_id());
+
     if (!(m_trackingEffect & k_tracking_highlight_notes))
         return;
 

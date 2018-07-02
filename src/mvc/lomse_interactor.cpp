@@ -472,25 +472,25 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 
     GmoRef gref = find_event_originator_gref(pGmo);
 
-    LOMSE_LOG_DEBUG(Logger::k_events,
-        "Gmo %d, %s / gref(%d, %d) -------------------",
-         pGmo->get_gmobj_type(), pGmo->get_name().c_str(),
-         gref.first, gref.second );
+//    LOMSE_LOG_DEBUG(Logger::k_events,
+//        "Gmo %d, %s / gref(%d, %d) -------------------",
+//         pGmo->get_gmobj_type(), pGmo->get_name().c_str(),
+//         gref.first, gref.second );
 
     if (m_grefLastMouseOver != k_no_gmo_ref && m_grefLastMouseOver != gref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events,
-            "Mouse out. gref(%d %d)",
-            m_grefLastMouseOver.first, m_grefLastMouseOver.second );
+//        LOMSE_LOG_DEBUG(Logger::k_events,
+//            "Mouse out. gref(%d %d)",
+//            m_grefLastMouseOver.first, m_grefLastMouseOver.second );
         send_mouse_out_event(m_grefLastMouseOver, x, y);
         m_grefLastMouseOver = k_no_gmo_ref;
     }
 
     if (m_grefLastMouseOver == k_no_gmo_ref && gref != k_no_gmo_ref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events,
-            "Mouse in. gref(%d %d)",
-            gref.first, gref.second );
+//        LOMSE_LOG_DEBUG(Logger::k_events,
+//            "Mouse in. gref(%d %d)",
+//            gref.first, gref.second );
         send_mouse_in_event(gref, x, y);
         m_grefLastMouseOver = gref;
     }
@@ -1480,24 +1480,24 @@ void Interactor::on_visual_tracking(SpEventVisualTracking pEvent)
                 case EventVisualTracking::k_end_of_visual_tracking:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_end_of_visual_tracking");
                     remove_all_visual_tracking();
-                    return;
+                    break;
 
                 case EventVisualTracking::k_highlight_off:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_off");
                     remove_highlight_from_object( static_cast<ImoStaffObj*>(
                                                 spDoc->get_pointer_to_imo((*it).second) ));
-                    return;
+                    break;
 
                 case EventVisualTracking::k_highlight_on:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_highlight_on");
                     highlight_object( static_cast<ImoStaffObj*>(
                                             spDoc->get_pointer_to_imo((*it).second) ));
-                    return;
+                    break;
 
                 case EventVisualTracking::k_move_tempo_line:
                     //LOMSE_LOG_DEBUG(Logger::k_events, "Processing k_move_tempo_line");
                     move_tempo_line(pEvent->get_score_id(), pEvent->get_timepos());
-                    return;
+                    break;
 
                 default:
                 {
