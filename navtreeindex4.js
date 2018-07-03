@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4ae46b6ec737049284229e1527e3121149":[2,1,4,14],
+"group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4aed64ac48060a388a63f570e67f3fe0a7":[2,1,4,18],
 "group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4af316403ef51a15c1677d080a5a3b439c":[2,1,4,0],
 "group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4af9c846f008a9cec1b0b63efaed228508":[2,1,4,7],
 "group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4afc2cbbf0ed83b8169b7008d89c6739c6":[2,1,4,10],
@@ -117,6 +119,7 @@ var NAVTREEINDEX4 =
 "page-sound-generation.html#implementing-player-gui":[0,4,5],
 "page-sound-generation.html#page-sound-generation-overview":[0,4,0],
 "page-sound-generation.html#playback-summary":[0,4,1],
+"page-sound-generation.html#sound-generation-external-player":[0,4,6],
 "page-tasks.html":[0,5],
 "page-tasks.html#gui-interaction":[0,5,0],
 "page-tasks.html#task-data-entry":[0,5,1,6],

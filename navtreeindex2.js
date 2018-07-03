@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05":[1,0,45,0],
+"classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b":[1,0,45,1],
 "classLomseDoorway.html#a50315ec325c9ad3e3ee5525a19f72f42":[1,0,45,23],
 "classLomseDoorway.html#a50dbce970b84945868887966a0708634":[1,0,45,2],
 "classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e":[1,0,45,16],
@@ -125,8 +127,8 @@ var NAVTREEINDEX2 =
 "example_3_wxwidgets_8cpp-example.html":[3,7],
 "example_4_wxwidgets_8cpp-example.html":[3,8],
 "examples.html":[3],
-"functions.html":[1,3,0],
 "functions.html":[1,3,0,0],
+"functions.html":[1,3,0],
 "functions_b.html":[1,3,0,1],
 "functions_c.html":[1,3,0,2],
 "functions_d.html":[1,3,0,3],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "group__enumerations.html#gga330f908c8714832e484a019624e7ccc9a822e7d7eed3e931124b25df0815b1103":[2,1,12,0],
 "group__enumerations.html#gga330f908c8714832e484a019624e7ccc9a8e628283ac00740125de4d1f36b45e95":[2,1,12,1],
 "group__enumerations.html#gga3408dff8976b942845051c1a08287e30a966e12dafa5d820314f29efe17c436ca":[2,1,13,1],
-"group__enumerations.html#gga3408dff8976b942845051c1a08287e30aa3aa828decb25e2fd96dc3afe9283489":[2,1,13,2],
-"group__enumerations.html#gga3408dff8976b942845051c1a08287e30ad11e7e92feea17efaa96c9a7467a4adb":[2,1,13,3],
-"group__enumerations.html#gga3408dff8976b942845051c1a08287e30ae94523b84237773e025ba36188d6f201":[2,1,13,0]
+"group__enumerations.html#gga3408dff8976b942845051c1a08287e30aa3aa828decb25e2fd96dc3afe9283489":[2,1,13,2]
 };

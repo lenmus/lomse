@@ -7,5 +7,6 @@ var searchData=
   ['midiserverbase',['MidiServerBase',['../classMidiServerBase.html',1,'MidiServerBase'],['../classMidiServerBase.html#ac96968b04c1d60f5acad32cf9e90dd0c',1,'MidiServerBase::MidiServerBase()']]],
   ['model_5fpoint_5fto_5fscreen',['model_point_to_screen',['../classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e',1,'Interactor']]],
   ['move_5ftempo_5fline',['move_tempo_line',['../classInteractor.html#abdabbfee6aadbb77b6c9348e1c71e6e0',1,'Interactor::move_tempo_line(ImoStaffObj *pSO)'],['../classInteractor.html#a59a34de84e5ca08186be15ee25818868',1,'Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)'],['../classInteractor.html#a6d866749780f71c0e6297b8932c24fdb',1,'Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0)']]],
+  ['move_5ftempo_5fline_5fand_5fscroll_5fif_5fnecessary',['move_tempo_line_and_scroll_if_necessary',['../classInteractor.html#a4d27182dd9d0930064818342e915fed8',1,'Interactor']]],
   ['musicxmloptions',['MusicXmlOptions',['../classMusicXmlOptions.html',1,'']]]
 ];

@@ -36,7 +36,8 @@ var index =
       [ "How to handle sound events", "page-sound-generation.html#handling-sound-events", null ],
       [ "How to play an score", "page-sound-generation.html#how-to-play-score", null ],
       [ "Handling visual tracking events", "page-sound-generation.html#handling-visual-tracking-events", null ],
-      [ "The PlayerGui object", "page-sound-generation.html#implementing-player-gui", null ]
+      [ "The PlayerGui object", "page-sound-generation.html#implementing-player-gui", null ],
+      [ "Using an external player", "page-sound-generation.html#sound-generation-external-player", null ]
     ] ],
     [ "Interaction with your application GUI", "page-tasks.html", [
       [ "Interactors and Tasks", "page-tasks.html#gui-interaction", null ],
