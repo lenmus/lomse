@@ -110,8 +110,6 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_transform()
     , m_vxOrg(0)
     , m_vyOrg(0)
-    , m_vxLast(0)
-    , m_vyLast(0)
     , m_pCaret(nullptr)
     , m_pCursor(nullptr)
     , m_pDragImg(nullptr)
@@ -123,6 +121,8 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_trackingEffect(k_tracking_highlight_notes)
     , m_backgroundColor( Color(145, 156, 166) )
     , k_scrollLeftMargin(100.0)
+    , m_vxLast(0)
+    , m_vyLast(0)
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
     m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);

@@ -179,7 +179,6 @@ public:
     void build_main_boxes_table();
 
     //active and pointed elements
-    GmoBoxSystem* get_system_for(ImoId scoreId, int instr, int measure, TimeUnits time);
 
     /** Returns pointer to GmoBoxSystem containing the requested timepos. If pointer
         @c iPage is not @nullptr, it also updates its

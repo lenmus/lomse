@@ -106,7 +106,7 @@ enum EVisualTrackingMode
     k_tracking_none =               0x0000, ///< Do not add any visual tracking effect
     k_tracking_highlight_notes =    0x0001, ///< Highlight the notes and rest being played back
     k_tracking_tempo_line =	        0x0002, ///< Display a vertical line at beat start
-    k_tracking_tempo_block =	    0x0004, ///< Draw a rectangle surrounding all notes/rests in current beat
+//    k_tracking_tempo_block =	    0x0004, ///< Draw a rectangle surrounding all notes/rests in current beat
 };
 
 
