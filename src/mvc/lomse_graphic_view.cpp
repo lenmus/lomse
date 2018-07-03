@@ -845,6 +845,7 @@ void GraphicView::highlight_object(ImoStaffObj* pSO)
                         pShape->get_name().c_str(),
                         pSO->get_id() );
 
+    change_viewport_if_necessary(pSO->get_id());
     m_pHighlighted->set_visible(true);
     m_pHighlighted->add_highlight( pShape );
 }

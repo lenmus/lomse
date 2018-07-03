@@ -643,7 +643,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking && events[i]->pSO->is_visible())
                 {
                     ImoId id = events[i]->pSO->get_id();
-                    m_pInteractor->change_viewport_if_necessary(id);
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
                     //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
                     //                "implicit k_highlight_on generated for %d", id);
@@ -684,7 +683,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking)
                 {
                     ImoId id = events[i]->pSO->get_id();
-                    m_pInteractor->change_viewport_if_necessary(id);
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
                     //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
                     //                "explicit k_highlight_on generated for %d", id);

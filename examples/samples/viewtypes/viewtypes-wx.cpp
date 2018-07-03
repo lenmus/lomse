@@ -198,8 +198,8 @@ public:
     void open_test_document();
 
     //event handlers (these functions should _not_ be virtual)
-    void OnQuit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
+    void on_quit(wxCommandEvent& event);
+    void on_about(wxCommandEvent& event);
 
     //callback wrappers
     static void wrapper_lomse_event(void* pThis, SpEventInfo pEvent);
@@ -213,9 +213,10 @@ protected:
     MyCanvas* get_active_canvas() const { return m_canvas; }
 
     //event handlers
-    void OnOpen(wxCommandEvent& WXUNUSED(event));
-    void OnZoomIn(wxCommandEvent& WXUNUSED(event));
-    void OnZoomOut(wxCommandEvent& WXUNUSED(event));
+    void on_open_file(wxCommandEvent& WXUNUSED(event));
+    void on_open_test(wxCommandEvent& WXUNUSED(event));
+    void on_zoom_in(wxCommandEvent& WXUNUSED(event));
+    void on_zoom_out(wxCommandEvent& WXUNUSED(event));
     void on_midi_settings(wxCommandEvent& WXUNUSED(event));
     void on_sound_test(wxCommandEvent& WXUNUSED(event));
     void on_play_start(wxCommandEvent& WXUNUSED(event));
@@ -229,6 +230,7 @@ protected:
 
     void create_menu();
     void show_midi_settings_dlg();
+    int select_view_type();
 
     LomseDoorway m_lomse;        //the Lomse library doorway
     MyCanvas* m_canvas;
@@ -270,10 +272,10 @@ public:
 
 protected:
     //event handlers
-    void OnPaint(wxPaintEvent& WXUNUSED(event));
-    void OnSize(wxSizeEvent& event);
-    void OnKeyDown(wxKeyEvent& event);
-    void OnMouseEvent(wxMouseEvent& event);
+    void on_paint(wxPaintEvent& WXUNUSED(event));
+    void on_size(wxSizeEvent& event);
+    void on_key_down(wxKeyEvent& event);
+    void on_mouse_event(wxMouseEvent& event);
     void on_visual_tracking(MyVisualTrackingEvent& event);
     void on_update_viewport(MyUpdateViewportEvent& event);
 
@@ -416,6 +418,7 @@ enum
 {
     //menu File
     k_menu_file_open = wxID_HIGHEST + 1,
+    k_menu_file_open_test,
 
     //menu Sound
     k_menu_play_start,
@@ -451,12 +454,13 @@ enum
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     //File menu
-    EVT_MENU(k_menu_file_quit, MyFrame::OnQuit)
-    EVT_MENU(k_menu_file_open, MyFrame::OnOpen)
+    EVT_MENU(k_menu_file_quit, MyFrame::on_quit)
+    EVT_MENU(k_menu_file_open, MyFrame::on_open_file)
+    EVT_MENU(k_menu_file_open_test, MyFrame::on_open_test)
 
     //Zoom menu
-    EVT_MENU(k_menu_zoom_in, MyFrame::OnZoomIn)
-    EVT_MENU(k_menu_zoom_out, MyFrame::OnZoomOut)
+    EVT_MENU(k_menu_zoom_in, MyFrame::on_zoom_in)
+    EVT_MENU(k_menu_zoom_out, MyFrame::on_zoom_out)
 
     //Sound menu
     EVT_MENU(k_menu_midi_settings, MyFrame::on_midi_settings)
@@ -466,7 +470,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(k_menu_play_pause, MyFrame::on_play_pause)
 
     //Help menu
-    EVT_MENU(k_menu_help_about, MyFrame::OnAbout)
+    EVT_MENU(k_menu_help_about, MyFrame::on_about)
 
     //Debug menu
     EVT_MENU(k_menu_debug_dump_gmodel, MyFrame::on_debug_dump_gmodel)
@@ -503,6 +507,7 @@ void MyFrame::create_menu()
 {
     wxMenu *fileMenu = new wxMenu;
     fileMenu->Append(k_menu_file_open, _T("&Open..."));
+    fileMenu->Append(k_menu_file_open_test, _T("Open test document"));
     fileMenu->AppendSeparator();
     fileMenu->Append(k_menu_file_quit, _T("E&xit"));
 
@@ -521,13 +526,18 @@ void MyFrame::create_menu()
     helpMenu->Append(k_menu_help_about, _T("&About"));
 
     m_viewMenu = new wxMenu;
-    m_viewMenu->Append(k_menu_view_vertical_book, _T("k_view_vertical_book"), _T("Use Vertical book View"), wxITEM_CHECK);
-    m_viewMenu->Append(k_menu_view_horizontal_book, _T("k_view_horizontal_book"), _T("Use Horizontal book View"), wxITEM_CHECK);
-    m_viewMenu->Append(k_menu_view_single_system, _T("k_view_single_system"), _T("Use Single system View"), wxITEM_CHECK);
+    m_viewMenu->Append(k_menu_view_single_system, _T("k_view_single_system"),
+                       _T("Use Single system View"), wxITEM_RADIO);
+    m_viewMenu->Append(k_menu_view_vertical_book, _T("k_view_vertical_book"),
+                       _T("Use Vertical book View"), wxITEM_RADIO);
+    m_viewMenu->Append(k_menu_view_horizontal_book, _T("k_view_horizontal_book"),
+                       _T("Use Horizontal book View"), wxITEM_RADIO);
 
     m_effectMenu = new wxMenu;
-    m_effectMenu->Append(k_menu_effect_highlight, _T("k_tracking_highlight_notes"), _T("Highlight the notes and rest being played back"), wxITEM_CHECK);
-    m_effectMenu->Append(k_menu_effect_tempo_line, _T("k_tracking_tempo_line"), _T("Display a vertical line at beat start"), wxITEM_CHECK);
+    m_effectMenu->Append(k_menu_effect_highlight, _T("k_tracking_highlight_notes"),
+                         _T("Highlight the notes and rest being played back"), wxITEM_CHECK);
+    m_effectMenu->Append(k_menu_effect_tempo_line, _T("k_tracking_tempo_line"),
+                         _T("Display a vertical line at beat start"), wxITEM_CHECK);
 
     wxMenu *debugMenu = new wxMenu;
     debugMenu->Append(k_menu_debug_dump_gmodel, _T("See graphic model"));
@@ -543,16 +553,19 @@ void MyFrame::create_menu()
     menuBar->Append(helpMenu, _T("&Help"));
 
     SetMenuBar(menuBar);
+
+    m_effectMenu->Check(k_menu_effect_tempo_line, true);
+    m_viewMenu->Check(k_menu_view_single_system, true);
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_quit(wxCommandEvent& WXUNUSED(event))
 {
     Close(true /*force to close*/);
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_about(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox(_T("Lomse: Test single system view, for wxWidgets"),
                  _T("About wxWidgets Lomse sample"),
@@ -599,13 +612,7 @@ void MyFrame::initialize_lomse()
 //---------------------------------------------------------------------------------------
 void MyFrame::open_test_document()
 {
-    int viewType = k_view_single_system;
-    if (m_viewMenu->IsChecked(k_menu_view_vertical_book))
-        viewType = k_view_vertical_book;
-    else if (m_viewMenu->IsChecked(k_menu_view_horizontal_book))
-        viewType = k_view_horizontal_book;
-
-    get_active_canvas()->open_test_document(viewType);
+    get_active_canvas()->open_test_document( select_view_type() );
 
     //BUG_BYPASS
     // In Linux there are problems to catch Key Up/Down events. See for instance
@@ -613,6 +620,24 @@ void MyFrame::open_test_document()
     // Following line is not needed for Windows (doen't hurt) but it is
     // necessary for Linux, in order to receive Key Up/Down events
     get_active_canvas()->SetFocus();
+}
+
+//---------------------------------------------------------------------------------------
+void MyFrame::on_open_test(wxCommandEvent& WXUNUSED(event))
+{
+    open_test_document();
+}
+
+//---------------------------------------------------------------------------------------
+int MyFrame::select_view_type()
+{
+    int viewType = k_view_single_system;
+    if (m_viewMenu->IsChecked(k_menu_view_vertical_book))
+        viewType = k_view_vertical_book;
+    else if (m_viewMenu->IsChecked(k_menu_view_horizontal_book))
+        viewType = k_view_horizontal_book;
+
+    return viewType;
 }
 
 //---------------------------------------------------------------------------------------
@@ -658,7 +683,7 @@ void MyFrame::on_lomse_event(SpEventInfo pEvent)
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_open_file(wxCommandEvent& WXUNUSED(event))
 {
     wxString defaultPath = wxT("../../../test-scores/");
 
@@ -682,23 +707,17 @@ void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
     if (filename.empty())
         return;
 
-    int viewType = k_view_single_system;
-    if (m_viewMenu->IsChecked(k_menu_view_vertical_book))
-        viewType = k_view_vertical_book;
-    else if (m_viewMenu->IsChecked(k_menu_view_horizontal_book))
-        viewType = k_view_horizontal_book;
-
-    get_active_canvas()->open_file(filename, viewType);
+    get_active_canvas()->open_file(filename, select_view_type());
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_zoom_in(wxCommandEvent& WXUNUSED(event))
 {
     get_active_canvas()->zoom_in();
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_zoom_out(wxCommandEvent& WXUNUSED(event))
 {
     get_active_canvas()->zoom_out();
 }
@@ -812,10 +831,10 @@ void MyFrame::on_debug_dump_gmodel(wxCommandEvent& WXUNUSED(event))
 //=======================================================================================
 
 BEGIN_EVENT_TABLE(MyCanvas, wxWindow)
-	EVT_KEY_DOWN(MyCanvas::OnKeyDown)
-    EVT_MOUSE_EVENTS(MyCanvas::OnMouseEvent)
-    EVT_SIZE(MyCanvas::OnSize)
-    EVT_PAINT(MyCanvas::OnPaint)
+	EVT_KEY_DOWN(MyCanvas::on_key_down)
+    EVT_MOUSE_EVENTS(MyCanvas::on_mouse_event)
+    EVT_SIZE(MyCanvas::on_size)
+    EVT_PAINT(MyCanvas::on_paint)
     MY_EVT_VISUAL_TRACKING(MyCanvas::on_visual_tracking)
     MY_EVT_UPDATE_VIEWPORT(MyCanvas::on_update_viewport)
 END_EVENT_TABLE()
@@ -877,7 +896,7 @@ void MyCanvas::open_file(const wxString& fullname, int viewType)
 }
 
 //---------------------------------------------------------------------------------------
-void MyCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
+void MyCanvas::on_size(wxSizeEvent& WXUNUSED(event))
 {
     wxSize size = this->GetClientSize();
     create_rendering_buffer(size.GetWidth(), size.GetHeight());
@@ -886,7 +905,7 @@ void MyCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
 }
 
 //---------------------------------------------------------------------------------------
-void MyCanvas::OnPaint(wxPaintEvent& event)
+void MyCanvas::on_paint(wxPaintEvent& event)
 {
     if (!m_pPresenter)
         event.Skip(false);
@@ -1005,6 +1024,9 @@ void MyCanvas::open_test_document(int viewType)
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
+
+    m_view_needs_redraw = true;
+    Refresh(false);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1053,7 +1075,7 @@ void MyCanvas::update_view_content()
 }
 
 //---------------------------------------------------------------------------------------
-void MyCanvas::OnKeyDown(wxKeyEvent& event)
+void MyCanvas::on_key_down(wxKeyEvent& event)
 {
     if (!m_pPresenter) return;
 
@@ -1159,7 +1181,7 @@ unsigned MyCanvas::get_keyboard_flags(wxKeyEvent& event)
 }
 
 //-------------------------------------------------------------------------
-void MyCanvas::OnMouseEvent(wxMouseEvent& event)
+void MyCanvas::on_mouse_event(wxMouseEvent& event)
 {
     if (!m_pPresenter) return;
 

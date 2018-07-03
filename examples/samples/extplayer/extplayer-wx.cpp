@@ -136,6 +136,9 @@ public:
 
 
 protected:
+    //menus
+    wxMenu* m_testMenu;
+
     //accessors
     MyCanvas* get_active_canvas() const { return m_canvas; }
 
@@ -170,7 +173,7 @@ public:
 
     //commands
     void open_test_document();
-    void start_test();
+    void start_test(int test);
     void stop_test();
 
 protected:
@@ -213,11 +216,18 @@ protected:
     int     m_measure;              //current measure
     ImoId   m_scoreId;              //Id of the score to playback
 
+    //method to test
+    int m_testType;
 
     DECLARE_EVENT_TABLE()
 };
 
-
+//For selecting the method to test
+enum ETest {
+    k_test_move_tempo_line = 0,
+    k_test_scroll_to_measure,
+    k_test_move_and_scroll,
+};
 
 //=======================================================================================
 // MyApp implementation
@@ -267,6 +277,9 @@ enum
     k_menu_test_start = wxID_HIGHEST + 1,
     k_menu_test_stop,
     k_id_tempo_line_timer,
+    k_menu_test_tempo_line,
+    k_menu_test_scroll,
+    k_menu_test_tempo_line_scroll,
 
     //using standard IDs
     //it is important for the id corresponding to the "About" command to have
@@ -309,13 +322,20 @@ void MyFrame::create_menu()
     wxMenu *fileMenu = new wxMenu;
     fileMenu->Append(k_menu_file_quit, _T("E&xit"));
 
-    wxMenu* testMenu = new wxMenu;
-    testMenu->Append(k_menu_test_start, _T("&Start..."));
-    testMenu->Append(k_menu_test_stop, _T("S&top..."));
+    m_testMenu = new wxMenu;
+    m_testMenu->Append(k_menu_test_start, _T("&Start..."));
+    m_testMenu->Append(k_menu_test_stop, _T("S&top..."));
+    m_testMenu->AppendSeparator();
+    m_testMenu->Append(k_menu_test_tempo_line,
+                     "move_tempo_line()", "", wxITEM_RADIO);
+    m_testMenu->Append(k_menu_test_scroll,
+                     "scroll_to_measure()", "", wxITEM_RADIO);
+    m_testMenu->Append(k_menu_test_tempo_line_scroll,
+                     "move_tempo_line_and_scroll_if_necessary()", "", wxITEM_RADIO);
 
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(fileMenu, _T("&File"));
-    menuBar->Append(testMenu, _T("&Test"));
+    menuBar->Append(m_testMenu, _T("&Test"));
 
     SetMenuBar(menuBar);
 }
@@ -411,7 +431,15 @@ void MyFrame::open_test_document()
 //---------------------------------------------------------------------------------------
 void MyFrame::on_test_start(wxCommandEvent& WXUNUSED(event))
 {
-    get_active_canvas()->start_test();
+    int test;
+    if (m_testMenu->IsChecked(k_menu_test_tempo_line))
+        test = k_test_move_tempo_line;
+    else if (m_testMenu->IsChecked(k_menu_test_scroll))
+        test = k_test_scroll_to_measure;
+    else
+        test = k_test_move_and_scroll;
+
+    get_active_canvas()->start_test(test);
 }
 
 //---------------------------------------------------------------------------------------
@@ -444,6 +472,7 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse)
     , m_nBeatTime(1000)     //1000 milliseconds = 1 sec.
     , m_beat(0)
     , m_measure(0)
+    , m_testType(k_test_move_and_scroll)
 {
 }
 
@@ -706,8 +735,9 @@ void MyCanvas::on_update_viewport(MyUpdateViewportEvent& event)
 }
 
 //---------------------------------------------------------------------------------------
-void MyCanvas::start_test()
+void MyCanvas::start_test(int test)
 {
+    m_testType = test;
     m_beat = -1;
     m_measure = 0;
     m_playbackTimer.Start(m_nBeatTime, wxTIMER_CONTINUOUS);
@@ -741,8 +771,12 @@ void MyCanvas::on_tempo_line_timer(wxTimerEvent& WXUNUSED(event))
             m_beat = 0;
             ++m_measure;
         }
-        //spInteractor->move_tempo_line(m_scoreId, m_measure, m_beat);
-        //spInteractor->scroll_to_measure(m_scoreId, m_measure, m_beat);
-        spInteractor->move_tempo_line_and_scroll_if_necessary(m_scoreId, m_measure, m_beat);
+
+        if (m_testType == k_test_move_tempo_line)
+            spInteractor->move_tempo_line(m_scoreId, m_measure, m_beat);
+        else if (m_testType == k_test_scroll_to_measure)
+            spInteractor->scroll_to_measure(m_scoreId, m_measure, m_beat);
+        else
+            spInteractor->move_tempo_line_and_scroll_if_necessary(m_scoreId, m_measure, m_beat);
     }
 }

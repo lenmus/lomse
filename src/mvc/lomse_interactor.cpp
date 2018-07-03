@@ -1103,7 +1103,7 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
-        pGView->move_tempo_line(scoreId, timepos);
+        pGView->move_tempo_line_and_change_viewport(scoreId, timepos);
         pGView->draw_visual_tracking();
         request_window_update();
     }
