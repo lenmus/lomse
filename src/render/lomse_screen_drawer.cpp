@@ -978,10 +978,10 @@ void ScreenDrawer::model_point_to_screen(double* x, double* y) const
 }
 
 //---------------------------------------------------------------------------------------
-double ScreenDrawer::Pixels_to_LUnits(Pixels value)
+LUnits ScreenDrawer::Pixels_to_LUnits(Pixels value)
 {
     TransAffine& mtx = m_pRenderer->get_transform();
-    return double(value) / mtx.scale();
+    return LUnits(double(value) / mtx.scale());
 }
 
 //---------------------------------------------------------------------------------------

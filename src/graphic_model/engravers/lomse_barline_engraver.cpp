@@ -112,7 +112,7 @@ UPoint BarlineEngraver::get_drag_offset()
 {
     //return left side, vertical center
     URect bounds = m_pBarlineShape->get_bounds();
-    return UPoint(0.0, bounds.get_height() / 2.0);
+    return UPoint(0.0f, bounds.get_height() / 2.0f);
 }
 
 

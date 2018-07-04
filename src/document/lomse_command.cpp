@@ -1239,7 +1239,7 @@ void CmdChangeAccidentals::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor
         ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*itN) );
         FPitch fp = *itP;
         pNote->set_notated_accidentals( fp.accidentals() );
-        pNote->set_actual_accidentals( fp.num_accidentals() );
+        pNote->set_actual_accidentals( float(fp.num_accidentals()) );
         pNote->set_dirty(true);
         if (!pScore)
             pScore = pNote->get_score();
@@ -1377,9 +1377,9 @@ int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor
     switch (m_dataType)
     {
         case k_type_bool:
-            pImo->set_bool_attribute(m_attrb, m_newInt);       break;
+            pImo->set_bool_attribute(m_attrb, m_newInt != 0); break;
         case k_type_color:
-            pImo->set_color_attribute(m_attrb, m_newColor);   break;
+            pImo->set_color_attribute(m_attrb, m_newColor);    break;
         case k_type_double:
             pImo->set_double_attribute(m_attrb, m_newDouble);  break;
         case k_type_int:
@@ -1399,9 +1399,9 @@ void CmdChangeAttribute::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     switch (m_dataType)
     {
         case k_type_bool:
-            pImo->set_bool_attribute(m_attrb, m_oldInt);       break;
+            pImo->set_bool_attribute(m_attrb, m_oldInt != 0); break;
         case k_type_color:
-            pImo->set_color_attribute(m_attrb, m_oldColor);   break;
+            pImo->set_color_attribute(m_attrb, m_oldColor);    break;
         case k_type_double:
             pImo->set_double_attribute(m_attrb, m_oldDouble);  break;
         case k_type_int:

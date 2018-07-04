@@ -774,7 +774,7 @@ float MnxElementAnalyser::analyze_optional_child_pcdata_float(const string& name
     {
         bool fError = false;
         string number = m_childToAnalyse.value();
-        long rNumber;
+        float rNumber;
         std::istringstream iss(number);
         if ((iss >> rNumber).fail())
             fError = true;
@@ -3920,7 +3920,7 @@ bool MnxAnalyser::pitch_to_components(const string& pitch, int *step, int* octav
                 if (i+sz != iMax)
                     return true;   //error
             }
-            catch (const std::invalid_argument& ia)
+            catch (...)
             {
                 return true;   //error
             }

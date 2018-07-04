@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -212,10 +212,10 @@ public:
         return m_barlinesInfo & k_all_instr_have_barline;
     }
     inline bool some_instr_have_barline() {
-        return m_barlinesInfo & k_some_instr_have_barline;
+        return (m_barlinesInfo & k_some_instr_have_barline) != 0;
     }
     inline bool all_instr_have_final_barline() {
-        return m_barlinesInfo & k_all_instr_have_final_barline;
+        return (m_barlinesInfo & k_all_instr_have_final_barline) != 0;
     }
     void collect_barlines_information(int numInstruments);
 

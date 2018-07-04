@@ -62,7 +62,7 @@ namespace lomse
 ptime::duration ptime::operator-(const ptime rhs)
 {
     long long millis = chrono::duration_cast<chrono::milliseconds>(timepoint - rhs.timepoint).count();
-	return millis;
+    return ptime::duration(millis);
 }
 
 //=======================================================================================
@@ -327,7 +327,13 @@ void Interactor::task_action_select_object_and_show_contextual_menu(
         GmoObj* pGmo = find_object_at(x, y);
         if (pGmo)
         {
-            select_object(pGmo, flags);
+            //TODO: Review this code. flag for select_object() is just fClearSelection,
+            //      not event flags. It is necessary to decide if selection must be
+            //      clared based on event flags:
+            //        k_kbd_shift   = 8,      ///< 0x08. Keyboard Shift key pressed while mouse event
+            //        k_kbd_ctrl    = 16,     ///< 0x10. Keyboard Ctrol key pressed while mouse event
+            //        k_kbd_alt     = 32,     ///< 0x20. Keyboard Alt key pressed while mouse event
+            select_object(pGmo, false); //flags);
             force_redraw();     //to draw it as selected and remove previous selection
             ImoObj* pImo = pGmo->get_creator_imo();
             if (pImo)
@@ -398,7 +404,7 @@ DocCursorState Interactor::click_event_to_cursor_state(SpEventMouse event)
     double x = double(event->get_x());
     double y = double(event->get_y());
     int iPage = pGView->page_at_screen_point(x, y);
-    GmoObj* pGmo = find_object_at(x, y);
+    GmoObj* pGmo = find_object_at(Pixels(x), Pixels(y));
     screen_point_to_page_point(&x, &y);
     return pGView->click_event_to_cursor_state(iPage, LUnits(x), LUnits(y), pImo, pGmo);
 }
@@ -428,7 +434,7 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
     if (pInfo->pShapeStaff)
     {
         //determine position on staff
-        int lineSpace = pInfo->pShapeStaff->line_space_at(yPos);     //0=first ledger line below staff
+        int lineSpace = pInfo->pShapeStaff->line_space_at(LUnits(yPos));     //0=first ledger line below staff
 
         //determine instrument, staff and timepos
         GmoObj* pGmo = pInfo->pGmo;

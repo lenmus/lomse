@@ -142,7 +142,8 @@ void Caret::draw_caret_as_line(ScreenDrawer* pDrawer)
     pDrawer->render();
     pDrawer->remove_shift();
 
-    m_bounds = URect(UPoint(x1 - 100, y1), UPoint(x2 + 100, y2));
+    m_bounds = URect(UPoint(Tenths(x1) - 100.0f, Tenths(y1)),
+                     UPoint(Tenths(x2) + 100.0f, Tenths(y2)));
 }
 
 //---------------------------------------------------------------------------------------

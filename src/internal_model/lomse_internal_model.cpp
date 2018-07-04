@@ -2143,12 +2143,12 @@ void ImoContentObj::set_double_attribute(TIntAttribute attrib, double value)
     switch(attrib)
     {
         case k_attr_xpos:
-            m_txUserLocation = value;
+            m_txUserLocation = Tenths(value);
             set_dirty(true);
             break;
 
         case k_attr_ypos:
-            m_tyUserLocation = value;
+            m_tyUserLocation = Tenths(value);
             set_dirty(true);
             break;
 

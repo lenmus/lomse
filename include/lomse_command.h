@@ -165,7 +165,7 @@ public:
         reversible commands are recordable by nature, as this is required for supporting
         redo. See is_reversible().
     */
-    inline bool is_recordable() { return m_flags &  k_recordable; }
+    inline bool is_recordable() { return (m_flags &  k_recordable) != 0; }
 
     /** Returns an error message with the error explanation. This method should be
         invoked after executing a command that fails. Otherwise it will return an
@@ -179,8 +179,12 @@ public:
 //excluded from public API. Only for internal use.
 ///@cond INTERNALS
 public:
-    inline bool is_target_set_in_constructor() { return m_flags &  k_target_set_in_constructor; }
-    inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
+    inline bool is_target_set_in_constructor() {
+        return (m_flags &  k_target_set_in_constructor) != 0;
+    }
+    inline bool is_included_in_composite_cmd() {
+        return (m_flags &  k_included_in_composite_cmd) != 0;
+    }
 
     virtual void update_selection(SelectionSet* UNUSED(pSelection)) {}
     inline void set_final_cursor_pos(ImoId id) { m_idRefresh = id; }

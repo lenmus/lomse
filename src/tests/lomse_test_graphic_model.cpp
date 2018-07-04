@@ -814,7 +814,7 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(128.0, false), 5309.59) );
+        CHECK( is_equal_pos(pGrid->get_x_for_time(128.0, false), 5309.59f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(128.0, false) << endl;

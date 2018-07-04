@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -131,7 +131,7 @@ void GmoShapeBarline::determine_lines_relative_positions()
             break;
 
         case k_barline_end_repetition:
-            uxPos += m_uRadius * 2.7;   //BUG-BYPASS: Need to shift right the drawing
+            uxPos += m_uRadius * 2.7f;   //BUG-BYPASS: Need to shift right the drawing
             uxPos += m_uRadius + m_uSpacing;
             m_xLeftLine = uxPos;
             uxPos += m_uThinLineWidth + m_uSpacing;
@@ -189,7 +189,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
         case k_barline_end_repetition:
             //uxPos += m_uRadius;
-            uxPos += m_uRadius * 2.7;   //BUG-BYPASS: Need to shift right the drawing
+            uxPos += m_uRadius * 2.7f;   //BUG-BYPASS: Need to shift right the drawing
             draw_two_dots(pDrawer, uxPos, uyTop);
             uxPos += m_uRadius + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);

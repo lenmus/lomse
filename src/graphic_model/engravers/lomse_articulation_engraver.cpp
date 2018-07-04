@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -108,7 +108,7 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
 
     else if (m_pArticulation->is_articulation_line())
     {
-        pos.y = (m_pParentShape->get_top() + m_pParentShape->get_bottom() ) / 2.0;
+        pos.y = (m_pParentShape->get_top() + m_pParentShape->get_bottom() ) / 2.0f;
         if (type == k_articulation_plop || type == k_articulation_scoop)
         {
             pos.x = m_pParentShape->get_left() - tenths_to_logical(16.0f);

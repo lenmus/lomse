@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -151,8 +151,8 @@ UPoint NoteEngraver::get_drag_offset()
     //return center of notehead
     URect total = m_pNoteShape->get_bounds();
     URect head = m_pNoteheadShape->get_bounds();
-    return UPoint(head.get_x() - total.get_x() + head.get_width() / 2.0,
-                  head.get_y() - total.get_y() + head.get_height() / 2.0 );
+    return UPoint(head.get_x() - total.get_x() + head.get_width() / 2.0f,
+                  head.get_y() - total.get_y() + head.get_height() / 2.0f );
 }
 
 //---------------------------------------------------------------------------------------
