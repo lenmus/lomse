@@ -190,13 +190,13 @@ bool XmlParser::build_offset_data(const char* filename)
     //This is not needed in lomse code as the file is opened for read.
     //https://stackoverflow.com/questions/906599/why-cant-i-use-fopen
     FILE* f;
-#ifndef _CRT_SECURE_NO_DEPRECATE
-    #define _CRT_SECURE_NO_DEPRECATE
-    f = fopen(filename, "rb");
-    if (!f)
-        return false;
-    #undef _CRT_SECURE_NO_DEPRECATE
-#endif
+    #ifndef _CRT_SECURE_NO_WARNINGS
+        #define _CRT_SECURE_NO_WARNINGS
+        f = fopen(filename, "rb");
+        if (!f)
+            return false;
+        #undef _CRT_SECURE_NO_WARNINGS
+    #endif
 
     ptrdiff_t offset = 0;
 
