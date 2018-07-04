@@ -472,7 +472,7 @@ SUITE(DocLayouterTest)
         CHECK( pPage->get_num_boxes() == 1 );
 
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        Pixels height = pBDPC->get_size().height;
+        Tenths height = pBDPC->get_size().height;
         CHECK( pBDPC->get_num_boxes() == 1 );
 
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage

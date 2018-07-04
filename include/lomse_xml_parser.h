@@ -84,7 +84,7 @@ public:
     };
 
     //XmlNode helper methods
-    inline bool is_null() { return m_node.type() == k_node_null; }
+    inline bool is_null() { return m_node.type() == pugi::xml_node_type::node_null; }
     //inline bool is_null() { return ! m_node; }      //TODO: is this valid? It seems to work!
 	///get child with the specified name
     inline XmlNode child(const string& name) {

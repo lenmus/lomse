@@ -97,10 +97,14 @@ struct glyph_cache
         //--------------------------------------------------------------------
         void signature(const char* font_signature)
         {
+        #ifndef _CRT_SECURE_NO_DEPRECATE
+            #define _CRT_SECURE_NO_DEPRECATE
             int len = strlen(font_signature) + 1;
             m_font_signature = (char*)m_allocator.allocate(len);
             strncpy(m_font_signature, font_signature, len);
             memset(m_glyphs, 0, sizeof(m_glyphs));
+            #undef _CRT_SECURE_NO_DEPRECATE
+        #endif
         }
 
         //--------------------------------------------------------------------

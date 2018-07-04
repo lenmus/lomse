@@ -171,7 +171,7 @@ void XmlParser::find_root()
 }
 
 //---------------------------------------------------------------------------------------
-bool XmlParser::build_offset_data(const char* file)
+bool XmlParser::build_offset_data(const char* filename)
 {
     //AWARE:
     // * Windows and DOS use a pair of CR (\r) and LF (\n) chars to end lines
@@ -184,9 +184,19 @@ bool XmlParser::build_offset_data(const char* file)
 
     m_offsetData.clear();
 
-    FILE* f = fopen(file, "rb");
+    //AWARE: Microsoft deprecated fopen() but the alternative they're providing
+    //is not portable. The security issue is, basically, for files opened for writing.
+    //Microsoft improves security by opening the file with exclusive access.
+    //This is not needed in lomse code as the file is opened for read.
+    //https://stackoverflow.com/questions/906599/why-cant-i-use-fopen
+    FILE* f;
+#ifndef _CRT_SECURE_NO_DEPRECATE
+    #define _CRT_SECURE_NO_DEPRECATE
+    f = fopen(filename, "rb");
     if (!f)
         return false;
+    #undef _CRT_SECURE_NO_DEPRECATE
+#endif
 
     ptrdiff_t offset = 0;
 
