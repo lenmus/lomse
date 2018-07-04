@@ -410,11 +410,11 @@ void ScoreLayouter::decide_line_breaks()
     {
         bool fUseSimple;
         if (m_libraryScope.use_debug_values())
-            fUseSimple = bool(m_libraryScope.get_render_spacing_opts()
-                              & k_render_opt_breaker_simple);
+            fUseSimple = (m_libraryScope.get_render_spacing_opts()
+                              & k_render_opt_breaker_simple) != 0;
         else
-            fUseSimple = bool(m_pScoreMeter->get_render_spacing_opts()
-                              & k_render_opt_breaker_simple);
+            fUseSimple = (m_pScoreMeter->get_render_spacing_opts()
+                              & k_render_opt_breaker_simple) != 0;
 
         if (fUseSimple)
         {
@@ -1457,8 +1457,8 @@ void LinesBreakerOptimal::initialize_entries_table()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::compute_optimal_break_sequence()
 {
-    bool fTrace = bool(m_libraryScope.get_trace_level_for_lines_breaker()
-                       & k_trace_breaks_computation);
+    bool fTrace = (m_libraryScope.get_trace_level_for_lines_breaker()
+                       & k_trace_breaks_computation) != 0;
 
     for (int i=0; i < m_numCols; ++i)
     {
@@ -1538,8 +1538,8 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 //---------------------------------------------------------------------------------------
 void LinesBreakerOptimal::retrieve_breaks_sequence()
 {
-    bool fTrace = bool(m_libraryScope.get_trace_level_for_lines_breaker()
-                       & k_trace_breaks_table);
+    bool fTrace = (m_libraryScope.get_trace_level_for_lines_breaker()
+                       & k_trace_breaks_table) != 0;
     if (fTrace)
     {
         dbgLogger << "Breaks computed. Entries: ************************************" << endl;

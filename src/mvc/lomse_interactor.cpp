@@ -61,7 +61,8 @@ namespace lomse
 
 ptime::duration ptime::operator-(const ptime rhs)
 {
-    return chrono::duration_cast<chrono::milliseconds>(timepoint - rhs.timepoint).count();
+    long long millis = chrono::duration_cast<chrono::milliseconds>(timepoint - rhs.timepoint).count();
+    return ptime::duration(millis);
 }
 
 //=======================================================================================

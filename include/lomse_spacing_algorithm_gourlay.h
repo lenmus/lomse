@@ -212,10 +212,10 @@ public:
         return m_barlinesInfo & k_all_instr_have_barline;
     }
     inline bool some_instr_have_barline() {
-        return bool(m_barlinesInfo & k_some_instr_have_barline);
+        return (m_barlinesInfo & k_some_instr_have_barline) != 0;
     }
     inline bool all_instr_have_final_barline() {
-        return bool(m_barlinesInfo & k_all_instr_have_final_barline);
+        return (m_barlinesInfo & k_all_instr_have_final_barline) != 0;
     }
     void collect_barlines_information(int numInstruments);
 

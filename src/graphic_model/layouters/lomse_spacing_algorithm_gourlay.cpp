@@ -665,8 +665,8 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //    line_width   is the desired width of for the line
     //    fopt  is a constant value set by the user (and dependent on personal taste).
 
-    bool fTrace = bool(m_libraryScope.get_trace_level_for_lines_breaker()
-                       & k_trace_breaks_penalties);
+    bool fTrace = (m_libraryScope.get_trace_level_for_lines_breaker()
+                       & k_trace_breaks_penalties) != 0;
 
     //force break when so required
     if (m_pScoreLyt->column_has_system_break(iLastCol))

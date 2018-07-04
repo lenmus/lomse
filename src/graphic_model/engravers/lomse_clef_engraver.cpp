@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -101,8 +101,8 @@ UPoint ClefEngraver::get_drag_offset()
 {
     //return center of clef
     URect bounds = m_pClefShape->get_bounds();
-    return UPoint(bounds.get_width() / 2.0,
-                  bounds.get_height() / 2.0 );
+    return UPoint(bounds.get_width() / 2.0f,
+                  bounds.get_height() / 2.0f );
 }
 
 //---------------------------------------------------------------------------------------

@@ -1377,7 +1377,7 @@ int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor
     switch (m_dataType)
     {
         case k_type_bool:
-            pImo->set_bool_attribute(m_attrb, bool(m_newInt)); break;
+            pImo->set_bool_attribute(m_attrb, m_newInt != 0); break;
         case k_type_color:
             pImo->set_color_attribute(m_attrb, m_newColor);    break;
         case k_type_double:
@@ -1399,7 +1399,7 @@ void CmdChangeAttribute::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     switch (m_dataType)
     {
         case k_type_bool:
-            pImo->set_bool_attribute(m_attrb, bool(m_oldInt)); break;
+            pImo->set_bool_attribute(m_attrb, m_oldInt != 0); break;
         case k_type_color:
             pImo->set_color_attribute(m_attrb, m_oldColor);    break;
         case k_type_double:

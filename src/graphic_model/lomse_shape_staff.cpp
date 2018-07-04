@@ -112,7 +112,7 @@ int GmoShapeStaff::line_space_at(LUnits yPos)
 
     //compute the number of steps (half lines) from line 5 (top staff line = step #10)
     LUnits spacing = m_pStaff->get_line_spacing();
-	LUnits uHalfLine = spacing / 2.0;
+	LUnits uHalfLine = spacing / 2.0f;
     float rStep = (m_origin.y - yPos)/uHalfLine;
     int nStep = (rStep > 0.0f ? int(rStep + 0.5f) : int(rStep - 0.5f) );
 //    //wxLogMessage(_T("[GmoShapeStaff::line_space_at] yPos=%.2f, spacing=%.2f, Top.y=%.2f, rStep=%.2f, nStep=%d"),
