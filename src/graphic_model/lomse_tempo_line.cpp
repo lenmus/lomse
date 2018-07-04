@@ -82,8 +82,8 @@ void TempoLine::on_draw(ScreenDrawer* pDrawer)
         yBottom -= double(pStyle->margin_bottom());
         xLeft += double(pStyle->margin_left());
     }
-    m_bounds.top(yTop);
-    m_bounds.bottom(yBottom);
+    m_bounds.top(float(yTop));
+    m_bounds.bottom(float(yBottom));
     m_bounds.width = m_width;
 
     //draw the tempo line

@@ -158,7 +158,7 @@ void DocLayouter::fix_document_size()
 
         //View height is determined by BoxDocPageContent.
         //It is only necessary to fix BoxDocPage
-        LUnits height = pBDPC->get_size().height + 2.0 * pBDPC->get_origin().y;
+        LUnits height = pBDPC->get_size().height + 2.0f * pBDPC->get_origin().y;
         pPage->set_height(height);
 
         //View width is determined by BoxSystem.

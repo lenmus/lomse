@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -91,8 +91,8 @@ void TimeGrid::on_draw(ScreenDrawer* pDrawer)
     pDrawer->remove_shift();
 
     if (iMax > 0)
-        m_bounds = URect(UPoint(pGridTable->get_x_pos(0)-8, yTop),
-                         UPoint(pGridTable->get_x_pos(iMax-1)+8, yBottom) );
+        m_bounds = URect(UPoint(pGridTable->get_x_pos(0)-8, Tenths(yTop)),
+                         UPoint(pGridTable->get_x_pos(iMax-1)+8, Tenths(yBottom)) );
 }
 
 

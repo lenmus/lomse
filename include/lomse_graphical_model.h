@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -96,8 +96,8 @@ public:
 
 
     AreaInfo()
-        : x(-1000000000000.0)   //any impossible big value
-        , y(-1000000000000.0)   //any impossible big value
+        : x(-1000000000000.0f)   //any impossible big value
+        , y(-1000000000000.0f)   //any impossible big value
         , pShapeStaff(nullptr)
         , pBSI(nullptr)
         , pGmo(nullptr)

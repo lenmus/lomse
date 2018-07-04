@@ -120,7 +120,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pTempoLine(nullptr)
     , m_trackingEffect(k_tracking_highlight_notes)
     , m_backgroundColor( Color(145, 156, 166) )
-    , k_scrollLeftMargin(100.0)
+    , k_scrollLeftMargin(100)
     , m_vxLast(0)
     , m_vyLast(0)
 {
@@ -967,8 +967,8 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
     GmoBoxDocPage* pPage = pGModel->get_page(0);
     URect rect = pPage->get_bounds();
     double margin = 0.05 * rect.width;      //5% margin, 2.5 at each side
-    double xScale = m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin);
-    double yScale = m_pDrawer->Pixels_to_LUnits(screenHeight) / (rect.height + margin);
+    double xScale = double(m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin));
+    double yScale = double(m_pDrawer->Pixels_to_LUnits(screenHeight) / (rect.height + margin));
     double scale = min (xScale, yScale);
 
     //apply new user scaling factor
@@ -996,7 +996,7 @@ void GraphicView::zoom_fit_width(Pixels screenWidth)
     GmoBoxDocPage* pPage = pGModel->get_page(0);
     URect rect = pPage->get_bounds();
     double margin = 0.05 * rect.width;      //5% margin, 2.5 at each side
-    double scale = m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin);
+    double scale = double(m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin));
 
     //apply new user scaling factor
     m_transform.scale(scale);
@@ -1092,7 +1092,7 @@ UPoint GraphicView::screen_point_to_model_point(Pixels x, Pixels y)
     double xm = double(x);
     double ym = double(y);
     m_pDrawer->screen_point_to_model(&xm, &ym);
-    return UPoint(xm, ym);
+    return UPoint(Tenths(xm), Tenths(ym));
 }
 
 //---------------------------------------------------------------------------------------

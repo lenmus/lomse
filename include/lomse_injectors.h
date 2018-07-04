@@ -139,7 +139,7 @@ protected:
     int m_traceLinesBreaker;        //trace level for lines breaker algorithm
 
     //spacing algorithm
-    float m_fUseDbgValues;          //use values defined here for spacing params.
+    bool m_fUseDbgValues;           //use values defined here for spacing params.
     float m_spacingOptForce;
     float m_spacingAlpha;
     float m_spacingDmin;
@@ -217,7 +217,7 @@ public:
         m_fUseDbgValues = true;
     }
     inline int get_render_spacing_opts() { return m_renderSpacingOpts; }
-    inline void set_render_spacing_opts(float opts) {
+    inline void set_render_spacing_opts(int opts) {
         m_renderSpacingOpts = opts;
         m_fUseDbgValues = true;
     }

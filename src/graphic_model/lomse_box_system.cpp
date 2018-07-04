@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -130,7 +130,7 @@ int GmoBoxSystem::nearest_staff_to_point(LUnits y)
     while (iStaff < maxStaff)
     {
         GmoShapeStaff* pStaff = m_staffShapes[iStaff++];
-        LUnits limit = bottomPrev + (pStaff->get_top() - bottomPrev) / 2.0;
+        LUnits limit = bottomPrev + (pStaff->get_top() - bottomPrev) / 2.0f;
         if (y < limit)
             return iStaff-2;
         bottomPrev = pStaff->get_bottom();
