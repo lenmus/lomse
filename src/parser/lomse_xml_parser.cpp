@@ -55,15 +55,15 @@ using namespace std;
 #if (defined(_MSC_VER) && (_MSC_VER >= 1400) )
     #include <cstdio>
 
-    inline extern FILE* my_fopen_s(char *fname, char *mode)
+    inline extern FILE* my_fopen_s(const char *fname, char *mode)
     {
         FILE *fptr;
         fopen_s(&fptr, fname, mode);
         return fptr;
     }
-    #define fopen(fname, mode)               my_fopen_s((fname), mode))
+    #define fopen(fname, mode)               my_fopen_s((fname), (mode))
 #else
-    #define fopen_s(fp, fmt, mode)          *(fp)=fopen( (fmt), (mode))
+    #define fopen_s(fp, fmt, mode)          *(fp)=fopen((fmt), (mode))
 #endif
 //---------------------------------------------------------------------------------------
 
