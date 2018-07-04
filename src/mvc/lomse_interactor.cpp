@@ -472,25 +472,25 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 
     GmoRef gref = find_event_originator_gref(pGmo);
 
-    LOMSE_LOG_DEBUG(Logger::k_events,
-        "Gmo %d, %s / gref(%d, %d) -------------------",
-         pGmo->get_gmobj_type(), pGmo->get_name().c_str(),
-         gref.first, gref.second );
+//    LOMSE_LOG_DEBUG(Logger::k_events,
+//        "Gmo %d, %s / gref(%d, %d) -------------------",
+//         pGmo->get_gmobj_type(), pGmo->get_name().c_str(),
+//         gref.first, gref.second );
 
     if (m_grefLastMouseOver != k_no_gmo_ref && m_grefLastMouseOver != gref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events,
-            "Mouse out. gref(%d %d)",
-            m_grefLastMouseOver.first, m_grefLastMouseOver.second );
+//        LOMSE_LOG_DEBUG(Logger::k_events,
+//            "Mouse out. gref(%d %d)",
+//            m_grefLastMouseOver.first, m_grefLastMouseOver.second );
         send_mouse_out_event(m_grefLastMouseOver, x, y);
         m_grefLastMouseOver = k_no_gmo_ref;
     }
 
     if (m_grefLastMouseOver == k_no_gmo_ref && gref != k_no_gmo_ref)
     {
-        LOMSE_LOG_DEBUG(Logger::k_events,
-            "Mouse in. gref(%d %d)",
-            gref.first, gref.second );
+//        LOMSE_LOG_DEBUG(Logger::k_events,
+//            "Mouse in. gref(%d %d)",
+//            gref.first, gref.second );
         send_mouse_in_event(gref, x, y);
         m_grefLastMouseOver = gref;
     }
@@ -1082,7 +1082,11 @@ void Interactor::remove_all_visual_tracking()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->remove_all_visual_tracking();
+        pGView->draw_visual_tracking();
+        request_window_update();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1099,12 +1103,34 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
-        pGView->move_tempo_line(scoreId, timepos);
+        pGView->move_tempo_line_and_change_viewport(scoreId, timepos);
+        pGView->draw_visual_tracking();
+        request_window_update();
     }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
+{
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_only_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
+                                                         int iBeat, int iInstr)
+{
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_scroll_and_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
+{
+    do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_only_scroll);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::do_move_tempo_line_and_scroll(ImoId scoreId, int iMeasure, int iBeat,
+                                               int iInstr, int mode)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -1118,7 +1144,37 @@ void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iIn
             ImoScore* score = static_cast<ImoScore*>(pScore);
             TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
                                                                  iBeat, iInstr);
-            pGView->move_tempo_line(scoreId, timepos);
+            if (mode == k_only_tempo_line)
+                pGView->move_tempo_line(scoreId, timepos);
+            else if (mode == k_only_scroll)
+                pGView->change_viewport_if_necessary(scoreId, timepos);
+            else
+                pGView->move_tempo_line_and_change_viewport(scoreId, timepos);
+
+            pGView->draw_visual_tracking();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
+                                                                 iBeat, iInstr);
+            pGView->change_viewport_to(scoreId, timepos);
+            pGView->draw_visual_tracking();
+            request_window_update();
         }
     }
 }
@@ -1130,6 +1186,8 @@ void Interactor::highlight_object(ImoStaffObj* pSO)
     if (pGView)
     {
         pGView->highlight_object(pSO);
+        pGView->draw_visual_tracking();
+        request_window_update();
     }
 }
 
@@ -1138,7 +1196,11 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->remove_highlight_from_object(pSO);
+        pGView->draw_visual_tracking();
+        request_window_update();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1148,15 +1210,6 @@ void Interactor::change_viewport_if_necessary(ImoId id)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->change_viewport_if_necessary(id);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::scroll_to_measure(int iMeasure, int iBeat, int iInstr)
-{
-    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->scroll_to_measure(iMeasure, iBeat, iInstr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1456,9 +1509,6 @@ void Interactor::on_visual_tracking(SpEventVisualTracking pEvent)
                 }
             }
         }
-
-        pGView->draw_visual_tracking();
-        request_window_update();
     }
 }
 

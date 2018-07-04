@@ -391,8 +391,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //lower pulse time
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     curTime = delta_to_milliseconds( nMtrEvDeltaTime );
-    LOMSE_LOG_DEBUG(Logger::k_score_player, "At start: nMtrEvDeltaTime=%d, event=%d",
-                    nMtrEvDeltaTime, events[i]->DeltaTime);
+    //LOMSE_LOG_DEBUG(Logger::k_score_player, "At start: nMtrEvDeltaTime=%d, event=%d",
+    //                nMtrEvDeltaTime, events[i]->DeltaTime);
 
     //prepare weak_ptr to interactor
     WpInteractor wpInteractor;
@@ -546,6 +546,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking && nMtrEvDeltaTime >= 0L)
                 {
                     pEvent->add_move_tempo_line_event(nMtrEvDeltaTime);
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "k_move_tempo_line generated");
                 }
 
                 fMtrOn = true;
@@ -563,6 +565,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 long elapsed = 0L;
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "Flush pending events");
                     clock_t t1=clock();
                     if (m_fPostEvents)
                         m_libScope.post_event(pEvent);
@@ -639,8 +643,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking && events[i]->pSO->is_visible())
                 {
                     ImoId id = events[i]->pSO->get_id();
-                    m_pInteractor->change_viewport_if_necessary(id);
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "implicit k_highlight_on generated for %d", id);
                 }
 
             }
@@ -665,7 +670,12 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 //generate implicit visual off event
                 if (fVisualTracking && events[i]->pSO->is_visible())
+                {
                     pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "implicit k_highlight_off generated for %d",
+                    //                events[i]->pSO->get_id());
+                }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
@@ -673,15 +683,21 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking)
                 {
                     ImoId id = events[i]->pSO->get_id();
-                    m_pInteractor->change_viewport_if_necessary(id);
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "explicit k_highlight_on generated for %d", id);
                 }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {
                 //remove visual highlight
                 if (fVisualTracking)
+                {
                     pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
+                    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    //                "explicit k_highlight_off generated for %d",
+                    //                events[i]->pSO->get_id());
+                }
 
             }
             else if (events[i]->EventType == SoundEvent::k_end_of_score)
@@ -769,6 +785,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         SpEventVisualTracking pEvent(
             LOMSE_NEW EventVisualTracking(wpInteractor, m_pScore->get_id()) );
         pEvent->add_item(EventVisualTracking::k_end_of_visual_tracking, k_no_imoid);
+        //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+        //                "Flush pending events");
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)

@@ -231,8 +231,16 @@ public:
     /// @name Scrolling support
     ///@{
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
+
+    /** For auto-scroll during playback. Change the viewport to ensure that the note/rest
+        whose ID is @c ImoId is visible on the screen.
+    */
     virtual void change_viewport_if_necessary(ImoId id);
-    virtual void scroll_to_measure(int iMeasure, int iBeat, int iInstr);
+    virtual void change_viewport_if_necessary(ImoId scoreId, TimeUnits timepos);
+
+    /** Force to scroll to specified timepos.
+    */
+    virtual void change_viewport_to(ImoId scoreId, TimeUnits timepos);
 
     ///@}    //Scrolling support
 
@@ -253,12 +261,15 @@ public:
         @param pSO The tempo line will be placed at this note or rest.
     */
     virtual void move_tempo_line(ImoStaffObj* pSO);
+    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
 
-    /** Move the tempo line to the given time position.
+    /** For performance and for sharing common code, this method combines the operation
+        of moving the tempo line to the given time position and the operation of
+        changing the viewport, if necessary, to ensure that the tempo line is visible.
         @param scoreId  Id. of the score to which the operation refers.
         @param timepos The time position to move the tempo line to.
     */
-    virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
+    virtual void move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */
@@ -414,6 +425,41 @@ protected:
     void delete_all_handlers();
     void add_handler(int iHandler, GmoObj* pOwnerGmo);
     void do_change_viewport(Pixels x, Pixels y);
+
+    //scrolling and tempo line
+
+    void determine_scroll_position_for(ImoId scoreId, TimeUnits timepos);
+
+    //results computed by methods:
+    //  determine_page_system_and_position_for(ImoId scoreId, TimeUnits timepos)
+    //  change_viewport_if_necessary(ImoId id)
+    //and used by do_xxx methods:
+    //  do_change_viewport_if_necessary()
+    //  do_determine_if_scroll_needed()
+    int m_iScrollPage;
+    GmoBoxSystem* m_pScrollSystem;
+    LUnits m_xScrollLeft, m_xScrollRight;
+
+    bool determine_page_system_and_position_for(ImoId scoreId, TimeUnits timepos);
+    virtual void do_change_viewport_if_necessary();
+    virtual bool do_determine_if_scroll_needed();
+
+    //results computed by method:
+    //  do_determine_new_scroll_position()
+    //and used by do_xxx methods:
+    //  do_change_viewport();
+    Pixels k_scrollLeftMargin;
+    Pixels m_vxLast, m_vyLast;
+    Pixels m_vxNew, m_vyNew;
+    Pixels m_vxScrollLeft, m_vxScrollRight;
+    Pixels m_vySysTop, m_vySysBottom;
+
+    void do_determine_new_scroll_position();
+    void do_change_viewport();
+
+
+    void do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
+                                                bool fTempoLine, bool fViewport);
 
 };
 

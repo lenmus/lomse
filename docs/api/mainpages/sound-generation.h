@@ -6,7 +6,7 @@
 
 @section page-sound-generation-overview How Lomse playback works
 
-Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.
+Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, Lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.
 
 From Lomse internal point of view, playing back an score involves, basically, two steps:
 
@@ -17,7 +17,11 @@ From Lomse internal point of view, playing back an score involves, basically, tw
   -# Visual tracking events, for adding visual tracking effects to the displayed score during playback. For instance, highlighting notes as they are being played or displaying a vertical line at current beat position.
   -# End of playback events, oriented to facilitate GUI controls synchronization and housekeeping.
 
-It is responsibility of your application to handle these events and do whatever is necessary. But for visual effects, lomse provides an implementation for generating them so, if desired, your application can delegate in lomse for this task.
+It is responsibility of your application to handle these events and do whatever is necessary. But for visual effects, lose provides an implementation for generating them so, if desired, your application can delegate in lose for this task.
+
+Alternatively, your application could do playback by other mechanisms (e.g., using an external player) and to provide visual feedback by synchronizing the performance with the displayed score by using Lomse methods for this. See @ref sound-generation-external-player.
+
+
 
 
 @section playback-summary Your application set-up: summary
@@ -195,6 +199,51 @@ the second parameter for load_score is NULL, meaning that no PlayerGui is used. 
     pPlayer->play(fVisualTracking, 0, pInteractor);
 @endcode
 
+
+@section sound-generation-external-player Using an external player
+
+If your application would like to use an external player and to provide visual feedback by synchronizing the performance with the displayed score, Lomse can not do this automatically as it doesn't control the playback, but Lomse provides some methods that can help your application to achieve the sound/display synchronization.
+
+For synchronizing the performance with the displayed score it would be necessary:
+1. to synchronize the visual tracking effects with the performance, and
+2. to scroll the view as playback advances.
+
+Visual tracking effects can be managed by your application by invoking Interactor methods for displaying, hiding and positioning the desired visual effect. Thus the only requirement is that your application can provide the necessary information for positioning the visual effect as playback advances.
+
+Probably, the most easy approach for visual tracking effects will be to use the tempo line or the tempo block, as for using them it is only required that your application can identify the location (current measure and beat, or current time position) being played back. If your application can get that information, the procedure for synchronizing the tempo line with the playback would be as follows:
+
+1. Enable the desired visual effect. For this just invoke:
+@code
+spInteractor->set_visual_tracking_mode(k_tracking_tempo_line);
+@endcode
+This can be done at any moment before playback. So perhaps the best time to do it is when the View is created or when the @c Play button is clicked.
+
+2. Once the playback has started your application has to take care of advancing the tempo line each time a new beat is going to be played back and of doing scroll if necessary:
+@code
+int measure =  ... 	//0..n
+int beat = ... //relative to measure. First beat is beat #0
+spInteractor->move_tempo_line_and_scroll_if_necessary(scoreId, measure, beat);
+@endcode
+
+The above method will do scroll only when Lomse determines it is necessary. If you would like to use your own algorithms for scrolling, then, instead of using `move_tempo_line_and_scroll_if_necessary()`, you should use `move_tempo_line()` and to invoke `scroll_to_measure()` when your application considers this convenient: 
+@code
+int measure =  ... 	//0..n
+int beat = ... //relative to measure. First beat is beat #0
+spInteractor->move_tempo_line(scoreId, measure, beat);
+if (scroll_is_necessary())
+	spInteractor->scroll_to_measure(scoreId, measure, beat);
+@endcode
+
+
+3. Finally, when playback is stopped or has finished it is necessary to ensure that any displayed visual effect is removed:
+@code
+spInteractor->remove_all_visual_tracking();
+@endcode
+
+And that's all. You can see a working example in examples/samples/extplayer.
+
+
+Trying to highlight/unhighlight the notes and rests as playback advances would be too complex as this would require that your application could provide a pointer to the note/rest being played back and to detect when it has to be unhighlighted. But the approach will be similar.
 
 
 */

@@ -292,8 +292,20 @@ MeasureLocator ScoreAlgorithms::get_locator_for(ImoScore* pScore, TimeUnits time
 TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int iBeat,
                                            int iInstr)
 {
-    //TODO
-    return 0.0;
+    if (iInstr < 0 || iInstr >= pScore->get_num_instruments())
+        return 0.0;
+
+    ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+    ImMeasuresTable* pTable = pInstr->get_measures_table();
+    ImMeasuresTableEntry* measure = pTable->get_measure(iMeasure);
+    TimeUnits timepos = 0.0f;
+    if (measure)
+    {
+        timepos = measure->get_timepos();
+        if (iBeat >= 0)
+            timepos += measure->get_beat_duration() * iBeat;
+    }
+    return timepos;
 }
 
 

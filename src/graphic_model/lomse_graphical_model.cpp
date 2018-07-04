@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -282,31 +282,6 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId sco
     GmoBoxSystem* pSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
     if (pSystem)
         return pSystem->get_staff_shape(0);
-    return nullptr;
-}
-
-//---------------------------------------------------------------------------------------
-GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, int instr,
-                                           int measure, TimeUnits time)
-{
-    //if not found returns -1
-
-    ScoreStub* pStub = get_stub_for(scoreId);
-    GmoBoxScorePage* pPage = pStub->get_page_for(time);
-//    vector<GmoBoxScorePage*>& pages = pStub->get_pages();
-
-//    //find page with end time greater or equal than requested time
-//    int maxPage = int(pages.size());
-//    for (int i=0; i < maxPage; ++i)
-//    {
-//        GmoBoxScorePage* pPage = pages[i];
-//        if (!is_lower_time(pPage->end_time(), time)
-//            break;
-//    }
-
-    //find system in this page
-    //TODO
-
     return nullptr;
 }
 

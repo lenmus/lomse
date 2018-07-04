@@ -10,7 +10,8 @@
 
 ##### COMPATIBLE CHANGES
 
-- None.
+- Added new methods for controlling scroll and visual tracking during playback, when using an external player. A new sample 'extplayer' has been added to the 'examples' folder.
+
 
 
 
