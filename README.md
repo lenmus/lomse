@@ -1,7 +1,9 @@
 # Lomse: A free open source library for rendering music scores
 
-[![Build Status](https://travis-ci.org/lenmus/lomse.svg?branch=master)](https://travis-ci.org/lenmus/lomse)
-[![Build Status](https://ci.appveyor.com/api/projects/status/lenmus/lomse?branch=master&svg=true)](https://ci.appveyor.com/project/lenmus/lomse/branch/master)
+[![Travis CI](https://travis-ci.org/lenmus/lomse.svg)](https://travis-ci.org/lenmus/lomse)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/lenmus/lomse?svg=true)](https://ci.appveyor.com/project/lenmus/lomse/)
+[![License: BSD2](https://img.shields.io/badge/License-BSD--2-blue.svg)](https://lenmus.github.io/lomse/page-library-license.html)
+
 
 Lomse objective is provide software developers with a library to add capabilities to any program for rendering, editing and playing back music scores. It is written in C++ and it is free open source and platform independent. Lomse stands for "LenMus Open Music Score Edition Library".
 
