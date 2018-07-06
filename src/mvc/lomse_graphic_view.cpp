@@ -120,7 +120,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pTempoLine(nullptr)
     , m_trackingEffect(k_tracking_highlight_notes)
     , m_backgroundColor( Color(145, 156, 166) )
-    , k_scrollLeftMargin(100)
+    , k_scrollLeftMargin(50)       //AWARE: Pixels
     , m_vxLast(0)
     , m_vyLast(0)
 {
@@ -362,7 +362,7 @@ bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnit
         return false;    //error
 
     m_xScrollLeft = m_pScrollSystem->get_x_for_time(timepos);
-    m_xScrollRight = m_xScrollLeft + 10000;   //1 cm
+    m_xScrollRight = m_xScrollLeft + 1000;   //1 cm
 
     //LOMSE_LOG_DEBUG(Logger::k_events, "new scroll pos = %f, %f", m_xScrollLeft, m_xScrollRight);
 
@@ -420,6 +420,18 @@ bool GraphicView::do_determine_if_scroll_needed()
 {
     do_determine_new_scroll_position();
 
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+        "Viewport: m_vxOrg=%d, m_vyOrg=%d, width=%d, height=%d",
+        m_vxOrg, m_vyOrg, m_viewportSize.width, m_viewportSize.height);
+
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+        "System: m_vxSysLeft=%d, m_vxSysRight=%d",
+        m_vxSysLeft, m_vxSysRight);
+
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+        "Required: m_vySysTop=%d, m_vySysBottom=%d, m_vx_RequiredLeft=%d, m_vx_RequiredRight=%d",
+        m_vySysTop, m_vySysBottom, m_vx_RequiredLeft, m_vx_RequiredRight);
+
     //Check if vertical movement needed:
     bool fVerticalScroll = false;
     // 1. Top of system must be visible
@@ -431,14 +443,37 @@ bool GraphicView::do_determine_if_scroll_needed()
 
     //Check if horizontal movement needed:
     bool fHorizontalScroll = false;
-    // 1. left of measure must be visible
-    fHorizontalScroll |= (m_vxScrollLeft < 0);
-    fHorizontalScroll |= (m_vxScrollLeft > (m_viewportSize.width-k_scrollLeftMargin));
-//    // 2. Move left of measure to left of screen unless end of system visible
-//    fHorizontalScroll |= (vxSysRight > m_viewportSize.width);
-    // 2. Right of measure not visible but enough width for the measure
-    fHorizontalScroll |= ((m_vxScrollRight > (m_viewportSize.width-k_scrollLeftMargin))
-                        && ((m_vxScrollRight-m_vxScrollLeft) < (m_viewportSize.width-k_scrollLeftMargin)));
+    //do horizontal scroll only if system is not fully visible, in horizontal
+    if (m_vxSysLeft < 0 || m_vxSysRight > m_viewportSize.width)
+    {
+        // 1. left of measure must be visible
+        fHorizontalScroll |= (m_vx_RequiredLeft < 0);
+        if (fHorizontalScroll)
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                "Horizontal scroll. Rule 1.1");
+        }
+        else
+        {
+            fHorizontalScroll |= (m_vx_RequiredLeft > (m_viewportSize.width-k_scrollLeftMargin));
+            if (fHorizontalScroll)
+            {
+                LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                    "Horizontal scroll. Rule 1.2");
+            }
+            else
+            {
+                // 2. Right of measure not visible but enough width for the measure
+                fHorizontalScroll |= ((m_vx_RequiredRight > (m_viewportSize.width-k_scrollLeftMargin))
+                                      && ((m_vx_RequiredRight-m_vx_RequiredLeft) < (m_viewportSize.width-k_scrollLeftMargin)));
+                if (fHorizontalScroll)
+                {
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                        "Horizontal scroll. Rule 2");
+                }
+            }
+        }
+    }
 
     if (!fVerticalScroll)
         m_vyNew = m_vyLast;
@@ -489,54 +524,51 @@ void GraphicView::determine_scroll_position_for(ImoId scoreId, TimeUnits timepos
 void GraphicView::do_determine_new_scroll_position()
 {
     //Using m_iScrollPage, m_pScrollSystem, m_xScrollLeft, m_xScrollRight
-    //Computes: m_vxNew, m_vyNew, m_vxScrollLeft, m_vxScrollRight, m_vySysTop
-    //          m_vySysBottom
-
-
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //    "1. m_iScrollPage=%d, m_xScrollLeft=%f, m_xScrollRight=%f",
-    //    m_iScrollPage, m_xScrollLeft, m_xScrollRight);
-    //
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //    "2. vp.height=%d, vp.width=%d, m_iScrollPage=%d",
-    //    m_viewportSize.height, m_viewportSize.width, m_iScrollPage);
+    //Computes: m_vxNew, m_vyNew, m_vx_RequiredLeft, m_vx_RequiredRight, m_vySysTop
+    //          m_vySysBottom, m_vxSysLeft, m_vxSysRight
 
     double xSliceLeft = double(m_xScrollLeft);
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //                "3. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f",
-    //                m_iScrollPage, m_xScrollLeft, xSliceLeft);
     double xSliceRight = double(m_xScrollRight);
     double ySysTop = double(m_pScrollSystem->get_top());
     double ySysBottom = ySysTop + double(m_pScrollSystem->get_height());
 
     //model point to screen returns shift from current viewport origin
-    double xLeft = xSliceLeft;
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //                "4. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
-    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
+    double xLeft = double(m_pScrollSystem->get_left());
     double yTop = ySysTop;
     model_point_to_screen(&xLeft, &yTop, m_iScrollPage);
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //                "5. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f",
-    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft);
-    double xRight = xSliceRight;
+    //AWARE: The next variables are relative: shift from current viewport origin
+    m_vxSysLeft = Pixels(xLeft);
+    m_vySysTop = Pixels(yTop);
+
+    //model point to screen returns shift from current viewport origin
+    double xRight = double(m_pScrollSystem->get_right());
     double yBottom = ySysBottom;
     model_point_to_screen(&xRight, &yBottom, m_iScrollPage);
     //AWARE: The next variables are relative: shift from current viewport origin
-    m_vxScrollLeft = Pixels(xLeft);
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //                "6. m_iScrollPage=%d, m_xScrollLeft=%f, xSliceLeft=%f, xLeft=%f, m_vxScrollLeft=%d",
-    //                m_iScrollPage, m_xScrollLeft, xSliceLeft, xLeft, m_vxScrollLeft);
-    m_vxScrollRight = Pixels(xRight);
-    m_vySysTop = Pixels(yTop);
+    m_vxSysRight = Pixels(xRight);
     m_vySysBottom = Pixels(yBottom);
 
-    //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-    //    "7. m_vySysTop=%d, vp.height=%d, m_vxScrollLeft=%d, vp.width=%d, m_iScrollPage=%d",
-    //    m_vySysTop, m_viewportSize.height, m_vxScrollLeft, m_viewportSize.width, m_iScrollPage);
+    //model point to screen returns shift from current viewport origin
+    xLeft = xSliceLeft;
+    yTop = ySysTop;
+    model_point_to_screen(&xLeft, &yTop, m_iScrollPage);
+    //AWARE: The next variables are relative: shift from current viewport origin
+    m_vx_RequiredLeft = Pixels(xLeft);
 
-    m_vxNew = m_vxOrg + m_vxScrollLeft - k_scrollLeftMargin;
+    //model point to screen returns shift from current viewport origin
+    xRight = xSliceRight;
+    yBottom = ySysBottom;
+    model_point_to_screen(&xRight, &yBottom, m_iScrollPage);
+    //AWARE: The next variables are relative: shift from current viewport origin
+    m_vx_RequiredRight = Pixels(xRight);
+
+    m_vxNew = m_vxOrg + m_vx_RequiredLeft - k_scrollLeftMargin;
     m_vyNew = m_vyOrg +  m_vySysTop;
+
+    //limit xNew to the right of the system, to avoid over-scrolling
+    Pixels xMax = m_vxOrg + m_vxSysRight + k_scrollLeftMargin - m_viewportSize.width;
+    if (m_vxNew > xMax)
+        m_vxNew = xMax;
 }
 
 ////---------------------------------------------------------------------------------------
