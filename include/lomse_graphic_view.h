@@ -448,11 +448,15 @@ protected:
     //  do_determine_new_scroll_position()
     //and used by do_xxx methods:
     //  do_change_viewport();
+    //  do_determine_if_scroll_needed();
     Pixels k_scrollLeftMargin;
     Pixels m_vxLast, m_vyLast;
     Pixels m_vxNew, m_vyNew;
-    Pixels m_vxScrollLeft, m_vxScrollRight;
-    Pixels m_vySysTop, m_vySysBottom;
+    //to determine if scroll needed.
+    //All these values are relative to current viewport origin
+    Pixels m_vySysTop, m_vySysBottom;               //system top, bottom
+    Pixels m_vxSysLeft, m_vxSysRight;               //system left, right
+    Pixels m_vx_RequiredLeft, m_vx_RequiredRight;   //required visible zone (e.g. measure)
 
     void do_determine_new_scroll_position();
     void do_change_viewport();

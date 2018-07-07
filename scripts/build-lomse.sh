@@ -45,11 +45,11 @@ if [[ ! -e "${root_path}/src" ]]; then
 fi
 
 #path for building
-build_path="${root_path}/build-area"
+build_path="${root_path}/zz_build-area"
 sources="${root_path}"
 
 #paths for local website
-website_root="/datos/USR/WebSite/mws"
+website_root="/datos/cecilio/WebSite/mws"
 website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
 
 fGenerateForWeb=0

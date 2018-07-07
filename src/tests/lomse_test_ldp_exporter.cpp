@@ -101,7 +101,7 @@ SUITE(LdpExporterTest)
 ////        doc.from_file(m_scores_path + "50130-metronome.lms" );
 ////        doc.from_file(m_scores_path + "50180-new-system-tag.lms" );
 ////        doc.from_file(m_scores_path + "50110-graphic-line-text.lms" );
-////        doc.from_file("/datos/USR/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
+////        doc.from_file("/datos/cecilio/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
 //        ImoDocument* pRoot = doc.get_im_root();
 //
 //        LdpExporter exporter(&m_libraryScope);
