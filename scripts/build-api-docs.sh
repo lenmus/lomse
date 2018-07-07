@@ -3,7 +3,7 @@
 # This bash script regenerates the HTML doxygen version of the
 # Lomse API documentation.
 #
-# Documentation is generated in a folder, named api-docs, at the same
+# Documentation is generated in a folder, named zz_build-api, at the same
 # level than the project root folder. This folder will be created if
 # does not exist.
 #
@@ -35,7 +35,7 @@ fi
 ROOT="${LOMSE}"
 PROJECTS=$(dirname "${ROOT}")
 DOXY="${ROOT}/docs/api"
-HTML="${PROJECTS}/api-docs"
+HTML="${PROJECTS}/zz_build-api"
 echo "ROOT = ${ROOT}"
 echo "PROJECTS = ${PROJECTS}"
 echo "DOXY = ${DOXY}"

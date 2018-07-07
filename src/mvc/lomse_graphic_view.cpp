@@ -420,24 +420,26 @@ bool GraphicView::do_determine_if_scroll_needed()
 {
     do_determine_new_scroll_position();
 
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "Viewport: m_vxOrg=%d, m_vyOrg=%d, width=%d, height=%d",
-        m_vxOrg, m_vyOrg, m_viewportSize.width, m_viewportSize.height);
-
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "System: m_vxSysLeft=%d, m_vxSysRight=%d",
-        m_vxSysLeft, m_vxSysRight);
-
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        "Required: m_vySysTop=%d, m_vySysBottom=%d, m_vx_RequiredLeft=%d, m_vx_RequiredRight=%d",
-        m_vySysTop, m_vySysBottom, m_vx_RequiredLeft, m_vx_RequiredRight);
+//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+//        "Viewport: m_vxOrg=%d, m_vyOrg=%d, width=%d, height=%d",
+//        m_vxOrg, m_vyOrg, m_viewportSize.width, m_viewportSize.height);
+//
+//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+//        "System: m_vxSysLeft=%d, m_vxSysRight=%d",
+//        m_vxSysLeft, m_vxSysRight);
+//
+//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+//        "Required: m_vySysTop=%d, m_vySysBottom=%d, m_vx_RequiredLeft=%d, m_vx_RequiredRight=%d",
+//        m_vySysTop, m_vySysBottom, m_vx_RequiredLeft, m_vx_RequiredRight);
 
     //Check if vertical movement needed:
     bool fVerticalScroll = false;
-    // 1. Top of system must be visible
+    //Rule 1. Top of system must be visible
+    //1.1 if top of system is above the viewport, do scroll
     fVerticalScroll |= (m_vySysTop < 0);
+    //1.2 if top of system is below the viewport, do scroll
     fVerticalScroll |= (m_vySysTop > m_viewportSize.height);
-    // 2. Bottom of system not visible but enough height for the system
+    //Rule 2. Bottom of system not visible but enough height for the system
     fVerticalScroll |= ((m_vySysBottom > m_viewportSize.height)
                         && ((m_vySysBottom-m_vySysTop) < m_viewportSize.height));
 
@@ -446,33 +448,36 @@ bool GraphicView::do_determine_if_scroll_needed()
     //do horizontal scroll only if system is not fully visible, in horizontal
     if (m_vxSysLeft < 0 || m_vxSysRight > m_viewportSize.width)
     {
-        // 1. left of measure must be visible
-        fHorizontalScroll |= (m_vx_RequiredLeft < 0);
-        if (fHorizontalScroll)
+        do
         {
-            LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                "Horizontal scroll. Rule 1.1");
-        }
-        else
-        {
+            //Rule 1. Required left must be visible
+            //1.1 if required left is at left of viewport, do scroll
+            fHorizontalScroll |= (m_vx_RequiredLeft < 0);
+            if (fHorizontalScroll)
+            {
+                //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                //    "Horizontal scroll. Rule 1.1");
+                break;
+            }
+            //1.2 if required left is at right of viewport, do scroll
             fHorizontalScroll |= (m_vx_RequiredLeft > (m_viewportSize.width-k_scrollLeftMargin));
             if (fHorizontalScroll)
             {
-                LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                    "Horizontal scroll. Rule 1.2");
+                //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                //    "Horizontal scroll. Rule 1.2");
+                break;
             }
-            else
+            //Rule 2. Required right not visible but enough width for the required zone
+            fHorizontalScroll |= ((m_vx_RequiredRight > (m_viewportSize.width-k_scrollLeftMargin))
+                                  && ((m_vx_RequiredRight-m_vx_RequiredLeft) < (m_viewportSize.width-k_scrollLeftMargin)));
+            if (fHorizontalScroll)
             {
-                // 2. Right of measure not visible but enough width for the measure
-                fHorizontalScroll |= ((m_vx_RequiredRight > (m_viewportSize.width-k_scrollLeftMargin))
-                                      && ((m_vx_RequiredRight-m_vx_RequiredLeft) < (m_viewportSize.width-k_scrollLeftMargin)));
-                if (fHorizontalScroll)
-                {
-                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-                        "Horizontal scroll. Rule 2");
-                }
+                //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                //    "Horizontal scroll. Rule 2");
+                break;
             }
-        }
+
+        } while(false);
     }
 
     if (!fVerticalScroll)

@@ -27,7 +27,7 @@ if [[ ! -e "${root_path}/src" ]]; then
     exit $E_BADPATH
 fi
 
-build_root="${root_path}/build-area"
+build_root="${root_path}/zz_build-area"
 
 #prepare package:
 echo -e "${enhanced}Building lomse package${reset}"

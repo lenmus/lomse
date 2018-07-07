@@ -45,7 +45,7 @@ if [[ ! -e "${root_path}/src" ]]; then
 fi
 
 #path for building
-build_path="${root_path}/build-area"
+build_path="${root_path}/zz_build-area"
 sources="${root_path}"
 
 #paths for local website
