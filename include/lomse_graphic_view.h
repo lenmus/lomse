@@ -294,6 +294,12 @@ public:
     */
 	inline void set_visual_tracking_mode(int mode) { m_trackingEffect = mode; }
 
+    /** Returns the specified visual tracking effect.
+        @param effect It is a value from enum EVisualTrackingMode. If `k_tracking_none`
+			is specified it will return @nullptr.
+    */
+	VisualEffect* get_tracking_effect(int effect);
+
     ///@}    //Visual effects for tracking during playback
 
 

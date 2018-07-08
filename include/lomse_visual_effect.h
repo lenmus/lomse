@@ -38,8 +38,10 @@
 using namespace std;
 
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class ScreenDrawer;
@@ -52,7 +54,10 @@ typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
 
 //---------------------------------------------------------------------------------------
-// VisualEffect: any real time visual graphical effect. Base class
+/** %VisualEffect is the base class for any real time visual graphic effect, that is,
+    for any overlay to be displayed on top of the document layer, such as
+    dragged images, selection rectangles, visual tracking effects during playback, etc.
+*/
 class VisualEffect
 {
 protected:
@@ -62,6 +67,10 @@ protected:
     bool m_fEnabled;
 
     VisualEffect(GraphicView* view, LibraryScope& libraryScope);
+
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
 
 public:
     virtual ~VisualEffect() {}
@@ -81,8 +90,12 @@ public:
 
 protected:
 
+///@endcond
 };
 
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
 //---------------------------------------------------------------------------------------
 // DraggedImage: an image to be attached to mouse cursor
 class DraggedImage : public VisualEffect
@@ -136,16 +149,34 @@ public:
     void on_draw(ScreenDrawer* pDrawer);
     URect get_bounds();
 };
+///@endcond
+
 
 //---------------------------------------------------------------------------------------
-// PlaybackHighlight: a visual tracking effect for highlighting note/rests during playback
+/** %PlaybackHighlight is a visual tracking effect for highlighting notes and rests
+    during playback.
+*/
 class PlaybackHighlight : public VisualEffect
 {
 protected:
     list<GmoShape*> m_noterests;
     URect m_bounds;
+    Color m_color;
 
 public:
+    //customizable properties
+
+    /** Return the current color for highlighting notes and rests. */
+    inline Color get_color() const { return m_color; }
+
+    /** Set the color to use for highlighting notes and rests. It is recommended to
+        use a solid (not transparent) color.
+    */
+    inline void set_color(Color color) { m_color = color; }
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
+
     PlaybackHighlight(GraphicView* view, LibraryScope& libraryScope);
     virtual ~PlaybackHighlight() {}
 
@@ -157,8 +188,13 @@ public:
     //mandatory overrides from VisualEffect
     void on_draw(ScreenDrawer* pDrawer);
     URect get_bounds();
+
+///@endcond
 };
 
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
 //---------------------------------------------------------------------------------------
 // SelectionHighlight: an effect for highlighting selected objects
 class SelectionHighlight : public VisualEffect
@@ -181,6 +217,7 @@ public:
     GmoObj* get_object_needing_handlers();
 
 };
+///@endcond
 
 
 }   //namespace lomse

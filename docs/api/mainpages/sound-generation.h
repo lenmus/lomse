@@ -143,6 +143,17 @@ spInteractor->set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highli
 
 Lomse will handle the event and will send an <i>update window</i> event to your application, for updating the display.
 
+Some properties of the tracking effects, such as its colour, can be customized. See method Interactor::get_tracking_effect(). For the customizable properties see the documentation of each specific visual effect. Example:
+@code
+VisualEffect* pVE = spInteractor->get_tracking_effect(k_tracking_tempo_line);
+if (pVE)
+{
+	TempoLine* pTL = static_cast<TempoLine*>(pVE);
+	pTL->set_color(Color(255,0,0,128));     //transparent red
+	pTL->set_width(200);		            //logical units: 2 mm
+}
+@endcode
+
 @todo Advanced topic: direct modification of the graphic model.
 
 
@@ -226,19 +237,20 @@ spInteractor->move_tempo_line_and_scroll_if_necessary(scoreId, measure, beat);
 @endcode
 
 The above method will do scroll only when Lomse determines it is necessary. If you would like to use your own algorithms for scrolling, then, instead of using `move_tempo_line_and_scroll_if_necessary()`, you should use `move_tempo_line()` and to invoke `scroll_to_measure()` when your application considers this convenient: 
-@code
-int measure =  ... 	//0..n
-int beat = ... //relative to measure. First beat is beat #0
-spInteractor->move_tempo_line(scoreId, measure, beat);
-if (scroll_is_necessary())
-	spInteractor->scroll_to_measure(scoreId, measure, beat);
-@endcode
+	@code
+	int measure =  ... 	//0..n
+	int beat = ... //relative to measure. First beat is beat #0
+	spInteractor->move_tempo_line(scoreId, measure, beat);
+	if (scroll_is_necessary())
+		spInteractor->scroll_to_measure(scoreId, measure, beat);
+	@endcode
 
 
 3. Finally, when playback is stopped or has finished it is necessary to ensure that any displayed visual effect is removed:
 @code
 spInteractor->remove_all_visual_tracking();
 @endcode
+
 
 And that's all. You can see a working example in examples/samples/extplayer.
 

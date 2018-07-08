@@ -128,8 +128,8 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);
     m_pSelRect = LOMSE_NEW SelectionRectangle(this, libraryScope);
     m_pHighlighted = LOMSE_NEW PlaybackHighlight(this, libraryScope);
-    m_pTimeGrid = LOMSE_NEW TimeGrid(this, m_libraryScope);
-    m_pTempoLine = LOMSE_NEW TempoLine(this, m_libraryScope);
+    m_pTimeGrid = LOMSE_NEW TimeGrid(this, libraryScope);
+    m_pTempoLine = LOMSE_NEW TempoLine(this, libraryScope);
 
     m_pOverlaysGenerator = LOMSE_NEW OverlaysGenerator(this, libraryScope);
 
@@ -725,6 +725,18 @@ DocCursorState GraphicView::click_event_to_cursor_state(int iPage, LUnits x, LUn
 string GraphicView::get_caret_timecode()
 {
     return m_pCaret->get_timecode();
+}
+
+//---------------------------------------------------------------------------------------
+VisualEffect* GraphicView::get_tracking_effect(int effect)
+{
+    if ((m_trackingEffect & effect) && (effect == k_tracking_highlight_notes))
+        return m_pHighlighted;
+
+    if ((m_trackingEffect & effect) && (effect == k_tracking_tempo_line))
+        return m_pTempoLine;
+
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

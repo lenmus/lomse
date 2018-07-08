@@ -16,14 +16,14 @@ Lomse is distributed under the BSD 2-clause license, a permissive open source li
 
 ## Features
 
-* Platform independent
-* Can be safely used in commercial closed source projects
-* MusicXML import
+* Platform independent.
+* Can be safely used in commercial closed source projects.
+* MusicXML import.
 * Renderization of full documents (paragraphs, tables, lists, scores, images, etc.).
-* Support for play back of scores, by generating "midi events" in real time
-* Support for play back visual effects (i.e. moving cursor) in sync. with midi events
-* Support for music scores edition
-* Music renderization is based on fonts compliant with the Standard Music Font Layout (SMuFL) specification
+* Support for score playback, by generating "midi events" in real time
+* Support for visual tracking effects (i.e. moving cursor) during playback in sync. with midi events or with external player.
+* Support for music scores edition.
+* Music renderization is based on fonts compliant with the Standard Music Font Layout (SMuFL) specification.
 
 
 

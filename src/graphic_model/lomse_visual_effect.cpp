@@ -221,7 +221,8 @@ void PlaybackHighlight::on_draw(ScreenDrawer* pDrawer)
     m_bounds = URect(0.0, 0.0, 0.0, 0.0);
     RenderOptions options;
     options.draw_shapes_highlighted = true;
-//    options.highlighted_color = Color(255, 255, 0);       //just a test
+    Color savedColor = options.highlighted_color;
+    options.highlighted_color = m_color;
     list<GmoShape*>::const_iterator it;
     for (it = m_noterests.begin(); it != m_noterests.end(); ++it)
     {
@@ -238,6 +239,7 @@ void PlaybackHighlight::on_draw(ScreenDrawer* pDrawer)
     }
     pDrawer->render();
     pDrawer->remove_shift();
+    options.highlighted_color = savedColor;
 }
 
 //---------------------------------------------------------------------------------------
