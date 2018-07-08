@@ -150,6 +150,8 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_pImoDoc(nullptr)
     , m_flags(k_dirty)
     , m_modified(0)
+    , m_beatType(k_beat_implied)
+    , m_beatDuration( TimeUnits(k_duration_quarter) )
 {
 }
 
@@ -406,6 +408,31 @@ bool Document::is_editable()
     //TODO: How to mark a document as 'not editable'?
     //For now, all documents are editable
     return true;
+}
+
+//---------------------------------------------------------------------------------------
+void Document::define_beat(int beatType, TimeUnits duration)
+{
+    switch (beatType)
+    {
+        case k_beat_implied:
+        case k_beat_bottom_ts:
+            m_beatType = beatType;
+            if (is_greater_time(duration, 0.0))
+                m_beatDuration = duration;
+            break;
+
+        case k_beat_specified:
+            if (is_greater_time(duration, 0.0))
+            {
+                m_beatType = beatType;
+                m_beatDuration = duration;
+            }
+            break;
+
+        default:
+            LOMSE_LOG_ERROR("Invalid beat type %d. Ignored.", beatType);;
+    }
 }
 
 //---------------------------------------------------------------------------------------
