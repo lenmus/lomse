@@ -51,13 +51,16 @@ var annotated =
     [ "MusicXmlOptions", "classMusicXmlOptions.html", "classMusicXmlOptions" ],
     [ "Observable", "classObservable.html", "classObservable" ],
     [ "Observer", "classObserver.html", "classObserver" ],
+    [ "PlaybackHighlight", "classPlaybackHighlight.html", "classPlaybackHighlight" ],
     [ "Presenter", "classPresenter.html", "classPresenter" ],
     [ "Request", "classRequest.html", "classRequest" ],
     [ "RequestDynamic", "classRequestDynamic.html", "classRequestDynamic" ],
     [ "RequestFont", "classRequestFont.html", "classRequestFont" ],
     [ "ScorePlayer", "classScorePlayer.html", "classScorePlayer" ],
     [ "SingleSystemView", "classSingleSystemView.html", null ],
+    [ "TempoLine", "classTempoLine.html", "classTempoLine" ],
     [ "UndoElement", "classUndoElement.html", "classUndoElement" ],
     [ "UPitch", "classUPitch.html", "classUPitch" ],
-    [ "VerticalBookView", "classVerticalBookView.html", null ]
+    [ "VerticalBookView", "classVerticalBookView.html", null ],
+    [ "VisualEffect", "classVisualEffect.html", null ]
 ];

@@ -211,7 +211,15 @@ Handling visual tracking events</h1>
 </div><!-- fragment --><p><em>Visual</em> <em>tracking</em> events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a <em>visual</em> <em>tracking</em> event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:</p>
 <div class="fragment"><div class="line">pInteractor-&gt;<a class="code" href="classEventHandler.html#a298527266550615c0a3da8ec78687d91">handle_event</a>(pEvent);</div>
 </div><!-- fragment --><p>Lomse will handle the event and will send an <em>update window</em> event to your application, for updating the display.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
+<p>Some properties of the tracking effects, such as its colour, can be customized. See method <a class="el" href="classInteractor.html#a20eaba9bb880060c9eb121566f22dc52">Interactor::get_tracking_effect()</a>. For the customizable properties see the documentation of each specific visual effect. Example: </p>
+<div class="fragment"><div class="line"><a class="code" href="classVisualEffect.html">VisualEffect</a>* pVE = spInteractor-&gt;get_tracking_effect(<a class="code" href="group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497">k_tracking_tempo_line</a>);</div>
+<div class="line"><span class="keywordflow">if</span> (pVE)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code" href="classTempoLine.html">TempoLine</a>* pTL = <span class="keyword">static_cast&lt;</span><a class="code" href="classTempoLine.html">TempoLine</a>*<span class="keyword">&gt;</span>(pVE);</div>
+<div class="line">    pTL-&gt;<a class="code" href="classTempoLine.html#ad6c771005a9093ade9fa0dd8ff195c92">set_color</a>(Color(255,0,0,128));     <span class="comment">//transparent red</span></div>
+<div class="line">    pTL-&gt;<a class="code" href="classTempoLine.html#a77fec9b68721babbfece733171b5d3e7">set_width</a>(200);                    <span class="comment">//logical units: 2 mm</span></div>
+<div class="line">}</div>
+</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
 <h1><a class="anchor" id="implementing-player-gui"></a>
 The PlayerGui object</h1>
 <p>For controlling playback some GUI controls (buttons, menu items, etc. to trigger start, stop, pause actions, sliders or other for setting tempo speed, etc.) are normally required.</p>
@@ -284,7 +292,7 @@ Using an external player</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Tue Jul 3 2018 17:18:42 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Jul 8 2018 11:22:40 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

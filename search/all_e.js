@@ -10,6 +10,7 @@ var searchData=
   ['play_5ffrom_5fmeasure',['play_from_measure',['../classScorePlayer.html#a7eebc1f8428946be58ecb719557048d0',1,'ScorePlayer']]],
   ['play_5fmeasure',['play_measure',['../classScorePlayer.html#a2926281a3853a0daca442395073981e5',1,'ScorePlayer']]],
   ['play_5fmeasures',['play_measures',['../classScorePlayer.html#a990b8950855e69a7902609c9c0a7108a',1,'ScorePlayer']]],
+  ['playbackhighlight',['PlaybackHighlight',['../classPlaybackHighlight.html',1,'']]],
   ['presenter',['Presenter',['../classPresenter.html',1,'']]],
   ['print_5fpage',['print_page',['../classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d',1,'Interactor']]],
   ['program_5fchange',['program_change',['../classMidiServerBase.html#a10fbaf6f8a6704bafbc0a2ce317f5218',1,'MidiServerBase']]],

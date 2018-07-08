@@ -241,6 +241,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Visual tracking effects during playback</div></td></tr>
 <tr class="memitem:a6f0200c891ae22c32050be6ac415c292"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a6f0200c891ae22c32050be6ac415c292">set_visual_tracking_mode</a> (int mode)</td></tr>
 <tr class="separator:a6f0200c891ae22c32050be6ac415c292"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20eaba9bb880060c9eb121566f22dc52"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classVisualEffect.html">VisualEffect</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a20eaba9bb880060c9eb121566f22dc52">get_tracking_effect</a> (int effect)</td></tr>
+<tr class="separator:a20eaba9bb880060c9eb121566f22dc52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdabbfee6aadbb77b6c9348e1c71e6e0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#abdabbfee6aadbb77b6c9348e1c71e6e0">move_tempo_line</a> (ImoStaffObj *pSO)</td></tr>
 <tr class="separator:abdabbfee6aadbb77b6c9348e1c71e6e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59a34de84e5ca08186be15ee25818868"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a59a34de84e5ca08186be15ee25818868">move_tempo_line</a> (ImoId scoreId, TimeUnits timepos)</td></tr>
@@ -956,6 +958,45 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <p>Returns the selection set associated to the View of this Interactor.</p>
 <p>See <a class="el" href="page-edit-overview.html">Editing documents overview</a> </p>
 
+</div>
+</div>
+<a class="anchor" id="a20eaba9bb880060c9eb121566f22dc52"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classVisualEffect.html">VisualEffect</a>* Interactor::get_tracking_effect </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>effect</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the specified visual tracking effect (derived from <a class="el" href="classVisualEffect.html">VisualEffect</a>). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">effect</td><td>It is a value from enum EVisualTrackingMode. If <code>k_tracking_none</code> is specified it will return <span class="literal">nullptr</span>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Example: </p>
+<div class="fragment"><div class="line"><a class="code" href="classVisualEffect.html">VisualEffect</a>* pVE = spInteractor-&gt;get_tracking_effect(<a class="code" href="group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497">k_tracking_tempo_line</a>);</div>
+<div class="line"><span class="keywordflow">if</span> (pVE)</div>
+<div class="line">{</div>
+<div class="line">    <a class="code" href="classTempoLine.html">TempoLine</a>* pTL = <span class="keyword">static_cast&lt;</span><a class="code" href="classTempoLine.html">TempoLine</a>*<span class="keyword">&gt;</span>(pVE);</div>
+<div class="line">    pTL-&gt;<a class="code" href="classTempoLine.html#ad6c771005a9093ade9fa0dd8ff195c92">set_color</a>(Color(255,0,0,128));     <span class="comment">//transparent red</span></div>
+<div class="line">    pTL-&gt;<a class="code" href="classTempoLine.html#a77fec9b68721babbfece733171b5d3e7">set_width</a>(200);                    <span class="comment">//logical units: 2 mm</span></div>
+<div class="line">}</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a class="anchor" id="aaac9826efeddfba9c2ed3f8d1db0f96a"></a>
@@ -2905,7 +2946,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Tue Jul 3 2018 17:18:42 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Jul 8 2018 11:22:40 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

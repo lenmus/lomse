@@ -33,6 +33,7 @@ var classInteractor =
     [ "get_pitch_at", "classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012", null ],
     [ "get_scale", "classInteractor.html#ad79a50661807b829755219e4bdf21121", null ],
     [ "get_selection_set", "classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0", null ],
+    [ "get_tracking_effect", "classInteractor.html#a20eaba9bb880060c9eb121566f22dc52", null ],
     [ "get_view", "classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a", null ],
     [ "get_view_size", "classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65", null ],
     [ "get_viewport", "classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905", null ],

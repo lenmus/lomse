@@ -85,5 +85,9 @@ var hierarchy =
         [ "SingleSystemView", "classSingleSystemView.html", null ],
         [ "VerticalBookView", "classVerticalBookView.html", null ]
       ] ]
+    ] ],
+    [ "VisualEffect", "classVisualEffect.html", [
+      [ "PlaybackHighlight", "classPlaybackHighlight.html", null ],
+      [ "TempoLine", "classTempoLine.html", null ]
     ] ]
 ];

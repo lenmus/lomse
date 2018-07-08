@@ -382,7 +382,6 @@ var group__enumerations =
     [ "EVisualTrackingMode", "group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9", [
       [ "k_tracking_none", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a5a9a08498fdc5cac9b5b32fc56e8b57e", null ],
       [ "k_tracking_highlight_notes", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9a79da3a4bf6cc26fc683d2085e559a780", null ],
-      [ "k_tracking_tempo_line", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497", null ],
-      [ "k_tracking_tempo_block", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ab97b0b9ccf8cfc9c1d6aa0b2a2f26294", null ]
+      [ "k_tracking_tempo_line", "group__enumerations.html#gga5428193fc11653b86ce227a4c89bb2b9ad4833f9050cea288dcf71cf8604cc497", null ]
     ] ]
 ];

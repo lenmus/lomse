@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['verticalbookview',['VerticalBookView',['../classVerticalBookView.html',1,'']]]
+  ['undoelement',['UndoElement',['../classUndoElement.html',1,'']]],
+  ['upitch',['UPitch',['../classUPitch.html',1,'']]]
 ];
