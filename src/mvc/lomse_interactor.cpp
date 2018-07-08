@@ -1084,6 +1084,16 @@ void Interactor::set_visual_tracking_mode(int mode)
 }
 
 //---------------------------------------------------------------------------------------
+VisualEffect* Interactor::get_tracking_effect(int effect)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_tracking_effect(effect);
+    else
+        return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::remove_all_visual_tracking()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);

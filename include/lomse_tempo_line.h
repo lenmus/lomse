@@ -39,8 +39,10 @@
 using namespace std;
 
 
+///@cond INTERNALS
 namespace lomse
 {
+///@endcond
 
 //forward declarations
 class ScreenDrawer;
@@ -62,6 +64,29 @@ protected:
     int m_iPage;
 
 public:
+
+    //customizable properties
+
+    /** Return the current color for the line. */
+    inline Color get_color() const { return m_color; }
+
+    /** Set the color to use for drawing the line. If the line width is large, use
+        a transparent color so that the line does not totally hide the notes/rests.
+        @param color New color to use.
+    */
+    inline void set_color(Color color) { m_color = color; }
+
+    /** Returns the current width (in logical units) of the line. */
+    inline LUnits get_width() const { return m_width; }
+
+    /** Set the width to use for drawing the line.
+        @param width New line width, in logical units.
+    */
+    inline void set_width(LUnits width) { m_width = width; }
+
+
+///@cond INTERNALS
+//excluded from public API. Only for internal use.
     TempoLine(GraphicView* view, LibraryScope& libraryScope);
     virtual ~TempoLine() {}
 
@@ -74,16 +99,9 @@ public:
     void on_draw(ScreenDrawer* pDrawer);
     URect get_bounds() { return m_bounds; }
 
-    //getters
-    inline Color get_color() const { return m_color; }
-    inline LUnits get_width() const { return m_width; }
-
-    //set properties
-    inline void set_color(Color color) { m_color = color; }
-    inline void set_width(LUnits width) { m_width = width; }
-
 protected:
 
+///@endcond
 };
 
 

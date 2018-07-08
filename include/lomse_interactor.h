@@ -55,11 +55,12 @@ class DocCursor;
 class GmoObj;
 class GmoBox;
 class GraphicModel;
+class Handler;
 class ImoScore;
 class ImoStaffObj;
 class PlayerGui;
 class Task;
-class Handler;
+class VisualEffect;
 
 class Document;
 typedef std::shared_ptr<Document>     SpDocument;
@@ -861,6 +862,23 @@ public:
         @endcode
     */
 	virtual void set_visual_tracking_mode(int mode);
+
+    /** Returns the specified visual tracking effect (derived from VisualEffect).
+        @param effect It is a value from enum EVisualTrackingMode. If `k_tracking_none`
+			is specified it will return @nullptr.
+
+		Example:
+        @code
+        VisualEffect* pVE = spInteractor->get_tracking_effect(k_tracking_tempo_line);
+		if (pVE)
+		{
+			TempoLine* pTL = static_cast<TempoLine*>(pVE);
+			pTL->set_color(Color(255,0,0,128));     //transparent red
+			pTL->set_width(200);		            //logical units: 2 mm
+		}
+        @endcode
+    */
+	virtual VisualEffect* get_tracking_effect(int effect);
 
     /** Move the tempo line to the given note/rest.
         @param pSO The tempo line will be placed at this note or rest.
