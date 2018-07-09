@@ -106,8 +106,8 @@ public:
         , EventType(nEventType)
         , Channel(nChannel)
         , NotePitch(midiPitch)
-        , Volume(nVolume)
         , NoteStep(nStep)
+        , Volume(nVolume)
         , pSO(pStaffObj)
         , Measure(nMeasure)
     {
@@ -117,8 +117,8 @@ public:
         , EventType(nEventType)
         , Channel(0)
         , NotePitch(0)
-        , Volume(0)
         , NoteStep(0)
+        , Volume(0)
         , pJump(pJumpEntry)
         , Measure(nMeasure)
     {
@@ -145,13 +145,16 @@ public:
     union {
         int     NotePitch;      //k_note_xxx: MIDI pitch
         int     Instrument;     //k_prog_instr: MIDI instrument
-        int     NumPulses;      //k_rhythm_change: num. metronome pulses per measure
+        int     TopNumber;      //k_rhythm_change: top number of TS
     };
     union {
-        int     Volume;             //k_note_xxx: for notes
-        int     MeasureDuration;    //k_rhythm_change: In LDP duration units
+        int     NoteStep;       //k_note_xxx: Note step 0..6 : 0-Do, ... 6-Si
+        int     BeatDuration;   //k_rhythm_change: bottom num. of TS (as duration)
     };
-    int             NoteStep;   //k_note_xxx: Note step 0..6 : 0-Do, ... 6-Si
+    union {
+        int     Volume;         //k_note_xxx: for notes
+        int     NumPulses;      //k_rhythm_change: implied number of beats per measure
+    };
     union {
         ImoStaffObj*    pSO;        //staffobj who originated the event (for visual highlight)
         JumpEntry*      pJump;      //jump entry, for playback jumps

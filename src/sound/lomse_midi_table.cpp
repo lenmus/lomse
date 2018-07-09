@@ -434,11 +434,12 @@ void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
                                         ImoTimeSignature* pTS)
 {
     TimeUnits rTime = cursor.time() + cursor.anacrusis_missing_time();
-    int measureDuration = int( pTS->get_measure_duration() );
+    int topNumber = pTS->get_top_number();
     int numBeats = pTS->get_num_pulses();
+    int beatDuration = int( pTS->get_ref_note_duration() );
 
-    store_event(rTime, SoundEvent::k_rhythm_change, 0, numBeats,
-                measureDuration, 0, pTS, measure);
+    store_event(rTime, SoundEvent::k_rhythm_change, 0, topNumber,
+                numBeats, beatDuration, pTS, measure);
 }
 
 //---------------------------------------------------------------------------------------
@@ -537,7 +538,8 @@ string SoundEventsTable::dump_events_table()
 
             //list current entry
             SoundEvent* pSE = m_events[i];
-            msg << i << ":\t" << pSE->DeltaTime << "\t\t" << pSE->Channel << "\t" << pSE->Measure << "\t";
+            msg << i << ":\t" << pSE->DeltaTime << "\t\t" << pSE->Channel << "\t"
+                << pSE->Measure << "\t";
 
             bool fAddData = true;
             switch (pSE->EventType)
@@ -572,7 +574,8 @@ string SoundEventsTable::dump_events_table()
                     msg << "?? " << pSE->EventType;
             }
             if (fAddData)
-                msg << "\t" << pSE->NotePitch << "\t" << pSE->NoteStep << "\t" << pSE->Volume << "\n";
+                msg << "\t" << pSE->NotePitch << "\t" << pSE->NoteStep
+                    << "\t" << pSE->Volume << "\n";
         }
 
     return msg.str();

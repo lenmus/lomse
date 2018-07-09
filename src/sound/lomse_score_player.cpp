@@ -288,7 +288,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         return;
     }
 
-    const long k_QUARTER_DURATION = 64L;    //duration (LDP units) of a quarter note (to convert to milliseconds)
     const int k_SOLFA_NOTE = 60;            //pitch for sight reading with percussion sound
     int nPercussionChannel = m_MtrChannel;        //channel to use for percussion
 
@@ -315,14 +314,19 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     long nEvTime;           //time for next event
     long nMtrEvDeltaTime;   //time for next metronome click
 
+    //get current definition for 'beat'
+    Document* pDoc = m_pScore->get_the_document();
+    m_beatDuration = pDoc->get_beat_duration();
+    m_beatType = pDoc->get_beat_type();
+
     //default beat and metronome information. It is going to be properly set
     //when a SoundEvent::k_RhythmChange event is found (a time signature object). So these
     //default settings will be used when no time signature in the score.
-    m_nMtrPulseDuration = k_QUARTER_DURATION;                     //a beat duration, in TU
+    m_nMtrPulseDuration = m_beatDuration;                              //a beat duration, in TU
     long nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration, in TU
     long nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
     long nMeasureDuration = m_nMtrPulseDuration * 4;                   //in TU. Assume 4/4 time signature
-    long nMtrNumPulses = 4;                                          //assume 4/4 time signature
+    long nMtrNumPulses = 4;                                            //assume 4/4 time signature
 
     //Execute control events that take place before the segment to play, so that
     //instruments and tempo are properly programmed. Continue in the loop while
@@ -352,9 +356,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         }
         else if (events[i]->EventType == SoundEvent::k_rhythm_change)
         {
-            //set up new beat and metronome information
-            nMeasureDuration = events[i]->MeasureDuration;
-            nMtrNumPulses = events[i]->NumPulses;
+            set_new_beat_information(events[i], &nMeasureDuration, &nMtrNumPulses);
+
             m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;       //a pulse duration, in TU
             nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration (interval to click off), in TU
             nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click, in TU
@@ -707,9 +710,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             }
             else if (events[i]->EventType == SoundEvent::k_rhythm_change)
             {
-                //set up new beat and metronome information
-                nMeasureDuration = events[i]->MeasureDuration;
-                nMtrNumPulses = events[i]->NumPulses;
+                set_new_beat_information(events[i], &nMeasureDuration, &nMtrNumPulses);
+
                 m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;        //a pulse duration
                 nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click duration (interval to click off)
                 nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
@@ -865,6 +867,26 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
             pInteractor->handle_event(event);
     }
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::set_new_beat_information(SoundEvent* pEvent, long* pMeasureDuration,
+                                           long* pMtrNumPulses)
+{
+    if (m_beatType == k_beat_implied)
+    {
+        *pMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+        *pMtrNumPulses = pEvent->NumPulses;
+    }
+    else if (m_beatType == k_beat_bottom_ts)
+    {
+        *pMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+        *pMtrNumPulses = pEvent->TopNumber;
+    }
+    else    //k_beat_specified
+    {
+        //No need to change as default duration is already in use
+    }
 }
 
 

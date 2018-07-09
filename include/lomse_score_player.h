@@ -341,11 +341,15 @@ protected:
     void thread_main(int nEvStart, int nEvEnd, bool fVisualTracking, long nMM,
                      Interactor* pInteractor);
     void end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor);
+    void set_new_beat_information(SoundEvent* pEvent, long* pMeasureDuration,
+                                  long* pMtrNumPulses);
 
     //helper, for do_play()
     //-----------------------------------------------------------------------------------
     long m_nMtrClickIntval;     //metronome interval duration, in milliseconds
     long m_nMtrPulseDuration;   //a beat duration, in DeltaTime units
+    int m_beatType;             //beat definition to use
+    TimeUnits m_beatDuration;   //for no time signature or beatType == k_beat_specified
 
     inline long delta_to_milliseconds(long deltaTime) {
         return deltaTime * m_nMtrClickIntval / m_nMtrPulseDuration;
