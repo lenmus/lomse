@@ -46,7 +46,8 @@ ImMeasuresTableEntry::ImMeasuresTableEntry(ColStaffObjsEntry* pEntry)
     : m_index(-1)
     , m_timepos(LOMSE_NO_TIME)
     , m_firstId(-1)
-    , m_beatDuration(LOMSE_NO_DURATION)
+    , m_bottomBeat(LOMSE_NO_DURATION)
+    , m_impliedBeat(LOMSE_NO_DURATION)
     , m_pCsoEntry(pEntry)
 {
     if (pEntry != nullptr)
@@ -58,7 +59,8 @@ ImMeasuresTableEntry::ImMeasuresTableEntry()
     : m_index(-1)
     , m_timepos(LOMSE_NO_TIME)
     , m_firstId(-1)
-    , m_beatDuration(LOMSE_NO_DURATION)
+    , m_bottomBeat(LOMSE_NO_DURATION)
+    , m_impliedBeat(LOMSE_NO_DURATION)
     , m_pCsoEntry(nullptr)
 {
 }
@@ -67,7 +69,9 @@ ImMeasuresTableEntry::ImMeasuresTableEntry()
 string ImMeasuresTableEntry::dump()
 {
     stringstream s;
-    s << m_index << "\t" << m_timepos << "\t" << m_beatDuration << "\t";
+    s << m_index << "\t" << m_timepos << "\t" << m_bottomBeat << "\t"
+      << m_impliedBeat << "\t";
+
     if (m_pCsoEntry != nullptr)
         s << m_pCsoEntry->to_string_with_ids();
     s << endl;

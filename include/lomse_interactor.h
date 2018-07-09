@@ -334,6 +334,7 @@ public:
     /** Define the duration for one beat, for metronome and for methods that use
         measure/beat parameters to define a location. This value is shared by all
         scores contained in the document and can be changed at any time.
+        Changes while the score is being played back are ignored until playback finishes.
         @param beatType A value from enum EBeatDuration.
         @param duration The duration (in Lomse Time Units) for one beat. You can use
             a value from enum ENoteDuration casted to double. This parameter is

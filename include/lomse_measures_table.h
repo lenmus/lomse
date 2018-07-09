@@ -50,7 +50,8 @@ protected:
     int         m_index;            //index of this element in ImMeasuresTable
 	TimeUnits   m_timepos;          //measure starts at this timepos
 	ImoId       m_firstId;          //id of first note/rest in measure
-	TimeUnits   m_beatDuration;     //applicable TS to this measure
+    TimeUnits   m_bottomBeat;       //applicable TS bottom number (as note duration)
+    TimeUnits   m_impliedBeat;      //implied beat duration for applicable TS
 
 	ColStaffObjsEntry* m_pCsoEntry; //ptr to barline (end of this measure) or nullptr
 	                                //when no end barline
@@ -63,7 +64,8 @@ public:
     inline int get_table_index() const { return m_index; }
 	inline TimeUnits get_timepos() const { return m_timepos; }
 	inline ImoId get_first_id() const { return m_firstId; }
-	inline TimeUnits get_beat_duration() const { return m_beatDuration; }
+	inline TimeUnits get_implied_beat_duration() const { return m_bottomBeat; }
+	inline TimeUnits get_bottom_ts_beat_duration() const { return m_impliedBeat; }
     inline ColStaffObjsEntry* get_entry() const { return m_pCsoEntry; }
 
     //debug
@@ -77,7 +79,8 @@ protected:
     friend class MeasuresTableBuilder;
 	inline void set_timepos(TimeUnits timepos) { m_timepos = timepos; }
 	inline void set_first_id(ImoId id) { m_firstId = id; }
-	inline void set_beat_duration(TimeUnits duration) { m_beatDuration = duration; }
+	inline void set_implied_beat_duration(TimeUnits duration) { m_bottomBeat = duration; }
+	inline void set_bottom_ts_beat_duration(TimeUnits duration) { m_impliedBeat = duration; }
 	inline void set_entry(ColStaffObjsEntry* entry) { m_pCsoEntry = entry; }
 
 };

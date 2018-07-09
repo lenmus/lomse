@@ -303,9 +303,29 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int i
     {
         timepos = measure->get_timepos();
         if (iBeat >= 0)
-            timepos += measure->get_beat_duration() * iBeat;
+        {
+            timepos += get_beat_duration_for(pScore, measure) * iBeat;
+        }
     }
     return timepos;
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits ScoreAlgorithms::get_beat_duration_for(ImoScore* pScore,
+                                                 ImMeasuresTableEntry* measure)
+{
+    //get current definition for 'beat'
+    Document* pDoc = pScore->get_the_document();
+    TimeUnits beatType = pDoc->get_beat_type();
+
+    //use current definition for providing beat duration
+    if (beatType == k_beat_implied)
+        return measure->get_implied_beat_duration();
+
+    if (beatType == k_beat_bottom_ts)
+        return measure->get_bottom_ts_beat_duration();
+
+    return pDoc->get_beat_duration();
 }
 
 

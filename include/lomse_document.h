@@ -88,9 +88,23 @@ enum EDocLayoutOptions
 */
 enum EBeatDuration
 {
-    k_beat_implied = 0,     ///< Implied by the time signature; e.g. 3/8 = one beat
-    k_beat_bottom_ts,       ///< Use the bottom number of the time signature; e.g. 3/8 = three beats
-    k_beat_specified,       ///< Use specified note value
+    k_beat_implied = 0,     ///< Implied by the time signature; e.g. 4/4 = four
+                            ///< beats, 6/8 = two beats, 3/8 = one beat.
+                            ///< The number of implied beats for a time signature is
+                            ///< provided by method ImoTimeSignature::get_num_pulses().
+                            ///< Basically, for simple time signatures, such as 4/4,
+                            ///< 3/4, 2/4, 3/8, and 2/2, the number of beats is given by
+                            ///< the time signature top number, with the exception of
+                            ///< 3/8 which is normally conducted in one beat. In compound
+                            ///< time signatures (6/x, 12/x, and 9/x) the number of beats
+                            ///< is given by dividing the top number by three.
+
+    k_beat_bottom_ts,       ///< Use the note duration implied by the time signature
+                            ///< bottom number; e.g. 3/8 = use eighth notes. Notice
+                            ///< that the number of beats will coincide with the
+                            ///< time signature top number, e.g. 3 beats for 3/8.
+
+    k_beat_specified,       ///< Use specified note value for beat duration.
 };
 
 
@@ -561,6 +575,7 @@ public:
     /** Define the duration for one beat, for metronome and for methods that use
         measure/beat parameters to define a location. This value is shared by all
         scores contained in the document and can be changed at any time.
+        Changes while the score is being played back are ignored until playback finishes.
         @param beatType A value from enum EBeatDuration.
         @param duration The duration (in Lomse Time Units) for one beat. You can use
             a value from enum ENoteDuration casted to TimeUnits. This parameter is
@@ -568,7 +583,7 @@ public:
             For all other values, if a non-zero value is specified, the value
             will be used for the beat duration in scores without time signature.
     */
-    void define_beat(int beatType, TimeUnits duration);
+    void define_beat(int beatType, TimeUnits duration=0.0);
 
     /** Return the beat type to use for scores in this document.
 

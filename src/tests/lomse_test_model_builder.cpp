@@ -790,7 +790,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_entry() == pCSO->front() );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_003)
@@ -819,7 +820,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_entry() == pCSO->front() );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
 
         pInstr = pScore->get_instrument(1);
         pTable = pInstr->get_measures_table();
@@ -829,7 +831,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( pMeasure != nullptr );
         CHECK( builder.my_get_current_measure(1) == pMeasure );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_implied_beat_duration() == LOMSE_NO_DURATION );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == LOMSE_NO_DURATION );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_004)
@@ -860,7 +863,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_entry() == pCSO->front() );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
 
@@ -872,7 +876,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( pMeasure != nullptr );
         CHECK( builder.my_get_current_measure(1) == pMeasure );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
 
@@ -906,7 +911,8 @@ SUITE(MeasuresTableBuilderTest)
         ImMeasuresTableEntry* pMeasure = pTable->get_measure(0);
         CHECK( pMeasure != nullptr );
         CHECK( pMeasure->get_timepos() == 0.0f );
-        CHECK( pMeasure->get_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
         CHECK( pMeasure->get_entry() == pCSO->front() );
     }
 
@@ -943,7 +949,8 @@ SUITE(MeasuresTableBuilderTest)
         CHECK( pMeasure != nullptr );
         CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_timepos() == 64.0f );
-        CHECK( pMeasure->get_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
     }
 
     TEST_FIXTURE(MeasuresTableBuilderTestFixture, measures_table_builder_007)
@@ -980,13 +987,15 @@ SUITE(MeasuresTableBuilderTest)
         pMeasure = pTable->get_measure(1);
         CHECK( pMeasure != nullptr );
         CHECK( pMeasure->get_timepos() == 128.0f );
-        CHECK( pMeasure->get_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 64.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 64.0f );
 
         pMeasure = pTable->get_measure(2);
         CHECK( pMeasure != nullptr );
         CHECK( builder.my_get_current_measure(0) == pMeasure );
         CHECK( pMeasure->get_timepos() == 256.0f );
-        CHECK( pMeasure->get_beat_duration() == 96.0f );
+        CHECK( pMeasure->get_implied_beat_duration() == 96.0f );
+        CHECK( pMeasure->get_bottom_ts_beat_duration() == 32.0f );
     }
 
 };

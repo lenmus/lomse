@@ -426,7 +426,8 @@ void MeasuresTableBuilder::build(ImoScore* pScore)
         if (pSO->is_time_signature())
         {
             ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(pSO);
-            m_measures[iInstr]->set_beat_duration( pTS->get_beat_duration() );
+            m_measures[iInstr]->set_implied_beat_duration( pTS->get_beat_duration() );
+            m_measures[iInstr]->set_bottom_ts_beat_duration( pTS->get_ref_note_duration() );
         }
 
         //if not intermediate barline finish current measure
@@ -471,7 +472,10 @@ void MeasuresTableBuilder::start_new_measure(int iInstr, ColStaffObjsEntry* pCso
     m_measures[iInstr] = pTable->add_entry(pCsoEntry);
 
     if (prevMeasure != nullptr)
-        m_measures[iInstr]->set_beat_duration( prevMeasure->get_beat_duration() );
+    {
+        m_measures[iInstr]->set_implied_beat_duration( prevMeasure->get_implied_beat_duration() );
+        m_measures[iInstr]->set_bottom_ts_beat_duration( prevMeasure->get_bottom_ts_beat_duration() );
+    }
 }
 
 
