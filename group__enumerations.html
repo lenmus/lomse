@@ -112,6 +112,8 @@ $(document).ready(function(){initNavTree('group__enumerations.html','');});
 Enumerations</h2></td></tr>
 <tr class="memitem:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a> </td></tr>
 <tr class="separator:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0e973f43f78c8517d60e61811c5b9077"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga0e973f43f78c8517d60e61811c5b9077">EBeatDuration</a> </td></tr>
+<tr class="separator:ga0e973f43f78c8517d60e61811c5b9077"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1903a90921a42ab8abc8857c21f08c15"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga1903a90921a42ab8abc8857c21f08c15">ERenderOptions</a> </td></tr>
 <tr class="separator:ga1903a90921a42ab8abc8857c21f08c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabfcf510bafec7c6429906a6ecaac656d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d">EEventType</a> </td></tr>
@@ -380,6 +382,31 @@ Enumerations</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="gga76688a92a7723eab3a493292d3f81e54a576d00ec4eee377969fba6a1cb726bb2"></a>k_wings_double_curved</em>&#160;</td><td class="fielddoc">
 <p>Doube curved wings. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a class="anchor" id="ga0e973f43f78c8517d60e61811c5b9077"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga0e973f43f78c8517d60e61811c5b9077">EBeatDuration</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum defines the duration of one beat, for metronome and for methods that use measure/beat to define a location.</p>
+<p>#include &lt;<a class="el" href="lomse__document_8h_source.html">lomse_document.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="gga0e973f43f78c8517d60e61811c5b9077ae3a18ad77e0af2ae9e69cf8ee70fe34b"></a>k_beat_implied</em>&#160;</td><td class="fielddoc">
+<p>Implied by the time signature; e.g. 4/4 = four beats, 6/8 = two beats, 3/8 = one beat. The number of implied beats for a time signature is provided by method ImoTimeSignature::get_num_pulses(). Basically, for simple time signatures, such as 4/4, 3/4, 2/4, 3/8, and 2/2, the number of beats is given by the time signature top number, with the exception of 3/8 which is normally conducted in one beat. In compound time signatures (6/x, 12/x, and 9/x) the number of beats is given by dividing the top number by three. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga0e973f43f78c8517d60e61811c5b9077aba010854b95508806b44bf7a36a20290"></a>k_beat_bottom_ts</em>&#160;</td><td class="fielddoc">
+<p>Use the note duration implied by the time signature bottom number; e.g. 3/8 = use eighth notes. Notice that the number of beats will coincide with the time signature top number, e.g. 3 beats for 3/8. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga0e973f43f78c8517d60e61811c5b9077a45a0390f0aabcbfc5542950b6bd0dc9f"></a>k_beat_specified</em>&#160;</td><td class="fielddoc">
+<p>Use specified note value for beat duration. </p>
 </td></tr>
 </table>
 
@@ -1616,7 +1643,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jul 8 2018 11:22:40 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jul 10 2018 17:54:31 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

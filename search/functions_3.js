@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['define_5fbeat',['define_beat',['../classDocument.html#a6b25caea5366e0efef7d820fc99d88e8',1,'Document::define_beat()'],['../classInteractor.html#a7eb3d6d7f505c8e37f22a3ddef38859f',1,'Interactor::define_beat()']]],
   ['delete_5fauxobj',['delete_auxobj',['../classDocument.html#a9700f30a9e1ad231d66569381ec4c258',1,'Document']]],
   ['delete_5fblock_5flevel_5fobj',['delete_block_level_obj',['../classDocument.html#afcd7597ae6126d00c6bee464a404ad96',1,'Document']]],
   ['delete_5frelation',['delete_relation',['../classDocument.html#a8748a74df806ac65a1986af64929b85f',1,'Document']]],

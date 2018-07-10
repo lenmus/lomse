@@ -167,6 +167,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3e96befa4410ffe879ed55fc09d6c62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task</a> (int taskType)</td></tr>
 <tr class="separator:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eb3d6d7f505c8e37f22a3ddef38859f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7eb3d6d7f505c8e37f22a3ddef38859f">define_beat</a> (int beatType, TimeUnits duration=0.0)</td></tr>
+<tr class="separator:a7eb3d6d7f505c8e37f22a3ddef38859f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Access to collaborators in MVC model</div></td></tr>
 <tr class="memitem:ab5192c9307818200f5b08e93892c61ed"><td class="memItemLeft" align="right" valign="top">GraphicModel *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">get_graphic_model</a> ()</td></tr>
 <tr class="separator:ab5192c9307818200f5b08e93892c61ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -481,6 +483,40 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a7eb3d6d7f505c8e37f22a3ddef38859f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::define_beat </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>beatType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">TimeUnits&#160;</td>
+          <td class="paramname"><em>duration</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Define the duration for one beat, for metronome and for methods that use measure/beat parameters to define a location. This value is shared by all scores contained in the document and can be changed at any time. Changes while the score is being played back are ignored until playback finishes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">beatType</td><td>A value from enum EBeatDuration. </td></tr>
+    <tr><td class="paramname">duration</td><td>The duration (in Lomse Time Units) for one beat. You can use a value from enum ENoteDuration casted to double. This parameter is required only when value for parameter <code>beatType</code> is <code>k_beat_specified</code>. For all other values, if a non-zero value is specified, the value will be used for the beat duration in scores without time signature. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a class="anchor" id="a77ba1f1700deaf912f80f7b460ab508f"></a>
@@ -2946,7 +2982,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sun Jul 8 2018 11:22:40 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jul 10 2018 17:54:32 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

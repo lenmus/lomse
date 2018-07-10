@@ -15,6 +15,7 @@ var classInteractor =
     ] ],
     [ "blink_caret", "classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1", null ],
     [ "click_event_to_cursor_state", "classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2", null ],
+    [ "define_beat", "classInteractor.html#a7eb3d6d7f505c8e37f22a3ddef38859f", null ],
     [ "dump_cursor", "classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f", null ],
     [ "dump_selection", "classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659", null ],
     [ "enable_drag_image", "classInteractor.html#a0579315896d75bfd6f54df2cad4f9d82", null ],

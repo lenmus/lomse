@@ -4,6 +4,7 @@ var searchData=
   ['earticulations',['EArticulations',['../group__enumerations.html#gab2ee1efe289105a4f57f26b4fe7633ad',1,'lomse_internal_model.h']]],
   ['ebarline',['EBarline',['../group__enumerations.html#gac2b9227b141b8d8aff14a30886e81b98',1,'lomse_internal_model.h']]],
   ['ebarlinewings',['EBarlineWings',['../group__enumerations.html#ga76688a92a7723eab3a493292d3f81e54',1,'lomse_internal_model.h']]],
+  ['ebeatduration',['EBeatDuration',['../group__enumerations.html#ga0e973f43f78c8517d60e61811c5b9077',1,'lomse_document.h']]],
   ['eclef',['EClef',['../group__enumerations.html#gae2b8bc4155c37c3b10224456733664e4',1,'lomse_internal_model.h']]],
   ['ecmdcursorpolicy',['ECmdCursorPolicy',['../classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add',1,'DocCommand']]],
   ['ecmdselectionpolicy',['ECmdSelectionPolicy',['../classDocCommand.html#a8f5897829747c5a527d7c7f410182e30',1,'DocCommand']]],

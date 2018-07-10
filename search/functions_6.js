@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['get_5fbeat_5fduration',['get_beat_duration',['../classDocument.html#aab61dfb1f007698076aaba83c46c1242',1,'Document']]],
+  ['get_5fbeat_5ftype',['get_beat_type',['../classDocument.html#a84e87406b61cda92f8e61a2080bfa997',1,'Document']]],
   ['get_5fbold',['get_bold',['../classRequestFont.html#a9c3719b6491ce9e2ebfe76292bebbd7d',1,'RequestFont']]],
   ['get_5fbuild_5fdate',['get_build_date',['../classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a',1,'LomseDoorway']]],
   ['get_5fcaret_5ftimecode',['get_caret_timecode',['../classInteractor.html#ac30c10982952f57d03a3e992e90eaca0',1,'Interactor']]],

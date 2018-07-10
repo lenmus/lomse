@@ -59,6 +59,11 @@ var group__enumerations =
       [ "k_wings_double_straight", "group__enumerations.html#gga76688a92a7723eab3a493292d3f81e54a27e2c58ce0bd9e4725f2c2bc094b5395", null ],
       [ "k_wings_double_curved", "group__enumerations.html#gga76688a92a7723eab3a493292d3f81e54a576d00ec4eee377969fba6a1cb726bb2", null ]
     ] ],
+    [ "EBeatDuration", "group__enumerations.html#ga0e973f43f78c8517d60e61811c5b9077", [
+      [ "k_beat_implied", "group__enumerations.html#gga0e973f43f78c8517d60e61811c5b9077ae3a18ad77e0af2ae9e69cf8ee70fe34b", null ],
+      [ "k_beat_bottom_ts", "group__enumerations.html#gga0e973f43f78c8517d60e61811c5b9077aba010854b95508806b44bf7a36a20290", null ],
+      [ "k_beat_specified", "group__enumerations.html#gga0e973f43f78c8517d60e61811c5b9077a45a0390f0aabcbfc5542950b6bd0dc9f", null ]
+    ] ],
     [ "EClef", "group__enumerations.html#gae2b8bc4155c37c3b10224456733664e4", [
       [ "k_clef_undefined", "group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4af316403ef51a15c1677d080a5a3b439c", null ],
       [ "k_clef_G2", "group__enumerations.html#ggae2b8bc4155c37c3b10224456733664e4a34698de0a0d67e464fab9bbc29366173", null ],

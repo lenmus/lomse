@@ -253,6 +253,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a8c3cdebeba1affc24e85651536b458df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6fa50c1bc66a6cc0516af29fbece700"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#af6fa50c1bc66a6cc0516af29fbece700">is_editable</a> ()</td></tr>
 <tr class="separator:af6fa50c1bc66a6cc0516af29fbece700"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b25caea5366e0efef7d820fc99d88e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a6b25caea5366e0efef7d820fc99d88e8">define_beat</a> (int beatType, TimeUnits duration=0.0)</td></tr>
+<tr class="separator:a6b25caea5366e0efef7d820fc99d88e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84e87406b61cda92f8e61a2080bfa997"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a84e87406b61cda92f8e61a2080bfa997">get_beat_type</a> ()</td></tr>
+<tr class="separator:a84e87406b61cda92f8e61a2080bfa997"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab61dfb1f007698076aaba83c46c1242"><td class="memItemLeft" align="right" valign="top">TimeUnits&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#aab61dfb1f007698076aaba83c46c1242">get_beat_duration</a> ()</td></tr>
+<tr class="separator:aab61dfb1f007698076aaba83c46c1242"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89876730919eaea7a497fcfda63e83ec"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a89876730919eaea7a497fcfda63e83ec">is_dirty</a> ()</td></tr>
 <tr class="separator:a89876730919eaea7a497fcfda63e83ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b18b96f8e791c454ef83414a072bc0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a0b18b96f8e791c454ef83414a072bc0f">notify_if_document_modified</a> ()</td></tr>
@@ -765,6 +771,40 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 
 </div>
 </div>
+<a class="anchor" id="a6b25caea5366e0efef7d820fc99d88e8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Document::define_beat </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>beatType</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">TimeUnits&#160;</td>
+          <td class="paramname"><em>duration</em> = <code>0.0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Define the duration for one beat, for metronome and for methods that use measure/beat parameters to define a location. This value is shared by all scores contained in the document and can be changed at any time. Changes while the score is being played back are ignored until playback finishes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">beatType</td><td>A value from enum EBeatDuration. </td></tr>
+    <tr><td class="paramname">duration</td><td>The duration (in Lomse Time Units) for one beat. You can use a value from enum ENoteDuration casted to TimeUnits. This parameter is required only when value for parameter <code>beatType</code> is <code>k_beat_specified</code>. For all other values, if a non-zero value is specified, the value will be used for the beat duration in scores without time signature. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a9700f30a9e1ad231d66569381ec4c258"></a>
 <div class="memitem">
 <div class="memproto">
@@ -969,6 +1009,56 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 <li>This method will do not attempt to discover the string format. It just assumes the format passed as parameter. Therefore, if the format is not correct, this method will report parsing errors and will return a valid empty document with a valid empty internal model.</li>
 <li>Errors detected while parsing the source string are reported to the reporter object defined in Document constructor. By default, to <code>cout</code> stream. </li>
 </ul>
+
+</div>
+</div>
+<a class="anchor" id="aab61dfb1f007698076aaba83c46c1242"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">TimeUnits Document::get_beat_duration </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Return the duration for beats to use in scores without time signature and when beat type is <code>k_beat__specified</code>.</p>
+<p>See <a class="el" href="classDocument.html#a6b25caea5366e0efef7d820fc99d88e8">define_beat()</a> </p>
+
+</div>
+</div>
+<a class="anchor" id="a84e87406b61cda92f8e61a2080bfa997"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Document::get_beat_type </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Return the beat type to use for scores in this document.</p>
+<p>See <a class="el" href="classDocument.html#a6b25caea5366e0efef7d820fc99d88e8">define_beat()</a> </p>
 
 </div>
 </div>
@@ -1599,7 +1689,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocument.html">Document</a></li>
-    <li class="footer">Generated on Sun Jul 8 2018 11:22:40 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jul 10 2018 17:54:32 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
