@@ -130,6 +130,13 @@ void Interactor::switch_task(int taskType)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::define_beat(int beatType, TimeUnits duration)
+{
+    if (SpDocument spDoc = m_wpDoc.lock())
+        spDoc->define_beat(beatType, duration);
+}
+
+//---------------------------------------------------------------------------------------
 GraphicModel* Interactor::get_graphic_model()
 {
     if (!m_pGraphicModel)

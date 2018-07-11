@@ -288,7 +288,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         return;
     }
 
-    const long k_QUARTER_DURATION = 64L;    //duration (LDP units) of a quarter note (to convert to milliseconds)
     const int k_SOLFA_NOTE = 60;            //pitch for sight reading with percussion sound
     int nPercussionChannel = m_MtrChannel;        //channel to use for percussion
 
@@ -312,17 +311,38 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //-----------------------------------------------------------------------------------
 
     //declaration of some time related variables.
-    long nEvTime;           //time for next event
-    long nMtrEvDeltaTime;   //time for next metronome click
+    long nEvTime;           //time (millisecs) for next event, metronome or from table
+    long nMtrEvDeltaTime;   //time (Time Units) for next metronome click
+
+    // get metronome interval duration, in milliseconds
+    //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
+    //was specified in method load_score(). Nevertheless, metronome speed can be
+    //overridden to force a predefined speed by specifying a non-zero value for
+    //parameter nMM.
+    if (nMM == 0)
+        m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
+    else
+        m_nMtrClickIntval = (nMM == 0 ? 1000L : 60000L/nMM);
+
+    //get current definition for 'beat'
+    Document* pDoc = m_pScore->get_the_document();
+    m_beatDuration = pDoc->get_beat_duration();
+    m_beatType = pDoc->get_beat_type();
 
     //default beat and metronome information. It is going to be properly set
     //when a SoundEvent::k_RhythmChange event is found (a time signature object). So these
     //default settings will be used when no time signature in the score.
-    m_nMtrPulseDuration = k_QUARTER_DURATION;                     //a beat duration, in TU
+    m_nMtrPulseDuration = m_beatDuration;                              //a beat duration, in TU
     long nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration, in TU
     long nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
     long nMeasureDuration = m_nMtrPulseDuration * 4;                   //in TU. Assume 4/4 time signature
-    long nMtrNumPulses = 4;                                          //assume 4/4 time signature
+    long nMtrNumPulses = 4;                                            //assume 4/4 time signature
+
+    m_conversionFactor = float(m_nMtrClickIntval) / float(m_nMtrPulseDuration);
+//    LOMSE_LOG_DEBUG(Logger::k_score_player,
+//                    "initial settings: nMeasureDuration=%ld, nMtrClickIntval=%ld"
+//                    "conversionFactor=%f",
+//                    nMeasureDuration, m_nMtrClickIntval, m_conversionFactor);
 
     //Execute control events that take place before the segment to play, so that
     //instruments and tempo are properly programmed. Continue in the loop while
@@ -352,12 +372,15 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         }
         else if (events[i]->EventType == SoundEvent::k_rhythm_change)
         {
-            //set up new beat and metronome information
-            nMeasureDuration = events[i]->MeasureDuration;
-            nMtrNumPulses = events[i]->NumPulses;
+            set_new_beat_information(events[i], &nMeasureDuration, &nMtrNumPulses);
+
             m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;       //a pulse duration, in TU
             nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration (interval to click off), in TU
             nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click, in TU
+
+//            LOMSE_LOG_DEBUG(Logger::k_score_player,
+//                            "new TS: nMeasureDuration=%ld, nMtrClickIntval=%ld",
+//                            nMeasureDuration, m_nMtrClickIntval);
         }
         else
         {
@@ -370,21 +393,13 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //Here i points to the first event of desired measure that is not a control event,
     //that is, to first event to play
 
-    //Define and initialize time counter. If playback starts not at the beginning but
-	//in another measure, advance time counter to that measure
+    //Define and initialize time counter (real time, in millisecs). If playback
+    //starts not at the beginning but in another measure, advance time counter to that
+    //measure
     long curTime = 0L;
 	if (nEvStart > 1)
 		curTime = delta_to_milliseconds( events[nEvStart]->DeltaTime );
 
-    // get metronome interval duration, in milliseconds
-    //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
-    //was specified in method load_score(). Nevertheless, metronome speed can be
-    //overridden to force a predefined speed by specifying a non-zero value for
-    //parameter nMM.
-    if (nMM == 0)
-        m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
-    else
-        m_nMtrClickIntval = (nMM == 0 ? 1000L : 60000L/nMM);
 
     //determine last metronome pulse before first note to play.
     //First note could be syncopated or an off-beat note. Round time to nearest
@@ -414,7 +429,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //generate count off metronome clicks. Number of pulses will be the necessary
     //pulses before first anacrusis note, or full measure if no anacrusis.
     //At least two pulses.
-    bool fMtrOn = false;                //if true, next metronome event is start
+    bool fSendMtrOff = false;                //if true, next metronome event is start
     if (fCountOff)
     {
         //determine num pulses
@@ -474,7 +489,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         //generate final metronome click before real events
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
 
-        fMtrOn = true;
+        fSendMtrOff = true;
         nMtrEvDeltaTime += nMtrIntvalOff;
         fFirstBeatInMeasure = false;
         fCountOffPulseActive = true;
@@ -483,11 +498,17 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //loop to process events
     do
     {
-        //Verify if next event is a metronome click
+//        LOMSE_LOG_DEBUG(Logger::k_score_player,
+//                        "new iteration: i=%d, curTime=%ld, nMtrEvDeltaTime=%ld, "
+//                        "events[i]->DeltaTime=%d",
+//                        i, curTime, nMtrEvDeltaTime, events[i]->DeltaTime);
+
+        //Verify if next event is a metronome click on/off
         if (nMtrEvDeltaTime <= events[i]->DeltaTime)
         {
             //Next event should be a metronome click or the click off event for the previous metronome click
             nEvTime = delta_to_milliseconds(nMtrEvDeltaTime);
+//            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (MtrDeltaTime) = %ld", nEvTime);
             if (curTime < nEvTime)
             {
                 //flush pending events
@@ -514,9 +535,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     std::this_thread::sleep_for(waitTime);
                 }
                 curTime = nEvTime;
+//                LOMSE_LOG_DEBUG(Logger::k_score_player, "flush pending events: waitT=%ld, new curTime=%ld",
+//                                waitT, curTime);
             }
 
-            if (fMtrOn)
+            if (fSendMtrOff)
             {
                 //the event is the click off for the previous metronome click
                 if (fPlayWithMetronome || fCountOffPulseActive)
@@ -528,8 +551,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                     fCountOffPulseActive = false;
                 }
-                fMtrOn = false;
+                fSendMtrOff = false;
                 nMtrEvDeltaTime += nMtrIntvalNextClick;
+//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr Off: new nMtrEvDeltaTime=%ld",
+//                                nMtrEvDeltaTime);
             }
             else
             {
@@ -550,15 +575,20 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     //                "k_move_tempo_line generated");
                 }
 
-                fMtrOn = true;
+                fSendMtrOff = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;
+//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On: new nMtrEvDeltaTime=%ld",
+//                                nMtrEvDeltaTime);
             }
             curTime = nEvTime;
+//            LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On/Off: new curTime=%ld, new nMtrEvDeltaTime=%ld",
+//                            curTime, nMtrEvDeltaTime);
         }
         else
         {
             //next even comes from the table. Usually it will be a note on/off
             nEvTime = delta_to_milliseconds( events[i]->DeltaTime );
+//            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (event i) = %ld", nEvTime);
             if (nEvTime > curTime)
             {
                 //flush accumulated events for curTime
@@ -647,7 +677,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
                     //                "implicit k_highlight_on generated for %d", id);
                 }
-
+//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note On");
             }
             else if (events[i]->EventType == SoundEvent::k_note_off)
             {
@@ -676,6 +706,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     //                "implicit k_highlight_off generated for %d",
                     //                events[i]->pSO->get_id());
                 }
+//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note Off");
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
@@ -707,12 +738,15 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             }
             else if (events[i]->EventType == SoundEvent::k_rhythm_change)
             {
-                //set up new beat and metronome information
-                nMeasureDuration = events[i]->MeasureDuration;
-                nMtrNumPulses = events[i]->NumPulses;
+                set_new_beat_information(events[i], &nMeasureDuration, &nMtrNumPulses);
+
                 m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;        //a pulse duration
                 nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click duration (interval to click off)
                 nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
+
+//                LOMSE_LOG_DEBUG(Logger::k_score_player,
+//                                "new TS: nMeasureDuration=%ld, nMtrClickIntval=%ld",
+//                                nMeasureDuration, m_nMtrClickIntval);
             }
             else if (events[i]->EventType == SoundEvent::k_prog_instr)
             {
@@ -739,9 +773,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 //TODO: log event
             }
 
-            curTime = max(curTime, nEvTime);        //to avoid going backwards when no metronome
+            curTime = max(curTime, nEvTime);    //to avoid going backwards when no metronome
                                                 //before start and progInstr events
             i++;
+//            LOMSE_LOG_DEBUG(Logger::k_score_player, "Increment i: curTime=%ld", curTime);
         }
 
         //check if the thread should be paused or stopped
@@ -766,6 +801,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             long newMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
             if (newMtrClickIntval != m_nMtrClickIntval)
             {
+                m_conversionFactor /= float(m_nMtrClickIntval);
+                m_conversionFactor *= float(newMtrClickIntval);
                 m_nMtrClickIntval = newMtrClickIntval;
                 curTime = delta_to_milliseconds( events[i-1]->DeltaTime );
             }
@@ -865,6 +902,26 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
             pInteractor->handle_event(event);
     }
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::set_new_beat_information(SoundEvent* pEvent, long* pMeasureDuration,
+                                           long* pMtrNumPulses)
+{
+    if (m_beatType == k_beat_implied)
+    {
+        *pMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+        *pMtrNumPulses = pEvent->NumPulses;
+    }
+    else if (m_beatType == k_beat_bottom_ts)
+    {
+        *pMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+        *pMtrNumPulses = pEvent->TopNumber;
+    }
+    else    //k_beat_specified
+    {
+        //No need to change as default duration is already in use
+    }
 }
 
 

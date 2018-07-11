@@ -157,6 +157,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, ProgramSounds)
     {
+        //@001. program_sounds_for_instruments(). Event added
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
@@ -175,6 +177,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, ProgramSoundsMidiInfo)
     {
+        //@002. program_sounds_for_instruments(). Midi info from instrument added
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (infoMIDI 2 0)(musicData (clef G)(n c4 q) )) )))" );
@@ -193,6 +197,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_OneNote)
     {
+        //@010. create_events(). Note.
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
@@ -213,6 +219,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_OneRest)
     {
+        //@011. create_events(). Rest.
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(r q) )) )))" );
@@ -234,6 +242,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_RestNoVisible)
     {
+        //@012. create_events(). Invisible rest.
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(r q noVisible)(n c4 q) )) )))" );
@@ -255,6 +265,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_TwoNotesTied)
     {
+        //@013. create_events(). Two tied notes.
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q l)(n c4 e) )) )))" );
@@ -279,6 +291,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, BarlineIncrementsMeasureCount)
     {
+        //@020. create_events(). Barline increments measure count
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n c4 e) )) )))" );
@@ -304,6 +318,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, TimeSignatureAddsRythmChange)
     {
+        //@030. create_events(). Time signature adds rhythm change
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(time 2 4) )) )))" );
@@ -318,14 +334,17 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_rhythm_change );
+        CHECK( (*it)->TopNumber == 2 );
+        CHECK( (*it)->BeatDuration == 64 );
         CHECK( (*it)->NumPulses == 2 );
-        CHECK( (*it)->MeasureDuration == 128 );
         //cout << ", NumPulses = " << (*it)->NumPulses
-        //     << ", MeasureDuration = " << (*it)->MeasureDuration << endl;
+        //     << ", TopNumber = " << (*it)->TopNumber << endl;
     }
 
     TEST_FIXTURE(MidiTableTestFixture, TimeSignatureInfoOk)
     {
+        //@031. create_events(). Time signature info ok
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(time 6 8) )) )))" );
@@ -340,14 +359,17 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_rhythm_change );
+        CHECK( (*it)->TopNumber == 6 );
+        CHECK( (*it)->BeatDuration == 32 );
         CHECK( (*it)->NumPulses == 2 );
-        CHECK( (*it)->MeasureDuration == 192 );
         //cout << ", NumPulses = " << (*it)->NumPulses
-        //     << ", MeasureDuration = " << (*it)->MeasureDuration << endl;
+        //     << ", TopNumber = " << (*it)->TopNumber << endl;
     }
 
     TEST_FIXTURE(MidiTableTestFixture, CloseTableAddsEvent)
     {
+        //@100. close_table() adds end_of_score event
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (r q) )) )))" );
@@ -364,6 +386,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, CloseTableFinalTime)
     {
+        //@101. close_table() Final time computed ok
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (r q) )) )))" );
@@ -388,6 +412,8 @@ SUITE(MidiTableTest)
 
     TEST_FIXTURE(MidiTableTestFixture, EventsSorted)
     {
+        //@200. Events are sorted ok
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)) )) )))" );

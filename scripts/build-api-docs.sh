@@ -33,9 +33,8 @@ fi
 
 #paths
 ROOT="${LOMSE}"
-PROJECTS=$(dirname "${ROOT}")
 DOXY="${ROOT}/docs/api"
-HTML="${PROJECTS}/api-docs"
+HTML="${LOMSE}/zz_build-api"
 echo "ROOT = ${ROOT}"
 echo "PROJECTS = ${PROJECTS}"
 echo "DOXY = ${DOXY}"

@@ -5192,7 +5192,7 @@ int ImoTimeSignature::get_num_pulses()
 
     //In simple time signatures, such as  4/4, 3/4, 2/4, 3/8, and 2/2, the number
     //of beats is given by the top number, with the exception of 3/8 which is
-    //marked in one beat.
+    //conducted in one beat.
     //TODO: Any other exception?
     //In compound time signatures (6/x, 12/x, and 9/x) the number of beats is given
     //by dividing the top number by three.

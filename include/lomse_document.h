@@ -78,6 +78,36 @@ enum EDocLayoutOptions
 ///@endcond
 
 
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum defines the duration of one beat, for metronome and for methods that use
+    measure/beat to define a location.
+
+	@#include <lomse_document.h>
+*/
+enum EBeatDuration
+{
+    k_beat_implied = 0,     ///< Implied by the time signature; e.g. 4/4 = four
+                            ///< beats, 6/8 = two beats, 3/8 = one beat.
+                            ///< The number of implied beats for a time signature is
+                            ///< provided by method ImoTimeSignature::get_num_pulses().
+                            ///< Basically, for simple time signatures, such as 4/4,
+                            ///< 3/4, 2/4, 3/8, and 2/2, the number of beats is given by
+                            ///< the time signature top number, with the exception of
+                            ///< 3/8 which is normally conducted in one beat. In compound
+                            ///< time signatures (6/x, 12/x, and 9/x) the number of beats
+                            ///< is given by dividing the top number by three.
+
+    k_beat_bottom_ts,       ///< Use the note duration implied by the time signature
+                            ///< bottom number; e.g. 3/8 = use eighth notes. Notice
+                            ///< that the number of beats will coincide with the
+                            ///< time signature top number, e.g. 3 beats for 3/8.
+
+    k_beat_specified,       ///< Use specified note value for beat duration.
+};
+
+
 //------------------------------------------------------------------------------------
 /** The %Document class is a facade object that contains, basically, the @IM, a model
     similar to the DOM in HTML. By accessing and modifying this internal model you
@@ -123,6 +153,8 @@ protected:
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
     int             m_modified;
+    int             m_beatType;
+    TimeUnits       m_beatDuration;
 
 public:
     /// Constructor
@@ -539,6 +571,32 @@ public:
         returns @true.
     */
     bool is_editable();
+
+    /** Define the duration for one beat, for metronome and for methods that use
+        measure/beat parameters to define a location. This value is shared by all
+        scores contained in the document and can be changed at any time.
+        Changes while the score is being played back are ignored until playback finishes.
+        @param beatType A value from enum #EBeatDuration.
+        @param duration The duration (in Lomse Time Units) for one beat. You can use
+            a value from enum ENoteDuration casted to TimeUnits. This parameter is
+            required only when value for parameter `beatType` is `k_beat_specified`.
+            For all other values, if a non-zero value is specified, the value
+            will be used for the beat duration in scores without time signature.
+    */
+    void define_beat(int beatType, TimeUnits duration=0.0);
+
+    /** Return the beat type to use for scores in this document.
+
+        See define_beat()
+    */
+    inline int get_beat_type() { return m_beatType; }
+
+    /** Return the duration for beats to use in scores without time signature and when
+        beat type is `k_beat__specified`.
+
+        See define_beat()
+    */
+    inline TimeUnits get_beat_duration() { return m_beatDuration; }
 
     /** Return @true if the document has been modified (if it is dirty).
         This flag is automatically cleared when the graphic model for the

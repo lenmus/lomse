@@ -13,6 +13,7 @@
 - Added new methods for controlling scroll and visual tracking during playback, when using an external player. A new sample 'extplayer' has been added to the 'examples' folder.
 - The algorithm for auto-scroll has been improved.
 - Added Interactor method to customize visual tracking effects
+- Added Interactor method to define what is a beat. This allows, for example, to subdivide metronome or to decide which note duration corresponds to a metronome click. It is also usefull for methods that specify a location by using measure/beat parameters.
 - Fixes for removing Microsoft compiler warnings.
 
 
