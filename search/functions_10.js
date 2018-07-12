@@ -2,8 +2,8 @@ var searchData=
 [
   ['screen_5fpoint_5fto_5fmodel_5fpoint',['screen_point_to_model_point',['../classInteractor.html#a986167b680f97ad5914c69343a7d15c5',1,'Interactor']]],
   ['screen_5fpoint_5fto_5fpage_5fpoint',['screen_point_to_page_point',['../classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff',1,'Interactor']]],
-  ['scroll_5fto_5fmeasure',['scroll_to_measure',['../classInteractor.html#a5b6951dee5875a88b3e4b4a7be666ccd',1,'Interactor']]],
-  ['scroll_5fto_5fmeasure_5fif_5fnecessary',['scroll_to_measure_if_necessary',['../classInteractor.html#a39380d590f1d5d3a97ab7657524a9d61',1,'Interactor']]],
+  ['scroll_5fto_5fmeasure',['scroll_to_measure',['../classInteractor.html#a5b6951dee5875a88b3e4b4a7be666ccd',1,'Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0)'],['../classInteractor.html#a639f66bc540bcf59c9df2d872ef11bbb',1,'Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, TimeUnits location=0.0, int iInstr=0)']]],
+  ['scroll_5fto_5fmeasure_5fif_5fnecessary',['scroll_to_measure_if_necessary',['../classInteractor.html#a39380d590f1d5d3a97ab7657524a9d61',1,'Interactor::scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0)'],['../classInteractor.html#a0872e43398a5737ab79d507a9c846bcb',1,'Interactor::scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, TimeUnits location=0.0, int iInstr=0)']]],
   ['select_5fvoice',['select_voice',['../classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73',1,'Interactor']]],
   ['set_5fbox_5fto_5fdraw',['set_box_to_draw',['../classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309',1,'Interactor']]],
   ['set_5fcolor',['set_color',['../classTempoLine.html#ad6c771005a9093ade9fa0dd8ff195c92',1,'TempoLine::set_color()'],['../classPlaybackHighlight.html#a4c952ffd681b57f64fa70ff2361af73e',1,'PlaybackHighlight::set_color()']]],
