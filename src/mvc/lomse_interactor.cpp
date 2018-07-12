@@ -1133,6 +1133,58 @@ void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure,
+                                                TimeUnits location, int iInstr)
+{
+    MeasureLocator ml(iInstr, iMeasure, location);
+    do_move_tempo_line_and_scroll(scoreId, ml, k_only_scroll);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location,
+                                 int iInstr)
+{
+    MeasureLocator ml(iInstr, iMeasure, location);
+    do_move_tempo_line_and_scroll(scoreId, ml, k_only_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
+                                                         TimeUnits location, int iInstr)
+{
+    MeasureLocator ml(iInstr, iMeasure, location);
+    do_move_tempo_line_and_scroll(scoreId, ml, k_scroll_and_tempo_line);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::do_move_tempo_line_and_scroll(ImoId scoreId, const MeasureLocator& ml,
+                                               int mode)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, ml);
+            if (mode == k_only_tempo_line)
+                pGView->move_tempo_line(scoreId, timepos);
+            else if (mode == k_only_scroll)
+                pGView->change_viewport_if_necessary(scoreId, timepos);
+            else
+                pGView->move_tempo_line_and_change_viewport(scoreId, timepos);
+
+            pGView->draw_visual_tracking();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr)
 {
     do_move_tempo_line_and_scroll(scoreId, iMeasure, iBeat, iInstr, k_only_tempo_line);
@@ -1195,6 +1247,29 @@ void Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat, int i
             ImoScore* score = static_cast<ImoScore*>(pScore);
             TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, iMeasure,
                                                                  iBeat, iInstr);
+            pGView->change_viewport_to(scoreId, timepos);
+            pGView->draw_visual_tracking();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::scroll_to_measure(ImoId scoreId, int iMeasure, TimeUnits location,
+                                   int iInstr)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        ImoObj* pScore = nullptr;
+        if (SpDocument spDoc = m_wpDoc.lock())
+            pScore = spDoc->get_pointer_to_imo(scoreId);
+
+        if (pScore && pScore->is_score())
+        {
+            ImoScore* score = static_cast<ImoScore*>(pScore);
+            MeasureLocator ml(iInstr, iMeasure, location);
+            TimeUnits timepos = ScoreAlgorithms::get_timepos_for(score, ml);
             pGView->change_viewport_to(scoreId, timepos);
             pGView->draw_visual_tracking();
             request_window_update();

@@ -311,6 +311,23 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int i
 }
 
 //---------------------------------------------------------------------------------------
+TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, const MeasureLocator& ml)
+{
+    if (ml.iInstr < 0 || ml.iInstr >= pScore->get_num_instruments())
+        return 0.0;
+
+    ImoInstrument* pInstr = pScore->get_instrument(ml.iInstr);
+    ImMeasuresTable* pTable = pInstr->get_measures_table();
+    ImMeasuresTableEntry* measure = pTable->get_measure(ml.iMeasure);
+    TimeUnits timepos = 0.0f;
+    if (measure)
+    {
+        timepos = measure->get_timepos() + ml.location;
+    }
+    return timepos;
+}
+
+//---------------------------------------------------------------------------------------
 TimeUnits ScoreAlgorithms::get_beat_duration_for(ImoScore* pScore,
                                                  ImMeasuresTableEntry* measure)
 {

@@ -735,6 +735,27 @@ public:
     */
     virtual void scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0);
 
+    /** This method invokes Lomse auto-scrolling algorithm to determine if scroll is
+        necessary, and if that is the case, it will set a new origin for the
+        viewport so that requested score location is visible in the viewport.
+        @param scoreId ID of the score to which all other parameters refer to.
+        @param iMeasure The index to the desired measure. First measure in the
+            instrument, including a possible anacrusis start measure, is always measure 0.
+        @param location Time units from the start of the measure.
+        @param iInstr The index to the instrument to which the measure refers. If not
+            specified, iInstr 0 is assumed. Normally,
+            all instruments in the score use the same time signature. In these cases all
+            score parts have the same number of measures and iInstr is not needed.
+            But in polymetric music not all instruments use the same time signature and
+            this implies that the instruments have different number of measures; in these
+            cases the measure number alone is not enough for determining
+            the location.
+
+        See @ref viewport-concept
+    */
+    virtual void scroll_to_measure_if_necessary(ImoId scoreId, int iMeasure,
+                                                TimeUnits location=0.0, int iInstr=0);
+
     /** This method forces to set a new origin for the viewport so that requested score
         location is visible in the viewport.
         @param scoreId ID of the score to which all other parameters refer to.
@@ -753,6 +774,26 @@ public:
         See @ref viewport-concept
     */
     virtual void scroll_to_measure(ImoId scoreId, int iMeasure, int iBeat=0, int iInstr=0);
+
+    /** This method forces to set a new origin for the viewport so that requested score
+        location is visible in the viewport.
+        @param scoreId ID of the score to which all other parameters refer to.
+        @param iMeasure The index to the desired measure. First measure in the
+            instrument, including a possible anacrusis start measure, is always measure 0.
+        @param location Time units from the start of the measure.
+        @param iInstr The index to the instrument to which the measure refers. If not
+            specified, iInstr 0 is assumed. Normally,
+            all instruments in the score use the same time signature. In these cases all
+            score parts have the same number of measures and iInstr is not needed.
+            But in polymetric music not all instruments use the same time signature and
+            this implies that the instruments have different number of measures; in these
+            cases the measure number alone is not enough for determining
+            the location.
+
+        See @ref viewport-concept
+    */
+    virtual void scroll_to_measure(ImoId scoreId, int iMeasure, TimeUnits location=0.0,
+                                   int iInstr=0);
 
     //@}    //interface to GraphicView. Viewport / scroll
 
@@ -917,6 +958,20 @@ public:
     */
     virtual void move_tempo_line(ImoId scoreId, int iMeasure, int iBeat, int iInstr=0);
 
+    /** Move the tempo line to the given measure and relative location inside the measure.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param location Time units from the start of the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line(ImoId scoreId, int iMeasure, TimeUnits location,
+                                 int iInstr=0);
+
     /** Move the tempo line to the given measure and beat and change the viewport, if
         necessary, for ensuring that the requested measure/beat is visible.
         @param scoreId  Id. of the score to which all other parameters refer.
@@ -931,6 +986,22 @@ public:
     */
     virtual void move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
                                                          int iBeat, int iInstr=0);
+
+    /** Move the tempo line to the given measure and relative location inside the measure,
+        and change the viewport, if
+        necessary, for ensuring that the requested measure/beat is visible.
+        @param scoreId  Id. of the score to which all other parameters refer.
+        @param iMeasure Measure number (0..n) in instrument iInstr.
+        @param location Time units from the start of the measure.
+        @param iInstr Number of the instrument (0..m) to which the measures refer to.
+            Take into account that for polymetric music (music in which not all
+            instruments have the same time signature), the measure number is not an
+            absolute value, common to all the score instruments (score parts), but it
+            is relative to an instrument. For normal scores, just providing measure
+            number and location will do the job.
+    */
+    virtual void move_tempo_line_and_scroll_if_necessary(ImoId scoreId, int iMeasure,
+                                                         TimeUnits location, int iInstr=0);
 
     /** @param pSO This note or rest will be highlighted
         @todo Document Interactor::highlight_object    */
@@ -1519,6 +1590,7 @@ protected:
 
     //To select mode for do_move_tempo_line_and_scroll()
     enum { k_only_tempo_line=0, k_scroll_and_tempo_line, k_only_scroll };
+    void do_move_tempo_line_and_scroll(ImoId scoreId, const MeasureLocator& ml,int mode);
     void do_move_tempo_line_and_scroll(ImoId scoreId, int iMeasure, int iBeat,
                                        int iInstr, int mode);
 
