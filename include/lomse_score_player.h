@@ -341,18 +341,23 @@ protected:
     void thread_main(int nEvStart, int nEvEnd, bool fVisualTracking, long nMM,
                      Interactor* pInteractor);
     void end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor);
-    void set_new_beat_information(SoundEvent* pEvent, long* pMeasureDuration,
-                                  long* pMtrNumPulses);
+    void set_new_beat_information(SoundEvent* pEvent);
 
     //helper, for do_play()
     //-----------------------------------------------------------------------------------
-    long m_nMtrClickIntval;     //metronome interval duration, in milliseconds
-    long m_nMtrPulseDuration;   //a beat duration, in DeltaTime units
-    int m_beatType;             //beat definition to use
-    TimeUnits m_beatDuration;   //for no time signature or beatType == k_beat_specified
-    float m_conversionFactor;   //to convert TimeUnits (delta time) to millisecs
+    long m_nMtrPulseDuration;       //a beat duration, in Time Units
+    int m_beatType;                 //beat definition to use
+    TimeUnits m_beatDuration;       //for no time signature or beatType == k_beat_specified
+    float m_conversionFactor;       //to convert TimeUnits (delta time) to millisecs
+    long m_nPrevMeasureDuration;    //previous TS: measure duration, in TU
+    long m_nCurMeasureDuration;     //current TS: measure duration, in TU
+    long m_nPrevNumPulses;          //previous TS: number of metronome pulses per measure                                            //assume 4/4 time signature
+    long m_nCurNumPulses;           //current TS: number of metronome pulses per measure                                            //assume 4/4 time signature
+    long m_nPrevMtrIntval;          //previous TS: metronome click interval, in milliseconds
+    long m_nCurMtrIntval;           //current TS: metronome click interval, in milliseconds
+    long m_prevGuiBpm;              //last known value of metronome setting in GUI
 
-    inline long delta_to_milliseconds(long deltaTime) {
+    inline long time_units_to_milliseconds(long deltaTime) {
         return long( float(deltaTime) * m_conversionFactor );
     }
 
