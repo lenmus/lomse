@@ -144,6 +144,12 @@ public:
     static TimeUnits get_timepos_for(ImoScore* pScore, int iMeasure, int iBeat,
                                      int iInstr=0);
 
+    /** Return the time position for the specified measure locator.
+        @param pScore Pointer to the score to wich all other parameters refer.
+        @param ml The measure locator to convert.
+    */
+    static TimeUnits get_timepos_for(ImoScore* pScore, const MeasureLocator& ml);
+
 protected:
     static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,
                                              int instr, TimeUnits maxTime);

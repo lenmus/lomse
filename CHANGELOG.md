@@ -10,13 +10,18 @@
 
 ##### COMPATIBLE CHANGES
 
-- Added new methods for controlling scroll and visual tracking during playback, when using an external player. A new sample 'extplayer' has been added to the 'examples' folder.
 - The algorithm for auto-scroll has been improved.
+- During playback, when the time signature changes, metronome clicks
+  interval is now adjusted for maintaining notes duration equivalence.
+- Added new methods for controlling scroll and visual tracking during
+  playback, when using an external player. A new sample 'extplayer' has
+  been added to the 'examples' folder.
 - Added Interactor method to customize visual tracking effects
-- Added Interactor method to define what is a beat. This allows, for example, to subdivide metronome or to decide which note duration corresponds to a metronome click. It is also usefull for methods that specify a location by using measure/beat parameters.
+- Added Interactor method to define what is a beat. This allows, for
+  example, to subdivide metronome or to decide which note duration
+  corresponds to a metronome click. It is also usefull for methods that
+  specify a location by using measure/beat parameters.
 - Fixes for removing Microsoft compiler warnings.
-
-
 
 
 
@@ -25,7 +30,13 @@ Version [0.25.0] (29/Jun/2018)
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.24.0
 
-* Until now all visual tracking effects were named score highlight effects due to the fact that highlighting notes/rests was the first programmed visual effect. But, currently, Lomse supports more visual tracking effects and, for coherence and to use more descriptive names, all references to score highlight effects have been changed, when appropriate, to 'visual tracking' effects. In particular, the more important changes that will affect your code are:
+* Until now all visual tracking effects were named score highlight effects
+  due to the fact that highlighting notes/rests was the first programmed
+  visual effect. But, currently, Lomse supports more visual tracking
+  effects and, for coherence and to use more descriptive names, all
+  references to score highlight effects have been changed, when appropriate,
+  to 'visual tracking' effects. In particular, the more important changes
+  that will affect your code are:
 	- Class `EventScoreHighlight` changed to `EventVisualTracking`.
 	- Type `SpEventcoreHighlight` changed to `SpEventVisualTracking`.
 	- Enum item `k_highlight_event` changed to `k_tracking_event`.
@@ -37,12 +48,16 @@ Version [0.25.0] (29/Jun/2018)
 
 ##### COMPATIBLE CHANGES
 
-* Added method `Interactor::set_visual_tracking_mode(int mode)` for selecting the visual trackin effect to use. A new enum `EVisualTrackingMode` defines valid modes.
+* Added method `Interactor::set_visual_tracking_mode(int mode)` for
+  selecting the visual trackin effect to use. A new enum `EVisualTrackingMode`
+  defines valid modes.
 * Changes to allow extension '.musicxml' for uncompressed MusicXML files.
-* Added some initial code to deal with `global` elements in experimental MNX importer.
+* Added some initial code to deal with `global` elements in experimental
+  MNX importer.
 * Changes to allow compilers other than GCC and MSVC.
 * Several fixes to make Lomse buildable in macOS with clang compiler.
-* Several changes for trying to reduce or eliminate dependencies from other libraries. In particular:
+* Several changes for trying to reduce or eliminate dependencies from
+  other libraries. In particular:
 	- PR #144 Replaced boost::format with standard functions
 	- PR #146 Replaced boost::variant with union class
 
