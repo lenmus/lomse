@@ -3707,8 +3707,8 @@ protected:
     int m_winged;       //indicates whether the barline has winged extensions above and
     //below. The k_winged_none value indicates no wings.
 
-    ImoMeasureInfo* m_pMeasure;   //ptr to info for measure ending with this barline.
-                                  //nullptr when middle barline
+    ImoMeasureInfo* m_pMeasureInfo;     //ptr to info for measure ending with this barline.
+                                        //nullptr when middle barline
 
 
     friend class ImFactory;
@@ -3718,19 +3718,19 @@ protected:
         , m_fMiddle(false)
         , m_times(0)
         , m_winged(k_wings_none)
-        , m_pMeasure(nullptr)
+        , m_pMeasureInfo(nullptr)
     {
     }
 
 public:
-    virtual ~ImoBarline() {}
+    virtual ~ImoBarline();
 
     //getters
     inline int get_type() { return m_barlineType; }
     inline bool is_middle() { return m_fMiddle; }
     inline int get_num_repeats() { return m_times; }
     inline int get_winged() { return m_winged; }
-    inline ImoMeasureInfo* get_measure() { return m_pMeasure; }
+    inline ImoMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
 
 
     //setters
@@ -3738,7 +3738,7 @@ public:
     inline void set_middle(bool value) { m_fMiddle = value; }
     inline void set_num_repeats(int times) { m_times = times; }
     inline void set_winged(int wingsType) { m_winged = wingsType; }
-    inline void set_measure(ImoMeasureInfo* pEntry) { m_pMeasure = pEntry; }
+    inline void set_measure_info(ImoMeasureInfo* pEntry) { m_pMeasureInfo = pEntry; }
 
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }
@@ -4989,8 +4989,8 @@ protected:
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //from enum EBarlineLayout
     ImMeasuresTable*  m_pMeasures;
-    ImoMeasureInfo* m_pLastMeasure;     //for last measure if not closed or the score
-                                        //has no metric. Otherwise it will be nullptr.
+    ImoMeasureInfo* m_pLastMeasureInfo;     //for last measure if not closed or the score
+                                            //has no metric. Otherwise it will be nullptr.
 
     friend class ImFactory;
     ImoInstrument();
@@ -5017,7 +5017,7 @@ public:
     inline const string& get_instr_id() const { return m_partId; }
     inline int get_barline_layout() const { return m_barlineLayout; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
-    inline ImoMeasureInfo* get_las_measure() { return m_pLastMeasure; }
+    inline ImoMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -5028,7 +5028,7 @@ public:
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
-    inline void set_last_measure(ImoMeasureInfo* pInfo) { m_pLastMeasure = pInfo; }
+    inline void set_last_measure_info(ImoMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -5235,18 +5235,22 @@ class ImoMeasureInfo : public ImoSimpleObj
 protected:
     int m_mnxIndex;     //An optional integer index for the measure, as defined in NMX.
                         //The first measure has an index of 1.
+    int m_count;        //sequential integer index for the measure. The first measure
+                        //is counted as 1, even if anacrusis start.
     string m_number;    //An optional textual number to be displayed for the measure.
 
     friend class ImFactory;
     ImoMeasureInfo()
         : ImoSimpleObj(k_imo_measure_info)
-        , m_mnxIndex(1)
+        , m_mnxIndex(0)
+        , m_count(0)
         , m_number("")
     {
     }
-    ImoMeasureInfo(int index, const string& number)
+    ImoMeasureInfo(int index, int count, const string& number)
         : ImoSimpleObj(k_imo_measure_info)
         , m_mnxIndex(index)
+        , m_count(count)
         , m_number(number)
     {
     }
@@ -5256,16 +5260,18 @@ public:
     virtual ~ImoMeasureInfo() {}
 
     inline int get_index() const { return m_mnxIndex; }
+    inline int get_count() const { return m_count; }
     inline const string& get_number() { return m_number; }
 
 protected:
 
     friend class MxlAnalyser;
     friend class LdpAnalyser;
+    friend class ElementAnalyser;
     friend class MnxAnalyser;
     inline void set_index(int index) { m_mnxIndex = index; }
+    inline void set_count(int value) { m_count = value; }
     inline void set_number(const string& number) { m_number = number; }
-
 };
 
 //---------------------------------------------------------------------------------------
