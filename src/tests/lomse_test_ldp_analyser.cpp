@@ -10956,7 +10956,7 @@ SUITE(LdpAnalyserTest)
 
     TEST_FIXTURE(LdpAnalyserTestFixture, measures_001)
     {
-        //@001. Barline has info. No info in instrument
+        //@001. Score ends in barline. MeasuresInfo in Barline but not in Instrument
 
         stringstream errormsg;
         stringstream expected;
@@ -10997,8 +10997,7 @@ SUITE(LdpAnalyserTest)
         ImoMeasureInfo* pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_count() == 1 );
-//        cout << test_name();
-//        cout << ": count=" << pInfo->get_count() << endl;
+//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -11006,7 +11005,7 @@ SUITE(LdpAnalyserTest)
 
     TEST_FIXTURE(LdpAnalyserTestFixture, measures_002)
     {
-        //@002. Barline has info. Info in instrument
+        //@002. Score does not end in barline. MeasuresInfo in Barline and Instrument
 
         stringstream errormsg;
         stringstream expected;
@@ -11029,8 +11028,7 @@ SUITE(LdpAnalyserTest)
         ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_count() == 2 );
-//        cout << test_name();
-//        cout << ": count=" << pInfo->get_count() << endl;
+//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
 
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -11053,8 +11051,34 @@ SUITE(LdpAnalyserTest)
         pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
         CHECK( pInfo->get_count() == 1 );
-//        cout << test_name();
-//        cout << ": count=" << pInfo->get_count() << endl;
+//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, measures_003)
+    {
+        //@003. Empty score. No MeasuresInfo in Instrument
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0)"
+            "(instrument (musicData "
+            ")))"
+        );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;

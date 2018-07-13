@@ -5265,9 +5265,9 @@ public:
 
 protected:
 
-    friend class MxlAnalyser;
     friend class LdpAnalyser;
     friend class ElementAnalyser;
+    friend class MeasureMxlAnalyser;
     friend class MnxAnalyser;
     inline void set_index(int index) { m_mnxIndex = index; }
     inline void set_count(int value) { m_count = value; }

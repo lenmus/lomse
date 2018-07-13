@@ -249,6 +249,7 @@ protected:
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
     string          m_curPartId;        //Part Id being analysed
     string          m_curMeasureNum;    //Num of measure being analysed
+    int             m_measuresCounter;  //counter for measures in current instrument
 
     //inherited values
 //    int m_curStaff;
@@ -353,6 +354,9 @@ public:
     int create_index_for_sound(const string& id);
     ImoMidiInfo* get_latest_midi_info_for(const string& id);
     void set_latest_midi_info_for(const string& id, ImoMidiInfo* pMidi);
+
+    //for creating measures info
+    inline int increment_measures_counter() { return ++m_measuresCounter; }
 
     //interface for building relations
     void add_relation_info(ImoObj* pDto);

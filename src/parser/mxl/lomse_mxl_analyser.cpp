@@ -3377,7 +3377,7 @@ public:
             error_msg("<measure>: missing mandatory 'number' attribute. <measure> content will be ignored");
             return nullptr;
         }
-        m_pAnalyser->save_current_measure_num(num);
+        ImoMeasureInfo* pInfo = create_measure_info(num);
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
@@ -3414,7 +3414,7 @@ public:
         {
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
             if (pSO == nullptr || !pSO->is_barline())
-                add_barline(pMD);
+                add_barline(pInfo);
         }
 
         return pMD;
@@ -3422,7 +3422,19 @@ public:
 
 protected:
 
-    void add_barline(ImoMusicData* UNUSED(pMD))
+    ImoMeasureInfo* create_measure_info(const string& num)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoMeasureInfo* pInfo = static_cast<ImoMeasureInfo*>(
+                        ImFactory::inject(k_imo_measure_info, pDoc) );
+        int count = m_pAnalyser->increment_measures_counter();
+        pInfo->set_count(count);
+        pInfo->set_number(num);
+        m_pAnalyser->save_current_measure_num(num);
+        return pInfo;
+    }
+
+    void add_barline(ImoMeasureInfo* pInfo)
     {
         advance_timepos_if_required();
 
@@ -3430,6 +3442,7 @@ protected:
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
         pBarline->set_type(k_barline_simple);
+        pBarline->set_measure_info(pInfo);
         add_to_model(pBarline);
         m_pAnalyser->save_last_barline(pBarline);
     }
@@ -6715,6 +6728,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
+    , m_measuresCounter(0)
 {
     //populate the name to enum conversion map
     m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
@@ -6844,6 +6858,7 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     m_time = 0.0;
     m_maxTime = 0.0;
     save_last_barline(nullptr);
+    m_measuresCounter = 0;
 }
 
 //---------------------------------------------------------------------------------------
