@@ -66,7 +66,7 @@ public:
         : m_libraryScope(cout)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
-        , m_pDoc(NULL)
+        , m_pDoc(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -123,7 +123,7 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot != NULL );
+        CHECK( pRoot != nullptr );
         CHECK( pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc->get_num_content_items() == 0 );
@@ -161,7 +161,7 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot != NULL );
+        CHECK( pRoot != nullptr );
         CHECK( pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( doc.is_dirty() == true );
@@ -201,7 +201,7 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pRoot != NULL );
+//        CHECK( pRoot != nullptr );
 //        CHECK( pRoot->is_document() == true );
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        CHECK( doc.is_dirty() == true );
@@ -212,6 +212,174 @@ SUITE(MnxAnalyserTest)
 //
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
+
+
+    //@ measure -------------------------------------------------------------------------
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, measure_01)
+    {
+        //@01. MeasuresInfo in Barline but not in Instrument
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><cwmnx profile='standard'>"
+                "<part>"
+                    "<part-name>Piano</part-name>"
+                    "<measure>"
+                      "<directions>"
+                        "<staves number='1'/>"
+                        "<clef line='2' sign='G'/>"
+                      "</directions>"
+                      "<sequence staff='1'>"
+                        "<event value='/4'><note pitch='C4'/></event>"
+                        "<event value='/2'><note pitch='E4'/></event>"
+                      "</sequence>"
+                    "</measure>"
+                "</part>"
+            "</cwmnx></score>"
+            "</mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 4 );
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        CHECK( (*it)->is_clef() );
+        ++it;   //note c4
+        CHECK( (*it)->is_note() );
+        ++it;   //note e4
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        pInfo = pBarline->get_measure_info();
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, measure_02)
+    {
+        //@02. Two measures
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><cwmnx profile='standard'>"
+                "<part>"
+                    "<part-name>Piano</part-name>"
+                    "<measure number='1'>"
+                      "<directions>"
+                        "<staves number='1'/>"
+                        "<clef line='2' sign='G'/>"
+                      "</directions>"
+                      "<sequence staff='1'>"
+                        "<event value='/4'><note pitch='C4'/></event>"
+                        "<event value='/2'><note pitch='E4'/></event>"
+                      "</sequence>"
+                    "</measure>"
+                    "<measure number='2'>"
+                      "<sequence staff='1'>"
+                        "<event value='/4'><note pitch='C4'/></event>"
+                        "<event value='/2'><note pitch='E4'/></event>"
+                      "</sequence>"
+                    "</measure>"
+                "</part>"
+            "</cwmnx></score>"
+            "</mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 7 );
+        ImoObj::children_iterator it = pMD->begin();    //clef
+        CHECK( (*it)->is_clef() );
+        ++it;   //note c4
+        CHECK( (*it)->is_note() );
+        ++it;   //note e4
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
+        CHECK( pInfo1 != nullptr );
+        CHECK( pInfo1->count == 1 );
+        CHECK( pInfo1->number == "1" );
+//        cout << test_name() << ": count=" << pInfo1->count
+//             << ", number=" << pInfo1->number << endl;
+
+        //measure 2
+        ++it;   //note c4
+        CHECK( (*it)->is_note() );
+        ++it;   //note e4
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
+        CHECK( pInfo2 != nullptr );
+        CHECK( pInfo2->count == 2 );
+        CHECK( pInfo2->number == "2" );
+//        cout << test_name() << ": count=" << pInfo2->count
+//             << ", number=" << pInfo2->number << endl;
+
+        CHECK( pInfo1 != pInfo2 );
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
 
 
     //@ z. miscellaneous ----------------------------------------------------------------

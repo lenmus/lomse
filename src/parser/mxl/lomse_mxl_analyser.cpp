@@ -3370,7 +3370,7 @@ public:
         ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
         bool fSomethingAdded = false;
 
-        //attrb: number #REQUIRED
+        //attrb: number CDATA #REQUIRED
         string num = get_optional_string_attribute("number", "");
         if (num.empty())
         {
@@ -3378,6 +3378,17 @@ public:
             return nullptr;
         }
         TypeMeasureInfo* pInfo = create_measure_info(num);
+
+        //attrb: implicit %yes-no; #IMPLIED
+        //TODO
+
+        //attrb: non-controlling %yes-no; #IMPLIED
+        //'non-controlling': a barline not suitable for line breaks or page breaks.
+        //MusicXML uses this concept for dealing with multi-metrics
+        //TODO
+
+        //attrb: width %tenths; #IMPLIED
+        //TODO
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
@@ -6725,6 +6736,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
+    , m_curMeasureNum("")
     , m_measuresCounter(0)
 {
     //populate the name to enum conversion map

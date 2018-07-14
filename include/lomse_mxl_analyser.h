@@ -357,6 +357,7 @@ public:
 
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
+    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
 
     //interface for building relations
     void add_relation_info(ImoObj* pDto);
@@ -395,7 +396,6 @@ public:
     //information for reporting errors
     string get_element_info();
     inline void save_current_part_id(const string& id) { m_curPartId = id; }
-    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
     int get_line_number(XmlNode* node);
 
 

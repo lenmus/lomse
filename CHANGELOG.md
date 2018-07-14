@@ -21,6 +21,10 @@
   example, to subdivide metronome or to decide which note duration
   corresponds to a metronome click. It is also usefull for methods that
   specify a location by using measure/beat parameters.
+- The internal model now has information about measure attributes, such
+  as the displayed measure number. All importers now parse and
+  store this information.
+Deal with measure container in internal model
 - Fixes for removing Microsoft compiler warnings.
 
 

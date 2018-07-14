@@ -2299,15 +2299,6 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <!ELEMENT measure (attributes?,
-//@     (sequence | directions)* ) >
-////@ <!ATTLIST measure
-////@     number CDATA #REQUIRED
-////@     implicit %yes-no; #IMPLIED
-////@     non-controlling %yes-no; #IMPLIED
-////@     width %tenths; #IMPLIED
-////@ >
-//
 //@ <measure>
 //@Contexts:
 //@    global, part
@@ -2317,9 +2308,9 @@ protected:
 //@    One or more sequence elements (for measures within part elements only) = sequence+
 //@    Interpretation content
 //@Attributes:
-//@    number - an optional numeric index for the measure
-//@    barline - an optional ending barline type for the measure class MeasureMnxAnalyser : public MnxElementAnalyser
-//
+//@    index - an optional integer index for the measure
+//@    number - an optional textual number to be displayed for the measure
+//@    barline - an optional ending barline type for the measure //
 class MeasureMnxAnalyser : public MnxElementAnalyser
 {
 public:
@@ -2333,14 +2324,17 @@ public:
         ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
         bool fSomethingAdded = false;
 
-//        //attrb: number #REQUIRED
-//        string num = get_optional_string_attribute("number", "");
-//        if (num.empty())
-//        {
-//            error_msg("<measure>: missing mandatory 'number' attribute. <measure> content will be ignored");
-//            return nullptr;
-//        }
-//        m_pAnalyser->save_current_measure_num(num);
+        //attrb: number
+        string num = get_optional_string_attribute("number", "");
+        m_pAnalyser->save_current_measure_num(num);
+
+        TypeMeasureInfo* pInfo = create_measure_info(num);
+
+        //attrb: index
+        //TODO
+
+        //attrb: barline
+        //TODO
 
         // directions?
         analyse_optional("directions", pMD);
@@ -2359,7 +2353,7 @@ public:
         {
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
             if (pSO == nullptr || !pSO->is_barline())
-                add_barline(pMD);
+                add_barline(pInfo);
         }
 
         set_result(pMD);
@@ -2368,7 +2362,16 @@ public:
 
 protected:
 
-    void add_barline(ImoMusicData* UNUSED(pMD))
+    TypeMeasureInfo* create_measure_info(const string& num)
+    {
+        TypeMeasureInfo* pInfo = LOMSE_NEW TypeMeasureInfo();
+        pInfo->count = m_pAnalyser->increment_measures_counter();
+        pInfo->number = num;
+        m_pAnalyser->save_current_measure_num(num);
+        return pInfo;
+    }
+
+    void add_barline(TypeMeasureInfo* pInfo)
     {
         advance_timepos_if_required();
 
@@ -2376,6 +2379,7 @@ protected:
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
         pBarline->set_type(k_barline_simple);
+        pBarline->set_measure_info(pInfo);
         add_to_model(pBarline);
         m_pAnalyser->save_last_barline(pBarline);
     }
@@ -3390,6 +3394,8 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
+    , m_curMeasureNum("")
+    , m_measuresCounter(0)
 {
     //populate the name to enum conversion map
 //    m_NameToEnum["accordion-registration"] = k_mnx_tag_accordion_registration;
@@ -3536,6 +3542,7 @@ void MnxAnalyser::prepare_for_new_instrument_content()
     m_time = 0.0;
     m_maxTime = 0.0;
     save_last_barline(nullptr);
+    m_measuresCounter = 0;
 }
 
 //---------------------------------------------------------------------------------------

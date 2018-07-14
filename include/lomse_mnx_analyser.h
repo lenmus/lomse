@@ -272,6 +272,7 @@ protected:
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
     string          m_curPartId;        //Part Id being analysed
     string          m_curMeasureNum;    //Num of measure being analysed
+    int             m_measuresCounter;  //counter for measures in current instrument
 
     //current values
     int m_curStaff;
@@ -372,6 +373,10 @@ public:
     inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
     inline ImoNote* get_last_note() { return m_pLastNote; }
 
+    //for creating measures info
+    inline int increment_measures_counter() { return ++m_measuresCounter; }
+    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
     inline ImoBarline* get_last_barline() { return m_pLastBarline; }
@@ -425,7 +430,6 @@ public:
     //information for reporting errors
     string get_element_info();
     inline void save_current_part_id(const string& id) { m_curPartId = id; }
-    inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
     int get_line_number(XmlNode* node);
 
 
