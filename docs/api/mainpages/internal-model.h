@@ -218,7 +218,6 @@ The following diagram shows current hierarchy of objects. Those marked with '(A)
       |     +-- (ImoFigBassIntervalInfo)
       |     +-- ImoInstrGroup -- data in ImoInstrument(*)
       |     +-- ImoLineStyle -- data in ImoTextBox, ImoLine(*)
-      |     +-- ImoMeasureInfo -- data in ImoInstrument and ImoBarline
       |     +-- ImoPageInfo -- data in ImoDocument, ImoScore
       |     +-- ImoStaffInfo -- data in ImoInstrument(list)
       |     +-- ImoStyle - data in ImoStyles (std::map)

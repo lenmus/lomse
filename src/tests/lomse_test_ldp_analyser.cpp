@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -10994,10 +10994,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_simple );
         CHECK( pBarline->is_visible() );
-        ImoMeasureInfo* pInfo = pBarline->get_measure_info();
+        TypeMeasureInfo* pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_count() == 1 );
-//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -11025,10 +11025,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_count() == 2 );
-//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
+        CHECK( pInfo->count == 2 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
 
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -11050,8 +11050,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pBarline->is_visible() );
         pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_count() == 1 );
-//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -11077,7 +11077,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();

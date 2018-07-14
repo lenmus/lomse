@@ -3377,7 +3377,7 @@ public:
             error_msg("<measure>: missing mandatory 'number' attribute. <measure> content will be ignored");
             return nullptr;
         }
-        ImoMeasureInfo* pInfo = create_measure_info(num);
+        TypeMeasureInfo* pInfo = create_measure_info(num);
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
@@ -3422,19 +3422,16 @@ public:
 
 protected:
 
-    ImoMeasureInfo* create_measure_info(const string& num)
+    TypeMeasureInfo* create_measure_info(const string& num)
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoMeasureInfo* pInfo = static_cast<ImoMeasureInfo*>(
-                        ImFactory::inject(k_imo_measure_info, pDoc) );
-        int count = m_pAnalyser->increment_measures_counter();
-        pInfo->set_count(count);
-        pInfo->set_number(num);
+        TypeMeasureInfo* pInfo = LOMSE_NEW TypeMeasureInfo();
+        pInfo->count = m_pAnalyser->increment_measures_counter();
+        pInfo->number = num;
         m_pAnalyser->save_current_measure_num(num);
         return pInfo;
     }
 
-    void add_barline(ImoMeasureInfo* pInfo)
+    void add_barline(TypeMeasureInfo* pInfo)
     {
         advance_timepos_if_required();
 

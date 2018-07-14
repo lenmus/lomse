@@ -1796,7 +1796,7 @@ SUITE(MxlAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo == nullptr );
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
@@ -1814,8 +1814,8 @@ SUITE(MxlAnalyserTest)
         CHECK( pBarline->is_visible() );
         pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_count() == 1 );
-//        cout << test_name() << ": count=" << pInfo->get_count() << endl;
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1859,7 +1859,7 @@ SUITE(MxlAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo == nullptr );
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
@@ -1875,12 +1875,12 @@ SUITE(MxlAnalyserTest)
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_simple );
         CHECK( pBarline->is_visible() );
-        ImoMeasureInfo* pInfo1 = pBarline->get_measure_info();
+        TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
         CHECK( pInfo1 != nullptr );
-        CHECK( pInfo1->get_count() == 1 );
-        CHECK( pInfo1->get_number() == "1" );
-//        cout << test_name() << ": count=" << pInfo1->get_count()
-//             << ", number=" << pInfo1->get_number() << endl;
+        CHECK( pInfo1->count == 1 );
+        CHECK( pInfo1->number == "1" );
+//        cout << test_name() << ": count=" << pInfo1->count
+//             << ", number=" << pInfo1->number << endl;
 
         //measure 2
         ++it;   //note a4
@@ -1893,12 +1893,12 @@ SUITE(MxlAnalyserTest)
         CHECK( pBarline != nullptr );
         CHECK( pBarline->get_type() == k_barline_simple );
         CHECK( pBarline->is_visible() );
-        ImoMeasureInfo* pInfo2 = pBarline->get_measure_info();
+        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
         CHECK( pInfo2 != nullptr );
-        CHECK( pInfo2->get_count() == 2 );
-        CHECK( pInfo2->get_number() == "2" );
-//        cout << test_name() << ": count=" << pInfo2->get_count()
-//             << ", number=" << pInfo2->get_number() << endl;
+        CHECK( pInfo2->count == 2 );
+        CHECK( pInfo2->number == "2" );
+//        cout << test_name() << ": count=" << pInfo2->count
+//             << ", number=" << pInfo2->number << endl;
 
         CHECK( pInfo1 != pInfo2 );
 

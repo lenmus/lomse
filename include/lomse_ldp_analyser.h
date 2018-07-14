@@ -51,7 +51,7 @@ class LdpAnalyser;
 class ImoObj;
 class ImoNote;
 class ImoRest;
-class ImoMeasureInfo;
+class TypeMeasureInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ protected:
 
     //saved values
     ImoNote* m_pLastNote;
-    ImoMeasureInfo* m_pMeasureInfo;
+    TypeMeasureInfo* m_pMeasureInfo;
 
     //other
     bool    m_fInstrIdRequired;     //Id required in instruments
@@ -324,8 +324,8 @@ public:
     inline bool is_instr_id_required() { return m_fInstrIdRequired; }
 
     //methods for creating measures info
-    inline ImoMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
-    inline void set_measure_info(ImoMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
+    inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
     inline int increment_measures_counter() { return ++m_measuresCounter; }
 
     //static methods for general use

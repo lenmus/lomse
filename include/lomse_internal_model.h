@@ -99,7 +99,6 @@ class ImoList;
 class ImoListItem;
 class ImoLyrics;
 class ImoLyricsTextInfo;
-class ImoMeasureInfo;
 class ImoMultiColumn;
 class ImoMusicData;
 class ImoNote;
@@ -561,7 +560,6 @@ enum EImoObjType
     k_imo_instr_group,
     k_imo_line_style,
     k_imo_lyrics_text_info,
-    k_imo_measure_info,
     k_imo_midi_info,
     k_imo_page_info,
     k_imo_sound_info,
@@ -1008,6 +1006,52 @@ protected:
 
 
 //=======================================================================================
+// Auxiliary data containers. They are composite data types used to encapsulate data
+// for the IM, but they are not nodes in the IM tree.
+//
+// They are just passive data structures (= Plain old data (POD), = Pasive Data Structure
+// (PDS), = record), that is a collections of field values, without using object-oriented
+// features. The C++ compiler guarantees that there will be no "magic" going on in the
+// structure: for example hidden pointers to vtables, offsets that get applied to
+// the address when it is cast to other types (at least if the target's Type too),
+// constructors, or destructors. Roughly speaking, a type is a Type when the only things
+// in it are built-in types and combinations of them. The result is something that
+// "acts like" a C type.
+//
+// This 'Type' classes are auxiliary and they are not nodes in the IM tree.
+//=======================================================================================
+
+//---------------------------------------------------------------------------------------
+/** %TypeMeasureInfo contains the data associated to a measure, such as its
+    displayed number.
+
+    %TypeMeasureInfo objects are not part of the IM tree. Each %TypeMeasureInfo object
+    is directly stored in the ImoBarline object that closes the measure. And
+    in ImoInstrument if last measure is not closed or if the score has no metric.
+*/
+class TypeMeasureInfo
+{
+public:
+    int index;      ///> An optional integer index for the measure, as defined in NMX.
+                    ///> The first measure has an index of 1.
+    int count;      ///> sequential integer index for the measure. The first measure
+                    ///> is counted as 1, even if anacrusis start.
+    string number;  ///> An optional textual number to be displayed for the measure.
+
+
+    TypeMeasureInfo() : index(0), count(0), number("") {}
+    TypeMeasureInfo(int index, int count, const string& number)
+        : index(index)
+        , count(count)
+        , number(number)
+    {
+    }
+
+    ~TypeMeasureInfo() {}
+};
+
+
+//=======================================================================================
 // standard interface for ImoObj objects containing an ImoSounds child
 //=======================================================================================
 #define LOMSE_DECLARE_IMOSOUNDS_INTERFACE                               \
@@ -1278,7 +1322,6 @@ public:
     inline bool is_lyric() { return m_objtype == k_imo_lyric; }
     inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
     inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
-    inline bool is_measure_info() { return m_objtype == k_imo_measure_info; }
     inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
     inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
     inline bool is_music_data() { return m_objtype == k_imo_music_data; }
@@ -3707,7 +3750,7 @@ protected:
     int m_winged;       //indicates whether the barline has winged extensions above and
     //below. The k_winged_none value indicates no wings.
 
-    ImoMeasureInfo* m_pMeasureInfo;     //ptr to info for measure ending with this barline.
+    TypeMeasureInfo* m_pMeasureInfo;    //ptr to info for measure ending with this barline.
                                         //nullptr when middle barline
 
 
@@ -3730,7 +3773,7 @@ public:
     inline bool is_middle() { return m_fMiddle; }
     inline int get_num_repeats() { return m_times; }
     inline int get_winged() { return m_winged; }
-    inline ImoMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+    inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
 
 
     //setters
@@ -3738,7 +3781,7 @@ public:
     inline void set_middle(bool value) { m_fMiddle = value; }
     inline void set_num_repeats(int times) { m_times = times; }
     inline void set_winged(int wingsType) { m_winged = wingsType; }
-    inline void set_measure_info(ImoMeasureInfo* pEntry) { m_pMeasureInfo = pEntry; }
+    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
 
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }
@@ -4989,7 +5032,7 @@ protected:
     std::list<ImoStaffInfo*> m_staves;
     int             m_barlineLayout;        //from enum EBarlineLayout
     ImMeasuresTable*  m_pMeasures;
-    ImoMeasureInfo* m_pLastMeasureInfo;     //for last measure if not closed or the score
+    TypeMeasureInfo*  m_pLastMeasureInfo;   //for last measure if not closed or the score
                                             //has no metric. Otherwise it will be nullptr.
 
     friend class ImFactory;
@@ -5017,7 +5060,7 @@ public:
     inline const string& get_instr_id() const { return m_partId; }
     inline int get_barline_layout() const { return m_barlineLayout; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
-    inline ImoMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
+    inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -5028,7 +5071,7 @@ public:
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
-    inline void set_last_measure_info(ImoMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
+    inline void set_last_measure_info(TypeMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -5220,58 +5263,6 @@ public:
 protected:
     friend class BlockLevelCreatorApi;
 
-};
-
-//---------------------------------------------------------------------------------------
-/** %ImoMeasureInfo represents the data associated to a measure, such as its
-    displayed number.
-
-    %ImoMeasureInfo objects are not part of the IM tree. Each %ImoMeasureInfo object
-    is directly stored in the ImoBarline object that closes the measure. And
-    in ImoInstrument if last measure is not closed or if the score has no metric.
-*/
-class ImoMeasureInfo : public ImoSimpleObj
-{
-protected:
-    int m_mnxIndex;     //An optional integer index for the measure, as defined in NMX.
-                        //The first measure has an index of 1.
-    int m_count;        //sequential integer index for the measure. The first measure
-                        //is counted as 1, even if anacrusis start.
-    string m_number;    //An optional textual number to be displayed for the measure.
-
-    friend class ImFactory;
-    ImoMeasureInfo()
-        : ImoSimpleObj(k_imo_measure_info)
-        , m_mnxIndex(0)
-        , m_count(0)
-        , m_number("")
-    {
-    }
-    ImoMeasureInfo(int index, int count, const string& number)
-        : ImoSimpleObj(k_imo_measure_info)
-        , m_mnxIndex(index)
-        , m_count(count)
-        , m_number(number)
-    {
-    }
-
-public:
-
-    virtual ~ImoMeasureInfo() {}
-
-    inline int get_index() const { return m_mnxIndex; }
-    inline int get_count() const { return m_count; }
-    inline const string& get_number() { return m_number; }
-
-protected:
-
-    friend class LdpAnalyser;
-    friend class ElementAnalyser;
-    friend class MeasureMxlAnalyser;
-    friend class MnxAnalyser;
-    inline void set_index(int index) { m_mnxIndex = index; }
-    inline void set_count(int value) { m_count = value; }
-    inline void set_number(const string& number) { m_number = number; }
 };
 
 //---------------------------------------------------------------------------------------

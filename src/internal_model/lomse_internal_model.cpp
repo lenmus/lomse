@@ -489,7 +489,6 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_instr_group] = "instr-group";
         m_TypeToName[k_imo_line_style] = "line-style";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
-        m_TypeToName[k_imo_measure_info] = "measure-info";
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";

@@ -990,7 +990,7 @@ protected:
 
     void add_measure_info(ImoBarline* pBarline)
     {
-        ImoMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+        TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
         if (pInfo)  //In Unit Tests it could not exist
         {
             pBarline->set_measure_info(pInfo);
@@ -3604,7 +3604,7 @@ protected:
         ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
         if (pInstr != nullptr)  //in Unit Tests there could be no instrument
         {
-            ImoMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+            TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
             pInstr->set_last_measure_info(pInfo);
             m_pAnalyser->set_measure_info(nullptr);
         }
@@ -6321,15 +6321,12 @@ void ElementAnalyser::add_to_model(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void ElementAnalyser::create_measure_info_if_necessary()
 {
-    ImoMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+    TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
     if (pInfo == nullptr)
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        pInfo = static_cast<ImoMeasureInfo*>(
-                    ImFactory::inject(k_imo_measure_info, pDoc) );
+        pInfo = LOMSE_NEW TypeMeasureInfo();
         m_pAnalyser->set_measure_info(pInfo);
-        int count = m_pAnalyser->increment_measures_counter();
-        pInfo->set_count(count);
+        pInfo->count = m_pAnalyser->increment_measures_counter();
     }
 }
 
