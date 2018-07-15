@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -292,7 +292,7 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
                                             time);
     m_pBoxSystem = m_pGModel->get_system_box(iSystem);
     TimeGridTable* pTimeGrid = m_pBoxSystem->get_time_grid_table();
-    bounds.x = pTimeGrid->get_x_for_time(time);
+    bounds.x = pTimeGrid->get_x_for_note_rest_at_time(time);
 #endif
 
     //set caret

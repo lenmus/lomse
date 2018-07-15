@@ -765,9 +765,12 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
+
+    //@1xx. TimeGridTable::get_x_for_note_rest_at_time() --------------------------------
+
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_100)
     {
-        //@100. get_x_for_time() returns 0 if timepos lower than first entry
+        //@100. Returns 0 if timepos lower than first entry
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -784,18 +787,18 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 64.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( pGrid->get_x_for_time(-1.0) == 0.0 );
+        CHECK( pGrid->get_x_for_note_rest_at_time(-1.0) == 0.0 );
 
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=-1.0) = " << pGrid->get_x_for_time(-1.0) << endl;
+//        cout << "x(t=-1.0) = " << pGrid->get_x_for_note_rest_at_time(-1.0) << endl;
 
         delete pIntor;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_101)
     {
-        //@101. get_x_for_time(). Get non-timed position when there are notes/rests
+        //@101. Get note position when no more staffobjs at that timepos.
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -814,17 +817,17 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(128.0, false), 5309.59f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(192.0), 6439.38477f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(128.0, false) << endl;
+//        cout << "x(t=192.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(192.0) << endl;
 
         delete pIntor;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_102)
     {
-        //@102. get_x_for_time(). Get note aligned position when it is the only position.
+        //@102. Get note position when two staffobjs at that timepos
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -843,17 +846,17 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(192.0), 6439.38477f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 5381.58984f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=192.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(192.0) << endl;
+//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
 
         delete pIntor;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_103)
     {
-        //@103. get_x_for_time(). Get note aligned position when there are non-timed.
+        //@103. Get note position when many staffobjs at that timepos
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -862,7 +865,7 @@ SUITE(GraphicModelTest)
         spDoc->from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(key e)(time 2 4)"
             "(n c4 q)(r q)(barline simple)"
-            "(n e4 q)(n e4 e)(n g4 e)(barline simple)"
+            "(clef F4)(n e4 q)(n e4 e)(n g4 e)(barline simple)"
             ")))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
@@ -872,18 +875,17 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(128.0), 5381.58984f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 6154.58984f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(128.0) << endl;
+//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
 
         delete pIntor;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_104)
     {
-        //@104. get_x_for_time(). Timepos between two table values, event aligned case
-        //@     What to do? Interpolate?
+        //@104. Interpolated value for timepos between two table values
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -902,18 +904,17 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(160.0), 6439.38477f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(160.0), 5910.48731f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_time(160.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(160.0) << endl;
 
         delete pIntor;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_105)
     {
-        //@105. get_x_for_time(). Timepos between two table values, non-timed case
-        //@     What to do? Interpolate?
+        //@105. Timepos greater than maximum entry. Return last staffobj position
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -932,18 +933,48 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(160.0), 6439.38477f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(260.0), 7672.18213f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_time(160.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(260.0) << endl;
 
         delete pIntor;
     }
 
-    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_106)
+
+    //@2xx. TimeGridTable::get_x_for_staffobj_at_time() ---------------------------------
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_200)
     {
-        //@106. get_x_for_time(). Timepos greater than maximum entry
-        //@     Should return system right position?
+        //@200. Returns 0 if timepos lower than first entry
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple)"
+            ")))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 64.0);
+        TimeGridTable* pGrid = pBSys->get_time_grid_table();
+
+        CHECK( pGrid->get_x_for_staffobj_at_time(-1.0) == 0.0 );
+
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=-1.0) = " << pGrid->get_x_for_staffobj_at_time(-1.0) << endl;
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_201)
+    {
+        //@201. Get first staffobj position when more staffobjs at that timepos
 
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
@@ -962,10 +993,68 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_time(260.0), 7672.18213f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(128.0), 5309.59f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_time(260.0) << endl;
+//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0, false) << endl;
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_202)
+    {
+        //@202. Interpolated value for timepos between two table values
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(key e)(time 2 4)"
+            "(n c4 q)(r q)(barline simple)"
+            "(n e4 q)(n e4 e)(n g4 e)(barline simple)"
+            ")))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
+        TimeGridTable* pGrid = pBSys->get_time_grid_table();
+
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(160.0), 5910.48731f) );
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(160.0) << endl;
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_203)
+    {
+        //@203. Timepos greater than maximum entry. Return last staffobj position
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(key e)(time 2 4)"
+            "(n c4 q)(r q)(barline simple)"
+            "(n e4 q)(n e4 e)(n g4 e)(barline simple)"
+            ")))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
+        TimeGridTable* pGrid = pBSys->get_time_grid_table();
+
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(260.0), 7672.18213f) );
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(260.0) << endl;
 
         delete pIntor;
     }
@@ -973,40 +1062,6 @@ SUITE(GraphicModelTest)
 //    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_002)
 //    {
 //        //@002. TimeGridTable for multimetric test score
-//
-//        MyDoorway doorway;
-//        LibraryScope libraryScope(cout, &doorway);
-//        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-//        SpDocument spDoc( new Document(libraryScope) );
-//        spDoc->from_file(m_scores_path + "00205-multimetric.lmd",
-//                         Document::k_format_lmd );
-//        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-//            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
-//        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
-//        GraphicModel* pGModel = pIntor->get_graphic_model();
-//        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
-//
-//        //First system
-//        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 64.0);
-//        TimeGridTable* pGrid = pBSys->get_time_grid_table();
-//
-//        cout << test_name() << endl;
-//        cout << pGrid->dump();
-//        cout << "x(t=0) = " << pGrid->get_x_for_time(0.0) << endl;
-//        cout << "x(t=128) = " << pGrid->get_x_for_time(128.0) << endl;
-//        cout << "x(t=192) = " << pGrid->get_x_for_time(192.0) << endl;
-//
-//        //second system
-//        pBSys = pGModel->get_system_for(scoreId, 400.0);
-//        pGrid = pBSys->get_time_grid_table();
-//
-//        cout << test_name() << endl;
-//        cout << pGrid->dump();
-//        cout << "x(t=0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(0.0) << endl;
-//        cout << "x(t=128) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(128.0) << endl;
-//        cout << "x(t=192) = " << setw(14) << setprecision(5) << pGrid->get_x_for_time(192.0) << endl;
-//
-//        delete pIntor;
 //    }
 
 };
