@@ -583,5 +583,55 @@ For instance, here are the objects involved in modeling some relationships:
 
 
 @todo Finish this by describing the ImoAuxRelObjs (e.g. Lyrics)
+
+
+
+@subsection internal-model-scores-measures-intro  How measures are modelled
+<!---------------------------------------------------------------------------------->
+
+Initially, the idea of using a *measure container* to hold the staff objects was considered. But measures only exist when time signatures and barlines exist, and Lomse should be able to represent multi-metric and non-measured music.
+
+The approach followed in Lomse has been to represent the music as a linearized sequence of staff objects (notes, rests, etc.) with explicit barline objects. As a measure extends from one barline to the next one, both representations (with or without measures containers) are equivalent: given the barlines it is easy to deduce measure limits in data which has no such measure containers; and given the measure containers, it is easy to produce a linearized sequence with only barlines. So both approaches are equivalent. But by using a measure container, Lomse will have to force a special case for music that has no measures. Therefore, the decision was not to include measure containers in the internal model. But as not all barlines defines the boundaries for measures (e.g. intermediate barlines) it is necessary to identify these barlines.
+
+Nevertheless, as the concept of measure is very important in most common Western music, there are attributes (e.g. the displayed measure number) that have to be captured when they exist. In Lomse, the barlines contain the measure attributes for the measure that is ending in that barline, such as the displayed measure number. For accessing to this information use method `ImoBarline::get_measure_info`.
+
+And for non-measured scores or when the score is incomplete and the last measure is not finished in a barline, the attributes for this last incomplete measure, if exist, are stored in the ImoInstrument object, and are accessible by method `ImoInstrument::get_last_measure_info()`. Notice that this method will return @nullptr when the score finishes in barline.
+
+
+@subsubsection internal-model-scores-measures-needs  Tables related to measures
+<!---------------------------------------------------------------------------------->
+
+For any method based on measure location information (e.g., for scrolling to measure/beat or for visual tracking effects during payback), it is necessary to solve two needs:
+
+a) The first one is to convert the measure location data into timepos data. This information is inmutable for an internal model the conversion method can be provided by the internal model.
+
+b) And the second one is for converting timepos data into spacial position in the graphic model and vice-versa (e.g., to determine the timepos for a mouse position). As this information is specific for each graphic model, the conversion method must be provided by the graphic model.
+
+For solving these two needs there exist two objects: ImMeasuresTable and TimeGridTable objects.
+
+
+<b>The ImMeasuresTable object</b>
+<!---------------------------------------------------------------------------------->
+
+For solving the need to convert measure location data (e.g. measure/beat) into timepos data, the internal model contains a measures table. In fact, it is necessary to maintain a table per instrument, as for multi-metric music the number of measures is different in each score part (instrument).
+
+The table is contained and managed by class ImMeasuresTable. Each ImoInstrument object contains an instance, with the specific information for that instrument. For single-metric scores, the tables in all instruments will contain the same data, as the number of measures will be the same for all instruments. Each table is accesible by method ImoInstrument::get_measures_table();
+
+ImMeasuresTable objects are created by the model builder (class ModelBuilder) once the ColSatffObjs object is created. 
+
+
+
+<b>The TimeGridTable object</b>
+<!---------------------------------------------------------------------------------->
+
+For solving the need to convert timepos data into spacial position in the graphic model and vice-versa, the TimeGridTable object is responsible for supplying all occupied timepos and their positions.
+
+There exist a TimeGridTable object for each system. It is owned by the GmoBoxSystem object, which provide access to it. Each %TimeGridTable object contains a table with the relation timepos <-> x-position for all positions currently occupied by staff objects in the system. The last position is normally the position of the barline at the end of the system. The system provides the y-position and the table the x-postion. 
+
+
+
+*/
+
+
 */
 
