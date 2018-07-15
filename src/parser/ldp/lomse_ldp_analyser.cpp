@@ -131,6 +131,7 @@ protected:
 
     //building the model
     void add_to_model(ImoObj* pImo);
+    void create_measure_info_if_necessary();
 
     //auxiliary
     inline ImoId get_node_id() { return m_pAnalysedNode->get_id(); }
@@ -955,6 +956,7 @@ public:
         error_if_more_elements();
 
         add_to_model(pBarline);
+        add_measure_info(pBarline);
     }
 
 protected:
@@ -984,6 +986,16 @@ protected:
         }
 
         return type;
+    }
+
+    void add_measure_info(ImoBarline* pBarline)
+    {
+        TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+        if (pInfo)  //In Unit Tests it could not exist
+        {
+            pBarline->set_measure_info(pInfo);
+            m_pAnalyser->set_measure_info(nullptr);
+        }
     }
 
 };
@@ -2923,7 +2935,7 @@ public:
         while (analyse_optional(k_staff, pInstrument));
 
         //FIX: For adding space for lyrics
-        m_pAnalyser->m_pCurInstr = pInstrument;
+        m_pAnalyser->set_current_instrument(pInstrument);
         if (!m_pAnalyser->is_instr_id_required())
         {
             pInstrument->reserve_space_for_lyrics(0, m_pAnalyser->m_extraMarginSpace);
@@ -3582,6 +3594,20 @@ public:
         }
 
         add_to_model(pMD);
+        add_last_measure_info_if_required();
+    }
+
+protected:
+
+    void add_last_measure_info_if_required()
+    {
+        ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+        if (pInstr != nullptr)  //in Unit Tests there could be no instrument
+        {
+            TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+            pInstr->set_last_measure_info(pInfo);
+            m_pAnalyser->set_measure_info(nullptr);
+        }
     }
 
 };
@@ -6283,13 +6309,26 @@ void ElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 //---------------------------------------------------------------------------------------
 void ElementAnalyser::add_to_model(ImoObj* pImo)
 {
+    if (pImo->is_staffobj())
+        create_measure_info_if_necessary();
+
     int ldpNodeType = m_pAnalysedNode->get_type();
     Linker linker( m_pAnalyser->get_document_being_analysed() );
     ImoObj* pObj = linker.add_child_to_model(m_pAnchor, pImo, ldpNodeType);
     m_pAnalysedNode->set_imo(pObj);
 }
 
-
+//---------------------------------------------------------------------------------------
+void ElementAnalyser::create_measure_info_if_necessary()
+{
+    TypeMeasureInfo* pInfo = m_pAnalyser->get_measure_info();
+    if (pInfo == nullptr)
+    {
+        pInfo = LOMSE_NEW TypeMeasureInfo();
+        m_pAnalyser->set_measure_info(pInfo);
+        pInfo->count = m_pAnalyser->increment_measures_counter();
+    }
+}
 
 
 //=======================================================================================
@@ -6316,7 +6355,10 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(nullptr)
+    , m_pMeasureInfo(nullptr)
     , m_fInstrIdRequired(false)
+    , m_measuresCounter(0)
+    , m_pCurInstr(nullptr)
     , m_extraMarginSpace(0.0f)
 {
 }
@@ -6336,6 +6378,9 @@ void LdpAnalyser::reset_defaults_for_instrument()
     m_curStaff = 0;
     m_curVoice = 1;
     m_pLastNote = nullptr;
+    m_pMeasureInfo = nullptr;
+    m_pCurInstr = nullptr;
+    m_measuresCounter = 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6433,7 +6478,7 @@ void LdpAnalyser::add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric)
 
     int iStaff = pNote->get_staff();
     bool fAbove = pLyric->get_placement() == k_placement_above;
-    ImoInstrument* pInstr = m_pCurInstr;
+    ImoInstrument* pInstr = get_current_instrument();
     LUnits space = 400.0f;  //4mm per lyrics line
     if (fAbove)
     {

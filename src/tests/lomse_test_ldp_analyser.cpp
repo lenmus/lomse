@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -681,25 +681,10 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Barline_HasId)
+    TEST_FIXTURE(LdpAnalyserTestFixture, barline_012)
     {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "Line 0. " << endl;
-//        parser.parse_text("(barline#7 double)");
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
-//        CHECK( pBarline != nullptr );
-//        CHECK( pBarline->get_id() == 7 );
-//
-//        delete tree->get_root();
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
+        //@012. Barline has id
+
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         parser.parse_text("(barline#7 double)");
@@ -10962,6 +10947,138 @@ SUITE(LdpAnalyserTest)
         CHECK( pBody->get_num_items() == 1 );
         pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    //@ measures ------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, measures_001)
+    {
+        //@001. Score ends in barline. MeasuresInfo in Barline but not in Instrument
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0)"
+            "(instrument (musicData "
+            "(clef G)(key D)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            ")))"
+        );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr->get_last_measure_info() == nullptr );
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();  //clef
+        CHECK( (*it)->is_clef() );
+        ++it;   //key
+        CHECK( (*it)->is_key_signature() );
+        ++it;   //TS
+        CHECK( (*it)->is_time_signature() );
+        ++it;   //n c4
+        CHECK( (*it)->is_note() );
+        ++it;   //n eq
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        TypeMeasureInfo* pInfo = pBarline->get_measure_info();
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, measures_002)
+    {
+        //@002. Score does not end in barline. MeasuresInfo in Barline and Instrument
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0)"
+            "(instrument (musicData "
+            "(clef G)(key D)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n g4 q)"
+            ")))"
+        );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->count == 2 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
+
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();  //clef
+        CHECK( (*it)->is_clef() );
+        ++it;   //key
+        CHECK( (*it)->is_key_signature() );
+        ++it;   //TS
+        CHECK( (*it)->is_time_signature() );
+        ++it;   //n c4
+        CHECK( (*it)->is_note() );
+        ++it;   //n eq
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        pInfo = pBarline->get_measure_info();
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo->count == 1 );
+//        cout << test_name() << ": count=" << pInfo->count << endl;
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, measures_003)
+    {
+        //@003. Empty score. No MeasuresInfo in Instrument
+
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        parser.parse_text("(score (vers 2.0)"
+            "(instrument (musicData "
+            ")))"
+        );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;

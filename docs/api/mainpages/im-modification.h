@@ -1,11 +1,3 @@
-/*
-
-See:  https://github.com/0xfe/vexflow/wiki/The-VexFlow-Tutorial
-
-For images: use LenMus at full screen and Zoom out six times
-
-*/
-
 ﻿/**
 @page page-im-modification The low level edition API
 

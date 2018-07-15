@@ -51,6 +51,7 @@ class LdpAnalyser;
 class ImoObj;
 class ImoNote;
 class ImoRest;
+class TypeMeasureInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -213,13 +214,15 @@ protected:
 
     //saved values
     ImoNote* m_pLastNote;
+    TypeMeasureInfo* m_pMeasureInfo;
 
     //other
     bool    m_fInstrIdRequired;     //Id required in instruments
+    int     m_measuresCounter;
 
     //FIX: for lyrics space
-    friend class InstrumentAnalyser;
     ImoInstrument*  m_pCurInstr;    //current instrument being analysed
+    friend class InstrumentAnalyser;
     LUnits  m_extraMarginSpace;     //extra margin for next instrument
 
 public:
@@ -255,6 +258,9 @@ public:
 
     inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
     inline ImoNote* get_last_note() { return m_pLastNote; }
+
+    inline void set_current_instrument(ImoInstrument* pInstr) { m_pCurInstr = pInstr; }
+    inline ImoInstrument* get_current_instrument() { return m_pCurInstr; }
 
     //interface for building relations
     void add_relation_info(ImoObj* pDto);
@@ -314,8 +320,13 @@ public:
     inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
     //methods related to analysing instruments
-    void require_instr_id() { m_fInstrIdRequired = true; }
-    bool is_instr_id_required() { return m_fInstrIdRequired; }
+    inline void require_instr_id() { m_fInstrIdRequired = true; }
+    inline bool is_instr_id_required() { return m_fInstrIdRequired; }
+
+    //methods for creating measures info
+    inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
+    inline int increment_measures_counter() { return ++m_measuresCounter; }
 
     //static methods for general use
     static int ldp_name_to_key_type(const string& value);

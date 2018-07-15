@@ -3370,14 +3370,25 @@ public:
         ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
         bool fSomethingAdded = false;
 
-        //attrb: number #REQUIRED
+        //attrb: number CDATA #REQUIRED
         string num = get_optional_string_attribute("number", "");
         if (num.empty())
         {
             error_msg("<measure>: missing mandatory 'number' attribute. <measure> content will be ignored");
             return nullptr;
         }
-        m_pAnalyser->save_current_measure_num(num);
+        TypeMeasureInfo* pInfo = create_measure_info(num);
+
+        //attrb: implicit %yes-no; #IMPLIED
+        //TODO
+
+        //attrb: non-controlling %yes-no; #IMPLIED
+        //'non-controlling': a barline not suitable for line breaks or page breaks.
+        //MusicXML uses this concept for dealing with multi-metrics
+        //TODO
+
+        //attrb: width %tenths; #IMPLIED
+        //TODO
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
@@ -3414,7 +3425,7 @@ public:
         {
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
             if (pSO == nullptr || !pSO->is_barline())
-                add_barline(pMD);
+                add_barline(pInfo);
         }
 
         return pMD;
@@ -3422,7 +3433,16 @@ public:
 
 protected:
 
-    void add_barline(ImoMusicData* UNUSED(pMD))
+    TypeMeasureInfo* create_measure_info(const string& num)
+    {
+        TypeMeasureInfo* pInfo = LOMSE_NEW TypeMeasureInfo();
+        pInfo->count = m_pAnalyser->increment_measures_counter();
+        pInfo->number = num;
+        m_pAnalyser->save_current_measure_num(num);
+        return pInfo;
+    }
+
+    void add_barline(TypeMeasureInfo* pInfo)
     {
         advance_timepos_if_required();
 
@@ -3430,6 +3450,7 @@ protected:
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
         pBarline->set_type(k_barline_simple);
+        pBarline->set_measure_info(pInfo);
         add_to_model(pBarline);
         m_pAnalyser->save_last_barline(pBarline);
     }
@@ -6715,6 +6736,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
+    , m_curMeasureNum("")
+    , m_measuresCounter(0)
 {
     //populate the name to enum conversion map
     m_NameToEnum["accordion-registration"] = k_mxl_tag_accordion_registration;
@@ -6844,6 +6867,7 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     m_time = 0.0;
     m_maxTime = 0.0;
     save_last_barline(nullptr);
+    m_measuresCounter = 0;
 }
 
 //---------------------------------------------------------------------------------------

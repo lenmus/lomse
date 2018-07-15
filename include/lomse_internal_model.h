@@ -1006,6 +1006,52 @@ protected:
 
 
 //=======================================================================================
+// Auxiliary data containers. They are composite data types used to encapsulate data
+// for the IM, but they are not nodes in the IM tree.
+//
+// They are just passive data structures (= Plain old data (POD), = Pasive Data Structure
+// (PDS), = record), that is a collections of field values, without using object-oriented
+// features. The C++ compiler guarantees that there will be no "magic" going on in the
+// structure: for example hidden pointers to vtables, offsets that get applied to
+// the address when it is cast to other types (at least if the target's Type too),
+// constructors, or destructors. Roughly speaking, a type is a Type when the only things
+// in it are built-in types and combinations of them. The result is something that
+// "acts like" a C type.
+//
+// This 'Type' classes are auxiliary and they are not nodes in the IM tree.
+//=======================================================================================
+
+//---------------------------------------------------------------------------------------
+/** %TypeMeasureInfo contains the data associated to a measure, such as its
+    displayed number.
+
+    %TypeMeasureInfo objects are not part of the IM tree. Each %TypeMeasureInfo object
+    is directly stored in the ImoBarline object that closes the measure. And
+    in ImoInstrument if last measure is not closed or if the score has no metric.
+*/
+class TypeMeasureInfo
+{
+public:
+    int index;      ///> An optional integer index for the measure, as defined in NMX.
+                    ///> The first measure has an index of 1.
+    int count;      ///> sequential integer index for the measure. The first measure
+                    ///> is counted as 1, even if anacrusis start.
+    string number;  ///> An optional textual number to be displayed for the measure.
+
+
+    TypeMeasureInfo() : index(0), count(0), number("") {}
+    TypeMeasureInfo(int index, int count, const string& number)
+        : index(index)
+        , count(count)
+        , number(number)
+    {
+    }
+
+    ~TypeMeasureInfo() {}
+};
+
+
+//=======================================================================================
 // standard interface for ImoObj objects containing an ImoSounds child
 //=======================================================================================
 #define LOMSE_DECLARE_IMOSOUNDS_INTERFACE                               \
@@ -1198,477 +1244,144 @@ public:
     }
 
     //groups
-    inline bool is_dto()
-    {
-        return m_objtype > k_imo_dto
-               && m_objtype < k_imo_dto_last;
-    }
-    inline bool is_simpleobj()
-    {
-        return m_objtype > k_imo_simpleobj
-               && m_objtype < k_imo_simpleobj_last;
-    }
-    inline bool is_collection()
-    {
-        return m_objtype > k_imo_collection
-               && m_objtype < k_imo_collection_last;
-    }
-    inline bool is_reldataobj()
-    {
-        return m_objtype > k_imo_reldataobj
-               && m_objtype < k_imo_reldataobj_last;
-    }
-    inline bool is_containerobj()
-    {
-        return m_objtype > k_imo_containerobj
-               && m_objtype < k_imo_containerobj_last;
-    }
-    inline bool is_contentobj()
-    {
-        return m_objtype > k_imo_contentobj
-               && m_objtype < k_imo_contentobj_last;
-    }
-    inline bool is_scoreobj()
-    {
-        return m_objtype > k_imo_scoreobj
-               && m_objtype < k_imo_scoreobj_last;
-    }
-    inline bool is_staffobj()
-    {
-        return m_objtype > k_imo_staffobj
-               && m_objtype < k_imo_staffobj_last;
-    }
-    inline bool is_auxobj()
-    {
-        return m_objtype > k_imo_auxobj
-               && m_objtype < k_imo_auxobj_last;
-    }
-    inline bool is_relobj()
-    {
-        return m_objtype > k_imo_relobj
-               && m_objtype < k_imo_relobj_last;
-    }
-    inline bool is_auxrelobj()
-    {
-        return m_objtype > k_imo_auxrelobj
-               && m_objtype < k_imo_auxobj_last;
-    }
-    inline bool is_block_level_obj()
-    {
-        return m_objtype > k_imo_block_level_obj
-               && m_objtype < k_imo_block_level_obj_last;
-    }
-    inline bool is_blocks_container()
-    {
-        return m_objtype > k_imo_blocks_container
-               && m_objtype < k_imo_blocks_container_last;
-    }
-    inline bool is_inlines_container()
-    {
-        return m_objtype > k_imo_inlines_container
-               && m_objtype < k_imo_inlines_container_last;
-    }
-    inline bool is_box_inline()
-    {
-        return m_objtype > k_imo_box_inline
-               && m_objtype < k_imo_box_inline_last;
-    }
-    inline bool is_inline_level_obj()
-    {
-        return m_objtype > k_imo_inline_level_obj
-               && m_objtype < k_imo_inline_level_obj_last;
-    }
-    inline bool is_articulation()
-    {
-        return m_objtype > k_imo_articulation
-               && m_objtype < k_imo_articulation_last;
-    }
+    inline bool is_dto() { return m_objtype > k_imo_dto
+                                  && m_objtype < k_imo_dto_last; }
+    inline bool is_simpleobj() { return m_objtype > k_imo_simpleobj
+                                        && m_objtype < k_imo_simpleobj_last; }
+    inline bool is_collection() { return m_objtype > k_imo_collection
+                                         && m_objtype < k_imo_collection_last; }
+    inline bool is_reldataobj() { return m_objtype > k_imo_reldataobj
+                                         && m_objtype < k_imo_reldataobj_last; }
+    inline bool is_containerobj() { return m_objtype > k_imo_containerobj
+                                           && m_objtype < k_imo_containerobj_last; }
+    inline bool is_contentobj() { return m_objtype > k_imo_contentobj
+                                         && m_objtype < k_imo_contentobj_last; }
+    inline bool is_scoreobj() { return m_objtype > k_imo_scoreobj
+                                       && m_objtype < k_imo_scoreobj_last; }
+    inline bool is_staffobj() { return m_objtype > k_imo_staffobj
+                                       && m_objtype < k_imo_staffobj_last; }
+    inline bool is_auxobj() { return m_objtype > k_imo_auxobj
+                                     && m_objtype < k_imo_auxobj_last; }
+    inline bool is_relobj() { return m_objtype > k_imo_relobj
+                                     && m_objtype < k_imo_relobj_last; }
+    inline bool is_auxrelobj() { return m_objtype > k_imo_auxrelobj
+                                        && m_objtype < k_imo_auxobj_last; }
+    inline bool is_block_level_obj() { return m_objtype > k_imo_block_level_obj
+                                              && m_objtype < k_imo_block_level_obj_last; }
+    inline bool is_blocks_container() { return m_objtype > k_imo_blocks_container
+                                               && m_objtype < k_imo_blocks_container_last; }
+    inline bool is_inlines_container() { return m_objtype > k_imo_inlines_container
+                                                && m_objtype < k_imo_inlines_container_last; }
+    inline bool is_box_inline() { return m_objtype > k_imo_box_inline
+                                         && m_objtype < k_imo_box_inline_last; }
+    inline bool is_inline_level_obj() { return m_objtype > k_imo_inline_level_obj
+                                               && m_objtype < k_imo_inline_level_obj_last; }
+    inline bool is_articulation() { return m_objtype > k_imo_articulation
+                                           && m_objtype < k_imo_articulation_last; }
 
     //items
-    inline bool is_anonymous_block()
-    {
-        return m_objtype == k_imo_anonymous_block;
-    }
-    inline bool is_articulation_symbol()
-    {
-        return m_objtype == k_imo_articulation_symbol;
-    }
-    inline bool is_articulation_line()
-    {
-        return m_objtype == k_imo_articulation_line;
-    }
-    inline bool is_attachments()
-    {
-        return m_objtype == k_imo_attachments;
-    }
-    inline bool is_barline()
-    {
-        return m_objtype == k_imo_barline;
-    }
-    inline bool is_beam()
-    {
-        return m_objtype == k_imo_beam;
-    }
-    inline bool is_beam_data()
-    {
-        return m_objtype == k_imo_beam_data;
-    }
-    inline bool is_beam_dto()
-    {
-        return m_objtype == k_imo_beam_dto;
-    }
-    inline bool is_bezier_info()
-    {
-        return m_objtype == k_imo_bezier_info;
-    }
-    inline bool is_border_dto()
-    {
-        return m_objtype == k_imo_border_dto;
-    }
-    inline bool is_button()
-    {
-        return m_objtype == k_imo_button;
-    }
-    inline bool is_chord()
-    {
-        return m_objtype == k_imo_chord;
-    }
-    inline bool is_clef()
-    {
-        return m_objtype == k_imo_clef;
-    }
-    inline bool is_color_dto()
-    {
-        return m_objtype == k_imo_color_dto;
-    }
-    inline bool is_content()
-    {
-        return m_objtype == k_imo_content;
-    }
-    inline bool is_control()
-    {
-        return m_objtype >= k_imo_control
-               && m_objtype < k_imo_control_end;
-    }
-    inline bool is_cursor_info()
-    {
-        return m_objtype == k_imo_cursor_info;
-    }
-    inline bool is_direction()
-    {
-        return m_objtype == k_imo_direction;
-    }
-    inline bool is_document()
-    {
-        return m_objtype == k_imo_document;
-    }
-    inline bool is_dynamic()
-    {
-        return m_objtype == k_imo_dynamic;
-    }
-    inline bool is_dynamics_mark()
-    {
-        return m_objtype == k_imo_dynamics_mark;
-    }
-    inline bool is_fermata()
-    {
-        return m_objtype == k_imo_fermata;
-    }
-    inline bool is_figured_bass()
-    {
-        return m_objtype == k_imo_figured_bass;
-    }
-    inline bool is_figured_bass_info()
-    {
-        return m_objtype == k_imo_figured_bass_info;
-    }
-    inline bool is_font_style_dto()
-    {
-        return m_objtype == k_imo_font_style_dto;
-    }
-    inline bool is_go_back_fwd()
-    {
-        return m_objtype == k_imo_go_back_fwd;
-    }
+    inline bool is_anonymous_block() { return m_objtype == k_imo_anonymous_block; }
+    inline bool is_articulation_symbol() { return m_objtype == k_imo_articulation_symbol; }
+    inline bool is_articulation_line() { return m_objtype == k_imo_articulation_line; }
+    inline bool is_attachments() { return m_objtype == k_imo_attachments; }
+    inline bool is_barline() { return m_objtype == k_imo_barline; }
+    inline bool is_beam() { return m_objtype == k_imo_beam; }
+    inline bool is_beam_data() { return m_objtype == k_imo_beam_data; }
+    inline bool is_beam_dto() { return m_objtype == k_imo_beam_dto; }
+    inline bool is_bezier_info() { return m_objtype == k_imo_bezier_info; }
+    inline bool is_border_dto() { return m_objtype == k_imo_border_dto; }
+    inline bool is_button() { return m_objtype == k_imo_button; }
+    inline bool is_chord() { return m_objtype == k_imo_chord; }
+    inline bool is_clef() { return m_objtype == k_imo_clef; }
+    inline bool is_color_dto() { return m_objtype == k_imo_color_dto; }
+    inline bool is_content() { return m_objtype == k_imo_content; }
+    inline bool is_control() { return m_objtype >= k_imo_control
+                                      && m_objtype < k_imo_control_end; }
+    inline bool is_cursor_info() { return m_objtype == k_imo_cursor_info; }
+    inline bool is_direction() { return m_objtype == k_imo_direction; }
+    inline bool is_document() { return m_objtype == k_imo_document; }
+    inline bool is_dynamic() { return m_objtype == k_imo_dynamic; }
+    inline bool is_dynamics_mark() { return m_objtype == k_imo_dynamics_mark; }
+    inline bool is_fermata() { return m_objtype == k_imo_fermata; }
+    inline bool is_figured_bass() { return m_objtype == k_imo_figured_bass; }
+    inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
+    inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
+    inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
     bool is_gap();      ///a rest representing a goFwd element
-    inline bool is_heading()
-    {
-        return m_objtype == k_imo_heading;
-    }
-    inline bool is_image()
-    {
-        return m_objtype == k_imo_image;
-    }
-    inline bool is_inline_wrapper()
-    {
-        return m_objtype == k_imo_inline_wrapper;
-    }
-    inline bool is_instrument()
-    {
-        return m_objtype == k_imo_instrument;
-    }
-    inline bool is_instr_group()
-    {
-        return m_objtype == k_imo_instr_group;
-    }
-    inline bool is_key_signature()
-    {
-        return m_objtype == k_imo_key_signature;
-    }
-    inline bool is_line()
-    {
-        return m_objtype == k_imo_line;
-    }
-    inline bool is_line_style()
-    {
-        return m_objtype == k_imo_line_style;
-    }
-    inline bool is_link()
-    {
-        return m_objtype == k_imo_link;
-    }
-    inline bool is_list()
-    {
-        return m_objtype == k_imo_list;
-    }
-    inline bool is_listitem()
-    {
-        return m_objtype == k_imo_listitem;
-    }
-    inline bool is_lyric()
-    {
-        return m_objtype == k_imo_lyric;
-    }
-    inline bool is_lyrics_text_info()
-    {
-        return m_objtype == k_imo_lyrics_text_info;
-    }
-    inline bool is_metronome_mark()
-    {
-        return m_objtype == k_imo_metronome_mark;
-    }
-    inline bool is_midi_info()
-    {
-        return m_objtype == k_imo_midi_info;
-    }
-    inline bool is_multicolumn()
-    {
-        return m_objtype == k_imo_multicolumn;
-    }
-    inline bool is_music_data()
-    {
-        return m_objtype == k_imo_music_data;
-    }
-    inline bool is_note()
-    {
-        return m_objtype == k_imo_note;
-    }
-    inline bool is_note_rest()
-    {
-        return m_objtype == k_imo_note
-               || m_objtype == k_imo_rest;
-    }
-    inline bool is_option()
-    {
-        return m_objtype == k_imo_option;
-    }
-    inline bool is_ornament()
-    {
-        return m_objtype == k_imo_ornament;
-    }
-    inline bool is_page_info()
-    {
-        return m_objtype == k_imo_page_info;
-    }
-    inline bool is_paragraph()
-    {
-        return m_objtype == k_imo_para;
-    }
-    inline bool is_param_info()
-    {
-        return m_objtype == k_imo_param_info;
-    }
-    inline bool is_point_dto()
-    {
-        return m_objtype == k_imo_point_dto;
-    }
-    inline bool is_rest()
-    {
-        return m_objtype == k_imo_rest;
-    }
-    inline bool is_relations()
-    {
-        return m_objtype == k_imo_relations;
-    }
-    inline bool is_repetition_mark()
-    {
-        return m_objtype == k_imo_text_repetition_mark
-               || m_objtype == k_imo_symbol_repetition_mark;
-    }
-    inline bool is_score()
-    {
-        return m_objtype == k_imo_score;
-    }
-    inline bool is_score_line()
-    {
-        return m_objtype == k_imo_score_line;
-    }
-    inline bool is_score_player()
-    {
-        return m_objtype == k_imo_score_player;
-    }
-    inline bool is_score_text()
-    {
-        return m_objtype == k_imo_score_text;
-    }
-    inline bool is_score_title()
-    {
-        return m_objtype == k_imo_score_title;
-    }
-    inline bool is_size_info()
-    {
-        return m_objtype == k_imo_size_dto;
-    }
-    inline bool is_slur()
-    {
-        return m_objtype == k_imo_slur;
-    }
-    inline bool is_slur_data()
-    {
-        return m_objtype == k_imo_slur_data;
-    }
-    inline bool is_slur_dto()
-    {
-        return m_objtype == k_imo_slur_dto;
-    }
-    inline bool is_sound_change()
-    {
-        return m_objtype == k_imo_sound_change;
-    }
-    inline bool is_sound_info()
-    {
-        return m_objtype == k_imo_sound_info;
-    }
-    inline bool is_spacer()
-    {
-        return m_objtype == k_imo_spacer;
-    }
-    inline bool is_staff_info()
-    {
-        return m_objtype == k_imo_staff_info;
-    }
-    inline bool is_style()
-    {
-        return m_objtype == k_imo_style;
-    }
-    inline bool is_styles()
-    {
-        return m_objtype == k_imo_styles;
-    }
-    inline bool is_symbol_repetition_mark()
-    {
-        return m_objtype == k_imo_symbol_repetition_mark;
-    }
-    inline bool is_system_break()
-    {
-        return m_objtype == k_imo_system_break;
-    }
-    inline bool is_system_info()
-    {
-        return m_objtype == k_imo_system_info;
-    }
-    inline bool is_table()
-    {
-        return m_objtype == k_imo_table;
-    }
-    inline bool is_table_cell()
-    {
-        return m_objtype == k_imo_table_cell;
-    }
-    inline bool is_table_body()
-    {
-        return m_objtype == k_imo_table_body;
-    }
-    inline bool is_table_head()
-    {
-        return m_objtype == k_imo_table_head;
-    }
-    inline bool is_table_row()
-    {
-        return m_objtype == k_imo_table_row;
-    }
-    inline bool is_technical()
-    {
-        return m_objtype == k_imo_technical;
-    }
-    inline bool is_text_info()
-    {
-        return m_objtype == k_imo_text_info;
-    }
-    inline bool is_text_item()
-    {
-        return m_objtype == k_imo_text_item;
-    }
-    inline bool is_text_style()
-    {
-        return m_objtype == k_imo_text_style;
-    }
-    inline bool is_textblock_info()
-    {
-        return m_objtype == k_imo_textblock_info;
-    }
-    inline bool is_text_box()
-    {
-        return m_objtype == k_imo_text_box;
-    }
-    inline bool is_text_repetition_mark()
-    {
-        return m_objtype == k_imo_text_repetition_mark;
-    }
-    inline bool is_tie()
-    {
-        return m_objtype == k_imo_tie;
-    }
-    inline bool is_tie_data()
-    {
-        return m_objtype == k_imo_tie_data;
-    }
-    inline bool is_tie_dto()
-    {
-        return m_objtype == k_imo_tie_dto;
-    }
-    inline bool is_time_signature()
-    {
-        return m_objtype == k_imo_time_signature;
-    }
-    inline bool is_time_modification_dto()
-    {
-        return m_objtype == k_imo_time_modification_dto;
-    }
-    inline bool is_tuplet()
-    {
-        return m_objtype == k_imo_tuplet;
-    }
-    inline bool is_tuplet_dto()
-    {
-        return m_objtype == k_imo_tuplet_dto;
-    }
-    inline bool is_volta_bracket()
-    {
-        return m_objtype == k_imo_volta_bracket;
-    }
-    inline bool is_volta_bracket_dto()
-    {
-        return m_objtype == k_imo_volta_bracket_dto;
-    }
+    inline bool is_heading() { return m_objtype == k_imo_heading; }
+    inline bool is_image() { return m_objtype == k_imo_image; }
+    inline bool is_inline_wrapper() { return m_objtype == k_imo_inline_wrapper; }
+    inline bool is_instrument() { return m_objtype == k_imo_instrument; }
+    inline bool is_instr_group() { return m_objtype == k_imo_instr_group; }
+    inline bool is_key_signature() { return m_objtype == k_imo_key_signature; }
+    inline bool is_line() { return m_objtype == k_imo_line; }
+    inline bool is_line_style() { return m_objtype == k_imo_line_style; }
+    inline bool is_link() { return m_objtype == k_imo_link; }
+    inline bool is_list() { return m_objtype == k_imo_list; }
+    inline bool is_listitem() { return m_objtype == k_imo_listitem; }
+    inline bool is_lyric() { return m_objtype == k_imo_lyric; }
+    inline bool is_lyrics_text_info() { return m_objtype == k_imo_lyrics_text_info; }
+    inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
+    inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
+    inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
+    inline bool is_music_data() { return m_objtype == k_imo_music_data; }
+    inline bool is_note() { return m_objtype == k_imo_note; }
+    inline bool is_note_rest() { return m_objtype == k_imo_note
+               || m_objtype == k_imo_rest; }
+    inline bool is_option() { return m_objtype == k_imo_option; }
+    inline bool is_ornament() { return m_objtype == k_imo_ornament; }
+    inline bool is_page_info() { return m_objtype == k_imo_page_info; }
+    inline bool is_paragraph() { return m_objtype == k_imo_para; }
+    inline bool is_param_info() { return m_objtype == k_imo_param_info; }
+    inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
+    inline bool is_rest() { return m_objtype == k_imo_rest; }
+    inline bool is_relations() { return m_objtype == k_imo_relations; }
+    inline bool is_repetition_mark() { return m_objtype == k_imo_text_repetition_mark
+               || m_objtype == k_imo_symbol_repetition_mark; }
+    inline bool is_score() { return m_objtype == k_imo_score; }
+    inline bool is_score_line() { return m_objtype == k_imo_score_line; }
+    inline bool is_score_player() { return m_objtype == k_imo_score_player; }
+    inline bool is_score_text() { return m_objtype == k_imo_score_text; }
+    inline bool is_score_title() { return m_objtype == k_imo_score_title; }
+    inline bool is_size_info() { return m_objtype == k_imo_size_dto; }
+    inline bool is_slur() { return m_objtype == k_imo_slur; }
+    inline bool is_slur_data() { return m_objtype == k_imo_slur_data; }
+    inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
+    inline bool is_sound_change() { return m_objtype == k_imo_sound_change; }
+    inline bool is_sound_info() { return m_objtype == k_imo_sound_info; }
+    inline bool is_spacer() { return m_objtype == k_imo_spacer; }
+    inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
+    inline bool is_style() { return m_objtype == k_imo_style; }
+    inline bool is_styles() { return m_objtype == k_imo_styles; }
+    inline bool is_symbol_repetition_mark() { return m_objtype == k_imo_symbol_repetition_mark; }
+    inline bool is_system_break() { return m_objtype == k_imo_system_break; }
+    inline bool is_system_info() { return m_objtype == k_imo_system_info; }
+    inline bool is_table() { return m_objtype == k_imo_table; }
+    inline bool is_table_cell() { return m_objtype == k_imo_table_cell; }
+    inline bool is_table_body() { return m_objtype == k_imo_table_body; }
+    inline bool is_table_head() { return m_objtype == k_imo_table_head; }
+    inline bool is_table_row() { return m_objtype == k_imo_table_row; }
+    inline bool is_technical() { return m_objtype == k_imo_technical; }
+    inline bool is_text_info() { return m_objtype == k_imo_text_info; }
+    inline bool is_text_item() { return m_objtype == k_imo_text_item; }
+    inline bool is_text_style() { return m_objtype == k_imo_text_style; }
+    inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
+    inline bool is_text_box() { return m_objtype == k_imo_text_box; }
+    inline bool is_text_repetition_mark() { return m_objtype == k_imo_text_repetition_mark; }
+    inline bool is_tie() { return m_objtype == k_imo_tie; }
+    inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
+    inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
+    inline bool is_time_signature() { return m_objtype == k_imo_time_signature; }
+    inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
+    inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
+    inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
+    inline bool is_volta_bracket() { return m_objtype == k_imo_volta_bracket; }
+    inline bool is_volta_bracket_dto() { return m_objtype == k_imo_volta_bracket_dto; }
 
     //special checkers
-    inline bool is_mouse_over_generator()
-    {
-        return    m_objtype == k_imo_link
+    inline bool is_mouse_over_generator() { return   m_objtype == k_imo_link
                   || m_objtype == k_imo_button
-                  ;
-    }
+                  ; }
 
 protected:
     void visit_children(BaseVisitor& v);
@@ -4020,6 +3733,8 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** %ImoBarline represents a barline for an instrument.
+*/
 class ImoBarline : public ImoStaffObj
 {
 protected:
@@ -4035,7 +3750,7 @@ protected:
     int m_winged;       //indicates whether the barline has winged extensions above and
     //below. The k_winged_none value indicates no wings.
 
-    ImMeasuresTableEntry* m_pMeasure;   //ptr to measure ending with this barline.
+    TypeMeasureInfo* m_pMeasureInfo;    //ptr to info for measure ending with this barline.
                                         //nullptr when middle barline
 
 
@@ -4046,19 +3761,19 @@ protected:
         , m_fMiddle(false)
         , m_times(0)
         , m_winged(k_wings_none)
-        , m_pMeasure(nullptr)
+        , m_pMeasureInfo(nullptr)
     {
     }
 
 public:
-    virtual ~ImoBarline() {}
+    virtual ~ImoBarline();
 
     //getters
     inline int get_type() { return m_barlineType; }
     inline bool is_middle() { return m_fMiddle; }
     inline int get_num_repeats() { return m_times; }
     inline int get_winged() { return m_winged; }
-    inline ImMeasuresTableEntry* get_measure() { return m_pMeasure; }
+    inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
 
 
     //setters
@@ -4066,7 +3781,7 @@ public:
     inline void set_middle(bool value) { m_fMiddle = value; }
     inline void set_num_repeats(int times) { m_times = times; }
     inline void set_winged(int wingsType) { m_winged = wingsType; }
-    inline void set_measure(ImMeasuresTableEntry* pEntry) { m_pMeasure = pEntry; }
+    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
 
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }
@@ -4125,13 +3840,9 @@ protected:
 public:
     virtual ~ImoTextBox() {}
 
-    inline ImoTextBlockInfo* get_box_info()
-    {
-        return &m_box;
+    inline ImoTextBlockInfo* get_box_info() { return &m_box;
     }
-    inline ImoLineStyle* get_anchor_line_info()
-    {
-        return &m_line;
+    inline ImoLineStyle* get_anchor_line_info() { return &m_line;
     }
     inline bool has_anchor_line()
     {
@@ -5032,9 +4743,7 @@ public:
     {
         return m_text.get_text();
     }
-    inline ImoTextInfo* get_text_info()
-    {
-        return &m_text;
+    inline ImoTextInfo* get_text_info() { return &m_text;
     }
     string& get_language();
     inline void set_language(const string& lang)
@@ -5310,6 +5019,9 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** %ImoInstrument represents the musical content and attributes for an score-part
+    ('instrument', in lomse terminology).
+*/
 class ImoInstrument : public ImoContainerObj
 {
 protected:
@@ -5318,8 +5030,10 @@ protected:
     ImoScoreText    m_abbrev;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
-    int             m_barlineLayout;        //enum EBarlineLayout
+    int             m_barlineLayout;        //from enum EBarlineLayout
     ImMeasuresTable*  m_pMeasures;
+    TypeMeasureInfo*  m_pLastMeasureInfo;   //for last measure if not closed or the score
+                                            //has no metric. Otherwise it will be nullptr.
 
     friend class ImFactory;
     ImoInstrument();
@@ -5346,6 +5060,7 @@ public:
     inline const string& get_instr_id() const { return m_partId; }
     inline int get_barline_layout() const { return m_barlineLayout; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
+    inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -5356,6 +5071,7 @@ public:
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
     inline void set_barline_layout(int value) { m_barlineLayout = value; }
+    inline void set_last_measure_info(TypeMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -5488,9 +5204,7 @@ public:
         delete m_pStyle;
     }
 
-    inline ImoLineStyle* get_line_info()
-    {
-        return m_pStyle;
+    inline ImoLineStyle* get_line_info() { return m_pStyle;
     }
     inline void set_line_style(ImoLineStyle* pStyle)
     {
@@ -6270,18 +5984,12 @@ public:
 
     //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
-    inline ImoSystemInfo* get_first_system_info()
-    {
-        return &m_systemInfoFirst;
+    inline ImoSystemInfo* get_first_system_info() { return &m_systemInfoFirst;
     }
-    inline ImoSystemInfo* get_other_system_info()
-    {
-        return &m_systemInfoOther;
+    inline ImoSystemInfo* get_other_system_info() { return &m_systemInfoOther;
     }
     void add_page_info(ImoPageInfo* pPI);
-    inline ImoPageInfo* get_page_info()
-    {
-        return &m_pageInfo;
+    inline ImoPageInfo* get_page_info() { return &m_pageInfo;
     }
     bool has_default_values(ImoSystemInfo* pInfo);
 

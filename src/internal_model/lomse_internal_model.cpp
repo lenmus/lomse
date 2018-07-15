@@ -1543,6 +1543,12 @@ void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
 //=======================================================================================
 // ImoBarline implementation
 //=======================================================================================
+ImoBarline::~ImoBarline()
+{
+    delete m_pMeasureInfo;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoBarline::set_int_attribute(TIntAttribute attrib, int value)
 {
     //AWARE: override of staff_num (in ImoStaffObj)
@@ -2423,6 +2429,7 @@ ImoInstrument::ImoInstrument()
     , m_partId("")
     , m_barlineLayout(k_isolated)
     , m_pMeasures(nullptr)
+    , m_pLastMeasureInfo(nullptr)
 {
     add_staff();
 //	m_midiChannel = g_pMidi->DefaultVoiceChannel();
@@ -2438,6 +2445,7 @@ ImoInstrument::~ImoInstrument()
     m_staves.clear();
 
     delete m_pMeasures;
+    delete m_pLastMeasureInfo;
 }
 
 //---------------------------------------------------------------------------------------
