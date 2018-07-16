@@ -133,8 +133,8 @@ LUnits TimeGridTable::get_x_for_note_rest_at_time(TimeUnits timepos)
         if (is_lower_time(timepos, (*it).rTimepos))
         {
             //interpolate                  //<---------------- Test 104
-            LUnits dx = ((*it).uxPos - xPrev) / ((*it).rTimepos - prevTimepos);
-            return xPrev + (timepos - prevTimepos) * dx;
+            double dx = double((*it).uxPos - xPrev) / double((*it).rTimepos - prevTimepos);
+            return xPrev + LUnits( double(timepos - prevTimepos) * dx );
         }
         else if (is_equal_time(timepos, (*it).rTimepos))
         {
@@ -181,8 +181,8 @@ LUnits TimeGridTable::get_x_for_staffobj_at_time(TimeUnits timepos)
         else if (is_lower_time(timepos, (*it).rTimepos))//<---------- Test 202 (case <)
         {
             //interpolate
-            LUnits dx = ((*it).uxPos - xPrev) / ((*it).rTimepos - prevTimepos);
-            return xPrev + (timepos - prevTimepos) * dx;
+            double dx = double((*it).uxPos - xPrev) / double((*it).rTimepos - prevTimepos);
+            return xPrev + LUnits( double(timepos - prevTimepos) * dx );
         }
 
         prevTimepos = (*it).rTimepos;

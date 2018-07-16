@@ -820,7 +820,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(192.0), 6439.38477f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=192.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(192.0) << endl;
+//        cout << "x(t=192.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(192.0) << endl;
 
         delete pIntor;
     }
@@ -849,7 +849,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 5381.58984f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
 
         delete pIntor;
     }
@@ -876,9 +876,10 @@ SUITE(GraphicModelTest)
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 6154.58984f) );
-//        cout << test_name() << endl;
-//        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        cout << test_name() << endl;
+        cout << pGrid->dump();
+        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
 
         delete pIntor;
     }
@@ -907,7 +908,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(160.0), 5910.48731f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(160.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(160.0) << endl;
 
         delete pIntor;
     }
@@ -936,7 +937,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(260.0), 7672.18213f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_note_rest_at_time(260.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(260.0) << endl;
 
         delete pIntor;
     }
@@ -996,7 +997,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(128.0), 5309.59f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0, false) << endl;
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0, false) << endl;
 
         delete pIntor;
     }
@@ -1025,7 +1026,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(160.0), 5910.48731f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(160.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(160.0) << endl;
 
         delete pIntor;
     }
@@ -1054,7 +1055,7 @@ SUITE(GraphicModelTest)
         CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(260.0), 7672.18213f) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << setw(14) << setprecision(5) << pGrid->get_x_for_staffobj_at_time(260.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(260.0) << endl;
 
         delete pIntor;
     }
