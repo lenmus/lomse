@@ -817,7 +817,7 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(192.0), 6439.38477f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(192.0), pGrid->get_x_pos(5)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=192.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(192.0) << endl;
@@ -846,7 +846,7 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 5381.58984f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(4)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
@@ -875,11 +875,13 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 6154.58984f) );
-        cout << test_name() << endl;
-        cout << pGrid->dump();
-        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
-        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(5)) );
+//        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 6154.58984f) );
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "table[5] = " << pGrid->get_x_pos(5) << endl;
 
         delete pIntor;
     }
@@ -934,7 +936,8 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(260.0), 7672.18213f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(260.0),
+                            pGrid->get_x_pos(pGrid->get_size()-1)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(260.0) << endl;
@@ -964,7 +967,7 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 64.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( pGrid->get_x_for_staffobj_at_time(-1.0) == 0.0 );
+        CHECK( pGrid->get_x_for_staffobj_at_time(-1.0) == 0.0f );
 
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
@@ -994,10 +997,10 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(128.0), 5309.59f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(128.0), pGrid->get_x_pos(3)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0, false) << endl;
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0) << endl;
 
         delete pIntor;
     }
@@ -1052,7 +1055,8 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(260.0), 7672.18213f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(260.0),
+                            pGrid->get_x_pos(pGrid->get_size()-1)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(260.0) << endl;
