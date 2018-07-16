@@ -117,48 +117,80 @@ TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits TimeGridTable::get_x_for_time(TimeUnits timepos, bool fEventAligned)
+LUnits TimeGridTable::get_x_for_note_rest_at_time(TimeUnits timepos)
 {
     //xPos = 0 if table is empty or timepos < first entry timepos
     if (m_PosTimes.size() == 0 || is_lower_time(timepos, m_PosTimes.front().rTimepos))
-        return 0.0;       //<--------------------------- T100
+        return 0.0;       //<--------------------------- Test 100
 
     //otherwise find in table
     vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
-    if (fEventAligned)
-    {
-        for (; it != m_PosTimes.end(); ++it)
-        {
-            if (is_lower_time(timepos, (*it).rTimepos))
-                return (*it).uxPos;       //<---------------- T104 Interpolate?
-            else if (is_equal_time(timepos, (*it).rTimepos))
-            {
-                if ((*it).rDuration > 0.0)
-                    return (*it).uxPos;       //<--------------------------- T102
+    TimeUnits prevTimepos = (*it).rTimepos;
+    LUnits xPrev = (*it).uxPos;
 
-                //try next entry
-                vector<TimeGridTableEntry>::iterator itNext = it;
-                ++itNext;
-                if (is_equal_time(timepos, (*itNext).rTimepos))
-                    return (*itNext).uxPos;            //<-------------- T103
-                    //<--------- missing case: no next entry. Is this possible?
-                    //           It would imply a barline followed by another barline
-//                else
-//                    return (*it).uxPos;
-            }
-        }
-    }
-    else
+    for (; it != m_PosTimes.end(); ++it)
     {
-        for (; it != m_PosTimes.end(); ++it)
+        if (is_lower_time(timepos, (*it).rTimepos))
         {
-            if (!is_greater_time(timepos, (*it).rTimepos))//<--------------- T101 (case =)
-                return (*it).uxPos;       //<--------------- T105 (case <) Interpolate?
+            //interpolate                  //<---------------- Test 104
+            double dx = double((*it).uxPos - xPrev) / double((*it).rTimepos - prevTimepos);
+            return xPrev + LUnits( double(timepos - prevTimepos) * dx );
         }
+        else if (is_equal_time(timepos, (*it).rTimepos))
+        {
+            if ((*it).rDuration > 0.0)
+                return (*it).uxPos;       //<--------------------------- Test 101
+
+            //try next entry
+            vector<TimeGridTableEntry>::iterator itNext = it;
+            LUnits lastPos = (*it).uxPos;
+            ++itNext;
+            while (itNext != m_PosTimes.end()
+                   && is_equal_time(timepos, (*itNext).rTimepos))
+            {
+                lastPos = (*itNext).uxPos;
+                ++itNext;
+            }
+            return lastPos;            //<-------------- Tests 102 & T103
+        }
+
+        prevTimepos = (*it).rTimepos;
+        xPrev = (*it).uxPos;
     }
 
     //if not found return last entry xPos. Or should return system xRight?
-    return m_PosTimes.back().uxPos;       //<--------------------------- T106
+    return m_PosTimes.back().uxPos;       //<--------------------------- Test 105
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TimeGridTable::get_x_for_staffobj_at_time(TimeUnits timepos)
+{
+    //xPos = 0 if table is empty or timepos < first entry timepos
+    if (m_PosTimes.size() == 0 || is_lower_time(timepos, m_PosTimes.front().rTimepos))
+        return 0.0;       //<--------------------------- Test 200
+
+    //otherwise find in table
+    vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
+    TimeUnits prevTimepos = (*it).rTimepos;
+    LUnits xPrev = (*it).uxPos;
+
+    for (; it != m_PosTimes.end(); ++it)
+    {
+        if (is_equal_time(timepos, (*it).rTimepos))//<--------------- Test 201 (case =)
+            return (*it).uxPos;
+        else if (is_lower_time(timepos, (*it).rTimepos))//<---------- Test 202 (case <)
+        {
+            //interpolate
+            double dx = double((*it).uxPos - xPrev) / double((*it).rTimepos - prevTimepos);
+            return xPrev + LUnits( double(timepos - prevTimepos) * dx );
+        }
+
+        prevTimepos = (*it).rTimepos;
+        xPrev = (*it).uxPos;
+    }
+
+    //if not found return last entry xPos. Or should return system xRight?
+    return m_PosTimes.back().uxPos;       //<--------------------------- Test 203
 }
 
 //---------------------------------------------------------------------------------------
