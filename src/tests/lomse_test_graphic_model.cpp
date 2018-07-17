@@ -736,6 +736,9 @@ SUITE(GraphicModelTest)
 ////        CHECK( rmap.size() == 1 );
 ////    }
 
+
+    //@ get_system_for() ----------------------------------------------------------------
+
     TEST_FIXTURE(GraphicModelTestFixture, get_system_for_001)
     {
         //@001. get_system_for() returns system
@@ -876,12 +879,11 @@ SUITE(GraphicModelTest)
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(5)) );
-//        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), 6154.58984f) );
-//        cout << test_name() << endl;
-//        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
-//        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
-//        cout << "table[5] = " << pGrid->get_x_pos(5) << endl;
+        cout << test_name() << endl;
+        cout << pGrid->dump();
+        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        cout << "table[5] = " << pGrid->get_x_pos(5) << endl;
 
         delete pIntor;
     }
@@ -906,11 +908,16 @@ SUITE(GraphicModelTest)
         ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
+        //interpolate for computing expected result:
+        double dx = double(pGrid->get_x_pos(5) - pGrid->get_x_pos(4))
+                    / double(192.0 - 128.0);
+        LUnits xPos = pGrid->get_x_pos(4) + LUnits( double(160.0 - 128.0) * dx );
 
-        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(160.0), 5910.48731f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(160.0), xPos) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(160.0) << endl;
+//        cout << "expected xPos = " << xPos << endl;
 
         delete pIntor;
     }
@@ -1025,11 +1032,16 @@ SUITE(GraphicModelTest)
         ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
+        //interpolate for computing expected result:
+        double dx = double(pGrid->get_x_pos(5) - pGrid->get_x_pos(4))
+                    / double(192.0 - 128.0);
+        LUnits xPos = pGrid->get_x_pos(4) + LUnits( double(160.0 - 128.0) * dx );
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(160.0), 5910.48731f) );
+        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(160.0), xPos) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
 //        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(160.0) << endl;
+//        cout << "expected xPos = " << xPos << endl;
 
         delete pIntor;
     }
@@ -1068,6 +1080,40 @@ SUITE(GraphicModelTest)
 //    {
 //        //@002. TimeGridTable for multimetric test score
 //    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_issue_173)
+    {
+        //@issue_173: For tracing and debugging this issue
+        //Also to try to understand why MSVS and Clang produce different results than gcc
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(key e)(time 2 4)"
+            "(n c4 q)(r q)(barline simple)"
+            "(clef F4)(n e4 q)(n e4 e)(n g4 e)(barline simple)"
+            ")))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
+        TimeGridTable* pGrid = pBSys->get_time_grid_table();
+
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "table(5).xPos = " << pGrid->get_x_pos(5) << endl;
+//        cout << "diff = " << pGrid->get_x_pos(5) - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+        //pGModel->dump_page(0, cout);
+
+        CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(5)) );
+
+        delete pIntor;
+    }
 
 };
 
