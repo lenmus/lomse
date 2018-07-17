@@ -1922,7 +1922,8 @@ TimeGridTable* ColumnDataGourlay::create_time_grid_table()
     {
         TimeUnits rCurTime = pSlice->get_timepos();
         TimeUnits rDuration = pSlice->get_spring_duration();
-        TimeGridTableEntry entry = { rCurTime, rDuration, xPos };
+        LUnits x = xPos + pSlice->get_fixed_extent();
+        TimeGridTableEntry entry = { rCurTime, rDuration, x };
         table->add_entry(entry);
 
         xPos += pSlice->get_width();
