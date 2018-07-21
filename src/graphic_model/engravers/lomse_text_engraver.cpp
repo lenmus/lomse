@@ -51,18 +51,6 @@ TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 {
 }
 
-////---------------------------------------------------------------------------------------
-//TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-//                           ImoScoreText* pText, ImoScore* pScore)
-//    : Engraver(libraryScope, pScoreMeter)
-//    , m_text(pText->get_text())
-//    , m_pFontStorage( libraryScope.font_storage() )
-//{
-//    m_pStyle = pText->get_style();
-//    if (!m_pStyle)
-//        m_pStyle = pScore->get_default_style();
-//}
-
 //---------------------------------------------------------------------------------------
 TextEngraver::~TextEngraver()
 {
@@ -114,6 +102,77 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
     ShapeId idx = 0;
     return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, m_language,
                                   pos.x, pos.y, m_libraryScope);
+}
+
+
+
+//=======================================================================================
+// TextBoxEngraver implementation
+//=======================================================================================
+TextBoxEngraver::TextBoxEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           const string& text, const string& language, ImoStyle* pStyle)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_text(text)
+    , m_pStyle(pStyle)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_language(language)
+{
+}
+
+//---------------------------------------------------------------------------------------
+TextBoxEngraver::~TextBoxEngraver()
+{
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TextBoxEngraver::measure_width()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font(m_language,
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size() );
+    return meter.measure_width(m_text);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TextBoxEngraver::measure_height()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font(m_language,
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size() );
+    return meter.get_font_height();
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeTextBox* TextBoxEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop)
+{
+    UPoint pos(xLeft, yTop);
+    if (pCreatorImo && pCreatorImo->is_contentobj())
+    {
+        //TODO: This is a temporal fix for dealing with <words> "default-x, default-y"
+        ImoContentObj* pObj = static_cast<ImoContentObj*>(pCreatorImo);
+        pos.x += tenths_to_logical(pObj->get_user_ref_point_x());
+        pos.y += tenths_to_logical(pObj->get_user_ref_point_y());
+
+        add_user_shift(static_cast<ImoContentObj*>(pCreatorImo), &pos);
+    }
+
+    //TODO-LOG
+    //if (valign == k_center)
+    {
+        TextMeter meter(m_libraryScope);
+        yTop -= meter.get_descender();
+    }
+
+    ShapeId idx = 0;
+    return LOMSE_NEW GmoShapeTextBox(pCreatorImo, idx, m_text, m_language,
+                                     m_pStyle, m_libraryScope, pos,
+                                     USize(1000.0f, 1000.0f),     //rectangle size
+                                     50.0f            //radius for rounded corners
+                                    );
 }
 
 

@@ -879,11 +879,11 @@ SUITE(GraphicModelTest)
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(5)) );
-        cout << test_name() << endl;
-        cout << pGrid->dump();
-        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
-        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
-        cout << "table[5] = " << pGrid->get_x_pos(5) << endl;
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "diff = " << 6154.58984f - pGrid->get_x_for_note_rest_at_time(128.0) << endl;
+//        cout << "table[5] = " << pGrid->get_x_pos(5) << endl;
 
         delete pIntor;
     }

@@ -1107,6 +1107,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
                                pImo->get_language(), pImo->get_style());
             return engrv.create_shape(pImo, pos.x, pos.y);
         }
+        case k_imo_text_box:
+        {
+            ImoTextBox* pImo = static_cast<ImoTextBox*>(pAO);
+            TextBoxEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
+                                  "en", /*pImo->get_language(),*/ pImo->get_style());
+            return engrv.create_shape(pImo, pos.x, pos.y);
+        }
         case k_imo_technical:
         {
             ImoTechnical* pImo = static_cast<ImoTechnical*>(pAO);

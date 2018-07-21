@@ -44,6 +44,7 @@ class FontStorage;
 class ImoScore;
 class GmoBox;
 class GmoShapeText;
+class GmoShapeTextBox;
 class ImoStyle;
 class ImoScoreText;
 
@@ -59,11 +60,28 @@ protected:
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  const string& text, const string& language, ImoStyle* pStyle);
-//    TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-//                 ImoScoreText* pText, ImoScore* pScore);
     ~TextEngraver();
 
     GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);
+    LUnits measure_width();
+    LUnits measure_height();
+};
+
+//---------------------------------------------------------------------------------------
+class TextBoxEngraver : public Engraver
+{
+protected:
+    const string& m_text;
+    ImoStyle* m_pStyle;
+    FontStorage* m_pFontStorage;
+    string m_language;
+
+public:
+    TextBoxEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                 const string& text, const string& language, ImoStyle* pStyle);
+    ~TextBoxEngraver();
+
+    GmoShapeTextBox* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);
     LUnits measure_width();
     LUnits measure_height();
 };

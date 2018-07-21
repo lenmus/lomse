@@ -274,6 +274,37 @@ void GmoShapeRectangle::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->end_path();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
+
+//From ButtonCtrl::on_draw(), in lomse_button_ctrl.cpp
+//
+//    Color strokeColor = Color(128, 128, 128);
+//    Color bgColor = m_normalColor;
+//
+//    //draw background and border
+//    pDrawer->begin_path();
+//    pDrawer->fill( m_normalColor );
+//    pDrawer->stroke( strokeColor );
+//    pDrawer->stroke_width(15.0);
+//    Color white(255, 255, 255);
+//    Color dark(bgColor);
+//    dark.a = 45;
+//    Color light(dark);
+//    light = light.gradient(white, 0.2);
+//    pDrawer->gradient_color(white, 0.0, 0.1);
+//    pDrawer->gradient_color(white, dark, 0.1, 0.7);
+//    pDrawer->gradient_color(dark, light, 0.7, 1.0);
+//    pDrawer->fill_linear_gradient(m_pos.x, m_pos.y,
+//                                  m_pos.x, m_pos.y + m_height);
+//    pDrawer->rect(m_pos, USize(m_width, m_height), 100.0f);
+//    pDrawer->end_path();
+//
+//    //draw text
+//    select_font();
+//    center_text();
+//    pDrawer->set_text_color( textColor );
+//    LUnits x = m_pos.x + m_xLabel;
+//    LUnits y = m_pos.y + m_yLabel;
+//    pDrawer->draw_text(x, y, m_label);
 }
 
 

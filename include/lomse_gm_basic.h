@@ -172,7 +172,10 @@ public:
                 k_shape_slur, k_shape_squared_bracket,
                 k_shape_stem, k_shape_staff,
                 k_shape_technical,
-                k_shape_text, k_shape_time_signature, k_shape_tie,
+                k_shape_text,
+                k_shape_text_box,
+                k_shape_time_signature,
+                k_shape_tie,
                 k_shape_time_signature_glyph, k_shape_tuplet,
                 k_shape_volta_bracket, k_shape_word,
             k_max
@@ -238,6 +241,7 @@ public:
     inline bool is_shape_staff() { return m_objtype == k_shape_staff; }
     inline bool is_shape_technical() { return m_objtype == k_shape_technical; }
     inline bool is_shape_text() { return m_objtype == k_shape_text; }
+    inline bool is_shape_text_box() { return m_objtype == k_shape_text_box; }
     inline bool is_shape_tie() { return m_objtype == k_shape_tie; }
     inline bool is_shape_time_signature() { return m_objtype == k_shape_time_signature; }
     inline bool is_shape_time_signature_glyph() { return m_objtype == k_shape_time_signature_glyph; }

@@ -259,6 +259,286 @@ void GmoShapeWord::select_font()
 
 
 
+////---------------------------------------------------------------------------------------
+////helper class to contain a line of text (to distribute text inside the box)
+//class TextLine
+//{
+//public:
+//    TextLine(std::string text, LUnits width, LUnits height)
+//        : sText(text), uWidth(width), uHeight(height) {}
+//    ~TextLine() {}
+//
+//	std::string		sText;
+//    LUnits        uWidth;
+//    LUnits        uHeight;
+//    UPoint        uPos;     // text position (relative to top-left of rectangle)
+//};
+
+
+
+//=======================================================================================
+// GmoShapeTextBox object implementation
+//=======================================================================================
+GmoShapeTextBox::GmoShapeTextBox(ImoObj* pCreatorImo, ShapeId idx, const string& text,
+                                 const string& language, ImoStyle* pStyle,
+                                 LibraryScope& libraryScope, const UPoint& pos,
+                                 const USize& size, LUnits radius)
+    : GmoShapeRectangle(pCreatorImo, GmoObj::k_shape_text_box, idx, pos, size, radius,
+                        pStyle)
+    , m_text(text)
+    , m_language(language)
+    , m_pStyle(pStyle)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_libraryScope(libraryScope)
+{
+//    SetBorderStyle(nBorderStyle);
+//
+//    //measure text
+//    pPaper->SetFont(*m_pFont);
+//    pPaper->GetTextExtent(m_text, &m_uTextWidth, &m_uTextHeight);
+//
+//    //Adjust text within the box
+//    ComputeTextPosition(pPaper);
+//}
+    //bounds
+    select_font();
+    TextMeter meter(m_libraryScope);
+    m_size.width = meter.measure_width(text);
+    m_size.height = meter.get_font_height();
+
+    //position
+    m_origin.x = pos.x;
+    m_origin.y = pos.y - m_size.height;     //reference is at text bottom
+
+    //color
+    if (m_pStyle)
+        m_color = m_pStyle->color();
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeTextBox::~GmoShapeTextBox()
+{
+//    DeleteTextLines();      //delete text lines
+}
+
+////---------------------------------------------------------------------------------------
+//void GmoShapeTextBox::DeleteTextLines()
+//{
+//    //delete text lines
+//    std::list<TextLine*>::iterator it;
+//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
+//        delete *it;
+//    m_TextLines.clear();
+//}
+//
+////---------------------------------------------------------------------------------------
+//void GmoShapeTextBox::ComputeTextPosition(lmPaper* pPaper)
+//{
+//    //Position the text within the box, splitting lines if necessary
+//
+//    //delete obsolete text arrangement
+//    DeleteTextLines();
+//
+//    //compute box margin: the width of the 'l' letter
+//    LUnits uxMargin, uyMargin;
+//	pPaper->SetFont(*m_pFont);
+//	pPaper->GetTextExtent(_T("l"), &uxMargin, &uyMargin);
+//    uyMargin = uxMargin;
+//
+//    LUnits uBoxAreaWidth = m_uBoundsBottom.x - m_uBoundsTop.x - uxMargin - uxMargin;
+//
+//	//split text in lines
+//    TextLine* pCurLine;
+//    LUnits uxLine = uxMargin;
+//    LUnits uyLine = uyMargin;
+//	if (uBoxAreaWidth >= m_uTextWidth)
+//    {
+//        //the text fits in one line
+//        pCurLine = LOMSE_NEW TextLine(m_text, m_uTextWidth, m_uTextHeight);
+//    }
+//    else
+//	{
+//		//we have to split the text. Loop to add chars until line full
+//		LUnits uWidth, uHeight;
+//        pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
+//		int iC = 0;
+//		LUnits uAvailable = uBoxAreaWidth;
+//		while(iC < (int)m_text.Length())
+//		{
+//			const std::string ch = m_text.Mid(iC, 1);
+//			pPaper->GetTextExtent(ch, &uWidth, &uHeight);
+//			if (uAvailable < uWidth)
+//            {
+//                //line full. Save it and start a new line
+//                m_TextLines.push_back(pCurLine);
+//                uxLine += ApplyHAlign(uBoxAreaWidth, pCurLine->uWidth, m_nHAlign);
+//                pCurLine->uPos = UPoint(uxLine, uyLine);
+//                uyLine += pCurLine->uHeight;
+//
+//                pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
+//                uAvailable = uBoxAreaWidth;
+//            }
+//
+//			//add char to clipped text
+//			uAvailable -= uWidth;
+//            pCurLine->sText += ch;
+//			iC++;
+//		}
+//        pPaper->GetTextExtent(pCurLine->sText, &(pCurLine->uWidth), &(pCurLine->uHeight));
+//	}
+//    m_TextLines.push_back(pCurLine);
+//    uxLine += ApplyHAlign(uBoxAreaWidth, pCurLine->uWidth, m_nHAlign);
+//    pCurLine->uPos = UPoint(uxLine, uyLine);
+//}
+
+////---------------------------------------------------------------------------------------
+//LUnits GmoShapeTextBox::ApplyHAlign(LUnits uAvailableWidth, LUnits uLineWidth,
+//                                     lmEHAlign nHAlign)
+//{
+//    //Returns x shift to apply for desired aligment
+//
+//    switch (nHAlign)
+//    {
+//        case lmHALIGN_DEFAULT:
+//        case lmHALIGN_LEFT:
+//            return 0.0f;
+//
+//        case lmHALIGN_RIGHT:
+//            return uAvailableWidth - uLineWidth;
+//
+//        case lmHALIGN_JUSTIFY:
+//            //TODO
+//            return 0.0f;
+//
+//        case lmHALIGN_CENTER:
+//            return (uAvailableWidth - uLineWidth) / 2.0f;
+//
+//        default:
+//            wxASSERT(false);
+//            return 0.0f;    //compiler happy
+//    }
+//}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeTextBox::select_font()
+{
+    TextMeter meter(m_libraryScope);
+    if (!m_pStyle)
+        meter.select_font(m_language, "", "Liberation serif", 12.0);
+    else
+        meter.select_font(m_language,
+                          m_pStyle->font_file(),
+                          m_pStyle->font_name(),
+                          m_pStyle->font_size(),
+                          m_pStyle->is_bold(),
+                          m_pStyle->is_italic() );
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeTextBox::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    GmoShapeRectangle::on_draw(pDrawer, opt);
+    draw_text(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeTextBox::draw_text(Drawer* pDrawer, RenderOptions& opt)
+{
+//    //ensure text is properly split for current box size
+//    ComputeTextPosition(pPaper);
+//
+//    pPaper->SetFont(*m_pFont);
+//    pPaper->SetTextForeground(m_nTxtColor);
+//
+//    LUnits uySpace = m_uBoundsBottom.y - m_uBoundsTop.y;
+//    std::list<TextLine*>::iterator it;
+//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
+//    {
+//        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
+//        if (uySpaceLeft < 0.0f) break;
+//        pPaper->DrawText((*it)->sText, (*it)->uPos.x + m_uBoundsTop.x,
+//                         (*it)->uPos.y + m_uBoundsTop.y);
+//    }
+    select_font();
+    pDrawer->set_text_color( determine_color_to_use(opt) );
+    LUnits x = m_origin.x;
+    LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
+    pDrawer->draw_text(x, y, m_text);
+
+    //std::string str("¿This? is a test: Ñ € & abc. Ruso:Текст на кирилица");
+    //pDrawer->draw_text(m_xPos, m_yPos, str);
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+////---------------------------------------------------------------------------------------
+//void GmoShapeTextBox::SetFont(wxFont *pFont)
+//{
+//    m_pFont = pFont;
+//}
+//
+////---------------------------------------------------------------------------------------
+//wxBitmap* GmoShapeTextBox::OnBeginDrag(double rScale, wxDC* pDC)
+//{
+//	// A dragging operation is started. The view invokes this method to request the
+//	// bitmap to be used as drag image. No other action is required.
+//	// If no bitmap is returned drag is cancelled.
+//	//
+//	// So this method returns the bitmap to use with the drag image.
+//
+//
+//    //as this is a shape defined by points: save all points position
+//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
+//        m_uSavePoint[i] = m_uPoint[i];
+//
+//    // allocate a bitmap whose size is that of the box area
+//    // convert size to pixels
+//    LUnits uySpace = m_uBoundsBottom.y - m_uBoundsTop.y;
+//    int wD = (int)pDC->LogicalToDeviceXRel( m_uBoundsBottom.x - m_uBoundsTop.x );
+//    int hD = (int)pDC->LogicalToDeviceYRel( uySpace );
+//    wxBitmap bitmap(wD+2, hD+2);
+//
+//    // allocate a memory DC for drawing into a bitmap
+//    wxMemoryDC dc2;
+//    dc2.SelectObject(bitmap);
+//    dc2.SetMapMode(lmDC_MODE);
+//    dc2.SetUserScale(rScale, rScale);
+//    dc2.SetFont(*m_pFont);
+//
+//    // draw onto the bitmap
+//    dc2.SetBackground(* wxWHITE_BRUSH);
+//    dc2.Clear();
+//    dc2.SetBackgroundMode(wxTRANSPARENT);
+//    dc2.SetPen(*wxBLACK_PEN);
+//    dc2.DrawRectangle(0, 0, GetBounds().GetWidth(), GetBounds().GetHeight() );
+//    dc2.SetTextForeground(g_pColors->ScoreSelected());
+//
+//    std::list<TextLine*>::iterator it;
+//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
+//    {
+//        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
+//        if (uySpaceLeft < 0.0f) break;
+//        dc2.DrawText((*it)->sText, (*it)->uPos.x, (*it)->uPos.y);
+//    }
+//    dc2.SelectObject(wxNullBitmap);
+//
+//    // Make the bitmap masked
+//    wxImage image = bitmap.ConvertToImage();
+//    image.SetMaskColour(255, 255, 255);
+//    wxBitmap* pBitmap = LOMSE_NEW wxBitmap(image);
+//
+//    ////DBG -----------
+//    //std::string sFileName = _T("GmoShapeTextBox.bmp");
+//    //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
+//    ////END DBG -------
+//
+//    return pBitmap;
+//
+//}
+//
+
+
+
 ////========================================================================================
 //// GmoShapeTitle object implementation
 ////========================================================================================
@@ -587,277 +867,5 @@ void GmoShapeWord::select_font()
 //	//send a move object command to the Interactor
 //	pCanvas->MoveObject(this, uFinalPos);
 //}
-//
-//
-//
-////========================================================================================
-//// GmoShapeTextbox object implementation
-////========================================================================================
-//
-////---------------------------------------------------------------------------------------
-////helper class to contain a line of text (to distribute text inside the box)
-//class TextLine
-//{
-//public:
-//    TextLine(std::string text, LUnits width, LUnits height)
-//        : sText(text), uWidth(width), uHeight(height) {}
-//    ~TextLine() {}
-//
-//	std::string		sText;
-//    LUnits        uWidth;
-//    LUnits        uHeight;
-//    UPoint        uPos;     // text position (relative to top-left of rectangle)
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//GmoShapeTextbox::GmoShapeTextbox(lmScoreObj* pOwner, int nShapeIdx,
-//                //text related
-//                lmPaper* pPaper,
-//                const std::string& sText, wxFont* pFont, wxColour nTxtColor,
-//                //block related
-//                lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
-//                LUnits uxLeft, LUnits uyTop, LUnits uxRight, LUnits uyBottom,
-//                wxColour nBgColor,
-//                //border
-//                LUnits uBorderWidth,
-//                wxColour nBorderColor,
-//                lmELineStyle nBorderStyle,
-//                //other
-//                std::string sName, bool fDraggable)
-//    : GmoShapeRectangle(pOwner, uxLeft, uyTop, uxRight, uyBottom,
-//                       uBorderWidth, nBorderColor, nBgColor, nShapeIdx,
-//                       sName, fDraggable, lmSELECTABLE, lmVISIBLE)
-//    , m_text(sText)
-//    , m_pFont(pFont)
-//    , m_nTxtColor(nTxtColor)
-//    , m_nBlockAlign(nBlockAlign)
-//    , m_nHAlign(nHAlign)
-//    , m_nVAlign(nVAlign)
-//{
-//    m_nType = eGMO_ShapeTextbox;
-//    SetBorderStyle(nBorderStyle);
-//
-//    //measure text
-//    pPaper->SetFont(*m_pFont);
-//    pPaper->GetTextExtent(m_text, &m_uTextWidth, &m_uTextHeight);
-//
-//    //Adjust text within the box
-//    ComputeTextPosition(pPaper);
-//}
-//
-////---------------------------------------------------------------------------------------
-//GmoShapeTextbox::~GmoShapeTextbox()
-//{
-//    DeleteTextLines();      //delete text lines
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::DeleteTextLines()
-//{
-//    //delete text lines
-//    std::list<TextLine*>::iterator it;
-//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
-//        delete *it;
-//    m_TextLines.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::ComputeTextPosition(lmPaper* pPaper)
-//{
-//    //Position the text within the box, splitting lines if necessary
-//
-//    //delete obsolete text arrangement
-//    DeleteTextLines();
-//
-//    //compute box margin: the width of the 'l' letter
-//    LUnits uxMargin, uyMargin;
-//	pPaper->SetFont(*m_pFont);
-//	pPaper->GetTextExtent(_T("l"), &uxMargin, &uyMargin);
-//    uyMargin = uxMargin;
-//
-//    LUnits uBoxAreaWidth = m_uBoundsBottom.x - m_uBoundsTop.x - uxMargin - uxMargin;
-//
-//	//split text in lines
-//    TextLine* pCurLine;
-//    LUnits uxLine = uxMargin;
-//    LUnits uyLine = uyMargin;
-//	if (uBoxAreaWidth >= m_uTextWidth)
-//    {
-//        //the text fits in one line
-//        pCurLine = LOMSE_NEW TextLine(m_text, m_uTextWidth, m_uTextHeight);
-//    }
-//    else
-//	{
-//		//we have to split the text. Loop to add chars until line full
-//		LUnits uWidth, uHeight;
-//        pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
-//		int iC = 0;
-//		LUnits uAvailable = uBoxAreaWidth;
-//		while(iC < (int)m_text.Length())
-//		{
-//			const std::string ch = m_text.Mid(iC, 1);
-//			pPaper->GetTextExtent(ch, &uWidth, &uHeight);
-//			if (uAvailable < uWidth)
-//            {
-//                //line full. Save it and start a new line
-//                m_TextLines.push_back(pCurLine);
-//                uxLine += ApplyHAlign(uBoxAreaWidth, pCurLine->uWidth, m_nHAlign);
-//                pCurLine->uPos = UPoint(uxLine, uyLine);
-//                uyLine += pCurLine->uHeight;
-//
-//                pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
-//                uAvailable = uBoxAreaWidth;
-//            }
-//
-//			//add char to clipped text
-//			uAvailable -= uWidth;
-//            pCurLine->sText += ch;
-//			iC++;
-//		}
-//        pPaper->GetTextExtent(pCurLine->sText, &(pCurLine->uWidth), &(pCurLine->uHeight));
-//	}
-//    m_TextLines.push_back(pCurLine);
-//    uxLine += ApplyHAlign(uBoxAreaWidth, pCurLine->uWidth, m_nHAlign);
-//    pCurLine->uPos = UPoint(uxLine, uyLine);
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits GmoShapeTextbox::ApplyHAlign(LUnits uAvailableWidth, LUnits uLineWidth,
-//                                     lmEHAlign nHAlign)
-//{
-//    //Returns x shift to apply for desired aligment
-//
-//    switch (nHAlign)
-//    {
-//        case lmHALIGN_DEFAULT:
-//        case lmHALIGN_LEFT:
-//            return 0.0f;
-//
-//        case lmHALIGN_RIGHT:
-//            return uAvailableWidth - uLineWidth;
-//
-//        case lmHALIGN_JUSTIFY:
-//            //TODO
-//            return 0.0f;
-//
-//        case lmHALIGN_CENTER:
-//            return (uAvailableWidth - uLineWidth) / 2.0f;
-//
-//        default:
-//            wxASSERT(false);
-//            return 0.0f;    //compiler happy
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::Render(lmPaper* pPaper, wxColour color)
-//{
-//    //if selected, book to be rendered with handlers when posible
-//    if (IsSelected())
-//    {
-//        //book to be rendered with handlers
-//        GetOwnerBoxPage()->OnNeedToDrawHandlers(this);
-//        SavePoints();
-//    }
-//
-//    //render it normally (anti-aliased)
-//    RenderNormal(pPaper, color);
-//    DrawTextbox(pPaper, color, false);        //false -> anti-aliased
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::RenderWithHandlers(lmPaper* pPaper)
-//{
-//    //render only the rectangle and its handlers. Text and background will not move
-//
-//    GmoShapeRectangle::RenderWithHandlers(pPaper);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::DrawTextbox(lmPaper* pPaper, wxColour color, bool fSketch)
-//{
-//    //ensure text is properly splitted for current box size
-//    ComputeTextPosition(pPaper);
-//
-//    pPaper->SetFont(*m_pFont);
-//    pPaper->SetTextForeground(m_nTxtColor);
-//
-//    LUnits uySpace = m_uBoundsBottom.y - m_uBoundsTop.y;
-//    std::list<TextLine*>::iterator it;
-//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
-//    {
-//        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
-//        if (uySpaceLeft < 0.0f) break;
-//        pPaper->DrawText((*it)->sText, (*it)->uPos.x + m_uBoundsTop.x,
-//                         (*it)->uPos.y + m_uBoundsTop.y);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeTextbox::SetFont(wxFont *pFont)
-//{
-//    m_pFont = pFont;
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxBitmap* GmoShapeTextbox::OnBeginDrag(double rScale, wxDC* pDC)
-//{
-//	// A dragging operation is started. The view invokes this method to request the
-//	// bitmap to be used as drag image. No other action is required.
-//	// If no bitmap is returned drag is cancelled.
-//	//
-//	// So this method returns the bitmap to use with the drag image.
-//
-//
-//    //as this is a shape defined by points: save all points position
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//        m_uSavePoint[i] = m_uPoint[i];
-//
-//    // allocate a bitmap whose size is that of the box area
-//    // convert size to pixels
-//    LUnits uySpace = m_uBoundsBottom.y - m_uBoundsTop.y;
-//    int wD = (int)pDC->LogicalToDeviceXRel( m_uBoundsBottom.x - m_uBoundsTop.x );
-//    int hD = (int)pDC->LogicalToDeviceYRel( uySpace );
-//    wxBitmap bitmap(wD+2, hD+2);
-//
-//    // allocate a memory DC for drawing into a bitmap
-//    wxMemoryDC dc2;
-//    dc2.SelectObject(bitmap);
-//    dc2.SetMapMode(lmDC_MODE);
-//    dc2.SetUserScale(rScale, rScale);
-//    dc2.SetFont(*m_pFont);
-//
-//    // draw onto the bitmap
-//    dc2.SetBackground(* wxWHITE_BRUSH);
-//    dc2.Clear();
-//    dc2.SetBackgroundMode(wxTRANSPARENT);
-//    dc2.SetPen(*wxBLACK_PEN);
-//    dc2.DrawRectangle(0, 0, GetBounds().GetWidth(), GetBounds().GetHeight() );
-//    dc2.SetTextForeground(g_pColors->ScoreSelected());
-//
-//    std::list<TextLine*>::iterator it;
-//    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
-//    {
-//        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
-//        if (uySpaceLeft < 0.0f) break;
-//        dc2.DrawText((*it)->sText, (*it)->uPos.x, (*it)->uPos.y);
-//    }
-//    dc2.SelectObject(wxNullBitmap);
-//
-//    // Make the bitmap masked
-//    wxImage image = bitmap.ConvertToImage();
-//    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = LOMSE_NEW wxBitmap(image);
-//
-//    ////DBG -----------
-//    //std::string sFileName = _T("GmoShapeTextbox.bmp");
-//    //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
-//    ////END DBG -------
-//
-//    return pBitmap;
-//
-//}
-//
 
 }  //namespace lomse
