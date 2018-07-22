@@ -190,10 +190,11 @@ public:
     virtual LUnits get_column_width(int iCol);
     virtual bool column_has_system_break(int iCol);
 
-    //support for debuggin and unit tests
+    //support for debugging and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
     void delete_not_used_objects();
     void trace_column(int iCol, int level);
+    ColumnData* get_column(int i);
 
 protected:
     void add_error_message(const string& msg);

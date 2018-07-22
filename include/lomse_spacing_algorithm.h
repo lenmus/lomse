@@ -41,25 +41,26 @@ namespace lomse
 {
 
 //forward declarations
-class ImoScore;
-class ScoreMeter;
-class LibraryScope;
-class ScoreLayouter;
-class ShapesStorage;
-class ShapesCreator;
-class PartsEngraver;
-class GmoBoxSlice;
 class ColStaffObjsEntry;
-class TimeGridTable;
-class GmoBoxSliceInstr;
-
-class ColumnsBuilder;
-class StaffObjsCursor;
 class ColumnBreaker;
-class ImoInstrument;
-class ImoStaffObj;
-class GmoShape;
 class ColumnData;
+class ColumnsBuilder;
+class GmoBoxSlice;
+class GmoBoxSliceInstr;
+class GmoShape;
+class ImoInstrument;
+class ImoScore;
+class ImoStaffObj;
+class LibraryScope;
+class PartsEngraver;
+class ScoreLayouter;
+class ScoreMeter;
+class ShapesCreator;
+class ShapesStorage;
+class SpAlgColumn;
+class StaffObjsCursor;
+class TimeGridTable;
+class TypeMeasureInfo;
 
 //---------------------------------------------------------------------------------------
 // Barlines at the end of a column
@@ -155,9 +156,75 @@ public:
     virtual ColStaffObjsEntry* get_prolog_clef(int iCol, ShapeId idx) = 0;
     virtual ColStaffObjsEntry* get_prolog_key(int iCol, ShapeId idx) = 0;
 
-    //debug
+    //debug and support for unit tests
     virtual void dump_column_data(int iCol, ostream& outStream) = 0;
     virtual void set_trace_level(int iCol, int nTraceLevel) = 0;
+    virtual ColumnData* get_column(int i) = 0;
+
+};
+
+
+//---------------------------------------------------------------------------------------
+//ColumnData: helper class used by SpAlgColumn for storing data for columns
+class ColumnData
+{
+protected:
+    ScoreMeter* m_pScoreMeter;
+    bool m_fHasSystemBreak;
+    GmoBoxSlice* m_pBoxSlice;           //box for this column
+    SpAlgColumn* m_pSpAlgorithm;
+    TypeMeasureInfo* m_pMeasureInfo;
+    bool m_fMeasureStart;
+    int m_nTraceLevel;                  //for debugging
+
+    std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;   //instr.boxes for this column
+
+    //applicable prolog at start of this column. On entry per staff
+    std::vector<ColStaffObjsEntry*> m_prologClefs;
+    std::vector<ColStaffObjsEntry*> m_prologKeys;
+
+
+public:
+    ColumnData(ScoreMeter* pScoreMeter, SpAlgColumn* pSpAlgorithm);
+    virtual ~ColumnData();
+
+
+    inline void use_this_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
+    inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
+    void save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
+                      ColStaffObjsEntry* pKeyEntry);
+
+    //access to info
+    inline bool has_system_break() { return m_fHasSystemBreak; }
+    inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
+    inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
+    inline ColStaffObjsEntry* get_prolog_key(ShapeId idx) { return m_prologKeys[idx]; }
+
+    //boxes and shapes
+    void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage);
+    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
+    inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
+    void set_slice_width(LUnits width);
+    void set_slice_final_position(LUnits left, LUnits top);
+
+    //adding shapes to graphical model
+    void add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
+    void delete_shapes(int iCol);
+
+    //support to lay out measure attributes
+    inline void mark_as_start_of_measure() { m_fMeasureStart = true; }
+    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
+    inline bool is_start_of_measure() { return m_fMeasureStart; }
+    inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+
+    //support for debug and unit tests
+    void delete_box_and_shapes(int iCol);
+    inline void set_trace_level(int level) { m_nTraceLevel = level; }
+
+protected:
+    void reserve_space_for_prolog_clefs_keys(int numStaves);
+
+
 };
 
 
@@ -233,6 +300,7 @@ public:
 
     //debug
     virtual void dump_column_data(int iCol, ostream& outStream) = 0;
+    virtual ColumnData* get_column(int i);
 
 
     //new methods to be implemented by derived classes (apart from previous methods)
@@ -311,12 +379,13 @@ protected:
     UPoint m_pagePos;           //to track current position
 
     int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
+    int m_iColStartMeasure;     //to store index at which next measure starts
 
     int m_iColumnToTrace;   //support for debug and unit test
     int m_nTraceLevel;
 
     SpAlgColumn* m_pSpAlgorithm;
-    int m_numColumns;
+    int m_maxColumn;
     std::vector<ColumnData*>& m_colsData;
 
 public:
@@ -336,7 +405,7 @@ public:
         return m_stavesHeight;
     }
 
-    //support for debuggin and unit tests
+    //support for debugging and unit tests
     inline void set_debug_options(int iCol, int level)
     {
         m_iColumnToTrace = iCol;

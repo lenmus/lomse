@@ -613,6 +613,12 @@ int ScoreLayouter::get_num_columns()
 }
 
 //---------------------------------------------------------------------------------------
+ColumnData* ScoreLayouter::get_column(int i)
+{
+    return m_pSpAlgorithm->get_column(i);
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::create_parts_engraver()
 {
     ImoInstrGroups* pGroups = m_pScore->get_instrument_groups();

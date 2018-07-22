@@ -282,32 +282,15 @@ public:
 SUITE(ScoreLayouterTest)
 {
 
-    //===================================================================================
-    // ScoreLayouter initialization tests
-    //===================================================================================
+    //@0xx. ColumnsBuilder creates columns ----------------------------------------------
 
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialize)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData))) ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        scoreLyt.my_initialice_score_layouter();
-//
-//        CHECK( scoreLyt.my_get_columns_builder() != nullptr);
-//        CHECK( scoreLyt.my_shapes_creator() != nullptr );
-//        std::vector<InstrumentEngraver*>& instrEngravers =
-//            scoreLyt.my_get_instrument_engravers();
-//        CHECK( instrEngravers.size() == 1 );
-//    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_EmptyScoreNoColumnsOneSystem)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_001)
     {
+        //@001. Empty score has one system and no columns
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData))) ))" );
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData)))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -316,11 +299,13 @@ SUITE(ScoreLayouterTest)
         CHECK( scoreLyt.get_num_columns() == 0 );
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreateColumnsOneColumn)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_002)
     {
+        //@002. Score with content for one column
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -331,12 +316,14 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreateColumnsThree)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_003)
     {
+        //@003. Score with content for three columns
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
-            "(n e4 q) ))) ))" );
+            "(n e4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -349,12 +336,14 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_PageInitialization)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_010)
     {
+        //@010. PageBox correctly initialized
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
-            "(n e4 q) ))) ))" );
+            "(n e4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -373,12 +362,14 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_MoveToTopLeftCOrner)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_011)
     {
+        //@011. check method move_cursor_to_top_left_corner()
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
-            "(n e4 q) ))) ))" );
+            "(n e4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -400,10 +391,12 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DecideBreaks)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_012)
     {
+        //@012. check method decide_line_breaks()
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
             "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
             "(n e2 q)(n e3 q)(barline)"
@@ -427,7 +420,6 @@ SUITE(ScoreLayouterTest)
             "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
                 "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
             "(n c5 q p1)(barline)"
-            "))"
             ")))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -453,11 +445,13 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreateSystemBox)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_013)
     {
+        //@013. check method create_system_box()
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -486,12 +480,14 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DecideLineSizesDefault)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_014)
     {
+        //@014. staves width using default margins
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
-            "(n e4 q) ))) ))" );
+            "(n e4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -510,13 +506,15 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DecideLineSizesCustom)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_015)
     {
+        //@015. staves width when not default system margins
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(systemLayout other (systemMargins 200 100 0 0))"
             "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
-            "(n e4 q) ))) ))" );
+            "(n e4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -535,12 +533,14 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DistanceToTopOfSystem_1stInScore)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_016)
     {
+        //@016. first system: top distance when default settings
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(systemLayout first (systemMargins 200 100 2200 4400))"
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -558,13 +558,15 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DistanceToTopOfSystem_1stInPage)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_017)
     {
+        //@017. first system: top distance when user settings
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(systemLayout first (systemMargins 200 100 2200 4400))"
             "(systemLayout other (systemMargins 200 100 2200 3400))"
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -582,13 +584,15 @@ SUITE(ScoreLayouterTest)
         scoreLyt.my_delete_all();
     }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DistanceToTopOfSystem_Other)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_018)
     {
+        //@018. Not first system: top distance when user settings
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(score (vers 2.0) "
             "(systemLayout first (systemMargins 200 100 2200 4400))"
             "(systemLayout other (systemMargins 200 100 2200 3400))"
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -608,12 +612,14 @@ SUITE(ScoreLayouterTest)
 
 //Next test is wrong. Available space is not page height - 2000. Why 2000?
 //==============================================================================
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_RemainingHeight)
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_019)
 //    {
+//        //@019. Available space in page when score layouted is properly computed
+//
 //        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//        doc.from_string("(score (vers 2.0) "
 //            "(systemLayout first (systemMargins 200 100 2200 4400))"
-//            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+//            "(instrument (musicData (clef G)(n c4 q) )))" );
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -632,11 +638,13 @@ SUITE(ScoreLayouterTest)
 //        scoreLyt.my_delete_all();
 //    }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_EnoughtSpaceInPage_1st_true)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_020)
     {
+        //@020. Enough space in page for first system
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -654,11 +662,13 @@ SUITE(ScoreLayouterTest)
 
 //Next test is wrong. Available space is not 3900-2000. Why these numbers?
 //==============================================================================
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_EnoughtSpaceInPage_1st_false)
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_021)
 //    {
+//        //@021. Not enough space in page for first system
+//
 //        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
+//        doc.from_string("(score (vers 2.0) "
+//            "(instrument (musicData (clef G)(n c4 q) )))" );
 //        GraphicModel gmodel;
 //        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
 //        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -679,11 +689,13 @@ SUITE(ScoreLayouterTest)
 //        scoreLyt.my_delete_all();
 //   }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, SystemLayouter_FillSystemOneColumn)
+    TEST_FIXTURE(ScoreLayouterTestFixture, SystemLayouter_022)
     {
+        //@022. First system occupied space is correct
+
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q) )) )))" );
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q) )))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
@@ -714,120 +726,161 @@ SUITE(ScoreLayouterTest)
         //scoreLyt.my_delete_all();
     }
 
-}
 
+    //@1xx. ColumnBuilder adds measure information to columns --------------------------
 
-
-//---------------------------------------------------------------------------------------
-// ColumnsBuilder tests
-//---------------------------------------------------------------------------------------
-
-////---------------------------------------------------------------------------------------
-//// helper, for accesing protected members
-//class MyColumnsBuilder : public ColumnsBuilder
-//{
-//public:
-//    MyColumnsBuilder(ImoContentObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope)
-//        : SColumnsBuilder(pImo, pGModel, libraryScope)
-//    {
-//    }
-//    virtual ~MyColumnsBuilder() {}
-//};
-
-
-//---------------------------------------------------------------------------------------
-class ColumnsBuilderTestFixture
-{
-public:
-    LibraryScope m_libraryScope;
-
-    ColumnsBuilderTestFixture()   // setUp()
-        : m_libraryScope(cout)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_100)
     {
-        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        //@100. First column is start of measure
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)(n c4 q)(barline)"
+            ")))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 1 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        CHECK( pCol->is_start_of_measure() == true );
+
+        scoreLyt.my_delete_all();
     }
 
-    ~ColumnsBuilderTestFixture()  // tearDown()
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_101)
     {
+        //@101. When barline found start of measure is identified.
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)(n e4 h)(barline)"
+            ")))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 2 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        CHECK( pCol->is_start_of_measure() == true );
+        pCol = scoreLyt.get_column(1);
+        CHECK( pCol->is_start_of_measure() == true );
+
+        scoreLyt.my_delete_all();
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_102)
+    {
+        //@102. Start of measure is identified when does not finish in barline
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)"
+            "(n e4 h)(barline)(n g4 q)(n -b4 q)"
+            ")))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 3 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        CHECK( pCol->is_start_of_measure() == true );
+        pCol = scoreLyt.get_column(1);
+        CHECK( pCol->is_start_of_measure() == true );
+        pCol = scoreLyt.get_column(2);
+        CHECK( pCol->is_start_of_measure() == true );
+
+        scoreLyt.my_delete_all();
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_110)
+    {
+        //@110. TypeMeasureInfo taken from barlines
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)(n e4 h)(barline)"
+            ")))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 2 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        TypeMeasureInfo* pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 1 );
+        pCol = scoreLyt.get_column(1);
+        pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 2 );
+
+        scoreLyt.my_delete_all();
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_111)
+    {
+        //@111. TypeMeasureInfo taken from instrument
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)"
+            "(instrument (musicData (clef G)(time 2 4)(n c4 h)(barline)"
+            "(n e4 h)(barline)(n g4 q)(n -b4 q)"
+            ")))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 3 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        TypeMeasureInfo* pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 1 );
+        pCol = scoreLyt.get_column(1);
+        pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 2 );
+        pCol = scoreLyt.get_column(2);
+        pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 3 );
+
+        scoreLyt.my_delete_all();
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_120)
+    {
+        //@120. Empty scores have no measures
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData)))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 0 );
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_121)
+    {
+        //@121. Scores without barlines have one not-finished measure
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q) )))" );
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.prepare_to_start_layout();
+
+        CHECK( scoreLyt.get_num_columns() == 1 );
+        ColumnData* pCol = scoreLyt.get_column(0);
+        CHECK( pCol->is_start_of_measure() == true );
+        TypeMeasureInfo* pInfo = pCol->get_measure_info();
+        CHECK( pInfo && pInfo->count == 1 );
+
+        scoreLyt.my_delete_all();
     }
 
 };
-
-
-SUITE(ColumnsBuilderTest)
-{
-
-//    TEST_FIXTURE(ColumnsBuilderTestFixture, ColumnsBuilder_Initialize)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData))) ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        ColumnsBuilder* pColsBuilder = scoreLyt.my_get_columns_builder();
-//        CHECK(pColsBuilder != nullptr );
-////        std::vector<int>& breaks = scoreLyt.get_line_breaks();
-////        CHECK( breaks.size() == 0 );
-//    }
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_StavesHeightOneStaff)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q) ))) ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        scoreLyt.my_initialize();
-//        scoreLyt.my_determine_staves_vertical_position();
-//        CHECK( scoreLyt.my_get_staves_height() == 735.0f );
-//    }
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_StavesHeightTwoStaves)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (staves 2)(musicData (clef G)(n c4 q) ))) ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        scoreLyt.my_initialize();
-//        scoreLyt.my_determine_staves_vertical_position();
-//        CHECK( scoreLyt.my_get_staves_height() == 2470.0f );    //1000 + 735 * 2
-//    }
-
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_StavesHeightTwoInstrTwoStaves)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q) ))"
-//            "(instrument (staff 1 (staffDistance 1500))(musicData (clef G)(n c4 q) ))"
-//            ") ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        scoreLyt.my_initialize();
-//        scoreLyt.my_determine_staves_vertical_position();
-//        CHECK( scoreLyt.my_get_staves_height() == 2970.0f );    //1500 + 735 * 2
-//    }
-//
-//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_StavesHeightTtreeInstrFourStaves)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(n c4 q) ))"
-//            "(instrument (staves 2)(musicData (clef G)(n c4 q) ))"
-//            "(instrument (musicData (clef G)(n c4 q) ))"
-//            ") ))" );
-//        GraphicModel gmodel;
-//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-//        scoreLyt.my_initialize();
-//        scoreLyt.my_determine_staves_vertical_position();
-////        cout << "height = " << scoreLyt.my_get_staves_height() << endl;
-//        CHECK( scoreLyt.my_get_staves_height() == 5940.0f );    //1000 * 3 + 735 * 4
-//    }
-//
-};
-
