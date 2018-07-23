@@ -135,6 +135,7 @@ public:
     virtual LUnits get_column_width(int iCol) = 0;
     virtual bool has_system_break(int iCol) = 0;
     virtual int get_column_barlines_information(int iCol) = 0;
+    virtual TypeMeasureInfo* get_measure_info_for_column(int iCol) = 0;
 
     //boxes and shapes management
     virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
@@ -273,6 +274,8 @@ public:
     virtual GmoBoxSlice* get_slice_box(int iCol);
     virtual bool has_system_break(int iCol);
     virtual void delete_box_and_shapes(int iCol);
+    //other
+    virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
 
 
     //methods in base class SpacingAlgorithm that still need to be created

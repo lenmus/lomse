@@ -215,9 +215,19 @@ int SpAlgColumn::get_num_columns()
 }
 
 //---------------------------------------------------------------------------------------
-ColumnData* SpAlgColumn::get_column(int i)
+ColumnData* SpAlgColumn::get_column(int iCol)
 {
-    return (i < get_num_columns() ? m_colsData[i] : nullptr);
+    return (iCol < get_num_columns() ? m_colsData[iCol] : nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+TypeMeasureInfo* SpAlgColumn::get_measure_info_for_column(int iCol)
+{
+    ColumnData* pCol = get_column(iCol);
+    if (pCol && pCol->is_start_of_measure())
+        return pCol->get_measure_info();
+
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

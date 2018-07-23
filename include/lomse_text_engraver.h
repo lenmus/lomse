@@ -86,6 +86,24 @@ public:
     LUnits measure_height();
 };
 
+//---------------------------------------------------------------------------------------
+class MeasureNumberEngraver : public Engraver
+{
+protected:
+    const string& m_text;
+    ImoStyle* m_pStyle;
+    FontStorage* m_pFontStorage;
+
+public:
+    MeasureNumberEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                          const string& text);
+    ~MeasureNumberEngraver();
+
+    GmoShapeText* create_shape(ImoObj* pCreator, LUnits xLeft, LUnits yTop);
+    LUnits measure_width();
+    LUnits measure_height();
+};
+
 
 }   //namespace lomse
 

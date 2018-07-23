@@ -33,6 +33,7 @@
 #include "lomse_calligrapher.h"
 #include "lomse_gm_basic.h"
 #include "lomse_shape_text.h"
+#include "lomse_score_meter.h"
 
 
 namespace lomse
@@ -173,6 +174,56 @@ GmoShapeTextBox* TextBoxEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft
                                      USize(1000.0f, 1000.0f),     //rectangle size
                                      50.0f            //radius for rounded corners
                                     );
+}
+
+
+
+//=======================================================================================
+// MeasureNumberEngraver implementation
+//=======================================================================================
+MeasureNumberEngraver::MeasureNumberEngraver(LibraryScope& libraryScope,
+                                             ScoreMeter* pScoreMeter, const string& text)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_text(text)
+    , m_pFontStorage( libraryScope.font_storage() )
+{
+    m_pStyle = m_pMeter->get_style_info("Measure number");
+}
+
+//---------------------------------------------------------------------------------------
+MeasureNumberEngraver::~MeasureNumberEngraver()
+{
+}
+
+//---------------------------------------------------------------------------------------
+LUnits MeasureNumberEngraver::measure_width()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font("en",
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size() );
+    return meter.measure_width(m_text);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits MeasureNumberEngraver::measure_height()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font("en",
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size() );
+    return meter.get_font_height();
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeText* MeasureNumberEngraver::create_shape(ImoObj* pCreator,
+                                                  LUnits xLeft, LUnits yTop)
+{
+    ShapeId idx = 0;
+    return LOMSE_NEW GmoShapeText(pCreator, idx, m_text, m_pStyle, "en",
+                                  xLeft, yTop, m_libraryScope);
 }
 
 

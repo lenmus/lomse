@@ -724,6 +724,12 @@ LUnits ScoreLayouter::get_column_width(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
+TypeMeasureInfo* ScoreLayouter::get_measure_info_for_column(int iCol)
+{
+    return m_pSpAlgorithm->get_measure_info_for_column(iCol);
+}
+
+//---------------------------------------------------------------------------------------
 bool ScoreLayouter::column_has_system_break(int iCol)
 {
     return m_pSpAlgorithm->has_system_break(iCol);
@@ -1137,6 +1143,17 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         default:
             return create_invisible_shape(pAO, iInstr, iStaff, pos, 0.0f);
     }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ShapesCreator::create_measure_number_shape(ImoObj* pCreator,
+                                                     const string& number,
+                                                     LUnits xPos, LUnits yPos,
+                                                     int iInstr, int iStaff)
+{
+    MeasureNumberEngraver engrv(m_libraryScope, m_pScoreMeter, number);
+//    LUnits xPos = m_pScoreMeter->tenths_to_logical(40.0f, iInstr, iStaff));
+    return engrv.create_shape(pCreator, xPos, yPos);
 }
 
 //---------------------------------------------------------------------------------------

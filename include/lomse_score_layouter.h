@@ -184,6 +184,7 @@ public:
     //info
     virtual int get_num_columns();
     SystemLayouter* get_system_layouter(int iSys) { return m_sysLayouters[iSys]; }
+    virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
 
     //support for helper classes
     virtual LUnits get_target_size_for_system(int iSystem);
@@ -366,6 +367,11 @@ public:
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol, int iLine, LUnits prologWidth,
                                     ImoInstrument* pInstr);
+
+    //other shapes
+    GmoShape* create_measure_number_shape(ImoObj* pCreator, const string& number,
+                                          LUnits xPos, LUnits yPos,
+                                          int iInstr, int iStaff);
 
 protected:
 
