@@ -129,6 +129,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     build_system_timegrid();
     engrave_system_details(m_iSystem);
 
+    engrave_measure_numbers();
     engrave_instrument_details();
     add_instruments_info();
 
@@ -520,8 +521,6 @@ void SystemLayouter::engrave_instrument_details()
 //---------------------------------------------------------------------------------------
 void SystemLayouter::engrave_system_details(int iSystem)
 {
-    bool fFirstNumberInSystem = true;
-
     std::list<PendingAuxObjs*>::iterator it;
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end(); )
     {
@@ -539,12 +538,6 @@ void SystemLayouter::engrave_system_details(int iSystem)
                                     );
 		    it = m_pScoreLyt->m_pendingAuxObjs.erase(it);
             delete pPAO;
-
-            TypeMeasureInfo* pInfo = m_pScoreLyt->get_measure_info_for_column(iCol);
-            if (pInfo)
-                engrave_measure_number(pInfo, iCol, fFirstNumberInSystem);
-
-            fFirstNumberInSystem = false;
         }
         else
             ++it;
@@ -552,40 +545,56 @@ void SystemLayouter::engrave_system_details(int iSystem)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::engrave_measure_number(TypeMeasureInfo* pInfo, int iCol,
-                                            bool fFirstNumberInSystem)
+void SystemLayouter::engrave_measure_numbers()
 {
-    string number = pInfo->number;
+    for (int iCol = m_iFirstCol; iCol < m_iLastCol; ++iCol)
+    {
+        bool fFirstNumberInSystem = (iCol == m_iFirstCol);
 
-    if (number.empty())
-        number = std::to_string(pInfo->count);
+        //get measure number info and check if it must be engraved
+        TypeMeasureInfo* pInfo = m_pScoreLyt->get_measure_info_for_column(iCol);
+        if (pInfo == nullptr)
+            continue;
 
-    bool fPrintNumber = true;
-    //TODO: Add rules/options to determine if this measure should be numbered or not
-    //Rule 1: print numbers only in first measure of every system
-    fPrintNumber = fFirstNumberInSystem;
-    if (!fPrintNumber)
-        return;
+        string number = pInfo->number;
 
-    //Needs:
-    // - m_pPartsEngraver for accessing InstrumentEngraver for every instrument and
-    //      determining top of each staff
-    int iInstr = 0;
-    InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-    ImoObj* pCreator = m_pScore->get_instrument(iInstr);
-    int iStaff = 0;
+        if (number.empty())
+            number = std::to_string(pInfo->count);
 
-    LUnits xPos = pInstrEngrv->get_staves_left();
-    LUnits yPos = pInstrEngrv->get_staves_top_line()
-                  - m_pScoreMeter->tenths_to_logical(10.0f, iInstr, iStaff);
+        bool fPrintNumber = true;
+        //TODO: Add rules/options to determine if this measure should be numbered or not
+        //Rule 1: print numbers only in first measure of every system
+        fPrintNumber = fFirstNumberInSystem;
+        //Rule 2: (optional) measure #1 is not numbered
+        if (fPrintNumber)
+            fPrintNumber = pInfo->count != 1;
 
-    GmoShape* pShape =
-                m_pShapesCreator->create_measure_number_shape(pCreator, number,
-                                                              xPos, yPos,
-                                                              iInstr, iStaff);
-    //m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
-    add_aux_shape_to_model(pShape, GmoShape::k_layer_staff, iCol, iInstr);
-    m_yMax = max(m_yMax, pShape->get_bottom());
+        if (!fPrintNumber)
+            continue;
+
+
+        //The number must be engraved. Do it
+        //Needs:
+        // - m_pPartsEngraver for accessing InstrumentEngraver for every instrument and
+        //      determining top of each staff
+        int iInstr = 0;
+        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+        ImoObj* pCreator = m_pScore->get_instrument(iInstr);
+        int iStaff = 0;
+
+        LUnits xPos = pInstrEngrv->get_staves_left();
+        LUnits yPos = pInstrEngrv->get_staves_top_line()
+                      - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
+
+        GmoShape* pShape =
+                    m_pShapesCreator->create_measure_number_shape(pCreator, number,
+                                                                  xPos, yPos,
+                                                                  iInstr, iStaff);
+
+        m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
+
+        m_yMax = max(m_yMax, pShape->get_bottom());
+    }
 }
 
 //---------------------------------------------------------------------------------------

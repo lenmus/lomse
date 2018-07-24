@@ -187,7 +187,7 @@ MeasureNumberEngraver::MeasureNumberEngraver(LibraryScope& libraryScope,
     , m_text(text)
     , m_pFontStorage( libraryScope.font_storage() )
 {
-    m_pStyle = m_pMeter->get_style_info("Measure number");
+    m_pStyle = m_pMeter->get_style_info("Measure numbers");
 }
 
 //---------------------------------------------------------------------------------------

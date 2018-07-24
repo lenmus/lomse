@@ -142,6 +142,7 @@ protected:
     void add_initial_line_joining_all_staves_in_system();
     void reposition_slices_and_staffobjs();
     void redistribute_free_space();
+    void engrave_measure_numbers();
     void engrave_system_details(int iSystem);
     void add_instruments_info();
 
@@ -151,8 +152,6 @@ protected:
     LUnits determine_column_size(int iCol);
     void create_boxes_for_column(int iCol, LUnits pos, LUnits size);
 
-    void engrave_measure_number(TypeMeasureInfo* pInfo, int iCol,
-                                bool fFirstNumberInSystem);
 
     void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                   int iInstr, int iStaff, int iSystem,
