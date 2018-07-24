@@ -812,10 +812,14 @@ SUITE(ScoreLayouterTest)
         CHECK( scoreLyt.get_num_columns() == 2 );
         ColumnData* pCol = scoreLyt.get_column(0);
         TypeMeasureInfo* pInfo = pCol->get_measure_info();
+        CHECK( pCol->is_start_of_measure() == true );
         CHECK( pInfo && pInfo->count == 1 );
+        CHECK( pCol->get_shape_for_start_barline() == nullptr );
         pCol = scoreLyt.get_column(1);
         pInfo = pCol->get_measure_info();
+        CHECK( pCol->is_start_of_measure() == true );
         CHECK( pInfo && pInfo->count == 2 );
+        CHECK( pCol->get_shape_for_start_barline() != nullptr );
 
         scoreLyt.my_delete_all();
     }
@@ -837,13 +841,19 @@ SUITE(ScoreLayouterTest)
         CHECK( scoreLyt.get_num_columns() == 3 );
         ColumnData* pCol = scoreLyt.get_column(0);
         TypeMeasureInfo* pInfo = pCol->get_measure_info();
+        CHECK( pCol->is_start_of_measure() == true );
         CHECK( pInfo && pInfo->count == 1 );
+        CHECK( pCol->get_shape_for_start_barline() == nullptr );
         pCol = scoreLyt.get_column(1);
         pInfo = pCol->get_measure_info();
+        CHECK( pCol->is_start_of_measure() == true );
         CHECK( pInfo && pInfo->count == 2 );
+        CHECK( pCol->get_shape_for_start_barline() != nullptr );
         pCol = scoreLyt.get_column(2);
         pInfo = pCol->get_measure_info();
+        CHECK( pCol->is_start_of_measure() == true );
         CHECK( pInfo && pInfo->count == 3 );
+        CHECK( pCol->get_shape_for_start_barline() != nullptr );
 
         scoreLyt.my_delete_all();
     }
@@ -879,6 +889,7 @@ SUITE(ScoreLayouterTest)
         CHECK( pCol->is_start_of_measure() == true );
         TypeMeasureInfo* pInfo = pCol->get_measure_info();
         CHECK( pInfo && pInfo->count == 1 );
+        CHECK( pCol->get_shape_for_start_barline() == nullptr );
 
         scoreLyt.my_delete_all();
     }

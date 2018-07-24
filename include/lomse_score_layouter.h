@@ -185,6 +185,7 @@ public:
     virtual int get_num_columns();
     SystemLayouter* get_system_layouter(int iSys) { return m_sysLayouters[iSys]; }
     virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
+    virtual GmoShapeBarline* get_start_barline_shape_for_column(int iCol);
 
     //support for helper classes
     virtual LUnits get_target_size_for_system(int iSystem);

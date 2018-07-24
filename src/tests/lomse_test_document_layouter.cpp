@@ -265,9 +265,19 @@ SUITE(DocLayouterTest)
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         GmoBox* pBSys = pBSP->get_child_box(0);     //System
-        GmoShape* pShape = pBSys->get_shape(0);     //ShapeStaff
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
+        int iMax = pBSys->get_num_shapes();
+        GmoShape* pShape = nullptr;
+        bool fStaffShapeFound = false;
+        for (int i=0; i < iMax; ++i)
+        {
+            pShape = pBSys->get_shape(i);
+            if (pShape && pShape->is_shape_staff())
+            {
+                fStaffShapeFound = true;
+                break;
+            }
+        }
+        CHECK( fStaffShapeFound == true );
         //CHECK( pShape->get_width() == 16000.0f );
         delete pGModel;
     }

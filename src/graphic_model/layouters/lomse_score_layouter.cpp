@@ -730,6 +730,12 @@ TypeMeasureInfo* ScoreLayouter::get_measure_info_for_column(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
+GmoShapeBarline* ScoreLayouter::get_start_barline_shape_for_column(int iCol)
+{
+    return m_pSpAlgorithm->get_start_barline_shape_for_column(iCol);
+}
+
+//---------------------------------------------------------------------------------------
 bool ScoreLayouter::column_has_system_break(int iCol)
 {
     return m_pSpAlgorithm->has_system_break(iCol);

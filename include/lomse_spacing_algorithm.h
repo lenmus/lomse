@@ -48,6 +48,7 @@ class ColumnsBuilder;
 class GmoBoxSlice;
 class GmoBoxSliceInstr;
 class GmoShape;
+class GmoShapeBarline;
 class ImoInstrument;
 class ImoScore;
 class ImoStaffObj;
@@ -136,6 +137,7 @@ public:
     virtual bool has_system_break(int iCol) = 0;
     virtual int get_column_barlines_information(int iCol) = 0;
     virtual TypeMeasureInfo* get_measure_info_for_column(int iCol) = 0;
+    virtual GmoShapeBarline* get_start_barline_shape_for_column(int iCol) = 0;
 
     //boxes and shapes management
     virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
@@ -174,8 +176,14 @@ protected:
     bool m_fHasSystemBreak;
     GmoBoxSlice* m_pBoxSlice;           //box for this column
     SpAlgColumn* m_pSpAlgorithm;
-    TypeMeasureInfo* m_pMeasureInfo;
-    bool m_fMeasureStart;
+    bool m_fMeasureStart;               //a measure starts in this column
+    TypeMeasureInfo* m_pMeasureInfo;    //info for measure that starts or nullptr
+
+    GmoShapeBarline* m_pShapeBarline;   //shape for barline at which the measure starts
+                                        //(the previous barline) or nullptr if measure
+                                        //does not starts in this column or it is the
+                                        //first measure.
+
     int m_nTraceLevel;                  //for debugging
 
     std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;   //instr.boxes for this column
@@ -213,10 +221,15 @@ public:
     void delete_shapes(int iCol);
 
     //support to lay out measure attributes
-    inline void mark_as_start_of_measure() { m_fMeasureStart = true; }
-    inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
+    inline void mark_as_start_of_measure(TypeMeasureInfo* pInfo, GmoShapeBarline* pShape)
+    {
+        m_pMeasureInfo = pInfo;
+        m_fMeasureStart = true;
+        m_pShapeBarline = pShape;
+    }
     inline bool is_start_of_measure() { return m_fMeasureStart; }
     inline TypeMeasureInfo* get_measure_info() { return m_pMeasureInfo; }
+    inline GmoShapeBarline* get_shape_for_start_barline() { return m_pShapeBarline; }
 
     //support for debug and unit tests
     void delete_box_and_shapes(int iCol);
@@ -276,6 +289,7 @@ public:
     virtual void delete_box_and_shapes(int iCol);
     //other
     virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
+    virtual GmoShapeBarline* get_start_barline_shape_for_column(int iCol);
 
 
     //methods in base class SpacingAlgorithm that still need to be created
@@ -383,6 +397,10 @@ protected:
 
     int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
     int m_iColStartMeasure;     //to store index at which next measure starts
+    GmoShapeBarline* m_pStartBarlineShape;  //to store ptr to the barline shape for the
+                                            //the measure that finishes current measure.
+                                            //It is going to be the barline that starts
+                                            //next measure (in column m_iColStartMeasure)
 
     int m_iColumnToTrace;   //support for debug and unit test
     int m_nTraceLevel;

@@ -38,7 +38,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
 #include "lomse_logger.h"
-
+#include "lomse_shape_barline.h"
 #include "lomse_score_layouter.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_engraving_options.h"
@@ -563,37 +563,54 @@ void SystemLayouter::engrave_measure_numbers()
 
         bool fPrintNumber = true;
         //TODO: Add rules/options to determine if this measure should be numbered or not
-        //Rule 1: print numbers only in first measure of every system
-        fPrintNumber = fFirstNumberInSystem;
-        //Rule 2: (optional) measure #1 is not numbered
+
+//        //Rule 1: (optional) print numbers only in first measure of every system
+//        fPrintNumber = fFirstNumberInSystem;
+
+//        //Rule 2: (optional) measure #1 is not numbered
+//        if (fPrintNumber)
+//            fPrintNumber = pInfo->count != 1;
+
         if (fPrintNumber)
-            fPrintNumber = pInfo->count != 1;
+        //if (measure_number_must_be_displayed())
+        {
+            //The number must be engraved. Do it
 
-        if (!fPrintNumber)
-            continue;
+            int iInstr = 0;
+            int iStaff = 0;
+            LUnits xPos = 0.0f;
+            LUnits yPos = 0.0f;
+            ImoObj* pCreator = m_pScore->get_instrument(iInstr);
 
+            if (fFirstNumberInSystem)
+            {
+                //engrave_measure_number_at_start_of_system();
+                InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
 
-        //The number must be engraved. Do it
-        //Needs:
-        // - m_pPartsEngraver for accessing InstrumentEngraver for every instrument and
-        //      determining top of each staff
-        int iInstr = 0;
-        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-        ImoObj* pCreator = m_pScore->get_instrument(iInstr);
-        int iStaff = 0;
+                xPos = pInstrEngrv->get_staves_left();
+                yPos = pInstrEngrv->get_staves_top_line()
+                       - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
+            }
+            else
+            {
+                //engrave_measure_number_at_barline();
+                InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+                GmoShapeBarline* pShapeBarline =
+                    m_pScoreLyt->get_start_barline_shape_for_column(iCol);
+                xPos = pShapeBarline->get_left();
+                yPos = pInstrEngrv->get_staves_top_line()
+                       - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
+            }
 
-        LUnits xPos = pInstrEngrv->get_staves_left();
-        LUnits yPos = pInstrEngrv->get_staves_top_line()
-                      - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
+            GmoShape* pShape =
+                        m_pShapesCreator->create_measure_number_shape(pCreator, number,
+                                                                      xPos, yPos,
+                                                                      iInstr, iStaff);
 
-        GmoShape* pShape =
-                    m_pShapesCreator->create_measure_number_shape(pCreator, number,
-                                                                  xPos, yPos,
-                                                                  iInstr, iStaff);
+            m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
 
-        m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
-
-        m_yMax = max(m_yMax, pShape->get_bottom());
+            m_yMax = max(m_yMax, pShape->get_bottom());
+        }
     }
 }
 
