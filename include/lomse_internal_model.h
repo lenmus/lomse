@@ -378,6 +378,8 @@ enum EBarline
     k_barline_start_repetition,         ///< Start of repetition barline
     k_barline_end_repetition,           ///< End of repetition barline
     k_barline_double_repetition,        ///< Double repetition barline
+    k_barline_double_repetition_alt,    ///< Double repetition barline alternative design
+                                        //for heavy-heavy in MusicXML. See E.Gould, p.234
 
     k_max_barline,                      ///< Last element, for loops and checks
 };
@@ -1032,18 +1034,20 @@ protected:
 class TypeMeasureInfo
 {
 public:
-    int index;      ///> An optional integer index for the measure, as defined in NMX.
-                    ///> The first measure has an index of 1.
-    int count;      ///> sequential integer index for the measure. The first measure
-                    ///> is counted as 1, even if anacrusis start.
-    string number;  ///> An optional textual number to be displayed for the measure.
+    int index;      ///< An optional integer index for the measure, as defined in NMX.
+                    ///< The first measure has an index of 1.
+    int count;      ///< sequential integer index for the measure. The first measure
+                    ///< is counted as 1, even if anacrusis start.
+    string number;  ///< An optional textual number to be displayed for the measure.
+    bool fHideNumber;   ///< Override measures number policy for preventing to
+                        ///< display the number in this measure.
 
 
-    TypeMeasureInfo() : index(0), count(0), number("") {}
-    TypeMeasureInfo(int index, int count, const string& number)
-        : index(index)
-        , count(count)
-        , number(number)
+    TypeMeasureInfo()
+        : index(0)
+        , count(0)
+        , number("")
+        , fHideNumber(false)
     {
     }
 
@@ -5019,8 +5023,11 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-/** %ImoInstrument represents the musical content and attributes for an score-part
+/** %ImoInstrument represents the musical content and attributes for an score part
     ('instrument', in lomse terminology).
+
+    Layout options are modeled by specific member variables. Perhaps, in future, if
+    there are many options, they could be modeled by an ImoOptions child
 */
 class ImoInstrument : public ImoContainerObj
 {
@@ -5030,7 +5037,12 @@ protected:
     ImoScoreText    m_abbrev;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
-    int             m_barlineLayout;        //from enum EBarlineLayout
+
+    //layout options
+    int     m_barlineLayout;        //from enum EBarlineLayout
+    int     m_measuresNumbering;    //from enum EMeasuresNumbering
+
+    //measures info
     ImMeasuresTable*  m_pMeasures;
     TypeMeasureInfo*  m_pLastMeasureInfo;   //for last measure if not closed or the score
                                             //has no metric. Otherwise it will be nullptr.
@@ -5045,8 +5057,6 @@ protected:
 public:
     virtual ~ImoInstrument();
 
-    enum EBarlineLayout { k_isolated=0, k_joined, k_mensurstrich, k_nothing, };
-
     //methods for accessing ImoSounds child
     LOMSE_DECLARE_IMOSOUNDS_INTERFACE;
 
@@ -5058,7 +5068,6 @@ public:
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
     inline const string& get_instr_id() const { return m_partId; }
-    inline int get_barline_layout() const { return m_barlineLayout; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
     inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
 
@@ -5070,8 +5079,40 @@ public:
     void set_abbrev(const string& value);
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
-    inline void set_barline_layout(int value) { m_barlineLayout = value; }
     inline void set_last_measure_info(TypeMeasureInfo* pInfo) { m_pLastMeasureInfo = pInfo; }
+
+        //layout options
+
+    /// Valid values for defining the policy to layout barlines.
+    enum EBarlineLayout
+    {
+        k_isolated=0,       ///< Independent barlines for each score part
+        k_joined,           ///< Barlines joined across all parts
+        k_mensurstrich,     ///< Barlines only in the gaps between parts, but not on
+                            ///< the staves of each part
+        k_nothing,          ///< Do not display barlines (???)
+    };
+
+    /// Valid values for measure numbering global policy.
+    enum EMeasuresNumbering
+    {
+        k_none=0,   ///< Measure numbers are never displayed
+        k_system,   ///< Display measure numbers only at start of each system
+        k_all,      ///< Display measure numbers in all measures
+    };
+
+    /** Barlines layout describes the policy for laying out barlines.
+    */
+    inline int get_barline_layout() const { return m_barlineLayout; }
+    inline void set_barline_layout(int value) { m_barlineLayout = value; }
+
+    /** Measures numbering describes the policy for displaying numbers in measures
+        for this instrument. The value set in the policy can be overridden at each
+        measure.
+    */
+    inline int get_measures_numbering() const { return m_measuresNumbering; }
+    inline void set_measures_numbering(int value) { m_measuresNumbering = value; }
+
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }

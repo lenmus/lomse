@@ -38,7 +38,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
 #include "lomse_logger.h"
-
+#include "lomse_shape_barline.h"
 #include "lomse_score_layouter.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_engraving_options.h"
@@ -129,6 +129,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     build_system_timegrid();
     engrave_system_details(m_iSystem);
 
+    engrave_measure_numbers();
     engrave_instrument_details();
     add_instruments_info();
 
@@ -523,7 +524,8 @@ void SystemLayouter::engrave_system_details(int iSystem)
     std::list<PendingAuxObjs*>::iterator it;
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end(); )
     {
-        int objSystem = m_pScoreLyt->get_system_containing_column( (*it)->m_iCol );
+        int iCol = (*it)->m_iCol;
+        int objSystem = m_pScoreLyt->get_system_containing_column(iCol);
         if (objSystem > iSystem)
             break;
         if (objSystem == iSystem)
@@ -531,7 +533,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
             PendingAuxObjs* pPAO = *it;
             engrave_attached_objects((*it)->m_pSO, (*it)->m_pMainShape,
                                      (*it)->m_iInstr, (*it)->m_iStaff, objSystem,
-                                     (*it)->m_iCol, (*it)->m_iLine,
+                                     iCol, (*it)->m_iLine,
                                      (*it)->m_pInstr
                                     );
 		    it = m_pScoreLyt->m_pendingAuxObjs.erase(it);
@@ -540,6 +542,84 @@ void SystemLayouter::engrave_system_details(int iSystem)
         else
             ++it;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::engrave_measure_numbers()
+{
+    for (int iCol = m_iFirstCol; iCol < m_iLastCol; ++iCol)
+    {
+        bool fFirstNumberInSystem = (iCol == m_iFirstCol);
+
+        //get the number for the measure
+        TypeMeasureInfo* pInfo = m_pScoreLyt->get_measure_info_for_column(iCol);
+        if (pInfo == nullptr)
+            continue;   //nothing to render in this measure
+
+        string number = pInfo->number;
+
+        if (number.empty())
+            continue;   //nothing to render in this measure
+
+        //TODO: Loop for all instruments. For MusicXML is needed as, in theory, each
+        //  part could have a different policy. But I have not found any sample
+        //  requiring it. So, for now, I will save time and do it only for 1st instr.
+        //  Notice that TypeMeasureInfo in iCol is from first instrument. If the
+        //  instruments loop is finally required, the columns must include info
+        //  for all instruments.
+        int iInstr = 0;
+        ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+        int policy = pInstr->get_measures_numbering();
+
+        if (measure_number_must_be_displayed(policy, pInfo, fFirstNumberInSystem))
+        {
+            int iStaff = 0;
+            LUnits xPos = 0.0f;
+            LUnits yPos = 0.0f;
+            ImoObj* pCreator = m_pScore->get_instrument(iInstr);
+            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+
+            if (fFirstNumberInSystem)
+            {
+                //engrave_measure_number_at_start_of_system();
+                xPos = pInstrEngrv->get_staves_left();
+            }
+            else
+            {
+                //engrave_measure_number_at_barline();
+                GmoShapeBarline* pShapeBarline =
+                    m_pScoreLyt->get_start_barline_shape_for_column(iCol);
+                xPos = pShapeBarline->get_right();
+            }
+            yPos = pInstrEngrv->get_staves_top_line()
+                   - m_pScoreMeter->tenths_to_logical(20.0f, iInstr, iStaff);
+
+            GmoShape* pShape = m_pShapesCreator->create_measure_number_shape(
+                                        pCreator, number, xPos, yPos);
+
+            m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
+
+            m_yMax = max(m_yMax, pShape->get_bottom());
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool SystemLayouter::measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
+                                                      bool fFirstNumberInSystem)
+{
+    bool fPrintNumber;
+    if (policy == ImoInstrument::k_system)
+        fPrintNumber = fFirstNumberInSystem;
+    else if (policy == ImoInstrument::k_all)
+        fPrintNumber = true;
+    else
+        fPrintNumber = false;
+
+    if (fPrintNumber)
+        fPrintNumber = !pInfo->fHideNumber;
+
+    return fPrintNumber;
 }
 
 //---------------------------------------------------------------------------------------
@@ -628,7 +708,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                             m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
                                                                   pMainShape);
     //            pMainShape->accept_link_from(pAuxShape);
-                add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
+                add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
                                        iCol, iInstr);
                 m_yMax = max(m_yMax, pAuxShape->get_bottom());
             }
@@ -648,13 +728,7 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
-        {
-            int iSystem = pInfo->iSystem;
-            int iCol = pInfo->iCol;
-            int iInstr = pInfo->iInstr;
-
-            add_aux_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
-        }
+            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
    }
 
     m_shapesStorage.remove_engraver(pAO);
@@ -673,13 +747,7 @@ void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
-        {
-            int iSystem = pInfo->iSystem;
-            int iCol = pInfo->iCol;
-            int iInstr = pInfo->iInstr;
-
-            add_aux_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
-        }
+            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
    }
 
     m_shapesStorage.remove_engraver(tag);
@@ -689,7 +757,6 @@ void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_aux_shape_to_model(GmoShape* pShape, int layer,
-                                            int UNUSED(iSystem),
                                             int iCol, int iInstr)
 {
     pShape->set_layer(layer);

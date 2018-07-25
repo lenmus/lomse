@@ -613,6 +613,12 @@ int ScoreLayouter::get_num_columns()
 }
 
 //---------------------------------------------------------------------------------------
+ColumnData* ScoreLayouter::get_column(int i)
+{
+    return m_pSpAlgorithm->get_column(i);
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::create_parts_engraver()
 {
     ImoInstrGroups* pGroups = m_pScore->get_instrument_groups();
@@ -715,6 +721,18 @@ void ScoreLayouter::dump_column_data(int iCol, ostream& outStream)
 LUnits ScoreLayouter::get_column_width(int iCol)
 {
     return m_pSpAlgorithm->get_column_width(iCol);
+}
+
+//---------------------------------------------------------------------------------------
+TypeMeasureInfo* ScoreLayouter::get_measure_info_for_column(int iCol)
+{
+    return m_pSpAlgorithm->get_measure_info_for_column(iCol);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeBarline* ScoreLayouter::get_start_barline_shape_for_column(int iCol)
+{
+    return m_pSpAlgorithm->get_start_barline_shape_for_column(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1107,6 +1125,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
                                pImo->get_language(), pImo->get_style());
             return engrv.create_shape(pImo, pos.x, pos.y);
         }
+        case k_imo_text_box:
+        {
+            ImoTextBox* pImo = static_cast<ImoTextBox*>(pAO);
+            TextBoxEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
+                                  "en", /*pImo->get_language(),*/ pImo->get_style());
+            return engrv.create_shape(pImo, pos.x, pos.y);
+        }
         case k_imo_technical:
         {
             ImoTechnical* pImo = static_cast<ImoTechnical*>(pAO);
@@ -1124,6 +1149,15 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         default:
             return create_invisible_shape(pAO, iInstr, iStaff, pos, 0.0f);
     }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ShapesCreator::create_measure_number_shape(ImoObj* pCreator,
+                                                     const string& number,
+                                                     LUnits xPos, LUnits yPos)
+{
+    MeasureNumberEngraver engrv(m_libraryScope, m_pScoreMeter, number);
+    return engrv.create_shape(pCreator, xPos, yPos);
 }
 
 //---------------------------------------------------------------------------------------

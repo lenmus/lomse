@@ -3480,6 +3480,7 @@ string LdpExporter::barline_type_to_ldp(int barlineType)
         case k_barline_start:
             return "start";
         case k_barline_double_repetition:
+        case k_barline_double_repetition_alt:
             return "doubleRepetition";
         case k_barline_none:
             return "none";

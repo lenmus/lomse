@@ -2036,8 +2036,15 @@ protected:
             else
                 fError = true;
         }
-//        else if (barType == "heavy-heavy")
-//            type = ?
+        else if (barType == "heavy-heavy")
+        {
+            if (repeat == "backward")
+                type = k_barline_double_repetition_alt;
+            else if (repeat.empty())
+                type = k_barline_double;
+            else
+                fError = true;
+        }
 //        else if (barType == "tick")   //a short stroke through the top line
 //            type = ?
 //        else if (barType == "short")  //a partial barline between the 2nd and 4th lines
@@ -2050,7 +2057,6 @@ protected:
 
         if (fError)
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <bar-style> ('" + barType
                 + "') and/or <repeat> ('" + repeat
@@ -2483,10 +2489,24 @@ public:
         while (analyse_optional("direction-type", pDirection));
 
         // offset?
-        //TODO
+        if (get_optional("offset"))
+        {
+            //TODO
+        }
 
-        // %editorial-voice;
-        //TODO
+        // %editorial-voice; = (footnote?, level?, voice?)
+        if (get_optional("footnote"))
+        {
+            //TODO
+        }
+        if (get_optional("level"))
+        {
+            //TODO
+        }
+        if (get_optional("voice"))
+        {
+            //TODO
+        }
 
         // staff?
         pDirection->set_staff(analyse_optional_staff(1) - 1);
@@ -3368,7 +3388,6 @@ public:
     ImoObj* do_analysis()
     {
         ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
-        bool fSomethingAdded = false;
 
         //attrb: number CDATA #REQUIRED
         string num = get_optional_string_attribute("number", "");
@@ -3380,7 +3399,8 @@ public:
         TypeMeasureInfo* pInfo = create_measure_info(num);
 
         //attrb: implicit %yes-no; #IMPLIED
-        //TODO
+        //AWARE: implicit="yes" means 'do not display measure number'
+        pInfo->fHideNumber = get_optional_yes_no_attribute("implicit", false);
 
         //attrb: non-controlling %yes-no; #IMPLIED
         //'non-controlling': a barline not suitable for line breaks or page breaks.
@@ -3393,26 +3413,16 @@ public:
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
         {
-            if (analyse_optional("attributes", pMD))
-                fSomethingAdded = true;
-            else if (analyse_optional("barline", pMD))
-                fSomethingAdded = true;
-            else if (analyse_optional("direction", pMD))
-                //TODO: add fSomethingAdded = true;  when direction analyser coded
-                ;
-            else if (analyse_optional("note", pMD))
-                fSomethingAdded = true;
-            else if (analyse_optional("forward", pMD))
-                fSomethingAdded = true;
-            else if (analyse_optional("backup", pMD))
-                fSomethingAdded = true;
-            else if (analyse_optional("print"))
-                //TODO: add fSomethingAdded = true;  when print analyser coded
-                ;
-            else if (analyse_optional("sound", pMD))
-                //TODO: add fSomethingAdded = true;  when sound analyser coded
-                ;
-            else
+            if (!(analyse_optional("attributes", pMD)
+                  || analyse_optional("barline", pMD)
+                  || analyse_optional("direction", pMD)
+                  || analyse_optional("note", pMD)
+                  || analyse_optional("forward", pMD)
+                  || analyse_optional("backup", pMD)
+                  || analyse_optional("print")
+                  || analyse_optional("sound", pMD)
+                 )
+               )
             {
                 error_invalid_child();
                 move_to_next_child();
@@ -3421,12 +3431,11 @@ public:
 
         error_if_more_elements();
 
-        if (fSomethingAdded)
-        {
-            ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
-            if (pSO == nullptr || !pSO->is_barline())
-                add_barline(pInfo);
-        }
+        ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
+        if (pSO == nullptr || !pSO->is_barline())
+            add_barline(pInfo);
+        else if (pSO->is_barline())
+            static_cast<ImoBarline*>(pSO)->set_measure_info(pInfo);
 
         return pMD;
     }
@@ -4326,6 +4335,7 @@ public:
 
         m_pAnalyser->save_current_part_id(id);
         m_pAnalyser->prepare_for_new_instrument_content();
+        m_pAnalyser->save_current_instrument(pInstr);
         ImoMusicData* pMD = pInstr->get_musicdata();
 
         // <measure>*
@@ -5010,6 +5020,18 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ print
+//@ <!ELEMENT print (page-layout?, system-layout?, staff-layout*,
+//@     measure-layout?, measure-numbering?, part-name-display?,
+//@     part-abbreviation-display?)>
+//@ <!ATTLIST print
+//@     staff-spacing %tenths; #IMPLIED
+//@     new-system %yes-no; #IMPLIED
+//@     new-page %yes-no; #IMPLIED
+//@     blank-page NMTOKEN #IMPLIED
+//@     page-number CDATA #IMPLIED
+//@     %optional-unique-id;
+//@ >
+//@
 class PrintMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -5019,9 +5041,83 @@ public:
 
     ImoObj* do_analysis()
     {
-        //TODO
+        //TODO: Finish this
+
+            //attribs
+
+        // staff-spacing %tenths; #IMPLIED
+        // new-system %yes-no; #IMPLIED
+        // new-page %yes-no; #IMPLIED
+        // blank-page NMTOKEN #IMPLIED
+        // page-number CDATA #IMPLIED
+        // %optional-unique-id;
+
+            // elements
+
+
+        // page-layout?
+        if (get_optional("page-layout"))
+        {
+
+        }
+
+        // system-layout?
+        if (get_optional("system-layout"))
+        {
+
+        }
+
+        // staff-layout*
+        while (get_optional("staff-layout"))
+        {
+
+        }
+
+        // measure-layout?
+        if (get_optional("measure-layout"))
+        {
+
+        }
+
+        // measure-numbering?
+        if (get_optional("measure-numbering"))
+            set_measures_numbering();
+
+        // part-name-display?
+        if (get_optional("part-name-display"))
+        {
+
+        }
+
+        // part-abbreviation-display?
+        if (get_optional("part-abbreviation-display"))
+        {
+
+        }
+
         return nullptr;
     }
+
+protected:
+
+    void set_measures_numbering()
+    {
+        string numbering = m_childToAnalyse.value();
+        ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+        if (numbering == "system")
+            pInstr->set_measures_numbering(ImoInstrument::k_system);
+        else if (numbering == "measure")
+            pInstr->set_measures_numbering(ImoInstrument::k_all);
+        else if (numbering == "none")
+            pInstr->set_measures_numbering(ImoInstrument::k_none);
+        else
+        {
+            error_msg2(
+                "Invalid value '" + numbering + "'. Value 'none' assumed.");
+            pInstr->set_measures_numbering(ImoInstrument::k_none);
+        }
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------

@@ -1906,6 +1906,94 @@ SUITE(MxlAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, measure_03)
+    {
+        //@03. Explicit barline
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+            "</measure>"
+            "<measure number='X2'>"
+            "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+           "<barline location='right'>"
+                "<bar-style>light-heavy</bar-style>"
+           "</barline>"
+           "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 6 );
+        ImoObj::children_iterator it = pMD->begin();    //measure 1: note a4
+        CHECK( (*it)->is_note() );
+        ++it;   //note c3
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline->is_visible() );
+        TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
+        CHECK( pInfo1 != nullptr );
+        CHECK( pInfo1->count == 1 );
+        CHECK( pInfo1->number == "1" );
+//        cout << test_name() << ": count=" << pInfo1->count
+//             << ", number=" << pInfo1->number << endl;
+
+        //measure 2
+        ++it;   //note a4
+        CHECK( (*it)->is_note() );
+        ++it;   //note c3
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline->get_type() == k_barline_end );
+        CHECK( pBarline->is_visible() );
+        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
+        CHECK( pInfo2 != nullptr );
+        CHECK( pInfo2->count == 2 );
+        CHECK( pInfo2->number == "X2" );
+//        cout << test_name() << ": count=" << pInfo2->count
+//             << ", number=" << pInfo2->number << endl;
+
+        CHECK( pInfo1 != pInfo2 );
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
 
     //@ midi-device -----------------------------------------------------------------
 

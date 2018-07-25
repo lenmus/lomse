@@ -45,25 +45,25 @@ namespace lomse
 {
 
 //forward declarations
-class ImoInstrument;
-class ImoScore;
-class ImoStaffObj;
-class ImoAuxObj;
-class ImoStaff;
+class ColumnStorage;
+class GmoBoxSlice;
+class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBoxSystem;
-class GmoBoxSliceInstr;
-class GmoBoxSlice;
-class ScoreMeter;
-class ShapesStorage;
+class ImoAuxObj;
+class ImoInstrument;
+class ImoScore;
+class ImoStaff;
+class ImoStaffObj;
 class InstrumentEngraver;
-class ShapesCreator;
 class PartsEngraver;
 class ScoreLayouter;
-class SystemLayouter;
-class ColumnStorage;
+class ScoreMeter;
+class ShapesCreator;
+class ShapesStorage;
 class SpacingAlgorithm;
-
+class SystemLayouter;
+class TypeMeasureInfo;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -142,6 +142,7 @@ protected:
     void add_initial_line_joining_all_staves_in_system();
     void reposition_slices_and_staffobjs();
     void redistribute_free_space();
+    void engrave_measure_numbers();
     void engrave_system_details(int iSystem);
     void add_instruments_info();
 
@@ -150,6 +151,9 @@ protected:
     LUnits determine_column_start_position(int iCol);
     LUnits determine_column_size(int iCol);
     void create_boxes_for_column(int iCol, LUnits pos, LUnits size);
+    bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
+                                          bool fFirstNumberInSystem);
+
 
     void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                   int iInstr, int iStaff, int iSystem,
@@ -158,8 +162,7 @@ protected:
 
     void add_relobjs_shapes_to_model(ImoObj* pAO, int layer);
     void add_relauxobjs_shapes_to_model(const string& tag, int layer);
-    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iSystem, int iCol,
-                                int iInstr);
+    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr);
 
     //helpers
     inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }

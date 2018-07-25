@@ -36,12 +36,13 @@
 #include "lomse_engraving_options.h"
 #include "lomse_score_meter.h"
 #include "lomse_box_slice_instr.h"
-
 #include "lomse_score_iterator.h"
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_score_layouter.h"
 #include "lomse_box_slice.h"
+#include "lomse_shape_barline.h"
+
 
 namespace lomse
 {
@@ -70,69 +71,6 @@ SpacingAlgorithm::~SpacingAlgorithm()
 {
 }
 
-
-//=======================================================================================
-// SpAlgColumn: helper class ColumnData and implementation
-//=======================================================================================
-
-//forward declarations
-class SpAlgColumn;
-
-//---------------------------------------------------------------------------------------
-//ColumnData: helper class used by SpAlgColumn for storing data for columns
-//---------------------------------------------------------------------------------------
-class ColumnData
-{
-protected:
-    ScoreMeter* m_pScoreMeter;
-    bool m_fHasSystemBreak;
-    GmoBoxSlice* m_pBoxSlice;           //box for this column
-    SpAlgColumn* m_pSpAlgorithm;
-    int m_nTraceLevel;                  //for debugging
-
-    std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;   //instr.boxes for this column
-
-    //applicable prolog at start of this column. On entry per staff
-    std::vector<ColStaffObjsEntry*> m_prologClefs;
-    std::vector<ColStaffObjsEntry*> m_prologKeys;
-
-
-public:
-    ColumnData(ScoreMeter* pScoreMeter, SpAlgColumn* pSpAlgorithm);
-    virtual ~ColumnData();
-
-
-    inline void use_this_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
-    inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
-    void save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
-                      ColStaffObjsEntry* pKeyEntry);
-
-    //access to info
-    inline bool has_system_break() { return m_fHasSystemBreak; }
-    inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
-    inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
-    inline ColStaffObjsEntry* get_prolog_key(ShapeId idx) { return m_prologKeys[idx]; }
-
-    //boxes and shapes
-    void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage);
-    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
-    inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
-    void set_slice_width(LUnits width);
-    void set_slice_final_position(LUnits left, LUnits top);
-
-    //adding shapes to graphical model
-    void add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
-    void delete_shapes(int iCol);
-
-    //support for debug and unit tests
-    void delete_box_and_shapes(int iCol);
-    inline void set_trace_level(int level) { m_nTraceLevel = level; }
-
-protected:
-    void reserve_space_for_prolog_clefs_keys(int numStaves);
-
-
-};
 
 //=====================================================================================
 //SpAlgColumn implementation
@@ -278,6 +216,32 @@ int SpAlgColumn::get_num_columns()
 }
 
 //---------------------------------------------------------------------------------------
+ColumnData* SpAlgColumn::get_column(int iCol)
+{
+    return (iCol < get_num_columns() ? m_colsData[iCol] : nullptr);
+}
+
+//---------------------------------------------------------------------------------------
+TypeMeasureInfo* SpAlgColumn::get_measure_info_for_column(int iCol)
+{
+    ColumnData* pCol = get_column(iCol);
+    if (pCol && pCol->is_start_of_measure())
+        return pCol->get_measure_info();
+
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeBarline* SpAlgColumn::get_start_barline_shape_for_column(int iCol)
+{
+    ColumnData* pCol = get_column(iCol);
+    if (pCol && pCol->is_start_of_measure())
+        return pCol->get_shape_for_start_barline();
+
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 void SpAlgColumn::set_trace_level(int iColumnToTrace, int nTraceLevel)
 {
     m_pColsBuilder->set_debug_options(iColumnToTrace, nTraceLevel);
@@ -305,6 +269,7 @@ ColumnsBuilder::ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& col
     , m_iColumnToTrace(-1)
     , m_nTraceLevel(k_trace_off)
     , m_pSpAlgorithm(pSpAlgorithm)
+    , m_maxColumn(0)
     , m_colsData(colsData)
 {
 }
@@ -326,6 +291,8 @@ ColumnsBuilder::~ColumnsBuilder()
 void ColumnsBuilder::create_columns()
 {
     m_iColumn = -1;
+    m_iColStartMeasure = 0;
+    m_pStartBarlineShape = nullptr;
     determine_staves_vertical_position();
     while(!m_pSysCursor->is_end())
     {
@@ -335,13 +302,13 @@ void ColumnsBuilder::create_columns()
         find_and_save_context_info_for_this_column();
         collect_content_for_this_column();
     }
-    m_numColumns = m_iColumn;
+    m_maxColumn = m_iColumn;
 }
 
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::do_spacing_algorithm()
 {
-    for (m_iColumn=0; m_iColumn <= m_numColumns; ++m_iColumn)
+    for (m_iColumn=0; m_iColumn <= m_maxColumn; ++m_iColumn)
         layout_column();
 }
 
@@ -353,8 +320,16 @@ void ColumnsBuilder::collect_content_for_this_column()
 
     //loop to process all StaffObjs until this column is completed
     ImoStaffObj* pSO = nullptr;
+    ImoStaffObj* pPrevSO = nullptr;
+    GmoShapeBarline* pPrevBarlineShape = nullptr;
+    GmoShape* pShape = nullptr;
+
     while(!m_pSysCursor->is_end() )
     {
+        pPrevSO = pSO;
+        if (pPrevSO && pPrevSO->is_barline())
+            pPrevBarlineShape = static_cast<GmoShapeBarline*>(pShape);
+
         pSO = m_pSysCursor->get_staffobj();
         int iInstr = m_pSysCursor->num_instrument();
         int iStaff = m_pSysCursor->staff();
@@ -363,7 +338,6 @@ void ColumnsBuilder::collect_content_for_this_column()
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
         InstrumentEngraver* pIE = m_pPartsEngraver->get_engraver_for(iInstr);
         m_pagePos.y = pIE->get_top_line_of_staff(iStaff);
-        GmoShape* pShape = nullptr;
 
         //if feasible column break, exit loop and finish column
         if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
@@ -403,16 +377,6 @@ void ColumnsBuilder::collect_content_for_this_column()
                                                pShape, fInProlog);
             }
 
-//            else if (pSO->is_barline())
-//            {
-//                int clefType = m_pSysCursor->get_applicable_clef_type();
-//                pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-//                                                                 m_pagePos, clefType);
-//                m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
-//                                               iLine, iInstr, pSO, rTime-0.5f, iStaff,
-//                                               pShape);
-//            }
-
             else
             {
                 int clefType = m_pSysCursor->get_applicable_clef_type();
@@ -429,6 +393,44 @@ void ColumnsBuilder::collect_content_for_this_column()
 
 
         m_pSysCursor->move_next();
+    }
+
+    //The loop is exited:
+    //a) on the first SO after a barline: pSO=normally a note/rest, pPrevSO=barline
+    //   pPrevBarlineShape= ptr.to barline for pPrevSO
+    //b) or at end of SysCursor: pSO=last barline, last pSO, or nullptr if score empty.
+
+    //save data for laying out measure attributes
+    if ((pPrevSO && pPrevSO->is_barline()) || (m_pSysCursor->is_end() && pSO))
+    {
+        //measure that starts in column m_iColStartMeasure finishes in current column.
+        //Its start barline shape is in m_pStartBarlineShape
+
+        ColumnData* pStartColumn = m_colsData[m_iColStartMeasure];
+        TypeMeasureInfo* pInfo = nullptr;
+
+        if (m_pSysCursor->is_end())
+        {
+            if (pSO->is_barline())
+            {
+                ImoBarline* pBarline = static_cast<ImoBarline*>(pSO);
+                pInfo = pBarline->get_measure_info();
+            }
+            else
+            {
+                ImoInstrument* pInstr = pSO->get_instrument();
+                pInfo = pInstr->get_last_measure_info();
+            }
+        }
+        else
+        {
+            ImoBarline* pBarline = static_cast<ImoBarline*>(pPrevSO);
+            pInfo = pBarline->get_measure_info();
+        }
+        pStartColumn->mark_as_start_of_measure(pInfo, m_pStartBarlineShape);
+
+        m_iColStartMeasure = m_iColumn + 1;
+        m_pStartBarlineShape = pPrevBarlineShape;
     }
 
     m_pSpAlgorithm->finish_column_measurements(m_iColumn);
@@ -594,6 +596,9 @@ ColumnData::ColumnData(ScoreMeter* pScoreMeter, SpAlgColumn* pSpAlgorithm)
     , m_fHasSystemBreak(false)
     , m_pBoxSlice(nullptr)
     , m_pSpAlgorithm(pSpAlgorithm)
+    , m_fMeasureStart(false)
+    , m_pMeasureInfo(nullptr)
+    , m_pShapeBarline(nullptr)
     , m_nTraceLevel(k_trace_off)
 {
     reserve_space_for_prolog_clefs_keys( m_pScoreMeter->num_staves() );

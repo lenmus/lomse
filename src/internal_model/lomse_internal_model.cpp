@@ -2427,7 +2427,8 @@ ImoInstrument::ImoInstrument()
     , m_name()
     , m_abbrev()
     , m_partId("")
-    , m_barlineLayout(k_isolated)
+    , m_barlineLayout(EBarlineLayout::k_isolated)
+    , m_measuresNumbering(EMeasuresNumbering::k_none)
     , m_pMeasures(nullptr)
     , m_pLastMeasureInfo(nullptr)
 {
@@ -3645,6 +3646,18 @@ void ImoScore::add_required_text_styles()
     }
     //font-family="Liberation Serif" font-size="10" bold
 
+    //For measure numbers
+    if (find_style("Measure numbers") == nullptr)
+    {
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+        pStyle->set_name("Measure numbers");
+        pStyle->set_parent_style(pDefStyle);
+	    pStyle->font_size( 10.0f);
+        pStyle->font_style( ImoStyle::k_font_style_italic);
+        pStyle->font_weight( ImoStyle::k_font_weight_normal);
+        add_style(pStyle);
+    }
+
 }
 
 
@@ -4538,6 +4551,57 @@ bool ImoStyle::is_default_style_with_default_values()
             && is_equal_pos( max_width(), k_default_max_width )
             && is_equal_pos( width(), k_default_width )
             ;
+
+    //Measure numbers
+    if (m_name == "Measure numbers")
+        return font_size() == 10.0f
+            && font_style() == k_font_style_italic
+            //inherited defaults:
+               //font
+            && font_file() == ""
+            && font_name() == "Liberation serif"
+            //&& font_size() == 12.0f
+            //&& font_style() == k_font_style_normal
+            && font_weight() == k_font_weight_normal
+               //text
+            && word_spacing() == k_default_word_spacing
+            && text_decoration() == k_default_text_decoration
+            && vertical_align() == k_default_vertical_align
+            && text_align() == k_default_text_align
+            && text_indent_length() == k_default_text_indent_length
+            && word_spacing_length() == k_default_word_spacing_length   //not applicable
+            && line_height() == k_default_line_height
+               //color and background
+            && is_equal(color(), Color(0,0,0))
+            && is_equal(background_color(), Color(255,255,255))
+               //margin
+            && is_equal_pos( margin_top(), k_default_margin_top )
+            && is_equal_pos( margin_bottom(), k_default_margin_bottom )
+            && is_equal_pos( margin_left(), k_default_margin_left )
+            && is_equal_pos( margin_right(), k_default_margin_right )
+               //padding
+            && is_equal_pos( padding_top(), k_default_padding_top )
+            && is_equal_pos( padding_bottom(), k_default_padding_bottom )
+            && is_equal_pos( padding_left(), k_default_padding_left )
+            && is_equal_pos( padding_right(), k_default_padding_right )
+               ////border
+            //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top
+            //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom
+            //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left
+            //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right
+               //border width
+            && is_equal_pos( border_width_top(), k_default_border_width_top )
+            && is_equal_pos( border_width_bottom(), k_default_border_width_bottom )
+            && is_equal_pos( border_width_left(), k_default_border_width_left )
+            && is_equal_pos( border_width_right(), k_default_border_width_right )
+               //size
+            && is_equal_pos( min_height(), k_default_min_height )
+            && is_equal_pos( max_height(), k_default_max_height )
+            && is_equal_pos( height(), k_default_height )
+            && is_equal_pos( min_width(), k_default_min_width )
+            && is_equal_pos( max_width(), k_default_max_width )
+            && is_equal_pos( width(), k_default_width )
+               ;
 
     return false;
 }

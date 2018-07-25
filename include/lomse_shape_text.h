@@ -31,6 +31,7 @@
 #define __LOMSE_SHAPE_TEXT_H__
 
 #include "lomse_shape_base.h"
+#include "lomse_shapes.h"
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include <string>
@@ -56,6 +57,7 @@ protected:
 
     friend class TextEngraver;
     friend class LyricEngraver;
+    friend class MeasureNumberEngraver;
     GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                  ImoStyle* pStyle, const string& language,
                  LUnits x, LUnits y, LibraryScope& libraryScope);
@@ -105,8 +107,94 @@ protected:
 
 };
 
+
+//---------------------------------------------------------------------------------------
+/** %GmoShapeTextBox represents a text (several lines) surrounded by a rectangle
+*/
+//class TextLine;
+//
+class GmoShapeTextBox : public GmoShapeRectangle
+{
+protected:
+    string m_text;
+    string m_language;
+    ImoStyle* m_pStyle;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
+
+    friend class MeasureNumberEngraver;
+    friend class TextBoxEngraver;
+    GmoShapeTextBox(ImoObj* pCreatorImo, ShapeId idx
+                    , const string& text                //text inside the box
+                    , const string& language            //text language
+                    , ImoStyle* pStyle                  //for the text & the box
+                    , LibraryScope& libraryScope
+                    , const UPoint& pos = UPoint(0.0f, 0.0f)    //top-left corner
+                    , const USize& size = USize(0.0f, 0.0f)     //rectangle size
+                    , LUnits radius = 0.0f                      //for rounded corners
+                    );
+//    GmoShapeTextBox(lmScoreObj* pOwner, int nShapeIdx,
+//            //text related
+//            lmPaper* pPaper,
+//            const std::string& sText, wxFont* pFont, wxColour nTxtColor,
+//            //block related
+//            lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
+//            LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom,
+//            wxColour nBgColor = *wxWHITE,
+//            //border
+//            LUnits uBorderWidth = 1.0f,
+//            wxColour nBorderColor = *wxBLACK,
+//            lmELineStyle nBorderStyle = lm_eLine_None,             //no border
+//            //other
+//            std::string sName=_T("ShapeTextbox"),
+//            bool fDraggable = true);
+
+public:
+
+    virtual ~GmoShapeTextBox();
+
+    //implementation of virtual methods from base class
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+//    //other
+//    string dump(int nIndent);
+//
+//
+//    //specific methods
+//    void SetFont(wxFont *pFont);
+//    std::string* GetText() { return &m_text; }
+//
+//    //shape dragging: overrides of GmoShapeRectangle
+//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
+
+
+private:
+
+    void draw_text(Drawer* pDrawer, RenderOptions& opt);
+    void select_font();
+
+//    void ComputeTextPosition(lmPaper* pPaper);
+//    LUnits ApplyHAlign(LUnits uAvailableWidth, LUnits uLineWidth, lmEHAlign nHAlign);
+//    void DeleteTextLines();
+//
+//
+//    lmEBlockAlign   m_nBlockAlign;
+//    lmEHAlign       m_nHAlign;
+//    lmEVAlign       m_nVAlign;
+//    std::string        m_text;
+//    wxFont*         m_pFont;
+//    wxColour        m_nTxtColor;
+//    UPoint        m_uTextPos;     // text position (relative to top-left of rectangle)
+//    LUnits        m_uTextWidth;
+//    LUnits        m_uTextHeight;
+//
+//
+//    std::list<TextLine*>   m_TextLines;
+};
+
+
 ////------------------------------------------------------------------------------------
-//// GmoShapeTitle: a primitive textbox. To be replaced, in future, by a GmoShapeTextbox
+//// GmoShapeTitle: a primitive textbox. To be replaced, in future, by a GmoShapeTextBox
 //
 //class GmoShapeTitle : public GmoShapeRectangle
 //{
@@ -157,71 +245,6 @@ protected:
 //    LUnits        m_uClippedTextWidth;
 //    LUnits        m_uClippedTextHeight;
 //
-//};
-//
-//
-////------------------------------------------------------------------------------------
-//
-//class TextLine;
-//
-//class GmoShapeTextbox : public GmoShapeRectangle
-//{
-//public:
-//    GmoShapeTextbox(lmScoreObj* pOwner, int nShapeIdx,
-//            //text related
-//            lmPaper* pPaper,
-//            const std::string& sText, wxFont* pFont, wxColour nTxtColor,
-//            //block related
-//            lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
-//            LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom,
-//            wxColour nBgColor = *wxWHITE,
-//            //border
-//            LUnits uBorderWidth = 1.0f,
-//            wxColour nBorderColor = *wxBLACK,
-//            lmELineStyle nBorderStyle = lm_eLine_None,             //no border
-//            //other
-//            std::string sName=_T("ShapeTextbox"),
-//            bool fDraggable = true);
-//
-//    ~GmoShapeTextbox();
-//
-//    //implementation of virtual methods from base class
-//
-//    //renderization
-//    void Render(lmPaper* pPaper, wxColour color = *wxBLACK);
-//    void RenderWithHandlers(lmPaper* pPaper);
-//
-//    //other
-//    std::string Dump(int nIndent);
-//
-//
-//    //specific methods
-//    void SetFont(wxFont *pFont);
-//    std::string* GetText() { return &m_text; }
-//
-//    //shape dragging: overrides of GmoShapeRectangle
-//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-//
-//
-//private:
-//    void ComputeTextPosition(lmPaper* pPaper);
-//    void DrawTextbox(lmPaper* pPaper, wxColour colorC, bool fSketch);
-//    LUnits ApplyHAlign(LUnits uAvailableWidth, LUnits uLineWidth, lmEHAlign nHAlign);
-//    void DeleteTextLines();
-//
-//
-//    lmEBlockAlign   m_nBlockAlign;
-//    lmEHAlign       m_nHAlign;
-//    lmEVAlign       m_nVAlign;
-//    std::string        m_text;
-//    wxFont*         m_pFont;
-//    wxColour        m_nTxtColor;
-//    UPoint        m_uTextPos;     // text position (relative to top-left of rectangle)
-//    LUnits        m_uTextWidth;
-//    LUnits        m_uTextHeight;
-//
-//
-//    std::list<TextLine*>   m_TextLines;
 //};
 
 

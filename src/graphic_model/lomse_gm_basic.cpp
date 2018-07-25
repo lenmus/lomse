@@ -207,6 +207,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_staff]             = "staff          ";
         m_typeToName[k_shape_technical]         = "technical      ";
         m_typeToName[k_shape_text]              = "text           ";
+        m_typeToName[k_shape_text_box]          = "text-box       ";
         m_typeToName[k_shape_time_signature]    = "time           ";
         m_typeToName[k_shape_tie]               = "tie            ";
         m_typeToName[k_shape_time_signature_glyph]

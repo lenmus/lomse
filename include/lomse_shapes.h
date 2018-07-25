@@ -39,7 +39,6 @@ namespace lomse
 
 //forward declarations
 class FontStorage;
-class ImoButton;
 class ImoImage;
 class ImoStyle;
 

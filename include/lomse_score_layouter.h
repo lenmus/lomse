@@ -184,16 +184,19 @@ public:
     //info
     virtual int get_num_columns();
     SystemLayouter* get_system_layouter(int iSys) { return m_sysLayouters[iSys]; }
+    virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
+    virtual GmoShapeBarline* get_start_barline_shape_for_column(int iCol);
 
     //support for helper classes
     virtual LUnits get_target_size_for_system(int iSystem);
     virtual LUnits get_column_width(int iCol);
     virtual bool column_has_system_break(int iCol);
 
-    //support for debuggin and unit tests
+    //support for debugging and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
     void delete_not_used_objects();
     void trace_column(int iCol, int level);
+    ColumnData* get_column(int i);
 
 protected:
     void add_error_message(const string& msg);
@@ -365,6 +368,10 @@ public:
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol, int iLine, LUnits prologWidth,
                                     ImoInstrument* pInstr);
+
+    //other shapes
+    GmoShape* create_measure_number_shape(ImoObj* pCreator, const string& number,
+                                          LUnits xPos, LUnits yPos);
 
 protected:
 
