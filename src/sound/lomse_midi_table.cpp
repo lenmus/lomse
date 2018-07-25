@@ -169,7 +169,8 @@ void SoundEventsTable::create_events()
                     JumpEntry* pJump = create_jump(jumpToMeasure, times);
                     add_jump(cursor, measure, pJump);
                 }
-                else if (pBar->get_type() == k_barline_double_repetition)
+                else if (pBar->get_type() == k_barline_double_repetition
+                         || pBar->get_type() == k_barline_double_repetition_alt)
                 {
                     int times = pBar->get_num_repeats();
                     JumpEntry* pJump = create_jump(jumpToMeasure, times);

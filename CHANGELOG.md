@@ -24,7 +24,13 @@
 - The internal model now has information about measure attributes, such
   as the displayed measure number. All importers now parse and
   store this information.
-Deal with measure container in internal model
+- Measure numbers can now be rendered. Options for controlling measures
+  numbering have been added. MusicXML importer modified for importing
+  measure numbering options.
+- Style "Measure numbers" has been added to the scores for controlling
+  the appearance of measure numbers.
+- Defined a new barline type: alternative rendering for double repetition,
+  using two thick barlines instead of thin barlines (E.Gould, p.234)
 - Fixes for removing Microsoft compiler warnings.
 
 

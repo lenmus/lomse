@@ -371,8 +371,7 @@ public:
 
     //other shapes
     GmoShape* create_measure_number_shape(ImoObj* pCreator, const string& number,
-                                          LUnits xPos, LUnits yPos,
-                                          int iInstr, int iStaff);
+                                          LUnits xPos, LUnits yPos);
 
 protected:
 

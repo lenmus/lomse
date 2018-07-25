@@ -151,6 +151,8 @@ protected:
     LUnits determine_column_start_position(int iCol);
     LUnits determine_column_size(int iCol);
     void create_boxes_for_column(int iCol, LUnits pos, LUnits size);
+    bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
+                                          bool fFirstNumberInSystem);
 
 
     void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,

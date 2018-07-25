@@ -1154,11 +1154,9 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_measure_number_shape(ImoObj* pCreator,
                                                      const string& number,
-                                                     LUnits xPos, LUnits yPos,
-                                                     int iInstr, int iStaff)
+                                                     LUnits xPos, LUnits yPos)
 {
     MeasureNumberEngraver engrv(m_libraryScope, m_pScoreMeter, number);
-//    LUnits xPos = m_pScoreMeter->tenths_to_logical(40.0f, iInstr, iStaff));
     return engrv.create_shape(pCreator, xPos, yPos);
 }
 

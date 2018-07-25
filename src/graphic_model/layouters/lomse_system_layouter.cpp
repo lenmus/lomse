@@ -551,67 +551,75 @@ void SystemLayouter::engrave_measure_numbers()
     {
         bool fFirstNumberInSystem = (iCol == m_iFirstCol);
 
-        //get measure number info and check if it must be engraved
+        //get the number for the measure
         TypeMeasureInfo* pInfo = m_pScoreLyt->get_measure_info_for_column(iCol);
         if (pInfo == nullptr)
-            continue;
+            continue;   //nothing to render in this measure
 
         string number = pInfo->number;
 
         if (number.empty())
-            number = std::to_string(pInfo->count);
+            continue;   //nothing to render in this measure
 
-        bool fPrintNumber = true;
-        //TODO: Add rules/options to determine if this measure should be numbered or not
+        //TODO: Loop for all instruments. For MusicXML is needed as, in theory, each
+        //  part could have a different policy. But I have not found any sample
+        //  requiring it. So, for now, I will save time and do it only for 1st instr.
+        //  Notice that TypeMeasureInfo in iCol is from first instrument. If the
+        //  instruments loop is finally required, the columns must include info
+        //  for all instruments.
+        int iInstr = 0;
+        ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+        int policy = pInstr->get_measures_numbering();
 
-//        //Rule 1: (optional) print numbers only in first measure of every system
-//        fPrintNumber = fFirstNumberInSystem;
-
-//        //Rule 2: (optional) measure #1 is not numbered
-//        if (fPrintNumber)
-//            fPrintNumber = pInfo->count != 1;
-
-        if (fPrintNumber)
-        //if (measure_number_must_be_displayed())
+        if (measure_number_must_be_displayed(policy, pInfo, fFirstNumberInSystem))
         {
-            //The number must be engraved. Do it
-
-            int iInstr = 0;
             int iStaff = 0;
             LUnits xPos = 0.0f;
             LUnits yPos = 0.0f;
             ImoObj* pCreator = m_pScore->get_instrument(iInstr);
+            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
 
             if (fFirstNumberInSystem)
             {
                 //engrave_measure_number_at_start_of_system();
-                InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-
                 xPos = pInstrEngrv->get_staves_left();
-                yPos = pInstrEngrv->get_staves_top_line()
-                       - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
             }
             else
             {
                 //engrave_measure_number_at_barline();
-                InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
                 GmoShapeBarline* pShapeBarline =
                     m_pScoreLyt->get_start_barline_shape_for_column(iCol);
-                xPos = pShapeBarline->get_left();
-                yPos = pInstrEngrv->get_staves_top_line()
-                       - m_pScoreMeter->tenths_to_logical(15.0f, iInstr, iStaff);
+                xPos = pShapeBarline->get_right();
             }
+            yPos = pInstrEngrv->get_staves_top_line()
+                   - m_pScoreMeter->tenths_to_logical(20.0f, iInstr, iStaff);
 
-            GmoShape* pShape =
-                        m_pShapesCreator->create_measure_number_shape(pCreator, number,
-                                                                      xPos, yPos,
-                                                                      iInstr, iStaff);
+            GmoShape* pShape = m_pShapesCreator->create_measure_number_shape(
+                                        pCreator, number, xPos, yPos);
 
             m_pBoxSystem->add_shape(pShape, GmoShape::k_layer_staff);
 
             m_yMax = max(m_yMax, pShape->get_bottom());
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool SystemLayouter::measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
+                                                      bool fFirstNumberInSystem)
+{
+    bool fPrintNumber;
+    if (policy == ImoInstrument::k_system)
+        fPrintNumber = fFirstNumberInSystem;
+    else if (policy == ImoInstrument::k_all)
+        fPrintNumber = true;
+    else
+        fPrintNumber = false;
+
+    if (fPrintNumber)
+        fPrintNumber = !pInfo->fHideNumber;
+
+    return fPrintNumber;
 }
 
 //---------------------------------------------------------------------------------------
