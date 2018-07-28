@@ -262,11 +262,12 @@ SUITE(InternalModelTest)
         CHECK( pScore->has_options() == true );
         CHECK( pScore->get_options()->get_num_items() == 11 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
-        CHECK( pScore->get_option("Render.SpacingFopt")->get_float_value() == 1.0f );
-        CHECK( pScore->get_option("Render.SpacingOptions")->get_long_value() == 1L );
+        CHECK( pScore->get_option("Render.SpacingFopt")->get_float_value() == 1.4f );
+        CHECK( pScore->get_option("Render.SpacingOptions")->get_long_value() ==
+                            (k_render_opt_breaker_simple | k_render_opt_dmin_fixed) );
         CHECK( pScore->get_option("Score.FillPageWithEmptyStaves")->get_bool_value() == false );
-        CHECK( pScore->get_option("StaffLines.Truncate")->get_long_value() == 1L );
-        CHECK( pScore->get_option("Score.JustifyLastSystem")->get_long_value() == 0L );
+        CHECK( pScore->get_option("StaffLines.Truncate")->get_long_value() == k_truncate_barline_final );
+        CHECK( pScore->get_option("Score.JustifyLastSystem")->get_long_value() == k_justify_never );
         CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == false );
         CHECK( pScore->get_option("Staff.DrawLeftBarline")->get_bool_value() == true );
         CHECK( pScore->get_option("Staff.UpperLegerLines.Displacement")->get_long_value() == 0L  );

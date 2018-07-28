@@ -4208,18 +4208,18 @@ public:
                 pOpt->set_name("Score.JustifyLastSystem");
                 pOpt->set_type(ImoOptionInfo::k_number_long);
                 if (pOpt->get_bool_value())
-                    pOpt->set_long_value(1L);   //yes = 1-only if ends in barline
+                    pOpt->set_long_value(k_justify_barline_final);
                 else
-                    pOpt->set_long_value(0L);   //no = 0-never justify last system
+                    pOpt->set_long_value(k_justify_never);
             }
             else if (name == "StaffLines.StopAtFinalBarline")
             {
                 pOpt->set_name("StaffLines.Truncate");
                 pOpt->set_type(ImoOptionInfo::k_number_long);
                 if (pOpt->get_bool_value())
-                    pOpt->set_long_value(1L);   //yes = 1-only barline of type final
+                    pOpt->set_long_value(k_truncate_barline_final);
                 else
-                    pOpt->set_long_value(0L);   //no = 0-never
+                    pOpt->set_long_value(k_truncate_never);
             }
         }
 
@@ -4740,12 +4740,11 @@ protected:
         string version = pScore->get_version_string();
         if (version == "2.1")
         {
-            ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
-            pOpt->set_float_value(0.35f);
+            ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFopt");
+            pOpt->set_float_value(1.0f);
 
             pOpt = pScore->get_option("Render.SpacingOptions");
-            pOpt->set_long_value(k_render_opt_breaker_optimal
-                                 | k_render_opt_dmin_global);
+            pOpt->set_long_value(k_render_opt_breaker_optimal | k_render_opt_dmin_global);
         }
         else
         {

@@ -4774,7 +4774,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Truncate" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 2 );
+        CHECK( pOpt->get_long_value() == k_truncate_barline_any );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;

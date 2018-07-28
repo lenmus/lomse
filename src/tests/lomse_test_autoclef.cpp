@@ -332,8 +332,8 @@ SUITE(AutoClefTest)
         ac.do_autoclef();
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(opt Render.SpacingOptions 769)(opt Score.JustifyLastSystem 3)"
-              "(opt Render.SpacingFactor 0.35)(instrument P1 (name \"Music\")"
+              "(opt Render.SpacingOptions 514)(opt Score.JustifyLastSystem 3)"
+              "(instrument P1 (name \"Music\")"
               "(staves 1)(musicData (clef G p1)(key C)(time 4 4)(n c4 w v1 p1)"
               "(barline simple))))))" );
 //        cout << test_name() << endl;
