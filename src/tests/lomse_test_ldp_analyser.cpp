@@ -4897,7 +4897,7 @@ SUITE(LdpAnalyserTest)
         //expected << "" << endl;
         parser.parse_text("(score (vers 1.6)"
             "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 30)"
-            "(instrument (musicData)))"
+            "(opt Render.SpacingFactor 0.778)(instrument (musicData)))"
         );
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
@@ -4909,15 +4909,17 @@ SUITE(LdpAnalyserTest)
         CHECK( pScore != nullptr );
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingMethod");
-        CHECK( pOpt != nullptr );
-        CHECK( pOpt->get_name() == "Render.SpacingMethod" );
-        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
-        CHECK( pOpt->get_long_value() == 1L );
+        CHECK( pOpt && pOpt->get_name() == "Render.SpacingMethod" );
+        CHECK( pOpt && pOpt->get_type() == ImoOptionInfo::k_number_long );
+        CHECK( pOpt && pOpt->get_long_value() == 1L );
         pOpt = pScore->get_option("Render.SpacingValue");
-        CHECK( pOpt != nullptr );
-        CHECK( pOpt->get_name() == "Render.SpacingValue" );
-        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
-        CHECK( pOpt->get_float_value() == 30.0f );
+        CHECK( pOpt && pOpt->get_name() == "Render.SpacingValue" );
+        CHECK( pOpt && pOpt->get_type() == ImoOptionInfo::k_number_long );
+        CHECK( pOpt && pOpt->get_long_value() == 30L );
+        pOpt = pScore->get_option("Render.SpacingFactor");
+        CHECK( pOpt && pOpt->get_name() == "Render.SpacingFactor" );
+        CHECK( pOpt && pOpt->get_type() == ImoOptionInfo::k_number_float );
+        CHECK( pOpt && is_equal_float(pOpt->get_float_value(), 0.778f) );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;

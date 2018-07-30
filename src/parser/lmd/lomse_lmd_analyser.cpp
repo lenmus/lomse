@@ -3643,6 +3643,7 @@ public:
     {
         return (name == "Render.SpacingMethod")
             || (name == "Render.SpacingOptions")
+            || (name == "Render.SpacingValue")
             || (name == "Score.JustifyLastSystem")
             || (name == "Staff.UpperLegerLines.Displacement")
             || (name == "StaffLines.Truncate")
@@ -3653,7 +3654,6 @@ public:
     {
         return (name == "Render.SpacingFactor")
             || (name == "Render.SpacingFopt")
-            || (name == "Render.SpacingValue")
             ;
     }
 
