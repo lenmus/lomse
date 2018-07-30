@@ -75,7 +75,7 @@ ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
     , m_numEntries(0)
     , m_rMissingTime(0.0)
-    , m_minNoteDuration(0.0f)   //LOMSE_NO_NOTE_DURATION
+    , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
     , m_pFirst(nullptr)
     , m_pLast(nullptr)
 {

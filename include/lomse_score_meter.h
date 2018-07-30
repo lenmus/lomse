@@ -63,10 +63,13 @@ protected:
     ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
     Tenths m_rSpacingValue;             //space for 'fixed' method
 
-
     //layout options
     Tenths m_rUpperLegerLinesDisplacement;
     bool m_fDrawLeftBarline;            //draw left barline joining all system staves
+    bool m_fFillPageWithEmptyStaves;
+    bool m_fHideStaffLines;
+    long m_nJustifyLastSystem;
+    long m_nTruncateStaffLines;
 
 	std::vector<LUnits> m_lineSpace;    //spacing for each staff
     std::vector<int> m_staffIndex;
@@ -102,6 +105,10 @@ public:
     }
     inline bool must_draw_left_barline() { return m_fDrawLeftBarline; }
     inline Tenths get_upper_ledger_lines_displacement() { return m_rUpperLegerLinesDisplacement; }
+    inline bool must_fill_page_with_empty_systems() { return m_fFillPageWithEmptyStaves; }
+    inline bool must_hide_stafflines() { return m_fHideStaffLines; }
+    inline long justify_last_system_opt() { return m_nJustifyLastSystem; }
+    inline long truncate_staff_lines_opt() { return m_nTruncateStaffLines; }
 
     //spacing
     LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);

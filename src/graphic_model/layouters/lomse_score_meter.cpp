@@ -112,7 +112,29 @@ void ScoreMeter::get_options(ImoScore* pScore)
     m_rUpperLegerLinesDisplacement = Tenths( pOpt->get_long_value() );
 
 	m_spacingSmin = tenths_to_logical_max(LOMSE_MIN_SPACE);
-	m_spacingDmin = 16.0f;      //sixteenth note
+
+    if (m_renderSpacingOpts & k_render_opt_dmin_global)
+    {
+        //k_render_opt_dmin_global
+        m_spacingDmin = float(m_pScore->get_staffobjs_table()->min_note_duration());
+        m_spacingDmin = min(m_spacingDmin, 16.0f);    //option Render.SpacingMaxDmin ?
+    }
+    else
+    {   //k_render_opt_dmin_fixed
+        m_spacingDmin = 16.0f;      //option Render.SpacingFixedDmin ?
+    }
+
+	pOpt = pScore->get_option("Score.FillPageWithEmptyStaves");
+    m_fFillPageWithEmptyStaves = pOpt->get_bool_value();
+
+	pOpt = pScore->get_option("Score.JustifyLastSystem");
+    m_nJustifyLastSystem = pOpt->get_long_value();
+
+	pOpt = pScore->get_option("StaffLines.Hide");
+    m_fHideStaffLines = pOpt->get_bool_value();
+
+	pOpt = pScore->get_option("StaffLines.Truncate");
+    m_nTruncateStaffLines = pOpt->get_long_value();
 
 //    LOMSE_LOG_DEBUG(Logger::k_all, "SpacingFactor=%f, SpacingFopt=%f, SpacingMethod=%d, "
 //        "SpacingOptions=%d, SpacingValue=%f, DrawLeftBarline=%s, "

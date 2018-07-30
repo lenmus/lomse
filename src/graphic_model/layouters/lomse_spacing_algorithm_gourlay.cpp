@@ -402,10 +402,7 @@ void SpAlgGourlay::determine_spacing_parameters()
     {
         m_Fopt = m_pScoreMeter->get_spacing_Fopt();
         m_alpha = m_pScoreMeter->get_spacing_alpha();
-        if (m_pScoreMeter->get_render_spacing_opts() & k_render_opt_dmin_global)
-            m_dmin = float(m_pScore->get_staffobjs_table()->min_note_duration());
-        else //k_render_opt_dmin_fixed
-            m_dmin = m_pScoreMeter->get_spacing_dmin();
+        m_dmin = m_pScoreMeter->get_spacing_dmin();
         m_uSmin = m_pScoreMeter->get_spacing_smin();
     }
 
@@ -574,20 +571,60 @@ void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncr
     //succesive approximations is started.
 
     LUnits uError = required - achieved;
-    float Fprev = m_Fopt;
+    float Fprev1 = m_Fopt;
     int round=0;
-    while (abs(uError) > 10.0f && round < 8)     //10.0f = one tenth of a millimeter
+    float Fmin = 0.0f;              //F must be >= than Fmin
+    float Fmax = LOMSE_MAX_FORCE;   //F must be < Fmax
+
+    while (abs(uError) > 10.0f && round < 12)     //10.0f = one tenth of a millimeter
     {
-//        dbgLogger << "Error = " << uError << ". Iter. "
-//                  << round;
+//        dbgLogger << "Iter. " << round << ", Error = " << uError
+//            << ", space incr= " << uSpaceIncrement;
+
         ++round;
 
-        //compute an increment for F
-        float deltaF = F - Fprev;
-        Fprev = F;
+        float deltaF = F - Fprev1;
         LUnits deltaS = uSpaceIncrement - uError;
+        float Fsave = F;
+
+        if (uError > 0.0f)
+        {
+            //F is not enough. More stretch needed
+            Fmin = max (Fmin, F);
+            if (abs(deltaS) < 1.0f)
+            {
+                //Previous force did nothing. Much more stretch needed
+                F *= 2.0f;
+//                dbgLogger << ", case=1";
+            }
+            else
+            {
+                F += (uError/deltaS) * deltaF;
+//                dbgLogger << ", case=2";
+            }
+            if (F > Fmax)
+                F = (Fprev1 + Fmax) / 2.0f;
+        }
+        else
+        {
+            //F is excessive. Less stretch needed
+            Fmax = min(Fmax, F);
+            if (abs(deltaS) < 1.0f)
+            {
+                //Previous force did nothing. Much less stretch needed
+                F *= 0.5f;
+//                dbgLogger << ", case=3";
+            }
+            else
+            {
+                F += (uError/deltaS) * deltaF;
+//                dbgLogger << ", case=4";
+            }
+            if (F < Fmin)
+                F = Fprev1 + (Fprev1 + Fmin) / 2.0f;
+        }
         uSpaceIncrement = uError;
-        F += (uError/deltaS) * deltaF;
+        Fprev1 = Fsave;
 
         //apply then new force to columns
         LUnits achieved = 0.0f;
@@ -604,6 +641,10 @@ void SpAlgGourlay::justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncr
 //                  << ", new F= " << setprecision(6) << F
 //                  << ", achieved= " << setprecision(2) << achieved
 //                  << ", error= " << uError
+//                  << ", Fprev2= " << Fprev2
+//                  << ", Fprev1= " << Fprev1
+//                  << ", Fmin= " << Fmin
+//                  << ", Fmax= " << Fmax
 //                  << endl;
     }
 }
