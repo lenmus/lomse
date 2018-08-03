@@ -1118,14 +1118,6 @@ void Interactor::remove_all_visual_tracking()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::move_tempo_line(ImoStaffObj* pSO)
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->move_tempo_line(pSO);
-}
-
-//---------------------------------------------------------------------------------------
 void Interactor::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);

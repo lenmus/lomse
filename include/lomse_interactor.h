@@ -934,11 +934,6 @@ public:
     */
 	virtual VisualEffect* get_tracking_effect(int effect);
 
-    /** Move the tempo line to the given note/rest.
-        @param pSO The tempo line will be placed at this note or rest.
-    */
-    virtual void move_tempo_line(ImoStaffObj* pSO);
-
     /** Move the tempo line to the given time position.
         @param scoreId  Id. of the score to which all other parameters refer.
         @param timepos Time units from the start of the score.

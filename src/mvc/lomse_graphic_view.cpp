@@ -277,37 +277,6 @@ GraphicModel* GraphicView::get_graphic_model()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::move_tempo_line(ImoStaffObj* pSO)
-{
-    if (!(m_trackingEffect & k_tracking_tempo_line))
-        return;
-
-    GraphicModel* pGModel = get_graphic_model();
-    if (!pGModel)
-        return;
-    GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
-    if (!pShape)
-    {
-        LOMSE_LOG_ERROR("No shape found for Imo id: %d",
-                        pSO->get_id() );
-        return;
-    }
-    if (! (pShape->is_shape_notehead()
-           || pShape->is_shape_note()
-           || pShape->is_shape_rest()) )
-        LOMSE_LOG_ERROR("Shape is neither note nor rest. Shape type: %s, Imo id=%d",
-                        pShape->get_name().c_str(),
-                        pSO->get_id() );
-
-    GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
-    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
-    GmoBoxSystem* pBoxSystem = static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
-
-    m_pTempoLine->set_visible(true);
-    m_pTempoLine->move_to(pShape, pBoxSystem);
-}
-
-//---------------------------------------------------------------------------------------
 void GraphicView::move_tempo_line(ImoId scoreId, TimeUnits timepos)
 {
     do_move_tempo_line_and_change_viewport(scoreId, timepos, true, false);
@@ -528,14 +497,17 @@ void GraphicView::determine_scroll_position_for(ImoId scoreId, TimeUnits timepos
 //---------------------------------------------------------------------------------------
 void GraphicView::do_determine_new_scroll_position()
 {
-    //Using m_iScrollPage, m_pScrollSystem, m_xScrollLeft, m_xScrollRight
+    //Using m_pScrollSystem, m_xScrollLeft, m_xScrollRight
     //Computes: m_vxNew, m_vyNew, m_vx_RequiredLeft, m_vx_RequiredRight, m_vySysTop
-    //          m_vySysBottom, m_vxSysLeft, m_vxSysRight
+    //          m_vySysBottom, m_vxSysLeft, m_vxSysRight, m_iScrollPage
 
     double xSliceLeft = double(m_xScrollLeft);
     double xSliceRight = double(m_xScrollRight);
     double ySysTop = double(m_pScrollSystem->get_top());
     double ySysBottom = ySysTop + double(m_pScrollSystem->get_height());
+
+    GmoBoxDocPage* pBoxPage = m_pScrollSystem->get_parent_doc_page();
+    m_iScrollPage = pBoxPage->get_number() - 1;
 
     //model point to screen returns shift from current viewport origin
     double xLeft = double(m_pScrollSystem->get_left());
