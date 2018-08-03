@@ -52,6 +52,7 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_pThread(nullptr)
     , m_pMidi(pMidi)
     , m_fPaused(false)
+    , m_fRunning(false)
     , m_fShouldStop(false)
     , m_fPlaying(false)
     , m_fPostEvents(true)
@@ -211,10 +212,12 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
     if (pInteractor && !m_fPostEvents)
         pInteractor->enable_forced_view_updates(false);
     fVisualTracking &= (pInteractor != nullptr);
+    m_fRunning = true;
     do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
 
     end_of_playback_housekeeping(fVisualTracking, pInteractor);
     m_fPlaying = false;
+    m_fRunning = false;
 
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::thread_main]");
 }
@@ -246,18 +249,26 @@ void ScorePlayer::pause()
 void ScorePlayer::stop()
 {
     LOMSE_LOG_DEBUG(Logger::k_score_player, ">> Enter");
-    if (m_pThread)
+
+    if (m_pThread && m_fRunning)
     {
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "Ending thread ...");
         m_fShouldStop = true;
         m_pThread->join();
 
         m_pTable->reset_jumps();
 
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "Delete thread");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "Deleting thread ...");
         delete m_pThread;
         m_pThread = nullptr;
-        m_fShouldStop = false;
     }
+
+    if (m_pThread)
+        m_pThread = nullptr;
+
+    m_fRunning = false;
+    m_fShouldStop = false;
+
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
 }
 

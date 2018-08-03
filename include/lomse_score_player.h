@@ -172,6 +172,7 @@ protected:
     std::mutex          m_startMutex;   //mutex so synchronize thread start
     MidiServerBase*     m_pMidi;        //MIDI server to receive MIDI events
     bool                m_fPaused;      //execution is paused
+    bool                m_fRunning;     //method do_play has not finished.
     bool                m_fShouldStop;  //request to stop playback
     bool                m_fPlaying;     //playing (control in do_play loop)
     bool                m_fPostEvents;  //post events to application events loop
