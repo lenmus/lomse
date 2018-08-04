@@ -134,7 +134,7 @@ void SoundEventsTable::create_events()
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
-    rAnacrusisMissingTime = 0.0;    //cursor.anacrusis_missing_time();
+    rAnacrusisMissingTime = cursor.anacrusis_missing_time();
     ImoKeySignature* pKey = nullptr;
     reset_accidentals(pKey);
 
@@ -375,7 +375,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     //(rests, tied notes...)
 
     //Generate Note ON event
-    TimeUnits rTime = cursor.time();    // + cursor.anacrusis_missing_time();
+    TimeUnits rTime = cursor.time();
     if (pSO->is_rest())
     {
         //it is a rest. Generate only event for visual highlight
@@ -434,7 +434,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
 void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
                                         ImoTimeSignature* pTS)
 {
-    TimeUnits rTime = cursor.time() ;   //+ cursor.anacrusis_missing_time();
+    TimeUnits rTime = cursor.time();
     int topNumber = pTS->get_top_number();
     int numBeats = pTS->get_num_pulses();
     int beatDuration = int( pTS->get_ref_note_duration() );
@@ -721,7 +721,7 @@ JumpEntry* SoundEventsTable::create_jump(int jumpTo, int timesValid, int timesBe
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump)
 {
-    TimeUnits rTime = cursor.time() ;   //+ cursor.anacrusis_missing_time();
+    TimeUnits rTime = cursor.time();
     store_jump_event(rTime, pJump, measure);
 }
 

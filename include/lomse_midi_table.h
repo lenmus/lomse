@@ -192,7 +192,6 @@ public:
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
     inline TimeUnits get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
-    inline bool is_anacrusis_start() { return is_greater_time(rAnacrusisMissingTime, 0.0f); }
 
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }

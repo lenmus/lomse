@@ -844,6 +844,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable->num_events() == 12 );
+        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[1]->EventType == SoundEvent::k_note_on );
         CHECK( events[1]->DeltaTime == 0L );
@@ -868,7 +869,7 @@ SUITE(MidiTableTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
-            "(clef G p1)(time#3231 3 4)"
+            "(clef G p1)(time 3 4)"
             "(n c5 q)(n a4 q)(n d4 q)(barline simple)"
             "(n c4 q)"
             ")))" );
@@ -878,6 +879,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable->num_events() == 11 );
+        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
         CHECK( events[2]->DeltaTime == 0L );
@@ -909,6 +911,7 @@ SUITE(MidiTableTest)
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
         CHECK( pTable->num_events() == 13 );
+        CHECK( is_equal_time(pTable->get_anacrusis_missing_time(), 128.0 ) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
         CHECK( events[2]->DeltaTime == 0L );
