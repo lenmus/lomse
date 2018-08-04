@@ -63,7 +63,7 @@ int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeSh
 
     // compute relative position of this note/rest with reference to the beat
     TimeUnits time = timePos + timeShift;
-    int beatNum = int( time / beatDuration);   //number of beat
+    int beatNum = int( (time / beatDuration) + 0.1);   //number of beat
     TimeUnits beatShift = fabs(time - beatDuration * TimeUnits(beatNum));
 
     if (beatShift < 1.0)
@@ -72,7 +72,6 @@ int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeSh
     else
         // off-beat
         return k_off_beat;
-
 }
 
 //---------------------------------------------------------------------------------------
