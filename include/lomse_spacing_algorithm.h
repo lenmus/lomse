@@ -452,7 +452,9 @@ protected:
                                            int iInstr, int iStaff, int iCol, int iLine,
                                            ImoInstrument* pInstr);
 
-    bool determine_if_is_in_prolog(TimeUnits rTime);
+    bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime);
+    bool m_fNoSignatures;       //key/time signature not yet found
+
     inline bool is_first_column()
     {
         return m_iColumn == 0;

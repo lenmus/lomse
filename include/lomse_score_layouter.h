@@ -333,7 +333,7 @@ public:
                   ShapesStorage& shapesStorage, PartsEngraver* pPartsEngraver);
     ~ShapesCreator() {}
 
-    enum {k_flag_small_clef=1, };
+    enum {k_flag_small_clef=0x01, };
 
     //StaffObj shapes
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,

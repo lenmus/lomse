@@ -293,6 +293,8 @@ void ColumnsBuilder::create_columns()
     m_iColumn = -1;
     m_iColStartMeasure = 0;
     m_pStartBarlineShape = nullptr;
+    m_fNoSignatures = true;
+
     determine_staves_vertical_position();
     while(!m_pSysCursor->is_end())
     {
@@ -353,7 +355,7 @@ void ColumnsBuilder::collect_content_for_this_column()
             if (pSO->is_clef())
             {
                 ImoClef* pClef = static_cast<ImoClef*>(pSO);
-                bool fInProlog = determine_if_is_in_prolog(rTime);
+                bool fInProlog = determine_if_is_in_prolog(pSO, rTime);
                 unsigned flags = fInProlog ? 0 : ShapesCreator::k_flag_small_clef;
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
@@ -367,7 +369,7 @@ void ColumnsBuilder::collect_content_for_this_column()
             else if (pSO->is_key_signature() || pSO->is_time_signature())
             {
                 unsigned flags = 0;
-                bool fInProlog = determine_if_is_in_prolog(rTime);
+                bool fInProlog = determine_if_is_in_prolog(pSO, rTime);
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                          m_pagePos, clefType, flags);
@@ -566,12 +568,25 @@ void ColumnsBuilder::prepare_for_new_column()
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnsBuilder::determine_if_is_in_prolog(TimeUnits rTime)
+bool ColumnsBuilder::determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime)
 {
-    // only if clef/key/time is at start of score or after a barline. This is equivalent
-    // to check that clef/key/time will be placed at timepos 0
-    //TODO: after a barline?
-    return is_equal_time(rTime, 0.0);
+    // only clef/key/time is at start of score. This is equivalent
+    // to check that clef/key/time will be placed at timepos 0 and the clef is not
+    // after keys or time signatures
+
+    if (!is_equal_time(rTime, 0.0))
+        return false;
+
+    if (pSO->is_clef())
+    {
+        return m_fNoSignatures;     //for case: clef change after prolog
+    }
+    else if (pSO->is_key_signature() || pSO->is_time_signature())
+    {
+        m_fNoSignatures = false;
+        return true;
+    }
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
