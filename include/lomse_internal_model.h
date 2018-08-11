@@ -717,6 +717,70 @@ enum EImoObjType
 
 };
 
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes valid values for score option "Score.JustifyLastSystem". This
+    option controls the justification of the last system.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EJustifyLastSystemOpts
+{
+	k_justify_never = 0,			///< Never justify last system
+    k_justify_barline_final = 1,	///< Justify it only if ends in barline of type final
+    k_justify_barline_any = 2,		///< Justify it only if ends in barline of any type
+    k_justify_always = 3,			///< Justify it in any case
+};
+
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    When a system is not justified, the staff lines should always run until right margin
+	of the score, but this behavior can be controlled by the score option
+	"StaffLines.Truncate". This option only works when a system is not justified and
+	the valid values are described by this enum.
+
+    Option 'k_truncate_barline_final' is the default behavior and it can be useful
+	for score editors: staff lines will run always to right margin until a barline of
+	type final is entered.
+
+    Option 'k_truncate_always' truncates staff lines after last staff object. It can
+	be useful for creating score samples (i.e. for ebooks).
+
+    @#include <lomse_internal_model.h>
+*/
+enum ETruncateStaffLinesOpts
+{
+
+    k_truncate_never = 0,			///< Never truncate. Staff lines will always run to right margin.
+    k_truncate_barline_final = 1,	///< Truncate only if last object is a barline of type final
+    k_truncate_barline_any = 2,		///< Truncate only if last object is a barline of any type
+    k_truncate_always = 3,			///< Truncate always, in any case, after last object
+};
+
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes valid flags for score option "Render.SpacingOptions". This
+    flags control the algorithms for laying out scores.
+
+    @#include <lomse_internal_model.h>
+*/
+enum ERenderSpacingOpts
+{
+    // Lines breaker algorithm
+    k_render_opt_breaker_simple     = 0x0001,   ///< use LinesBreakerSimple.
+    k_render_opt_breaker_optimal    = 0x0002,   ///< use LinesBreakerOptimal
+    k_render_opt_breaker_no_shrink  = 0x0004,   ///< do not shrink lines
+
+    // Spacing algorithm
+    k_render_opt_dmin_fixed         = 0x0100,   ///< use fixed value for Dmin
+    k_render_opt_dmin_global        = 0x0200,   ///< use min note in score for Dmin
+};
+
+
+
 ///@cond INTERNALS
 //---------------------------------------------------------------------------------------
 // a struct to contain note/rest figure and dots

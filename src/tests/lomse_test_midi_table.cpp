@@ -826,6 +826,110 @@ SUITE(MidiTableTest)
         CHECK( check_jump(2, 2,1) == true );
     }
 
+
+    //@ Volume computation --------------------------------------------------------------
+
+    TEST_FIXTURE(MidiTableTestFixture, volume_001)
+    {
+        //001. When no time signature all notes have equal volume
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n d5 q)(n c5 q)(n a4 q)(n d4 q)(barline simple)"
+            "(n c4 q)"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable->num_events() == 12 );
+        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[1]->EventType == SoundEvent::k_note_on );
+        CHECK( events[1]->DeltaTime == 0L );
+        CHECK( events[1]->Volume == 64);
+        CHECK( events[3]->EventType == SoundEvent::k_note_on );
+        CHECK( events[3]->DeltaTime == 64L );
+        CHECK( events[3]->Volume == 64);
+        CHECK( events[5]->EventType == SoundEvent::k_note_on );
+        CHECK( events[5]->DeltaTime == 128L );
+        CHECK( events[5]->Volume == 64);
+        CHECK( events[7]->EventType == SoundEvent::k_note_on );
+        CHECK( events[7]->DeltaTime == 192L );
+        CHECK( events[7]->Volume == 64);
+        CHECK( events[9]->EventType == SoundEvent::k_note_on );
+        CHECK( events[9]->DeltaTime == 256L );
+        CHECK( events[9]->Volume == 64);
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, volume_002)
+    {
+        //002. When time signature, volume depends on beat position
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G p1)(time 3 4)"
+            "(n c5 q)(n a4 q)(n d4 q)(barline simple)"
+            "(n c4 q)"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable->num_events() == 11 );
+        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[2]->EventType == SoundEvent::k_note_on );
+        CHECK( events[2]->DeltaTime == 0L );
+        CHECK( events[2]->Volume == 85 );
+        CHECK( events[4]->EventType == SoundEvent::k_note_on );
+        CHECK( events[4]->DeltaTime == 64L );
+        CHECK( events[4]->Volume == 75 );
+        CHECK( events[6]->EventType == SoundEvent::k_note_on );
+        CHECK( events[6]->DeltaTime == 128L );
+        CHECK( events[6]->Volume == 75 );
+        CHECK( events[8]->EventType == SoundEvent::k_note_on );
+        CHECK( events[8]->DeltaTime == 192L );
+        CHECK( events[8]->Volume == 85 );
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, volume_003)
+    {
+        //003. Anacrusis start does not shift strong beats
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G p1)(time 3 4)(n d5 q)(barline simple)"
+            "(n c5 q)(n a4 q)(n d4 q)(barline simple)"
+            "(n c4 q)"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable->num_events() == 13 );
+        CHECK( is_equal_time(pTable->get_anacrusis_missing_time(), 128.0 ) );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[2]->EventType == SoundEvent::k_note_on );
+        CHECK( events[2]->DeltaTime == 0L );
+        CHECK( events[2]->Volume == 75 );
+        CHECK( events[4]->EventType == SoundEvent::k_note_on );
+        CHECK( events[4]->DeltaTime == 64L );
+        CHECK( events[4]->Volume == 85 );
+        CHECK( events[6]->EventType == SoundEvent::k_note_on );
+        CHECK( events[6]->DeltaTime == 128L );
+        CHECK( events[6]->Volume == 75 );
+        CHECK( events[8]->EventType == SoundEvent::k_note_on );
+        CHECK( events[8]->DeltaTime == 192L );
+        CHECK( events[8]->Volume == 75 );
+        CHECK( events[10]->EventType == SoundEvent::k_note_on );
+        CHECK( events[10]->DeltaTime == 256L );
+        CHECK( events[10]->Volume == 85 );
+    }
+
 }
 
 

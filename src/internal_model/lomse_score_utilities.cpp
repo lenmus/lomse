@@ -45,45 +45,33 @@ namespace lomse
 //=======================================================================================
 
 //---------------------------------------------------------------------------------------
-int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS)
+int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeShift)
 {
     // Some times it is necessary to know the type of beat (strong, medium, weak,
     // off-beat) at which a note or rest is positioned.
     // This function receives the time for a note/rest and the current time signature
     // and returns the type of beat: either an integer positive value 0..n, meaning
     // 'on-beat', where n is the beat number, or -1 meaning 'off-beat'
+    //
+    // Parameter timeShift can be useful for taking into account anacrusis start
 
     int beatType = pTS->get_bottom_number();
+    TimeUnits beatDuration = pTS->get_ref_note_duration();
 
-    // coumpute beat duration
-    int beatDuration;
-    switch (beatType)
-    {
-        case 1: beatDuration = int( to_duration(k_whole, 0) ); break;
-        case 2: beatDuration = int( to_duration(k_half, 0) ); break;
-        case 4: beatDuration = int( to_duration(k_quarter, 0) ); break;
-        case 8: beatDuration = 3 * int( to_duration(k_eighth, 0) ); break;
-        case 16: beatDuration = int( to_duration(k_eighth, 0) ); break;
-        default:
-        {
-            stringstream ss;
-            ss << "[get_beat_position] BeatType " << beatType << " unknown.";
-            LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
-        }
-    }
+    if (pTS->is_compound_meter()|| (beatType == 8 && pTS->get_top_number() == 3))
+        beatDuration *= 3.0;
 
     // compute relative position of this note/rest with reference to the beat
-    int beatNum = int(timePos) / beatDuration;               //number of beat
-    TimeUnits beatShift = fabs(timePos - TimeUnits(beatDuration * beatNum));
+    TimeUnits time = timePos + timeShift;
+    int beatNum = int( (time / beatDuration) + 0.1);   //number of beat
+    TimeUnits beatShift = fabs(time - beatDuration * TimeUnits(beatNum));
 
     if (beatShift < 1.0)
         //on-beat
-        return beatNum;
+        return beatNum % pTS->get_num_pulses();
     else
         // off-beat
         return k_off_beat;
-
 }
 
 //---------------------------------------------------------------------------------------

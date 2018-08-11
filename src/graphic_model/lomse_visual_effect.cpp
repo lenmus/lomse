@@ -194,6 +194,7 @@ URect SelectionRectangle::get_bounds()
 //=======================================================================================
 PlaybackHighlight::PlaybackHighlight(GraphicView* view, LibraryScope& libraryScope)
     : VisualEffect(view, libraryScope)
+    , m_color(Color(255,0,0))   //red
 {
 }
 
@@ -233,8 +234,8 @@ void PlaybackHighlight::on_draw(ScreenDrawer* pDrawer)
             pDrawer->set_shift(-org.x, -org.y);
             pShape->on_draw(pDrawer, options);
             m_bounds.Union( pShape->get_bounds() );
-            //LOMSE_LOG_DEBUG(Logger::k_events, "draw note: xPos=%f, org=%f",
-            //                m_bounds.x, org.x);
+//            LOMSE_LOG_DEBUG(Logger::k_events, "draw note: xPos=%f, org=%f",
+//                            m_bounds.x, org.x);
         }
     }
     pDrawer->render();

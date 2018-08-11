@@ -3604,18 +3604,18 @@ public:
                 pOpt->set_name("Score.JustifyLastSystem");
                 pOpt->set_type(ImoOptionInfo::k_number_long);
                 if (pOpt->get_bool_value())
-                    pOpt->set_long_value(1L);   //yes = 1-only if ends in barline
+                    pOpt->set_long_value(k_justify_barline_final);
                 else
-                    pOpt->set_long_value(0L);   //no = 0-never justify last system
+                    pOpt->set_long_value(k_justify_never);
             }
             else if (name == "StaffLines.StopAtFinalBarline")
             {
                 pOpt->set_name("StaffLines.Truncate");
                 pOpt->set_type(ImoOptionInfo::k_number_long);
                 if (pOpt->get_bool_value())
-                    pOpt->set_long_value(1L);   //yes = 1-only barline of type final
+                    pOpt->set_long_value(k_truncate_barline_final);
                 else
-                    pOpt->set_long_value(0L);   //no = 0-never
+                    pOpt->set_long_value(k_truncate_never);
             }
         }
 
@@ -3643,6 +3643,7 @@ public:
     {
         return (name == "Render.SpacingMethod")
             || (name == "Render.SpacingOptions")
+            || (name == "Render.SpacingValue")
             || (name == "Score.JustifyLastSystem")
             || (name == "Staff.UpperLegerLines.Displacement")
             || (name == "StaffLines.Truncate")
@@ -3653,7 +3654,6 @@ public:
     {
         return (name == "Render.SpacingFactor")
             || (name == "Render.SpacingFopt")
-            || (name == "Render.SpacingValue")
             ;
     }
 

@@ -991,7 +991,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         }
         case k_imo_clef:
         {
-            bool fSmallClef = flags && k_flag_small_clef;
+            bool fSmallClef = flags & k_flag_small_clef;
             ImoClef* pClef = static_cast<ImoClef*>(pSO);
             int clefSize = pClef->get_symbol_size();
             if (clefSize == k_size_default)

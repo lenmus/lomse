@@ -192,7 +192,6 @@ public:
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
     inline TimeUnits get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
-    inline bool is_anacrusis_start() { return is_greater_time(rAnacrusisMissingTime, 0.0f); }
 
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }
@@ -221,7 +220,7 @@ protected:
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
     void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
     void delete_events_table();
-    int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS);
+    int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeShift);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
     JumpEntry* create_jump(int jumpTo, int timesValid, int timesBefore=0);

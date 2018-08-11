@@ -263,6 +263,8 @@ protected:
     friend class SpAlgGourlay;
     friend class ColumnDataGourlay;
     friend class TimeSliceNonTimed;
+    friend class TimeSliceBarline;
+    friend class TimeSliceNoterest;
     ColStaffObjsEntry*  m_firstEntry;
     ColStaffObjsEntry*  m_lastEntry;
     int         m_iFirstData;   //index to first StaffObjData element for this slice
@@ -291,8 +293,9 @@ protected:
     TimeUnits   m_minNote;      //min note/rest duration in this segment
     TimeUnits   m_minNoteNext;  //min note/rest duration still sounding in next segment
 
-public:
     TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
+
+public:
     virtual ~TimeSlice();
 
     enum ESliceType {
@@ -315,7 +318,7 @@ public:
     void compute_spring_data(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin,
                              bool fProportional, LUnits dsFixed);
     virtual void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
-                                       TextMeter& textMeter);
+                                       TextMeter& textMeter) = 0;
     void apply_force(float F);
     inline void increment_fixed_extent(LUnits value) { m_xLeft += value; }
     inline void increment_xRi(LUnits value) { m_xRi += value; }
@@ -390,18 +393,19 @@ protected:
     LUnits m_spaceBefore;
 
 public:
-    TimeSliceProlog(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
+    TimeSliceProlog(ColStaffObjsEntry* pEntry, int column, int iData);
     virtual ~TimeSliceProlog();
 
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
-                               TextMeter& textMeter);
+                               TextMeter& textMeter) override;
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                        ScoreMeter* pMeter);
+                                        ScoreMeter* pMeter) override;
 
     //specific methods
     void remove_after_space_if_not_full(ScoreMeter* pMeter, int SOtype);
+    void remove_after_space(ScoreMeter* pMeter);
 };
 
 
@@ -412,20 +416,59 @@ class TimeSliceNonTimed : public TimeSlice
 {
 protected:
     int m_numStaves;
-    LUnits m_realWidth;
     LUnits m_interSpace;
     vector<LUnits> m_widths;    //total width for objects on each staff
+    bool m_fHasWidth;           //true if at least one shape has width
+    bool m_fSomeVisible;        //true if at least one shape is visible
 
 public:
-    TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int entryType, int column, int iData);
+    TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int column, int iData);
     virtual ~TimeSliceNonTimed();
 
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
-                               TextMeter& textMeter);
+                               TextMeter& textMeter) override;
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                        ScoreMeter* pMeter);
+                                        ScoreMeter* pMeter) override;
+
+    inline bool has_width() { return m_fHasWidth; }
+    inline bool some_objects_visible() { return m_fSomeVisible; }
+};
+
+
+//---------------------------------------------------------------------------------------
+// TimeSliceBarline
+// An slice for barlines
+class TimeSliceBarline : public TimeSlice
+{
+protected:
+
+public:
+    TimeSliceBarline(ColStaffObjsEntry* pEntry, int column, int iData);
+    virtual ~TimeSliceBarline();
+
+    //overrides
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                               TextMeter& textMeter) override;
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// TimeSliceNoterest
+// An slice for noterests
+class TimeSliceNoterest : public TimeSlice
+{
+protected:
+
+public:
+    TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int iData);
+    virtual ~TimeSliceNoterest();
+
+    //overrides
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                               TextMeter& textMeter) override;
 
 };
 

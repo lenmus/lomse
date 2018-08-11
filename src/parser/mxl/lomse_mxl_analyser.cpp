@@ -5449,15 +5449,11 @@ protected:
 
     void set_options(ImoScore* pScore)
     {
-        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
-        pOpt->set_float_value(0.35f);
-
-        pOpt = pScore->get_option("Score.JustifyLastSystem");
-        pOpt->set_long_value(3);    //justify it in any case
+        ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
+        pOpt->set_long_value(k_justify_always);
 
         pOpt = pScore->get_option("Render.SpacingOptions");
-        pOpt->set_long_value(k_render_opt_breaker_optimal
-                             | k_render_opt_dmin_global);
+        pOpt->set_long_value(k_render_opt_breaker_optimal | k_render_opt_dmin_global);
     }
 
     void remove_score(ImoDocument* pImoDoc, ImoScore* pScore)

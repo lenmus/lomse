@@ -1076,6 +1076,17 @@ GmoBoxScorePage* ScoreStub::get_page_for(TimeUnits timepos)
     {
 //        LOMSE_LOG_DEBUG(Logger::k_events, "page %d. End time = %f",
 //                        i, m_pages[i]->end_time());
+
+        //BUG-BYPASS: first page could be empty when the score is embedded in a text and
+        // space in current page is small. In these cases, an score page is allocated
+        // at the end of current document page, but as there is not enough space for
+        // the score, a new document page is created and a new score page is allocated.
+        // This causes the previously allocated score page to remain without content.
+        // This is a bug bypass. The real solution would be not to allocate the unused
+        // page or to remove it from ScoreStub.
+        if (m_pages[i]->get_num_systems() == 0)
+            continue;
+
         if (is_lower_time(timepos, m_pages[i]->end_time()))
             break;
         else if(is_equal_time(timepos, m_pages[i]->end_time()))

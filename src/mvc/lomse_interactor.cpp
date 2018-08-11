@@ -241,6 +241,11 @@ void Interactor::delete_graphic_model()
     delete m_pGraphicModel;
     m_pGraphicModel = nullptr;
     m_pSelections->graphic_model_changed(nullptr);
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->remove_all_visual_tracking();
+
 //    m_idLastMouseOver = k_no_imoid;
     set_drag_image(nullptr, k_do_not_get_ownership, UPoint(0.0, 0.0));
     LOMSE_LOG_DEBUG(Logger::k_render, "GModel deleted.");
@@ -1110,14 +1115,6 @@ void Interactor::remove_all_visual_tracking()
         pGView->draw_visual_tracking();
         request_window_update();
     }
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::move_tempo_line(ImoStaffObj* pSO)
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->move_tempo_line(pSO);
 }
 
 //---------------------------------------------------------------------------------------

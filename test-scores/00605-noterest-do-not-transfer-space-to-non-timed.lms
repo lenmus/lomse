@@ -1,0 +1,15 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef F)
+		(key C)
+		(time 4 4)
+        (n f3 s g+)
+     	(spacer 0
+			(line (startPoint dx:0 dy:-15)(endPoint dx:0 dy:55)(width 1.0)(color #FF0000))
+		)
+        (n -f3 s g-)
+	)
+)) 
+

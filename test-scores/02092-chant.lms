@@ -1,0 +1,149 @@
+(score (vers 2.0)(instrument (musicData 
+    (clef G)
+    (key C)
+    (n g4 q (slur 100 start)(lyric "Quem" (melisma)))
+    (n f4 q (slur 100 stop))
+    (n d4 q (slur 101 start)(lyric "que" -))
+    (n f4 q)
+    (n e4 q (slur 101 stop))
+    (n f4 q (slur 102 start)(lyric "ri" -))
+    (n g4 q)
+    (n f4 q (slur 102 stop))
+    (n g4 q (lyric "this"))
+    (n f4 q (lyric "in"))
+    (n a4 q (lyric "se" -))
+    (n a4 q (slur 103 start above)(lyric "pul" -))
+    (n c5 q)
+    (n b4 q)
+    (n a4 q (slur 103 stop))
+    (n c5 q (slur 104 start)(lyric "chro," (melisma)))
+    (n g4 q)
+    (n a4 q)
+    (n g4 q (slur 104 stop))
+/*
+      <note default-x="844">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="5">up</stem>
+        <notations>
+          <slur number="1" placement="below" type="start"/>
+        </notations>
+        <lyric default-y="-76" justify="left" number="1">
+          <syllabic>single</syllabic>
+          <text>o</text>
+        </lyric>
+      </note>
+      <note default-x="885">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <notations>
+          <slur number="1" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="927">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="5">up</stem>
+        <notations>
+          <slur number="1" placement="below" type="start"/>
+        </notations>
+        <lyric default-y="-76" justify="left" number="1">
+          <syllabic>begin</syllabic>
+          <text>Chri</text>
+        </lyric>
+      </note>
+      <note default-x="967">
+        <pitch>
+          <step>F</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="0.5">up</stem>
+        <notations>
+          <slur number="1" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="1009">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <notations>
+          <slur number="1" placement="above" type="start"/>
+        </notations>
+        <lyric default-y="-76" justify="left" number="1">
+          <syllabic>middle</syllabic>
+          <text>sti</text>
+        </lyric>
+      </note>
+      <note default-x="1050">
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-50">down</stem>
+        <notations>
+          <slur number="1" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="1091">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-76" justify="left" number="1">
+          <syllabic>middle</syllabic>
+          <text>co</text>
+        </lyric>
+      </note>
+      <note default-x="1132">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="5">up</stem>
+        <lyric default-y="-76" justify="left" number="1">
+          <syllabic>end</syllabic>
+          <text>lae?</text>
+        </lyric>
+      </note>
+      <barline location="right">
+        <bar-style>light-light</bar-style>
+      </barline>
+    </measure>
+*/
+    (barline)
+)))
+

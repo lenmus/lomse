@@ -91,24 +91,6 @@ enum ETraceLevelLinesBreaker
 };
 
 //---------------------------------------------------------------------------------------
-// Values for render spacing options defined in the score source file
-enum ERenderSpacingOpts
-{
-    //0xx - Predefined sets (for backwards compatibility)
-    k_render_opt_set_none           = 0x0000,   //no predefined set.
-    k_render_opt_set_classic        = 0x0001,   //initial appearance (LDP <= 2.0) for
-                                                //  eBooks backwards compatibility.
-    //1xx - Lines breaker algorithm
-    k_render_opt_breaker_simple     = 0x0100,   //use LinesBreakerSimple.
-    k_render_opt_breaker_optimal    = 0x0101,   //use LinesBreakerOptimal
-    k_render_opt_breaker_no_shrink  = 0x0102,   //do not shrink lines
-
-    //2xx - Spacing algorithm
-    k_render_opt_dmin_fixed         = 0x0200,   //use fixed value for Dmin
-    k_render_opt_dmin_global        = 0x0201,   //use min note in score for Dmin
-};
-
-//---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
 {
 protected:

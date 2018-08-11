@@ -1,0 +1,14 @@
+(score
+   (vers 2.1)
+   (instrument (staves 2)
+      (musicData 
+        (clef G p1)
+        (clef F4 p2)
+        (key c)
+        (time 4 4)
+        (clef F4 p1)
+        (n c3 q p1 v1)
+        (n e3 h p2 v2)
+      )
+)) 
+

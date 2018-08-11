@@ -257,10 +257,10 @@ public:
     /// @name Visual effects for tracking during playback
     ///@{
 
-    /** Move the tempo line to the given note/rest.
-        @param pSO The tempo line will be placed at this note or rest.
+    /** Move the tempo line to the given position.
+        @param scoreId  Id. of the score to which the operation refers.
+        @param timepos The time position to move the tempo line to.
     */
-    virtual void move_tempo_line(ImoStaffObj* pSO);
     virtual void move_tempo_line(ImoId scoreId, TimeUnits timepos);
 
     /** For performance and for sharing common code, this method combines the operation
@@ -271,7 +271,8 @@ public:
     */
     virtual void move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos);
 
-    /** @param pSO This note or rest will be highlighted
+    /** @param scoreId  Id. of the score to which the operation refers.
+        @param timepos The time position to move the tempo line to.
         @todo Document Interactor::highlight_object    */
     virtual void highlight_object(ImoStaffObj* pSO);
 
@@ -442,7 +443,6 @@ protected:
     //and used by do_xxx methods:
     //  do_change_viewport_if_necessary()
     //  do_determine_if_scroll_needed()
-    int m_iScrollPage;
     GmoBoxSystem* m_pScrollSystem;
     LUnits m_xScrollLeft, m_xScrollRight;
 
@@ -458,6 +458,7 @@ protected:
     Pixels k_scrollLeftMargin;
     Pixels m_vxLast, m_vyLast;
     Pixels m_vxNew, m_vyNew;
+    int m_iScrollPage;
     //to determine if scroll needed.
     //All these values are relative to current viewport origin
     Pixels m_vySysTop, m_vySysBottom;               //system top, bottom

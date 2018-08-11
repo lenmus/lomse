@@ -1,0 +1,22 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef C2)
+		(key C)
+		(time 4 4)
+		(n c4 q)
+		(n a4 q)
+	))
+	(instrument (staves 2) (musicData 
+		(clef G p1)
+		(clef F4 p2)
+		(key C)
+		(time 4 4)
+		(n +f4 e g+ p1 v1)
+		(n a4 e g- p1 v1)
+		(n f3 e g+ p2 v2)
+		(n c3 e g- p2 v2)
+	))
+)
+
