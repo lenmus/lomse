@@ -1,0 +1,13 @@
+(score (vers 2.1)(instrument
+	(musicData
+		(clef G p1)
+		(key E-)
+		(time cut)
+		(spacer 30)
+		(n g4 q)
+		(n a4 q)
+		(spacer 200)
+		(barline end)
+	)
+))
+

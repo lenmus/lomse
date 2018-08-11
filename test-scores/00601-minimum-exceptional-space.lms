@@ -1,0 +1,13 @@
+(score
+   (vers 2.1)
+   (instrument
+      (musicData 
+        (clef G)
+        (n e4 e. (stem up)(beam 1 +))
+		(n d4 s (stem up)(beam 1 -b))
+        (n e4 q)
+        (barline end)
+      )
+   )
+)
+

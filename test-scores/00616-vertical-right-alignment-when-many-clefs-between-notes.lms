@@ -1,0 +1,27 @@
+(score
+   (vers 2.0)
+   (instrument (staves 2)
+      (musicData 
+            (clef G p1)
+            (clef F4 p2)
+            (key D)
+            (time 2 4)
+            (n f4 q. p1 v1)
+            (clef F4 p1)
+            (n e2 e)
+            (clef G p1)
+            
+            //second staff
+            (n c3 q p2 v2)(n c3 e)
+            (clef G p2)
+            (clef F4 p2)
+            (n a3 e)
+            (barline)
+
+            //second measure
+            (n c5 q p1)
+      )
+   )
+   
+)
+

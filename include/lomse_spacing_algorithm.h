@@ -452,8 +452,10 @@ protected:
                                            int iInstr, int iStaff, int iCol, int iLine,
                                            ImoInstrument* pInstr);
 
-    bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime);
-    bool m_fNoSignatures;       //key/time signature not yet found
+    bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime, int iInstr,
+                                   int idx);
+    vector<bool> m_fNoSignatures;   //key/time signature not yet found, for each instrument
+    vector<bool> m_fClefFound;      //for each instrument
 
     inline bool is_first_column()
     {

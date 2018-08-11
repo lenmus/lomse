@@ -1,0 +1,27 @@
+(score
+   (vers 2.0)
+   (defineStyle ''Normal text'' (font ''Times New Roman'' 10pt normal) (color #000000))
+   (opt Render.SpacingMethod 1)
+   (opt Render.SpacingValue 30)
+   (opt StaffLines.Truncate 2)
+   (instrument
+      (musicData
+        (clef G)
+        (key C)
+        (time 4 4)
+        (n c4 w)
+        (n c4 w)
+        (barline double)
+
+        (text _''2nd'' (style ''Normal text'') dx:25 dy:90)
+        (n +d4 w)
+        (n e4 w)
+        (barline double)
+
+        (n +d4 w)
+        (n e4 w)
+        (barline double)
+      )
+   )
+)
+

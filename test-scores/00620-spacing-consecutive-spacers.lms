@@ -1,0 +1,24 @@
+(score (vers 2.0)
+   (instrument (musicData
+     (clef G)
+     (key C)
+     (chord
+        (n b4 q v1)
+        (n d5 q v1)
+     )
+     (spacer 0
+        (line (startPoint dx:0 dy:5)(endPoint dx:10 dy:5)(width 1.0)(color #000000))
+     )
+	 (spacer 200)
+     (barline)
+     (chord
+        (n b4 q v1)
+        (n d5 q v1)
+     )
+     (spacer 0
+        (line (startPoint dx:0 dy:5)(endPoint dx:10 dy:5)(width 1.0)(color #000000))
+     )
+	 (spacer 0)
+     (barline)
+)))
+

@@ -1,0 +1,12 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef G)
+		(key c)
+		(time 4 4)
+		(n c4 q)(n e4 q)(barline)
+		(n c4 q)(n e4 q)
+	)
+)) 
+

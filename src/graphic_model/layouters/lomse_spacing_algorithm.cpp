@@ -293,7 +293,8 @@ void ColumnsBuilder::create_columns()
     m_iColumn = -1;
     m_iColStartMeasure = 0;
     m_pStartBarlineShape = nullptr;
-    m_fNoSignatures = true;
+    m_fNoSignatures.assign(m_pScore->get_num_instruments(), true);
+    m_fClefFound.assign(m_pSysCursor->get_num_staves(), false);
 
     determine_staves_vertical_position();
     while(!m_pSysCursor->is_end())
@@ -355,7 +356,8 @@ void ColumnsBuilder::collect_content_for_this_column()
             if (pSO->is_clef())
             {
                 ImoClef* pClef = static_cast<ImoClef*>(pSO);
-                bool fInProlog = determine_if_is_in_prolog(pSO, rTime);
+                int idx = m_pSysCursor->staff_index();
+                bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 unsigned flags = fInProlog ? 0 : ShapesCreator::k_flag_small_clef;
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
@@ -369,7 +371,8 @@ void ColumnsBuilder::collect_content_for_this_column()
             else if (pSO->is_key_signature() || pSO->is_time_signature())
             {
                 unsigned flags = 0;
-                bool fInProlog = determine_if_is_in_prolog(pSO, rTime);
+                int idx = m_pSysCursor->staff_index();
+                bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                          m_pagePos, clefType, flags);
@@ -568,22 +571,29 @@ void ColumnsBuilder::prepare_for_new_column()
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnsBuilder::determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime)
+bool ColumnsBuilder::determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime,
+                                               int iInstr, int idx)
 {
-    // only clef/key/time is at start of score. This is equivalent
-    // to check that clef/key/time will be placed at timepos 0 and the clef is not
-    // after keys or time signatures
+    // In prolog only any clef, key & time signature at start of score. And only the
+    // first clef before key/time signature. Any other clef will be considered a
+    // clef change.
+    // AWARE: Take into account that when the instrument has more than one staff
+    // (e.g. piano) there are more than one clef per instrument. Also, take into
+    // account that clef for second instrument could be defined after key and time
+    // signatures for first instrument.
 
     if (!is_equal_time(rTime, 0.0))
         return false;
 
     if (pSO->is_clef())
     {
-        return m_fNoSignatures;     //for case: clef change after prolog
+        bool fFirstClef = !m_fClefFound[idx];
+        m_fClefFound[idx] = true;
+        return fFirstClef || m_fNoSignatures[iInstr];
     }
     else if (pSO->is_key_signature() || pSO->is_time_signature())
     {
-        m_fNoSignatures = false;
+        m_fNoSignatures[iInstr] = false;
         return true;
     }
     return false;
