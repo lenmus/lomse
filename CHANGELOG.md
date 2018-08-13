@@ -32,6 +32,35 @@
 - Defined a new barline type: alternative rendering for double repetition,
   using two thick barlines instead of thin barlines (E.Gould, p.234)
 - Fixes for removing Microsoft compiler warnings.
+- Fixes for a few bugs causing a crash in specific scenarios:
+    - Visual tracking effects now cleared after deleting the graphic model.
+    - The sound thread is now not deleted when it has finished.
+    - Crash caused by visual tracking when the score is embedded in a
+	  text, at the end of a document page, but the score is laid out in
+	  the next document page.
+- Fixes for a few bugs related to scores layout:
+    - Fixed bug preventing to modify spacing value parameter from score
+	  option "Render.SpacingValue". Also it was incorrectly trated as
+	  float in ScoreMeter and in LDP parser.
+    - Fixed bugs related to Gourlay's lines justification and value for Dmin
+	  parameter.
+    - Spacing when there are invisible shapes (e.g. spacers) where
+	  incorrectly computed
+    - A clef change after prolog was not engraved in smaller size because
+	  it was considered part of the prolog.   
+- Fixed some bugs related to visual tracking effects:
+    - Color for highlight notes visual tracking was not initialized.
+    - Bug in tempo line positioning preventing to move the line to the correct page.
+    - Incorrect positioning visual tracking tempo line when anacrusis start.
+- Other changes:
+    - Removed unused method `Interactor::move_tempo_line_to(ImoStaffobj* pSO)`.
+    - Incorrect computation of beat type (strong, weak, off-beat), that
+	  affected to the computation of note volume, for stressing strong beats.
+	  It also affected Lomse user applications that could be using this method, such as LenMus Phonascus.
+    - Spacing algorithm has been refactored to facilitate maintenance. All
+	  spacing methods have been reviewed and more tests added. All test
+	  has been documented as well as the reasons for the differente rules.
+	  Fixes in a couple of spacing rules.
 
 
 

@@ -148,8 +148,7 @@ public:
 
 protected:
     void new_column(TimeSlice* pSlice);
-    void new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColumn, int iData,
-                   bool fInProlog);
+    void new_slice(ColStaffObjsEntry* pEntry, int entryType, int iColumn, int iData);
     void finish_slice(ColStaffObjsEntry* pLastEntry, int numEntries);
     void compute_springs();
     void order_slices_in_columns();
@@ -272,9 +271,6 @@ protected:
     int         m_type;         //type of slice. Value from enum ESliceType
     int         m_iColumn;      //Column in which this slice is included
 
-    //lyrics
-    vector<ImoLyric*> m_lyrics;
-
     //list
     TimeSlice* m_next;
     TimeSlice* m_prev;
@@ -308,7 +304,7 @@ public:
 
     //creation
     void set_final_data(ColStaffObjsEntry* pLastEntry, int numEntries,
-                        TimeUnits maxNextTime, TimeUnits minNote);
+                        TimeUnits maxNextTime, TimeUnits minNote, ScoreMeter* pMeter);
 
     //list creation
     inline TimeSlice* next() { return m_next; }
@@ -321,8 +317,9 @@ public:
                                        TextMeter& textMeter) = 0;
     void apply_force(float F);
     inline void increment_fixed_extent(LUnits value) { m_xLeft += value; }
-    inline void increment_xRi(LUnits value) { m_xRi += value; }
-    inline void set_minimum_xi(LUnits value) {
+    virtual void increment_xRi(LUnits value) { m_xRi += value; }
+    virtual void merge_with_xRi(LUnits value) { m_xRi = max(m_xRi, value); }
+    virtual void set_minimum_xi(LUnits value) {
         if (get_xi() < value)
             m_xRi = value - m_xLi;
     }
@@ -372,8 +369,6 @@ protected:
     LUnits spacing_function(LUnits uSmin, float alpha, float log2dmin, TimeUnits dmin);
     inline TimeUnits get_min_note_still_sounding() { return m_minNoteNext; }
 
-    void add_lyrics();
-    LUnits measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter, TextMeter& textMeter);
     LUnits measure_text(const string& text, ImoStyle* pStyle,
                         const string& language, TextMeter& meter);
 
@@ -417,9 +412,10 @@ class TimeSliceNonTimed : public TimeSlice
 protected:
     int m_numStaves;
     LUnits m_interSpace;
-    vector<LUnits> m_widths;    //total width for objects on each staff
-    bool m_fHasWidth;           //true if at least one shape has width
-    bool m_fSomeVisible;        //true if at least one shape is visible
+    vector<LUnits> m_widths;        //total width for objects, by staff
+    vector<bool> m_fHasObjects;     //there are objects, by staff
+    bool m_fHasWidth;               //true if at least one shape has width
+    bool m_fSomeVisible;            //true if at least one shape is visible
 
 public:
     TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int column, int iData);
@@ -434,6 +430,8 @@ public:
 
     inline bool has_width() { return m_fHasWidth; }
     inline bool some_objects_visible() { return m_fSomeVisible; }
+    inline LUnits get_width_for_staff(int iStaff) { return m_widths[iStaff]; }
+    inline bool is_empty_staff(int iStaff) { return !m_fHasObjects[iStaff]; }
 };
 
 
@@ -461,6 +459,11 @@ public:
 class TimeSliceNoterest : public TimeSlice
 {
 protected:
+    //lyrics (ptr to lyrics, index to staff)
+    vector< pair<ImoLyric*, int> > m_lyrics;
+    LUnits m_xRiLyrics;     //part of xRi due to lyrics
+    LUnits m_xRiMerged;     //part of xRi due to merged from non-timed
+    vector<LUnits> m_xLy;   //rods for lyrics
 
 public:
     TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int iData);
@@ -469,6 +472,14 @@ public:
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
+    void increment_xRi(LUnits value) override;
+    void merge_with_xRi(LUnits value) override;
+    void set_minimum_xi(LUnits value) override;
+
+    //specific to deal with lyrics
+    void add_lyrics(ScoreMeter* pMeter);
+    LUnits measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter, TextMeter& textMeter);
+    inline LUnits get_lyrics_rod() { return m_xRiLyrics; }
 
 };
 

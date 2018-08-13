@@ -1,0 +1,15 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef G)
+		(key C)
+		(n c4 s)
+		(n c4 s (lyric 1 "Segno"))
+		(n c4 s (lyric 1 "Coda"))
+		(n c4 s (lyric 1 "Word"))
+		(spacer 60)
+		(barline double)
+	))
+)
+
