@@ -1,0 +1,20 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef G)
+		(key C)
+		(time 3 8)
+		(n c4 e (lyric 1 "A"))
+     	(spacer 0
+			(line (startPoint dx:0 dy:-15)(endPoint dx:0 dy:55)(width 1.0)(color #FF0000))
+		)
+		(n g4 e (lyric 1 "loooooooong"))
+		(clef F4)
+		(n e4 e (lyric 1 "lyric"))
+		(barline)
+
+		(spacer 60)
+	))
+)
+

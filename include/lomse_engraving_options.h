@@ -75,7 +75,6 @@ namespace lomse
     //spacing function parameters
 #define LOMSE_MIN_SPACE                 10.0f   //Smin: space for Dmin (tenths)
     //space
-#define LOMSE_MIN_SPACE_BETWEEN_NOTE_AND_CLEF   10.0f
 #define LOMSE_EXCEPTIONAL_MIN_SPACE      2.5f
 #define LOMSE_SPACE_AFTER_BARLINE       14.0f
 #define LOMSE_SPACE_AFTER_SMALL_CLEF    10.0f

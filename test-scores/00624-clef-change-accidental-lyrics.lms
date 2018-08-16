@@ -1,0 +1,32 @@
+(score
+	(vers 2.1)
+	(opt StaffLines.Truncate 3)
+	(instrument (musicData 
+		(clef G)
+		(key C)
+		(time 3 8)
+		(n c4 e)
+		(n d4 e (lyric 1 "Loooooooong"))
+		(n e4 e (lyric 1 "lyric"))
+		(barline)
+	))
+	(instrument (staves 2) (musicData 
+		(clef G p1)
+		(clef F4 p2)
+		(key C)
+		(time 3 8)
+		(n f4 e p1 v1)
+		(clef F4 p1)
+		(n g3 e (lyric 1 "trasfer"))
+		(n g3 e (lyric 1 "note"))
+
+		//second staff
+		(n c3 e p2 v2)
+		(n +e3 e)
+		(n a3 e)
+		(barline)
+
+		(spacer 60)
+	))
+)
+
