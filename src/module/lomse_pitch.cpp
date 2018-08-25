@@ -201,7 +201,7 @@ EAccidentals FPitch::accidentals()
 //---------------------------------------------------------------------------------------
 string FPitch::to_abs_ldp_name()
 {
-    // The absolute LDP none name is returned
+    // The absolute LDP note name is returned
     // If note is invalid (more than two accidentals) returns empty string
 
     string sAnswer;
@@ -665,7 +665,7 @@ string DiatonicPitch::get_ldp_name()
         return m_sNoteName[step()] + m_sOctave[octave()];
     else
     {
-        LOMSE_LOG_ERROR("Operation on non-valid DiatonicPitch");
+        LOMSE_LOG_ERROR("Operation on non-valid DiatonicPitch %d", m_dp);
         return "*";
         //throw runtime_error("Operation on non-valid DiatonicPitch");
     }
