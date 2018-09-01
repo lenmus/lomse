@@ -93,7 +93,7 @@ void TableLayouter::create_sections_layouters()
 //---------------------------------------------------------------------------------------
 void TableLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
@@ -311,7 +311,7 @@ void TableSectionLayouter::prepare_to_start_layout()
 //---------------------------------------------------------------------------------------
 void TableSectionLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 }
 
 //---------------------------------------------------------------------------------------
@@ -319,7 +319,7 @@ void TableSectionLayouter::create_main_box(GmoBox* UNUSED(pParentBox),
                                            UPoint UNUSED(pos), LUnits UNUSED(width),
                                            LUnits UNUSED(height))
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 }
 
 //---------------------------------------------------------------------------------------
@@ -530,7 +530,7 @@ TableRowLayouter::~TableRowLayouter()
 //---------------------------------------------------------------------------------------
 void TableRowLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     set_cursor_and_available_space();
     LUnits yPos = m_pageCursor.y;

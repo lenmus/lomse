@@ -57,7 +57,7 @@ ContentLayouter::ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
 //---------------------------------------------------------------------------------------
 void ContentLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     set_cursor_and_available_space();
 
@@ -105,7 +105,7 @@ MultiColumnLayouter::~MultiColumnLayouter()
 //---------------------------------------------------------------------------------------
 void MultiColumnLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     set_cursor_and_available_space();
 
@@ -240,7 +240,7 @@ BlocksContainerLayouter::BlocksContainerLayouter(ImoContentObj* pImo, Layouter* 
 //---------------------------------------------------------------------------------------
 void BlocksContainerLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     set_cursor_and_available_space();
 

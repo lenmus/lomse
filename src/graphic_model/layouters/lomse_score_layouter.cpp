@@ -134,7 +134,7 @@ void ScoreLayouter::prepare_to_start_layout()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize

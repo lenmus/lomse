@@ -94,7 +94,7 @@ void InlinesContainerLayouter::get_indent_and_bullet_info()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::layout_in_box()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
@@ -131,7 +131,7 @@ void InlinesContainerLayouter::layout_in_box()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::prepare_line()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     set_line_pos_and_width();
     initialize_line_references();
@@ -245,7 +245,7 @@ void InlinesContainerLayouter::set_line_pos_and_width()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::add_line()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     m_pageCursor.x = m_xLineStart;
     LUnits left = m_pageCursor.x;       //save left margin
@@ -285,7 +285,7 @@ void InlinesContainerLayouter::add_line()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     m_pageCursor.x = left;
     m_pageCursor.y += m_lineRefs.lineHeight;
@@ -297,7 +297,7 @@ void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::add_engrouter_to_line(Engrouter* pEngrouter)
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     //add engrouter to the list of engrouters for current line.
     m_engrouters.push_back( pEngrouter );

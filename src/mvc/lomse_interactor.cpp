@@ -153,7 +153,7 @@ void Interactor::create_graphic_model()
     //of the requirements. The Interactor is the owner of the View.
 
 
-    LOMSE_LOG_DEBUG(Logger::k_render, "");
+    LOMSE_LOG_DEBUG(Logger::k_render, string(""));
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
@@ -268,7 +268,7 @@ void Interactor::delete_graphic_model()
 //---------------------------------------------------------------------------------------
 void Interactor::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events, "");
+    LOMSE_LOG_DEBUG(Logger::k_events, string(""));
     m_pTask->process_event( Event((flags & k_mouse_left ? Event::k_mouse_left_down
                                                         : Event::k_mouse_right_down),
                                   x, y, flags) );
@@ -277,7 +277,7 @@ void Interactor::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 //---------------------------------------------------------------------------------------
 void Interactor::on_mouse_move(Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_TRACE(Logger::k_events, "");
+    LOMSE_LOG_TRACE(Logger::k_events, string(""));
     m_pTask->process_event( Event(Event::k_mouse_move, x, y, flags) );
 }
 
@@ -332,7 +332,7 @@ bool Interactor::is_in_selection(GmoObj* pGmo)
 void Interactor::task_action_select_object_and_show_contextual_menu(
                                                     Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
@@ -366,7 +366,7 @@ void Interactor::task_action_select_object_and_show_contextual_menu(
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     //mouse left click when in selection mode
 
@@ -531,7 +531,7 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 ////---------------------------------------------------------------------------------------
 //void Interactor::task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton)
 //{
-//    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+//    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 //
 //    // Edition mode: mouse click down at point (x, y). Decide what to do.
 //
@@ -604,7 +604,7 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_move_drag_image(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -618,7 +618,7 @@ void Interactor::task_action_move_drag_image(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_insert_object_at_point(Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     //invoked only from TaskDataEntry: mouse left click when in data entry mode
 
@@ -769,7 +769,7 @@ void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixel
                                                                 Pixels x2, Pixels y2,
                                                                 unsigned flags)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     //invoked only from TaskSelection
 
@@ -801,7 +801,7 @@ void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixel
 void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y,
                                                       unsigned UNUSED(flags))
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     // Edition mode: mouse left click at point (x, y). Decide what to do.
 
@@ -869,7 +869,7 @@ void Interactor::task_action_move_object(Pixels UNUSED(x), Pixels UNUSED(y))
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_move_handler(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     UPoint pos = screen_point_to_model_point(x, y);
     m_pCurHandler->move_to(pos);
@@ -886,7 +886,7 @@ void Interactor::task_action_move_handler(Pixels x, Pixels y)
 void Interactor::task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
                                                     Pixels xTotalShift, Pixels yTotalShift)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     task_action_move_handler(xFinal, yFinal);
 
@@ -920,7 +920,7 @@ void Interactor::task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_drag_the_view(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     new_viewport(x, y);
 }
@@ -943,7 +943,7 @@ void Interactor::restore_selection()
 //---------------------------------------------------------------------------------------
 void Interactor::redraw_bitmap()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
@@ -960,7 +960,7 @@ void Interactor::redraw_bitmap()
 //---------------------------------------------------------------------------------------
 void Interactor::request_window_update()
 {
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_mvc, string(""));
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
@@ -987,7 +987,7 @@ void Interactor::force_redraw()
 //---------------------------------------------------------------------------------------
 void Interactor::do_force_redraw()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     redraw_bitmap();
     request_window_update();
@@ -996,7 +996,7 @@ void Interactor::do_force_redraw()
 //---------------------------------------------------------------------------------------
 void Interactor::new_viewport(Pixels x, Pixels y, bool fForceRedraw)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1046,7 +1046,7 @@ void Interactor::request_viewport_change(Pixels x, Pixels y)
 {
     //AWARE: This code is executed in the sound thread
 
-    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, string(""));
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
@@ -1301,7 +1301,7 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 void Interactor::change_viewport_if_necessary(ImoId id)
 {
-    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, "");
+    LOMSE_LOG_DEBUG(lomse::Logger::k_events | lomse::Logger::k_score_player, string(""));
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->change_viewport_if_necessary(id);
@@ -1345,7 +1345,7 @@ int Interactor::page_at_screen_point(double x, double y)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_in(Pixels x, Pixels y, bool fForceRedraw)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1360,7 +1360,7 @@ void Interactor::zoom_in(Pixels x, Pixels y, bool fForceRedraw)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_out(Pixels x, Pixels y, bool fForceRedraw)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1619,7 +1619,7 @@ void Interactor::on_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
     //avoid raising questions on users about the contradiction of having to invoke
     // "send_end_of_play_event" when an end of play event is received!!
 
-    LOMSE_LOG_DEBUG(Logger::k_events, "");
+    LOMSE_LOG_DEBUG(Logger::k_events, string(""));
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {

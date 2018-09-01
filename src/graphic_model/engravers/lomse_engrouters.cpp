@@ -82,7 +82,7 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace, bool fFirst
         return nullptr;
     }
 
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
     Engrouter* pEngr = nullptr;
     if (!is_there_a_pending_engrouter())
     {

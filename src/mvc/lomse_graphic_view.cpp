@@ -250,14 +250,14 @@ void GraphicView::add_handler(int iHandler, GmoObj* pOwnerGmo)
 //---------------------------------------------------------------------------------------
 void GraphicView::new_viewport(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
     do_change_viewport(x, y);
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::do_change_viewport(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
     std::lock_guard<std::mutex> lock(m_viewportMutex);
 
     m_vxOrg = x;
@@ -314,7 +314,7 @@ void GraphicView::do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnit
 //---------------------------------------------------------------------------------------
 bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnits timepos)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "");
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
 
     //returns true if no errors
     //updates variables m_iScrollPage, m_pScrollSystem and m_xScrollLeft;
@@ -477,7 +477,7 @@ void GraphicView::do_change_viewport()
 //---------------------------------------------------------------------------------------
 void GraphicView::change_viewport_to(ImoId scoreId, TimeUnits timepos)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "");
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
 
     determine_scroll_position_for(scoreId, timepos);
     do_change_viewport();
@@ -486,7 +486,7 @@ void GraphicView::change_viewport_to(ImoId scoreId, TimeUnits timepos)
 //---------------------------------------------------------------------------------------
 void GraphicView::determine_scroll_position_for(ImoId scoreId, TimeUnits timepos)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "");
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
 
     if (!determine_page_system_and_position_for(scoreId, timepos))
         return;
@@ -557,7 +557,7 @@ void GraphicView::do_determine_new_scroll_position()
 //---------------------------------------------------------------------------------------
 void GraphicView::redraw_bitmap() //, RepaintOptions& opt)
 {
-    LOMSE_LOG_DEBUG(Logger::k_render, "");
+    LOMSE_LOG_DEBUG(Logger::k_render, string(""));
 
     draw_all();
 }
@@ -631,7 +631,7 @@ void GraphicView::draw_all()
 {
     if (m_pRenderBuf)
     {
-        LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+        LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
         //render graphical model
         m_pInteractor->timing_start_measurements();
@@ -649,7 +649,7 @@ void GraphicView::draw_all()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_caret()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     layout_caret();
@@ -662,7 +662,7 @@ void GraphicView::draw_caret()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_time_grid()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     layout_time_grid();
@@ -736,7 +736,7 @@ void GraphicView::print_page(int page, VPoint viewport)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_graphic_model()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_options.background_color = m_backgroundColor;
     m_options.page_border_flag = true;
@@ -758,7 +758,7 @@ void GraphicView::draw_graphic_model()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_all_visual_effects()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     layout_caret();
     layout_time_grid();
@@ -769,7 +769,7 @@ void GraphicView::draw_all_visual_effects()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_selection_rectangle()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     m_pOverlaysGenerator->update_visual_effect(m_pSelRect, m_pDrawer);
@@ -779,7 +779,7 @@ void GraphicView::draw_selection_rectangle()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_visual_tracking()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     if (m_trackingEffect & k_tracking_highlight_notes)
@@ -792,7 +792,7 @@ void GraphicView::draw_visual_tracking()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_dragged_image()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     m_pOverlaysGenerator->update_visual_effect(m_pDragImg, m_pDrawer);
@@ -802,7 +802,7 @@ void GraphicView::draw_dragged_image()
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_handler(Handler* pHandler)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     m_pOverlaysGenerator->update_visual_effect(pHandler, m_pDrawer);
@@ -812,7 +812,7 @@ void GraphicView::draw_handler(Handler* pHandler)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_selected_objects()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     m_pInteractor->timing_start_measurements();
     layout_selection_highlight();
@@ -935,7 +935,7 @@ void GraphicView::update_selection_rectangle(LUnits x2, LUnits y2)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_in(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     double rx(x);
     double ry(y);
@@ -955,7 +955,7 @@ void GraphicView::zoom_in(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_out(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
 
     double rx(x);
     double ry(y);
