@@ -627,8 +627,8 @@ protected:
 
     //-----------------------------------------------------------------------------------
     //@ attachment : { `text` | `textbox` | `line` | `fermata` | `dynamics` |
-    //@            :   `accent` | `articulation` | `caesura` | `breathMark` |
-    //@            :   `technical` | `ornament` }
+    //@            :   `metronome` | `accent` | `articulation` | `caesura` |
+    //@            :   `breathMark` | `technical` | `ornament` }
     //@
     bool is_noterest_attachment(int type)
     {
@@ -1847,6 +1847,51 @@ protected:
         }
     }
 
+};
+
+//@--------------------------------------------------------------------------------------
+//@ ImoDirection StaffObj
+//@ <direction> = (dir <staffobjOptions>* <dirAttachments>*)
+//@ dirAttachment : { `metronome` }
+//@
+class DirectionAnalyser : public ElementAnalyser
+{
+public:
+    DirectionAnalyser(LdpAnalyser* pAnalyser, ostream& reporter,
+                      LibraryScope& libraryScope, ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                    ImFactory::inject(k_imo_direction, pDoc, get_node_id()) );
+
+        // <staffobjOptions>*
+        analyse_staffobjs_options(pDir);
+
+        // <dirAttachments>*
+        analyse_attachments(pDir);
+
+        add_to_model(pDir);
+    }
+
+protected:
+
+    void analyse_attachments(ImoDirection* pDir)
+    {
+        while( more_params_to_analyse() )
+        {
+            m_pParamToAnalyse = get_param_to_analyse();
+            ELdpElement type = m_pParamToAnalyse->get_type();
+            if (type == k_metronome)
+                m_pAnalyser->analyse_node(m_pParamToAnalyse, pDir);
+            else
+                error_invalid_param();
+
+            move_to_next_param();
+        }
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3533,7 +3578,7 @@ public:
         }
 
         // [<staffObjOptions>*]
-        analyse_scoreobj_options(pMtr);
+        analyse_scoreobj_options(pMtr);       //TODO: Needed?
 
         error_if_more_elements();
 
@@ -3581,6 +3626,7 @@ public:
                    || analyse_optional(k_time_signature, pMD)
                    || analyse_optional(k_goFwd, pMD)
                    || analyse_optional(k_goBack, pMD)
+                   || analyse_optional(k_direction, pMD)
 #if LOMSE_COMPATIBILITY_LDP_1_5
                    || analyse_optional(k_graphic, pMD)
                    || analyse_optional(k_line, pMD)
@@ -6967,6 +7013,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_cursor:          return LOMSE_NEW CursorAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_defineStyle:     return LOMSE_NEW DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_endPoint:        return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_direction:       return LOMSE_NEW DirectionAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_dynamic:         return LOMSE_NEW DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_dynamics_mark:   return LOMSE_NEW DynamicsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_fermata:         return LOMSE_NEW FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);

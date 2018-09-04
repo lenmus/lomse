@@ -103,6 +103,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_defineStyle] = "defineStyle";
     m_TypeToName[k_doit] = "doit";
     m_TypeToName[k_down] = "down";
+    m_TypeToName[k_direction] = "dir";
     m_TypeToName[k_displayBracket] = "displayBracket";
     m_TypeToName[k_displayNumber] = "displayNumber";
     m_TypeToName[k_duration] = "duration";
@@ -307,11 +308,12 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["ctrol2-y"] = LOMSE_NEW LdpElementFunctor<k_ctrol2_y>;
     m_NameToFunctor["cursor"] = LOMSE_NEW LdpElementFunctor<k_cursor>;
     m_NameToFunctor["defineStyle"] = LOMSE_NEW LdpElementFunctor<k_defineStyle>;
+    m_NameToFunctor["dir"] = LOMSE_NEW LdpElementFunctor<k_direction>;
+    m_NameToFunctor["displayBracket"] = LOMSE_NEW LdpElementFunctor<k_displayBracket>;
+    m_NameToFunctor["displayNumber"] = LOMSE_NEW LdpElementFunctor<k_displayNumber>;
     m_NameToFunctor["doit"] = LOMSE_NEW LdpElementFunctor<k_doit>;
     m_NameToFunctor["down"] = LOMSE_NEW LdpElementFunctor<k_down>;
     m_NameToFunctor["duration"] = LOMSE_NEW LdpElementFunctor<k_duration>;
-    m_NameToFunctor["displayBracket"] = LOMSE_NEW LdpElementFunctor<k_displayBracket>;
-    m_NameToFunctor["displayNumber"] = LOMSE_NEW LdpElementFunctor<k_displayNumber>;
     m_NameToFunctor["dx"] = LOMSE_NEW LdpElementFunctor<k_dx>;
     m_NameToFunctor["dy"] = LOMSE_NEW LdpElementFunctor<k_dy>;
     m_NameToFunctor["dyn"] = LOMSE_NEW LdpElementFunctor<k_dynamics_mark>;

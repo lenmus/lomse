@@ -65,6 +65,7 @@ enum ELdpElement
     //staffobjs
     k_barline,
     k_clef,
+    k_direction,
     k_figuredBass,
     k_goBack,
     k_goFwd,

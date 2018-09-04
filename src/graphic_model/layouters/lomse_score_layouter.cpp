@@ -1057,13 +1057,6 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             //TODO
             return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
         }
-        case k_imo_metronome_mark:
-        {
-            ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pSO);
-            MetronomeMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            Color color = pImo->get_color();
-            return engrv.create_shape(pImo, pos, color);
-        }
         case k_imo_sound_change:
         default:
             return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
@@ -1103,6 +1096,13 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             FermataEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
+        }
+        case k_imo_metronome_mark:
+        {
+            ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pAO);
+            MetronomeMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color);
         }
         case k_imo_ornament:
         {

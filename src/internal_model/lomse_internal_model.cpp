@@ -1964,7 +1964,9 @@ void ImoContentObj::add_attachment(Document* pDoc, ImoAuxObj* pAO)
 ImoAuxObj* ImoContentObj::get_attachment(int i)
 {
     ImoAttachments* pAuxObjs = get_attachments();
-    return static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+    if (pAuxObjs)
+        return static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

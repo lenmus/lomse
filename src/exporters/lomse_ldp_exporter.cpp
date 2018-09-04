@@ -1719,7 +1719,7 @@ public:
         start_element("metronome", m_pImo->get_id());
         add_marks();
         add_parenthesis();
-        source_for_staffobj_options(m_pImo);
+        //source_for_auxobj_options(m_pImo);    //TODO
         end_element(k_in_same_line);
         return m_source.str();
     }
