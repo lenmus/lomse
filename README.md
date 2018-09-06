@@ -45,7 +45,7 @@ Read [Contributing][] for information about how to contribute.
 ~~~~
 # download lomse repository
 cd <projects-path>
-git clone -b master --single-branch https.//github.com/lenmus/lomse.git
+git clone -b master --single-branch https://github.com/lenmus/lomse.git
 
 # create folder for building and move there
 mkdir build

@@ -158,7 +158,6 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
             case k_imo_clef:
             case k_imo_key_signature:
             case k_imo_time_signature:
-            case k_imo_spacer:
             case k_imo_direction:
             case k_imo_metronome_mark:
             case k_imo_go_back_fwd:

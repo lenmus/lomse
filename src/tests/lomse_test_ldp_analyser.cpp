@@ -4332,7 +4332,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 10.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -5111,7 +5111,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_spacer() == true );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5175,7 +5175,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 2 );
@@ -5198,7 +5198,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5221,7 +5221,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5244,7 +5244,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -5268,7 +5268,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -5292,7 +5292,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -10514,7 +10514,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote != nullptr );
 
         ++it;
-        ImoSpacer* pSpacer = dynamic_cast<ImoSpacer*>( *it );
+        ImoDirection* pSpacer = dynamic_cast<ImoDirection*>( *it );
         CHECK( pSpacer != nullptr );
         ImoAttachments* pAuxObjs = pSpacer->get_attachments();
         CHECK( pAuxObjs != nullptr );

@@ -200,6 +200,7 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE08B),  // CUT_TIME
 
 //Metronome marks (U+ECA0 - U+ECBF)
+    GlyphData(0xECA0),  // small longa note
     GlyphData(0xECA2),  // small whole note
     GlyphData(0xECA3),  // small half note up
     GlyphData(0xECA5),  // small quarter note up
@@ -396,6 +397,8 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE820),  // Table single handbell
     GlyphData(0xE821),  // Table pair of handbells
 
+//Electronic music pictograms (U+EB10 - U+EB5F)
+    GlyphData(0xEB1D),  // stop button, used for errors
 };
 
 

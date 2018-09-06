@@ -348,7 +348,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1 p1)" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(spacer 0 p1 (text \"Hello world\"))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(dir 0 p1 (text \"Hello world\"))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
         CHECK( pTable->min_note_duration() == 64.0 );
     }
@@ -525,6 +525,86 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,	    0,	    0,	128,	0,	"(barline simple)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	128,	2,	"(barline simple)" );
         CHECK( pTable->min_note_duration() == 32.0 );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_13)
+    {
+        //@13. Direction in prolog is re-ordered after prolog
+
+        ImoScore* pScore = create_score(    //unit test score 02033
+            "(score (vers 2.1)"
+            "(instrument P1"
+            "(musicData (clef G) (dir (metronome e 40))"
+            "(key a)(time 3 8)(n e5 s v1 (beam 45 ++))"
+            "(n +d5 s v1 (beam 45 --))"
+            "(barline simple)"
+            "))"
+            "(instrument P2 (musicData"
+            "(clef F4)(key a)(time 3 8)"
+            "(r e v1)(barline simple)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 12 );
+        CHECK( pTable->is_anacrusis_start() == true );
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+//
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(key a)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(time 3 8)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 31 ++))" );
+        CHECK( pTable->min_note_duration() == 16.0 );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_14)
+    {
+        //@14. Direction before prolog is re-ordered
+
+        ImoScore* pScore = create_score(    //unit test score 02034
+            "(score (vers 2.1)"
+            "(instrument P1"
+            "(musicData (dir (metronome e 40))(clef G)"
+            "(key a)(time 3 8)(n e5 s v1 (beam 45 ++))"
+            "(n +d5 s v1 (beam 45 --))"
+            "(barline simple)"
+            "))"
+            "(instrument P2 (musicData"
+            "(clef F4)(key a)(time 3 8)"
+            "(r e v1)(barline simple)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 12 );
+        CHECK( pTable->is_anacrusis_start() == true );
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+//
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,     0,	    0,	0,	    0,	"(clef G p1)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(key a)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(time 3 8)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(clef F4 p1)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
+        CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 31 ++))" );
+        CHECK( pTable->min_note_duration() == 16.0 );
     }
 
     // ColStaffObjsBuilderEngine1x ------------------------------------------------------
@@ -946,7 +1026,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( is_equal_time((*it)->time(), 64.0f) );
         CHECK( (*it)->line() == 0 );
         CHECK( (*it)->staff() == 0 );
-        ImoSpacer* pAnchor = dynamic_cast<ImoSpacer*>( (*it)->imo_object() );
+        ImoDirection* pAnchor = dynamic_cast<ImoDirection*>( (*it)->imo_object() );
         CHECK( pAnchor != nullptr );
         ++it;
         //CHECK( (*it)->to_string() == "(barline )" );

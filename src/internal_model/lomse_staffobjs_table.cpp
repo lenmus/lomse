@@ -191,7 +191,7 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         if ((pA->is_direction() || pA->is_sound_change())
             && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
         {
-            return (a->line() != b->line());    //move clef/key/time before 'A' object
+            return true;    //(a->line() != b->line());    //move clef/key/time before 'A' object
         }
 
 ////        //clef in other staff can not go after key or time signature
@@ -538,10 +538,11 @@ void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
 }
 
 //---------------------------------------------------------------------------------------
-ImoSpacer* ColStaffObjsBuilderEngine1x::anchor_object(ImoAuxObj* pAux)
+ImoDirection* ColStaffObjsBuilderEngine1x::anchor_object(ImoAuxObj* pAux)
 {
     Document* pDoc = m_pImScore->get_the_document();
-    ImoSpacer* pAnchor = static_cast<ImoSpacer*>(ImFactory::inject(k_imo_spacer, pDoc));
+    ImoDirection* pAnchor =
+            static_cast<ImoDirection*>(ImFactory::inject(k_imo_direction, pDoc));
     pAnchor->add_attachment(pDoc, pAux);
     return pAnchor;
 }

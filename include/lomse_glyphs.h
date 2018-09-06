@@ -225,6 +225,7 @@ enum EGlyphIndex
     k_glyph_cut_time,
 
     //Metronome marks
+    k_glyph_small_longa_note,
     k_glyph_small_whole_note,
     k_glyph_small_half_note,
     k_glyph_small_quarter_note,
@@ -419,6 +420,9 @@ enum EGlyphIndex
     k_glyph_belltree,                       // Belltree
     k_glyph_table_single_handbell,          // Table single handbell
     k_glyph_table_pair_of_handbells,        // Table pair of handbells
+
+    //Electronic music pictograms (U+EB10 - U+EB5F)
+    k_glyph_error,          // stop play button
 
 };
 

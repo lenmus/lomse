@@ -4349,7 +4349,7 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ ImoSpacer StaffObj
+//@ ImoDirection StaffObj
 //@ <spacer> = (spacer <width>[<staffobjOptions>*][<attachments>*])     width in Tenths
 
 class SpacerLmdAnalyser : public LmdElementAnalyser
@@ -4362,8 +4362,8 @@ public:
     ImoObj* do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                    ImFactory::inject(k_imo_spacer, pDoc) );
+        ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                                    ImFactory::inject(k_imo_direction, pDoc) );
 
         // <width>
         if (get_optional(k_number))

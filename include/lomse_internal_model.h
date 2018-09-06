@@ -118,7 +118,6 @@ class ImoSimpleObj;
 class ImoSlurDto;
 class ImoSoundInfo;
 class ImoSounds;
-class ImoSpacer;
 class ImoStaffInfo;
 class ImoStaffObj;
 class ImoStyle;
@@ -624,7 +623,6 @@ enum EImoObjType
     k_imo_note,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note
     k_imo_rest,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rest
     k_imo_sound_change,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Playback parameters
-    k_imo_spacer,           ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Spacer
     k_imo_system_break,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System break
     k_imo_time_signature,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Time signature
     k_imo_staffobj_last,
@@ -1417,7 +1415,7 @@ public:
     inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
     inline bool is_sound_change() { return m_objtype == k_imo_sound_change; }
     inline bool is_sound_info() { return m_objtype == k_imo_sound_info; }
-    inline bool is_spacer() { return m_objtype == k_imo_spacer; }
+    inline bool is_spacer() { return m_objtype == k_imo_direction; }
     inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
     inline bool is_style() { return m_objtype == k_imo_style; }
     inline bool is_styles() { return m_objtype == k_imo_styles; }
@@ -4154,6 +4152,9 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** ImoDirection represents a discrete instruction in the score that applies to
+    notated events.
+*/
 class ImoDirection : public ImoStaffObj
 {
 protected:
@@ -4182,50 +4183,20 @@ public:
     virtual ~ImoDirection() {}
 
     //getters
-    inline Tenths get_width()
-    {
-        return m_space;
-    }
-    inline int get_placement()
-    {
-        return m_placement;
-    }
-    inline int get_display_repeat()
-    {
-        return m_displayRepeat;
-    }
-    inline int get_sound_repeat()
-    {
-        return m_soundRepeat;
-    }
+    inline Tenths get_width() { return m_space; }
+    inline int get_placement() { return m_placement; }
+    inline int get_display_repeat() { return m_displayRepeat; }
+    inline int get_sound_repeat() { return m_soundRepeat; }
 
     //setters
-    inline void set_width(Tenths space)
-    {
-        m_space = space;
-    }
-    inline void set_placement(int placement)
-    {
-        m_placement = placement;
-    }
-    inline void set_display_repeat(int repeat)
-    {
-        m_displayRepeat = repeat;
-    }
-    inline void set_sound_repeat(int repeat)
-    {
-        m_soundRepeat = repeat;
-    }
+    inline void set_width(Tenths space) { m_space = space; }
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_display_repeat(int repeat) { m_displayRepeat = repeat; }
+    inline void set_sound_repeat(int repeat) { m_soundRepeat = repeat; }
 
     //info
-    inline bool is_display_repeat()
-    {
-        return m_displayRepeat != k_repeat_none;
-    }
-    inline bool is_sound_repeat()
-    {
-        return m_soundRepeat != k_repeat_none;
-    }
+    inline bool is_display_repeat() { return m_displayRepeat != k_repeat_none; }
+    inline bool is_sound_repeat() { return m_soundRepeat != k_repeat_none; }
 };
 
 ////---------------------------------------------------------------------------------------
@@ -5189,7 +5160,7 @@ public:
     ImoClef* add_clef(int type, int nStaff=1, bool fVisible=true);
     ImoKeySignature* add_key_signature(int type, bool fVisible=true);
     ImoTimeSignature* add_time_signature(int top, int bottom, bool fVisible=true);
-    ImoSpacer* add_spacer(Tenths space);
+    ImoDirection* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
     void add_staff_objects(const string& ldpsource);
 
@@ -5923,32 +5894,6 @@ public:
     inline void set_height(Tenths h)
     {
         m_size.height = h;
-    }
-
-};
-
-//---------------------------------------------------------------------------------------
-class ImoSpacer : public ImoStaffObj
-{
-protected:
-    Tenths  m_space;
-
-    friend class ImFactory;
-    ImoSpacer() : ImoStaffObj(k_imo_spacer), m_space(0.0f) {}
-
-public:
-    virtual ~ImoSpacer() {}
-
-    //getters
-    inline Tenths get_width()
-    {
-        return m_space;
-    }
-
-    //setters
-    inline void set_width(Tenths space)
-    {
-        m_space = space;
     }
 
 };

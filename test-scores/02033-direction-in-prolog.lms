@@ -1,0 +1,23 @@
+(score (vers 2.1)
+	(instrument P1
+		(musicData
+			(clef G)
+			(dir (metronome e 40))
+			(key a)
+			(time 3 8)
+			(n e5 s v1 (beam 45 ++))
+			(n +d5 s v1 (beam 45 --))
+			(barline simple)
+		)
+	)
+	(instrument P2
+		(musicData
+			(clef F4)
+			(key a)
+			(time 3 8)
+			(r e v1)
+			(barline simple)
+		)
+	)
+)
+

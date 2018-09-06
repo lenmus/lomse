@@ -1045,17 +1045,12 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color);
         }
-        case k_imo_spacer:
+        case k_imo_direction:
         {
-            ImoSpacer* pImo = static_cast<ImoSpacer*>(pSO);
+            ImoDirection* pImo = static_cast<ImoDirection*>(pSO);
             LUnits space = m_pScoreMeter->tenths_to_logical(pImo->get_width(),
                                                             iInstr, iStaff);
             return create_invisible_shape(pSO, iInstr, iStaff, pos, space);
-        }
-        case k_imo_direction:
-        {
-            //TODO
-            return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
         }
         case k_imo_sound_change:
         default:

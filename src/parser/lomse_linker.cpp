@@ -386,9 +386,9 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
         //in musicData; they must go attached to an spacer.
         if (m_pParent->is_music_data())
         {
-            //musicData: create anchor (ImoSpacer) and attach to it
-            ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                        ImFactory::inject(k_imo_spacer, m_pDoc) );
+            //musicData: create anchor (ImoDirection) and attach to it
+            ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, m_pDoc) );
             pSpacer->add_attachment(m_pDoc, pText);
             add_staffobj(pSpacer);
             return pText;
@@ -547,9 +547,9 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
         //be explicitly defined in LDP source.
         else if (m_pParent && m_pParent->is_music_data())
         {
-            //auxObj in musicData: create anchor (ImoSpacer) and attach to it
-            ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                        ImFactory::inject(k_imo_spacer, m_pDoc) );
+            //auxObj in musicData: create anchor (ImoDirection) and attach to it
+            ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, m_pDoc) );
             pSpacer->add_attachment(m_pDoc, pAuxObj);
             add_staffobj(pSpacer);
         }

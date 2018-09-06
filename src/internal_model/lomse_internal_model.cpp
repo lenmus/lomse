@@ -438,16 +438,14 @@ const string& ImoObj::get_name(int type)
         // ImoStaffObj (A)
         m_TypeToName[k_imo_barline] = "barline";
         m_TypeToName[k_imo_clef] = "clef";
+        m_TypeToName[k_imo_direction] = "direction";
+        m_TypeToName[k_imo_figured_bass] = "figured-bass";
+        m_TypeToName[k_imo_go_back_fwd] = "go-back-fwd";
         m_TypeToName[k_imo_key_signature] = "key-signature";
-        m_TypeToName[k_imo_time_signature] = "time-signature";
         m_TypeToName[k_imo_note] = "note";
         m_TypeToName[k_imo_rest] = "rest";
-        m_TypeToName[k_imo_go_back_fwd] = "go-back-fwd";
-        m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
         m_TypeToName[k_imo_system_break] = "system-break";
-        m_TypeToName[k_imo_spacer] = "spacer";
-        m_TypeToName[k_imo_figured_bass] = "figured-bass";
-        m_TypeToName[k_imo_direction] = "direction";
+        m_TypeToName[k_imo_time_signature] = "time-signature";
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
@@ -467,21 +465,20 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_para] = "paragraph";
 
         // ImoInlineLevelObj
+        m_TypeToName[k_imo_button] = "buttom";
+        m_TypeToName[k_imo_control] = "control";
         m_TypeToName[k_imo_image] = "image";
         m_TypeToName[k_imo_score_player] = "score-player";
-        m_TypeToName[k_imo_control] = "control";
-        m_TypeToName[k_imo_button] = "buttom";
         m_TypeToName[k_imo_text_item] = "text";
 
         // ImoBoxInline (A)
-        m_TypeToName[k_imo_inline_wrapper] = "wrapper";
         m_TypeToName[k_imo_link] = "link";
+        m_TypeToName[k_imo_inline_wrapper] = "wrapper";
 
         // ImoDto, ImoSimpleObj (A)
         m_TypeToName[k_imo_beam_dto] = "beam";
         m_TypeToName[k_imo_bezier_info] = "bezier";
         m_TypeToName[k_imo_border_dto] = "border";
-        m_TypeToName[k_imo_textblock_info] = "textblock";
         m_TypeToName[k_imo_color_dto] = "color";
         m_TypeToName[k_imo_cursor_info] = "cursor";
         m_TypeToName[k_imo_figured_bass_info] = "figured-bass";
@@ -501,6 +498,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_staff_info] = "staff-info";
         m_TypeToName[k_imo_style] = "style";
         m_TypeToName[k_imo_system_info] = "system-info";
+        m_TypeToName[k_imo_textblock_info] = "textblock";
         m_TypeToName[k_imo_text_info] = "text-info";
         m_TypeToName[k_imo_text_style] = "text-style";
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
@@ -536,6 +534,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
         m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
+        m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
         m_TypeToName[k_imo_ornament] = "ornament";
         m_TypeToName[k_imo_score_text] = "score-text";
         m_TypeToName[k_imo_score_line] = "score-line";
@@ -2589,10 +2588,11 @@ ImoKeySignature* ImoInstrument::add_key_signature(int type, bool fVisible)
 }
 
 //---------------------------------------------------------------------------------------
-ImoSpacer* ImoInstrument::add_spacer(Tenths space)
+ImoDirection* ImoInstrument::add_spacer(Tenths space)
 {
     ImoMusicData* pMD = get_musicdata();
-    ImoSpacer* pImo = static_cast<ImoSpacer*>( ImFactory::inject(k_imo_spacer, m_pDoc) );
+    ImoDirection* pImo =
+            static_cast<ImoDirection*>( ImFactory::inject(k_imo_direction, m_pDoc) );
     pImo->set_width(space);
     pMD->append_child_imo(pImo);
     return pImo;
