@@ -3553,10 +3553,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        ImoDirection* pDirection = nullptr;
-        if (m_pAnchor && m_pAnchor->is_direction())
-            pDirection = static_cast<ImoDirection*>(m_pAnchor);
-        else
+        if (m_pAnchor == nullptr || !m_pAnchor->is_direction())
         {
             LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
             error_msg("<direction-type> <measure> is not child of <direction>. Ignored.");
@@ -3623,7 +3620,6 @@ public:
             //TODO: examples needed, for understanding and unit tests
         }
 
-        //pDirection->add_attachment(pDoc, pMtr);
         add_to_model(pMtr);
         return pMtr;
     }
