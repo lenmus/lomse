@@ -201,11 +201,11 @@ SUITE(LdpExporterTest)
         CHECK( source == "(barline end (text \"Hello\"))" );
     }
 
-    // BeamLdpGenerator -----------------------------------------------------------------
+    // @beam ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_0)
     {
-        //beam
+        //@00. beam
         Document doc(m_libraryScope);
         doc.from_string(
             "(score (vers 1.6)(instrument#100 (musicData "
@@ -228,7 +228,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_1)
     {
-        //chord: beam only in base note
+        //@01. chord: beam only in base note
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
             "(chord (n e4 e. g+ (stem up))(n g4 e.))"
@@ -251,7 +251,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_2)
     {
-        //chord after goBack: beam only in base note
+        //@02. chord after goBack: beam only in base note
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
             "(n c4 q)(n e4 q)(goBack 64)"
@@ -276,7 +276,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, beam_3)
     {
-        //beamed notes must be generated in sequence
+        //@03. beamed notes must be generated in sequence
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument#100 (musicData "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
@@ -301,7 +301,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, clef_0)
     {
-        //@ clef, type and base staffobj
+        //@00 clef, type and base staffobj
 
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
@@ -316,7 +316,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, clef_1)
     {
-        //@ clef & id, type and base staffobj
+        //@01 clef & id, type and base staffobj
 
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc, 27L));
@@ -332,7 +332,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, clef_2)
     {
-        //@ clef. symbolSize
+        //@02 clef. symbolSize
 
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
@@ -347,11 +347,87 @@ SUITE(LdpExporterTest)
     }
 
 
-    // DynamicsLdpGenerator -------------------------------------------------------------
+    //@ direction -----------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, direction_0)
+    {
+        //@00. empty direction having width -> spacer
+
+        Document doc(m_libraryScope);
+        ImoDirection* pImo = static_cast<ImoDirection*>(
+                            ImFactory::inject(k_imo_direction, &doc));
+        pImo->set_width(53.2f);
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "(spacer 53.2 p1)" );
+        delete pImo;
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, direction_1)
+    {
+        //@01. direction id
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument#100"
+                "(musicData (spacer#123 50) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoDirection* pImo = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_add_id(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "(spacer#123 50 p1)" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, direction_2)
+    {
+        //@02. direction with attachments
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument#100"
+                "(musicData (spacer 50 (text \"Hello\")) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoDirection* pImo = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "(dir 50 p1 (text \"Hello\"))" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, direction_3)
+    {
+        //@03. direction, no width, no attachments -> not exported
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument#100"
+                "(musicData (spacer 0)) ))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoDirection* pImo = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "" );
+    }
+
+
+    //@ dynamics marks -------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, dyn_01)
     {
-        //@ dynamics marks
+        //@01. dynamics marks
 
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
@@ -379,18 +455,16 @@ SUITE(LdpExporterTest)
     }
 
 
-    // BeamLdpGenerator
     // ContentObjLdpGenerator
     // ErrorLdpGenerator
     // FermataLdpGenerator
-    // ImObjLdpGenerator
     // GoBackFwdLdpGenerator ------------------------------------------------------------
 
-    // InstrumentLdpGenerator -----------------------------------------------------------
+    //@ instrument ----------------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_0)
     {
-        //staves
+        //@00. staves
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (musicData)))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -406,7 +480,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_1)
     {
-        //staff data
+        //@01. staff data
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument "
             "(staff 1 (staffType ossia)(staffLines 5)(staffSpacing 250.00)"
@@ -428,7 +502,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_2)
     {
-        //midi data
+        //@02. midi data
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (infoMIDI 9 12)(musicData)))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -444,7 +518,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_3)
     {
-        //name, abbrev
+        //@03. name, abbrev
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (name \"Guitar\")(abbrev \"G.\")(musicData)))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
@@ -460,7 +534,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_4)
     {
-        //name, abbrev with style
+        //@04. name, abbrev with style
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)"
             "(defineStyle \"Best1\" (font \"Times New Roman\" 10pt bold) (color #000000))"
@@ -578,14 +652,15 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
-                                        pMD->get_child_of_type(k_imo_metronome_mark) );
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome q 55 p1)" );
+        CHECK( source == "(metronome q 55)" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, metronome_1)
@@ -598,51 +673,54 @@ SUITE(LdpExporterTest)
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
-                                        pMD->get_child_of_type(k_imo_metronome_mark) );
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_remove_newlines(true);
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome#123 q q. p1)" );
+        CHECK( source == "(metronome#123 q q.)" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, metronome_2)
     {
-        //@02. metronome: value, no visible
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument#100"
-                "(musicData (metronome 77 noVisible) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
-                                        pMD->get_child_of_type(k_imo_metronome_mark) );
-        LdpExporter exporter(&m_libraryScope);
-        exporter.set_remove_newlines(true);
-        string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome 77 p1 (visible no))" );
-    }
-
-    TEST_FIXTURE(LdpExporterTestFixture, metronome_3)
-    {
-        //@03. metronome. parenthesis
+        //@02. metronome. parenthesis
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0) (instrument#100"
                 "(musicData (metronome q 80 parenthesis) )))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(
-                                        pMD->get_child_of_type(k_imo_metronome_mark) );
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
         LdpExporter exporter(&m_libraryScope);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(metronome q 80 parenthesis p1)" );
+        CHECK( source == "(metronome q 80 parenthesis)" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, metronome_3)
+    {
+        //@03. metronome. no visible
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument#100"
+                "(musicData (metronome q 80 noVisible) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                                        pMD->get_child_of_type(k_imo_direction) );
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "(metronome q 80 (visible no))" );
     }
 
     // MusicDataLdpGenerator ------------------------------------------------------------
@@ -830,11 +908,12 @@ SUITE(LdpExporterTest)
         CHECK( source == expected );
     }
 
-    // NoteLdpGenerator -----------------------------------------------------------------
+    //@ note ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, note_0)
     {
-        //tuplet exports also time-modification
+        //@00. tuplet exports also time-modification
+
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
             "(score (vers 1.6)(instrument#100 (musicData "
@@ -853,6 +932,26 @@ SUITE(LdpExporterTest)
             ")))";
 
         CHECK( source == expected );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, note_1)
+    {
+        //@01. note with accidentals
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) (instrument#100"
+                "(musicData (clef G)(n +d4 q) )))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoNote* pImo = static_cast<ImoNote*>(
+                                        pMD->get_child_of_type(k_imo_note) );
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << test_name() << endl << "\"" << source << "\"" << endl;
+        CHECK( source == "(n +d4 q v1 p1)" );
     }
 
     // RestLdpGenerator -----------------------------------------------------------------
@@ -1027,17 +1126,17 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1)"
-            "(spacer 0 p1 (text \"Largo\" (style \"Notations\")(dx -20)(dy -45))))";
+            "(dir 0 p1 (text \"Largo\" (style \"Notations\")(dx -20)(dy -45))))";
 
         CHECK( source == expected );
     }
 #endif
 
-    // Slur -----------------------------------------------------------------
+    //@ slur ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, slur_01)
     {
-        //@ 01
+        //@01
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (n c4 q (slur 1 start))"
@@ -1060,71 +1159,14 @@ SUITE(LdpExporterTest)
         CHECK( source == expected );
     }
 
-    //@ spacer --------------------------------------------------------------------------
-
-    TEST_FIXTURE(LdpExporterTestFixture, spacer_0)
-    {
-        //@00. spacer, type
-
-        Document doc(m_libraryScope);
-        ImoSpacer* pImo = static_cast<ImoSpacer*>(
-                            ImFactory::inject(k_imo_spacer, &doc));
-        pImo->set_width(53.2f);
-        LdpExporter exporter(&m_libraryScope);
-        exporter.set_remove_newlines(true);
-        string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(spacer 53.2 p1)" );
-        delete pImo;
-    }
-
-    TEST_FIXTURE(LdpExporterTestFixture, spacer_1)
-    {
-        //@01. spacer id
-
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument#100"
-                "(musicData (spacer#123 50) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoSpacer* pImo = static_cast<ImoSpacer*>(
-                                        pMD->get_child_of_type(k_imo_spacer) );
-
-        LdpExporter exporter(&m_libraryScope);
-        exporter.set_remove_newlines(true);
-        exporter.set_add_id(true);
-        string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(spacer#123 50 p1)" );
-    }
-
-    TEST_FIXTURE(LdpExporterTestFixture, spacer_2)
-    {
-        //@02. spacer. Attachments
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument#100"
-                "(musicData (spacer 50 (text \"Hello\")) )))");
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        ImoSpacer* pImo = static_cast<ImoSpacer*>(
-                                        pMD->get_child_of_type(k_imo_spacer) );
-        LdpExporter exporter(&m_libraryScope);
-        exporter.set_remove_newlines(true);
-        string source = exporter.get_source(pImo);
-        //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(spacer 50 p1 (text \"Hello\"))" );
-    }
-
     // StaffObjLdpGenerator -------------------------------------------------------------
 
     // SystemBreakLdpGenerator ----------------------------------------------------------
-    // TieLdpGenerator ------------------------------------------------------------------
+    //@ tie -----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpExporterTestFixture, tie_01)
     {
-        //@ 01
+        //@01
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
             "(instrument (musicData (n c4 q (tie 1 start))"
@@ -1203,8 +1245,6 @@ SUITE(LdpExporterTest)
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         CHECK( source == "(time common (text \"Hello\"))" );
     }
-
-    // TupletLdpGenerator
 
 //    // score ----------------------------------------------------------------------------
 //
@@ -1291,7 +1331,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, tuplet_0)
     {
-        //tuplet v1.6: tm implicit
+        //@00. tuplet v1.6: tm implicit
         Document doc(m_libraryScope);
         doc.from_string(
             "(score (vers 1.6)(instrument#100 (musicData (clef G)"
@@ -1321,7 +1361,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, tuplet_1)
     {
-        //tuplet v2.0: tm explicit
+        //@01. tuplet v2.0: tm explicit
         Document doc(m_libraryScope);
         doc.from_string(
             "(score (vers 2.0)(instrument#100 (musicData (clef G)"
@@ -1353,7 +1393,7 @@ SUITE(LdpExporterTest)
 
     TEST_FIXTURE(LdpExporterTestFixture, order_01)
     {
-        //@ 01 Note
+        //@01 Note
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)"
             "(instrument#100 (staves 2)(musicData (n c4 q p1 (stem down))"

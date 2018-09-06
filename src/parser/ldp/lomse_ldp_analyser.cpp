@@ -627,8 +627,8 @@ protected:
 
     //-----------------------------------------------------------------------------------
     //@ attachment : { `text` | `textbox` | `line` | `fermata` | `dynamics` |
-    //@            :   `accent` | `articulation` | `caesura` | `breathMark` |
-    //@            :   `technical` | `ornament` }
+    //@            :   `metronome` | `accent` | `articulation` | `caesura` |
+    //@            :   `breathMark` | `technical` | `ornament` }
     //@
     bool is_noterest_attachment(int type)
     {
@@ -1847,6 +1847,51 @@ protected:
         }
     }
 
+};
+
+//@--------------------------------------------------------------------------------------
+//@ ImoDirection StaffObj
+//@ <direction> = (dir <staffobjOptions>* <dirAttachments>*)
+//@ dirAttachment : { `metronome` }
+//@
+class DirectionAnalyser : public ElementAnalyser
+{
+public:
+    DirectionAnalyser(LdpAnalyser* pAnalyser, ostream& reporter,
+                      LibraryScope& libraryScope, ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDirection* pDir = static_cast<ImoDirection*>(
+                    ImFactory::inject(k_imo_direction, pDoc, get_node_id()) );
+
+        // <staffobjOptions>*
+        analyse_staffobjs_options(pDir);
+
+        // <dirAttachments>*
+        analyse_attachments(pDir);
+
+        add_to_model(pDir);
+    }
+
+protected:
+
+    void analyse_attachments(ImoDirection* pDir)
+    {
+        while( more_params_to_analyse() )
+        {
+            m_pParamToAnalyse = get_param_to_analyse();
+            ELdpElement type = m_pParamToAnalyse->get_type();
+            if (type == k_metronome)
+                m_pAnalyser->analyse_node(m_pParamToAnalyse, pDir);
+            else
+                error_invalid_param();
+
+            move_to_next_param();
+        }
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3454,14 +3499,13 @@ protected:
 //@--------------------------------------------------------------------------------------
 //@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
 //@                            <TicksPerMinute> }
-//@                          [parenthesis][<staffObjOptions>*] )
+//@                          [parenthesis]<printOptions>* )
 //@
 //@ examples:
 //@    (metronome q 80)                -->  quarter_note_sign = 80
 //@    (metronome q q.)                -->  quarter_note_sign = dotted_quarter_note_sign
 //@    (metronome 80)                  -->  m.m. = 80
 //@    (metronome q 80 parenthesis)    -->  (quarter_note_sign = 80)
-//@    (metronome 120 noVisible)       -->  nothing displayed
 
 class MetronomeAnalyser : public ElementAnalyser
 {
@@ -3532,7 +3576,7 @@ public:
                 error_invalid_param();
         }
 
-        // [<staffObjOptions>*]
+        // <printOptions>*
         analyse_scoreobj_options(pMtr);
 
         error_if_more_elements();
@@ -3542,13 +3586,17 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <musicData> = (musicData [{<note>|<rest>|<barline>|<chord>|<clef>|<figuredBass>|
-//@                            <graphic>|<key>|<line>|<metronome>|<newSystem>|<spacer>|
-//@                            <text>|<time>|<goFwd>|<goBack>}*] )
+//@ <musicData> = (musicData [{<note>|<rest>|<barline>|<chord>|<clef>|<direction>|
+//@                            <figuredBass>|<key>|<metronome>|<newSystem>|<spacer>|
+//@                            <time>|<goFwd>|<goBack>|<graphic>|<line>|<text>}*] )
 //@
 //@ <graphic>, <line> and <text> elements are accepted for compatibility with 1.5.
 //@ From 1.6 these elements will no longer be possible. They must go attached to an
 //@ spacer or other staffobj
+//@
+//@ <metronome> element is accepted for backwards compatibility with 2.0. But in
+//@ future <metronome> element will not be possible here. It must go attached to a
+//@ <direction> element.
 
 
 class MusicDataAnalyser : public ElementAnalyser
@@ -3581,6 +3629,7 @@ public:
                    || analyse_optional(k_time_signature, pMD)
                    || analyse_optional(k_goFwd, pMD)
                    || analyse_optional(k_goBack, pMD)
+                   || analyse_optional(k_direction, pMD)
 #if LOMSE_COMPATIBILITY_LDP_1_5
                    || analyse_optional(k_graphic, pMD)
                    || analyse_optional(k_line, pMD)
@@ -4903,7 +4952,7 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ ImoSpacer StaffObj
+//@ ImoDirection StaffObj
 //@ <spacer> = (spacer <width> <staffobjOptions>* <soAttachments>*)
 //@
 //@ width in Tenths
@@ -4918,8 +4967,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                    ImFactory::inject(k_imo_spacer, pDoc, get_node_id()) );
+        ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                    ImFactory::inject(k_imo_direction, pDoc, get_node_id()) );
 
         // <width>
         if (get_optional(k_number))
@@ -6966,9 +7015,10 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_color:           return LOMSE_NEW ColorAnalyser(this, m_reporter, m_libraryScope);
         case k_cursor:          return LOMSE_NEW CursorAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_defineStyle:     return LOMSE_NEW DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_endPoint:        return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_direction:       return LOMSE_NEW DirectionAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_dynamic:         return LOMSE_NEW DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_dynamics_mark:   return LOMSE_NEW DynamicsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_endPoint:        return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_fermata:         return LOMSE_NEW FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_figuredBass:     return LOMSE_NEW FiguredBassAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_font:            return LOMSE_NEW FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);

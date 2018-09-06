@@ -3943,9 +3943,9 @@ SUITE(LdpAnalyserTest)
 
     //@ metronome -----------------------------------------------------------------------
 
-    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_0)
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_00)
     {
-        //@00. metronome, note value
+        //@00. metronome, note = value
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -3967,13 +3967,381 @@ SUITE(LdpAnalyserTest)
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
-        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(*it);
+        ImoDirection* pDir = static_cast<ImoDirection*>(*it);
+        ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+
         CHECK( pImo->get_ticks_per_minute() == 55 );
         CHECK( pImo->get_mark_type() == ImoMetronomeMark::k_note_value );
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_01)
+    {
+        //@01. metronome, just value
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(metronome 88)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_02)
+    {
+        //@02. metronome has id
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(metronome#10 88)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM->get_id() == 10L );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Missing metronome parameters. Replaced by '(metronome 60)'." << endl;
+        parser.parse_text("(metronome)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 60 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteValue)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(metronome e. 77)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
+        CHECK( pMM->get_ticks_per_minute() == 77 );
+        CHECK( pMM->get_left_note_type() == k_eighth );
+        CHECK( pMM->get_left_dots() == 1 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteNote)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(metronome e. s)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
+        CHECK( pMM->get_left_note_type() == k_eighth );
+        CHECK( pMM->get_left_dots() == 1 );
+        CHECK( pMM->get_right_note_type() == k_16th );
+        CHECK( pMM->get_right_dots() == 0 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error2)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Error in metronome parameters. Replaced by '(metronome 60)'." << endl;
+        parser.parse_text("(metronome e. \"s\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 60 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_LocationX)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text("(metronome 88 (dx 70))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->is_visible() );
+        CHECK( pMM->get_user_location_x() == 70.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoVisible)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text("(metronome 88 noVisible)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->get_user_location_x() == 0.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+        CHECK( pMM->is_visible() == false );
+        CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Parenthesis)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text("(metronome 88 parenthesis (visible no))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->get_user_location_x() == 0.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+        CHECK( pMM->is_visible() == false );
+        CHECK( pMM->has_parenthesis() == true );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Ordering)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. ?" << endl;
+        parser.parse_text("(metronome 88 parenthesis (dx 7) noVisible)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->is_visible() == false );
+        CHECK( pMM->has_parenthesis() == true );
+        CHECK( pMM->get_user_location_x() == 7.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error3)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Element 'label:parentesis' unknown or not possible here. Ignored." << endl;
+        parser.parse_text("(metronome 88 parentesis (dx 7))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pRoot);
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+        CHECK( pMM->get_user_location_x() == 7.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_12)
+    {
+        //@12. metronome directly attached to MusicData
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. Element 'label:parentesis' unknown or not possible here. Ignored." << endl;
+        parser.parse_text("(musicData (metronome 88 (dx 7)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        CHECK( pMusic != nullptr );
+        ImoObj::children_iterator it = pMusic->begin();
+        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 88 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+        CHECK( pMM->get_user_location_x() == 7.0f );
+        CHECK( pMM->get_user_location_y() == 0.0f );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_13)
+    {
+        //@13. attached to direction
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(dir (metronome 60))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDirection* pDir = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pDir != nullptr );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        CHECK( pMM != nullptr );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->get_ticks_per_minute() == 60 );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, metronome_14)
+    {
+        //@14. Error: metronome attached to spacer
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected <<
+            "Line 0. Element 'metronome' unknown or not possible here. Ignored." << endl;
+        parser.parse_text("(spacer 10 (metronome 60))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pSp != nullptr );
+        CHECK( pSp->get_width() == 10.0f );
+        CHECK( pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->get_attachment(0) == nullptr );
+
+        delete tree->get_root();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
 
     //@ time signature -------------------------------------------------------------------
 
@@ -4418,278 +4786,6 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-    // metronome ------------------------------------------------------------------------
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Value)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(metronome 88)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot->is_metronome_mark() == true );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_metronome)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(metronome#10 88)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot->is_metronome_mark() == true );
-        ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        expected << "Line 0. Missing metronome parameters. Replaced by '(metronome 60)'." << endl;
-        parser.parse_text("(metronome)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 60 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteValue)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(metronome e. 77)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
-        CHECK( pMM->get_ticks_per_minute() == 77 );
-        CHECK( pMM->get_left_note_type() == k_eighth );
-        CHECK( pMM->get_left_dots() == 1 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoteNote)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(metronome e. s)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
-        CHECK( pMM->get_left_note_type() == k_eighth );
-        CHECK( pMM->get_left_dots() == 1 );
-        CHECK( pMM->get_right_note_type() == k_16th );
-        CHECK( pMM->get_right_dots() == 0 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error2)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        expected << "Line 0. Error in metronome parameters. Replaced by '(metronome 60)'." << endl;
-        parser.parse_text("(metronome e. \"s\")");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 60 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_LocationX)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(metronome 88 (dx 70))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->is_visible() );
-        CHECK( pMM->get_user_location_x() == 70.0f );
-        CHECK( pMM->get_user_location_y() == 0.0f );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_NoVisible)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(metronome 88 noVisible)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->get_user_location_x() == 0.0f );
-        CHECK( pMM->get_user_location_y() == 0.0f );
-        CHECK( pMM->is_visible() == false );
-        CHECK( pMM->has_parenthesis() == false );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Parenthesis)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_libraryScope.ldp_factory());
-        parser.parse_text("(metronome 88 parenthesis (visible no))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->get_user_location_x() == 0.0f );
-        CHECK( pMM->get_user_location_y() == 0.0f );
-        CHECK( pMM->is_visible() == false );
-        CHECK( pMM->has_parenthesis() == true );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Ordering)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "Line 0. ?" << endl;
-        parser.parse_text("(metronome 88 parenthesis (dx 7) noVisible)");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->is_visible() == false );
-        CHECK( pMM->has_parenthesis() == true );
-        CHECK( pMM->get_user_location_x() == 7.0f );
-        CHECK( pMM->get_user_location_y() == 0.0f );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Metronome_Error3)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        expected << "Line 0. Element 'label:parentesis' unknown or not possible here. Ignored." << endl;
-        parser.parse_text("(metronome 88 parentesis (dx 7))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        CHECK( pMM != nullptr );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->get_ticks_per_minute() == 88 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
-        CHECK( pMM->get_user_location_x() == 7.0f );
-        CHECK( pMM->get_user_location_y() == 0.0f );
-
-        delete tree->get_root();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
 
     // opt ------------------------------------------------------------------------------
 
@@ -5015,7 +5111,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_spacer() == true );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5079,7 +5175,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 2 );
@@ -5102,7 +5198,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5125,7 +5221,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.5f );
         CHECK( pSp->get_staff() == 0 );
@@ -5148,7 +5244,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -5172,7 +5268,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -5196,7 +5292,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSpacer* pSp = dynamic_cast<ImoSpacer*>( pRoot );
+        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
         CHECK( pSp->get_width() == 70.0f );
         CHECK( pSp->get_staff() == 0 );
@@ -10418,7 +10514,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote != nullptr );
 
         ++it;
-        ImoSpacer* pSpacer = dynamic_cast<ImoSpacer*>( *it );
+        ImoDirection* pSpacer = dynamic_cast<ImoDirection*>( *it );
         CHECK( pSpacer != nullptr );
         ImoAttachments* pAuxObjs = pSpacer->get_attachments();
         CHECK( pAuxObjs != nullptr );

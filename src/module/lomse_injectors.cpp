@@ -198,7 +198,7 @@ int LibraryScope::get_pixel_format() const
 //---------------------------------------------------------------------------------------
 void LibraryScope::post_event(SpEventInfo pEvent)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events, "");
+    LOMSE_LOG_DEBUG(Logger::k_events, string(""));
     m_pDoorway->post_event(pEvent);
 }
 

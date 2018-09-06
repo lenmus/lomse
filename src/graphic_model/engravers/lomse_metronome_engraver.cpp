@@ -188,6 +188,8 @@ int MetronomeMarkEngraver::select_glyph(int noteType)
 {
     switch (noteType)
 	{
+        case k_longa:
+            return k_glyph_small_longa_note;
         case k_whole:
             return k_glyph_small_whole_note;
         case k_half:
@@ -208,10 +210,9 @@ int MetronomeMarkEngraver::select_glyph(int noteType)
             return k_glyph_small_256th_note;
         default:
         {
-            stringstream msg;
-            msg << "[MetronomeMarkEngraver::select_glyph] invalid note type " << noteType;
-            LOMSE_LOG_ERROR(msg.str());
-            throw runtime_error(msg.str());
+            LOMSE_LOG_ERROR(
+                "[MetronomeMarkEngraver::select_glyph] invalid note type %d", noteType);
+            return k_glyph_error;
         }
     }
 }

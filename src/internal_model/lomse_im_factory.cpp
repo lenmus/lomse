@@ -113,7 +113,6 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_sound_change:        pObj = LOMSE_NEW ImoSoundChange();        break;
         case k_imo_sound_info:          pObj = LOMSE_NEW ImoSoundInfo();          break;
         case k_imo_sounds:              pObj = LOMSE_NEW ImoSounds();             break;
-        case k_imo_spacer:              pObj = LOMSE_NEW ImoSpacer();             break;
         case k_imo_staff_info:          pObj = LOMSE_NEW ImoStaffInfo();          break;
         case k_imo_style:               pObj = LOMSE_NEW ImoStyle();              break;
         case k_imo_styles:              pObj = LOMSE_NEW ImoStyles(pDoc);         break;

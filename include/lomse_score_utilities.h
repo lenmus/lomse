@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -91,6 +91,11 @@ class ImoTimeSignature;
     //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
     //the Key signature. For example, if keyType is A sharp minor it returns 5 (step A)
     int get_step_for_root_note(EKeySignature keyType);
+
+    //-----------------------------------------------------------------------------------
+    //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the leading note in
+    //the Key signature. For example, if keyType is A sharp minor it returns 4 (step G)
+    int get_step_for_leading_note(EKeySignature keyType);
 
     //-----------------------------------------------------------------------------------
     extern bool is_major_key(EKeySignature keyType);

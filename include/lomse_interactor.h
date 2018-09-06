@@ -245,7 +245,7 @@ public:
             {
                 spInteractor->set_operating_mode(Interactor::k_mode_playback);
 
-                SpEventPlayCtrl pEv = boost::static_pointer_cast<EventPlayCtrl>(pEvent);
+                SpEventPlayCtrl pEv = static_pointer_cast<EventPlayCtrl>(pEvent);
                 ImoScore* pScore = pEv->get_score();
                 ScorePlayer* pPlayer  = m_appScope.get_score_player();
                 PlayerGui* pPlayerGui = pEv->get_player();

@@ -341,6 +341,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     Document* pDoc = m_pScore->get_the_document();
     m_beatDuration = pDoc->get_beat_duration();
     m_beatType = pDoc->get_beat_type();
+    LOMSE_LOG_DEBUG(Logger::k_score_player,
+                    "beat: m_beatType=%d, m_beatDuration=%f",
+                    m_beatType, m_beatDuration);
 
     //default beat and metronome information. It is going to be properly set
     //when a SoundEvent::k_RhythmChange event is found (a time signature object). So these

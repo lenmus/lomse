@@ -30,13 +30,16 @@
 #ifndef __LOMSE_METRONOME_H__        //to avoid nested includes
 #define __LOMSE_METRONOME_H__
 
+#include "lomse_document.h"         //EBeatDuration
+#include "lomse_internal_model.h"   //ENoteDuration
 
 
 namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-// Abstract class defining the interface for any Metronome
+/** Abstract class defining the interface for any Metronome
+*/
 class Metronome
 {
 protected:
@@ -44,10 +47,15 @@ protected:
     long        m_nInterval;    //metronome period: milliseconds between beats
     bool        m_fMuted;       //metronome sound is muted
     bool        m_fRunning;     //true if start() invoked
+    int         m_beatType;
+    TimeUnits   m_beatDuration;
+
 
     Metronome(long nMM)
         : m_fMuted(false)
         , m_fRunning(false)
+        , m_beatType(k_beat_implied)
+        , m_beatDuration(k_duration_quarter)
     {
         set_mm(nMM);
     }
@@ -67,11 +75,21 @@ public:
         m_nMM = (long)((60000.0 / (float)milliseconds)+ 0.5);;
     }
 
+    //setting beat type
+    inline void set_beat_type(int type, TimeUnits duration=0.0)
+    {
+        m_beatType = type;
+        m_beatDuration = duration;
+    }
+
+
     // accessors
     inline long get_mm() { return m_nMM; }
     inline long get_interval() { return m_nInterval; }
     inline bool is_muted() { return m_fMuted; }
     inline bool is_running() { return m_fRunning; }
+    inline int get_beat_type() { return m_beatType; }
+    inline TimeUnits get_beat_duration() { return m_beatDuration; }
 
     // commands
     virtual void start() = 0;

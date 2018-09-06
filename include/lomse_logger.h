@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -141,20 +141,33 @@ public:
     void log_error(const string& file, int line, const string& prettyFunction,
                    const char* fmtstr, ...) PRINTF_SYNTAX(5);
     void log_error(const string& file, int line, const string& prettyFunction,
-                   const string& msg)
-        { log_error(file, line, prettyFunction, "%s", msg.c_str()); }
+                   const string& msg);
+
     void log_warn(const string& file, int line, const string& prettyFunction,
                   const char* fmtstr, ...) PRINTF_SYNTAX(5);
+    void log_warn(const string& file, int line, const string& prettyFunction,
+                  const string& msg);
+
     void log_info(const string& file, int line, const string& prettyFunction,
                   const char* fmtstr, ...) PRINTF_SYNTAX(5);
+    void log_info(const string& file, int line, const string& prettyFunction,
+                  const string& msg);
+
     void log_debug(const string& file, int line, const string& prettyFunction,
                    uint_least32_t area, const char* fmtstr, ...) PRINTF_SYNTAX(6);
+    void log_debug(const string& file, int line, const string& prettyFunction,
+                   uint_least32_t area, const string& msg);
+
     void log_trace(const string& file, int line, const string& prettyFunction,
                    uint_least32_t area, const char* fmtstr, ...) PRINTF_SYNTAX(6);
+    void log_trace(const string& file, int line, const string& prettyFunction,
+                   uint_least32_t area, const string& msg);
 
 protected:
     void log_message(const string& file, int line, const string& prettyFunction,
                      const string& prefix, const char* fmtstr, va_list args);
+    void log_message(const string& file, int line, const string& prettyFunction,
+                     const string& prefix, const string& msg);
     string format(const char* fmtstr, va_list args);
 };
 

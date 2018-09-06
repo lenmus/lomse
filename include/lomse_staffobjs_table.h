@@ -48,7 +48,7 @@ class ImoObj;
 class ImoStaffObj;
 class ImoGoBackFwd;
 class ImoAuxObj;
-class ImoSpacer;
+class ImoDirection;
 class ImoScore;
 class ImoTimeSignature;
 class ImoGoBackFwd;
@@ -356,7 +356,7 @@ private:
     void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    ImoSpacer* anchor_object(ImoAuxObj* pImo);
+    ImoDirection* anchor_object(ImoAuxObj* pImo);
     void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
     void prepare_for_next_instrument();
 

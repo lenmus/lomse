@@ -74,7 +74,7 @@ Layouter::Layouter(LibraryScope& libraryScope)
 //---------------------------------------------------------------------------------------
 GmoBox* Layouter::start_new_page()
 {
-    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+    LOMSE_LOG_DEBUG(Logger::k_layout, string(""));
 
     GmoBox* pParentBox = m_pParentLayouter->start_new_page();
 

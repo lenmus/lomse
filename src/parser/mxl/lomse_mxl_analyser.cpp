@@ -1051,6 +1051,51 @@ protected:
 //        return size;
 //    }
 
+    //-----------------------------------------------------------------------------------
+    // Auxiliary methods
+    //-----------------------------------------------------------------------------------
+
+    int to_note_type(const string& type)
+    {
+        int noteType = k_unknown_notetype;
+
+        if (type == "quarter")
+            noteType = k_quarter;
+        else if (type == "eighth")
+            noteType = k_eighth;
+        else if (type == "16th")
+            noteType = k_16th;
+        else if (type == "half")
+            noteType = k_half;
+        else if (type == "32nd")
+            noteType = k_32nd;
+        else if (type == "64th")
+            noteType = k_64th;
+        else if (type == "whole")
+            noteType = k_whole;
+        else if (type == "long")
+            noteType = k_longa;
+        else if (type == "128th")
+            noteType = k_128th;
+        else if (type == "256th")
+            noteType = k_256th;
+        else if (type == "breve")
+            noteType = k_breve;
+//        else if (type == "512th")
+//            noteType = k_512th;
+//        else if (type == "1024th")
+//            noteType = k_1024th;
+//        else if (type == "maxima")
+//            noteType = k_maxima;
+        else
+        {
+            error_msg2(
+                "Invalid or not supported <type> value '" + type + "'. Replaced by 'eighth'.");
+            noteType = k_eighth;
+        }
+        return noteType;
+    }
+
 };
 
 
@@ -3485,6 +3530,20 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <metronome>
+//@ <!ELEMENT metronome
+//@ 	((beat-unit, beat-unit-dot*,
+//@      (per-minute | (beat-unit, beat-unit-dot*))) |
+//@ 	(metronome-note+, (metronome-relation, metronome-note+)?))>
+//@ <!ATTLIST metronome
+//@     %print-style;
+//@     parentheses %yes-no; #IMPLIED
+//@ >
+//@ <!ELEMENT beat-unit (#PCDATA)>
+//@ <!ELEMENT beat-unit-dot EMPTY>
+//@ <!ELEMENT per-minute (#PCDATA)>
+//@ <!ATTLIST per-minute
+//@     %font;
+//@ >
 class MetronomeMxlAnalyser : public MxlElementAnalyser
 {
 public:
@@ -3494,9 +3553,85 @@ public:
 
     ImoObj* do_analysis()
     {
-		//TODO
-        return nullptr;
+        if (m_pAnchor == nullptr || !m_pAnchor->is_direction())
+        {
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
+            error_msg("<direction-type> <measure> is not child of <direction>. Ignored.");
+            return nullptr;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoMetronomeMark* pMtr = static_cast<ImoMetronomeMark*>(
+                    ImFactory::inject(k_imo_metronome_mark, pDoc) );
+
+        //attrb: %print-style;
+            //TODO
+
+        //attrb: parentheses %yes-no; #IMPLIED
+            //TODO
+
+
+        //elements
+
+        if (get_optional("beat-unit"))
+        {
+            // (beat-unit, beat-unit-dot*, (per-minute | (beat-unit, beat-unit-dot*))
+
+            int noteType = get_beat_unit();
+            pMtr->set_left_note_type(noteType);
+
+            int dots = 0;
+            while (get_optional("beat-unit-dot"))
+                ++dots;
+            pMtr->set_left_dots(dots);
+
+            if (get_optional("per-minute"))
+            {
+                // case 1: (beat-unit, beat-unit-dot*) = per-minute
+                pMtr->set_ticks_per_minute( get_child_value_integer(60) );
+                pMtr->set_mark_type(ImoMetronomeMark::k_note_value);
+            }
+            else if (get_optional("beat-unit"))
+            {
+                // case 2: (beat-unit, beat-unit-dot*) = (beat-unit, beat-unit-dot*)
+                int noteType = get_beat_unit();
+                pMtr->set_right_note_type(noteType);
+
+                int dots = 0;
+                while (get_optional("beat-unit-dot"))
+                    ++dots;
+                pMtr->set_right_dots(dots);
+                pMtr->set_mark_type(ImoMetronomeMark::k_note_note);
+            }
+            else
+            {
+                error_msg2(
+                        "Error in metronome parameters. Replaced by '(metronome 60)'.");
+                pMtr->set_ticks_per_minute(60);
+                pMtr->set_mark_type(ImoMetronomeMark::k_value);
+                add_to_model(pMtr);
+                return pMtr;
+            }
+        }
+        else if (get_optional("metronome-note"))
+        {
+            // (metronome-note+, (metronome-relation, metronome-note+)?)
+
+            //TODO: examples needed, for understanding and unit tests
+        }
+
+        add_to_model(pMtr);
+        return pMtr;
     }
+
+protected:
+
+    int get_beat_unit()
+    {
+        return to_note_type( m_childToAnalyse.value() );
+    }
+
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -4042,7 +4177,7 @@ protected:
         int noteType = k_unknown_notetype;
         TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
         if (!type.empty())
-            noteType = get_note_type(type);
+            noteType = to_note_type(type);
         else if (pNR->is_rest() && static_cast<ImoRest*>(pNR)->is_full_measure())
         {
             dots = 0;
@@ -4076,49 +4211,6 @@ protected:
         }
 
         pNR->set_type_dots_duration(noteType, dots, units);
-    }
-
-    //----------------------------------------------------------------------------------
-    int get_note_type(const string& type)
-    {
-        int noteType = k_unknown_notetype;
-
-        if (type == "quarter")
-            noteType = k_quarter;
-        else if (type == "eighth")
-            noteType = k_eighth;
-        else if (type == "16th")
-            noteType = k_16th;
-        else if (type == "half")
-            noteType = k_half;
-        else if (type == "32nd")
-            noteType = k_32nd;
-        else if (type == "64th")
-            noteType = k_64th;
-        else if (type == "whole")
-            noteType = k_whole;
-        else if (type == "long")
-            noteType = k_longa;
-        else if (type == "128th")
-            noteType = k_128th;
-        else if (type == "256th")
-            noteType = k_256th;
-        else if (type == "breve")
-            noteType = k_breve;
-//        else if (type == "512th")
-//            noteType = k_512th;
-//        else if (type == "1024th")
-//            noteType = k_1024th;
-//        else if (type == "maxima")
-//            noteType = k_maxima;
-        else
-        {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-            error_msg2(
-                "Invalid or not supported <type> value '" + type + "'. Replaced by 'eighth'.");
-            noteType = k_eighth;
-        }
-        return noteType;
     }
 
     //----------------------------------------------------------------------------------
@@ -7285,7 +7377,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_lyric:                return LOMSE_NEW LyricMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_measure:              return LOMSE_NEW MeasureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_metronome:            return LOMSE_NEW MetronomeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_metronome:            return LOMSE_NEW MetronomeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_midi_device:          return LOMSE_NEW MidiDeviceMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_midi_instrument:      return LOMSE_NEW MidiInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_notations:            return LOMSE_NEW NotationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

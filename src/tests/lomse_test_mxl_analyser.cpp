@@ -1995,6 +1995,237 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ metronome -----------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, metronome_01)
+    {
+        //@01. Metronome. note,dots = value
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction placement='above'>"
+              "<direction-type>"
+                "<metronome parentheses='no' default-x='20.00' default-y='20.00'>"
+                  "<beat-unit>quarter</beat-unit>"
+                  "<beat-unit-dot/>"
+                  "<beat-unit-dot/>"
+                  "<per-minute>55</per-minute>"
+                "</metronome>"
+              "</direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 2 );  //direction + barline
+        CHECK( pMD != nullptr );
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( (*it)->is_direction() );
+        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+        CHECK( pDir != nullptr );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        CHECK( pMM->get_ticks_per_minute() == 55 );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
+        CHECK( pMM->get_left_note_type() == k_quarter );
+        CHECK( pMM->get_left_dots() == 2 );
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, metronome_02)
+    {
+        //@02. Metronome. note,dots = note,dots
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction placement='above'>"
+              "<direction-type>"
+                "<metronome parentheses='no' default-x='20.00' default-y='20.00'>"
+                  "<beat-unit>long</beat-unit>"
+                  "<beat-unit>32nd</beat-unit>"
+                  "<beat-unit-dot/>"
+                "</metronome>"
+              "</direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 2 );  //direction + barline
+        CHECK( pMD != nullptr );
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( (*it)->is_direction() );
+        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+        CHECK( pDir != nullptr );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
+        CHECK( pMM->get_left_note_type() == k_longa );
+        CHECK( pMM->get_left_dots() == 0 );
+        CHECK( pMM->get_right_note_type() == k_32nd );
+        CHECK( pMM->get_right_dots() == 1 );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, metronome_03)
+    {
+        //@03. Metronome. error
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part 'P1', measure '1'. Error in metronome parameters. "
+            "Replaced by '(metronome 60)'." << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction placement='above'>"
+              "<direction-type>"
+                "<metronome parentheses='no' default-x='20.00' default-y='20.00'>"
+                  "<beat-unit>quarter</beat-unit>"
+                "</metronome>"
+              "</direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD->get_num_children() == 2 );  //direction + barline
+        CHECK( pMD != nullptr );
+        ImoObj::children_iterator it = pMD->begin();
+        CHECK( (*it)->is_direction() );
+        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+        CHECK( pDir != nullptr );
+        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+        CHECK( pMM->get_ticks_per_minute() == 60 );
+        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        CHECK( pMM->is_visible() == true );
+        CHECK( pMM->has_parenthesis() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+//    TEST_FIXTURE(MxlAnalyserTestFixture, metronome_04)
+//    {
+//        //@04. Metronome. metronome-note+, (metronome-relation, metronome-note+)?)
+//
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        XmlParser parser;
+//        stringstream expected;
+//        expected << "Line 0. Part 'P1', measure '1'. Error in metronome parameters. "
+//            "Replaced by '(metronome 60)'." << endl;
+//        parser.parse_text(
+//            "<score-partwise version='3.0'><part-list>"
+//            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+//            "</part-list><part id='P1'>"
+//            "<measure number='1'>"
+//            "<direction placement='above'>"
+//              "<direction-type>"
+//                "<metronome parentheses='no' default-x='20.00' default-y='20.00'>"
+//                  "<beat-unit>quarter</beat-unit>"
+//                "</metronome>"
+//              "</direction-type>"
+//            "</direction>"
+//            "</measure>"
+//            "</part></score-partwise>"
+//        );
+//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+//        XmlNode* tree = parser.get_tree_root();
+//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+//
+////        cout << test_name() << endl;
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( pRoot != nullptr);
+//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+//        ImoInstrument* pInstr = pScore->get_instrument(0);
+//        ImoMusicData* pMD = pInstr->get_musicdata();
+//        CHECK( pMD != nullptr );
+//
+//        CHECK( pMD->get_num_children() == 2 );  //direction + barline
+//        CHECK( pMD != nullptr );
+//        ImoObj::children_iterator it = pMD->begin();
+//        CHECK( (*it)->is_direction() );
+//        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+//        CHECK( pDir != nullptr );
+//        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+//        CHECK( pMM->get_ticks_per_minute() == 60 );
+//        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+//        CHECK( pMM->is_visible() == true );
+//        CHECK( pMM->has_parenthesis() == false );
+//
+//        a.do_not_delete_instruments_in_destructor();
+//        if (pRoot && !pRoot->is_document()) delete pRoot;
+//    }
+
+
     //@ midi-device -----------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, midi_device_01)

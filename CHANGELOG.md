@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- MusicXML importer now accepts metronome directions.
 - The algorithm for auto-scroll has been improved.
 - During playback, when the time signature changes, metronome clicks
   interval is now adjusted for maintaining notes duration equivalence.

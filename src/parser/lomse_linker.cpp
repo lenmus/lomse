@@ -386,9 +386,9 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
         //in musicData; they must go attached to an spacer.
         if (m_pParent->is_music_data())
         {
-            //musicData: create anchor (ImoSpacer) and attach to it
-            ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                        ImFactory::inject(k_imo_spacer, m_pDoc) );
+            //musicData: create anchor (ImoDirection) and attach to it
+            ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, m_pDoc) );
             pSpacer->add_attachment(m_pDoc, pText);
             add_staffobj(pSpacer);
             return pText;
@@ -525,31 +525,51 @@ ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
 {
-    if (m_pParent && m_pParent->is_contentobj())
+    if (m_pParent && m_pParent->is_staffobj())
     {
-        ImoContentObj* pContentObj = static_cast<ImoContentObj*>(m_pParent);
-        pContentObj->add_attachment(m_pDoc, pAuxObj);
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(m_pParent);
+        pSO->add_attachment(m_pDoc, pAuxObj);
     }
-#if LOMSE_COMPATIBILITY_LDP_1_5
-    //backwards compatibility with 1.5
-    //Until v.1.5 included, it was ok to include AuxObj in a musicData element, and
-    //the parser will create an anchor object for it. Since v1.6 the anchor object *must*
-    //be explicitly defined in LDP source.
     else if (m_pParent && m_pParent->is_music_data())
     {
-        if (pAuxObj->is_score_line())
+        if (pAuxObj->is_metronome_mark())
         {
-            //auxObj in musicData: create anchor (ImoSpacer) and attach to it
-            ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                        ImFactory::inject(k_imo_spacer, m_pDoc) );
+            //metronome mark in musicData: create anchor (ImoDirection) and attach to it
+            ImoDirection* pDirection = static_cast<ImoDirection*>(
+                                            ImFactory::inject(k_imo_direction, m_pDoc) );
+            pDirection->add_attachment(m_pDoc, pAuxObj);
+            add_staffobj(pDirection);
+        }
+        #if LOMSE_COMPATIBILITY_LDP_1_5
+        //backwards compatibility with 1.5
+        //Until v.1.5 included, it was ok to include AuxObj in a musicData element, and
+        //the parser will create an anchor object for it. Since v1.6 the anchor object *must*
+        //be explicitly defined in LDP source.
+        else if (m_pParent && m_pParent->is_music_data())
+        {
+            //auxObj in musicData: create anchor (ImoDirection) and attach to it
+            ImoDirection* pSpacer = static_cast<ImoDirection*>(
+                                        ImFactory::inject(k_imo_direction, m_pDoc) );
             pSpacer->add_attachment(m_pDoc, pAuxObj);
             add_staffobj(pSpacer);
-            return nullptr;
         }
+        #endif  //LOMSE_COMPATIBILITY_LDP_1_5
         else
-            return pAuxObj;
+        {
+            LOMSE_LOG_ERROR("Invalid child for MusicData: %s",
+                            pAuxObj->get_name().c_str());
+        }
     }
-#endif  //LOMSE_COMPATIBILITY_LDP_1_5
+    else
+    {
+        if (m_pParent)
+            LOMSE_LOG_ERROR("Invalid parent %s for object %s",
+                            m_pParent->get_name().c_str(),
+                            pAuxObj->get_name().c_str());
+        else
+            LOMSE_LOG_ERROR("No parent (nullptr) for object %s",
+                            pAuxObj->get_name().c_str());
+    }
 
     return pAuxObj;
 }

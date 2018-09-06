@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -305,6 +305,13 @@ int get_step_for_root_note(EKeySignature keyType)
             throw runtime_error(ss.str());
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+int get_step_for_leading_note(EKeySignature keyType)
+{
+    int nRoot = get_step_for_root_note(keyType);
+    return (nRoot == 0 ? 6 : nRoot-1);      //scale degree seven
 }
 
 //---------------------------------------------------------------------------------------
