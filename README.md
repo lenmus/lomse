@@ -2,6 +2,7 @@
 
 [![Travis CI](https://travis-ci.org/lenmus/lomse.svg)](https://travis-ci.org/lenmus/lomse)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/m0sbs3tkwvnih9bl/branch/master?svg=true)](https://ci.appveyor.com/project/cecilios/lomse-aai68/branch/master)
+[![Coverity Scan](https://img.shields.io/coverity/scan/16694.svg)](https://scan.coverity.com/projects/lenmus-lomse)
 [![License: BSD2](https://img.shields.io/badge/License-BSD--2-blue.svg)](https://lenmus.github.io/lomse/page-library-license.html)
 
 
