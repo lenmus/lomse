@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -114,6 +114,8 @@ SUITE(EngroutersCreatorTest)
         TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
 
         CHECK( dynamic_cast<DefaultTextSplitter*>( pSplitter ) != nullptr );
+
+        delete pSplitter;
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, chinesse_text_splitter)
@@ -129,6 +131,8 @@ SUITE(EngroutersCreatorTest)
         TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
 
         CHECK( dynamic_cast<ChineseTextSplitter*>( pSplitter ) != nullptr );
+
+        delete pSplitter;
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, no_content)

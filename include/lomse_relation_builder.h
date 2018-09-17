@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -72,7 +72,6 @@ protected:
     void create_item(T* pInfo);
     void save_item_info(T* pNewInfo);
     void delete_consumed_info_items(T* pEndInfo);
-    void delete_item_element(T* pInfo);
     T* find_matching_start_item(T* pInfo);
     T* find_duplicated_staffobj(T* pInfo);
 
@@ -127,7 +126,10 @@ void RelationBuilder<T, A>::add_item_info(T* pNewInfo)
     {
         pExistingInfo = find_matching_start_item(pNewInfo);
         if (pExistingInfo)
+        {
             error_duplicated_number(pExistingInfo, pNewInfo);
+            return;
+        }
 
         save_item_info(pNewInfo);
     }
@@ -157,7 +159,6 @@ void RelationBuilder<T, A>::create_item(T* pEndInfo)
     else
     {
         error_no_matching_items(pEndInfo);
-        delete_item_element(pEndInfo);
     }
 }
 
@@ -221,13 +222,6 @@ void RelationBuilder<T, A>::delete_consumed_info_items(T* pEndInfo)
             ++it;
     }
     delete pEndInfo;
-}
-
-//---------------------------------------------------------------------------------------
-template <class T, class A>
-void RelationBuilder<T, A>::delete_item_element(T* UNUSED(pInfo))
-{
-    //Nothing to do: pInfo is deleted automatically when erasing node
 }
 
 //---------------------------------------------------------------------------------------

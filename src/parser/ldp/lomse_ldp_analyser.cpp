@@ -4155,9 +4155,10 @@ protected:
                 m_pAnalyser->add_to_open_tuplets(pNR);
 
             m_pTupletInfo->set_note_rest(pNR);
+            bool fEndOfTuplet = m_pTupletInfo->is_end_of_tuplet();
             m_pAnalyser->add_relation_info(m_pTupletInfo);
 
-            if (m_pTupletInfo->is_end_of_tuplet())
+            if (fEndOfTuplet)
                 m_pAnalyser->add_to_open_tuplets(pNR);
         }
         else

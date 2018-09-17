@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -452,7 +452,8 @@ void BeamEngraver::adjust_stems_lengths()
     std::vector<LUnits> yFlag(nNumNotes);
     std::vector<GmoShapeNote*> note(nNumNotes);
 
-    LUnits x1, xn;		    // x position of first and last stems, respectively
+    LUnits x1 = 0.0f;       // x position of first stem
+    LUnits xn = 0.0f;       // x position of last stem
 
     int i = 0;              // index to current element
     std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
@@ -492,7 +493,7 @@ void BeamEngraver::adjust_stems_lengths()
 
     LUnits Ay = yFlag[n] - yFlag[0];
     LUnits Ax = xn - x1;
-    LUnits uMinStem;
+    LUnits uMinStem = 0.0f;
     for(int i=0; i < nNumNotes; i++)
     {
         yFlag[i] = yFlag[0] + (Ay * (note[i]->get_stem_left() - x1)) / Ax;

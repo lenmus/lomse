@@ -2354,10 +2354,17 @@ public:
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
             if (pSO == nullptr || !pSO->is_barline())
                 add_barline(pInfo);
-        }
 
-        set_result(pMD);
-        return true;    //success
+            set_result(pMD);
+            return true;    //success
+        }
+        else
+        {
+            delete pInfo;
+            delete pMD;
+            set_result(nullptr);
+            return false;    //error
+        }
     }
 
 protected:

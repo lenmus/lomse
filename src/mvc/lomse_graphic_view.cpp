@@ -137,7 +137,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     add_visual_effect(m_pDragImg);
     add_visual_effect(m_pHighlighted);
     add_visual_effect(m_pSelRect);
-    //add_visual_effect(m_pTimeGrid);
+    //add_visual_effect(m_pTimeGrid);   when uncommenting change destructor
     add_visual_effect(m_pTempoLine);
 }
 
@@ -150,6 +150,8 @@ GraphicView::~GraphicView()
     //AWARE: ownership of all VisualEffects (m_pCaret, m_pDragImg, m_pHighlighted,
     //       m_pTimeGrid & m_pTempoLine) is transferred to OverlaysGenerator.
     //       Do not delete them here!
+
+    delete m_pTimeGrid;     //add_visual_effect(m_pTimeGrid) is commented out in constructor
 }
 
 //---------------------------------------------------------------------------------------

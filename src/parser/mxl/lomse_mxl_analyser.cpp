@@ -2797,7 +2797,7 @@ public:
         m_pVolta->set_barline(pBarline);
         m_pAnalyser->add_relation_info(m_pVolta);
 
-        return m_pVolta;
+        return nullptr;     //m_pVolta has been deleted in add_relation_info()
     }
 
 protected:
@@ -5857,7 +5857,7 @@ public:
             m_pAnalyser->add_relation_info(m_pInfo2);
         }
 
-        return m_pInfo1;
+        return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
     }
 
 protected:
@@ -6271,7 +6271,7 @@ public:
             m_pAnalyser->add_relation_info(m_pInfo2);
         }
 
-        return m_pInfo1;
+        return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
     }
 
 protected:
@@ -6556,7 +6556,7 @@ public:
         //add to model
         m_pAnalyser->add_relation_info(m_pInfo);
 
-        return m_pInfo;
+        return nullptr;     //m_pInfo has been deleted in add_relation_info()
     }
 
 protected:
