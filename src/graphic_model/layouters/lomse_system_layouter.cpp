@@ -83,6 +83,11 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_pBoxSystem(nullptr)
     , m_yMin(0.0f)
     , m_yMax(0.0f)
+    , m_iSystem(0)
+    , m_iFirstCol(0)
+    , m_iLastCol(0)
+    , m_uFreeSpace(0.0f)
+    , m_fFirstColumnInSystem(true)
     , m_barlinesInfo(0)
     , m_pSpAlgorithm(pSpAlgorithm)
     , m_constrains(0)
@@ -722,6 +727,12 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
     RelObjEngraver* pEngrv
         = dynamic_cast<RelObjEngraver*>(m_shapesStorage.get_engraver(pAO));
 
+    if (pEngrv == nullptr)
+    {
+        LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
+        return;
+    }
+
     int numShapes = pEngrv->get_num_shapes();
     for (int i=0; i < numShapes; ++i)
     {
@@ -739,7 +750,7 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
 void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer)
 {
     AuxRelObjEngraver* pEngrv
-        = dynamic_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
+        = static_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
 
     int numShapes = pEngrv->get_num_shapes();
     for (int i=0; i < numShapes; ++i)

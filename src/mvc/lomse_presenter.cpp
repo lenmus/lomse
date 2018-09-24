@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -153,7 +153,7 @@ SpInteractor Presenter::get_interactor_shared_ptr(int iIntor)
     std::list<SpInteractor>::iterator it;
     int i = 0;
     for (it=m_interactors.begin(); it != m_interactors.end() && i != iIntor; ++it, ++i);
-    if (i == iIntor)
+    if (i == iIntor && it != m_interactors.end())
         return *it;
     else
     {

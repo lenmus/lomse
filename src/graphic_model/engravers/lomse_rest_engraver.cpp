@@ -48,7 +48,15 @@ namespace lomse
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* UNUSED(pShapesStorage), int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    , m_restType(k_quarter)
+    , m_numDots(0)
     , m_pRest(nullptr)
+    , m_fontSize(0.0)
+    , m_uxLeft(0.0f)
+    , m_uyTop(0.0f)
+    , m_iGlyph(0)
+    , m_pRestShape(nullptr)
+    , m_pRestGlyphShape(nullptr)
 {
 }
 

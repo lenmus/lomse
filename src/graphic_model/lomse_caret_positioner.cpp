@@ -190,6 +190,9 @@ ScoreCaretPositioner::ScoreCaretPositioner(GraphicModel* pGModel)
     , m_pDocCursor(nullptr)
     , m_pScoreCursor(nullptr)
     , m_pDoc(nullptr)
+    , m_pScore(nullptr)
+    , m_pMeter(nullptr)
+    , m_pBoxSystem(nullptr)
 {
 }
 
@@ -487,7 +490,8 @@ SpElementCursorState ScoreCaretPositioner::click_point_to_cursor_state(int iPage
         if (!(pImo->is_staffobj() || pGmo->is_box()) || pImo->is_barline() )
         {
             pGmo = m_pGModel->find_inner_box_at(iPage, x, y);
-            pImo = pGmo->get_creator_imo();
+            if (pGmo)
+                pImo = pGmo->get_creator_imo();
 
     //        stringstream msg;
     //        msg << "Click changed to: Gmo=" << pGmo->get_name() << ", Imo=" << pImo->get_name();

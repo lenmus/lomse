@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -547,7 +547,7 @@ SUITE(MidiTableTest)
 
 		SoundEventsTable* pTable = pScore->get_midi_table();
 
-        CHECK( pTable->num_jumps() == 0 );
+        CHECK( pTable && pTable->num_jumps() == 0 );
     }
 
     TEST_FIXTURE(MidiTableTestFixture, jumps_table_02)
@@ -560,7 +560,7 @@ SUITE(MidiTableTest)
 
 		SoundEventsTable* pTable = pScore->get_midi_table();
 
-        CHECK( pTable->num_jumps() == 0 );
+        CHECK( pTable && pTable->num_jumps() == 0 );
     }
 
     TEST_FIXTURE(MidiTableTestFixture, jumps_table_03)
@@ -843,8 +843,8 @@ SUITE(MidiTableTest)
 
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable->num_events() == 12 );
-        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
+        CHECK( pTable && pTable->num_events() == 12 );
+        CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[1]->EventType == SoundEvent::k_note_on );
         CHECK( events[1]->DeltaTime == 0L );
@@ -878,8 +878,8 @@ SUITE(MidiTableTest)
 
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable->num_events() == 11 );
-        CHECK( pTable->get_anacrusis_missing_time() == 0.0 );
+        CHECK( pTable && pTable->num_events() == 11 );
+        CHECK( pTable && pTable->get_anacrusis_missing_time() == 0.0 );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );
         CHECK( events[2]->DeltaTime == 0L );
@@ -910,7 +910,7 @@ SUITE(MidiTableTest)
 
 //        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
 //        cout << pTable->dump_midi_events() << endl;
-        CHECK( pTable->num_events() == 13 );
+        CHECK( pTable && pTable->num_events() == 13 );
         CHECK( is_equal_time(pTable->get_anacrusis_missing_time(), 128.0 ) );
         std::vector<SoundEvent*>& events = pTable->get_events();
         CHECK( events[2]->EventType == SoundEvent::k_note_on );

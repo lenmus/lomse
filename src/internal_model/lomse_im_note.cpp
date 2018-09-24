@@ -56,7 +56,7 @@ int ImoNoteRest::get_beam_type(int level)
     ImoBeam* pBeam = static_cast<ImoBeam*>( find_relation(k_imo_beam) );
     if (pBeam)
     {
-        ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
+        ImoBeamData* pData = static_cast<ImoBeamData*>( pBeam->get_data_for(this) );
         return pData->get_beam_type(level);
     }
     else
@@ -83,7 +83,7 @@ bool ImoNoteRest::is_end_of_beam()
     ImoBeam* pBeam = static_cast<ImoBeam*>( find_relation(k_imo_beam) );
     if (pBeam)
     {
-        ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
+        ImoBeamData* pData = static_cast<ImoBeamData*>( pBeam->get_data_for(this) );
         return pData->is_end_of_beam();
     }
     else

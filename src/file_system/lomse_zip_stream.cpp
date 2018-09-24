@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,6 +51,7 @@ ZipInputStream::ZipInputStream(const std::string& filelocator)
     : InputStream()
     , m_fIsLastBuffer(true)
     , m_remainingBytes(0)
+    , m_pNextChar(nullptr)
 {
     if (!open_zip_archive(filelocator))
     {

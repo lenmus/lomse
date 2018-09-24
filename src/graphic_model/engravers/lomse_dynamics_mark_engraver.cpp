@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,6 +47,11 @@ DynamicsMarkEngraver::DynamicsMarkEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter,
                                            int UNUSED(iInstr), int UNUSED(iStaff))
     : Engraver(libraryScope, pScoreMeter)
+    , m_pDynamicsMark(nullptr)
+    , m_placement(k_placement_default)
+    , m_fAbove(true)
+    , m_pParentShape(nullptr)
+    , m_pDynamicsMarkShape(nullptr)
 {
 }
 
@@ -101,7 +106,7 @@ void DynamicsMarkEngraver::center_on_parent()
     if (m_pParentShape->is_shape_note())
     {
 		//it is a note. Center dynamics_mark on notehead shape
-        GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(m_pParentShape);
+        GmoShapeNote* pNote = static_cast<GmoShapeNote*>(m_pParentShape);
 		uCenterPos = pNote->get_notehead_left() + pNote->get_notehead_width() / 2.0f;
     }
     else

@@ -52,6 +52,8 @@ HyperlinkCtrl::HyperlinkCtrl(LibraryScope& libScope, Control* pParent,
     , m_pMainBox(nullptr)
     , m_width(width)
     , m_height(height)
+    , m_xCenter(0.0f)
+    , m_yCenter(0.0f)
     , m_hoverColor( Color(255, 0, 0) )      //red
     , m_visitedColor( Color(0, 127, 0) )    //dark green
     , m_visited(false)

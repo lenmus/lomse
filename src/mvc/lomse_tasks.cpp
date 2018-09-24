@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -169,6 +169,8 @@ TaskOnlyClicks::TaskOnlyClicks(Interactor* pIntor)
     : Task(TaskFactory::k_task_only_clicks, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0.0f)
+    , m_yStart(0.0f)
 {
 }
 
@@ -247,6 +249,8 @@ TaskSelection::TaskSelection(Interactor* pIntor)
     : Task(TaskFactory::k_task_selection, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0.0f)
+    , m_yStart(0.0f)
 {
 }
 
@@ -343,6 +347,8 @@ TaskSelectionRectangle::TaskSelectionRectangle(Interactor* pIntor)
     : Task(TaskFactory::k_task_selection_rectangle, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0.0f)
+    , m_yStart(0.0f)
 {
 }
 
@@ -429,6 +435,8 @@ TaskMoveObject::TaskMoveObject(Interactor* pIntor)
     : Task(TaskFactory::k_task_move_object, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0.0f)
+    , m_yStart(0.0f)
 {
 }
 
@@ -511,6 +519,8 @@ TaskDataEntry::TaskDataEntry(Interactor* pIntor)
     : Task(TaskFactory::k_task_selection, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 
@@ -612,6 +622,8 @@ TaskMoveHandler::TaskMoveHandler(Interactor* pIntor)
     : Task(TaskFactory::k_task_move_object, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 

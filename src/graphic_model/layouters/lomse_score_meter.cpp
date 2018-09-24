@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -65,11 +65,19 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
     , m_spacingOptForce(1.4f)
     , m_spacingAlpha(rSpacingFactor)
     , m_spacingDmin(16)
+    , m_spacingSmin(0.0f)
     , m_nSpacingMethod(nSpacingMethod)
     , m_rSpacingValue(rSpacingValue)
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
+    , m_fFillPageWithEmptyStaves(false)
+    , m_fHideStaffLines(false)
+    , m_nJustifyLastSystem(0L)
+    , m_nTruncateStaffLines(0L)
     , m_maxLineSpace(0.0f)
+    , m_numInstruments(0)
+    , m_numStaves(0)
+    , m_fScoreIsEmpty(false)
     , m_pScore(pScore)
 {
     m_staffIndex.resize(numInstruments);

@@ -69,6 +69,18 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_pInteractor(nullptr)
     , m_pPlayerGui(nullptr)
     , m_pMtr(nullptr)
+    //
+    , m_nMtrPulseDuration(0L)
+    , m_beatType(0)
+    , m_beatDuration(0.0)
+    , m_conversionFactor(1.0f)
+    , m_nPrevMeasureDuration(0L)
+    , m_nCurMeasureDuration(0L)
+    , m_nPrevNumPulses(0L)
+    , m_nCurNumPulses(0L)
+    , m_nPrevMtrIntval(0L)
+    , m_nCurMtrIntval(0L)
+    , m_prevGuiBpm(0L)
 {
 }
 
@@ -213,9 +225,22 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
         pInteractor->enable_forced_view_updates(false);
     fVisualTracking &= (pInteractor != nullptr);
     m_fRunning = true;
-    do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
 
-    end_of_playback_housekeeping(fVisualTracking, pInteractor);
+    try
+    {
+        do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
+        end_of_playback_housekeeping(fVisualTracking, pInteractor);
+    }
+    catch(const std::exception& e)     //to catch possible std::bad_weak_ptr
+    {
+        stringstream msg;
+        msg << "std exception caught: " << e.what();
+        LOMSE_LOG_ERROR(msg.str());
+    }
+    catch (...)
+    {
+        LOMSE_LOG_ERROR("Default exception caught");
+    }
     m_fPlaying = false;
     m_fRunning = false;
 

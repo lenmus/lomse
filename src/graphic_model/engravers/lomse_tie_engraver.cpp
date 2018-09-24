@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,7 +48,15 @@ TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_uStaffLeft(uStaffLeft)
     , m_uStaffRight(uStaffRight)
+    , m_pTie(nullptr)
     , m_numShapes(0)
+    , m_pStartNote(nullptr)
+    , m_pEndNote(nullptr)
+    , m_pStartNoteShape(nullptr)
+    , m_pEndNoteShape(nullptr)
+    , m_thickness(1.0f)
+    , m_fTieBelowNote(false)
+    , m_fTwoArches(false)
 {
 }
 

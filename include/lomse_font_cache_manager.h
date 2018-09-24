@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -114,10 +114,11 @@ struct glyph_cache
         enum block_size_e { block_size = 16384-16 };
 
         //--------------------------------------------------------------------
-        font_cache() :
-            m_allocator(block_size),
-            m_font_signature(0)
-        {}
+        font_cache()
+            : m_allocator(block_size)
+            , m_font_signature(0)
+        {
+        }
 
         //--------------------------------------------------------------------
         void signature(const char* font_signature)
@@ -237,7 +238,7 @@ public:
             if(m_num_fonts >= m_max_fonts)
             {
                 obj_allocator<font_cache>::deallocate(m_fonts[0]);
-                memcpy(m_fonts,
+                memmove(m_fonts,
                         m_fonts + 1,
                         (m_max_fonts - 1) * sizeof(font_cache*));
                 m_num_fonts = m_max_fonts - 1;
@@ -347,6 +348,8 @@ public:
         m_fonts(max_fonts),
         m_engine(engine),
         m_change_stamp(-1),
+        m_dx(0.0),
+        m_dy(0.0),
         m_prev_glyph(0),
         m_last_glyph(0)
     {}

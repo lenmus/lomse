@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -266,6 +266,10 @@ ColumnsBuilder::ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& col
     , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
     , m_pBreaker( LOMSE_NEW ColumnBreaker(m_pScoreMeter->num_instruments(),
                                           m_pSysCursor) )
+    , m_stavesHeight(0.0f)
+    , m_iColumn(0)
+    , m_iColStartMeasure(0)
+    , m_pStartBarlineShape(nullptr)
     , m_iColumnToTrace(-1)
     , m_nTraceLevel(k_trace_off)
     , m_pSpAlgorithm(pSpAlgorithm)

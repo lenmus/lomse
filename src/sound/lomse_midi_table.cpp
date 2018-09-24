@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -376,13 +376,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
 
     //Generate Note ON event
     TimeUnits rTime = cursor.time();
-    if (pSO->is_rest())
-    {
-        //it is a rest. Generate only event for visual highlight
-        if (pSO->is_visible())
-            store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pSO, measure);
-    }
-    else
+    if (pSO->is_note())
     {
         //It is a note. Generate Note On event
         if (!pNote->is_tied_prev())
@@ -401,16 +395,16 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
                         0, step, pSO, measure);
         }
     }
+    else
+    {
+        //it is a rest. Generate only event for visual highlight
+        if (pSO->is_visible())
+            store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pSO, measure);
+    }
 
     //generate NoteOff event
     rTime += pSO->get_duration();
-    if (pSO->is_rest())
-    {
-        //Is a rest. Generate only a VisualOff event
-        if (pSO->is_visible())
-            store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pSO, measure);
-    }
-    else
+    if (pSO->is_note())
     {
         //It is a note
         if (!pNote->is_tied_next())
@@ -427,6 +421,12 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
             store_event(rTime, SoundEvent::k_visual_off, channel, pitch,
                         0, step, pSO, measure);
         }
+    }
+    else
+    {
+        //Is a rest. Generate only a VisualOff event
+        if (pSO->is_visible())
+            store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pSO, measure);
     }
 }
 

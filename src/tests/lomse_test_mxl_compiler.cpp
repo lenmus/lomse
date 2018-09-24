@@ -85,12 +85,12 @@ SUITE(MxlCompilerTest)
         ImoObj* pRoot =  compiler.compile_string(src);
         CHECK( compiler.get_file_locator() == "string:" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_version() == "0.0" );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != nullptr );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_staffobjs_table() != nullptr );
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -103,20 +103,20 @@ SUITE(MxlCompilerTest)
         ImoObj* pRoot =  compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_version() == "0.0" );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != nullptr );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_staffobjs_table() != nullptr );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_staves() == 1 );
+        CHECK( pInstr && pInstr->get_num_staves() == 1 );
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
-        CHECK( pMD->get_num_items() == 5 );
+        CHECK( pMD && pMD->get_num_items() == 5 );
         ImoObj* pImo = pMD->get_first_child();
-        CHECK( pImo->is_clef() == true );
+        CHECK( pImo && pImo->is_clef() == true );
 
 //        cout << "Test: MxlCompilerFromFile_100" << endl;
 //        cout << doc.to_string() << endl;

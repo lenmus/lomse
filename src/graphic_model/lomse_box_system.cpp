@@ -39,12 +39,10 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)    //, int nNumPage, int iSystem,
+GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)
     : GmoBox(GmoObj::k_box_system, pCreatorImo)
     , m_pGridTable(nullptr)
-//    , m_nNumPage(nNumPage)
-//    , m_pBPage(pParent)
-//	, m_pTopSpacer(nullptr)
+    , m_iPage(0)
 {
 //    set_left_margin(pScore->GetSystemLeftSpace(iSystem));
 }

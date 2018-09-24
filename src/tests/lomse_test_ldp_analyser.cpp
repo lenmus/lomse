@@ -118,6 +118,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -140,6 +141,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -161,6 +163,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -175,12 +178,13 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_version_string() == "1.6" );
-        CHECK( pScore->get_num_instruments() == 0 );
+        CHECK( pScore && pScore->get_version_string() == "1.6" );
+        CHECK( pScore && pScore->get_num_instruments() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -199,11 +203,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 0 );
+        CHECK( pScore && pScore->get_num_instruments() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -221,11 +226,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        //CHECK( pScore->get_num_instruments() == 1 );
+        //CHECK( pScore && pScore->get_num_instruments() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -243,10 +249,11 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -264,13 +271,17 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(1);
-        CHECK( pScore->get_instr_number_for(pInstr) == 1 );
+        if (pScore)
+        {
+            CHECK( pScore->get_num_instruments() == 2 );
+            ImoInstrument* pInstr = pScore->get_instrument(1);
+            CHECK( pScore->get_instr_number_for(pInstr) == 1 );
+        }
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -295,10 +306,11 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_articulation() == true );
         ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_default );
-        CHECK( pImo->get_articulation_type() == k_articulation_tenuto );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
+        CHECK( pImo && pImo->get_articulation_type() == k_articulation_tenuto );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -320,11 +332,12 @@ SUITE(LdpAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
-//        CHECK( pImo->get_placement() == k_placement_default );
-//        CHECK( pImo->get_mark_type() == "ppp" );
-//        CHECK( pImo->get_id() == 30L );
+//        CHECK( pImo && pImo->get_placement() == k_placement_default );
+//        CHECK( pImo && pImo->get_mark_type() == "ppp" );
+//        CHECK( pImo && pImo->get_id() == 30L );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -346,10 +359,11 @@ SUITE(LdpAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
-//        CHECK( pImo->get_placement() == k_placement_above );
-//        CHECK( pImo->get_mark_type() == "sf" );
+//        CHECK( pImo && pImo->get_placement() == k_placement_above );
+//        CHECK( pImo && pImo->get_mark_type() == "sf" );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -371,12 +385,13 @@ SUITE(LdpAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pRoot );
 //        CHECK( pImo != nullptr );
-//        CHECK( pImo->get_placement() == k_placement_above );
-//        CHECK( pImo->get_mark_type() == "sf" );
-//        CHECK( pImo->get_user_location_x() == 70.0f );
-//        CHECK( pImo->get_user_location_y() == 0.0f );
+//        CHECK( pImo && pImo->get_placement() == k_placement_above );
+//        CHECK( pImo && pImo->get_mark_type() == "sf" );
+//        CHECK( pImo && pImo->get_user_location_x() == 70.0f );
+//        CHECK( pImo && pImo->get_user_location_y() == 0.0f );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -393,21 +408,22 @@ SUITE(LdpAnalyserTest)
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
 //        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+//        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
 //        CHECK( pNote != nullptr );
-//        CHECK( pNote->is_stem_up() == true );
-//        CHECK( pNote->get_num_attachments() == 1 );
+//        CHECK( pNote && pNote->is_stem_up() == true );
+//        CHECK( pNote && pNote->get_num_attachments() == 1 );
 //        ImoArticulationSymbol* pImo = dynamic_cast<ImoArticulationSymbol*>( pNote->get_attachment(0) );
 //        CHECK( pImo != nullptr );
-//        CHECK( pImo->get_placement() == k_placement_above );
-//        CHECK( pImo->get_mark_type() == "sf" );
-//        CHECK( pImo->get_user_location_x() == 70.0f );
-//        CHECK( pImo->get_user_location_y() == 0.0f );
+//        CHECK( pImo && pImo->get_placement() == k_placement_above );
+//        CHECK( pImo && pImo->get_mark_type() == "sf" );
+//        CHECK( pImo && pImo->get_user_location_x() == 70.0f );
+//        CHECK( pImo && pImo->get_user_location_y() == 0.0f );
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 
@@ -424,10 +440,11 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -442,11 +459,12 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->is_middle() == false );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->is_middle() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -467,10 +485,11 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -484,10 +503,11 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -501,10 +521,11 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() == false );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -524,10 +545,11 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -541,11 +563,12 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->is_middle() == true );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->is_middle() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -559,12 +582,13 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 70.0f );
-        CHECK( pBarline->get_user_location_y() == 0.0f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 70.0f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -578,12 +602,13 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 0.0f );
-        CHECK( pBarline->get_user_location_y() == 60.5f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 0.0f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 60.5f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -597,12 +622,13 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 70.0f );
-        CHECK( pBarline->get_user_location_y() == 20.3f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 70.0f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 20.3f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -622,12 +648,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 0.0f );
-        CHECK( pBarline->get_user_location_y() == 0.0f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 0.0f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -647,12 +674,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 0.0f );
-        CHECK( pBarline->get_user_location_y() == 0.0f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 0.0f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -672,12 +700,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_user_location_x() == 20.3f );
-        CHECK( pBarline->get_user_location_y() == 70.0f );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_user_location_x() == 20.3f );
+        CHECK( pBarline && pBarline->get_user_location_y() == 70.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -692,7 +721,7 @@ SUITE(LdpAnalyserTest)
         LdpElement* pBarline = tree->get_root();
 
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_id() == 7 );
+        CHECK( pBarline && pBarline->get_id() == 7 );
 
         delete tree->get_root();
     }
@@ -716,6 +745,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -735,6 +765,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -754,6 +785,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -774,6 +806,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 #endif
@@ -794,9 +827,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_music_data() == true );
         ImoMusicData* pImo = static_cast<ImoMusicData*>( pRoot );
-        CHECK( pImo->get_id() == 12L );
+        CHECK( pImo && pImo->get_id() == 12L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -814,13 +848,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        CHECK( pMD->get_instrument() == pInstr );
+        if (pInstr)
+        {
+            ImoMusicData* pMD = pInstr->get_musicdata();
+            CHECK( pMD != nullptr );
+            CHECK( pMD->get_instrument() == pInstr );
+        }
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -841,19 +879,20 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_sharp );
-        CHECK( pNote->get_dots() == 1 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == k_step_D );
-        CHECK( pNote->get_duration() == 48.0f );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+        CHECK( pNote && pNote->get_dots() == 1 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_step() == k_step_D );
+        CHECK( pNote && pNote->get_duration() == 48.0f );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -871,15 +910,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -897,15 +937,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -923,15 +964,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -949,16 +991,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_staff() == 6 );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_staff() == 6 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -976,14 +1019,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_staff() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_staff() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1001,17 +1045,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_voice() == 3 );
-        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_voice() == 3 );
+        CHECK( pNote && pNote->is_tied_next() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1029,15 +1074,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_voice() == 1 );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_voice() == 1 );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1057,9 +1103,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_note() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1077,17 +1124,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_voice() == 3 );
-        CHECK( pNote->has_attachments() == true );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_voice() == 3 );
+        CHECK( pNote && pNote->has_attachments() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1102,16 +1150,17 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser* pAnalyser = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pAnalyser->analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_tied_next() == false );
-        CHECK( pNote->is_tied_prev() == false );
+        CHECK( pNote && pNote->is_tied_next() == false );
+        CHECK( pNote && pNote->is_tied_prev() == false );
         delete pAnalyser;
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1126,15 +1175,16 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pNote->is_tied_next() == false );
-        CHECK( pNote->is_tied_prev() == false );
+        CHECK( pNote && pNote->is_tied_next() == false );
+        CHECK( pNote && pNote->is_tied_prev() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1154,25 +1204,24 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
-        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        ImoNote* pNote1 = static_cast<ImoNote*>( *it );
         ImoTie* pTie = pNote1->get_tie_next();
-        CHECK( pNote1 != nullptr );
         CHECK( pNote1->is_tied_next() == true );
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pTie->get_start_note() == pNote1 );
 
         ++it;
-        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote2 != nullptr );
+        ImoNote* pNote2 = static_cast<ImoNote*>( *it );
         CHECK( pNote2->is_tied_next() == false );
         CHECK( pNote2->is_tied_prev() == true );
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1192,7 +1241,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1208,6 +1257,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_tied_prev() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1227,7 +1277,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it;
         int numNotes;
@@ -1236,6 +1286,7 @@ SUITE(LdpAnalyserTest)
         CHECK( numNotes == 3 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1252,14 +1303,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_stem_up() == true );
+        CHECK( pNote && pNote->is_stem_up() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1274,14 +1326,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_stem_down() == true );
+        CHECK( pNote && pNote->is_stem_down() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1296,18 +1349,19 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_stem_default() == true );
+        CHECK( pNote && pNote->is_stem_default() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_stem_direction() == k_stem_default );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_stem_direction() == k_stem_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1327,7 +1381,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1345,6 +1399,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_stem_up() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1363,17 +1418,18 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_sharp );
-        CHECK( pNote->get_dots() == 1 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == k_step_D );
-        CHECK( pNote->get_duration() == 48.0f );
-        CHECK( pNote->get_staff() == 1 );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+        CHECK( pNote && pNote->get_dots() == 1 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_step() == k_step_D );
+        CHECK( pNote && pNote->get_duration() == 48.0f );
+        CHECK( pNote && pNote->get_staff() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1395,31 +1451,38 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
         ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
-        ImoTie* pTie = pNote1->get_tie_next();
         CHECK( pNote1 != nullptr );
-        CHECK( pNote1->is_tied_next() == true );
-        CHECK( pNote1->is_tied_prev() == false );
-        CHECK( pTie->get_start_note() == pNote1 );
-        ImoRelations* pRelObjs = pNote1->get_relations();
-        CHECK( pRelObjs != nullptr );
-        CHECK( pRelObjs->get_item(0) == pTie );
+        if (pNote1)
+        {
+            ImoTie* pTie = pNote1->get_tie_next();
+            CHECK( pNote1->is_tied_next() == true );
+            CHECK( pNote1->is_tied_prev() == false );
+            CHECK( pTie->get_start_note() == pNote1 );
+            ImoRelations* pRelObjs = pNote1->get_relations();
+            CHECK( pRelObjs != nullptr );
+            CHECK( pRelObjs->get_item(0) == pTie );
 
-        ++it;
-        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote2 != nullptr );
-        CHECK( pNote2->is_tied_next() == false );
-        CHECK( pNote2->is_tied_prev() == true );
-        CHECK( pTie->get_end_note() == pNote2 );
-        pRelObjs = pNote2->get_relations();
-        CHECK( pRelObjs != nullptr );
-        CHECK( pRelObjs->get_item(0) == pTie );
+            ++it;
+            ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote2 != nullptr );
+            if (pNote2)
+            {
+                CHECK( pNote2->is_tied_next() == false );
+                CHECK( pNote2->is_tied_prev() == true );
+                CHECK( pTie->get_end_note() == pNote2 );
+                pRelObjs = pNote2->get_relations();
+                CHECK( pRelObjs != nullptr );
+                CHECK( pRelObjs->get_item(0) == pTie );
+            }
+        }
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1439,7 +1502,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1455,6 +1518,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->is_tied_prev() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1474,7 +1538,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1494,6 +1558,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1513,7 +1578,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1534,6 +1599,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pTie->get_end_note() == pNote2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1553,7 +1620,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1591,6 +1658,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRelObjs->get_item(0) == pTie2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1613,12 +1681,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == false );
-        CHECK( pInfo->get_tie_number() == 12 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == false );
+        CHECK( pInfo && pInfo->get_tie_number() == 12 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1638,12 +1707,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == true );
-        CHECK( pInfo->get_tie_number() == 15 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == true );
+        CHECK( pInfo && pInfo->get_tie_number() == 15 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1663,9 +1733,9 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == true );
-        CHECK( pInfo->get_tie_number() == 15 );
-        CHECK( pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == true );
+        CHECK( pInfo && pInfo->get_tie_number() == 15 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
         ImoBezierInfo* pBezier = pInfo->get_bezier();
         CHECK( pBezier != nullptr );
         CHECK( pBezier->get_point(ImoBezierInfo::k_start).x == 0.0f );
@@ -1678,6 +1748,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1697,6 +1768,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1717,13 +1789,14 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == false );
-        CHECK( pInfo->get_tie_number() == 12 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == false );
+        CHECK( pInfo && pInfo->get_tie_number() == 12 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
         CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1764,6 +1837,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1802,6 +1876,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1840,6 +1915,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1862,12 +1938,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == false );
-        CHECK( pInfo->get_slur_number() == 12 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == false );
+        CHECK( pInfo && pInfo->get_slur_number() == 12 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1887,12 +1964,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == true );
-        CHECK( pInfo->get_slur_number() == 15 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == true );
+        CHECK( pInfo && pInfo->get_slur_number() == 15 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1913,12 +1991,13 @@ SUITE(LdpAnalyserTest)
         ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
         //TODO
-        //CHECK( pInfo->is_continue() == true );
-        CHECK( pInfo->get_slur_number() == 15 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        //CHECK( pInfo && pInfo->is_continue() == true );
+        CHECK( pInfo && pInfo->get_slur_number() == 15 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1938,9 +2017,9 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == true );
-        CHECK( pInfo->get_slur_number() == 27 );
-        CHECK( pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == true );
+        CHECK( pInfo && pInfo->get_slur_number() == 27 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
         ImoBezierInfo* pBezier = pInfo->get_bezier();
         CHECK( pBezier != nullptr );
         CHECK( pBezier->get_point(ImoBezierInfo::k_start).x == 0.0f );
@@ -1953,6 +2032,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1973,13 +2053,14 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start() == true );
-        CHECK( pInfo->get_slur_number() == 12 );
-        CHECK( pInfo->get_note() == nullptr );
-        CHECK( pInfo->get_bezier() == nullptr );
+        CHECK( pInfo && pInfo->is_start() == true );
+        CHECK( pInfo && pInfo->get_slur_number() == 12 );
+        CHECK( pInfo && pInfo->get_note() == nullptr );
+        CHECK( pInfo && pInfo->get_bezier() == nullptr );
         CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -1999,6 +2080,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2018,7 +2100,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -2037,6 +2119,7 @@ SUITE(LdpAnalyserTest)
 
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2064,6 +2147,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->has_attachments() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2088,6 +2172,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->get_staff() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2112,6 +2197,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2139,13 +2225,13 @@ SUITE(LdpAnalyserTest)
         ++it;
         ImoNote* pNote = dynamic_cast<ImoNote*>( (*it)->get_imo() );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_staff() == 1 );
+        CHECK( pNote && pNote->get_staff() == 1 );
         ++it;
         ++it;
         ++it;
         pNote = dynamic_cast<ImoNote*>( (*it)->get_imo() );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_staff() == 2 );
+        CHECK( pNote && pNote->get_staff() == 2 );
         ++it;
         ++it;
         ++it;
@@ -2155,6 +2241,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->get_staff() == 2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2174,9 +2261,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_rest() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2201,6 +2289,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest->has_attachments() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2223,11 +2312,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2249,9 +2339,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_fermata() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2272,11 +2363,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_below );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2297,12 +2389,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
         CHECK( pFerm->get_symbol() == ImoFermata::k_short );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2323,12 +2416,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_fermata() == true );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
         CHECK( pFerm->get_symbol() == ImoFermata::k_long );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2348,11 +2442,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2372,13 +2467,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2398,13 +2494,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pRoot );
+        ImoFermata* pFerm = static_cast<ImoFermata*>( pRoot );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2421,10 +2518,10 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_stem_up() == true );
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->is_stem_up() == true );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pNote->get_attachment(0) );
         CHECK( pFerm != nullptr );
         CHECK( pFerm->get_placement() == k_placement_above );
@@ -2435,6 +2532,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2457,12 +2555,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_dynamics_mark() == true );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_default );
-        CHECK( pImo->get_mark_type() == "ppp" );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
+        CHECK( pImo && pImo->get_mark_type() == "ppp" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2482,13 +2581,14 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_default );
-        CHECK( pImo->get_mark_type() == "ppp" );
-        CHECK( pImo->get_id() == 30L );
+        CHECK( pImo && pImo->get_placement() == k_placement_default );
+        CHECK( pImo && pImo->get_mark_type() == "ppp" );
+        CHECK( pImo && pImo->get_id() == 30L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2508,12 +2608,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_above );
-        CHECK( pImo->get_mark_type() == "sf" );
+        CHECK( pImo && pImo->get_placement() == k_placement_above );
+        CHECK( pImo && pImo->get_mark_type() == "sf" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2533,14 +2634,15 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pRoot );
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_above );
-        CHECK( pImo->get_mark_type() == "sf" );
-        CHECK( pImo->get_user_location_x() == 70.0f );
-        CHECK( pImo->get_user_location_y() == 0.0f );
+        CHECK( pImo && pImo->get_placement() == k_placement_above );
+        CHECK( pImo && pImo->get_mark_type() == "sf" );
+        CHECK( pImo && pImo->get_user_location_x() == 70.0f );
+        CHECK( pImo && pImo->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2557,21 +2659,22 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_stem_up() == true );
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->is_stem_up() == true );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoDynamicsMark* pImo = dynamic_cast<ImoDynamicsMark*>( pNote->get_attachment(0) );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_placement() == k_placement_above );
-        CHECK( pImo->get_mark_type() == "sf" );
-        CHECK( pImo->get_user_location_x() == 70.0f );
-        CHECK( pImo->get_user_location_y() == 0.0f );
+        CHECK( pImo && pImo->get_placement() == k_placement_above );
+        CHECK( pImo && pImo->get_mark_type() == "sf" );
+        CHECK( pImo && pImo->get_user_location_x() == 70.0f );
+        CHECK( pImo && pImo->get_user_location_y() == 0.0f );
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2593,11 +2696,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_go_back_fwd() == true );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( pGBF->is_to_start() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2617,9 +2721,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_go_back_fwd() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2639,6 +2744,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2656,13 +2762,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == -64.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2680,11 +2787,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( pGBF->is_to_end() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2704,9 +2812,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_go_back_fwd() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2726,6 +2835,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2743,13 +2853,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == 128.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2767,13 +2878,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == 128.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2793,6 +2905,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2810,13 +2923,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pRoot );
+        ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>( pRoot );
         CHECK( pGBF != nullptr );
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == -21.3f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2840,12 +2954,13 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_rest() == true );
         ImoRest* pImo = static_cast<ImoRest*>( pRoot );
-        CHECK( pImo->is_go_fwd() == true );
-        CHECK( pImo->get_duration() == 128.0 );
-        CHECK( pImo->get_voice() == 3 );
-        CHECK( pImo->is_visible() == false );
+        CHECK( pImo && pImo->is_go_fwd() == true );
+        CHECK( pImo && pImo->get_duration() == 128.0 );
+        CHECK( pImo && pImo->get_voice() == 3 );
+        CHECK( pImo && pImo->is_visible() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2866,11 +2981,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_clef() == true );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2890,9 +3006,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_clef() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2910,11 +3027,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2926,7 +3044,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
         CHECK( pClef->is_visible() );
@@ -2934,6 +3052,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2945,7 +3064,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -2954,6 +3073,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2965,7 +3085,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -2975,6 +3095,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -2986,7 +3107,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
         CHECK( pClef->get_user_location_x() == 0.0f );
@@ -2996,6 +3117,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_cue );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3010,7 +3132,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        ImoClef* pClef = static_cast<ImoClef*>( pRoot );
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -3024,6 +3146,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_symbol_size() == k_size_full );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3044,12 +3167,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstrument = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstrument != nullptr );
         //cout << "num.staves=" << pInstrument->get_num_staves() << endl;
         CHECK( pInstrument->get_num_staves() == 2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3069,9 +3193,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_instrument() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3089,12 +3214,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoInstrument* pInstrument = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstrument = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstrument != nullptr );
         //cout << "num.staves=" << pInstrument->get_num_staves() << endl;
         CHECK( pInstrument->get_num_staves() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3113,14 +3239,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3140,13 +3267,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "Guitar" );
         CHECK( pInstr->get_abbrev().get_text() == "" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3166,13 +3294,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
         CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3192,13 +3321,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "Guitar" );
         CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3218,10 +3348,11 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3241,10 +3372,11 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3265,13 +3397,14 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_sound_info() == true );
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == -1 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3291,13 +3424,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == -1 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3317,13 +3451,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>( pRoot );
+        ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>( pRoot );
         CHECK( pInfo != nullptr );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
         CHECK( pMidi->get_midi_channel() == 10 );
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3343,7 +3478,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
@@ -3356,6 +3491,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMidi->get_midi_program() == 56 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3376,12 +3512,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
+        ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_G );
         CHECK( pKeySignature->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3401,9 +3538,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_key_signature() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3421,11 +3559,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
+        ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3437,7 +3576,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
+        ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_d );
         CHECK( pKeySignature->get_staff() == 0 );
@@ -3446,6 +3585,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pKeySignature->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3457,7 +3597,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
+        ImoKeySignature* pKeySignature = static_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
         CHECK( pKeySignature->get_key_type() == k_key_Ef );
         CHECK( pKeySignature->get_user_location_x() == 0.0f );
@@ -3466,6 +3606,7 @@ SUITE(LdpAnalyserTest)
 
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3488,19 +3629,19 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_below );
-        CHECK( pImo->is_laughing() == false );
-        CHECK( pImo->is_humming() == false );
-        CHECK( pImo->is_end_line() == false );
-        CHECK( pImo->is_end_paragraph() == false );
-        CHECK( pImo->has_melisma() == false );
-        CHECK( pImo->has_hyphenation() == false );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
-        CHECK( pImo->get_num_text_items() == 1 );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->is_laughing() == false );
+        CHECK( pImo && pImo->is_humming() == false );
+        CHECK( pImo && pImo->is_end_line() == false );
+        CHECK( pImo && pImo->is_end_paragraph() == false );
+        CHECK( pImo && pImo->has_melisma() == false );
+        CHECK( pImo && pImo->has_hyphenation() == false );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_num_text_items() == 1 );
 
         ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
         CHECK( pSyl != nullptr );
@@ -3515,6 +3656,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3535,11 +3677,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_id() == 37L );
+        CHECK( pImo && pImo->get_id() == 37L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3560,19 +3703,19 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_below );
-        CHECK( pImo->is_laughing() == false );
-        CHECK( pImo->is_humming() == false );
-        CHECK( pImo->is_end_line() == false );
-        CHECK( pImo->is_end_paragraph() == false );
-        CHECK( pImo->has_hyphenation() == false );
-        CHECK( pImo->has_melisma() == false );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
-        CHECK( pImo->get_num_text_items() == 2 );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->is_laughing() == false );
+        CHECK( pImo && pImo->is_humming() == false );
+        CHECK( pImo && pImo->is_end_line() == false );
+        CHECK( pImo && pImo->is_end_paragraph() == false );
+        CHECK( pImo && pImo->has_hyphenation() == false );
+        CHECK( pImo && pImo->has_melisma() == false );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_num_text_items() == 2 );
 
         ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
         CHECK( pSyl != nullptr );
@@ -3593,6 +3736,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl->get_elision_text() == "" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3615,6 +3759,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3635,18 +3780,18 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_below );
-        CHECK( pImo->is_laughing() == false );
-        CHECK( pImo->is_humming() == false );
-        CHECK( pImo->is_end_line() == false );
-        CHECK( pImo->is_end_paragraph() == false );
-        CHECK( pImo->has_hyphenation() == true );
-        CHECK( pImo->has_melisma() == false );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->is_laughing() == false );
+        CHECK( pImo && pImo->is_humming() == false );
+        CHECK( pImo && pImo->is_end_line() == false );
+        CHECK( pImo && pImo->is_end_paragraph() == false );
+        CHECK( pImo && pImo->has_hyphenation() == true );
+        CHECK( pImo && pImo->has_melisma() == false );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
 
         ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
         CHECK( pSyl != nullptr );
@@ -3661,6 +3806,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3681,18 +3827,18 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_below );
-        CHECK( pImo->is_laughing() == false );
-        CHECK( pImo->is_humming() == false );
-        CHECK( pImo->is_end_line() == false );
-        CHECK( pImo->is_end_paragraph() == false );
-        CHECK( pImo->has_hyphenation() == false );
-        CHECK( pImo->has_melisma() == false );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->is_laughing() == false );
+        CHECK( pImo && pImo->is_humming() == false );
+        CHECK( pImo && pImo->is_end_line() == false );
+        CHECK( pImo && pImo->is_end_paragraph() == false );
+        CHECK( pImo && pImo->has_hyphenation() == false );
+        CHECK( pImo && pImo->has_melisma() == false );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
 
         ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
         CHECK( pSyl != nullptr );
@@ -3707,6 +3853,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3727,18 +3874,18 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_lyric() == true );
-        ImoLyric* pImo = dynamic_cast<ImoLyric*>( pRoot );
+        ImoLyric* pImo = static_cast<ImoLyric*>( pRoot );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_placement() == k_placement_below );
-        CHECK( pImo->is_laughing() == false );
-        CHECK( pImo->is_humming() == false );
-        CHECK( pImo->is_end_line() == false );
-        CHECK( pImo->is_end_paragraph() == false );
-        CHECK( pImo->has_hyphenation() == false );
-        CHECK( pImo->has_melisma() == true );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_placement() == k_placement_below );
+        CHECK( pImo && pImo->is_laughing() == false );
+        CHECK( pImo && pImo->is_humming() == false );
+        CHECK( pImo && pImo->is_end_line() == false );
+        CHECK( pImo && pImo->is_end_paragraph() == false );
+        CHECK( pImo && pImo->has_hyphenation() == false );
+        CHECK( pImo && pImo->has_melisma() == true );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
 
         ImoLyricsTextInfo* pSyl = pImo->get_text_item(0);
         CHECK( pSyl != nullptr );
@@ -3753,6 +3900,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSyl == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3774,7 +3922,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3782,14 +3930,15 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoLyric* pImo = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pImo != nullptr );
-        CHECK( pImo->get_number() == 1 );
-        CHECK( pImo->get_prev_lyric() == nullptr );
-        CHECK( pImo->get_next_lyric() == nullptr );
+        CHECK( pImo && pImo->get_number() == 1 );
+        CHECK( pImo && pImo->get_prev_lyric() == nullptr );
+        CHECK( pImo && pImo->get_next_lyric() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3813,7 +3962,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3821,9 +3970,9 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoLyric* pLyric1 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric1 != nullptr );
         CHECK( pLyric1->get_number() == 1 );
@@ -3831,9 +3980,9 @@ SUITE(LdpAnalyserTest)
         ++it;
         pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 1);
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 1);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoLyric* pLyric2 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric2 != nullptr );
         CHECK( pLyric2->get_number() == 1 );
@@ -3841,9 +3990,9 @@ SUITE(LdpAnalyserTest)
         ++it;
         pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 2);
-        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 2);
+        CHECK( pNote && pNote->get_num_attachments() == 1 );
         ImoLyric* pLyric3 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric3 != nullptr );
         CHECK( pLyric3->get_number() == 1 );
@@ -3856,6 +4005,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLyric3->get_next_lyric() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3879,7 +4029,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3887,9 +4037,9 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->get_num_attachments() == 2 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_num_attachments() == 2 );
         ImoLyric* pLyric11 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric11 != nullptr );
         CHECK( pLyric11->get_number() == 1 );
@@ -3900,9 +4050,9 @@ SUITE(LdpAnalyserTest)
         ++it;
         pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 1);
-        CHECK( pNote->get_num_attachments() == 2 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 1);
+        CHECK( pNote && pNote->get_num_attachments() == 2 );
         ImoLyric* pLyric21 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric21 != nullptr );
         CHECK( pLyric21->get_number() == 1 );
@@ -3913,9 +4063,9 @@ SUITE(LdpAnalyserTest)
         ++it;
         pNote = dynamic_cast<ImoNote*>(*it);
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 2);
-        CHECK( pNote->get_num_attachments() == 2 );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 2);
+        CHECK( pNote && pNote->get_num_attachments() == 2 );
         ImoLyric* pLyric31 = dynamic_cast<ImoLyric*>( pNote->get_attachment(0) );
         CHECK( pLyric31 != nullptr );
         CHECK( pLyric31->get_number() == 1 );
@@ -3938,6 +4088,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLyric32->get_next_lyric() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -3961,7 +4112,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -3970,10 +4121,11 @@ SUITE(LdpAnalyserTest)
         ImoDirection* pDir = static_cast<ImoDirection*>(*it);
         ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
 
-        CHECK( pImo->get_ticks_per_minute() == 55 );
-        CHECK( pImo->get_mark_type() == ImoMetronomeMark::k_note_value );
+        CHECK( pImo && pImo->get_ticks_per_minute() == 55 );
+        CHECK( pImo && pImo->get_mark_type() == ImoMetronomeMark::k_note_value );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4001,6 +4153,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4023,6 +4176,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4048,6 +4202,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4075,6 +4230,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4103,6 +4259,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4128,6 +4285,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4150,6 +4308,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4171,6 +4330,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4192,6 +4352,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->has_parenthesis() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4219,6 +4380,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4247,6 +4409,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4267,7 +4430,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
@@ -4281,6 +4444,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4302,7 +4466,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDirection* pDir = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pDir = static_cast<ImoDirection*>( pRoot );
         CHECK( pDir != nullptr );
         ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
         CHECK( pMM != nullptr );
@@ -4310,6 +4474,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_ticks_per_minute() == 60 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4332,13 +4497,14 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 10.0f );
-        CHECK( pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->get_width() == 10.0f );
+        CHECK( pSp && pSp->get_staff() == 0 );
         CHECK( pSp && pSp->get_attachment(0) == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4360,13 +4526,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4386,9 +4553,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4406,13 +4574,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4424,7 +4593,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 3 );
@@ -4434,6 +4603,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTimeSignature->get_user_location_y() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4445,7 +4615,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_normal() );
         CHECK( pTimeSignature->get_top_number() == 6 );
@@ -4455,6 +4625,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTimeSignature->is_visible() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4473,13 +4644,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_common() );
         CHECK( pTimeSignature->get_top_number() == 4 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4498,13 +4670,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_cut() );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4525,13 +4698,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->get_top_number() == 2 );
         CHECK( pTimeSignature->get_bottom_number() == 4 );
         CHECK( pTimeSignature->is_normal() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4551,12 +4725,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_time_signature() == true );
-        ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
+        ImoTimeSignature* pTimeSignature = static_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
         CHECK( pTimeSignature->is_single_number() );
         CHECK( pTimeSignature->get_top_number() == 10 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4577,7 +4752,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_system_info() == true );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
+        ImoSystemInfo* pSI = static_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4586,6 +4761,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 2000.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4603,7 +4779,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
+        ImoSystemInfo* pSI = static_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( !pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4612,6 +4788,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 0.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4630,7 +4807,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_system_info() == true );
-        ImoSystemInfo* pSI = dynamic_cast<ImoSystemInfo*>( pRoot );
+        ImoSystemInfo* pSI = static_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSI != nullptr );
         CHECK( !pSI->is_first() );
         CHECK( pSI->get_left_margin() == 0.0f );
@@ -4639,6 +4816,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pSI->get_top_system_distance() == 2000.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4656,11 +4834,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoSystemInfo* pSL = dynamic_cast<ImoSystemInfo*>( pRoot );
+        ImoSystemInfo* pSL = static_cast<ImoSystemInfo*>( pRoot );
         CHECK( pSL != nullptr );
         CHECK( !pSL->is_first() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4681,11 +4860,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score_text() == true );
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
+        ImoScoreText* pText = static_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "This is a text" );
+        CHECK( pText && pText->get_text() == "This is a text" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4705,9 +4885,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score_text() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4725,10 +4906,11 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
+        ImoScoreText* pText = static_cast<ImoScoreText*>( pRoot );
         CHECK( pText == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4748,13 +4930,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
+        ImoScoreText* pText = static_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "Moonlight sonata" );
+        CHECK( pText && pText->get_text() == "Moonlight sonata" );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4774,15 +4957,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pRoot );
+        ImoScoreText* pText = static_cast<ImoScoreText*>( pRoot );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "F. Chopin" );
-        CHECK( pText->get_user_location_x() == 20.0f );
-        CHECK( pText->get_user_location_y() == 30.0f );
+        CHECK( pText && pText->get_text() == "F. Chopin" );
+        CHECK( pText && pText->get_user_location_x() == 20.0f );
+        CHECK( pText && pText->get_user_location_y() == 30.0f );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4804,13 +4988,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_option() == true );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Hide" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4830,6 +5015,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4849,6 +5035,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4866,13 +5053,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Truncate" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
         CHECK( pOpt->get_long_value() == k_truncate_barline_any );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4892,6 +5080,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4909,13 +5098,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>( pRoot );
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>( pRoot );
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "Render.SpacingFactor" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
         CHECK( pOpt->get_float_value() == 0.536f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4935,6 +5125,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4954,6 +5145,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -4971,9 +5163,9 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->has_options() == true );
+        CHECK( pScore && pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("StaffLines.Hide");
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "StaffLines.Hide" );
@@ -4981,6 +5173,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt->get_bool_value() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5001,9 +5194,9 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->has_options() == true );
+        CHECK( pScore && pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingMethod");
         CHECK( pOpt && pOpt->get_name() == "Render.SpacingMethod" );
         CHECK( pOpt && pOpt->get_type() == ImoOptionInfo::k_number_long );
@@ -5018,6 +5211,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt && is_equal_float(pOpt->get_float_value(), 0.778f) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5037,9 +5231,9 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
-        CHECK( pScore->has_options() == true );
+        CHECK( pScore && pScore->has_options() == true );
         ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
         CHECK( pOpt != nullptr );
         CHECK( pOpt->get_name() == "Render.SpacingFactor" );
@@ -5047,6 +5241,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pOpt->get_float_value() == 4.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5067,13 +5262,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5091,6 +5287,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5111,12 +5308,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_spacer() == true );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.5f );
-        CHECK( pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->get_width() == 70.5f );
+        CHECK( pSp && pSp->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5136,9 +5334,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_spacer() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5158,6 +5357,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5175,12 +5375,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.5f );
-        CHECK( pSp->get_staff() == 2 );
+        CHECK( pSp && pSp->get_width() == 70.5f );
+        CHECK( pSp && pSp->get_staff() == 2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5198,12 +5399,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.5f );
-        CHECK( pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->get_width() == 70.5f );
+        CHECK( pSp && pSp->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5221,12 +5423,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.5f );
-        CHECK( pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->get_width() == 70.5f );
+        CHECK( pSp && pSp->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5244,13 +5447,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.0f );
-        CHECK( pSp->get_staff() == 0 );
-        CHECK( pSp->has_attachments() == true );
+        CHECK( pSp && pSp->get_width() == 70.0f );
+        CHECK( pSp && pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->has_attachments() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5268,13 +5472,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.0f );
-        CHECK( pSp->get_staff() == 0 );
-        CHECK( pSp->has_attachments() == false );
+        CHECK( pSp && pSp->get_width() == 70.0f );
+        CHECK( pSp && pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->has_attachments() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5292,13 +5497,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDirection* pSp = dynamic_cast<ImoDirection*>( pRoot );
+        ImoDirection* pSp = static_cast<ImoDirection*>( pRoot );
         CHECK( pSp != nullptr );
-        CHECK( pSp->get_width() == 70.0f );
-        CHECK( pSp->get_staff() == 0 );
-        CHECK( pSp->has_attachments() == true );
+        CHECK( pSp && pSp->get_width() == 70.0f );
+        CHECK( pSp && pSp->get_staff() == 0 );
+        CHECK( pSp && pSp->has_attachments() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5320,11 +5526,12 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         CHECK( pRoot->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5344,9 +5551,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_document() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5364,12 +5572,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         //cout << "language='" << pDoc->get_language() << "'" << endl;
-        CHECK( pDoc->get_language() == "zh_CN" );
+        CHECK( pDoc && pDoc->get_language() == "zh_CN" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5387,11 +5596,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5403,12 +5613,13 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "hello world" );
+        CHECK( pText && pText->get_text() == "hello world" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5420,16 +5631,17 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        CHECK( pDoc->get_num_content_items() == 2 );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc && pDoc->get_num_content_items() == 2 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(1) );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "hello world" );
+        CHECK( pText && pText->get_text() == "hello world" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5447,11 +5659,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoObj* pImo = pDoc->get_content_item(0);
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5469,11 +5682,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoObj* pImo = pDoc->get_content();
-        CHECK( pImo->get_id() == 60L );
+        CHECK( pImo && pImo->get_id() == 60L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5492,12 +5706,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoStyle* pStyle = pDoc->find_style("Heading-1");
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Heading-1" );
+        CHECK( pStyle && pStyle->get_name() == "Heading-1" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5666,7 +5881,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -5674,10 +5889,10 @@ SUITE(LdpAnalyserTest)
         ImoObj::children_iterator it = pMusic->begin();
 
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->is_tied_next() == false );
-        CHECK( pNote->is_tied_prev() == false );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->is_tied_next() == false );
+        CHECK( pNote && pNote->is_tied_prev() == false );
 
         pInstr = pScore->get_instrument(1);
         pMusic = pInstr->get_musicdata();
@@ -5686,12 +5901,13 @@ SUITE(LdpAnalyserTest)
         it = pMusic->begin();
 
         pNote = dynamic_cast<ImoNote*>(*it);
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 1 );
-        CHECK( pNote->is_tied_next() == false );
-        CHECK( pNote->is_tied_prev() == false );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 1 );
+        CHECK( pNote && pNote->is_tied_next() == false );
+        CHECK( pNote && pNote->is_tied_prev() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5709,16 +5925,17 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         CHECK( pRoot->is_beam_dto() == true );
-        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pRoot );
+        ImoBeamDto* pInfo = static_cast<ImoBeamDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_beam_number() == 12 );
-        CHECK( pInfo->get_beam_type(0) == ImoBeam::k_begin );
-        CHECK( pInfo->get_beam_type(1) == ImoBeam::k_none );
+        CHECK( pInfo && pInfo->get_beam_number() == 12 );
+        CHECK( pInfo && pInfo->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pInfo && pInfo->get_beam_type(1) == ImoBeam::k_none );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5733,20 +5950,21 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pRoot );
+        ImoBeamDto* pInfo = static_cast<ImoBeamDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_beam_number() == 12 );
-        CHECK( pInfo->get_beam_type(0) == ImoBeam::k_begin );
-        CHECK( pInfo->get_beam_type(1) == ImoBeam::k_begin );
-        CHECK( pInfo->get_beam_type(2) == ImoBeam::k_forward );
-        CHECK( pInfo->get_beam_type(3) == ImoBeam::k_none );
-        CHECK( pInfo->get_beam_type(4) == ImoBeam::k_none );
-        CHECK( pInfo->get_beam_type(5) == ImoBeam::k_none );
+        CHECK( pInfo && pInfo->get_beam_number() == 12 );
+        CHECK( pInfo && pInfo->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pInfo && pInfo->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pInfo && pInfo->get_beam_type(2) == ImoBeam::k_forward );
+        CHECK( pInfo && pInfo->get_beam_type(3) == ImoBeam::k_none );
+        CHECK( pInfo && pInfo->get_beam_type(4) == ImoBeam::k_none );
+        CHECK( pInfo && pInfo->get_beam_type(5) == ImoBeam::k_none );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5767,6 +5985,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5787,6 +6006,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5802,16 +6022,17 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_beamed() == false );
-        CHECK( pNote->get_beam_type(0) == ImoBeam::k_none );
+        CHECK( pNote && pNote->is_beamed() == false );
+        CHECK( pNote && pNote->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5828,7 +6049,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5848,6 +6069,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5863,7 +6085,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5887,6 +6109,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5905,19 +6128,20 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->is_beamed() == false );
-        CHECK( pNote->get_beam_type(0) == ImoBeam::k_none );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->is_beamed() == false );
+        CHECK( pNote && pNote->get_beam_type(0) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5936,7 +6160,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5960,6 +6184,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -5981,7 +6206,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6006,6 +6231,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), k_duration_whole) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6026,13 +6252,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6050,14 +6277,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->get_note_type() == k_whole );
-        CHECK( pNote->is_beamed() == false );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_whole );
+        CHECK( pNote && pNote->is_beamed() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6073,13 +6301,14 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6100,7 +6329,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -6137,6 +6366,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3->get_beam_type(5) == ImoBeam::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6239,6 +6469,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6258,14 +6489,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_tuplet_dto() == true );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6287,6 +6519,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6305,15 +6538,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 7 );
-        CHECK( pInfo->get_normal_number() == 4 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 7 );
+        CHECK( pInfo && pInfo->get_normal_number() == 4 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->get_show_number() == ImoTuplet::k_number_actual );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6332,15 +6566,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_no );
-        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_actual );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_no );
+        CHECK( pInfo && pInfo->get_show_number() == ImoTuplet::k_number_actual );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6359,15 +6594,16 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
-        CHECK( pInfo->get_show_number() == ImoTuplet::k_number_none );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->get_show_number() == ImoTuplet::k_number_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6386,14 +6622,15 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6414,7 +6651,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6442,6 +6679,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), 21.3333) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6462,7 +6700,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6490,6 +6728,7 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6519,7 +6758,7 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
@@ -6551,6 +6790,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTuplet2->get_normal_number() == 2 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6574,6 +6814,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6593,14 +6834,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_tuplet_dto() == true );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6622,6 +6864,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6640,14 +6883,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 7 );
-        CHECK( pInfo->get_normal_number() == 4 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 7 );
+        CHECK( pInfo && pInfo->get_normal_number() == 4 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6666,14 +6910,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_no );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6692,14 +6937,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_no );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6718,14 +6964,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pRoot );
+        ImoTupletDto* pInfo = static_cast<ImoTupletDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_start_of_tuplet() == true );
-        CHECK( pInfo->get_actual_number() == 3 );
-        CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == k_yesno_no );
+        CHECK( pInfo && pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo && pInfo->get_actual_number() == 3 );
+        CHECK( pInfo && pInfo->get_normal_number() == 2 );
+        CHECK( pInfo && pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6741,14 +6988,15 @@ SUITE(LdpAnalyserTest)
         LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = pA->analyse_tree(tree, "string:");
         delete pA;
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( pNote->find_attachment(k_imo_tuplet) == nullptr );
+        CHECK( pNote && pNote->find_attachment(k_imo_tuplet) == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6770,7 +7018,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6811,6 +7059,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3->find_relation(k_imo_tuplet) == pTuplet );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6830,18 +7079,19 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMusic = pInstr->get_musicdata();
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>(*it);
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->get_first_tuplet() == nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_first_tuplet() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6862,13 +7112,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == 0 );
-        CHECK( pNote->get_first_tuplet() == nullptr );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == 0 );
+        CHECK( pNote && pNote->get_first_tuplet() == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6888,6 +7139,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6908,6 +7160,7 @@ SUITE(LdpAnalyserTest)
 
         delete pA;
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6927,7 +7180,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6936,6 +7189,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTuplet == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -6955,7 +7209,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
@@ -6989,6 +7243,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote3 == pNt3 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7014,6 +7269,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7036,10 +7292,11 @@ SUITE(LdpAnalyserTest)
         ImoTimeModificationDto* pInfo =
                 dynamic_cast<ImoTimeModificationDto*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_top_number() == 2 );
-        CHECK( pInfo->get_bottom_number() == 3 );
+        CHECK( pInfo && pInfo->get_top_number() == 2 );
+        CHECK( pInfo && pInfo->get_bottom_number() == 3 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7056,14 +7313,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_voice() == 7 );
+        CHECK( pNote && pNote->get_voice() == 7 );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7078,14 +7336,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_voice() == 1 );
+        CHECK( pNote && pNote->get_voice() == 1 );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7102,14 +7361,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_staff() == 1 );
+        CHECK( pNote && pNote->get_staff() == 1 );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7124,14 +7384,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_staff() == 0 );
+        CHECK( pNote && pNote->get_staff() == 0 );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7154,7 +7415,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
         ImoRest* pRest = dynamic_cast<ImoRest*>( *it );
@@ -7194,6 +7455,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRest3->get_staff() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7260,6 +7522,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7274,7 +7537,7 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pRoot );
+        ImoColorDto* pColor = static_cast<ImoColorDto*>( pRoot );
         CHECK( pColor != nullptr );
         CHECK( pColor->red() == 240 );
         CHECK( pColor->green() == 69 );
@@ -7285,6 +7548,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7304,7 +7568,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         Color& color = pNote->get_color();
         CHECK( color.r == 240 );
@@ -7313,6 +7577,7 @@ SUITE(LdpAnalyserTest)
         CHECK( color.a == 255 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7326,11 +7591,12 @@ SUITE(LdpAnalyserTest)
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
         CHECK( is_equal(pBarline->get_color(), Color(255,0,0)) );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7350,9 +7616,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_barline() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7377,11 +7644,12 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != nullptr );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7405,11 +7673,12 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != nullptr );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7434,11 +7703,12 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != nullptr );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7463,11 +7733,12 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_instrument("P1") != nullptr );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_instrument("P1") != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7491,10 +7762,11 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 1 );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7521,8 +7793,8 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 2 );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
@@ -7534,6 +7806,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7560,8 +7833,8 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 2 );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
@@ -7573,6 +7846,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7600,8 +7874,8 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 2 );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
@@ -7618,6 +7892,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_barline_layout() == ImoInstrument::k_nothing );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7646,8 +7921,8 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pRoot->is_score() == true );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->get_num_instruments() == 3 );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->get_num_instruments() == 3 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
@@ -7668,6 +7943,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstr->get_barline_layout() == ImoInstrument::k_isolated );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -7694,7 +7970,7 @@ SUITE(LdpAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //
 //        CHECK( pRoot->is_instr_group() == true );
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
@@ -7708,6 +7984,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7731,7 +8008,7 @@ SUITE(LdpAnalyserTest)
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
@@ -7745,6 +8022,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7768,7 +8046,7 @@ SUITE(LdpAnalyserTest)
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7782,6 +8060,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7804,7 +8083,7 @@ SUITE(LdpAnalyserTest)
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7818,6 +8097,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7843,6 +8123,7 @@ SUITE(LdpAnalyserTest)
 //        CHECK( pRoot == nullptr );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7866,7 +8147,7 @@ SUITE(LdpAnalyserTest)
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7880,6 +8161,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(1);
 //        delete pGrp->get_instrument(2);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7901,6 +8183,7 @@ SUITE(LdpAnalyserTest)
 //        CHECK( pRoot == nullptr );
 //
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 //
@@ -7923,7 +8206,7 @@ SUITE(LdpAnalyserTest)
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
-//        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pRoot );
+//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
 //        CHECK( pGrp != nullptr );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
@@ -7936,6 +8219,7 @@ SUITE(LdpAnalyserTest)
 //        delete pGrp->get_instrument(0);
 //        delete pGrp->get_instrument(1);
 //        delete tree->get_root();
+//        // coverity[check_after_deref]
 //        if (pRoot && !pRoot->is_document()) delete pRoot;
 //    }
 
@@ -7957,7 +8241,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -7965,25 +8249,26 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == true );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8003,7 +8288,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -8011,25 +8296,26 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == true );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8051,7 +8337,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -8059,36 +8345,37 @@ SUITE(LdpAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
-        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == true );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_beamed() == true );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
-        CHECK( pNote->is_beamed() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == true );
+        CHECK( pNote && pNote->is_beamed() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
-        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == true );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_beamed() == true );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
-        CHECK( pNote->is_beamed() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == true );
+        CHECK( pNote && pNote->is_beamed() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8110,19 +8397,20 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoPageInfo* pInfo = dynamic_cast<ImoPageInfo*>( pRoot );
+        ImoPageInfo* pInfo = static_cast<ImoPageInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_page_info() == true );
-        CHECK( pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo->get_binding_margin() == 4000.0f );
-        CHECK( pInfo->get_page_width() == 14000.0f );
-        CHECK( pInfo->get_page_height() == 10000.0f );
-        CHECK( pInfo->is_portrait() == false );
+        CHECK( pInfo && pInfo->is_page_info() == true );
+        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
+        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
+        CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
+        CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
+        CHECK( pInfo && pInfo->is_portrait() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8142,21 +8430,22 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         ImoPageInfo* pInfo = pScore->get_page_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_page_info() == true );
-        CHECK( pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo->get_binding_margin() == 4000.0f );
-        CHECK( pInfo->get_page_width() == 14000.0f );
-        CHECK( pInfo->get_page_height() == 10000.0f );
-        CHECK( pInfo->is_portrait() == false );
+        CHECK( pInfo && pInfo->is_page_info() == true );
+        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
+        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
+        CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
+        CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
+        CHECK( pInfo && pInfo->is_portrait() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8176,21 +8465,22 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
         ImoPageInfo* pInfo = pDoc->get_page_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_page_info() == true );
-        CHECK( pInfo->get_left_margin() == 1000.0f );
-        CHECK( pInfo->get_top_margin() == 1200.0f );
-        CHECK( pInfo->get_right_margin() == 3000.0f );
-        CHECK( pInfo->get_bottom_margin() == 2500.0f );
-        CHECK( pInfo->get_binding_margin() == 4000.0f );
-        CHECK( pInfo->get_page_width() == 14000.0f );
-        CHECK( pInfo->get_page_height() == 10000.0f );
-        CHECK( pInfo->is_portrait() == false );
+        CHECK( pInfo && pInfo->is_page_info() == true );
+        CHECK( pInfo && pInfo->get_left_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_top_margin() == 1200.0f );
+        CHECK( pInfo && pInfo->get_right_margin() == 3000.0f );
+        CHECK( pInfo && pInfo->get_bottom_margin() == 2500.0f );
+        CHECK( pInfo && pInfo->get_binding_margin() == 4000.0f );
+        CHECK( pInfo && pInfo->get_page_width() == 14000.0f );
+        CHECK( pInfo && pInfo->get_page_height() == 10000.0f );
+        CHECK( pInfo && pInfo->is_portrait() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8212,7 +8502,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
+        ImoFontStyleDto* pFont = static_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8220,6 +8510,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 12 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8239,7 +8530,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
+        ImoFontStyleDto* pFont = static_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8247,6 +8538,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 8 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8266,7 +8558,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
+        ImoFontStyleDto* pFont = static_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8274,6 +8566,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 12 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8293,7 +8586,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFontStyleDto* pFont = dynamic_cast<ImoFontStyleDto*>( pRoot );
+        ImoFontStyleDto* pFont = static_cast<ImoFontStyleDto*>( pRoot );
         CHECK( pFont != nullptr );
         CHECK( pFont->name == "Trebuchet" );
         CHECK( pFont->style == ImoStyle::k_font_style_normal );
@@ -8301,6 +8594,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pFont->size == 17 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8323,16 +8617,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
-        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8352,18 +8647,19 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         ImoStyle* pStyle = pScore->find_style("Header1");
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Header1" );
+        CHECK( pStyle && pStyle->get_name() == "Header1" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
-        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8384,13 +8680,14 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->margin_bottom() == 2.0f );
+        CHECK( pStyle && pStyle->margin_bottom() == 2.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8412,15 +8709,16 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->font_name() == "Arial" );
-        CHECK( pStyle->font_size() == 14 );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->font_name() == "Arial" );
+        CHECK( pStyle && pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8443,16 +8741,17 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->font_file() == "wqy-zenhei.ttc" );
-        CHECK( pStyle->font_name() == "Arial" );
-        CHECK( pStyle->font_size() == 14 );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->font_file() == "wqy-zenhei.ttc" );
+        CHECK( pStyle && pStyle->font_name() == "Arial" );
+        CHECK( pStyle && pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8473,15 +8772,16 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->margin_top() == 3.0f );
-        CHECK( pStyle->margin_bottom() == 2.0f );
-        CHECK( pStyle->margin_left() == 5.0f );
-        CHECK( pStyle->margin_right() == 7.0f );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->margin_top() == 3.0f );
+        CHECK( pStyle && pStyle->margin_bottom() == 2.0f );
+        CHECK( pStyle && pStyle->margin_left() == 5.0f );
+        CHECK( pStyle && pStyle->margin_right() == 7.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8502,15 +8802,16 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->margin_top() == 0.5f );
-        CHECK( pStyle->margin_bottom() == 0.5f );
-        CHECK( pStyle->margin_left() == 0.5f );
-        CHECK( pStyle->margin_right() == 0.5f );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->margin_top() == 0.5f );
+        CHECK( pStyle && pStyle->margin_bottom() == 0.5f );
+        CHECK( pStyle && pStyle->margin_left() == 0.5f );
+        CHECK( pStyle && pStyle->margin_right() == 0.5f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8531,12 +8832,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pRoot );
+        ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->line_height() == 1.2f );
+        CHECK( pStyle && pStyle->get_name() == "Composer" );
+        CHECK( pStyle && pStyle->line_height() == 1.2f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8560,6 +8862,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8580,6 +8883,7 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8599,12 +8903,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
+        ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8624,9 +8929,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score_title() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8646,7 +8952,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         std::list<ImoScoreTitle*>& titles = pScore->get_titles();
         std::list<ImoScoreTitle*>::iterator it = titles.begin();
@@ -8657,6 +8963,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pTitle->get_h_align() == k_halign_center );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8676,7 +8983,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
+        ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "Moonlight sonata" );
         CHECK( pTitle->get_h_align() == k_halign_center );
@@ -8684,6 +8991,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8706,7 +9014,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         CHECK( pScore != nullptr );
         std::list<ImoScoreTitle*>& titles = pScore->get_titles();
         std::list<ImoScoreTitle*>::iterator it = titles.begin();
@@ -8717,14 +9025,15 @@ SUITE(LdpAnalyserTest)
         CHECK( pTitle->get_h_align() == k_halign_center );
         ImoStyle* pStyle = pTitle->get_style();
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Header1" );
+        CHECK( pStyle && pStyle->get_name() == "Header1" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
-        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8744,7 +9053,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreTitle* pTitle = dynamic_cast<ImoScoreTitle*>( pRoot );
+        ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>( pRoot );
         CHECK( pTitle != nullptr );
         CHECK( pTitle->get_text() == "F. Chopin" );
         CHECK( pTitle->get_h_align() == k_halign_right );
@@ -8754,6 +9063,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8777,7 +9087,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8790,6 +9100,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8809,7 +9120,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8822,6 +9133,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 1.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8841,9 +9153,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score_line() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8863,7 +9176,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8876,6 +9189,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8895,7 +9209,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8908,6 +9222,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8927,7 +9242,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pRoot );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pRoot );
         CHECK( pLine != nullptr );
         CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
         CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
@@ -8940,6 +9255,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -8964,22 +9280,23 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pRoot );
+        ImoTextBox* pTB = static_cast<ImoTextBox*>( pRoot );
         CHECK( pTB != nullptr );
         CHECK( pTB->get_text() == "This is a test of a textbox" );
         CHECK( pTB->has_anchor_line() == false );
         ImoTextBlockInfo* pInfo = pTB->get_box_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_textblock_info() == true );
-        CHECK( pInfo->get_height() == 150.0f );
-        CHECK( pInfo->get_width() == 300.0f );
-        CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
+        CHECK( pInfo && pInfo->is_textblock_info() == true );
+        CHECK( pInfo && pInfo->get_height() == 150.0f );
+        CHECK( pInfo && pInfo->get_width() == 300.0f );
+        CHECK( pInfo && pInfo->get_position() == TPoint(50.0f, 5.0f) );
         CHECK( is_equal(pInfo->get_bg_color(), Color(255,255,255,255)) );
         CHECK( is_equal(pInfo->get_border_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_border_width() == 1.0f );
-        CHECK( pInfo->get_border_style() == k_line_solid );
+        CHECK( pInfo && pInfo->get_border_width() == 1.0f );
+        CHECK( pInfo && pInfo->get_border_style() == k_line_solid );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9001,9 +9318,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_text_box() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9030,20 +9348,20 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pRoot );
+        ImoTextBox* pTB = static_cast<ImoTextBox*>( pRoot );
         CHECK( pTB != nullptr );
         CHECK( pTB->get_text() == "This is a test of a textbox" );
 
         ImoTextBlockInfo* pInfo = pTB->get_box_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_textblock_info() == true );
-        CHECK( pInfo->get_height() == 150.0f );
-        CHECK( pInfo->get_width() == 300.0f );
-        CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
+        CHECK( pInfo && pInfo->is_textblock_info() == true );
+        CHECK( pInfo && pInfo->get_height() == 150.0f );
+        CHECK( pInfo && pInfo->get_width() == 300.0f );
+        CHECK( pInfo && pInfo->get_position() == TPoint(50.0f, 5.0f) );
         CHECK( is_equal(pInfo->get_bg_color(), Color(255,254,11,255)) );
         CHECK( is_equal(pInfo->get_border_color(), Color(0,0,253,255)) );
-        CHECK( pInfo->get_border_width() == 5.0f );
-        CHECK( pInfo->get_border_style() == k_line_dot );
+        CHECK( pInfo && pInfo->get_border_width() == 5.0f );
+        CHECK( pInfo && pInfo->get_border_style() == k_line_dot );
 
         CHECK( pTB->has_anchor_line() == true );
         ImoLineStyle* pLine = pTB->get_anchor_line_info();
@@ -9060,6 +9378,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine->get_width() == 3.5f );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9081,27 +9400,28 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        ImoNote* pNote = static_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->has_attachments() == true );
+        CHECK( pNote && pNote->has_attachments() == true );
         ImoTextBox* pTB = dynamic_cast<ImoTextBox*>( pNote->get_attachment(0) );
         CHECK( pTB != nullptr );
         CHECK( pTB->get_text() == "This is a test of a textbox" );
 
         ImoTextBlockInfo* pInfo = pTB->get_box_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->is_textblock_info() == true );
-        CHECK( pInfo->get_height() == 150.0f );
-        CHECK( pInfo->get_width() == 300.0f );
-        CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
+        CHECK( pInfo && pInfo->is_textblock_info() == true );
+        CHECK( pInfo && pInfo->get_height() == 150.0f );
+        CHECK( pInfo && pInfo->get_width() == 300.0f );
+        CHECK( pInfo && pInfo->get_position() == TPoint(50.0f, 5.0f) );
         CHECK( is_equal(pInfo->get_bg_color(), Color(255,255,255,255)) );
         CHECK( is_equal(pInfo->get_border_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_border_width() == 1.0f );
-        CHECK( pInfo->get_border_style() == k_line_solid );
+        CHECK( pInfo && pInfo->get_border_width() == 1.0f );
+        CHECK( pInfo && pInfo->get_border_style() == k_line_solid );
 
         CHECK( pTB->has_anchor_line() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9123,14 +9443,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoCursorInfo* pInfo = dynamic_cast<ImoCursorInfo*>( pRoot );
-        CHECK( pInfo->is_cursor_info() == true );
-        CHECK( pInfo->get_instrument() == 1 );
-        CHECK( pInfo->get_staff() == 2 );
-        CHECK( pInfo->get_time() == 64.0f );
-        CHECK( pInfo->get_id() == 34L );
+        ImoCursorInfo* pInfo = static_cast<ImoCursorInfo*>( pRoot );
+        CHECK( pInfo && pInfo->is_cursor_info() == true );
+        CHECK( pInfo && pInfo->get_instrument() == 1 );
+        CHECK( pInfo && pInfo->get_staff() == 2 );
+        CHECK( pInfo && pInfo->get_time() == 64.0f );
+        CHECK( pInfo && pInfo->get_id() == 34L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9150,14 +9471,15 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
-        CHECK( pScore->is_score() == true );
-        //CHECK( pScore->get_instrument() == 1 );
-        //CHECK( pScore->get_staff() == 2 );
-        //CHECK( pScore->get_time() == 64.0f );
-        //CHECK( pScore->get_id() == 34L );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore && pScore->is_score() == true );
+        //CHECK( pScore && pScore->get_instrument() == 1 );
+        //CHECK( pScore && pScore->get_staff() == 2 );
+        //CHECK( pScore && pScore->get_time() == 64.0f );
+        //CHECK( pScore && pScore->get_id() == 34L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9176,12 +9498,12 @@ SUITE(LdpAnalyserTest)
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
 
-    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-    //    CHECK( pDoc->is_document() == true );
-    //    //CHECK( pScore->get_instrument() == 1 );
-    //    //CHECK( pScore->get_staff() == 2 );
-    //    //CHECK( pScore->get_time() == 64.0f );
-    //    //CHECK( pScore->get_id() == 34L );
+    //    ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
+    //    CHECK( pDoc && pDoc->is_document() == true );
+    //    //CHECK( pScore && pScore->get_instrument() == 1 );
+    //    //CHECK( pScore && pScore->get_staff() == 2 );
+    //    //CHECK( pScore && pScore->get_time() == 64.0f );
+    //    //CHECK( pScore && pScore->get_id() == 34L );
 
     //    delete tree->get_root();
     //    if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -9205,12 +9527,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoFiguredBass* pFB = dynamic_cast<ImoFiguredBass*>( pRoot );
+        ImoFiguredBass* pFB = static_cast<ImoFiguredBass*>( pRoot );
         CHECK( pFB->is_figured_bass() == true );
         //cout << "FB ='" << pFB->get_figured_bass_string() << "'" << endl;
         CHECK( pFB->get_figured_bass_string() == "7 5 2" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9232,14 +9555,9 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot == nullptr );
-        //ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pRoot );
-        //CHECK( pMM != nullptr );
-        //CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        //CHECK( pMM->get_ticks_per_minute() == 88 );
-        //CHECK( pMM->is_visible() == true );
-        //CHECK( pMM->has_parenthesis() == false );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9259,17 +9577,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
-        CHECK( pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo->get_line_spacing() == 180.0f );
-        CHECK( pInfo->get_height() == 735.0f );
-        CHECK( pInfo->get_line_thickness() == 15.0f );
-        CHECK( pInfo->get_num_lines() == 5 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
+        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_height() == 735.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9289,17 +9608,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo->get_line_spacing() == 180.0f );
-        CHECK( pInfo->get_height() == 735.0f );
-        CHECK( pInfo->get_line_thickness() == 15.0f );
-        CHECK( pInfo->get_num_lines() == 5 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_height() == 735.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9320,17 +9640,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo->get_line_spacing() == 180.0f );
-        CHECK( pInfo->get_height() == 735.0f );
-        CHECK( pInfo->get_line_thickness() == 15.0f );
-        CHECK( pInfo->get_num_lines() == 5 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_height() == 735.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9351,17 +9672,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo->get_line_spacing() == 200.0f );
-        CHECK( pInfo->get_height() == 815.0f );
-        CHECK( pInfo->get_line_thickness() == 15.0f );
-        CHECK( pInfo->get_num_lines() == 5 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo && pInfo->get_height() == 815.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9382,17 +9704,18 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pRoot );
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>( pRoot );
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo->get_staff_margin() == 800.0f );
-        CHECK( pInfo->get_line_spacing() == 200.0f );
-        CHECK( pInfo->get_height() == 620.5f );
-        CHECK( pInfo->get_line_thickness() == 20.5f );
-        CHECK( pInfo->get_num_lines() == 4 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo && pInfo->get_staff_margin() == 800.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo && pInfo->get_height() == 620.5f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 20.5f );
+        CHECK( pInfo && pInfo->get_num_lines() == 4 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9414,19 +9737,20 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         ImoStaffInfo* pInfo = pInstr->get_staff(1);
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->get_staff_number() == 1 );
-        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo->get_staff_margin() == 800.0f );
-        CHECK( pInfo->get_line_spacing() == 200.0f );
-        CHECK( pInfo->get_height() == 620.5f );
-        CHECK( pInfo->get_line_thickness() == 20.5f );
-        CHECK( pInfo->get_num_lines() == 4 );
+        CHECK( pInfo && pInfo->get_staff_number() == 1 );
+        CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo && pInfo->get_staff_margin() == 800.0f );
+        CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo && pInfo->get_height() == 620.5f );
+        CHECK( pInfo && pInfo->get_line_thickness() == 20.5f );
+        CHECK( pInfo && pInfo->get_num_lines() == 4 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9447,11 +9771,12 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_text_item() == true );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
+        ImoTextItem* pText = static_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "This is a text" );
+        CHECK( pText && pText->get_text() == "This is a text" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9471,9 +9796,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_text_item() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9489,7 +9815,7 @@ SUITE(LdpAnalyserTest)
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
-    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
+    //    ImoTextItem* pText = static_cast<ImoTextItem*>( pRoot );
     //    CHECK( pText == nullptr );
 
     //    delete tree->get_root();
@@ -9512,13 +9838,14 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
+        ImoTextItem* pText = static_cast<ImoTextItem*>( pRoot );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "This is a text" );
+        CHECK( pText && pText->get_text() == "This is a text" );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9533,10 +9860,13 @@ SUITE(LdpAnalyserTest)
         ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
-        CHECK( pPara->get_num_items() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
-        CHECK( pItem->get_style() != nullptr );
+        if (pPara)
+        {
+            CHECK( pPara->get_num_items() == 1 );
+            ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
+            CHECK( pItem && pItem->get_text() == "Hello world!" );
+            CHECK( pItem && pItem->get_style() != nullptr );
+        }
     }
 
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_Location)
@@ -9553,11 +9883,11 @@ SUITE(LdpAnalyserTest)
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
 
-    //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pRoot );
+    //    ImoTextItem* pText = static_cast<ImoTextItem*>( pRoot );
     //    CHECK( pText != nullptr );
-    //    CHECK( pText->get_text() == "F. Chopin" );
-    //    CHECK( pText->get_user_location_x() == 20.0f );
-    //    CHECK( pText->get_user_location_y() == 30.0f );
+    //    CHECK( pText && pText->get_text() == "F. Chopin" );
+    //    CHECK( pText && pText->get_user_location_x() == 20.0f );
+    //    CHECK( pText && pText->get_user_location_y() == 30.0f );
     //    ImoStyle* pStyle = pText->get_style();
     //    CHECK( pStyle == nullptr );
 
@@ -9585,6 +9915,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_paragraph() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9604,9 +9935,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_paragraph() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9625,12 +9957,13 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
+        ImoParagraph* pPara = static_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "This is a paragraph" );
+        CHECK( pItem && pItem->get_text() == "This is a paragraph" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9650,16 +9983,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
+        ImoParagraph* pPara = static_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 1 );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pPara->get_first_item() );
         CHECK( pLink != nullptr );
-        CHECK( pLink->get_url() == "This is the url" );
-        CHECK( pLink->get_num_items() == 1 );
+        CHECK( pLink && pLink->get_url() == "This is the url" );
+        CHECK( pLink && pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
-        CHECK( pItem->get_text() == "This is the link" );
+        CHECK( pItem && pItem->get_text() == "This is the link" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9679,16 +10013,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pRoot );
+        ImoParagraph* pPara = static_cast<ImoParagraph*>( pRoot );
         CHECK( pPara->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pPara->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
-        CHECK( pItem->get_text() == "This is a paragraph" );
+        CHECK( pItem && pItem->get_text() == "This is a paragraph" );
         ++it;
         pItem = dynamic_cast<ImoTextItem*>( *it );
-        CHECK( pItem->get_text() == " with two items." );
+        CHECK( pItem && pItem->get_text() == " with two items." );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9701,14 +10036,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        CHECK( pItem && pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9729,16 +10065,20 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
-        ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle != nullptr );
-        CHECK( pPara->get_num_items() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        if (pPara)
+        {
+            ImoStyle* pStyle = pPara->get_style();
+            CHECK( pStyle != nullptr );
+            CHECK( pPara->get_num_items() == 1 );
+            ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
+            CHECK( pItem && pItem->get_text() == "Hello world!" );
+        }
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9758,10 +10098,10 @@ SUITE(LdpAnalyserTest)
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
         ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle->get_name() == "Paragraph" );
+        CHECK( pStyle && pStyle->get_name() == "Paragraph" );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        CHECK( pItem && pItem->get_text() == "Hello world!" );
     }
 
     // heading --------------------------------------------------------------------------
@@ -9784,6 +10124,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_heading() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9803,9 +10144,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_heading() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9827,9 +10169,10 @@ SUITE(LdpAnalyserTest)
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pRoot );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
-        CHECK( pItem->get_text() == "This is a header" );
+        CHECK( pItem && pItem->get_text() == "This is a header" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9853,12 +10196,13 @@ SUITE(LdpAnalyserTest)
         CHECK( pH->get_num_items() == 2 );
         TreeNode<ImoObj>::children_iterator it = pH->begin();
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( *it );
-        CHECK( pItem->get_text() == "This is a header" );
+        CHECK( pItem && pItem->get_text() == "This is a header" );
         ++it;
         pItem = dynamic_cast<ImoTextItem*>( *it );
-        CHECK( pItem->get_text() == " with two items." );
+        CHECK( pItem && pItem->get_text() == " with two items." );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9871,14 +10215,15 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        CHECK( pItem && pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9899,16 +10244,17 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
 
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
         ImoStyle* pStyle = pH->get_style();
         CHECK( pStyle != nullptr );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        CHECK( pItem && pItem->get_text() == "Hello world!" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9927,11 +10273,14 @@ SUITE(LdpAnalyserTest)
         ImoDocument* pDoc = doc.get_im_root();
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != nullptr );
-        ImoStyle* pStyle = pH->get_style();
-        CHECK( pStyle->get_name() == "Heading-1" );
-        CHECK( pH->get_num_items() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        if (pH)
+        {
+            ImoStyle* pStyle = pH->get_style();
+            CHECK( pStyle && pStyle->get_name() == "Heading-1" );
+            CHECK( pH->get_num_items() == 1 );
+            ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
+            CHECK( pItem && pItem->get_text() == "Hello world!" );
+        }
     }
 
     // styles ---------------------------------------------------------------------------
@@ -9957,14 +10306,15 @@ SUITE(LdpAnalyserTest)
         CHECK( pStyles != nullptr );
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
-        CHECK( pStyle->get_name() == "Header1" );
+        CHECK( pStyle && pStyle->get_name() == "Header1" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
-        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -9987,21 +10337,22 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "hello world" );
+        CHECK( pText && pText->get_text() == "hello world" );
 
         ImoStyle* pStyle = pDoc->find_style("Header1");
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Header1" );
+        CHECK( pStyle && pStyle->get_name() == "Header1" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
-        CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
-        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle && pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle && pStyle->font_weight() == ImoStyle::k_font_weight_bold );
+        CHECK( pStyle && pStyle->font_size() == 14 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10022,16 +10373,17 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != nullptr );
-        CHECK( pText->get_text() == "hello world" );
+        CHECK( pText && pText->get_text() == "hello world" );
 
         ImoStyle* pStyle = pDoc->get_style_or_default("text");
         CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle && pStyle->get_name() == "Default style" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10052,6 +10404,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pParam->get_value() == "this is green" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10074,6 +10427,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10102,6 +10456,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pDyn->is_visible() );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10121,9 +10476,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_dynamic() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10136,11 +10492,12 @@ SUITE(LdpAnalyserTest)
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(cout, m_libraryScope, &doc);
         ImoObj* pRoot = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pDoc->get_content_item(0) );
         CHECK( pDyn != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10183,6 +10540,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pParm->get_value() == "all notes" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10208,12 +10566,13 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_link() == true );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
-        CHECK( pLink->get_url() == "#TheoryHarmony_ch3.lms" );
-        CHECK( pLink->get_num_items() == 1 );
+        CHECK( pLink && pLink->get_url() == "#TheoryHarmony_ch3.lms" );
+        CHECK( pLink && pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
-        CHECK( pItem->get_text() == "Harmony exercise" );
+        CHECK( pItem && pItem->get_text() == "Harmony exercise" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10234,9 +10593,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_link() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10260,12 +10620,16 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot->is_link() == true );
         ImoLink* pLink = dynamic_cast<ImoLink*>( pRoot );
         CHECK( pLink != nullptr );
-        CHECK( pLink->get_url() == "" );
-        CHECK( pLink->get_num_items() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
-        CHECK( pItem->get_text() == "Harmony exercise" );
+        if (pLink)
+        {
+            CHECK( pLink->get_url() == "" );
+            CHECK( pLink->get_num_items() == 1 );
+            ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
+            CHECK( pItem && pItem->get_text() == "Harmony exercise" );
+        }
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10293,6 +10657,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pImg != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 #endif // LOMSE_ENABLE_PNG
@@ -10321,9 +10686,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pLI->get_num_content_items() == 1 );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
-        CHECK( pText->get_text() == "This is the first item" );
+        CHECK( pText && pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10344,9 +10710,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_listitem() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10376,9 +10743,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pLI->get_num_content_items() == 1 );
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
-        CHECK( pText->get_text() == "This is the first item" );
+        CHECK( pText && pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10399,9 +10767,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_list() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10427,6 +10796,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRoot == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10465,6 +10835,7 @@ SUITE(LdpAnalyserTest)
         CHECK( color.a == 255 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10484,9 +10855,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_score_line() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10506,7 +10878,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pRoot );
+        ImoMusicData* pMusic = static_cast<ImoMusicData*>( pRoot );
         CHECK( pMusic != nullptr );
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -10522,6 +10894,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pLine != nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 #endif
@@ -10542,10 +10915,14 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
-        CHECK( pSP->is_score_player() == true );
-        CHECK( pSP->get_metronome_mm() == 60 );
-        //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        CHECK( pAB != nullptr );
+        if (pAB)
+        {
+            ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+            CHECK( pSP && pSP->is_score_player() == true );
+            CHECK( pSP && pSP->get_metronome_mm() == 60 );
+            //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        }
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_player)
@@ -10562,8 +10939,12 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
-        CHECK( pSP->get_id() == 10L );
+        CHECK( pAB != nullptr );
+        if (pAB)
+        {
+            ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+            CHECK( pSP && pSP->get_id() == 10L );
+        }
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_metronome)
@@ -10580,10 +10961,14 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
-        CHECK( pSP->is_score_player() == true );
-        CHECK( pSP->get_metronome_mm() == 65 );
-        //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        CHECK( pAB != nullptr );
+        if (pAB)
+        {
+            ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+            CHECK( pSP && pSP->is_score_player() == true );
+            CHECK( pSP && pSP->get_metronome_mm() == 65 );
+            //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        }
     }
 
     TEST_FIXTURE(LdpAnalyserTestFixture, scorePlayer_label_play)
@@ -10600,12 +10985,16 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = doc.get_im_root();
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
-        CHECK( pSP->is_score_player() == true );
-        CHECK( pSP->get_metronome_mm() == 65 );
-        CHECK( pSP->get_play_label() == "Tocar" );
-        CHECK( pSP->get_stop_label() == "Parar" );
-        //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        CHECK( pAB != nullptr );
+        if (pAB)
+        {
+            ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+            CHECK( pSP && pSP->is_score_player() == true );
+            CHECK( pSP && pSP->get_metronome_mm() == 65 );
+            CHECK( pSP && pSP->get_play_label() == "Tocar" );
+            CHECK( pSP && pSP->get_stop_label() == "Parar" );
+            //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+        }
     }
 
     // tableCell ------------------------------------------------------------------------
@@ -10634,9 +11023,10 @@ SUITE(LdpAnalyserTest)
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
         CHECK( pAB->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
-        CHECK( pText->get_text() == "This is a cell" );
+        CHECK( pText && pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10657,9 +11047,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_table_cell() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10687,9 +11078,10 @@ SUITE(LdpAnalyserTest)
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
         CHECK( pAB->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
-        CHECK( pText->get_text() == "This is a cell" );
+        CHECK( pText && pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10717,9 +11109,10 @@ SUITE(LdpAnalyserTest)
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
         CHECK( pAB->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
-        CHECK( pText->get_text() == "This is a cell" );
+        CHECK( pText && pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10747,9 +11140,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
         CHECK( pRow->get_num_cells() == 2 );
         ImoTableCell* pImo = dynamic_cast<ImoTableCell*>( pRow->get_cell(0) );
-        CHECK( pImo->is_table_cell() == true );
+        CHECK( pImo && pImo->is_table_cell() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10772,9 +11166,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_table_row() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10807,6 +11202,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->get_num_cells() == 1 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10829,9 +11225,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_table_head() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10863,6 +11260,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10885,9 +11283,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_table_body() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10913,7 +11312,7 @@ SUITE(LdpAnalyserTest)
         ImoTable* pTable = dynamic_cast<ImoTable*>( pRoot );
         CHECK( pTable != nullptr );
 
-        CHECK( pTable->get_head() == nullptr );
+        CHECK( pTable && pTable->get_head() == nullptr );
 
         ImoTableBody* pBody = pTable->get_body();
         CHECK( pBody != nullptr );
@@ -10922,6 +11321,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10942,9 +11342,10 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot->is_table() == true );
         ImoObj* pImo = pRoot;
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo && pImo->get_id() == 10L );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -10979,7 +11380,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -10991,6 +11392,7 @@ SUITE(LdpAnalyserTest)
         CHECK( (*it)->get_name() == "table1-col2" );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -11027,7 +11429,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoDocument* pDoc = static_cast<ImoDocument*>( pRoot );
         ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
         CHECK( pTable != nullptr );
 
@@ -11047,6 +11449,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -11071,7 +11474,7 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr->get_last_measure_info() == nullptr );
         ImoMusicData* pMusic = pInstr->get_musicdata();
@@ -11090,14 +11493,15 @@ SUITE(LdpAnalyserTest)
         CHECK( (*it)->is_barline() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
         TypeMeasureInfo* pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->count == 1 );
+        CHECK( pInfo && pInfo->count == 1 );
 //        cout << test_name() << ": count=" << pInfo->count << endl;
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -11121,11 +11525,11 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->count == 2 );
+        CHECK( pInfo && pInfo->count == 2 );
 //        cout << test_name() << ": count=" << pInfo->count << endl;
 
         ImoMusicData* pMusic = pInstr->get_musicdata();
@@ -11144,14 +11548,15 @@ SUITE(LdpAnalyserTest)
         CHECK( (*it)->is_barline() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
         pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->count == 1 );
+        CHECK( pInfo && pInfo->count == 1 );
 //        cout << test_name() << ": count=" << pInfo->count << endl;
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -11173,12 +11578,13 @@ SUITE(LdpAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
         CHECK( pInfo == nullptr );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -11211,7 +11617,7 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pRoot );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
         ImoInstrument* pInstr = pScore->get_instrument(1);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoClef* pClef = dynamic_cast<ImoClef*>( pMD->get_child(0) );
@@ -11219,6 +11625,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pClef->get_staff() == 0 );
 
         delete tree->get_root();
+        // coverity[check_after_deref]
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 }

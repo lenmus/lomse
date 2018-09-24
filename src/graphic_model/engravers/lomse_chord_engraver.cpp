@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,7 +52,14 @@ namespace lomse
 ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                              int numNotes)
     : RelObjEngraver(libraryScope, pScoreMeter)
+    , m_pChord(nullptr)
     , m_pBaseNoteData(nullptr)
+    , m_fStemDown(false)
+    , m_fHasStem(false)
+    , m_fHasFlag(false)
+    , m_fSomeNoteReversed(false)
+    , m_noteType(0)
+    , m_stemWidth(0.0f)
     , m_numNotesMissing(numNotes)
 {
 }
@@ -121,8 +128,8 @@ int ChordEngraver::create_shapes(Color color)
 void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 {
     m_numNotesMissing--;
-    ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
-    GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
+    ImoNote* pNote = static_cast<ImoNote*>(pSO);
+    GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
     int posOnStaff = pNoteShape->get_pos_on_staff();
 
     if (m_notes.size() == 0)

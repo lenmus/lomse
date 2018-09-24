@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -110,7 +110,7 @@ SUITE(GmoShapeTest)
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != nullptr );
-        CHECK( pShape->is_locked() == true );
+        CHECK( pShape && pShape->is_locked() == true );
 
         delete pNote;
         delete pShape;
@@ -131,20 +131,24 @@ SUITE(GmoShapeTest)
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
-        pShape->unlock();
-        CHECK( pShape->is_locked() == false );
+        CHECK( pShape != nullptr);
+        if (pShape)
+        {
+            pShape->unlock();
+            CHECK( pShape->is_locked() == false );
 
-        USize size = pShape->get_size();
-        UPoint org = pShape->get_origin();
-        GmoShapeNotehead* pNH = pShape->get_notehead_shape();
-        USize shift(200.0f, 300.0f);
-        pNH->shift_origin(shift);
-        pShape->lock();
+            USize size = pShape->get_size();
+            UPoint org = pShape->get_origin();
+            GmoShapeNotehead* pNH = pShape->get_notehead_shape();
+            USize shift(200.0f, 300.0f);
+            pNH->shift_origin(shift);
+            pShape->lock();
 
-        CHECK( pShape->is_locked() == true );
-        CHECK( pShape->get_size() == size );
-        CHECK( pShape->get_origin().x == org.x + shift.width );
-        CHECK( pShape->get_origin().y == org.y + shift.height );
+            CHECK( pShape->is_locked() == true );
+            CHECK( pShape->get_size() == size );
+            CHECK( pShape->get_origin().x == org.x + shift.width );
+            CHECK( pShape->get_origin().y == org.y + shift.height );
+        }
 
         delete pNote;
         delete pShape;
@@ -165,20 +169,24 @@ SUITE(GmoShapeTest)
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
-        pShape->unlock();
-        CHECK( pShape->is_locked() == false );
+        CHECK( pShape != nullptr);
+        if (pShape)
+        {
+            pShape->unlock();
+            CHECK( pShape->is_locked() == false );
 
-        USize size = pShape->get_size();
-        GmoShapeNotehead* pNH = pShape->get_notehead_shape();
-        GmoShapeAccidentals* pAcc = pShape->get_accidentals_shape();
-        USize shift(200.0f, 300.0f);
-        pNH->shift_origin(shift);
-        pShape->lock();
+            USize size = pShape->get_size();
+            GmoShapeNotehead* pNH = pShape->get_notehead_shape();
+            GmoShapeAccidentals* pAcc = pShape->get_accidentals_shape();
+            USize shift(200.0f, 300.0f);
+            pNH->shift_origin(shift);
+            pShape->lock();
 
-        CHECK( pShape->is_locked() == true );
-        CHECK( pShape->get_size().width == size.width + shift.width );
-        CHECK( pShape->get_origin().x == min(pAcc->get_origin().x, pNH->get_origin().x) );
-        CHECK( pShape->get_origin().y == min(pAcc->get_origin().y, pNH->get_origin().y) );
+            CHECK( pShape->is_locked() == true );
+            CHECK( pShape->get_size().width == size.width + shift.width );
+            CHECK( pShape->get_origin().x == min(pAcc->get_origin().x, pNH->get_origin().x) );
+            CHECK( pShape->get_origin().y == min(pAcc->get_origin().y, pNH->get_origin().y) );
+        }
 
         delete pNote;
         delete pShape;

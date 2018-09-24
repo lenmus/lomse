@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -927,10 +927,10 @@ SUITE(DocCursorTest)
         CHECK( state.get_parent_level_id() == 80L );     //score
         CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
-        CHECK( pSCE->id() == 106L );
-        CHECK( pSCE->instrument() == 0 );
-        CHECK( pSCE->measure() == 0 );
-        CHECK( pSCE->staff() == 0 );
+        CHECK( pSCE && pSCE->id() == 106L );
+        CHECK( pSCE && pSCE->instrument() == 0 );
+        CHECK( pSCE && pSCE->measure() == 0 );
+        CHECK( pSCE && pSCE->staff() == 0 );
         CHECK( is_equal_time(pSCE->time(), 0.0f) );
     }
 
@@ -950,7 +950,7 @@ SUITE(DocCursorTest)
         CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE =
             dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
-        CHECK( pSCE->is_at_end_of_score() );
+        CHECK( pSCE && pSCE->is_at_end_of_score() );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_705)
@@ -993,11 +993,11 @@ SUITE(DocCursorTest)
         CHECK( state.get_parent_level_id() == 64L );     //score
         CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
-        CHECK( pSCE->id() == 71L );
-        CHECK( pSCE->instrument() == 0 );
-        CHECK( pSCE->measure() == 0 );
-        CHECK( pSCE->staff() == 0 );
-        CHECK( is_equal_time(pSCE->time(), 0.0f) );
+        CHECK( pSCE && pSCE->id() == 71L );
+        CHECK( pSCE && pSCE->instrument() == 0 );
+        CHECK( pSCE && pSCE->measure() == 0 );
+        CHECK( pSCE && pSCE->staff() == 0 );
+        CHECK( pSCE && is_equal_time(pSCE->time(), 0.0f) );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, get_state_708)
@@ -1018,7 +1018,7 @@ SUITE(DocCursorTest)
         CHECK( state.get_delegate_state() != nullptr );
         ScoreCursorState* pSCE =
             dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
-        CHECK( pSCE->is_at_end_of_score() );
+        CHECK( pSCE && pSCE->is_at_end_of_score() );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, restore_state_720)

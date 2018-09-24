@@ -81,6 +81,7 @@ void TextSplitter::measure_glyphs()
 DefaultTextSplitter::DefaultTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope)
     : TextSplitter(pText, libraryScope)
     , m_start(0)
+    , m_length(0)
     , m_spaces(0)
 {
 }
@@ -173,6 +174,7 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace,
 ChineseTextSplitter::ChineseTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope)
     : TextSplitter(pText, libraryScope)
     , m_start(0)
+    , m_length(0)
     , m_spaces(0)
 {
 }

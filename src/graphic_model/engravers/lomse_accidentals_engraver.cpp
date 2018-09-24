@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,6 +46,12 @@ namespace lomse
 AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
                                          ScoreMeter* pScoreMeter, int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    , m_accidentals(k_no_accidentals)
+    , m_fCautionary(false)
+    , m_pContainer(nullptr)
+    , m_fontSize(0.0)
+    , m_pNote(nullptr)
+    , m_numGlyphs(0)
 {
 }
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,6 +55,7 @@ LyricEngraver::LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     : AuxRelObjEngraver(libraryScope, pScoreMeter)
     , m_pLyricsShape(nullptr)
     , m_pInstrEngrv(pInstrEngrv)
+    , m_fLyricAbove(false)
 {
 }
 
@@ -102,7 +103,7 @@ void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO
                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
                                      LUnits yTop)
 {
-    ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
+    ImoLyric* pLyric = static_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(nullptr, iSystem, iCol, iInstr);
@@ -119,14 +120,14 @@ int LyricEngraver::create_shapes(Color color)
     int i = 0;
     for(it=m_lyrics.begin(); it != m_lyrics.end(); ++it, ++i)
 	{
-        ImoLyric* pLyric = dynamic_cast<ImoLyric*>(it->first);
-        GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(it->second);
+        ImoLyric* pLyric = static_cast<ImoLyric*>(it->first);
+        GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(it->second);
 
         GmoShapeNote* pNextNoteShape = nullptr;
         list< pair<ImoLyric*, GmoShape*> >::iterator nextIt = it;
         ++nextIt;
         if (nextIt != m_lyrics.end())
-            pNextNoteShape = dynamic_cast<GmoShapeNote*>(nextIt->second);
+            pNextNoteShape = static_cast<GmoShapeNote*>(nextIt->second);
 
         create_shape(i, pNoteShape, pLyric, pNextNoteShape);
     }

@@ -256,10 +256,10 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"Hello" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"Hello" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
-        CHECK( pEngr->break_requested() == true );
+        CHECK( pEngr && pEngr->break_requested() == true );
         CHECK( creator.more_content() == true );
 
         delete pEngr;
@@ -279,8 +279,8 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"Hello" );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"Hello" );
+        CHECK( pEngr && pEngr->break_requested() == false );
 
         CHECK( creator.more_content() == false );
 
@@ -301,9 +301,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"This" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"This" );
         CHECK( creator.more_content() == true );
-        CHECK( pEngr->break_requested() == true );
+        CHECK( pEngr && pEngr->break_requested() == true );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
@@ -311,9 +311,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"is a paragraph" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"is a paragraph" );
         CHECK( creator.more_content() == false );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
     }
 
@@ -333,7 +333,7 @@ SUITE(EngroutersCreatorTest)
         pEngr = creator.create_next_engrouter(5000.0f, false);
         CHECK( pEngr != nullptr );
         CHECK( creator.more_content() == true );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(3000.0f, false);
@@ -341,7 +341,7 @@ SUITE(EngroutersCreatorTest)
         ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
         CHECK( creator.more_content() == false );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
     }
 
@@ -359,7 +359,7 @@ SUITE(EngroutersCreatorTest)
         NullEngrouter* pEngr1 = dynamic_cast<NullEngrouter*>( pEngr );
         CHECK( pEngr1 != nullptr );
         CHECK( creator.more_content() == true );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(3000.0f, false);
@@ -367,7 +367,7 @@ SUITE(EngroutersCreatorTest)
         ControlEngrouter* pEngr2 = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngr2 != nullptr );
         CHECK( creator.more_content() == false );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
     }
 
@@ -386,9 +386,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"This" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"This" );
         CHECK( creator.more_content() == true );
-        CHECK( pEngr->break_requested() == true );
+        CHECK( pEngr && pEngr->break_requested() == true );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
@@ -396,9 +396,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"is a paragraph " );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"is a paragraph " );
         CHECK( creator.more_content() == false );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
     }
 
@@ -417,9 +417,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L" This" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L" This" );
         CHECK( creator.more_content() == true );
-        CHECK( pEngr->break_requested() == true );
+        CHECK( pEngr && pEngr->break_requested() == true );
         delete pEngr;
 
         pEngr = creator.create_next_engrouter(5000.0f, false);
@@ -427,9 +427,9 @@ SUITE(EngroutersCreatorTest)
         CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"is a paragraph " );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"is a paragraph " );
         CHECK( creator.more_content() == false );
-        CHECK( pEngr->break_requested() == false );
+        CHECK( pEngr && pEngr->break_requested() == false );
         delete pEngr;
     }
 
@@ -498,8 +498,8 @@ SUITE(EngroutersCreatorTest)
 
         //cout << "box width = " << pEngrouter->get_width() << endl;
         //cout << "box height = " << pEngrouter->get_height() << endl;
-        CHECK( pEngrouter->get_width() == 4000.0f );
-        CHECK( pEngrouter->get_height() == 900.0f );
+        CHECK( pEngrouter && pEngrouter->get_width() == 4000.0f );
+        CHECK( pEngrouter && pEngrouter->get_height() == 900.0f );
         std::list<Engrouter*>& children = pEngrouter->get_engrouters();
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
@@ -525,7 +525,7 @@ SUITE(EngroutersCreatorTest)
 //        creator.my_create_text_item_engrouters(pText);
 //
 //        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-//        CHECK( pEngrouter->get_text() == " " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == " " );
 //
 //        creator.my_delete_engrouters();
 //        delete pText;
@@ -544,15 +544,15 @@ SUITE(EngroutersCreatorTest)
 //        CHECK( engrouters.size() == 5 );
 //        std::list<Engrouter*>::iterator it = engrouters.begin();
 //        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
-//        CHECK( pEngrouter->get_text() == " " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == " " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "This " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "This " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "is " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "is " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "a " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "a " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "paragraph" );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "paragraph" );
 //
 //        creator.my_delete_engrouters();
 //        delete pText;
@@ -571,15 +571,15 @@ SUITE(EngroutersCreatorTest)
 //        CHECK( engrouters.size() == 5 );
 //        std::list<Engrouter*>::iterator it = engrouters.begin();
 //        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
-//        CHECK( pEngrouter->get_text() == " " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == " " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "This " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "This " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "is " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "is " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "a " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "a " );
 //        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-//        CHECK( pEngrouter->get_text() == "paragraph" );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "paragraph" );
 //
 //        creator.my_delete_engrouters();
 //        delete pText;
@@ -597,7 +597,7 @@ SUITE(EngroutersCreatorTest)
 //
 //        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
 //        CHECK( engrouters.size() == 1 );
-//        CHECK( pEngrouter->get_text() == "Hello!" );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "Hello!" );
 //
 //        creator.my_delete_engrouters();
 //        delete pText;
@@ -615,7 +615,7 @@ SUITE(EngroutersCreatorTest)
 //
 //        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
 //        CHECK( engrouters.size() == 1 );
-//        CHECK( pEngrouter->get_text() == "Hello! " );
+//        CHECK( pEngrouter && pEngrouter->get_text() == "Hello! " );
 //
 //        creator.my_delete_engrouters();
 //        delete pText;

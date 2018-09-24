@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,8 +55,11 @@ namespace lomse
 //=======================================================================================
 LomseDoorway::LomseDoorway()
     : m_pLibraryScope(nullptr)
+    , m_platform{ EPixelFormat::k_pix_format_undefined, false, 72.0 }
     , m_pFunc_notify(null_notify_function)
     , m_pFunc_request(null_request_function)
+    , m_pObj_notify(nullptr)
+    , m_pObj_request(nullptr)
 {
     clear_forensic_log();
 }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -76,7 +76,7 @@ const char nEOF = EOF;         //End Of File
 
 //These methods perform an analysis at character level to form tokens.
 //If during the analysis the char sequence "//" is found the remaining chars until
-//end of line are ignoerd, including both "//" chars. An then analyisis continues as
+//end of line are ignored, including both "//" chars. An then analysis continues as
 //if all those ignored chars never existed.
 
 LdpTokenizer::LdpTokenizer(LdpReader& reader, ostream& reporter)
@@ -88,6 +88,7 @@ LdpTokenizer::LdpTokenizer(LdpReader& reader, ostream& reporter)
     , m_expectingEndOfElement(false)
     , m_expectingValuePart(false)
     , m_expectingNamePart(false)
+    , m_pTokenNamePart(nullptr)
 {
 }
 
@@ -250,9 +251,6 @@ LdpToken* LdpTokenizer::parse_new_token()
                             break;
                         case chQuotes:
                             state = k_STR00;
-                            break;
-                        case chApostrophe:
-                            state = k_STR02;
                             break;
                         case nEOF:
                             return LOMSE_NEW LdpToken(tkEndOfFile, "", numLine);
@@ -475,8 +473,6 @@ LdpToken* LdpTokenizer::parse_new_token()
                     LOMSE_LOG_ERROR(s.str());
                     throw runtime_error(s.str());
                 }
-                state = k_Start;
-                break;
 
             default:
             {

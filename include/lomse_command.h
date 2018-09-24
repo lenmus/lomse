@@ -1564,7 +1564,12 @@ protected:
     ImoId m_lastInsertedId;
     string m_source;
 
-    CmdInsert(const string& name) : DocCmdSimple(name), m_lastInsertedId(k_no_imoid) {}
+    CmdInsert(const string& name)
+        : DocCmdSimple(name)
+        , m_idAt(k_no_imoid)
+        , m_lastInsertedId(k_no_imoid)
+    {
+    }
 
 public:
     ~CmdInsert() {}

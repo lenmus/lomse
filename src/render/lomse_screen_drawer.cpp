@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -234,6 +234,8 @@ MarkerVertexSource::MarkerVertexSource()
     , m_tail_type(k_none)
     , m_curr_id(0)
     , m_curr_coord(0)
+    , m_status(stop)
+    , m_radius(1.0)
 {
 }
 
@@ -381,11 +383,14 @@ unsigned MarkerVertexSource::vertex(double* x, double* y)
     unsigned cmd = agg::path_cmd_stop;
     switch(m_status)
     {
+        // coverity[unterminated_case]
         case circle_start:
             m_circle.init(0.0, 0.0, m_radius, m_radius);
             m_circle.rewind(0);
             m_status = circle_point;
+            //continues in next case code
 
+        // coverity[unterminated_case]
         case circle_point:
             cmd = m_circle.vertex(x, y);
             if(agg::is_stop(cmd)) m_status = stop;
@@ -520,6 +525,7 @@ void Drawer::set_text_color(Color color)
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
     , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage, m_path) )
+    , m_pTextMeter(nullptr)
     , m_pCalligrapher( LOMSE_NEW Calligrapher(m_pFonts, m_pRenderer) )
     , m_numPaths(0)
 {
@@ -536,9 +542,10 @@ ScreenDrawer::~ScreenDrawer()
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::delete_paths()
 {
-    //AttrStorage objects are pod_bvector<PathAttributes>
-    //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore, we need to
-    //free memory allocated for GradientAttributes, to avoid memory leaks
+    //AttrStorage objects are typedef for pod_bvector<PathAttributes>
+    //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore, it
+    //is necessary to ensure that memory allocated for GradientAttributes is freed,
+    //to avoid memory leaks. Not sure if this is needed but just in case.
 
     for (int i = 0; i < m_numPaths; ++i)
     {

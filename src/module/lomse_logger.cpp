@@ -185,7 +185,10 @@ string Logger::format(const char* fmtstr, va_list args)
     int len = vsnprintf(nullptr, 0, fmtstr, args);
     if (len < 0)
     {
-        throw std::invalid_argument("Invalid argument to format-function");
+        dbgLogger << endl << "*** ERROR. Logger::format() error: Invalid argument to "
+            "format function" << endl;
+        return string(fmtstr);
+        //throw std::invalid_argument("Invalid argument to format-function");
     }
 
     vector<char> data(len + 1);

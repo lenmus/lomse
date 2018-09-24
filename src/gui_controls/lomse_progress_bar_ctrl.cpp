@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,6 +52,8 @@ ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
     , m_pMainBox(NULL)
     , m_width(width)
     , m_height(height)
+    , m_xCenter(0.0f)
+    , m_yCenter(0.0f)
     , m_curValue(0.0f)
     , m_percent(0.0f)
     , m_fDisplayPercentage(true)
@@ -90,7 +92,7 @@ USize ProgressBarCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* ProgressBarCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* ProgressBarCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -98,7 +100,7 @@ GmoBoxControl* ProgressBarCtrl::layout(LibraryScope& libraryScope, UPoint pos)
 }
 
 //---------------------------------------------------------------------------------------
-void ProgressBarCtrl::handle_event(SpEventInfo pEvent)
+void ProgressBarCtrl::handle_event(SpEventInfo UNUSED(pEvent))
 {
 }
 
@@ -139,13 +141,13 @@ URect ProgressBarCtrl::determine_text_position_and_size()
 }
 
 //---------------------------------------------------------------------------------------
-void ProgressBarCtrl::set_tooltip(const string& text)
+void ProgressBarCtrl::set_tooltip(const string& UNUSED(text))
 {
     //TODO: ProgressBarCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void ProgressBarCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void ProgressBarCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     select_font();
     URect pos = determine_text_position_and_size();

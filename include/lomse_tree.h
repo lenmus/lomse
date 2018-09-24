@@ -61,8 +61,8 @@ protected:
 	T* m_root;
 
 public:
-    Tree() {}
-    Tree(T* node) { m_root = node; }
+    Tree() : m_root(nullptr) {}
+    Tree(T* node) : m_root(node) {}
 
     void set_root(T* node) { m_root = node; }
     T* get_root() { return m_root; }

@@ -370,8 +370,9 @@ protected:
 public:
     BeamLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
         : LdpGenerator(pExporter)
+        , m_pRO( static_cast<ImoRelObj*>(pImo) )
+        , m_pNR(nullptr)
     {
-        m_pRO = static_cast<ImoRelObj*>(pImo);
     }
 
     string generate_source(ImoObj* pParent=nullptr)
@@ -1402,7 +1403,12 @@ protected:
     ImoScore* m_pScore;
 
 public:
-    MusicDataLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    MusicDataLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+        , m_curMeasure(0)
+        , m_iInstr(0)
+        , m_fNewMeasure(false)
+        , m_pColStaffObjs(nullptr)
     {
         m_pObj = static_cast<ImoMusicData*>(pImo);
         m_pScore = pExporter->get_current_score();
@@ -1866,6 +1872,7 @@ protected:
         if (acc != k_no_accidentals)
             m_source << LdpExporter::accidentals_to_string(acc);
 
+        // coverity[check_return]
         m_source << sNoteName[m_pObj->get_step()];
         m_source << sOctave[m_pObj->get_octave()];
     }
@@ -2240,8 +2247,9 @@ protected:
 public:
     SlurLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
         : LdpGenerator(pExporter)
+        , m_pObj( static_cast<ImoSlur*>(pImo) )
+        , m_pNote(nullptr)
     {
-        m_pObj = static_cast<ImoSlur*>(pImo);
     }
 
     string generate_source(ImoObj* pParent =nullptr)
@@ -2447,9 +2455,11 @@ protected:
     ImoNote* m_pNote;
 
 public:
-    TieLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    TieLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+        , m_pTie( static_cast<ImoTie*>(pImo) )
+        , m_pNote(nullptr)
     {
-        m_pTie = static_cast<ImoTie*>(pImo);
     }
 
     string generate_source(ImoObj* pParent=nullptr)
@@ -2606,8 +2616,9 @@ protected:
 public:
     TupletLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
         : LdpGenerator(pExporter)
+        , m_pTuplet( static_cast<ImoTuplet*>(pImo) )
+        , m_pNR(nullptr)
     {
-        m_pTuplet = static_cast<ImoTuplet*>(pImo);
     }
 
     string generate_source(ImoObj* pParent=nullptr)
@@ -2849,7 +2860,7 @@ protected:
         ImoObj::children_iterator it;
         for (it= pColOpts->begin(); it != pColOpts->end(); ++it)
         {
-            ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>(*it);
+            ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(*it);
             if (!m_pObj->has_default_value(pOpt))
             {
                 start_element("opt", pOpt->get_id(), k_in_new_line);

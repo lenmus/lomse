@@ -692,7 +692,7 @@ ImoContentObj* ImoObj::get_contentobj_parent()
                     pImo = pImo->get_parent();
             }
 
-            if (pImo->is_contentobj())
+            if (pImo && pImo->is_contentobj())
                 return static_cast<ImoContentObj*>(pImo);
         }
     }
@@ -1332,6 +1332,7 @@ bool ImoBeamData::is_end_of_beam()
 ImoBeamDto::ImoBeamDto()
     : ImoSimpleObj(k_imo_beam_dto)
     , m_beamNum(0)
+    , m_pBeamElm(nullptr)
     , m_pNR(nullptr)
     , m_lineNum(0)
 {
@@ -2524,7 +2525,7 @@ ImoStaffInfo* ImoInstrument::get_staff(int iStaff)
 {
     std::list<ImoStaffInfo*>::iterator it = m_staves.begin();
     for (; it != m_staves.end() && iStaff > 0; ++it, --iStaff);
-    return *it;
+    return (it != m_staves.end() ? *it : nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2802,7 +2803,7 @@ ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
     std::list<ImoInstrument*>::iterator it;
     int i = 0;
     for (it = m_instruments.begin(); it != m_instruments.end() && i < iInstr; ++it, ++i);
-    if (i == iInstr)
+    if (i == iInstr && it != m_instruments.end())
         return *it;
     else
         return nullptr;
@@ -3387,7 +3388,7 @@ ImoOptionInfo* ImoScore::get_option(const std::string& name)
     ImoObj::children_iterator it;
     for (it= pColOpts->begin(); it != pColOpts->end(); ++it)
     {
-        ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>(*it);
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(*it);
         if (pOpt->get_name() == name)
             return pOpt;
     }
@@ -4944,6 +4945,7 @@ ImoSlurData::ImoSlurData(ImoSlurDto* pDto)
     : ImoRelDataObj(k_imo_slur_data)
     , m_fStart( pDto->is_start() )
     , m_slurNum( pDto->get_slur_number() )
+    , m_orientation(k_orientation_default)
     , m_pBezier(nullptr)
 {
     if (pDto->get_bezier())
@@ -5210,6 +5212,7 @@ ImoTieData::ImoTieData(ImoTieDto* pDto)
     : ImoRelDataObj(k_imo_tie_data)
     , m_fStart( pDto->is_start() )
     , m_tieNum( pDto->get_tie_number() )
+    , m_orientation(k_orientation_default)
     , m_pBezier(nullptr)
 {
     if (pDto->get_bezier())

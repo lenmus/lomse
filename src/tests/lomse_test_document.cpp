@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -172,9 +172,9 @@ SUITE(DocumentTest)
         doc.create_empty();
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
-        CHECK( pImoDoc->get_content_item(0) == nullptr );
+        CHECK( pImoDoc && pImoDoc->get_content_item(0) == nullptr );
     }
 
     TEST_FIXTURE(DocumentTestFixture, creation_001)
@@ -184,7 +184,7 @@ SUITE(DocumentTest)
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
@@ -197,7 +197,7 @@ SUITE(DocumentTest)
         doc.from_file(m_scores_path + "08011-paragraph.lmd", Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
     }
 
@@ -209,8 +209,8 @@ SUITE(DocumentTest)
             "(instrument (musicData (n c4 q))))))");
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( pImoDoc->get_language() == "en" );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_language() == "en" );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
@@ -231,18 +231,21 @@ SUITE(DocumentTest)
         doc.from_string(src, Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 
         ImoDocument* pDoc = doc.get_im_root();
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != nullptr );
-        ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle != nullptr );
-        CHECK( pStyle->get_name() == "Credits" );
-        CHECK( pPara->get_num_items() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
-        CHECK( pItem->get_text() == "Hello world!" );
+        if (pPara)
+        {
+            ImoStyle* pStyle = pPara->get_style();
+            CHECK( pStyle != nullptr );
+            CHECK( pStyle && pStyle->get_name() == "Credits" );
+            CHECK( pPara && pPara->get_num_items() == 1 );
+            ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
+            CHECK( pItem && pItem->get_text() == "Hello world!" );
+        }
     }
 
     TEST_FIXTURE(DocumentTestFixture, creation_005)
@@ -253,7 +256,7 @@ SUITE(DocumentTest)
         doc.from_input(reader);
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
@@ -387,14 +390,14 @@ SUITE(DocumentTest)
 #if (LOMSE_ENABLE_COMPRESSION == 1)
         //@011. Compression enabled. Compressed LMB file read ok
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         //cout << doc.to_string() << endl;
         CHECK( doc.to_string().compare(0, 36, "(lenmusdoc (vers 0.0)(content (TODO:") == 0 );
 #else
         //@011. Compression disabled. Error when opening LMB compressed file
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content))" );
@@ -427,7 +430,7 @@ SUITE(DocumentTest)
         doc.create_with_empty_score();
         ImoDocument* pImoDoc = doc.get_im_root();
         CHECK( pImoDoc != nullptr );
-        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc && pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore != nullptr );

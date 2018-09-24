@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,8 +51,15 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 TupletEngraver::TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
+    , m_numShapes(0)
     , m_pTupletShape(nullptr)
+    , m_pStyle(nullptr)
     , m_pTuplet(nullptr)
+    , m_fDrawBracket(false)
+    , m_fDrawNumber(false)
+    , m_fAbove(false)
+    , m_yStart(0.0f)
+    , m_yEnd(0.0f)
 {
 }
 
@@ -201,9 +208,9 @@ void TupletEngraver::compute_y_coordinates()
     GmoShapeNote* pStart = get_first_note();
     GmoShapeNote* pEnd = get_last_note();
 
-    GmoShapeBeam* pBeamShapeStart = dynamic_cast<GmoShapeBeam*>(
+    GmoShapeBeam* pBeamShapeStart = static_cast<GmoShapeBeam*>(
                                     pStart->find_related_shape(GmoObj::k_shape_beam) );
-    GmoShapeBeam* pBeamShapeEnd = dynamic_cast<GmoShapeBeam*>(
+    GmoShapeBeam* pBeamShapeEnd = static_cast<GmoShapeBeam*>(
                                     pEnd->find_related_shape(GmoObj::k_shape_beam) );
 
     if (pBeamShapeStart && pBeamShapeStart == pBeamShapeEnd)
@@ -242,7 +249,7 @@ void TupletEngraver::compute_y_coordinates()
                 {
                     if (pNote->is_end_of_beam())
                     {
-                        GmoShapeBeam* pBeamShape = dynamic_cast<GmoShapeBeam*>(
+                        GmoShapeBeam* pBeamShape = static_cast<GmoShapeBeam*>(
                                           pNoteShape->find_related_shape(GmoObj::k_shape_beam) );
                         UPoint pos = pBeamShape->get_outer_right_reference_point();
                         yMax = max(yMax, pos.y);

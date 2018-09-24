@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -199,8 +199,8 @@ SUITE(TupletEngraverTest)
         Document doc(m_libraryScope);
         ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 2 );
-        CHECK( pTuplet->get_normal_number() == 3 );
+        CHECK( pTuplet && pTuplet->get_actual_number() == 2 );
+        CHECK( pTuplet && pTuplet->get_normal_number() == 3 );
     }
 
     TEST_FIXTURE(TupletEngraverTestFixture, FeedEngraver)
@@ -212,7 +212,7 @@ SUITE(TupletEngraverTest)
         TupletEngraver* pEngrv = dynamic_cast<TupletEngraver*>(m_pStorage->get_engraver(pTuplet));
 
         CHECK( pEngrv != nullptr );
-        CHECK( pEngrv == m_pTupletEngrv );
+        CHECK( pEngrv && pEngrv == m_pTupletEngrv );
 
         delete_test_data();
     }

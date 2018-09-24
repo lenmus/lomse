@@ -105,7 +105,7 @@ if [ ${fOnlyTests} -eq 0 ]; then
         echo -e "${enhanced}Removing last build${reset}"
         echo -e "${enhanced}Removing last build${reset}"
         cd "${build_path}" || exit $E_BADPATH
-        rm * -r
+        rm * -rf
         echo "-- Build folders now empty"
         echo ""
     fi

@@ -113,7 +113,7 @@ SUITE(DocLayouterTest)
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel != nullptr );
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         delete pGModel;
     }
 
@@ -128,9 +128,9 @@ SUITE(DocLayouterTest)
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->is_box_doc_page() == true );
-        CHECK( pPage->get_width() == 24000.0f );
-        CHECK( pPage->get_height() == 35700.0f );
+        CHECK( pPage && pPage->is_box_doc_page() == true );
+        CHECK( pPage && pPage->get_width() == 24000.0f );
+        CHECK( pPage && pPage->get_height() == 35700.0f );
         delete pGModel;
     }
 
@@ -146,11 +146,11 @@ SUITE(DocLayouterTest)
         GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBox = pPage->get_child_box(0);
-        CHECK( pBox->is_box_doc_page_content() == true );
-        CHECK( pBox->get_width() == 16000.0f );
-        CHECK( pBox->get_height() == 2735.0f );
-        CHECK( pBox->get_left() == 1000.0f );
-        CHECK( pBox->get_top() == 1500.0f );
+        CHECK( pBox && pBox->is_box_doc_page_content() == true );
+        CHECK( pBox && pBox->get_width() == 16000.0f );
+        CHECK( pBox && pBox->get_height() == 2735.0f );
+        CHECK( pBox && pBox->get_left() == 1000.0f );
+        CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
 
@@ -169,12 +169,12 @@ SUITE(DocLayouterTest)
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBox = pBDPC->get_child_box(0);      //ScorePage
         CHECK( pBox != nullptr );
-        CHECK( pBox->is_box_score_page() == true );
-        CHECK( pBox->get_width() == 16000.0f );
+        CHECK( pBox && pBox->is_box_score_page() == true );
+        CHECK( pBox && pBox->get_width() == 16000.0f );
         //cout << pBox->get_height() << endl;
-        CHECK( pBox->get_height() == 2735.0f );     //system height
-        CHECK( pBox->get_left() == 1000.0f );
-        CHECK( pBox->get_top() == 1500.0f );
+        CHECK( pBox && pBox->get_height() == 2735.0f );     //system height
+        CHECK( pBox && pBox->get_left() == 1000.0f );
+        CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
 
@@ -194,11 +194,11 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
         GmoBox* pBox = pBSP->get_child_box(0);       //System
         CHECK( pBox != nullptr );
-        CHECK( pBox->is_box_system() == true );
-        //CHECK( pBox->get_width() == 16000.0f );
-        //CHECK( pBox->get_height() == 735.0f );
-        //CHECK( pBox->get_left() == 1000.0f );
-        //CHECK( pBox->get_top() == 1500.0f );
+        CHECK( pBox && pBox->is_box_system() == true );
+        //CHECK( pBox && pBox->get_width() == 16000.0f );
+        //CHECK( pBox && pBox->get_height() == 735.0f );
+        //CHECK( pBox && pBox->get_left() == 1000.0f );
+        //CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
 
@@ -218,11 +218,11 @@ SUITE(DocLayouterTest)
         GmoBox* pBSys = pBSP->get_child_box(0);      //System
         GmoBox* pBox = pBSys->get_child_box(0);      //Slice
         CHECK( pBox != nullptr );
-        CHECK( pBox->is_box_slice() == true );
-        //CHECK( pBox->get_width() == 16000.0f );
-        //CHECK( pBox->get_height() == 735.0f );
-        //CHECK( pBox->get_left() == 1000.0f );
-        //CHECK( pBox->get_top() == 1500.0f );
+        CHECK( pBox && pBox->is_box_slice() == true );
+        //CHECK( pBox && pBox->get_width() == 16000.0f );
+        //CHECK( pBox && pBox->get_height() == 735.0f );
+        //CHECK( pBox && pBox->get_left() == 1000.0f );
+        //CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
 
@@ -243,11 +243,11 @@ SUITE(DocLayouterTest)
         GmoBox* pBSlice = pBSys->get_child_box(0);   //Slice
         GmoBox* pBox = pBSlice->get_child_box(0);    //SliceInstr
         CHECK( pBox != nullptr );
-        CHECK( pBox->is_box_slice_instr() == true );
-        //CHECK( pBox->get_width() == 16000.0f );
-        //CHECK( pBox->get_height() == 735.0f );
-        //CHECK( pBox->get_left() == 1000.0f );
-        //CHECK( pBox->get_top() == 1500.0f );
+        CHECK( pBox && pBox->is_box_slice_instr() == true );
+        //CHECK( pBox && pBox->get_width() == 16000.0f );
+        //CHECK( pBox && pBox->get_height() == 735.0f );
+        //CHECK( pBox && pBox->get_left() == 1000.0f );
+        //CHECK( pBox && pBox->get_top() == 1500.0f );
         delete pGModel;
     }
 
@@ -278,7 +278,7 @@ SUITE(DocLayouterTest)
             }
         }
         CHECK( fStaffShapeFound == true );
-        //CHECK( pShape->get_width() == 16000.0f );
+        //CHECK( pShape && pShape->get_width() == 16000.0f );
         delete pGModel;
     }
 
@@ -296,11 +296,15 @@ SUITE(DocLayouterTest)
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            GmoShape* pShape = pBSys->get_staff_shape(0);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+        }
         delete pGModel;
     }
 
@@ -313,21 +317,25 @@ SUITE(DocLayouterTest)
         DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 1 );
-        GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
-        CHECK( pBSys->get_num_boxes() == 0 );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            CHECK( pBSys->get_num_shapes() == 1 );
+            GmoShape* pShape = pBSys->get_staff_shape(0);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+            CHECK( pBSys->get_num_boxes() == 0 );
+        }
 
         delete pGModel;
     }
@@ -341,33 +349,37 @@ SUITE(DocLayouterTest)
         DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_top_margin() == 0.0f );
-        CHECK( pBSys->get_bottom_margin() == 0.0f );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            CHECK( pBSys->get_top_margin() == 0.0f );
+            CHECK( pBSys->get_bottom_margin() == 0.0f );
 
-        CHECK( pBSys->get_num_boxes() == 1 );
-        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
-        CHECK( pBSlice->get_top_margin() == 0.0f );
-        CHECK( pBSlice->get_bottom_margin() == 0.0f );
-        CHECK( pBSlice->get_left_margin() == 0.0f );
-        CHECK( pBSlice->get_right_margin() == 0.0f );
-        CHECK( pBSlice->get_top() == pBSys->get_top() );
+            CHECK( pBSys->get_num_boxes() == 1 );
+            GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
+            CHECK( pBSlice->get_top_margin() == 0.0f );
+            CHECK( pBSlice->get_bottom_margin() == 0.0f );
+            CHECK( pBSlice->get_left_margin() == 0.0f );
+            CHECK( pBSlice->get_right_margin() == 0.0f );
+            CHECK( pBSlice->get_top() == pBSys->get_top() );
 
-        CHECK( pBSlice->get_num_boxes() == 1 );
-        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
-        CHECK( pBSliceInstr->get_num_boxes() == 0 );
-        CHECK( pBSliceInstr->get_top_margin() == 0.0f );
-        CHECK( pBSliceInstr->get_bottom_margin() == 0.0f );
-        CHECK( pBSliceInstr->get_left_margin() == 0.0f );
-        CHECK( pBSliceInstr->get_right_margin() == 0.0f );
-        CHECK( pBSliceInstr->get_top() == pBSlice->get_top() );
+            CHECK( pBSlice->get_num_boxes() == 1 );
+            GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
+            CHECK( pBSliceInstr->get_num_boxes() == 0 );
+            CHECK( pBSliceInstr->get_top_margin() == 0.0f );
+            CHECK( pBSliceInstr->get_bottom_margin() == 0.0f );
+            CHECK( pBSliceInstr->get_left_margin() == 0.0f );
+            CHECK( pBSliceInstr->get_right_margin() == 0.0f );
+            CHECK( pBSliceInstr->get_top() == pBSlice->get_top() );
+        }
 
         delete pGModel;
     }
@@ -381,21 +393,25 @@ SUITE(DocLayouterTest)
         DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 1 );
-        GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
-        CHECK( pSS->get_top() > 0.0f );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            CHECK( pBSys->get_num_shapes() == 1 );
+            GmoShape* pShape = pBSys->get_staff_shape(0);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+            CHECK( pSS && pSS->get_top() > 0.0f );
+        }
 
         delete pGModel;
     }
@@ -409,26 +425,30 @@ SUITE(DocLayouterTest)
         DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 4 );  // two staves + bracket + left barline
-        GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
-        pShape = pBSys->get_staff_shape(1);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 1 );
-        CHECK( pBSys->get_num_boxes() == 0 );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            CHECK( pBSys->get_num_shapes() == 4 );  // two staves + bracket + left barline
+            GmoShape* pShape = pBSys->get_staff_shape(0);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+            pShape = pBSys->get_staff_shape(1);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 1 );
+            CHECK( pBSys->get_num_boxes() == 0 );
+        }
 
         delete pGModel;
     }
@@ -441,26 +461,30 @@ SUITE(DocLayouterTest)
         DocLayouter dl(&doc, m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 3 );
-        GmoShape* pShape = pBSys->get_staff_shape(0);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
-        pShape = pBSys->get_staff_shape(1);
-        CHECK( pShape != nullptr );
-        CHECK( pShape->is_shape_staff() == true );
-        pSS = dynamic_cast<GmoShapeStaff*>(pShape);
-        CHECK( pSS->get_num_staff() == 0 );
-        CHECK( pBSys->get_num_boxes() == 0 );
+        CHECK( pBSys != nullptr );
+        if (pBSys)
+        {
+            CHECK(  pBSys->get_num_shapes() == 3 );
+            GmoShape* pShape = pBSys->get_staff_shape(0);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+            pShape = pBSys->get_staff_shape(1);
+            CHECK( pShape != nullptr );
+            CHECK( pShape && pShape->is_shape_staff() == true );
+            pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+            CHECK( pSS && pSS->get_num_staff() == 0 );
+            CHECK( pBSys->get_num_boxes() == 0 );
+        }
 
         delete pGModel;
     }
@@ -475,22 +499,22 @@ SUITE(DocLayouterTest)
 
         dl.layout_document();
         GraphicModel* pGModel = dl.get_graphic_model();
-        CHECK( pGModel->get_num_pages() == 1 );
+        CHECK( pGModel && pGModel->get_num_pages() == 1 );
 
         GmoBoxDocPage* pPage = pGModel->get_page(0);
-        CHECK( pPage->get_size().width != LOMSE_INFINITE_LENGTH );
-        CHECK( pPage->get_num_boxes() == 1 );
+        CHECK( pPage && pPage->get_size().width != LOMSE_INFINITE_LENGTH );
+        CHECK( pPage && pPage->get_num_boxes() == 1 );
 
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
         Tenths height = pBDPC->get_size().height;
-        CHECK( pBDPC->get_num_boxes() == 1 );
+        CHECK( pBDPC && pBDPC->get_num_boxes() == 1 );
 
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_size().height == height );
         CHECK( pBSP->get_num_boxes() == 1 );
 
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_size().height == height );
+        CHECK( pBSys && pBSys->get_size().height == height );
 
         delete pGModel;
     }

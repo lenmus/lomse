@@ -1114,7 +1114,7 @@ SUITE(InternalModelTest)
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
-        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoContentObj* pImo = static_cast<ImoContentObj*>(*it);
         ImoStyle* pStyle = pImo->get_style();
         CHECK( pStyle != nullptr );
         CHECK( pStyle->get_name() == "Paragraph" );
@@ -1136,7 +1136,7 @@ SUITE(InternalModelTest)
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
-        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoContentObj* pImo = static_cast<ImoContentObj*>(*it);
         ImoObj* pTxt = pImo->get_child(0);
         CHECK( pTxt->is_text_item() );
         ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style(false);
@@ -1153,7 +1153,7 @@ SUITE(InternalModelTest)
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
-        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoContentObj* pImo = static_cast<ImoContentObj*>(*it);
         ImoObj* pTxt = pImo->get_child(0);
         CHECK( pTxt->is_text_item() );
         ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style();
@@ -1177,7 +1177,7 @@ SUITE(InternalModelTest)
         ImoContent* pContent = pDoc->get_content();
         TreeNode<ImoObj>::children_iterator it = pContent->begin();
         CHECK( (*it)->is_paragraph() == true );
-        ImoContentObj* pPara = dynamic_cast<ImoContentObj*>(*it);
+        ImoContentObj* pPara = static_cast<ImoContentObj*>(*it);
         CHECK( pPara->margin_top() == 400 );
         CHECK( pPara->margin_bottom() == 300 );
     }

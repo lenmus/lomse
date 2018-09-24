@@ -33,6 +33,7 @@
 - Defined a new barline type: alternative rendering for double repetition,
   using two thick barlines instead of thin barlines (E.Gould, p.234)
 - Fixes for removing Microsoft compiler warnings.
+- Fixes for all high impact oustanding defects detected with coverity scan.
 - Fixes for a few bugs causing a crash in specific scenarios:
     - Visual tracking effects now cleared after deleting the graphic model.
     - The sound thread is now not deleted when it has finished.

@@ -84,16 +84,27 @@ ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
                              GraphicModel* pGModel, LibraryScope& libraryScope)
     : Layouter(pItem, pParent, pGModel, libraryScope, nullptr, true)
     , m_libraryScope(libraryScope)
-    , m_pScore( dynamic_cast<ImoScore*>(pItem) )
+    , m_pScore( static_cast<ImoScore*>(pItem) )
     , m_pScoreMeter( LOMSE_NEW ScoreMeter(m_pScore) )
     , m_pSpAlgorithm(nullptr)
     , m_pShapesCreator(nullptr)
     , m_pPartsEngraver(nullptr)
+    , m_startTop(0.0f)
+    , m_iCurPage(0)
+    , m_iCurSystem(0)
+    , m_pCurSysLyt(nullptr)
+    , m_iSysPage(0)
+    , m_iCurColumn(0)
+    , m_truncateStaffLines(0L)
+    , m_justifyLastSystem(0L)
+    , m_uFirstSystemIndent(0.0f)
+    , m_uOtherSystemIndent(0.0f)
     , m_pStub(nullptr)
     , m_pCurBoxPage(nullptr)
     , m_pCurBoxSystem(nullptr)
     , m_iColumnToTrace(-1)
     , m_nTraceLevel(k_trace_off)
+    , m_fFirstSystemInPage(true)
 {
 }
 
@@ -379,7 +390,7 @@ void ScoreLayouter::decide_systems_indentation()
 void ScoreLayouter::page_initializations(GmoBox* pContainerBox)
 {
     m_iCurPage++;
-    m_pCurBoxPage = dynamic_cast<GmoBoxScorePage*>( pContainerBox );
+    m_pCurBoxPage = static_cast<GmoBoxScorePage*>( pContainerBox );
     m_pCurBoxPage->set_page_number(m_iCurPage);
     is_first_system_in_page(true);
     m_startTop = m_pCurBoxPage->get_top();

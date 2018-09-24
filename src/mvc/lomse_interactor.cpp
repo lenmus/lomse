@@ -350,7 +350,7 @@ void Interactor::task_action_select_object_and_show_contextual_menu(
             ImoObj* pImo = pGmo->get_creator_imo();
             if (pImo)
             {
-                ImoId id = pImo ? pImo->get_id() : k_no_imoid;
+                ImoId id = pImo->get_id();
                 SpInteractor sp = get_shared_ptr_from_this();
                 WpInteractor wp(sp);
                 SpEventInfo pEvent(
@@ -894,7 +894,7 @@ void Interactor::task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal
     GmoObj* pGmo = m_pCurHandler->get_controlled_gmo();
     int iHandler = m_pCurHandler->get_handler_index();
     //UPoint shift = screen_point_to_model_point(xTotalShift, yTotalShift);
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    GraphicView* pGView = static_cast<GraphicView*>(m_pView);
     UPoint shift(pGView->pixels_to_lunits(xTotalShift),
                  pGView->pixels_to_lunits(yTotalShift) );
 

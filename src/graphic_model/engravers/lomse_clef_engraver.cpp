@@ -47,12 +47,20 @@ namespace lomse
 ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    , m_nClefType(0)
+    , m_symbolSize(0)
+    , m_iGlyph(0)
+    , m_pClefShape(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
 ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
     : Engraver(libraryScope, nullptr)
+    , m_nClefType(0)
+    , m_symbolSize(0)
+    , m_iGlyph(0)
+    , m_pClefShape(nullptr)
 {
     //constructor for dragged images
 }
@@ -133,7 +141,10 @@ int ClefEngraver::find_glyph(int clefType)
         case k_clef_F4_15: return k_glyph_f_clef_quindicesima_bassa;
         case k_clef_percussion: return k_glyph_percussion_clef_block;
         default:
+        {
+            LOMSE_LOG_ERROR("No glyph defined for clef type %d.", clefType);
             return k_glyph_g_clef;
+        }
     }
 }
 

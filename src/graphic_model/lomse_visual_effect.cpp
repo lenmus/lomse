@@ -121,6 +121,12 @@ URect DraggedImage::get_bounds()
 //=======================================================================================
 SelectionRectangle::SelectionRectangle(GraphicView* view, LibraryScope& libraryScope)
     : VisualEffect(view, libraryScope)
+    , m_xStart(0.0f)
+    , m_yStart(0.0f)
+    , m_left(0.0f)
+    , m_top(0.0f)
+    , m_right(0.0f)
+    , m_bottom(0.0f)
 {
 }
 
