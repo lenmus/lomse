@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,7 +54,17 @@ protected:
     ImoBeam* m_pBeam;
 
 public:
-    AutoBeamer(ImoBeam* pBeam) : m_pBeam(pBeam) {}
+    AutoBeamer(ImoBeam* pBeam)
+        : m_pBeam(pBeam)
+        , m_curNotePos(k_first_note)
+        , m_pPrevNote(nullptr)
+        , m_pCurNote(nullptr)
+        , m_pNextNote(nullptr)
+        , m_nLevelPrev(0)
+        , m_nLevelCur(0)
+        , m_nLevelNext(0)
+    {
+    }
     ~AutoBeamer() {}
 
     void do_autobeam();

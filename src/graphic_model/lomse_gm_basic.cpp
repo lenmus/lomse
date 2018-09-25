@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -142,6 +142,8 @@ void GmoObj::shift_origin(LUnits x, LUnits y)
 //---------------------------------------------------------------------------------------
 void GmoObj::dump(ostream& outStream, int level)
 {
+    std::ios_base::fmtflags f( outStream.flags() );  //save formating options
+
     outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
               << get_name(m_objtype)
               << fixed << setprecision(2) << setfill(' ')
@@ -149,6 +151,8 @@ void GmoObj::dump(ostream& outStream, int level)
               << setw(10) << round_half_up(m_origin.y) << ", "
               << setw(10) << round_half_up(m_size.width) << ", "
               << setw(10) << round_half_up(m_size.height) << endl;
+
+    outStream.flags( f );  //restore formating options
 }
 
 //---------------------------------------------------------------------------------------
@@ -817,6 +821,7 @@ public:
 //=======================================================================================
 GmoBoxDocPage::GmoBoxDocPage(ImoObj* pCreatorImo)
     : GmoBox(GmoObj::k_box_doc_page, pCreatorImo)
+    , m_numPage(1)
 {
 }
 

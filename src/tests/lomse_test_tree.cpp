@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -310,14 +310,14 @@ SUITE(TreeTest)
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "I" );
         Element* parent = curNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = curNode->get_prev_sibling();
         Element* nextSibling = curNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "B" );
+        CHECK( prevSibling && prevSibling->m_value == "B" );
         CHECK( nextSibling == nullptr );
-        CHECK( prevSibling->get_next_sibling()->m_value == "I" );
+        CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "I" );
 
         DeleteTestData();
     }
@@ -338,14 +338,14 @@ SUITE(TreeTest)
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "D" );
         Element* parent = curNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "D" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "D" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = curNode->get_prev_sibling();
         Element* nextSibling = curNode->get_next_sibling();
         CHECK( prevSibling == nullptr );
         CHECK( nextSibling->m_value == "I" );
-        //CHECK( prevSibling->get_next_sibling()->m_value == "I" );
+        //CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "I" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "D" );
 
         DeleteTestData();
@@ -374,8 +374,8 @@ SUITE(TreeTest)
         Element* curNode = *itNext;
         //cout << curNode->m_value << endl;
         CHECK( curNode == nullptr );
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
         Element* lastChild = parent->get_last_child();
         CHECK( lastChild->m_value == "D" );
         CHECK( lastChild->get_next_sibling() == nullptr );
@@ -441,14 +441,14 @@ SUITE(TreeTest)
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
         Element* parent = curNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = curNode->get_prev_sibling();
         Element* nextSibling = curNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "B" );
+        CHECK( prevSibling && prevSibling->m_value == "B" );
         CHECK( nextSibling->m_value == "I" );
-        CHECK( prevSibling->get_next_sibling()->m_value == "Z" );
+        CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "Z" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "Z" );
 
         DeleteTestData();
@@ -471,9 +471,9 @@ SUITE(TreeTest)
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
         Element* parent = curNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "Z" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "Z" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = curNode->get_prev_sibling();
         Element* nextSibling = curNode->get_next_sibling();
         CHECK( prevSibling == nullptr );
@@ -507,14 +507,14 @@ SUITE(TreeTest)
         //cout << curNode->m_value << endl;
         CHECK( curNode->m_value == "Z" );
         Element* parent = curNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "Z" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "Z" );
         Element* prevSibling = curNode->get_prev_sibling();
         Element* nextSibling = curNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "D" );
+        CHECK( prevSibling && prevSibling->m_value == "D" );
         CHECK( nextSibling == nullptr );
-        CHECK( prevSibling->get_next_sibling()->m_value == "Z" );
+        CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "Z" );
 
         DeleteTestData();
     }
@@ -556,14 +556,14 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "B" );
+        CHECK( prevSibling && prevSibling->m_value == "B" );
         CHECK( nextSibling->m_value == "D" );
-        CHECK( prevSibling->get_next_sibling()->m_value == "(NEW)" );
+        CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "(NEW)" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
 
         DeleteTestData();
@@ -586,9 +586,9 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "(NEW)" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "(NEW)" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
         CHECK( prevSibling == nullptr );
@@ -622,12 +622,12 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "D" );
+        CHECK( prevSibling && prevSibling->m_value == "D" );
         CHECK( nextSibling->m_value == "I" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
 
@@ -654,14 +654,14 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "B" );
+        CHECK( prevSibling && prevSibling->m_value == "B" );
         CHECK( nextSibling->m_value == "D" );
-        CHECK( prevSibling->get_next_sibling()->m_value == "(NEW)" );
+        CHECK( prevSibling && prevSibling->get_next_sibling()->m_value == "(NEW)" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
 
         DeleteTestData();
@@ -685,9 +685,9 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "(NEW)" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "(NEW)" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
         CHECK( prevSibling == nullptr );
@@ -722,12 +722,12 @@ SUITE(TreeTest)
         //cout << newNode->m_value << endl;
         CHECK( newNode->m_value == "(NEW)" );
         Element* parent = newNode->get_parent();
-        CHECK( parent->m_value == "A" );
-        CHECK( parent->get_first_child()->m_value == "B" );
-        CHECK( parent->get_last_child()->m_value == "I" );
+        CHECK( parent && parent->m_value == "A" );
+        CHECK( parent && parent->get_first_child()->m_value == "B" );
+        CHECK( parent && parent->get_last_child()->m_value == "I" );
         Element* prevSibling = newNode->get_prev_sibling();
         Element* nextSibling = newNode->get_next_sibling();
-        CHECK( prevSibling->m_value == "D" );
+        CHECK( prevSibling && prevSibling->m_value == "D" );
         CHECK( nextSibling->m_value == "I" );
         CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
 

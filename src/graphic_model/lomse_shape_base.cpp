@@ -151,6 +151,8 @@ GmoShape* GmoShape::find_related_shape(int type)
 //---------------------------------------------------------------------------------------
 void GmoShape::dump(ostream& outStream, int level)
 {
+    std::ios_base::fmtflags f( outStream.flags() );  //save formating options
+
     outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
               << get_name(m_objtype)
               << "[" << m_idx << "]"
@@ -159,6 +161,8 @@ void GmoShape::dump(ostream& outStream, int level)
               << setw(10) << round_half_up(m_origin.y) << ", "
               << setw(10) << round_half_up(m_size.width) << ", "
               << setw(10) << round_half_up(m_size.height) << endl;
+
+    outStream.flags( f );  //restore formating options
 }
 
 //---------------------------------------------------------------------------------------

@@ -103,7 +103,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pDrawer(pDrawer)
     , m_options()
     , m_pRenderBuf(nullptr)
-
+    , m_pOverlaysGenerator(nullptr)
     , m_expand(0.0)
     , m_gamma(1.0)
     , m_rotation(0.0)   //degrees: -180.0 to 180.0
@@ -119,10 +119,25 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pSelObjects(nullptr)
     , m_pTempoLine(nullptr)
     , m_trackingEffect(k_tracking_highlight_notes)
+    , m_pPrintBuf(nullptr)
+    , m_print_ppi(0.0)
     , m_backgroundColor( Color(145, 156, 166) )
+    , m_pScrollSystem(nullptr)
+    , m_xScrollLeft(0.0f)
+    , m_xScrollRight(0.0f)
+    //
     , k_scrollLeftMargin(50)       //AWARE: Pixels
     , m_vxLast(0)
     , m_vyLast(0)
+    , m_vxNew(0)
+    , m_vyNew(0)
+    , m_iScrollPage(0)
+    , m_vySysTop(0)
+    , m_vySysBottom(0)
+    , m_vxSysLeft(0)
+    , m_vxSysRight(0)
+    , m_vx_RequiredLeft(0)
+    , m_vx_RequiredRight(0)
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
     m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);
@@ -137,7 +152,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     add_visual_effect(m_pDragImg);
     add_visual_effect(m_pHighlighted);
     add_visual_effect(m_pSelRect);
-    //add_visual_effect(m_pTimeGrid);
+    //add_visual_effect(m_pTimeGrid);   when uncommenting change destructor
     add_visual_effect(m_pTempoLine);
 }
 
@@ -150,6 +165,8 @@ GraphicView::~GraphicView()
     //AWARE: ownership of all VisualEffects (m_pCaret, m_pDragImg, m_pHighlighted,
     //       m_pTimeGrid & m_pTempoLine) is transferred to OverlaysGenerator.
     //       Do not delete them here!
+
+    delete m_pTimeGrid;     //add_visual_effect(m_pTimeGrid) is commented out in constructor
 }
 
 //---------------------------------------------------------------------------------------
@@ -976,7 +993,7 @@ void GraphicView::zoom_out(Pixels x, Pixels y)
 void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 {
     //move viewport origin (left-top window corner) to top screen, center
-    double rx(screenWidth/2);
+    double rx(double(screenWidth)/2.0);
     double ry(0);
     m_transform *= agg::trans_affine_translation(-rx, -ry);
 
@@ -1008,7 +1025,7 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 void GraphicView::zoom_fit_width(Pixels screenWidth)
 {
     //move viewport origin (left-top window corner) to top screen, center
-    double rx(screenWidth/2);
+    double rx(double(screenWidth)/2.0);
     double ry(0);
     m_transform *= agg::trans_affine_translation(-rx, -ry);
 
@@ -1128,7 +1145,7 @@ URect GraphicView::get_page_bounds(int iPage)
     int i = 0;
     std::list<URect>::iterator it;
     for (it = m_pageBounds.begin(); it != m_pageBounds.end() && i != iPage; ++it, ++i);
-    return URect(*it);
+    return (it != m_pageBounds.end() ? URect(*it) : URect(USize(0.0f, 0.0f)));
 }
 
 //---------------------------------------------------------------------------------------

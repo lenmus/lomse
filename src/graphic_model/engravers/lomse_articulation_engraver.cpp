@@ -47,6 +47,11 @@ ArticulationEngraver::ArticulationEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter,
                                            int UNUSED(iInstr), int UNUSED(iStaff))
     : Engraver(libraryScope, pScoreMeter)
+    , m_pArticulation(nullptr)
+    , m_placement(k_placement_default)
+    , m_fAbove(true)
+    , m_pParentShape(nullptr)
+    , m_pArticulationShape(nullptr)
 {
 }
 
@@ -160,7 +165,7 @@ void ArticulationEngraver::center_on_parent()
     if (m_pParentShape->is_shape_note())
     {
 		//it is a note. Center articulation on notehead shape
-        GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(m_pParentShape);
+        GmoShapeNote* pNote = static_cast<GmoShapeNote*>(m_pParentShape);
 		uCenterPos = pNote->get_notehead_left() + pNote->get_notehead_width() / 2.0f;
     }
     else
@@ -227,7 +232,7 @@ bool ArticulationEngraver::determine_if_above()
         if (m_pParentShape && m_pParentShape->is_shape_note())
         {
             GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(m_pParentShape);
-            return !pNote->is_up();
+            return pNote && !pNote->is_up();
         }
         else
             return true;

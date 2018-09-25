@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -118,10 +118,10 @@ SUITE(LinkableTest)
         MyShape* pMaster = LOMSE_NEW MyShape();
         MyShape* pSlave = LOMSE_NEW MyShape();
         pMaster->accept_link_from(pSlave, 7);
-        CHECK( pSlave->get_num_links_to() == 1 );
+        CHECK( pSlave && pSlave->get_num_links_to() == 1 );
 
         delete pMaster;
-        CHECK( pSlave->get_num_links_to() == 0 );
+        CHECK( pSlave && pSlave->get_num_links_to() == 0 );
 
         delete pSlave;
     }
@@ -131,10 +131,10 @@ SUITE(LinkableTest)
         MyShape* pMaster = LOMSE_NEW MyShape();
         MyShape* pSlave = LOMSE_NEW MyShape();
         pMaster->accept_link_from(pSlave, 7);
-        CHECK( pMaster->get_num_links_from() == 1 );
+        CHECK( pMaster && pMaster->get_num_links_from() == 1 );
 
         delete pSlave;
-        CHECK( pMaster->get_num_links_from() == 0 );
+        CHECK( pMaster && pMaster->get_num_links_from() == 0 );
 
         delete pMaster;
     }

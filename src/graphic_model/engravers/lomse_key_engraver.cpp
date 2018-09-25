@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,6 +46,9 @@ KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pKeyShape(nullptr)
+    , m_nKeyType(k_clef_undefined)
+    , m_fontSize(0.0)
+    , m_pCreatorImo(nullptr)
 {
 }
 
@@ -215,8 +218,11 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             break;
 
         default:
-            //LogMessage();
+        {
+            LOMSE_LOG_ERROR("Program maintenance error: clef type %d not supported here!",
+                            clefType);
             m_nKeyType = k_key_C;    //force not to draw any accidentals
+        }
     }
 }
 
@@ -339,8 +345,11 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             break;
 
         default:
-            //LogMessage();
+        {
+            LOMSE_LOG_ERROR("Program maintenance error: clef type %d not supported here!",
+                            clefType);
             m_nKeyType = k_key_C;    //force not to draw any accidentals
+        }
     }
 }
 
@@ -413,8 +422,11 @@ int KeyEngraver::get_num_fifths(int keyType)
             return -7;
 
         default:
+        {
+            LOMSE_LOG_ERROR("Program maintenance error: key type %d not supported here!",
+                            keyType);
             return -7;
-            //LogMessage();
+        }
     }
 }
 

@@ -156,7 +156,7 @@ SUITE(DocumentEventsTest)
         std::list<Observer*> observers = pDoc->my_get_observers();
         CHECK( observers.size() == 1 );
         Observer* pObserver = observers.front();
-        CHECK( pObserver->target() == pLink );
+        CHECK( pObserver && pObserver->target() == pLink );
     }
 
     TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_C)
@@ -191,7 +191,7 @@ SUITE(DocumentEventsTest)
         std::list<Observer*> observers = pDoc->my_get_observers();
         CHECK( observers.size() == 1 );
         Observer* pObserver = observers.front();
-        CHECK( pObserver->target() == pLink );
+        CHECK( pObserver && pObserver->target() == pLink );
     }
 
     TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_CPP)

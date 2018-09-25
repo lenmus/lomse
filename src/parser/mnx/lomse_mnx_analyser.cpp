@@ -111,8 +111,17 @@ void MnxPartList::add_score_part(const string& id, ImoInstrument* pInstrument)
 bool MnxPartList::mark_part_as_added(const string& id)
 {
     int i = find_index_for(id);
+    if (i == -1)
+    {
+        LOMSE_LOG_ERROR("Logic error. Part %s does not exist", id.c_str());
+        return true;    //error: instrument does not exist
+    }
     if (m_partAdded[i])
-        return true;    //if instrument is already marked!
+    {
+        LOMSE_LOG_ERROR("Logic error. Part %s is already marked!", id.c_str());
+        return true;    //error: instrument is already marked!
+    }
+
     m_partAdded[i] = true;
     return false;
 }
@@ -587,7 +596,7 @@ int MnxElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
     if ((iss >> std::dec >> nNumber).fail())
         return nDefault;
     else
-        return nNumber;
+        return int(nNumber);
 }
 
 //---------------------------------------------------------------------------------------
@@ -812,7 +821,7 @@ int MnxElementAnalyser::get_cur_node_value_as_integer(int nDefault)
     if ((iss >> std::dec >> nNumber).fail())
         return nDefault;
     else
-        return nNumber;
+        return int(nNumber);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -1024,6 +1033,9 @@ bool MnxElementAnalyser::get_note_value(const string& value, int* noteType, int*
             return false;   //error_invalid_start();
         ++it;
     }
+
+    if (it == value.end())
+        return false;   //error_missing_number();
 
     //get number
     string::const_iterator start = it;
@@ -1798,6 +1810,7 @@ public:
         if (staves > 1)
         {
             ImoInstrument* pInstr = m_pAnalyser->get_instrument_being_analysed();
+            // coverity[tainted_data]
             for(; staves > 1; --staves)
                 pInstr->add_staff();
         }
@@ -2321,7 +2334,14 @@ public:
 
     bool do_analysis()
     {
-        ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+        ImoMusicData* pMD = nullptr;
+        if (m_pAnchor && m_pAnchor->is_music_data())
+            pMD = static_cast<ImoMusicData*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("nullptr pAnchor or it is not musicData");
+            return false;    //error
+        }
         bool fSomethingAdded = false;
 
         //attrb: number
@@ -2354,10 +2374,19 @@ public:
             ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
             if (pSO == nullptr || !pSO->is_barline())
                 add_barline(pInfo);
-        }
+            else
+                delete pInfo;
 
-        set_result(pMD);
-        return true;    //success
+            set_result(pMD);
+            return true;    //success
+        }
+        else
+        {
+            delete pInfo;
+            delete pMD;
+            set_result(nullptr);
+            return false;    //error
+        }
     }
 
 protected:
@@ -2973,7 +3002,10 @@ protected:
 public:
     SequenceContentMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
                                LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_cursor(0.0)
+    {
+    }
 
     bool do_analysis()
     {
@@ -3385,14 +3417,20 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
 //    , m_nShowTupletNumber(k_yesno_default)
+    , m_pResult(nullptr)
     , m_pCurScore(nullptr)
+    , m_pCurInstrument(nullptr)
     , m_pLastNote(nullptr)
+    , m_pLastBarline(nullptr)
     , m_pImoDoc(nullptr)
     , m_time(0.0)
     , m_maxTime(0.0)
     , m_divisions(1.0f)
     , m_curMeasureNum("")
     , m_measuresCounter(0)
+    , m_curStaff(0)
+    , m_curVoice(0)
+    , m_beamLevel(0)
 {
     //populate the name to enum conversion map
 //    m_NameToEnum["accordion-registration"] = k_mnx_tag_accordion_registration;

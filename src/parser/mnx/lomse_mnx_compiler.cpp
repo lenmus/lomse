@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -95,7 +95,7 @@ ImoDocument* MnxCompiler::compile_file(const std::string& filename)
         m_pXmlParser->parse_cstring( (char *)buffer );
 
         delete pFile;
-        delete buffer;
+        delete[] buffer;
 #else
         LOMSE_LOG_ERROR("Could not open compressed file '%s'. Lomse was "
                         "compiled without compression support.", filename.c_str());

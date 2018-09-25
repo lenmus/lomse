@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,9 +52,12 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
     , m_libraryScope(libraryScope)
     , m_pStyles(pStyles)
     , m_pItemMainBox(nullptr)
+    , m_pCurLayouter(nullptr)
     , m_pItem(pItem)
     , m_fAddShapesToModel(fAddShapesToModel)
     , m_constrains(0)
+    , m_availableWidth(0.0f)
+    , m_availableHeight(0.0f)
 {
 }
 
@@ -67,7 +70,12 @@ Layouter::Layouter(LibraryScope& libraryScope)
     , m_libraryScope(libraryScope)
     , m_pStyles(nullptr)
     , m_pItemMainBox(nullptr)
+    , m_pCurLayouter(nullptr)
     , m_pItem(nullptr)
+    , m_fAddShapesToModel(false)
+    , m_constrains(0)
+    , m_availableWidth(0.0f)
+    , m_availableHeight(0.0f)
 {
 }
 

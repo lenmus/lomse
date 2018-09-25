@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -144,23 +144,25 @@ void RightAligner::add_border_segment(LUnits y0, LUnits y1, LUnits x)
         }
 
         //insert second point
+        if (it != m_border.end())   //sanity check: first point found
+        {
+            //remove intermediate points
+            while((*it).y < y1 && (*it).y != LOMSE_MAX_Y)
+            {
+                xNext = (*it).x;
+                m_border.erase(it++);
+            }
 
-        //remove intermediate points
-        while((*it).y < y1 && (*it).y != LOMSE_MAX_Y)
-        {
-            xNext = (*it).x;
-            m_border.erase(it++);
-        }
-
-        if ((*it).y == y1)
-        {
-            //no need to do anything. point is still valid!
-        }
-        else if ((*it).y > y1 || (*it).y == LOMSE_MAX_Y)
-        {
-            //insert before
-            UPoint p2(xNext, y1);
-            m_border.insert(it, p2);
+            if ((*it).y == y1)
+            {
+                //no need to do anything. point is still valid!
+            }
+            else if ((*it).y > y1 || (*it).y == LOMSE_MAX_Y)
+            {
+                //insert before
+                UPoint p2(xNext, y1);
+                m_border.insert(it, p2);
+            }
         }
     }
 }

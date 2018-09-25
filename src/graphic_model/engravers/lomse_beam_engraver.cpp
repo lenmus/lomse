@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,6 +49,15 @@ namespace lomse
 BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pBeamShape(nullptr)
+    , m_pBeam(nullptr)
+    , m_uBeamThickness(0.0f)
+    , m_fBeamAbove(false)
+    , m_fStemForced(false)
+    , m_fStemMixed(false)
+    , m_fStemsDown(false)
+    , m_numStemsDown(0)
+    , m_numNotes(0)
+    , m_averagePosOnStaff(0)
 {
 }
 
@@ -147,14 +156,20 @@ void BeamEngraver::reposition_rests()
 	{
         if ((it->first)->is_note())
         {
-            GmoShapeNote* pShapeNote = dynamic_cast<GmoShapeNote*>(it->second);
+            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(it->second);
             numNotes++;
             posForRests += pShapeNote->get_pos_on_staff();
         }
     }
-    posForRests /= numNotes;
+
+    if (numNotes <= 0)   //sanity check. Never must be true
+    {
+        LOMSE_LOG_ERROR("No notes in beam!");
+        return;
+    }
 
     //to convert to tenths it is necesary to multiply by 10/2 = 5
+    posForRests /= numNotes;
     Tenths meanPos = Tenths(posForRests) * 5.0f;
 
     // As rests are normally positioned on 3rd space (35 tenths), the shift to apply is
@@ -166,7 +181,7 @@ void BeamEngraver::reposition_rests()
 	{
         if ((it->first)->is_rest())
         {
-            GmoShapeRest* pShapeRest = dynamic_cast<GmoShapeRest*>(it->second);
+            GmoShapeRest* pShapeRest = static_cast<GmoShapeRest*>(it->second);
             pShapeRest->shift_origin(shift);
         }
     }
@@ -190,7 +205,7 @@ void BeamEngraver::decide_on_stems_direction()
 	{
         if ((it->first)->is_note())      //ignore rests
         {
-		    ImoNote* pNote = dynamic_cast<ImoNote*>(it->first);
+		    ImoNote* pNote = static_cast<ImoNote*>(it->first);
             m_numNotes++;
 
             if (pNote->get_stem_direction() != k_stem_default)
@@ -201,7 +216,7 @@ void BeamEngraver::decide_on_stems_direction()
             }
             else
             {
-                GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(it->second);
+                GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(it->second);
                 m_averagePosOnStaff += pNoteShape->get_pos_on_staff();
                 GmoShapeStem* pStemShape = pNoteShape->get_stem_shape();
                 if (pStemShape && pStemShape->is_stem_down())
@@ -210,7 +225,7 @@ void BeamEngraver::decide_on_stems_direction()
         }
     }
 
-    if (!m_fStemForced)
+    if (!m_fStemForced && m_numNotes > 0)
     {
         m_fStemsDown = m_averagePosOnStaff / m_numNotes > 6;
         m_fStemMixed = false;   //TODO: For now no automatic mixed beams
@@ -250,7 +265,7 @@ void BeamEngraver::change_stems_direction()
 	    {
             if (it->first->is_note())
             {
-                GmoShapeNote* pShape = dynamic_cast<GmoShapeNote*>(it->second);
+                GmoShapeNote* pShape = static_cast<GmoShapeNote*>(it->second);
                 pShape->set_stem_down(m_fStemsDown);
             }
         }
@@ -294,11 +309,11 @@ void BeamEngraver::compute_beam_segments()
         std::list< pair<ImoNoteRest*, GmoShape*> >::iterator itNR;
         for(itNR = m_noteRests.begin(); itNR != m_noteRests.end(); ++itNR, ++itLD)
         {
-            ImoBeamData* pBeamData = dynamic_cast<ImoBeamData*>( (*itLD).second );
+            ImoBeamData* pBeamData = static_cast<ImoBeamData*>( (*itLD).second );
             GmoShape* pNR = (*itNR).second;
             if (pNR->is_shape_note())
             {
-                GmoShapeNote* pShapeNote = dynamic_cast<GmoShapeNote*>(pNR);
+                GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(pNR);
 
                 uxCur = pShapeNote->get_stem_left();
                 uyCur = pShapeNote->get_stem_y_flag() + uyShift;
@@ -452,7 +467,8 @@ void BeamEngraver::adjust_stems_lengths()
     std::vector<LUnits> yFlag(nNumNotes);
     std::vector<GmoShapeNote*> note(nNumNotes);
 
-    LUnits x1, xn;		    // x position of first and last stems, respectively
+    LUnits x1 = 0.0f;       // x position of first stem
+    LUnits xn = 0.0f;       // x position of last stem
 
     int i = 0;              // index to current element
     std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
@@ -461,7 +477,7 @@ void BeamEngraver::adjust_stems_lengths()
         GmoShape* pNR = (*it).second;
         if (pNR->is_shape_note())
         {
-            GmoShapeNote* pShapeNote = dynamic_cast<GmoShapeNote*>(pNR);
+            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(pNR);
             note[i] = pShapeNote;
             if (i == 0)
                 x1 = pShapeNote->get_stem_left();
@@ -492,7 +508,7 @@ void BeamEngraver::adjust_stems_lengths()
 
     LUnits Ay = yFlag[n] - yFlag[0];
     LUnits Ax = xn - x1;
-    LUnits uMinStem;
+    LUnits uMinStem = 0.0f;
     for(int i=0; i < nNumNotes; i++)
     {
         yFlag[i] = yFlag[0] + (Ay * (note[i]->get_stem_left() - x1)) / Ax;

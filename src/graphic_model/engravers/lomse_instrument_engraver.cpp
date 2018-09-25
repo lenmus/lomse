@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -59,6 +59,7 @@ PartsEngraver::PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_uFirstSystemIndent(0.0f)
     , m_uOtherSystemIndent(0.0f)
     , m_pRightAlignerFirst(nullptr)
+    , m_pRightAlignerOther(nullptr)
 {
     create_group_engravers();
     create_instrument_engravers();
@@ -355,6 +356,9 @@ GroupEngraver::GroupEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_pScore(pScore)
     , m_pParts(pParts)
     , m_pFontStorage( libraryScope.font_storage() )
+    , m_stavesTop(0.0f)
+    , m_stavesBottom(0.0f)
+    , m_uBracketGap(0.0f)
 {
 }
 
@@ -548,6 +552,11 @@ InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
     , m_pInstr(pInstr)
     , m_pScore(pScore)
     , m_pFontStorage( libraryScope.font_storage() )
+    , m_uBracketGap(0.0f)
+    , m_stavesTop(0.0f)
+    , m_stavesBottom(0.0f)
+    , m_stavesLeft(0.0f)
+    , m_stavesWidth(0.0f)
     , m_pNextInstrEngr(nullptr)
 {
     int numStaves = m_pInstr->get_num_staves();

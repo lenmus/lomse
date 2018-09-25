@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,8 +48,18 @@ SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            InstrumentEngraver* pInstrEngrv)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
+    , m_uStaffTopStart(0.0f)
+    , m_uStaffTopEnd(0.0f)
     , m_numShapes(0)
+    , m_pSlur(nullptr)
+    , m_fSlurBelow(false)
     , m_uPrologWidth(0.0f)
+    , m_pStartNote(nullptr)
+    , m_pEndNote(nullptr)
+    , m_pStartNoteShape(nullptr)
+    , m_pEndNoteShape(nullptr)
+    , m_fTwoArches(false)
+    , m_thickness(0.0f)
 {
 }
 
@@ -61,10 +71,10 @@ void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_pSlur = dynamic_cast<ImoSlur*>(pRO);
+    m_pSlur = static_cast<ImoSlur*>(pRO);
 
-    m_pStartNote = dynamic_cast<ImoNote*>(pSO);
-    m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
+    m_pStartNote = static_cast<ImoNote*>(pSO);
+    m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
     m_shapesInfo[0].iCol = iCol;
     m_shapesInfo[0].iInstr = iInstr;
@@ -80,8 +90,8 @@ void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
                                     LUnits yTop)
 {
-    m_pEndNote = dynamic_cast<ImoNote*>(pSO);
-    m_pEndNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
+    m_pEndNote = static_cast<ImoNote*>(pSO);
+    m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
     m_shapesInfo[1].iCol = iCol;
     m_shapesInfo[1].iInstr = iInstr;

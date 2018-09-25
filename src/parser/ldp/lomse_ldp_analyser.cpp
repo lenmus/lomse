@@ -94,7 +94,14 @@ public:
         , m_pAnalyser(pAnalyser)
         , m_libraryScope(libraryScope)
         , m_pLdpFactory(libraryScope.ldp_factory())
-        , m_pAnchor(pAnchor) {}
+        , m_pAnchor(pAnchor)
+        //
+        , m_pAnalysedNode(nullptr)
+        , m_pParamToAnalyse(nullptr)
+        , m_pNextParam(nullptr)
+        , m_pNextNextParam(nullptr)
+    {
+    }
     virtual ~ElementAnalyser() {}
     void analyse_node(LdpElement* pNode);
 
@@ -3025,6 +3032,7 @@ protected:
         }
         else
         {
+            // coverity[tainted_data]
             for(; nStaves > 1; --nStaves)
                 pInstrument->add_staff();
         }
@@ -3130,6 +3138,8 @@ public:
             m_pAnalyser->save_root_imo_document(pImoDoc);
             pDoc->set_imo_doc(pImoDoc);
         }
+        else
+            return;
 
         // [<language>]
         if (get_optional(k_language))
@@ -4155,9 +4165,10 @@ protected:
                 m_pAnalyser->add_to_open_tuplets(pNR);
 
             m_pTupletInfo->set_note_rest(pNR);
+            bool fEndOfTuplet = m_pTupletInfo->is_end_of_tuplet();
             m_pAnalyser->add_relation_info(m_pTupletInfo);
 
-            if (m_pTupletInfo->is_end_of_tuplet())
+            if (fEndOfTuplet)
                 m_pAnalyser->add_to_open_tuplets(pNR);
         }
         else
@@ -6400,6 +6411,8 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_scoreVersion(0)
     , m_pTree()
     , m_fileLocator("")
+    , m_curStaff(0)
+    , m_curVoice(0)
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(nullptr)
@@ -7153,6 +7166,7 @@ OldTiesBuilder::OldTiesBuilder(ostream& reporter, LdpAnalyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
     , m_pStartNoteTieOld(nullptr)
+    , m_pOldTieParam(nullptr)
 {
 }
 

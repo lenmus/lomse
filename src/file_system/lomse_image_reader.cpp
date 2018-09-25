@@ -110,7 +110,6 @@ SpImage ImageReader::load_image(const string& locator)
         cerr << "Non-standard unknown exception (catch in ImageReader::load_image)" << endl;
         return img;
     }
-    return SpImage( LOMSE_NEW Image() );   //compiler happy
 }
 
 

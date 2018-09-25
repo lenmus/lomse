@@ -58,7 +58,13 @@ protected:
     Document*       m_pDoc;
     string         m_fileLocator;
 
-    Compiler() {}
+    Compiler()
+        : m_pParser(nullptr)
+        , m_pAnalyser(nullptr)
+        , m_pModelBuilder(nullptr)
+        , m_pDoc(nullptr)
+    {
+    }
     Compiler(Parser* p, Analyser* a, ModelBuilder* mb, Document* pDoc);
 
 public:

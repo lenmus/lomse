@@ -809,7 +809,7 @@ protected:
     }
 
 public:
-    InlineLevelCreatorApi() {}
+    InlineLevelCreatorApi() : m_pParent(nullptr) {}
     virtual ~InlineLevelCreatorApi() {}
 
     //API
@@ -838,7 +838,7 @@ protected:
     }
 
 public:
-    BlockLevelCreatorApi() {}
+    BlockLevelCreatorApi() : m_pParent(nullptr) {}
     virtual ~BlockLevelCreatorApi() {}
 
     //API
@@ -4854,6 +4854,7 @@ protected:
     friend class ImFactory;
     ImoTextRepetitionMark()
         : ImoScoreText(k_imo_text_repetition_mark)
+        , m_repeatType(0)
     {
     }
 
@@ -7062,7 +7063,15 @@ protected:
     int m_nPlacement;
 
     friend class ImFactory;
-    ImoTuplet() : ImoRelObj(k_imo_tuplet) {}
+    ImoTuplet()
+        : ImoRelObj(k_imo_tuplet)
+        , m_nActualNum(0)
+        , m_nNormalNum(0)
+        , m_nShowBracket(0)
+        , m_nShowNumber(0)
+        , m_nPlacement(0)
+    {
+    }
     ImoTuplet(ImoTupletDto* dto);
 
 public:

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -79,17 +79,20 @@ SUITE(ScoreIteratorTest)
         CHECK( (*it)->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
         CHECK( pScore != nullptr );
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        CHECK( pTable->num_entries() == 2 );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            CHECK( pTable->num_entries() == 2 );
 
-        StaffObjsIterator sit(pTable);
+            StaffObjsIterator sit(pTable);
 
-        CHECK( (*sit)->imo_object()->is_note() == true );
-        CHECK( (*sit)->line() == 0 );
-        CHECK( (*sit)->measure() == 0 );
-        CHECK( (*sit)->time() == 0.0f );
-        CHECK( (*sit)->num_instrument() == 0 );
-        CHECK( (*sit)->staff() == 0 );
+            CHECK( (*sit)->imo_object()->is_note() == true );
+            CHECK( (*sit)->line() == 0 );
+            CHECK( (*sit)->measure() == 0 );
+            CHECK( (*sit)->time() == 0.0f );
+            CHECK( (*sit)->num_instrument() == 0 );
+            CHECK( (*sit)->staff() == 0 );
+        }
     }
 
 
@@ -272,19 +275,23 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ++sit;
-        ++sit;
-        CHECK( sit.is_end() == true );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ++sit;
+            ++sit;
+            CHECK( sit.is_end() == true );
 
-        --sit;
-        --sit;
-        CHECK( sit.is_first() == true );
-        ColStaffObjsEntry* pEntry = sit.next();
-        ++sit;
-        CHECK( *sit == pEntry );
-        CHECK( (*sit)->imo_object()->is_rest() == true );
+            --sit;
+            --sit;
+            CHECK( sit.is_first() == true );
+            ColStaffObjsEntry* pEntry = sit.next();
+            ++sit;
+            CHECK( *sit == pEntry );
+            CHECK( (*sit)->imo_object()->is_rest() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_3)
@@ -296,16 +303,20 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ++sit;
-        CHECK( (*sit)->imo_object()->is_note() == true );
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ++sit;
+            CHECK( (*sit)->imo_object()->is_note() == true );
 
-        ColStaffObjsEntry* pEntry = sit.next();
-        ++sit;
+            ColStaffObjsEntry* pEntry = sit.next();
+            ++sit;
 
-        CHECK( *sit == pEntry );
-        CHECK( pEntry->imo_object()->is_rest() == true );
+            CHECK( *sit == pEntry );
+            CHECK( pEntry->imo_object()->is_rest() == true );
+        }
     }
 
 }

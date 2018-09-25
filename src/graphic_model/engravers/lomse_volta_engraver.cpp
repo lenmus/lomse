@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,8 +50,15 @@ VoltaBracketEngraver::VoltaBracketEngraver(LibraryScope& libraryScope,
                                            LUnits uStaffLeft, LUnits uStaffRight)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_numShapes(0)
+    , m_pVolta(nullptr)
     , m_uStaffLeft(uStaffLeft)
     , m_uStaffRight(uStaffRight)
+    , m_pStyle(nullptr)
+    , m_pStartBarline(nullptr)
+    , m_pStopBarline(nullptr)
+    , m_pStartBarlineShape(nullptr)
+    , m_pStopBarlineShape(nullptr)
+    , m_fTwoBrackets(false)
 {
 }
 

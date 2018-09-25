@@ -107,6 +107,11 @@ void GmoShapeBarline::compute_width()
         case k_barline_simple:
             width = m_uThinLineWidth;
             break;
+
+        default:
+            LOMSE_LOG_ERROR("Invalid barline type %d", m_nBarlineType);
+            width = m_uThinLineWidth;
+            break;
     }
 
     if (width < m_size.width)

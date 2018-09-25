@@ -54,10 +54,23 @@ namespace lomse
 //=======================================================================================
 NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* pShapesStorage, int iInstr, int iStaff)
-//    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pNote(nullptr)
+    , m_clefType(k_clef_undefined)
     , m_pShapesStorage(pShapesStorage)
+    , m_fStemDown(false)
+    , m_nPosOnStaff(0)
+    , m_uyStaffTopLine(0.0f)
+    , m_uxLeft(0.0f)
+    , m_uyTop(0.0f)
+    , m_pNoteShape(nullptr)
+    , m_pNoteheadShape(nullptr)
+    , m_pAccidentalsShape(nullptr)
+    , m_nDots(0)
+    , m_noteType(k_quarter)
+    , m_acc(k_no_accidentals)
+    , m_lineSpacing(0.0f)
+    , m_fontSize(0.0)
 {
 }
 
@@ -530,7 +543,7 @@ void NoteEngraver::add_to_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
-        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+        = static_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
 
     pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
                                 0.0f, 0.0f, 0.0f);
@@ -541,7 +554,7 @@ void NoteEngraver::layout_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
-        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+        = static_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
     pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
                              0.0f, 0.0f, 0.0f);
 
@@ -561,7 +574,20 @@ StemFlagEngraver::StemFlagEngraver(LibraryScope& libraryScope, ScoreMeter* pScor
     : Engraver(libraryScope, pScoreMeter)
     , m_iInstr(iInstr)
     , m_iStaff(iStaff)
+    , m_pNoteShape(nullptr)
+    , m_pBaseNoteShape(nullptr)
+    , m_noteType(0)
+    , m_fStemDown(false)
+    , m_fWithFlag(false)
+    , m_fShortFlag(false)
+    , m_uStemLength(0.0f)
+    , m_fontSize(0.0)
     , m_pCreatorImo(pCreatorImo)
+    , m_uStemThickness(0.0f)
+    , m_uxStem(0.0f)
+    , m_uyStemNote(0.0f)
+    , m_uyStemFlag(0.0f)
+    , m_pNoteheadShape(nullptr)
 {
 }
 //---------------------------------------------------------------------------------------

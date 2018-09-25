@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,6 +48,10 @@ TableLayouter::TableLayouter(ImoContentObj* pItem, Layouter* pParent,
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_headLayouter(nullptr)
     , m_bodyLayouter(nullptr)
+    , m_numHeadRows(0)
+    , m_numBodyRows(0)
+    , m_numCols(0)
+    , m_tableWidth(0.0f)
 {
 }
 
@@ -286,6 +290,7 @@ TableSectionLayouter::TableSectionLayouter(ImoContentObj* pItem, Layouter* pPare
     , m_numTableColumns(numCols)
     , m_tableWidth(tableWidth)
     , m_pRowLayouter(nullptr)
+    , m_nextLogicalRow(0)
 {
 }
 

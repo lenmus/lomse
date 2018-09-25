@@ -484,8 +484,16 @@ void DocCommandExecuter::redo(DocCursor* pCursor, SelectionSet* pSelection)
 //=======================================================================================
 CmdAddChordNote::CmdAddChordNote(const string& pitch, const string& name)
     : DocCmdSimple(name)
+    , m_baseId(k_no_imoid)
+    , m_noteId(k_no_imoid)
+    , m_pitch(pitch)
+    , m_step(0)
+    , m_octave(0)
+    , m_accidentals(k_no_accidentals)
+    , m_type(0)
+    , m_dots(0)
+    , m_voice(0)
 {
-    m_pitch = pitch;
     m_flags = k_recordable | k_reversible;
 }
 
@@ -580,8 +588,22 @@ void CmdAddChordNote::update_selection(SelectionSet* pSelection)
 CmdAddNoteRest::CmdAddNoteRest(const string& source, int UNUSED(editMode),
                                const string& name)
     : DocCmdSimple(name)
+    , m_idAt(k_no_imoid)
+    , m_source(source)
+    //
+    , m_pDoc(nullptr)
+    , m_pCursor(nullptr)
+    , m_pScore(nullptr)
+    , m_pInstr(nullptr)
+    , m_pSC(nullptr)
+    , m_instr(0)
+    , m_newVoice(0)
+    , m_pNewNR(nullptr)
+    , m_insertionTime(0.0)
+    , m_newDuration(0.0)
+    , m_pAt(nullptr)
+    , m_pLastOverlapped(nullptr)
 {
-    m_source = source;
     m_flags = k_recordable | k_reversible;
 }
 
@@ -1258,7 +1280,12 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_string)
     , m_newString(value)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
+    , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible;
 }
@@ -1269,7 +1296,11 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_double)
+    , m_oldDouble(0.0)
     , m_newDouble(value)
+    , m_oldInt(0)
+    , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible;
 }
@@ -1280,6 +1311,10 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_int)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
     , m_newInt(value)
 {
     m_flags = k_recordable | k_reversible;
@@ -1291,6 +1326,11 @@ CmdChangeAttribute::CmdChangeAttribute(EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_color)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
+    , m_newInt(0)
     , m_newColor(value)
 {
     m_flags = k_recordable | k_reversible;
@@ -1302,7 +1342,12 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_string)
     , m_newString(value)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
+    , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
     set_target(pImo);
@@ -1314,7 +1359,11 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_double)
+    , m_oldDouble(0.0)
     , m_newDouble(value)
+    , m_oldInt(0)
+    , m_newInt(0)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
     set_target(pImo);
@@ -1326,6 +1375,10 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_int)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
     , m_newInt(value)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
@@ -1338,6 +1391,11 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
     : DocCmdSimple(cmdName)
     , m_targetId(k_no_imoid)
     , m_attrb(attrb)
+    , m_dataType(k_type_color)
+    , m_oldDouble(0.0)
+    , m_newDouble(0.0)
+    , m_oldInt(0)
+    , m_newInt(0)
     , m_newColor(value)
 {
     m_flags = k_recordable | k_reversible | k_target_set_in_constructor;
@@ -1505,6 +1563,10 @@ CmdCursor::CmdCursor(ImoId id, const string& name)
     : DocCmdSimple(name)
     , m_operation(k_point_to)
     , m_targetId(id)
+    , m_measure(0)
+    , m_instrument(0)
+    , m_staff(0)
+    , m_time(0.0)
 {
     initialize();
 }
@@ -1514,6 +1576,10 @@ CmdCursor::CmdCursor(ECursorAction cmd, const string& name)
     : DocCmdSimple(name)
     , m_operation(cmd)
     , m_targetId(k_no_imoid)
+    , m_measure(0)
+    , m_instrument(0)
+    , m_staff(0)
+    , m_time(0.0)
 {
     initialize();
 }
@@ -1522,9 +1588,11 @@ CmdCursor::CmdCursor(ECursorAction cmd, const string& name)
 CmdCursor::CmdCursor(int measure, int instr, int staff, const string& name)
     : DocCmdSimple(name)
     , m_operation(k_to_measure)
+    , m_targetId(k_no_imoid)
     , m_measure(measure)
     , m_instrument(instr)
     , m_staff(staff)
+    , m_time(0.0)
 {
     initialize();
 }
@@ -1533,6 +1601,8 @@ CmdCursor::CmdCursor(int measure, int instr, int staff, const string& name)
 CmdCursor::CmdCursor(TimeUnits time, int instr, int staff, const string& name)
     : DocCmdSimple(name)
     , m_operation(k_to_time)
+    , m_targetId(k_no_imoid)
+    , m_measure(0)
     , m_instrument(instr)
     , m_staff(staff)
     , m_time(time)
@@ -1546,6 +1616,10 @@ CmdCursor::CmdCursor(DocCursorState& state, const string& name)
     , m_operation(k_to_state)
     , m_targetId(k_no_imoid)
     , m_targetState(state)
+    , m_measure(0)
+    , m_instrument(0)
+    , m_staff(0)
+    , m_time(0.0)
 {
     initialize();
 }
@@ -2484,6 +2558,7 @@ int CmdJoinBeam::perform_action(Document* pDoc, DocCursor* pCursor)
 CmdMoveObjectPoint::CmdMoveObjectPoint(int pointIndex, UPoint shift,
                                        const string& name)
     : DocCmdSimple(name)
+    , m_targetId(k_no_imoid)
     , m_pointIndex(pointIndex)
     , m_shift(shift)
 {
@@ -2565,6 +2640,7 @@ CmdSelection::CmdSelection(int cmd, ImoId id, const string& name)
     : DocCmdSimple(name)
     , m_operation(cmd)
     , m_targetId(id)
+    , m_pSelection(nullptr)
 {
     initialize();
 }
@@ -2574,6 +2650,7 @@ CmdSelection::CmdSelection(int cmd, const string& name)
     : DocCmdSimple(name)
     , m_operation(cmd)
     , m_targetId(k_no_imoid)
+    , m_pSelection(nullptr)
 {
     initialize();
 }

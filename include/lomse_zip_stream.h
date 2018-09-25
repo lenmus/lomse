@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -80,7 +80,24 @@ struct ZipEntryInfo
 	bool  fIsOpen;      //entry file is open: ready to read
 	bool  fEOF;         //End of file reached
 
-	ZipEntryInfo() : fIsValid(false), fIsOpen(false), fEOF(true) {}
+	ZipEntryInfo()
+        : dwVersion(0L)
+        , dwVersionNeeded(0L)
+        , dwFlags(0L)
+        , dwCompressionMethod(0L)
+        , dwDosDate(0L)
+        , dwCRC(0L)
+        , dwCompressedSize(0L)
+        , dwUncompressedSize(0L)
+        , dwInternalAttrib(0L)
+        , dwExternalAttrib(0L)
+        , bFolder(false)
+        //
+        , fIsValid(false)
+        , fIsOpen(false)
+        , fEOF(true)
+    {
+    }
 };
 
 //---------------------------------------------------------------------------------------

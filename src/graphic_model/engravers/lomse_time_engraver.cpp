@@ -44,6 +44,13 @@ namespace lomse
 TimeEngraver::TimeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
+    , m_pTimeShape(nullptr)
+    , m_uTopWidth(0.0f)
+    , m_uBottomWidth(0.0f)
+    , m_pShapesTop{nullptr, nullptr}
+    , m_pShapesBottom{nullptr, nullptr}
+    , m_fontSize(0.0)
+    , m_pCreatorImo(nullptr)
 {
 }
 

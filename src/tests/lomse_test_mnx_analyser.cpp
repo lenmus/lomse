@@ -124,9 +124,9 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -162,10 +162,10 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( doc.is_dirty() == true );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
 //        pScore->end_of_changes();
 //        cout << pScore->to_string_with_ids() << endl;
@@ -202,10 +202,10 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //        CHECK( pRoot != nullptr );
-//        CHECK( pRoot->is_document() == true );
+//        CHECK( pRoot && pRoot->is_document() == true );
 //        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
 //        CHECK( doc.is_dirty() == true );
-//        CHECK( pDoc->get_num_content_items() == 1 );
+//        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
 //        pScore->end_of_changes();
 //        cout << pScore->to_string_with_ids() << endl;
@@ -254,9 +254,9 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
@@ -264,7 +264,7 @@ SUITE(MnxAnalyserTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 4 );
+        CHECK( pMD && pMD->get_num_children() == 4 );
         ImoObj::children_iterator it = pMD->begin();    //clef
         CHECK( (*it)->is_clef() );
         ++it;   //note c4
@@ -275,11 +275,11 @@ SUITE(MnxAnalyserTest)
         CHECK( (*it)->is_barline() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
         pInfo = pBarline->get_measure_info();
         CHECK( pInfo != nullptr );
-        CHECK( pInfo->count == 1 );
+        CHECK( pInfo && pInfo->count == 1 );
 //        cout << test_name() << ": count=" << pInfo->count << endl;
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -329,7 +329,7 @@ SUITE(MnxAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
@@ -338,7 +338,7 @@ SUITE(MnxAnalyserTest)
         ImoMusicData* pMD = pInstr->get_musicdata();
         CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 7 );
+        CHECK( pMD && pMD->get_num_children() == 7 );
         ImoObj::children_iterator it = pMD->begin();    //clef
         CHECK( (*it)->is_clef() );
         ++it;   //note c4
@@ -349,8 +349,8 @@ SUITE(MnxAnalyserTest)
         CHECK( (*it)->is_barline() );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
         TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
         CHECK( pInfo1 != nullptr );
         CHECK( pInfo1->count == 1 );
@@ -367,8 +367,8 @@ SUITE(MnxAnalyserTest)
         CHECK( (*it)->is_barline() );
         pBarline = dynamic_cast<ImoBarline*>( *it );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
         TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
         CHECK( pInfo2 != nullptr );
         CHECK( pInfo2->count == 2 );

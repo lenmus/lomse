@@ -597,7 +597,12 @@ protected:
     DocCursor* m_pCursor;
 
     //for unit tests
-    EventUpdateUI(EEventType type) : EventAction(type, WpInteractor(), WpDocument()) {}
+    EventUpdateUI(EEventType type)
+        : EventAction(type, WpInteractor(), WpDocument())
+        , m_pSelection(nullptr)
+        , m_pCursor(nullptr)
+    {
+    }
 
 public:
     /// Constructor
@@ -720,7 +725,14 @@ protected:
     unsigned m_flags;
 
     //for unit tests
-    EventMouse(EEventType type) : EventAction(type, WpInteractor(), WpDocument()) {}
+    EventMouse(EEventType type)
+        : EventAction(type, WpInteractor(), WpDocument())
+        , m_imoId(k_no_imoid)
+        , m_x(0)
+        , m_y(0)
+        , m_flags(0)
+    {
+    }
 
 public:
     /// Constructor
@@ -879,7 +891,12 @@ protected:
     PlayerGui* m_pPlayer;
 
     //for unit tests
-    EventPlayCtrl(EEventType evType) : EventAction(evType, WpInteractor(), WpDocument()) {}
+    EventPlayCtrl(EEventType evType)
+        : EventAction(evType, WpInteractor(), WpDocument())
+        , m_pScore(nullptr)
+        , m_pPlayer(nullptr)
+    {
+    }
 
 public:
     /// Constructor
@@ -961,7 +978,12 @@ protected:
     ImoScore* m_pScore;
     PlayerGui* m_pPlayer;
 
-    EventEndOfPlayback(EEventType evType) : EventPlayback(evType, WpInteractor()) {}    //for unit tests
+    EventEndOfPlayback(EEventType evType)    //for unit tests
+        : EventPlayback(evType, WpInteractor())
+        , m_pScore(nullptr)
+        , m_pPlayer(nullptr)
+    {
+    }
 
 public:
     /// Constructor

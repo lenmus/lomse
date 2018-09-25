@@ -47,6 +47,7 @@ TempoLine::TempoLine(GraphicView* view, LibraryScope& libraryScope)
     , m_color( Color(0, 255, 0) )       // solid green
     , m_width(100.0)                    // 1.00 mm
     , m_pBoxSystem(nullptr)
+    , m_iPage(0)
 {
 }
 

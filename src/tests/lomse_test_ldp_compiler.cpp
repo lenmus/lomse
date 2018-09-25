@@ -69,8 +69,14 @@ SUITE(LdpCompilerTest)
         LdpCompiler compiler(m_libraryScope, &doc);
         ImoObj* pRoot =  compiler.create_empty();
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_version() == "0.0" );
+            CHECK( pDoc->get_num_content_items() == 0 );
+        }
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromString)
@@ -80,13 +86,18 @@ SUITE(LdpCompilerTest)
         ImoObj* pRoot =  compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.Truncate 1) (instrument (musicData)))))" );
         CHECK( compiler.get_file_locator() == "string:" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        CHECK( pScore->get_staffobjs_table() != nullptr );
-        CHECK( pScore->get_version_string() == "1.6" );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_version() == "0.0" );
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            CHECK( pScore && pScore->get_num_instruments() == 1 );
+            CHECK( pScore && pScore->get_staffobjs_table() != nullptr );
+            CHECK( pScore && pScore->get_version_string() == "1.6" );
+        }
+
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -98,11 +109,16 @@ SUITE(LdpCompilerTest)
         ImoObj* pRoot =  compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_version() == "0.0" );
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            CHECK( pScore && pScore->get_num_instruments() == 1 );
+        }
+
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
@@ -115,11 +131,16 @@ SUITE(LdpCompilerTest)
         ImoObj* pRoot =  compiler.compile_input(reader);
         CHECK( compiler.get_file_locator() == path );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pRoot);
-        CHECK( pDoc->get_version() == "0.0" );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_version() == "0.0" );
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            CHECK( pScore && pScore->get_num_instruments() == 1 );
+        }
+
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 

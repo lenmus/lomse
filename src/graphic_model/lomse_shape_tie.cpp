@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -65,6 +65,8 @@ GmoShapeSlurTie::GmoShapeSlurTie(ImoObj* pCreatorImo, int objtype, ShapeId idx,
     : GmoSimpleShape(pCreatorImo, objtype, idx, color)
     , VertexSource()
     , m_thickness(thickness)
+    , m_nCurVertex(0)
+    , m_nContour(0)
 {
     save_points(points);
     compute_vertices();

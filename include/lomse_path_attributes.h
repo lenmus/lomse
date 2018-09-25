@@ -164,14 +164,7 @@ struct PathAttributes
     //destructor
     ~PathAttributes()
     {
-        //AWARE: This destructor IS NEVER INVOKED
-        //AttrStorage objects are pod_bvector<PathAttributes>
-        //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore,
-        //memory allocated for GradientAttributes is released in
-        //ScreenDrawer::delete_paths().
-        //fill_gradient is deleted there, so DON'T DO IT HERE
-
-        //delete fill_gradient;
+        delete fill_gradient;
     }
 };
 

@@ -136,7 +136,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"This" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"This" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == true );
@@ -157,7 +157,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"is a paragraph" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"is a paragraph" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == false );
@@ -214,7 +214,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"This" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"This" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == true );
@@ -225,7 +225,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( pEngr != nullptr );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"is a paragraph" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"is a paragraph" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == false );
@@ -244,7 +244,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( pEngrouter->get_text() == L"Hello" );
+        CHECK( pEngrouter && pEngrouter->get_text() == L"Hello" );
 //        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
 //        cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == true );
@@ -340,7 +340,7 @@ SUITE(ChineseTextSplitterTest)
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
         CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
-            //CHECK( pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
+            //CHECK( pEngrouter && pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
         //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
         //cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == true );

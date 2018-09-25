@@ -188,7 +188,7 @@ public:
         {
             RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
             ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = pDyn->get_document();
+            m_pDoc = (pDyn ? pDyn->get_document() : nullptr);
         }
     }
 
@@ -242,9 +242,9 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( a.get_musicxml_version() == 300 );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -268,7 +268,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
         CHECK( pRoot != nullptr );
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         CHECK( errormsg.str() == expected.str() );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -292,10 +292,10 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -320,14 +320,14 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_version_number() == 160 );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_version_number() == 160 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
@@ -357,13 +357,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
@@ -393,10 +393,10 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
 
@@ -423,13 +423,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
@@ -456,13 +456,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
@@ -494,24 +494,35 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-
-        CHECK( pMD->get_num_items() == 0 );
-        pInstr = pScore->get_instrument(1);
-        CHECK( pInstr != nullptr );
-        pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        CHECK( pMD->get_num_items() == 0 );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                if (pInstr)
+                {
+                    ImoMusicData* pMD = pInstr->get_musicdata();
+                    CHECK( pMD != nullptr );
+                    if (pMD)
+                    {
+                        CHECK( pMD->get_num_items() == 0 );
+                        pInstr = pScore->get_instrument(1);
+                        CHECK( pInstr != nullptr );
+                        pMD = pInstr->get_musicdata();
+                        CHECK( pMD != nullptr );
+                        CHECK( pMD->get_num_items() == 0 );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -538,7 +549,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_instrument() == true );
+        CHECK( pRoot && pRoot->is_instrument() == true );
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pRoot );
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
@@ -583,13 +594,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
 
@@ -597,11 +608,11 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups != nullptr );
         ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
         CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+        CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+        CHECK( pGroup && pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup && pGroup->get_name_string() == "" );
+        CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -633,13 +644,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
 
@@ -676,13 +687,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
+        CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
 
@@ -719,18 +730,24 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups == nullptr );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups == nullptr );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -762,18 +779,24 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups == nullptr );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups == nullptr );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -805,18 +828,24 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups == nullptr );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups == nullptr );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -850,25 +879,34 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups != nullptr );
+                ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                CHECK( pGroup != nullptr );
+                if (pGroup)
+                {
+                    CHECK( pGroup->get_instrument(0) != nullptr );
+                    CHECK( pGroup->get_instrument(1) != nullptr );
+                    CHECK( pGroup->get_abbrev_string() == "" );
+                    CHECK( pGroup->get_name_string() == "" );
+                    CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -903,25 +941,33 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "Grp" );
-        CHECK( pGroup->get_name_string() == "Group" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups != nullptr );
+                if (pGroups)
+                {
+                    ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                    CHECK( pGroup != nullptr );
+                    CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+                    CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+                    CHECK( pGroup && pGroup->get_abbrev_string() == "Grp" );
+                    CHECK( pGroup && pGroup->get_name_string() == "Group" );
+                    CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -956,25 +1002,31 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "Group" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_brace );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups != nullptr );
+                ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                CHECK( pGroup != nullptr );
+                CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+                CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+                CHECK( pGroup && pGroup->get_abbrev_string() == "" );
+                CHECK( pGroup && pGroup->get_name_string() == "Group" );
+                CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_brace );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1010,26 +1062,32 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "Group" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
-        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_standard );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups != nullptr );
+                ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                CHECK( pGroup != nullptr );
+                CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+                CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+                CHECK( pGroup && pGroup->get_abbrev_string() == "" );
+                CHECK( pGroup && pGroup->get_name_string() == "Group" );
+                CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
+                CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_standard );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1065,26 +1123,35 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "Group" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_no );
+                ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                CHECK( pGroups != nullptr );
+                if (pGroups)
+                {
+                    ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                    CHECK( pGroup != nullptr );
+                    CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+                    CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+                    CHECK( pGroup && pGroup->get_abbrev_string() == "" );
+                    CHECK( pGroup && pGroup->get_name_string() == "Group" );
+                    CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+                    CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_no );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1120,30 +1187,42 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 2 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_barline_layout() == ImoInstrument::k_mensurstrich );
-        pInstr = pScore->get_instrument(1);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_barline_layout() == ImoInstrument::k_nothing );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 2 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                if (pInstr)
+                {
+                    CHECK( pInstr->get_barline_layout() == ImoInstrument::k_mensurstrich );
+                    pInstr = pScore->get_instrument(1);
+                    CHECK( pInstr != nullptr );
+                    CHECK( pInstr->get_barline_layout() == ImoInstrument::k_nothing );
 
-        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
-        CHECK( pGroups != nullptr );
-        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
-        CHECK( pGroup != nullptr );
-        CHECK( pGroup->get_instrument(0) != nullptr );
-        CHECK( pGroup->get_instrument(1) != nullptr );
-        CHECK( pGroup->get_abbrev_string() == "" );
-        CHECK( pGroup->get_name_string() == "Group" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
+                    ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+                    CHECK( pGroups != nullptr );
+                    if (pGroups)
+                    {
+                        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+                        CHECK( pGroup != nullptr );
+                        CHECK( pGroup && pGroup->get_instrument(0) != nullptr );
+                        CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
+                        CHECK( pGroup && pGroup->get_abbrev_string() == "" );
+                        CHECK( pGroup && pGroup->get_name_string() == "Group" );
+                        CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+                        CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1184,24 +1263,33 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_staves() == 1 );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        CHECK( pMD->get_num_items() == 4 );
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( (*it)->is_clef() == true );
-        ++it;
-        CHECK( (*it)->is_key_signature() == true );
-        ++it;
-        CHECK( (*it)->is_time_signature() == true );
-        ++it;
-        CHECK( (*it)->is_barline() == true );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 1 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                if (pInstr)
+                {
+                    CHECK( pInstr->get_num_staves() == 1 );
+                    ImoMusicData* pMD = pInstr->get_musicdata();
+                    CHECK( pMD != nullptr );
+                    CHECK( pMD->get_num_items() == 4 );
+                    ImoObj::children_iterator it = pMD->begin();
+                    CHECK( (*it)->is_clef() == true );
+                    ++it;
+                    CHECK( (*it)->is_key_signature() == true );
+                    ++it;
+                    CHECK( (*it)->is_time_signature() == true );
+                    ++it;
+                    CHECK( (*it)->is_barline() == true );
+                }
+            }
+        }
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -1282,11 +1370,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_barline() == true );
+        CHECK( pRoot && pRoot->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pRoot );
         CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_double );
-        CHECK( pBarline->is_visible() );
+        CHECK( pBarline && pBarline->get_type() == k_barline_double );
+        CHECK( pBarline && pBarline->is_visible() );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1342,11 +1430,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_clef() == true );
+        CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_G2 );
-        CHECK( pClef->get_staff() == 0 );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_G2 );
+        CHECK( pClef && pClef->get_staff() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1370,10 +1458,10 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_clef() == true );
+        CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_G2 );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_G2 );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1396,11 +1484,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_clef() == true );
+        CHECK( pRoot && pRoot->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
-        CHECK( pClef->get_clef_type() == k_clef_F4 );
-        CHECK( pClef->get_staff() == 1 );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_F4 );
+        CHECK( pClef && pClef->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1429,13 +1517,16 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
-        CHECK( pDM != nullptr );
-        CHECK( pDM->get_mark_type() == "fp" );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+            CHECK( pDM && pDM != nullptr );
+            CHECK( pDM && pDM->get_mark_type() == "fp" );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1463,19 +1554,25 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            CHECK( pSO->get_placement() == k_placement_default );
+            CHECK( pSO->get_display_repeat() == k_repeat_to_coda );
+            CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
-        ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_text() == "To Coda" );
-        CHECK( pAO->get_repeat_mark() == k_repeat_to_coda );
-        CHECK( pAO->get_language() == "it" );
+            ImoTextRepetitionMark* pAO = dynamic_cast<ImoTextRepetitionMark*>( pSO->get_attachment(0) );
+            CHECK( pAO != nullptr );
+            if (pAO)
+            {
+                CHECK( pAO->get_text() == "To Coda" );
+                CHECK( pAO->get_repeat_mark() == k_repeat_to_coda );
+                CHECK( pAO->get_language() == "it" );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1502,18 +1599,24 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
-        CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_none );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+        if (pSO)
+        {
+            CHECK( pSO != nullptr );
+            CHECK( pSO->get_num_attachments() == 1 );
+            CHECK( pSO->get_placement() == k_placement_default );
+            CHECK( pSO->get_display_repeat() == k_repeat_none );
+            CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
-        ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_text() == "Andante" );
-        CHECK( pAO->get_language() == "it" );
+            ImoScoreText* pAO = dynamic_cast<ImoScoreText*>( pSO->get_attachment(0) );
+            CHECK( pAO != nullptr );
+            if (pAO)
+            {
+                CHECK( pAO->get_text() == "Andante" );
+                CHECK( pAO->get_language() == "it" );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1650,17 +1753,20 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_segno );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            CHECK( pSO->get_placement() == k_placement_default );
+            CHECK( pSO->get_display_repeat() == k_repeat_segno );
+            CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
-        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
+            ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+            CHECK( pAO != nullptr );
+            CHECK( pAO && pAO->get_symbol() == ImoSymbolRepetitionMark::k_segno );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1687,17 +1793,21 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
-        CHECK( pSO->get_num_attachments() == 1 );
-        CHECK( pSO->get_placement() == k_placement_default );
-        CHECK( pSO->get_display_repeat() == k_repeat_coda );
-        CHECK( pSO->get_sound_repeat() == k_repeat_none );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            CHECK( pSO->get_placement() == k_placement_default );
+            CHECK( pSO->get_display_repeat() == k_repeat_coda );
+            CHECK( pSO->get_sound_repeat() == k_repeat_none );
 
-        ImoSymbolRepetitionMark* pAO = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
-        CHECK( pAO != nullptr );
-        CHECK( pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
+            ImoSymbolRepetitionMark* pAO
+                = dynamic_cast<ImoSymbolRepetitionMark*>( pSO->get_attachment(0) );
+            CHECK( pAO != nullptr );
+            CHECK( pAO && pAO->get_symbol() == ImoSymbolRepetitionMark::k_coda );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1724,11 +1834,14 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_key_signature() == true );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
-        CHECK( pKeySignature->get_key_type() == k_key_D );
-        CHECK( pKeySignature->get_staff() == 0 );
+        if (pKeySignature)
+        {
+            CHECK( pKeySignature->get_key_type() == k_key_D );
+            CHECK( pKeySignature->get_staff() == 0 );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1751,11 +1864,14 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_key_signature() == true );
+        CHECK( pRoot && pRoot->is_key_signature() == true );
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pRoot );
         CHECK( pKeySignature != nullptr );
-        CHECK( pKeySignature->get_key_type() == k_key_gs );
-        CHECK( pKeySignature->get_staff() == 0 );
+        if (pKeySignature)
+        {
+            CHECK( pKeySignature->get_key_type() == k_key_gs );
+            CHECK( pKeySignature->get_staff() == 0 );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1794,28 +1910,37 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
-        CHECK( pInfo == nullptr );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 3 );
-        ImoObj::children_iterator it = pMD->begin();    //note a4
-        CHECK( (*it)->is_note() );
-        ++it;   //note c3
-        CHECK( (*it)->is_note() );
-        ++it;   //barline
-        CHECK( (*it)->is_barline() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
-        pInfo = pBarline->get_measure_info();
-        CHECK( pInfo != nullptr );
-        CHECK( pInfo->count == 1 );
-//        cout << test_name() << ": count=" << pInfo->count << endl;
+                CHECK( pMD->get_num_children() == 3 );
+                ImoObj::children_iterator it = pMD->begin();    //note a4
+                CHECK( (*it)->is_note() );
+                ++it;   //note c3
+                CHECK( (*it)->is_note() );
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+                ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+                CHECK( pBarline != nullptr );
+                if (pBarline)
+                {
+                    CHECK( pBarline->get_type() == k_barline_simple );
+                    CHECK( pBarline->is_visible() );
+                    pInfo = pBarline->get_measure_info();
+                    CHECK( pInfo != nullptr );
+                    CHECK( pInfo->count == 1 );
+            //        cout << test_name() << ": count=" << pInfo->count << endl;
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1857,50 +1982,62 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
-        CHECK( pInfo == nullptr );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 6 );
-        ImoObj::children_iterator it = pMD->begin();    //measure 1: note a4
-        CHECK( (*it)->is_note() );
-        ++it;   //note c3
-        CHECK( (*it)->is_note() );
-        ++it;   //barline
-        CHECK( (*it)->is_barline() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
-        TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
-        CHECK( pInfo1 != nullptr );
-        CHECK( pInfo1->count == 1 );
-        CHECK( pInfo1->number == "1" );
-//        cout << test_name() << ": count=" << pInfo1->count
-//             << ", number=" << pInfo1->number << endl;
+                CHECK( pMD->get_num_children() == 6 );
+                ImoObj::children_iterator it = pMD->begin();    //measure 1: note a4
+                CHECK( (*it)->is_note() );
+                ++it;   //note c3
+                CHECK( (*it)->is_note() );
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+                ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+                CHECK( pBarline != nullptr );
+                if (pBarline)
+                {
+                    CHECK( pBarline->get_type() == k_barline_simple );
+                    CHECK( pBarline->is_visible() );
+                    TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
+                    CHECK( pInfo1 != nullptr );
+                    CHECK( pInfo1->count == 1 );
+                    CHECK( pInfo1->number == "1" );
+            //        cout << test_name() << ": count=" << pInfo1->count
+            //             << ", number=" << pInfo1->number << endl;
 
-        //measure 2
-        ++it;   //note a4
-        CHECK( (*it)->is_note() );
-        ++it;   //note c3
-        CHECK( (*it)->is_note() );
-        ++it;   //barline
-        CHECK( (*it)->is_barline() );
-        pBarline = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
-        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
-        CHECK( pInfo2 != nullptr );
-        CHECK( pInfo2->count == 2 );
-        CHECK( pInfo2->number == "2" );
-//        cout << test_name() << ": count=" << pInfo2->count
-//             << ", number=" << pInfo2->number << endl;
+                    //measure 2
+                    ++it;   //note a4
+                    CHECK( (*it)->is_note() );
+                    ++it;   //note c3
+                    CHECK( (*it)->is_note() );
+                    ++it;   //barline
+                    CHECK( (*it)->is_barline() );
+                    pBarline = dynamic_cast<ImoBarline*>( *it );
+                    CHECK( pBarline != nullptr );
+                    if (pBarline)
+                    {
+                        CHECK( pBarline->get_type() == k_barline_simple );
+                        CHECK( pBarline->is_visible() );
+                        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
+                        CHECK( pInfo2 != nullptr );
+                        CHECK( pInfo2->count == 2 );
+                        CHECK( pInfo2->number == "2" );
+                //        cout << test_name() << ": count=" << pInfo2->count
+                //             << ", number=" << pInfo2->number << endl;
 
-        CHECK( pInfo1 != pInfo2 );
+                        CHECK( pInfo1 != pInfo2 );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -1945,50 +2082,62 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
-        CHECK( pInfo == nullptr );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 6 );
-        ImoObj::children_iterator it = pMD->begin();    //measure 1: note a4
-        CHECK( (*it)->is_note() );
-        ++it;   //note c3
-        CHECK( (*it)->is_note() );
-        ++it;   //barline
-        CHECK( (*it)->is_barline() );
-        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_simple );
-        CHECK( pBarline->is_visible() );
-        TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
-        CHECK( pInfo1 != nullptr );
-        CHECK( pInfo1->count == 1 );
-        CHECK( pInfo1->number == "1" );
-//        cout << test_name() << ": count=" << pInfo1->count
-//             << ", number=" << pInfo1->number << endl;
+                CHECK( pMD->get_num_children() == 6 );
+                ImoObj::children_iterator it = pMD->begin();    //measure 1: note a4
+                CHECK( (*it)->is_note() );
+                ++it;   //note c3
+                CHECK( (*it)->is_note() );
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+                ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+                CHECK( pBarline != nullptr );
+                if (pBarline)
+                {
+                    CHECK( pBarline->get_type() == k_barline_simple );
+                    CHECK( pBarline->is_visible() );
+                    TypeMeasureInfo* pInfo1 = pBarline->get_measure_info();
+                    CHECK( pInfo1 != nullptr );
+                    CHECK( pInfo1->count == 1 );
+                    CHECK( pInfo1->number == "1" );
+            //        cout << test_name() << ": count=" << pInfo1->count
+            //             << ", number=" << pInfo1->number << endl;
 
-        //measure 2
-        ++it;   //note a4
-        CHECK( (*it)->is_note() );
-        ++it;   //note c3
-        CHECK( (*it)->is_note() );
-        ++it;   //barline
-        CHECK( (*it)->is_barline() );
-        pBarline = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline != nullptr );
-        CHECK( pBarline->get_type() == k_barline_end );
-        CHECK( pBarline->is_visible() );
-        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
-        CHECK( pInfo2 != nullptr );
-        CHECK( pInfo2->count == 2 );
-        CHECK( pInfo2->number == "X2" );
-//        cout << test_name() << ": count=" << pInfo2->count
-//             << ", number=" << pInfo2->number << endl;
+                    //measure 2
+                    ++it;   //note a4
+                    CHECK( (*it)->is_note() );
+                    ++it;   //note c3
+                    CHECK( (*it)->is_note() );
+                    ++it;   //barline
+                    CHECK( (*it)->is_barline() );
+                    pBarline = dynamic_cast<ImoBarline*>( *it );
+                    CHECK( pBarline != nullptr );
+                    if (pBarline)
+                    {
+                        CHECK( pBarline->get_type() == k_barline_end );
+                        CHECK( pBarline->is_visible() );
+                        TypeMeasureInfo* pInfo2 = pBarline->get_measure_info();
+                        CHECK( pInfo2 != nullptr );
+                        CHECK( pInfo2->count == 2 );
+                        CHECK( pInfo2->number == "X2" );
+                //        cout << test_name() << ": count=" << pInfo2->count
+                //             << ", number=" << pInfo2->number << endl;
 
-        CHECK( pInfo1 != pInfo2 );
+                        CHECK( pInfo1 != pInfo2 );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2033,22 +2182,32 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 2 );  //direction + barline
-        CHECK( pMD != nullptr );
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( (*it)->is_direction() );
-        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
-        CHECK( pDir != nullptr );
-        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
-        CHECK( pMM->get_ticks_per_minute() == 55 );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
-        CHECK( pMM->get_left_note_type() == k_quarter );
-        CHECK( pMM->get_left_dots() == 2 );
+                CHECK( pMD->get_num_children() == 2 );  //direction + barline
+                CHECK( pMD != nullptr );
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( (*it)->is_direction() );
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoMetronomeMark* pMM =
+                        static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+                    CHECK( pMM->get_ticks_per_minute() == 55 );
+                    CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_value );
+                    CHECK( pMM->get_left_note_type() == k_quarter );
+                    CHECK( pMM->get_left_dots() == 2 );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2089,25 +2248,35 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 2 );  //direction + barline
-        CHECK( pMD != nullptr );
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( (*it)->is_direction() );
-        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
-        CHECK( pDir != nullptr );
-        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
-        CHECK( pMM->get_left_note_type() == k_longa );
-        CHECK( pMM->get_left_dots() == 0 );
-        CHECK( pMM->get_right_note_type() == k_32nd );
-        CHECK( pMM->get_right_dots() == 1 );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
+                CHECK( pMD->get_num_children() == 2 );  //direction + barline
+                CHECK( pMD != nullptr );
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( (*it)->is_direction() );
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoMetronomeMark* pMM =
+                        static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+                    CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_note_note );
+                    CHECK( pMM->get_left_note_type() == k_longa );
+                    CHECK( pMM->get_left_dots() == 0 );
+                    CHECK( pMM->get_right_note_type() == k_32nd );
+                    CHECK( pMM->get_right_dots() == 1 );
+                    CHECK( pMM->is_visible() == true );
+                    CHECK( pMM->has_parenthesis() == false );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2148,22 +2317,31 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        CHECK( pMD->get_num_children() == 2 );  //direction + barline
-        CHECK( pMD != nullptr );
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( (*it)->is_direction() );
-        ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
-        CHECK( pDir != nullptr );
-        ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
-        CHECK( pMM->get_ticks_per_minute() == 60 );
-        CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
-        CHECK( pMM->is_visible() == true );
-        CHECK( pMM->has_parenthesis() == false );
+                CHECK( pMD->get_num_children() == 2 );  //direction + barline
+                CHECK( pMD != nullptr );
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( (*it)->is_direction() );
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    ImoMetronomeMark* pMM = static_cast<ImoMetronomeMark*>(pDir->get_attachment(0));
+                    CHECK( pMM->get_ticks_per_minute() == 60 );
+                    CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+                    CHECK( pMM->is_visible() == true );
+                    CHECK( pMM->has_parenthesis() == false );
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2253,13 +2431,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -2268,16 +2446,16 @@ SUITE(MxlAnalyserTest)
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
         CHECK( pInfo->get_score_instr_name() == "Marimba" );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
-        CHECK( pMidi->get_midi_port() == 0 );
-        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
-        CHECK( pMidi->get_midi_name() == "" );
-        CHECK( pMidi->get_midi_bank() == 0 );
-        CHECK( pMidi->get_midi_channel() == -1 );
-        CHECK( pMidi->get_midi_program() == 0 );
-        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( pMidi && pMidi->get_midi_port() == 0 );
+        CHECK( pMidi && pMidi->get_midi_device_name() == "Bank 1" );
+        CHECK( pMidi && pMidi->get_midi_name() == "" );
+        CHECK( pMidi && pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi && pMidi->get_midi_channel() == -1 );
+        CHECK( pMidi && pMidi->get_midi_program() == 0 );
+        CHECK( pMidi && pMidi->get_midi_unpitched() == 0 );
         CHECK( is_equal_float(pMidi->get_midi_volume(), 1.0f) );
-        CHECK( pMidi->get_midi_pan() == 0.0 );
-        CHECK( pMidi->get_midi_elevation() == 0.0 );
+        CHECK( pMidi && pMidi->get_midi_pan() == 0.0 );
+        CHECK( pMidi && pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
 //        cout << "instr.name= " << pInfo->get_score_instr_name() << endl
 //             << "instr.abbrev= " << pInfo->get_score_instr_abbrev() << endl
@@ -2330,13 +2508,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -2390,13 +2568,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_name().get_text() == "Flute 1" );
@@ -2411,16 +2589,16 @@ SUITE(MxlAnalyserTest)
         CHECK( pInfo->get_score_instr_virtual_library() == "Garritan Instruments for Finale" );
 	    CHECK( pInfo->get_score_instr_virtual_name() == "001. Woodwinds/1. Flutes/Flute Plr1" );
         ImoMidiInfo* pMidi = pInfo->get_midi_info();
-        CHECK( pMidi->get_midi_port() == 0 );
-        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
-        CHECK( pMidi->get_midi_name() == "" );
-        CHECK( pMidi->get_midi_bank() == 0 );
-        CHECK( pMidi->get_midi_channel() == 0 );
-        CHECK( pMidi->get_midi_program() == 0 );
-        CHECK( pMidi->get_midi_unpitched() == 0 );
+        CHECK( pMidi && pMidi->get_midi_port() == 0 );
+        CHECK( pMidi && pMidi->get_midi_device_name() == "Bank 1" );
+        CHECK( pMidi && pMidi->get_midi_name() == "" );
+        CHECK( pMidi && pMidi->get_midi_bank() == 0 );
+        CHECK( pMidi && pMidi->get_midi_channel() == 0 );
+        CHECK( pMidi && pMidi->get_midi_program() == 0 );
+        CHECK( pMidi && pMidi->get_midi_unpitched() == 0 );
         CHECK( is_equal_float(pMidi->get_midi_volume(), 0.8f) );
-        CHECK( pMidi->get_midi_pan() == -70.0 );
-        CHECK( pMidi->get_midi_elevation() == 0.0 );
+        CHECK( pMidi && pMidi->get_midi_pan() == -70.0 );
+        CHECK( pMidi && pMidi->get_midi_elevation() == 0.0 );
 //        cout << test_name() << endl;
 //        cout << "instr.name= " << pInstr->get_name().get_text() << endl
 //             << "instr.abbrev= " << pInstr->get_abbrev().get_text() << endl
@@ -2472,13 +2650,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -2512,18 +2690,18 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_whole );
-        CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == k_step_E );
-        CHECK( pNote->get_duration() == k_duration_whole );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_whole );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_step() == k_step_E );
+        CHECK( pNote && pNote->get_duration() == k_duration_whole );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
         CHECK( a.get_last_note() == pNote );
 
         a.do_not_delete_instruments_in_destructor();
@@ -2549,18 +2727,18 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_whole );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_duration() == k_duration_whole );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_whole );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_duration() == k_duration_whole );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2585,18 +2763,18 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_step_D );
-        CHECK( pNote->get_duration() == k_duration_quarter );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_step_D );
+        CHECK( pNote && pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2621,19 +2799,19 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 5 );
-        CHECK( pNote->get_step() == k_step_G );
-        CHECK( pNote->get_duration() == k_duration_whole );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 5 );
+        CHECK( pNote && pNote->get_step() == k_step_G );
+        CHECK( pNote && pNote->get_duration() == k_duration_whole );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2659,19 +2837,19 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_notated_accidentals() == k_sharp );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_half );
-        CHECK( pNote->get_octave() == 1 );
-        CHECK( pNote->get_step() == k_step_B );
-        CHECK( pNote->get_duration() == k_duration_quarter );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_half );
+        CHECK( pNote && pNote->get_octave() == 1 );
+        CHECK( pNote && pNote->get_step() == k_step_B );
+        CHECK( pNote && pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2697,20 +2875,20 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_whole );
-        CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == k_step_A );
-        CHECK( pNote->get_duration() == k_duration_whole );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
-        CHECK( pNote->get_staff() == 1 );
+        CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_whole );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_step() == k_step_A );
+        CHECK( pNote && pNote->get_duration() == k_duration_whole );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2736,17 +2914,17 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_quarter );
-        CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == k_step_A );
-        CHECK( pNote->get_duration() == k_duration_quarter );
-        CHECK( pNote->get_stem_direction() == k_stem_down );
+        CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_step() == k_step_A );
+        CHECK( pNote && pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote && pNote->get_stem_direction() == k_stem_down );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2781,26 +2959,29 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            ImoMusicData* pMD = pInstr->get_musicdata();
+            CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 3 );
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK( pMD->get_num_children() == 3 );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
+            ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote != nullptr );
+            CHECK( pNote && pNote->is_in_chord() == true );
+            CHECK( pNote && pNote->is_start_of_chord() == true );
+            CHECK( pNote && pNote->is_end_of_chord() == false );
 
-        ++it;
-        pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
+            ++it;
+            pNote = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote != nullptr );
+            CHECK( pNote && pNote->is_in_chord() == true );
+            CHECK( pNote && pNote->is_start_of_chord() == false );
+            CHECK( pNote && pNote->is_end_of_chord() == true );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2847,23 +3028,23 @@ SUITE(MxlAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == true );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == true );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        CHECK( pNote->is_in_chord() == true );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == true );
+        CHECK( pNote && pNote->is_in_chord() == true );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == true );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2888,19 +3069,19 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_half );
-        CHECK( pNote->get_octave() == 5 );
-        CHECK( pNote->get_step() == k_step_G );
-        CHECK( pNote->get_duration() == k_duration_half );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_half );
+        CHECK( pNote && pNote->get_octave() == 5 );
+        CHECK( pNote && pNote->get_step() == k_step_G );
+        CHECK( pNote && pNote->get_duration() == k_duration_half );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2926,20 +3107,20 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_actual_accidentals() == k_acc_not_computed );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_half );
-        CHECK( pNote->is_pitch_defined() == false );
-        CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == k_no_pitch );
-        CHECK( pNote->get_duration() == k_duration_quarter );
-        CHECK( pNote->is_in_chord() == false );
-        CHECK( pNote->is_start_of_chord() == false );
-        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote && pNote->get_actual_accidentals() == k_acc_not_computed );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_half );
+        CHECK( pNote && pNote->is_pitch_defined() == false );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_step() == k_no_pitch );
+        CHECK( pNote && pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -2967,7 +3148,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_rest() == true );
+        CHECK( pRoot && pRoot->is_rest() == true );
         ImoRest* pRest = dynamic_cast<ImoRest*>( pRoot );
         CHECK( pRest != nullptr );
         CHECK( pRest->get_dots() == 0 );
@@ -3006,13 +3187,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 0 );
@@ -3046,13 +3227,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
@@ -3088,13 +3269,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -3133,13 +3314,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -3179,13 +3360,13 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_document() == true );
+        CHECK( pRoot && pRoot->is_document() == true );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore && pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_sounds() == 1 );
@@ -3236,7 +3417,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
 
@@ -3288,11 +3469,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_sound_change() == true );
+        CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
-        CHECK( pSC->get_bool_attribute(k_attr_dacapo) == true );
-        CHECK( pSC->get_bool_attribute(k_attr_pizzicato) == false );
+        CHECK( pSC && pSC->get_bool_attribute(k_attr_dacapo) == true );
+        CHECK( pSC && pSC->get_bool_attribute(k_attr_pizzicato) == false );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3316,10 +3497,10 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_sound_change() == true );
+        CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
-        CHECK( pSC->get_float_attribute(k_attr_tempo) == 75.0f );
+        CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 75.0f );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3344,10 +3525,10 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_sound_change() == true );
+        CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
-        CHECK( pSC->get_float_attribute(k_attr_tempo) == 70.0f );
+        CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 70.0f );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3374,11 +3555,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_sound_change() == true );
+        CHECK( pRoot && pRoot->is_sound_change() == true );
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( pRoot );
         CHECK( pSC != nullptr );
-        CHECK( pSC->get_num_attributes() == 1 );
-        CHECK( pSC->get_float_attribute(k_attr_tempo) == 72.5f );
+        CHECK( pSC && pSC->get_num_attributes() == 1 );
+        CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 72.5f );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3406,7 +3587,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_direction() == true );
+        CHECK( pRoot && pRoot->is_direction() == true );
         ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
         CHECK( pSO != nullptr );
         CHECK( pSO->get_num_attachments() == 1 );
@@ -3417,7 +3598,7 @@ SUITE(MxlAnalyserTest)
         ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
                                         pSO->get_child_of_type(k_imo_sound_change) );
         CHECK( pSC != nullptr );
-        CHECK( pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
+        CHECK( pSC && pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3452,21 +3633,28 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 3 );          //third one is the barline
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 3 );          //third one is the barline
 
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( *it );
-        CHECK( pSC != nullptr );
-        CHECK( pSC->get_attribute_node(k_attr_tempo) != nullptr  );
+                ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>( *it );
+                CHECK( pSC != nullptr );
+                CHECK( pSC && pSC->get_attribute_node(k_attr_tempo) != nullptr  );
 
-        ++it;
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
+                ++it;
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3520,40 +3708,53 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
-                                    pMD->get_child_of_type(k_imo_sound_change) );
-        CHECK( pSC != nullptr );
-        CHECK( pSC->get_num_attributes() == 0 );
-        ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
-                                    pSC->get_child_of_type(k_imo_midi_info) );
-        CHECK( pMidi != nullptr );
-        CHECK( pMidi->get_score_instr_id() == "P1-I1" );
-        CHECK( pMidi->get_midi_port() == 0 );
-        CHECK( pMidi->get_midi_device_name() == "Bank 1" );
-        CHECK( pMidi->get_midi_name() == "" );
-        CHECK( pMidi->get_midi_bank() == 0 );
-        CHECK( pMidi->get_midi_channel() == 0 );
-        CHECK( pMidi->get_midi_program() == 45 );
-        CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.8f) );
-        CHECK( pMidi->get_midi_pan() == -70.0 );
-        CHECK( pMidi->get_midi_elevation() == 0.0 );
-//        cout << test_name() << endl;
-//        cout << "id= " << pMidi->get_score_instr_id() << endl
-//             << "port= " << pMidi->get_midi_port() << endl
-//             << "device name= " << pMidi->get_midi_device_name() << endl
-//             << "midi name= " << pMidi->get_midi_name() << endl
-//             << "bank= " << pMidi->get_midi_bank() << endl
-//             << "channel= " << pMidi->get_midi_channel() << endl
-//             << "program= " << pMidi->get_midi_program() << endl
-//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
-//             << "volume= " << pMidi->get_midi_volume() << endl
-//             << "pan= " << pMidi->get_midi_pan() << endl
-//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr);
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
+                                            pMD->get_child_of_type(k_imo_sound_change) );
+                CHECK( pSC != nullptr );
+                if (pSC)
+                {
+                    CHECK( pSC->get_num_attributes() == 0 );
+                    ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
+                                                pSC->get_child_of_type(k_imo_midi_info) );
+                    CHECK( pMidi != nullptr );
+                    if (pMidi)
+                    {
+                        CHECK( pMidi && pMidi->get_score_instr_id() == "P1-I1" );
+                        CHECK( pMidi && pMidi->get_midi_port() == 0 );
+                        CHECK( pMidi && pMidi->get_midi_device_name() == "Bank 1" );
+                        CHECK( pMidi && pMidi->get_midi_name() == "" );
+                        CHECK( pMidi && pMidi->get_midi_bank() == 0 );
+                        CHECK( pMidi && pMidi->get_midi_channel() == 0 );
+                        CHECK( pMidi && pMidi->get_midi_program() == 45 );
+                        CHECK( pMidi && pMidi->get_midi_unpitched() == 0 );
+                        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.8f) );
+                        CHECK( pMidi && pMidi->get_midi_pan() == -70.0 );
+                        CHECK( pMidi && pMidi->get_midi_elevation() == 0.0 );
+                //        cout << test_name() << endl;
+                //        cout << "id= " << pMidi->get_score_instr_id() << endl
+                //             << "port= " << pMidi->get_midi_port() << endl
+                //             << "device name= " << pMidi->get_midi_device_name() << endl
+                //             << "midi name= " << pMidi->get_midi_name() << endl
+                //             << "bank= " << pMidi->get_midi_bank() << endl
+                //             << "channel= " << pMidi->get_midi_channel() << endl
+                //             << "program= " << pMidi->get_midi_program() << endl
+                //             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+                //             << "volume= " << pMidi->get_midi_volume() << endl
+                //             << "pan= " << pMidi->get_midi_pan() << endl
+                //             << "elevation= " << pMidi->get_midi_elevation() << endl;
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3609,40 +3810,53 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
-                                    pMD->get_child_of_type(k_imo_sound_change) );
-        CHECK( pSC != nullptr );
-        CHECK( pSC->get_num_attributes() == 0 );
-        ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
-                                    pSC->get_child_of_type(k_imo_midi_info) );
-        CHECK( pMidi != nullptr );
-        CHECK( pMidi->get_score_instr_id() == "P1-I1" );
-        CHECK( pMidi->get_midi_port() == 0 );
-        CHECK( pMidi->get_midi_device_name() == "Bank 3" );
-        CHECK( pMidi->get_midi_name() == "" );
-        CHECK( pMidi->get_midi_bank() == 0 );
-        CHECK( pMidi->get_midi_channel() == 0 );
-        CHECK( pMidi->get_midi_program() == 18 );
-        CHECK( pMidi->get_midi_unpitched() == 0 );
-        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.4f) );
-        CHECK( pMidi->get_midi_pan() == -70.0 );
-        CHECK( pMidi->get_midi_elevation() == 0.0 );
-//        cout << test_name() << endl;
-//        cout << "id= " << pMidi->get_score_instr_id() << endl
-//             << "port= " << pMidi->get_midi_port() << endl
-//             << "device name= " << pMidi->get_midi_device_name() << endl
-//             << "midi name= " << pMidi->get_midi_name() << endl
-//             << "bank= " << pMidi->get_midi_bank() << endl
-//             << "channel= " << pMidi->get_midi_channel() << endl
-//             << "program= " << pMidi->get_midi_program() << endl
-//             << "unpitched= " << pMidi->get_midi_unpitched() << endl
-//             << "volume= " << pMidi->get_midi_volume() << endl
-//             << "pan= " << pMidi->get_midi_pan() << endl
-//             << "elevation= " << pMidi->get_midi_elevation() << endl;
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr);
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                ImoSoundChange* pSC = dynamic_cast<ImoSoundChange*>(
+                                            pMD->get_child_of_type(k_imo_sound_change) );
+                CHECK( pSC != nullptr );
+                if (pSC)
+                {
+                    CHECK( pSC->get_num_attributes() == 0 );
+                    ImoMidiInfo* pMidi = dynamic_cast<ImoMidiInfo*>(
+                                                pSC->get_child_of_type(k_imo_midi_info) );
+                    CHECK( pMidi != nullptr );
+                    if (pMidi)
+                    {
+                        CHECK( pMidi->get_score_instr_id() == "P1-I1" );
+                        CHECK( pMidi->get_midi_port() == 0 );
+                        CHECK( pMidi->get_midi_device_name() == "Bank 3" );
+                        CHECK( pMidi->get_midi_name() == "" );
+                        CHECK( pMidi->get_midi_bank() == 0 );
+                        CHECK( pMidi->get_midi_channel() == 0 );
+                        CHECK( pMidi->get_midi_program() == 18 );
+                        CHECK( pMidi->get_midi_unpitched() == 0 );
+                        CHECK( is_equal_float(pMidi->get_midi_volume(), 0.4f) );
+                        CHECK( pMidi->get_midi_pan() == -70.0 );
+                        CHECK( pMidi->get_midi_elevation() == 0.0 );
+                //        cout << test_name() << endl;
+                //        cout << "id= " << pMidi->get_score_instr_id() << endl
+                //             << "port= " << pMidi->get_midi_port() << endl
+                //             << "device name= " << pMidi->get_midi_device_name() << endl
+                //             << "midi name= " << pMidi->get_midi_name() << endl
+                //             << "bank= " << pMidi->get_midi_bank() << endl
+                //             << "channel= " << pMidi->get_midi_channel() << endl
+                //             << "program= " << pMidi->get_midi_program() << endl
+                //             << "unpitched= " << pMidi->get_midi_unpitched() << endl
+                //             << "volume= " << pMidi->get_midi_volume() << endl
+                //             << "pan= " << pMidi->get_midi_pan() << endl
+                //             << "elevation= " << pMidi->get_midi_elevation() << endl;
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3668,11 +3882,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_time_signature() == true );
+        CHECK( pRoot && pRoot->is_time_signature() == true );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
-        CHECK( pTimeSignature->get_top_number() == 6 );
-        CHECK( pTimeSignature->get_bottom_number() == 8 );
+        CHECK( pTimeSignature && pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature && pTimeSignature->get_bottom_number() == 8 );
 //        cout << test_name()
 //             << ": top number=" << pTimeSignature->get_top_number()
 //             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
@@ -3699,11 +3913,11 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_time_signature() == true );
+        CHECK( pRoot && pRoot->is_time_signature() == true );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pRoot );
         CHECK( pTimeSignature != nullptr );
-        CHECK( pTimeSignature->get_top_number() == 6 );
-        CHECK( pTimeSignature->get_bottom_number() == 4 );
+        CHECK( pTimeSignature && pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature && pTimeSignature->get_bottom_number() == 4 );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3735,16 +3949,16 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
-        CHECK( pRoot->is_note() == true );
+        CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
-        CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_eighth );
-        CHECK( pNote->get_octave() == 5 );
-        CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_time_modifier_top() == 2 );
-        CHECK( pNote->get_time_modifier_bottom() == 3 );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_eighth );
+        CHECK( pNote && pNote->get_octave() == 5 );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_time_modifier_top() == 2 );
+        CHECK( pNote && pNote->get_time_modifier_bottom() == 3 );
 //        cout << "time_modifier_top= " << pNote->get_time_modifier_top()
 //             << ", time_modifier_bottom= " << pNote->get_time_modifier_bottom() << endl;
 
@@ -3792,29 +4006,42 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 4 );
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        ImoTuplet* pTuplet = pNote->get_first_tuplet();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 1 );
-        CHECK( pTuplet->get_normal_number() == 1 );
-        CHECK( pTuplet->get_show_bracket() == k_yesno_default );
-        CHECK( pTuplet->get_num_objects() == 3 );
-        CHECK( pTuplet->get_id() == 137L );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                    CHECK( pTuplet != nullptr );
+                    CHECK( pTuplet && pTuplet->get_actual_number() == 1 );
+                    CHECK( pTuplet && pTuplet->get_normal_number() == 1 );
+                    CHECK( pTuplet && pTuplet->get_show_bracket() == k_yesno_default );
+                    CHECK( pTuplet && pTuplet->get_num_objects() == 3 );
+                    CHECK( pTuplet && pTuplet->get_id() == 137L );
 
-        ++it;
-        ++it;
-        pNote = dynamic_cast<ImoNote*>( *it );
-        ImoTuplet* pTuplet2 = pNote->get_first_tuplet();
-        CHECK( pTuplet2 == pTuplet );
+                    ++it;
+                    ++it;
+                    pNote = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote != nullptr );
+                    if (pNote)
+                    {
+                        ImoTuplet* pTuplet2 = pNote->get_first_tuplet();
+                        CHECK( pTuplet2 == pTuplet );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3868,13 +4095,16 @@ SUITE(MxlAnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != nullptr );
-        ImoTuplet* pTuplet = pNote->get_first_tuplet();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 1 );
-        CHECK( pTuplet->get_normal_number() == 1 );
-        CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
-        CHECK( pTuplet->get_num_objects() == 3 );
-        CHECK( pTuplet->get_id() == 141L );
+        if (pNote)
+        {
+            ImoTuplet* pTuplet = pNote->get_first_tuplet();
+            CHECK( pTuplet != nullptr );
+            CHECK( pTuplet && pTuplet->get_actual_number() == 1 );
+            CHECK( pTuplet && pTuplet->get_normal_number() == 1 );
+            CHECK( pTuplet && pTuplet->get_show_bracket() == k_yesno_yes );
+            CHECK( pTuplet && pTuplet->get_num_objects() == 3 );
+            CHECK( pTuplet && pTuplet->get_id() == 141L );
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -3921,23 +4151,36 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                if (pMD)
+                {
+                    ImoObj::children_iterator it = pMD->begin();
+                    CHECK( pMD->get_num_children() == 4 );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 4 );
-
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        ImoTuplet* pTuplet = pNote->get_first_tuplet();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 3 );
-        CHECK( pTuplet->get_normal_number() == 2 );
-        CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
-        CHECK( pTuplet->get_num_objects() == 3 );
-        CHECK( pTuplet->get_id() == 141L );
+                    ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote != nullptr );
+                    if (pNote)
+                    {
+                        ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                        CHECK( pTuplet != nullptr );
+                        CHECK( pTuplet && pTuplet->get_actual_number() == 3 );
+                        CHECK( pTuplet && pTuplet->get_normal_number() == 2 );
+                        CHECK( pTuplet && pTuplet->get_show_bracket() == k_yesno_yes );
+                        CHECK( pTuplet && pTuplet->get_num_objects() == 3 );
+                        CHECK( pTuplet && pTuplet->get_id() == 141L );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -4019,44 +4262,57 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 10 );
-//        cout << test_name() << endl;
-        //cout << "num.children= " << pMD->get_num_children() << endl;
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 10 );
+        //        cout << test_name() << endl;
+                //cout << "num.children= " << pMD->get_num_children() << endl;
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        ImoTuplet* pTuplet = pNote->get_first_tuplet();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 3 );
-        CHECK( pTuplet->get_normal_number() == 2 );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                    CHECK( pTuplet != nullptr );
+                    CHECK( pTuplet && pTuplet->get_actual_number() == 3 );
+                    CHECK( pTuplet && pTuplet->get_normal_number() == 2 );
 
-        ++it;
-        pNote = dynamic_cast<ImoNote*>( *it );
-        ++it;
-        pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        list<ImoTuplet*> tuplets = get_tuplets(pNote);
-        CHECK( tuplets.size() == 2 );
-        pTuplet = tuplets.front();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 5 );
-        CHECK( pTuplet->get_normal_number() == 2 );
-//        cout << test_name() << endl;
-//        cout << "Tuplet. actual=" << pTuplet->get_actual_number()
-//             << ", normal=" << pTuplet->get_normal_number() << endl;
-        pTuplet = tuplets.back();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 3 );
-        CHECK( pTuplet->get_normal_number() == 2 );
-//        cout << test_name() << endl;
-//        cout << "Tuplet. actual=" << pTuplet->get_actual_number()
-//             << ", normal=" << pTuplet->get_normal_number() << endl;
+                    ++it;
+                    ++it;
+                    pNote = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote != nullptr );
+                    if (pNote)
+                    {
+                        list<ImoTuplet*> tuplets = get_tuplets(pNote);
+                        CHECK( tuplets.size() == 2 );
+                        pTuplet = tuplets.front();
+                        CHECK( pTuplet != nullptr );
+                        CHECK( pTuplet && pTuplet->get_actual_number() == 5 );
+                        CHECK( pTuplet && pTuplet->get_normal_number() == 2 );
+                //        cout << test_name() << endl;
+                //        cout << "Tuplet. actual=" << pTuplet->get_actual_number()
+                //             << ", normal=" << pTuplet->get_normal_number() << endl;
+                        pTuplet = tuplets.back();
+                        CHECK( pTuplet != nullptr );
+                        CHECK( pTuplet && pTuplet->get_actual_number() == 3 );
+                        CHECK( pTuplet && pTuplet->get_normal_number() == 2 );
+                //        cout << test_name() << endl;
+                //        cout << "Tuplet. actual=" << pTuplet->get_actual_number()
+                //             << ", normal=" << pTuplet->get_normal_number() << endl;
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -4109,28 +4365,39 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 4 );
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
 
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote != nullptr );
-        ImoTuplet* pTuplet = pNote->get_first_tuplet();
-        CHECK( pTuplet != nullptr );
-        CHECK( pTuplet->get_actual_number() == 5 );
-        CHECK( pTuplet->get_normal_number() == 3 );
-        CHECK( pTuplet->get_show_bracket() == k_yesno_yes );
-        CHECK( pTuplet->get_num_objects() == 3 );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                    CHECK( pTuplet != nullptr );
+                    CHECK( pTuplet && pTuplet->get_actual_number() == 5 );
+                    CHECK( pTuplet && pTuplet->get_normal_number() == 3 );
+                    CHECK( pTuplet && pTuplet->get_show_bracket() == k_yesno_yes );
+                    CHECK( pTuplet && pTuplet->get_num_objects() == 3 );
 
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        cout << "Tuplet. actual=" << pTuplet->get_actual_number()
-//             << ", normal=" << pTuplet->get_normal_number() << endl;
+        //            cout << test_name() << endl;
+        //            cout << "[" << errormsg.str() << "]" << endl;
+        //            cout << "[" << expected.str() << "]" << endl;
+        //            cout << "Tuplet. actual=" << pTuplet->get_actual_number()
+        //                 << ", normal=" << pTuplet->get_normal_number() << endl;
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -4183,48 +4450,61 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 4 );
-//        cout << test_name() << endl;
-//        cout << "num.children=" << pMD->get_num_children() << endl;
-//        while (it != pMD->end())
-//        {
-//            cout << (*it)->to_string() << endl;
-//            ++it;
-//        }
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+        //        cout << test_name() << endl;
+        //        cout << "num.children=" << pMD->get_num_children() << endl;
+        //        while (it != pMD->end())
+        //        {
+        //            cout << (*it)->to_string() << endl;
+        //            ++it;
+        //        }
 
-        it = pMD->begin();
-        ++it;
-        ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline1 != nullptr );
-        CHECK( pBarline1->get_type() == k_barline_simple );
-        CHECK( pBarline1->is_visible() );
-        ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
-                                    pBarline1->find_relation(k_imo_volta_bracket) );
-        CHECK( pVB1 != nullptr );
+                it = pMD->begin();
+                ++it;
+                ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
+                CHECK( pBarline1 != nullptr );
+                if (pBarline1)
+                {
+                    CHECK( pBarline1->get_type() == k_barline_simple );
+                    CHECK( pBarline1->is_visible() );
+                    ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
+                                                pBarline1->find_relation(k_imo_volta_bracket) );
+                    CHECK( pVB1 != nullptr );
 
-        ++it;
-        ++it;
-        ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline2 != nullptr );
-        CHECK( pBarline2->get_type() == k_barline_end_repetition );
-        CHECK( pBarline2->is_visible() );
+                    ++it;
+                    ++it;
+                    ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
+                    CHECK( pBarline2 != nullptr );
+                    if (pBarline2)
+                    {
+                        CHECK( pBarline2->get_type() == k_barline_end_repetition );
+                        CHECK( pBarline2->is_visible() );
 
-        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
-                                    pBarline2->find_relation(k_imo_volta_bracket) );
-        CHECK( pVB2 != nullptr );
+                        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
+                                                    pBarline2->find_relation(k_imo_volta_bracket) );
+                        CHECK( pVB2 != nullptr );
 
-        CHECK( pVB1 == pVB2 );
-        CHECK( pVB1->get_start_barline() == pBarline1 );
-        CHECK( pVB1->get_stop_barline() == pBarline2 );
-        CHECK( pVB1->has_final_jog() == true );
-        CHECK( pVB1->get_volta_number() == "1" );
-        CHECK( pVB1->get_volta_text() == "" );
+                        CHECK( pVB1 == pVB2 );
+                        CHECK( pVB1 && pVB1->get_start_barline() == pBarline1 );
+                        CHECK( pVB1 && pVB1->get_stop_barline() == pBarline2 );
+                        CHECK( pVB1 && pVB1->has_final_jog() == true );
+                        CHECK( pVB1 && pVB1->get_volta_number() == "1" );
+                        CHECK( pVB1 && pVB1->get_volta_text() == "" );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -4273,50 +4553,63 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 4 );
-//        cout << test_name() << endl;
-//        cout << "num.children=" << pMD->get_num_children() << endl;
-//        while (it != pMD->end())
-//        {
-//            cout << (*it)->to_string() << endl;
-//            ++it;
-//        }
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+        //        cout << test_name() << endl;
+        //        cout << "num.children=" << pMD->get_num_children() << endl;
+        //        while (it != pMD->end())
+        //        {
+        //            cout << (*it)->to_string() << endl;
+        //            ++it;
+        //        }
 
-        it = pMD->begin();
-        ++it;
-        ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline1 != nullptr );
-        CHECK( pBarline1->get_type() == k_barline_simple );
-        CHECK( pBarline1->is_visible() );
-        ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
-                                    pBarline1->find_relation(k_imo_volta_bracket) );
-        CHECK( pVB1 != nullptr );
+                it = pMD->begin();
+                ++it;
+                ImoBarline* pBarline1 = dynamic_cast<ImoBarline*>( *it );
+                CHECK( pBarline1 != nullptr );
+                if (pBarline1)
+                {
+                    CHECK( pBarline1->get_type() == k_barline_simple );
+                    CHECK( pBarline1->is_visible() );
+                    ImoVoltaBracket* pVB1 = dynamic_cast<ImoVoltaBracket*>(
+                                                pBarline1->find_relation(k_imo_volta_bracket) );
+                    CHECK( pVB1 != nullptr );
 
-        ++it;
-        ++it;
-        ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
-        CHECK( pBarline2 != nullptr );
-        CHECK( pBarline2->get_type() == k_barline_end_repetition );
-        CHECK( pBarline2->is_visible() );
+                    ++it;
+                    ++it;
+                    ImoBarline* pBarline2 = dynamic_cast<ImoBarline*>( *it );
+                    CHECK( pBarline2 != nullptr );
+                    if (pBarline2)
+                    {
+                        CHECK( pBarline2->get_type() == k_barline_end_repetition );
+                        CHECK( pBarline2->is_visible() );
 
-        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
-                                    pBarline2->find_relation(k_imo_volta_bracket) );
-        CHECK( pVB2 != nullptr );
+                        ImoVoltaBracket* pVB2 = dynamic_cast<ImoVoltaBracket*>(
+                                                    pBarline2->find_relation(k_imo_volta_bracket) );
+                        CHECK( pVB2 != nullptr );
 
-        CHECK( pVB1 == pVB2 );
-        CHECK( pVB1->get_start_barline() == pBarline1 );
-        CHECK( pVB1->get_stop_barline() == pBarline2 );
-        CHECK( pVB1->has_final_jog() == true );
-        CHECK( pVB1->get_volta_number() == "1" );
-        CHECK( pVB1->get_volta_text() == "First time" );
-//        cout << "Volta number = '" << pVB1->get_volta_number() << "'" << endl;
-//        cout << "Volta text = '" << pVB1->get_volta_text() << "'" << endl;
+                        CHECK( pVB1 == pVB2 );
+                        CHECK( pVB1 && pVB1->get_start_barline() == pBarline1 );
+                        CHECK( pVB1 && pVB1->get_stop_barline() == pBarline2 );
+                        CHECK( pVB1 && pVB1->has_final_jog() == true );
+                        CHECK( pVB1 && pVB1->get_volta_number() == "1" );
+                        CHECK( pVB1 && pVB1->get_volta_text() == "First time" );
+                //        cout << "Volta number = '" << pVB1->get_volta_number() << "'" << endl;
+                //        cout << "Volta text = '" << pVB1->get_volta_text() << "'" << endl;
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -4400,18 +4693,24 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc != nullptr );
-        CHECK( pDoc->get_num_content_items() == 1 );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        CHECK( pScore != nullptr );
-        CHECK( pScore->get_num_instruments() == 1 );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr != nullptr );
-        CHECK( pInstr->get_num_staves() == 1 );
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
-        CHECK( pMD->get_num_items() == 5 );
-        ImoObj* pImo = pMD->get_first_child();
-        CHECK( pImo->is_clef() == true );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 1 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                CHECK( pInstr->get_num_staves() == 1 );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+                CHECK( pMD->get_num_items() == 5 );
+                ImoObj* pImo = pMD->get_first_child();
+                CHECK( pImo->is_clef() == true );
+            }
+        }
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -4447,48 +4746,61 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ImoInstrument* pInstr = pScore->get_instrument(0);
-        ImoMusicData* pMD = pInstr->get_musicdata();
-        CHECK( pMD != nullptr );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
 
-        ImoObj::children_iterator it = pMD->begin();
-        CHECK( pMD->get_num_children() == 3 );          //#3 is barline
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 3 );          //#3 is barline
 
-        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote1 != nullptr );
-        ++it;
-        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
-        CHECK( pNote2 != nullptr );
+                ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote1 != nullptr );
+                if (pNote1)
+                {
+                    ++it;
+                    ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote2 != nullptr );
+                    if (pNote2)
+                    {
+                        CHECK( pNote1->get_beam_type(0) == ImoBeam::k_begin );
+                        CHECK( pNote1->get_beam_type(1) == ImoBeam::k_begin );
+                        CHECK( pNote1->get_beam_type(2) == ImoBeam::k_none );
+                        CHECK( pNote1->get_beam_type(3) == ImoBeam::k_none );
+                        CHECK( pNote1->get_beam_type(4) == ImoBeam::k_none );
+                        CHECK( pNote1->get_beam_type(5) == ImoBeam::k_none );
 
-        CHECK( pNote1->get_beam_type(0) == ImoBeam::k_begin );
-        CHECK( pNote1->get_beam_type(1) == ImoBeam::k_begin );
-        CHECK( pNote1->get_beam_type(2) == ImoBeam::k_none );
-        CHECK( pNote1->get_beam_type(3) == ImoBeam::k_none );
-        CHECK( pNote1->get_beam_type(4) == ImoBeam::k_none );
-        CHECK( pNote1->get_beam_type(5) == ImoBeam::k_none );
+                        CHECK( pNote2->get_beam_type(0) == ImoBeam::k_end );
+                        CHECK( pNote2->get_beam_type(1) == ImoBeam::k_end );
+                        CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
+                        CHECK( pNote2->get_beam_type(3) == ImoBeam::k_none );
+                        CHECK( pNote2->get_beam_type(4) == ImoBeam::k_none );
+                        CHECK( pNote2->get_beam_type(5) == ImoBeam::k_none );
 
-        CHECK( pNote2->get_beam_type(0) == ImoBeam::k_end );
-        CHECK( pNote2->get_beam_type(1) == ImoBeam::k_end );
-        CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
-        CHECK( pNote2->get_beam_type(3) == ImoBeam::k_none );
-        CHECK( pNote2->get_beam_type(4) == ImoBeam::k_none );
-        CHECK( pNote2->get_beam_type(5) == ImoBeam::k_none );
-
-//        cout << test_name() << endl;
-//        cout << "errormsg: " << errormsg.str() << endl;
-//        cout << "note 1 beams: " << pNote1->get_beam_type(0)
-//             << ", " << pNote1->get_beam_type(1)
-//             << ", " << pNote1->get_beam_type(2)
-//             << ", " << pNote1->get_beam_type(3)
-//             << ", " << pNote1->get_beam_type(4)
-//             << ", " << pNote1->get_beam_type(5) << endl;
-//        cout << "note 2 beams: " << pNote2->get_beam_type(0)
-//             << ", " << pNote2->get_beam_type(1)
-//             << ", " << pNote2->get_beam_type(2)
-//             << ", " << pNote2->get_beam_type(3)
-//             << ", " << pNote2->get_beam_type(4)
-//             << ", " << pNote2->get_beam_type(5) << endl;
+                //        cout << test_name() << endl;
+                //        cout << "errormsg: " << errormsg.str() << endl;
+                //        cout << "note 1 beams: " << pNote1->get_beam_type(0)
+                //             << ", " << pNote1->get_beam_type(1)
+                //             << ", " << pNote1->get_beam_type(2)
+                //             << ", " << pNote1->get_beam_type(3)
+                //             << ", " << pNote1->get_beam_type(4)
+                //             << ", " << pNote1->get_beam_type(5) << endl;
+                //        cout << "note 2 beams: " << pNote2->get_beam_type(0)
+                //             << ", " << pNote2->get_beam_type(1)
+                //             << ", " << pNote2->get_beam_type(2)
+                //             << ", " << pNote2->get_beam_type(3)
+                //             << ", " << pNote2->get_beam_type(4)
+                //             << ", " << pNote2->get_beam_type(5) << endl;
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;

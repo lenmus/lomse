@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -270,41 +270,45 @@ Engrouter::Engrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits Engrouter::shift_for_vertical_alignment(LineReferences& refs)
+LUnits Engrouter::shift_for_vertical_alignment(LineReferences& UNUSED(refs))
 {
-    if (refs.lineHeight == 0.0f)
-        return 0.0f;
+    //TODO shift_for_vertical_alignment() method
 
-    int valign = k_valign_top;  //m_pStyle->vertical_align();
-    switch (valign)
-    {
-        case ImoStyle::k_valign_baseline:
-            return refs.baseline - m_refLines.baseline;
+    return 0.0f;
 
-        case ImoStyle::k_valign_sub:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        case ImoStyle::k_valign_super:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        case ImoStyle::k_valign_top:
-            return 0.0f;
-
-        case ImoStyle::k_valign_text_top:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        case ImoStyle::k_valign_middle:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        case ImoStyle::k_valign_bottom:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        case ImoStyle::k_valign_text_bottom:
-            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
-
-        default:
-            return 0.0f;
-    }
+//    if (refs.lineHeight == 0.0f)
+//        return 0.0f;
+//
+//    int valign = m_pStyle->vertical_align();
+//    switch (valign)
+//    {
+//        case ImoStyle::k_valign_baseline:
+//            return refs.baseline - m_refLines.baseline;
+//
+//        case ImoStyle::k_valign_sub:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        case ImoStyle::k_valign_super:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        case ImoStyle::k_valign_top:
+//            return 0.0f;
+//
+//        case ImoStyle::k_valign_text_top:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        case ImoStyle::k_valign_middle:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        case ImoStyle::k_valign_bottom:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        case ImoStyle::k_valign_text_bottom:
+//            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
+//
+//        default:
+//            return 0.0f;
+//    }
 }
 
 
@@ -477,12 +481,12 @@ void BoxEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
     {
         if (pGmo->is_shape())
         {
-            GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
+            GmoShape* pShape = static_cast<GmoShape*>(pGmo);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
         else if (pGmo->is_box())
         {
-            GmoBox* pChildBox = dynamic_cast<GmoBox*>(pGmo);
+            GmoBox* pChildBox = static_cast<GmoBox*>(pGmo);
             pBox->add_child_box(pChildBox);
         }
     }
@@ -496,7 +500,7 @@ void BoxEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 GmoObj* ImageEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
     pos.y += shift_for_vertical_alignment(refs);
-    ImoImage* pImage = dynamic_cast<ImoImage*>(m_pCreatorImo);
+    ImoImage* pImage = static_cast<ImoImage*>(m_pCreatorImo);
     SpImage image = pImage->get_image();
     return LOMSE_NEW GmoShapeImage(m_pCreatorImo, image, pos, m_size);
 }
@@ -525,6 +529,9 @@ WordEngrouter::WordEngrouter(ImoContentObj* pCreatorImo, LibraryScope& librarySc
                              const wstring& text)
     : Engrouter(pCreatorImo, libraryScope)
     , m_text(text)
+    , m_descent(0.0f)
+    , m_ascent(0.0f)
+    , m_halfLeading(0.0f)
 {
     ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pCreatorImo );
     if (pText)
@@ -654,12 +661,12 @@ void InlineWrapperEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 {
     if (pGmo->is_shape())
     {
-        GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
+        GmoShape* pShape = static_cast<GmoShape*>(pGmo);
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
     }
     else if (pGmo->is_box())
     {
-        GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
+        GmoBox* pBox = static_cast<GmoBox*>(pGmo);
         pBox->add_child_box(pBox);
     }
 }

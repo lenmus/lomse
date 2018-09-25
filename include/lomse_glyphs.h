@@ -422,6 +422,8 @@ enum EGlyphIndex
     k_glyph_table_pair_of_handbells,        // Table pair of handbells
 
     //Electronic music pictograms (U+EB10 - U+EB5F)
+    k_glyph_stop_button,                    // Stop button, used for errors
+
     k_glyph_error,          // stop play button
 
 };

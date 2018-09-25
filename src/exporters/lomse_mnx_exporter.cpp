@@ -1061,6 +1061,7 @@ protected:
 
 
         start_attrib("pitch");
+        // coverity[check_return]
         m_source << sNoteName[m_pObj->get_step()];
         m_source << sOctave[m_pObj->get_octave()];
         end_attrib();

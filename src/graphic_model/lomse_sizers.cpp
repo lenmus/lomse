@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,7 +42,13 @@ namespace lomse
 //-------------------------------------------------------------------------------------
 
 SizerChild::SizerChild(GmoBox* pBox, int factor, int alignment)
-    : m_alignment(alignment)
+    : m_minWidth(0.0f)
+    , m_minHeight(0.0f)
+    , m_marginLeft(0.0f)
+    , m_marginTop(0.0f)
+    , m_marginRight(0.0f)
+    , m_marginBottom(0.0f)
+    , m_alignment(alignment)
     , m_stretchFactor(factor)
     , m_pControlledBox(pBox)
 {

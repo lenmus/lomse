@@ -307,7 +307,11 @@ protected:
     StaffVoiceLineTable  m_lines;
 
     ColStaffObjsBuilderEngine(ImoScore* pScore)
-        : m_pImScore(pScore)
+        : m_pColStaffObjs(nullptr)
+        , m_pImScore(pScore)
+        , m_nCurMeasure(0)
+        , m_rMaxSegmentTime(0.0)
+        , m_rStartSegmentTime(0.0)
         , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
     {}
 
@@ -343,7 +347,11 @@ class ColStaffObjsBuilderEngine1x : public ColStaffObjsBuilderEngine
 protected:
 
 public:
-    ColStaffObjsBuilderEngine1x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
+    ColStaffObjsBuilderEngine1x(ImoScore* pScore)
+        : ColStaffObjsBuilderEngine(pScore)
+        , m_rCurTime(0.0)
+    {
+    }
     virtual ~ColStaffObjsBuilderEngine1x() {}
 
 private:
@@ -376,7 +384,11 @@ protected:
     int m_curVoice;
 
 public:
-    ColStaffObjsBuilderEngine2x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
+    ColStaffObjsBuilderEngine2x(ImoScore* pScore)
+        : ColStaffObjsBuilderEngine(pScore)
+        , m_curVoice(0)
+    {
+    }
     virtual ~ColStaffObjsBuilderEngine2x() {}
 
 private:

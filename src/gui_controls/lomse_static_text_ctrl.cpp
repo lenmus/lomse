@@ -51,6 +51,8 @@ StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, Control* pParent,
     , m_pMainBox(nullptr)
     , m_width(width)
     , m_height(height)
+    , m_xCenter(0.0f)
+    , m_yCenter(0.0f)
 {
     m_style = (pStyle == nullptr ? create_default_style() : pStyle);
 

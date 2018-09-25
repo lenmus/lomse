@@ -83,6 +83,12 @@ SpAlgGourlay::SpAlgGourlay(LibraryScope& libraryScope,
     //
     , m_maxNoteDur(0.0f)
     , m_minNoteDur(LOMSE_NO_DURATION)
+    //
+	, m_uSmin(0.0f)
+    , m_alpha(0.0f)
+    , m_dmin(0.0f)
+    , m_log2dmin(0.0f)
+    , m_Fopt(0.0f)
 {
 //    m_columns.reserve(pScoreLyt->get_num_columns());
     m_data.reserve(pScore->get_staffobjs_table()->num_entries());
@@ -837,9 +843,10 @@ TimeSlice::TimeSlice(ColStaffObjsEntry* pEntry, int entryType, int column, int i
     , m_ci(0.0f)
     , m_width(0.0f)
     , m_xLeft(0.0f)
-    , m_ds(0.0f)
-    , m_di(0.0f)
-    , m_minNote(0.0f)
+    , m_ds(0.0)
+    , m_di(0.0)
+    , m_minNote(0.0)
+    , m_minNoteNext(0.0)
 {
 }
 
@@ -1041,6 +1048,8 @@ void TimeSlice::dump_header(ostream& ss)
 //---------------------------------------------------------------------------------------
 void TimeSlice::dump(ostream& ss)
 {
+    std::ios_base::fmtflags f( ss.flags() );  //save formating options
+
     ss << "  " << m_type << "   "
        << fixed << setprecision(2) << setfill(' ')
        << setw(9) << get_timepos()
@@ -1067,6 +1076,8 @@ void TimeSlice::dump(ostream& ss)
     ss << setw(9) << m_iFirstData;
 
     ss << endl;
+
+    ss.flags( f );  //restore formating options
 }
 
 //---------------------------------------------------------------------------------------
@@ -1260,6 +1271,10 @@ void TimeSliceProlog::remove_after_space(ScoreMeter* pMeter)
 //=====================================================================================
 TimeSliceNonTimed::TimeSliceNonTimed(ColStaffObjsEntry* pEntry, int column, int iData)
     : TimeSlice(pEntry, k_non_timed, column, iData)
+    , m_numStaves(0)
+    , m_interSpace(0.0f)
+    , m_fHasWidth(false)
+    , m_fSomeVisible(false)
 {
 
 }
@@ -1300,22 +1315,19 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     {
         GmoShape* pShape = data[i]->get_shape();
         m_fSomeVisible |= !pShape->is_shape_invisible();
-        if (pShape)
+        int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
+        m_fHasObjects[iStaff] = true;
+        LUnits width = pShape->get_width();
+        if (width > 0.0f)
         {
-            int iStaff = pMeter->staff_index(pEntry->num_instrument(), pEntry->staff());
-            m_fHasObjects[iStaff] = true;
-            LUnits width = pShape->get_width();
-            if (width > 0.0f)
-            {
-                m_widths[iStaff] += width;
-                m_fHasWidth = true;
-                //[NT2] test 00607. CHECK: some space between clef change and note.
-                //                        Blue line on note, at center.
-                if (!pShape->is_shape_invisible())
-                    m_widths[iStaff] += m_interSpace;
-            }
-            maxWidth = max(maxWidth, m_widths[iStaff]);
+            m_widths[iStaff] += width;
+            m_fHasWidth = true;
+            //[NT2] test 00607. CHECK: some space between clef change and note.
+            //                        Blue line on note, at center.
+            if (!pShape->is_shape_invisible())
+                m_widths[iStaff] += m_interSpace;
         }
+        maxWidth = max(maxWidth, m_widths[iStaff]);
     }
 
     //Add some space before this slice, for separation from previous object.
@@ -1526,6 +1538,8 @@ void TimeSliceBarline::assign_spacing_values(vector<StaffObjData*>& data,
 //=====================================================================================
 TimeSliceNoterest::TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int iData)
     : TimeSlice(pEntry, k_noterest, column, iData)
+    , m_xRiLyrics(0.0f)
+    , m_xRiMerged(0.0f)
 {
 
 }
@@ -1704,7 +1718,7 @@ void TimeSliceNoterest::assign_spacing_values(vector<StaffObjData*>& data,
             m_xLeft -= xPrev;   //AWARE: xPrev is always negative
         }
     }
-    else
+    else if (m_prev)
     {
         //prev is barline or prolog. Lyrics space can always be transferred to them
         //but accidentals cannot.
@@ -1766,6 +1780,7 @@ LUnits TimeSliceNoterest::measure_lyric(ImoLyric* pLyric, ScoreMeter* pMeter,
     //hyphenation, if needed
     if (pLyric->has_hyphenation() && !pLyric->has_melisma())
     {
+        // coverity[var_deref_model]
         totalWidth += measure_text("-", pStyle, "en", textMeter)
                       + pMeter->tenths_to_logical_max(10.0);
     }
@@ -1831,8 +1846,11 @@ void TimeSliceNoterest::set_minimum_xi(LUnits value)
 ColumnDataGourlay::ColumnDataGourlay(TimeSlice* pSlice)
     : m_pFirstSlice(pSlice)
     , m_slope(1.0f)
+    , m_minFi(0.0f)
     , m_xFixed(0.0f)
     , m_colWidth(0.0f)
+    , m_colMinWidth(0.0f)
+    , m_barlinesInfo(0)
     , m_xPos(0.0f)
 {
 }

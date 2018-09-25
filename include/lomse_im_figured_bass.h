@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,7 +70,12 @@ protected:
     bool              m_fSounds;        //the interval exists and must sound
 
 public:
-    ImoFigBassIntervalInfo() {}
+    ImoFigBassIntervalInfo()
+        : m_quality(k_interval_not_present)
+        , m_aspect(k_interval_draw_normal)
+        , m_fSounds(false)
+    {
+    }
 
     //getters
     inline EIntervalQuality get_quality() { return m_quality; }

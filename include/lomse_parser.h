@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,6 +30,8 @@
 #ifndef __LOMSE_PARSER_H__
 #define __LOMSE_PARSER_H__
 
+#include "lomse_basic.h"
+
 #include <ostream>
 using namespace std;
 
@@ -43,9 +45,14 @@ class Parser
 protected:
     ostream& m_reporter;
     int m_numErrors;        //number of errors found during parsing
-    long m_nMaxId;          //maximum ID found
+    ImoId m_nMaxId;         //maximum ID found
 
-    Parser(ostream& reporter) : m_reporter(reporter) {}
+    Parser(ostream& reporter)
+        : m_reporter(reporter)
+        , m_numErrors(0)
+        , m_nMaxId(k_no_imoid)
+    {
+    }
 
 public:
     virtual ~Parser() {}

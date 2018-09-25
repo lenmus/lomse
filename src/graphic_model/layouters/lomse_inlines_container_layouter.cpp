@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,9 +52,12 @@ InlinesContainerLayouter::InlinesContainerLayouter(ImoContentObj* pItem, Layoute
     , m_libraryScope(libraryScope)
     , m_pPara( dynamic_cast<ImoInlinesContainer*>(pItem) )
     , m_fFirstLine(true)
+    , m_xLineStart(0.0f)
     , m_pEngrCreator(nullptr)
     , m_firstLineIndent(0.0f)
     , m_firstLinePrefix(L"")
+    , m_availableSpace(0.0f)
+    , m_lineWidth(0.0f)
 {
 }
 
@@ -417,13 +420,13 @@ void InlinesContainerLayouter::add_engrouter_shape(Engrouter* pEngrouter,
     {
         if (pGmo->is_shape())
         {
-            GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
+            GmoShape* pShape = static_cast<GmoShape*>(pGmo);
             m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
             m_pageCursor.x += pShape->get_width();
         }
         else if (pGmo->is_box())
         {
-            GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
+            GmoBox* pBox = static_cast<GmoBox*>(pGmo);
             m_pItemMainBox->add_child_box(pBox);
             m_pageCursor.x += pBox->get_width();
         }

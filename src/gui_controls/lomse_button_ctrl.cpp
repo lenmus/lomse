@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,6 +54,8 @@ ButtonCtrl::ButtonCtrl(LibraryScope& libScope, Control* pParent,
     , m_overColor( Color(255,200,0) )           //orange
     , m_fMouseIn(false)
     , m_pMainBox(nullptr)
+    , m_xLabel(0.0f)
+    ,  m_yLabel(0.0f)
 {
     m_style = (pStyle == nullptr ? create_default_style() : pStyle);
 
