@@ -1556,6 +1556,47 @@ void CmdChangeDots::undo_action(Document* pDoc, DocCursor* pCursor)
     pScore->end_of_changes();
 }
 
+
+//=======================================================================================
+// CmdChromaticTransposition implementation
+//=======================================================================================
+CmdChromaticTransposition::CmdChromaticTransposition(int numSemitones, bool fChangeKey,
+                                                     const string& name)
+    : DocCmdSimple(name)
+    , m_pSelection(nullptr)
+{
+    m_flags = k_recordable;
+    if (m_name=="")
+        m_name = "Chromatic transposition";
+}
+
+//---------------------------------------------------------------------------------------
+int CmdChromaticTransposition::set_target(Document* UNUSED(pDoc),
+                                          DocCursor* UNUSED(pCursor),
+                                          SelectionSet* pSelection)
+{
+    m_pSelection = pSelection;
+    return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+int CmdChromaticTransposition::perform_action(Document* UNUSED(pDoc),
+                                              DocCursor* UNUSED(pCursor))
+{
+    //Undo strategy: ?
+    //TODO
+
+    return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdChromaticTransposition::undo_action(Document* UNUSED(pDoc),
+                                            DocCursor* UNUSED(pCursor))
+{
+    //TODO
+}
+
+
 //=======================================================================================
 // CmdCursor implementation
 //=======================================================================================

@@ -1903,7 +1903,7 @@ public:
     };
 
     /**
-        This command changes clears the set of selected objects.
+        This command clears the set of selected objects.
         @param cmd The type of action to do on the selection set. Must be CmdSelection::k_clear
         @param name The displayable name for the command. If not specified or empty will be replaced
             by "Selection: clear selection".
@@ -1913,8 +1913,8 @@ public:
             - the selection will be empty.
             - the cursor will not change its position.
 
-        @todo Remove redundant parameter <i>cmd</i> as it always must be <i>k_clear</i>, and
-            rename this command (e.g. CmdClearSelection)
+        As parameter <i>cmd</i> must be always <i>k_clear</i>, a convenience macro
+        CmdClearSelection(const string& name="") has been defined.
     */
     CmdSelection(int cmd, const string& name="");
 
@@ -1966,6 +1966,97 @@ public:
 protected:
     void set_default_name();
     void initialize();
+
+};
+
+////Alias for CmdSelection(k_clear, x) commands
+//#define CmdClearSelection( name )   CmdSelection(ESelectionAction::k_clear, name)
+//#define CmdClearSelection()         CmdSelection(ESelectionAction::k_clear)
+
+
+//---------------------------------------------------------------------------------------
+/** A command for clearing the current set of selected objects.
+
+    See constructor for details.
+*/
+class CmdClearSelection : public CmdSelection
+{
+public:
+    CmdClearSelection(const string& name="")
+        : CmdSelection(ESelectionAction::k_clear, name)
+    {
+    }
+    virtual ~CmdClearSelection() {}
+
+};
+
+//some constants for legibility
+    enum EChangeKey : bool
+    {
+        k_change_key = true,
+        k_do_not_change_key = false,
+    };
+
+
+//---------------------------------------------------------------------------------------
+/** A command for applying a chromatic transposition to the score or to a selection.
+
+    See constructor for details.
+*/
+class CmdChromaticTransposition : public DocCmdSimple
+{
+protected:
+    SelectionSet*   m_pSelection;
+
+public:
+
+    /**
+        This command shifts every pitch by the number of semitones implied by a
+        fixed number of semitones. The command applies only to the notes in the current
+        selection set or, if it is empty, to the whole score.
+
+        @param numSemitones Positive up, negative down
+        @param fChangeKey Controls whether to change key signatures or not. If
+            fChangeKey == true, key signatures will also be changed.
+
+        @param name The displayable name for the command. If not specified or empty will be replaced
+            by "Chromatic transposition".
+
+        <b>Remarks</b>
+        - After executing the command:
+            - the selection set will be unmodified.
+            - the cursor will not change its position.
+
+        <b>Example</b>
+
+        @code
+        void CommandHandler::transpose(int numSemitones, bool fUp, fChangeKey=true)
+        {
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+	            string name = gettext("Chromatic transposition");
+	            SpInteractor->exec_command(
+                    new CmdChromaticTransposition(numSemitones, fUp, fChangeKey, name) );
+            }
+        }
+        @endcode
+    */
+    CmdChromaticTransposition(int numSemitones, bool fChangeKey=true,
+                              const string& name="");
+
+    virtual ~CmdChromaticTransposition() {};
+
+    int get_cursor_update_policy() { return k_do_nothing; }
+    int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
+
+protected:
 
 };
 

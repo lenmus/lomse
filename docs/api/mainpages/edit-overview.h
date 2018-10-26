@@ -125,6 +125,8 @@ This section presents a list of available commands (but more commands need to be
 <b>Selection commands:</b>
 
 - CmdSelection() - Changes the content of the set of selected objects.
+- CmdClearSelection() - An alias for the specific CmdSelection() command for clearing the set of selected objects.
+
 
 <b>Cursor commands:</b>
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,7 +63,7 @@ enum ENoteStem
 };
 
 //---------------------------------------------------------------------------------------
-// actaul accidentals are, normally, not specified in LDP. Therefore, note pitch is
+// actual accidentals are, normally, not specified in LDP. Therefore, note pitch is
 // computed from notated accidentals. But for this, it is necessary to know when it
 // is specified and when not.
 #define k_acc_not_computed      10000.0f    //an absurd value
@@ -150,14 +150,19 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** ImoNote represents a note in the score.
+**/
 class ImoNote : public ImoNoteRest
 {
 protected:
+    //pitch
     int     m_step;
     int     m_octave;
     EAccidentals m_notated_acc;
     float   m_actual_acc;           //number of semitones (i.e, -1 for flat). Decimal
                                     //values like 0.5 (quarter tone sharp) are also valid.
+
+    //stem and ties
     int     m_stemDirection;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
