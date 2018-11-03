@@ -151,7 +151,6 @@ public:
 
     ///@{
     /// Increment / decrement pitch by a certain number of steps.
-    //DiatonicPitch operator - (DiatonicPitch pitch) { return DiatonicPitch(m_dp - pitch); }
     DiatonicPitch operator -(int i) { return DiatonicPitch(m_dp - i); }
     DiatonicPitch operator +(int i) { return DiatonicPitch(m_dp + i); }
     DiatonicPitch operator -=(int i) {
@@ -287,11 +286,12 @@ public:
     MidiPitch(int step, int octave, int acc=0);
 
     //operations
-    //MidiPitch operator - (MidiPitch pitch) { return MidiPitch(m_pitch - pitch); }
     ///@{
     /// Increment / decrement pitch by an arbitrary number of MIDI steps
     MidiPitch operator -(int i) { return MidiPitch(m_pitch - i); }
     MidiPitch operator +(int i) { return MidiPitch(m_pitch + i); }
+    MidiPitch operator +=(int i) { m_pitch += i; return *this; }
+    MidiPitch operator -=(int i) { m_pitch -= i; return *this; }
     ///@}
 
     /// Operator to cast to an int
@@ -305,6 +305,17 @@ public:
         key signature.    */
     bool is_natural_note_for(EKeySignature nKey);
 
+    ///@{
+    ///Components extraction
+    int octave(EKeySignature nKey);
+    int step(EKeySignature nKey);
+    int accidentals(EKeySignature nKey);
+    void get_components(EKeySignature nKey, int* step, int* octave, int* acc);
+    ///@}
+
+protected:
+    int extract_octave(EKeySignature nKey, int step);
+    int extract_accidentals(EKeySignature nKey, int step, int octave);
 };
 
 #define C4_MPITCH               MidiPitch(60)
@@ -321,7 +332,7 @@ public:
         interval-invariant, that is, the number obtained by subtracting two pitches
         represents the interval between them. Therefore, this representation is
         specially useful to deal with intervals.
-    - Each octave requires an range of 40 values. So to represent 10 octaves (C0-B9) a
+    - Each octave requires a range of 40 values. So to represent 10 octaves (C0-B9) a
         range of 400 is required. An <i>int</i> is enough.
 
     FPitch representation has shown to be optimal for representing pitch in cases where
@@ -412,6 +423,9 @@ protected:
 #define k_undefined_fpitch   FPitch(-1)
 
 
+// UPitch not yet implemented. This is just tentative skeleton code.
+///@cond INTERNALS
+
 //---------------------------------------------------------------------------------------
 // UPitch: Microtonal pitch
 /** Class UPitch represents a chromatic absolute pitch plus deviation in cents.
@@ -463,6 +477,7 @@ public:
     //string get_ldp_name() const;
     //MidiPitch to_MidiPitch() const;
 };
+///@endcond
 
 } //namespace lomse
 

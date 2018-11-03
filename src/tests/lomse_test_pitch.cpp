@@ -126,7 +126,7 @@ SUITE(PitchTest)
     }
 
 
-    // MidiPitch ------------------------------------------------------------------------
+    //@ MidiPitch -----------------------------------------------------------------------
 
     TEST_FIXTURE(PitchTestFixture, MidiPitch_C4)
     {
@@ -145,6 +145,62 @@ SUITE(PitchTest)
         MidiPitch mp(k_step_A, k_octave_5);
         CHECK( mp.get_ldp_name() == "a5" );
         CHECK( C4_MPITCH.get_ldp_name() == "c4" );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_04)
+    {
+        //@04. Extract components
+        MidiPitch mp(k_step_F, k_octave_4, 1);  //+f4
+        EKeySignature key = k_key_C;
+        CHECK( mp.step(key) == k_step_F );
+        CHECK( mp.octave(key) == 4 );
+        CHECK( mp.accidentals(key) == 1 );
+
+//        int pitch = int(mp);
+//        cout << "Midi pitch = " << pitch
+//             << ", step=" << mp.step(key)
+//             << ", octave=" << mp.octave(key)
+//             << ", acc=" << mp.accidentals(key) << endl;
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_05)
+    {
+        //@05. Extract components. B+ in key D
+        MidiPitch mp(60);  //c4 = +b3   key D ==> +b3
+        EKeySignature key = k_key_D;
+        CHECK( mp.step(key) == k_step_B );
+        CHECK( mp.octave(key) == 3 );
+        CHECK( mp.accidentals(key) == 1 );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_06)
+    {
+        //@06. Extract components. B+ in key C
+        MidiPitch mp(60);  //c4 = +b3   key C ==> c4
+        EKeySignature key = k_key_C;
+        CHECK( mp.step(key) == k_step_C );
+        CHECK( mp.octave(key) == 4 );
+        CHECK( mp.accidentals(key) == 0 );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_07)
+    {
+        //@07. Extract components. C- in key C
+        MidiPitch mp(59);  //-c4 = b3   key C ==> b3
+        EKeySignature key = k_key_C;
+        CHECK( mp.step(key) == k_step_B );
+        CHECK( mp.octave(key) == 3 );
+        CHECK( mp.accidentals(key) == 0 );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_08)
+    {
+        //@08. Extract components. C- in key C-
+        MidiPitch mp(59);  //c4 = +b3   key C- ==> -c4
+        EKeySignature key = k_key_Cf;
+        CHECK( mp.step(key) == k_step_C );
+        CHECK( mp.octave(key) == 4 );
+        CHECK( mp.accidentals(key) == -1 );
     }
 
 
