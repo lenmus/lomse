@@ -80,10 +80,12 @@ public:
     ScoreAlgorithms() {}
     ~ScoreAlgorithms() {}
 
-    /** Look for a note that can be tied (as end of tie) with pStartNote
-    */
+    /** Look for a note that can be tied (as end of tie) with pStartNote     */
     static ImoNote* find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
                                              ImoNote* pStartNote);
+
+    /** Look for the key signature that is applicable to a note     */
+    static ImoKeySignature* get_applicable_key(ImoScore* pScore, ImoNote* pNote);
 
     /** Look for applicable clef at specified timepos
         @param pScore Pointer to the score to wich all other parameters refer.

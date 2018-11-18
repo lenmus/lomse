@@ -966,27 +966,27 @@ int MidiPitch::step(EKeySignature nKey)
 int MidiPitch::octave(EKeySignature nKey)
 {
     int step = this->step(nKey);
-    return extract_octave(nKey, step);
+    return extract_octave(step);
 }
 
 //---------------------------------------------------------------------------------------
 int MidiPitch::accidentals(EKeySignature nKey)
 {
     int step = this->step(nKey);
-    int octave = extract_octave(nKey, step);
-    return extract_accidentals(nKey, step, octave);
+    int octave = extract_octave(step);
+    return extract_accidentals(step, octave);
 }
 
 //---------------------------------------------------------------------------------------
 void MidiPitch::get_components(EKeySignature nKey, int* step, int* octave, int* acc)
 {
     *step = this->step(nKey);
-    *octave = extract_octave(nKey, *step);
-    *acc = extract_accidentals(nKey, *step, *octave);
+    *octave = extract_octave(*step);
+    *acc = extract_accidentals(*step, *octave);
 }
 
 //---------------------------------------------------------------------------------------
-int MidiPitch::extract_octave(EKeySignature nKey, int step)
+int MidiPitch::extract_octave(int step)
 {
     int remainder = m_pitch % 12;      //remainder goes from 0 (Do) to 11 (Si)
     int octave = (m_pitch - 12) / 12;
@@ -998,7 +998,7 @@ int MidiPitch::extract_octave(EKeySignature nKey, int step)
 }
 
 //---------------------------------------------------------------------------------------
-int MidiPitch::extract_accidentals(EKeySignature nKey, int step, int octave)
+int MidiPitch::extract_accidentals(int step, int octave)
 {
     return m_pitch - int( MidiPitch(step, octave));
 }

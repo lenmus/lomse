@@ -99,6 +99,14 @@ ImoNote* ScoreAlgorithms::find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
 }
 
 //---------------------------------------------------------------------------------------
+ImoKeySignature* ScoreAlgorithms::get_applicable_key(ImoScore* UNUSED(pScore),
+                                                     ImoNote* UNUSED(pNote))
+{
+    //TODO
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
 int ScoreAlgorithms::get_applicable_clef_for(ImoScore* pScore,
                                              int iInstr, int iStaff, TimeUnits time)
 {

@@ -5782,15 +5782,11 @@ SUITE(LdpAnalyserTest)
         expected << "Line 0. Requesting to tie notes of different voice or pitch. Tie number 12 will be ignored." << endl;
 
         ImoNote* startNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        startNote->set_octave(4);
-        startNote->set_step(2);
-        startNote->set_notated_accidentals(k_sharp);
+        startNote->set_notated_pitch(2, k_octave_4, k_sharp);
         startNote->set_note_type(k_eighth);
 
         ImoNote* endNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        endNote->set_octave(3);
-        endNote->set_step(2);
-        endNote->set_notated_accidentals(k_sharp);
+        endNote->set_notated_pitch(2, k_octave_3, k_sharp);
         endNote->set_note_type(k_eighth);
 
         ImoTieDto* pStartInfo = static_cast<ImoTieDto*>(ImFactory::inject(k_imo_tie_dto, &doc));

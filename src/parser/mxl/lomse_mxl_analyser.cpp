@@ -4322,6 +4322,8 @@ protected:
                 "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
         }
         pNote->set_notated_accidentals(accidentals);
+        if (accidentals != k_no_accidentals)
+            pNote->force_to_display_accidentals();
     }
 
     //----------------------------------------------------------------------------------
@@ -5053,9 +5055,7 @@ public:
         int nStep = mxl_step_to_step(step);
         float acc = mxl_alter_to_accidentals(accidentals);
         int nOctave = mxl_octave_to_octave(octave);
-        pNote->set_step(nStep);
-        pNote->set_octave(nOctave);
-        pNote->set_actual_accidentals(acc);
+        pNote->set_pitch(nStep, nOctave, acc);
         return pNote;
     }
 

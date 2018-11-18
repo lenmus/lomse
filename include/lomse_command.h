@@ -740,7 +740,7 @@ public:
         @param name The displayable name for the command. If not specified will default to "Change accidentals".
 
         <b>Remarks</b>
-        - If the selection is empy or does not contain notes, the command
+        - If the selection is empty or does not contain notes, the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -2006,23 +2006,27 @@ public:
 class CmdChromaticTransposition : public DocCmdSimple
 {
 protected:
-    SelectionSet*   m_pSelection;
+    int m_semitones;
+    bool m_fChangeKey;
+    list<ImoId> m_notes;
+    list<ImoId> m_keys;
 
 public:
 
     /**
-        This command shifts every pitch by the number of semitones implied by a
-        fixed number of semitones. The command applies only to the notes in the current
-        selection set or, if it is empty, to the whole score.
+        This command shifts every pitch by a fixed number of semitones.
+        The command applies only to the notes in the current selection set.
 
         @param numSemitones Positive up, negative down
         @param fChangeKey Controls whether to change key signatures or not. If
             fChangeKey == true, key signatures will also be changed.
 
-        @param name The displayable name for the command. If not specified or empty will be replaced
-            by "Chromatic transposition".
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Chromatic transposition".
 
         <b>Remarks</b>
+        - If the selection is empty or does not contain notes, the command
+            will not be executed and will return a failure code.
         - After executing the command:
             - the selection set will be unmodified.
             - the cursor will not change its position.
@@ -2030,13 +2034,13 @@ public:
         <b>Example</b>
 
         @code
-        void CommandHandler::transpose(int numSemitones, bool fUp, fChangeKey=true)
+        void CommandHandler::transpose(int numSemitones, fChangeKey=true)
         {
             if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
             {
 	            string name = gettext("Chromatic transposition");
 	            SpInteractor->exec_command(
-                    new CmdChromaticTransposition(numSemitones, fUp, fChangeKey, name) );
+                    new CmdChromaticTransposition(numSemitones, fChangeKey, name) );
             }
         }
         @endcode

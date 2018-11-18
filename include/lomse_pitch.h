@@ -105,8 +105,8 @@ enum EAccidentals
     k_flat_flat,                    ///< Two consecutive flat signs (bb)
     k_double_sharp,                 ///< The double sharp symbol (x)
     k_sharp_sharp,                  ///< Two consecutive sharp signs (##)
-    k_natural_flat,                 ///< Natural sign follwed by flat sign
-    k_natural_sharp,                ///< Natural sign follwed by sharp sign
+    k_natural_flat,                 ///< Natural sign followed by flat sign
+    k_natural_sharp,                ///< Natural sign followed by sharp sign
 };
 
 //---------------------------------------------------------------------------------------
@@ -314,8 +314,8 @@ public:
     ///@}
 
 protected:
-    int extract_octave(EKeySignature nKey, int step);
-    int extract_accidentals(EKeySignature nKey, int step, int octave);
+    int extract_octave(int step);
+    int extract_accidentals(int step, int octave);
 };
 
 #define C4_MPITCH               MidiPitch(60)

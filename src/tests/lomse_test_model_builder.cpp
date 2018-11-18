@@ -118,7 +118,7 @@ public:
 SUITE(PitchAssignerTest)
 {
 
-    TEST_FIXTURE(PitchAssignerTestFixture, AssignPitch_FPitch)
+    TEST_FIXTURE(PitchAssignerTestFixture, AssignPitch_FPitch_01)
     {
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
@@ -148,7 +148,7 @@ SUITE(PitchAssignerTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(PitchAssignerTestFixture, AssignPitch_MidiPitch)
+    TEST_FIXTURE(PitchAssignerTestFixture, AssignPitch_MidiPitch_02)
     {
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
@@ -178,7 +178,7 @@ SUITE(PitchAssignerTest)
         delete pScore;
    }
 
-    TEST_FIXTURE(PitchAssignerTestFixture, CompilerAssignsPitch)
+    TEST_FIXTURE(PitchAssignerTestFixture, CompilerAssignsPitch_03)
     {
         Document doc(m_libraryScope);
         doc.from_string(
@@ -202,7 +202,7 @@ SUITE(PitchAssignerTest)
         CHECK( pNote3->get_fpitch() == FPitch("+d4") );
     }
 
-    TEST_FIXTURE(PitchAssignerTestFixture, CloseScoreAssignsPitch_FPitch)
+    TEST_FIXTURE(PitchAssignerTestFixture, CloseScoreAssignsPitch_FPitch_04)
     {
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
@@ -228,7 +228,7 @@ SUITE(PitchAssignerTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(PitchAssignerTestFixture, NoPitchWhenPattern)
+    TEST_FIXTURE(PitchAssignerTestFixture, NoPitchWhenPattern_05)
     {
         Document doc(m_libraryScope);
         doc.from_string(
@@ -250,6 +250,121 @@ SUITE(PitchAssignerTest)
         CHECK( pNote1->get_fpitch() == k_undefined_fpitch );
         CHECK( pNote2->get_fpitch() == k_undefined_fpitch );
         CHECK( pNote3->get_fpitch() == k_undefined_fpitch );
+    }
+
+    TEST_FIXTURE(PitchAssignerTestFixture, pitch_assigner_06)
+    {
+        //@06. MusicXML. One instrument
+        Document doc(m_libraryScope);
+        doc.from_string(    //score 50301-pitch.xml
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes><key><fifths>-3</fifths></key>"
+                "<time><beats>3</beats><beat-type>4</beat-type></time>"
+                "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>A</step><alter>-1</alter><octave>4</octave></pitch>"
+                "<duration>12</duration><type>quarter</type></note>"
+            "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                "<duration>12</duration><type>quarter</type>"
+                "<accidental>natural</accidental></note>"
+            "<note><pitch><step>A</step><alter>-1</alter><octave>4</octave></pitch>"
+                "<duration>12</duration><type>quarter</type>"
+                "<accidental>flat</accidental></note>"
+            "</measure>"
+            "</part></score-partwise>"
+            , Document::k_format_mxl);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        StaffObjsCursor cursor(pScore);
+        while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
+        {
+            cursor.move_next();
+        }
+        ImoNote* pNote1 = static_cast<ImoNote*>( cursor.get_staffobj() );
+        cursor.move_next();
+        ImoNote* pNote2 = static_cast<ImoNote*>( cursor.get_staffobj() );
+        cursor.move_next();
+        ImoNote* pNote3 = static_cast<ImoNote*>( cursor.get_staffobj() );
+
+        CHECK( pNote1->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote2->get_notated_accidentals() == k_natural );
+        CHECK( pNote3->get_notated_accidentals() == k_flat );
+    }
+
+    TEST_FIXTURE(PitchAssignerTestFixture, pitch_assigner_07)
+    {
+        //@07. MusicXML. Two instruments
+        Document doc(m_libraryScope);
+        doc.from_string(    //score 50302-pitch.xml
+            "<score-partwise version='3.1'><part-list>"
+                "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+                "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+                "</part-list>"
+            "<part id='P1'><measure number='1'>"
+                "<attributes><divisions>24</divisions><key><fifths>-3</fifths></key>"
+                    "<time><beats>3</beats><beat-type>4</beat-type></time>"
+                    "<clef><sign>G</sign><line>2</line></clef></attributes>"
+                "<note><pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type></note>"
+                "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type><accidental>natural</accidental></note>"
+                "<note><pitch><step>A</step><alter>-1</alter><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type><accidental>flat</accidental></note>"
+            "</measure></part>"
+            "<part id='P2'><measure number='1'>"
+                "<attributes><divisions>24</divisions><key><fifths>-3</fifths></key>"
+                    "<time><beats>3</beats><beat-type>4</beat-type></time>"
+                    "<clef><sign>G</sign><line>2</line></clef></attributes>"
+                "<note><pitch><step>B</step><alter>-1</alter><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type></note>"
+                "<note><pitch><step>A</step><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type><accidental>natural</accidental></note>"
+                "<note><pitch><step>A</step><alter>-1</alter><octave>4</octave></pitch>"
+                    "<duration>24</duration><type>quarter</type><accidental>flat</accidental></note>"
+                "</measure>"
+            "</part></score-partwise>"
+            , Document::k_format_mxl);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 14 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        while(!(*it)->imo_object()->is_note())
+            ++it;
+
+        ImoNote* pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_B );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+
+        ++it;
+        pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_B );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+
+        ++it;
+        pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_notated_accidentals() == k_natural );
+
+        ++it;
+        pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_notated_accidentals() == k_natural );
+
+        ++it;
+        pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_notated_accidentals() == k_flat );
+
+        ++it;
+        pNote = static_cast<ImoNote*>( (*it)->imo_object() );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_notated_accidentals() == k_flat );
     }
 
 };
