@@ -5,7 +5,7 @@ includedir=@LOMSE_INCLUDEDIR@
 
 Name: liblomse
 Description: LenMus open music score edition library
-Version: @LOMSE_VERSION_STRING@
+Version: @LOMSE_PACKAGE_VERSION@
 Requires: @LOMSE_REQUIRES@
 Libs: -L${libdir} -llomse -lpthread
 Cflags: -I${includedir}
