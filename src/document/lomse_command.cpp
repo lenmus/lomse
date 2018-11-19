@@ -1150,6 +1150,8 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
     {
         //remove first note from beam
         pPrevNR->remove_from_relation(pBeam);
+        //Coverity false positive. pBeam is not freed as it has more than one note
+        // coverity[use_after_free]
         AutoBeamer autobeamer(pBeam);
         autobeamer.do_autobeam();
         return k_success;
@@ -1164,12 +1166,16 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
         //remove 'before' notes from existing beam
         list<ImoNoteRest*>::iterator it = notesBefore.begin();
         for (it = notesBefore.begin(); it != notesBefore.end(); ++it)
+            //Coverity false positive. pBeam is not freed as it has more than one note
+            // coverity[use_after_free]
             (*it)->remove_from_relation(pBeam);
 
         //create a new beam for the removed notes
         pDoc->add_beam(notesBefore);
 
         //adjust the old beam
+        //Coverity false positive. pBeam is not freed as it has more than one note
+        // coverity[use_after_free]
         AutoBeamer autobeamer(pBeam);
         autobeamer.do_autobeam();
 
@@ -1181,6 +1187,8 @@ int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
     {
         //remove last note from beam
         pBeforeNR->remove_from_relation(pBeam);
+        //Coverity false positive. pBeam is not freed as it has more than one note
+        // coverity[use_after_free]
         AutoBeamer autobeamer(pBeam);
         autobeamer.do_autobeam();
         return k_success;
