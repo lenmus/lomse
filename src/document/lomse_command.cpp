@@ -1633,10 +1633,37 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdChromaticTransposition::undo_action(Document* UNUSED(pDoc),
+void CmdChromaticTransposition::undo_action(Document* pDoc,
                                             DocCursor* UNUSED(pCursor))
 {
-    //TODO
+    ImoScore* pScore = nullptr;
+    list<ImoId>::iterator it;
+    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+    {
+        //get note and score
+        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
+        if (!pScore)
+            pScore = pNote->get_score();
+        if (!pScore)
+            return;
+
+        //get applicable key signature
+        ImoKeySignature* pKey = ScoreAlgorithms::get_applicable_key(pScore, pNote);
+        EKeySignature nKey = k_key_C;
+        if (pKey)
+            nKey = EKeySignature(pKey->get_key_type());
+
+        //transpose note
+        MidiPitch pitch = pNote->get_midi_pitch();
+        pitch -= m_semitones;
+        int step, octave, acc;
+        pitch.get_components(nKey, &step, &octave, &acc);
+        pNote->set_pitch(step, octave, float(acc));
+        pNote->set_dirty(true);
+    }
+
+    PitchAssigner tuner;
+    tuner.assign_pitch(pScore);
 }
 
 
