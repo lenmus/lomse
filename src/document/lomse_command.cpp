@@ -1623,11 +1623,6 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
                 if (std::find(m_keys.begin(), m_keys.end(), keyId) == m_keys.end())
                     m_keys.push_back(keyId);
             }
-            //transpose key, if requested
-            if (m_fChangeKey)
-            {
-                //pKey->set_key_type();
-            }
         }
 
         //transpose note
@@ -1639,6 +1634,19 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
         pNote->set_dirty(true);
     }
 
+    //transpose keys, if requested
+    if (m_fChangeKey)
+    {
+        list<ImoId>::iterator it;
+        for (it=m_keys.begin(); it != m_keys.end(); ++it)
+        {
+            ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*it) );
+            if (pKey)
+                pKey->transpose(m_semitones);
+        }
+    }
+
+    //assign pitch to all notes
     PitchAssigner tuner;
     tuner.assign_pitch(pScore);
 
@@ -1673,6 +1681,18 @@ void CmdChromaticTransposition::undo_action(Document* pDoc,
         pitch.get_components(nKey, &step, &octave, &acc);
         pNote->set_pitch(step, octave, float(acc));
         pNote->set_dirty(true);
+    }
+
+    //transpose keys, if requested
+    if (m_fChangeKey)
+    {
+        list<ImoId>::iterator it;
+        for (it=m_keys.begin(); it != m_keys.end(); ++it)
+        {
+            ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*it) );
+            if (pKey)
+                pKey->transpose(-m_semitones);
+        }
     }
 
     PitchAssigner tuner;

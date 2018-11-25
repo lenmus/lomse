@@ -5308,6 +5308,9 @@ public:
     int get_key_type();
     void set_key_type(int type);
 
+    //operations
+    void transpose(const int semitones);
+
     //overrides: key signatures always in staff 0
     void set_staff(int UNUSED(staff))
     {

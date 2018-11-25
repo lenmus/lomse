@@ -2830,10 +2830,23 @@ int ImoKeySignature::get_key_type()
     return int( key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
 }
 
+//---------------------------------------------------------------------------------------
 void ImoKeySignature::set_key_type(int type)
 {
     m_keyMode = get_key_mode(EKeySignature(type));
     m_fifths = key_signature_to_num_fifths(EKeySignature(type));
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::transpose(const int semitones)
+{
+    m_fifths += semitones;
+
+    //normalize -7..+7
+    while (m_fifths < -7)
+        m_fifths += 14;
+    while (m_fifths > 7)
+        m_fifths -= 14;
 }
 
 //=======================================================================================
