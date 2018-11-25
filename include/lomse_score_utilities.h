@@ -103,6 +103,10 @@ class ImoTimeSignature;
     extern EKeySignature get_relative_minor_key(EKeySignature majorKey);
     extern EKeySignature get_relative_major_key(EKeySignature minorKey);
 
+    //-----------------------------------------------------------------------------------
+    extern EKeySignature key_components_to_key_type(int fifths, EKeyMode mode);
+    extern EKeyMode get_key_mode(EKeySignature type);
+
 
 //---------------------------------------------------------------------------------------
 // Clef related functions

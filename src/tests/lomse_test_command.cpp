@@ -4433,7 +4433,7 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, chromatic_transposition_2801)
     {
-        //@2801. Whole score, no key transposition. Success. Cursor doesn't move.
+        //@2801. Do. Whole score, no key transposition. Success. Cursor doesn't move.
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
             "(clef G)(key B-)(n c4 q)(n =e4 q)"
@@ -4557,6 +4557,71 @@ SUITE(DocCommandTest)
         CHECK( pNote && pNote->get_step() == k_step_E );
         CHECK( pNote && pNote->get_octave() == 4 );
         CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, chromatic_transposition_2803)
+    {
+        //@2803. Do. Whole score, key transposition. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
+            "(clef G)(key B-)(n c4 q)(n =e4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        MySelectionSet sel(&doc);
+
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to key
+        ImoId idKey = cursor.get_pointee_id();
+        cursor.move_next();         //points to c4 q
+        sel.debug_add( *cursor );
+        cursor.move_next();         //points to =e4 q
+        sel.debug_add( *cursor );
+        ImoId idCur = cursor.get_pointee_id();
+
+        DocCommand* pCmd = LOMSE_NEW
+            CmdChromaticTransposition(2, k_change_key);
+        CHECK( pCmd->get_name() == "Chromatic transposition" );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        //selection unchanged
+        CHECK( sel.num_selected() == 2 );
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == idCur );
+
+        //key signature is not changed
+        cursor.point_to(idKey);   //key
+
+        //the score is transposed
+        CHECK( doc.is_dirty() == true );
+        DocCursor c(&doc);
+        c.enter_element();     //points to clef
+        c.move_next();         //points to key B- (now transposed to C)
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( c.get_pointee() );
+        CHECK( pKey && pKey->get_key_type() == k_key_C );
+        c.move_next();         //points to c4 (now transposed to d4)
+        ImoNote* pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_D );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+        c.move_next();         //points to =e4 (now transposed to +f4)
+        pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_F );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
     }
 
 }

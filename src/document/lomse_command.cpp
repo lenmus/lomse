@@ -1623,6 +1623,11 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
                 if (std::find(m_keys.begin(), m_keys.end(), keyId) == m_keys.end())
                     m_keys.push_back(keyId);
             }
+            //transpose key, if requested
+            if (m_fChangeKey)
+            {
+                //pKey->set_key_type();
+            }
         }
 
         //transpose note

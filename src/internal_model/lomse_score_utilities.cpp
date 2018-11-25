@@ -99,7 +99,7 @@ TimeUnits get_duration_for_ref_note(int bottomNumber)
             stringstream ss;
             ss << "[get_duration_for_ref_note] Invalid bottom number " << bottomNumber;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
+            return pow(2.0, (10 - k_quarter));
         }
     }
 }
@@ -237,7 +237,6 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
             stringstream ss;
             ss << "[get_accidentals_for_key] Invalid key signature " << keyType;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
         }
     }
 
@@ -302,7 +301,7 @@ int get_step_for_root_note(EKeySignature keyType)
             stringstream ss;
             ss << "[get_step_for_root_note] Invalid key signature " << keyType;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
+            return k_step_C;
         }
     }
 }
@@ -403,7 +402,7 @@ int key_signature_to_num_fifths(int keyType)
             stringstream ss;
             ss << "[key_signature_to_num_fifths] Invalid key signature " << keyType;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
+            return 0;
         }
     }
     return nFifths;
@@ -448,7 +447,7 @@ EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
             stringstream ss;
             ss << "[get_relative_minor_key] Invalid key signature " << nMajorKey;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
+            return k_key_C;
         }
     }
 
@@ -493,11 +492,86 @@ EKeySignature get_relative_major_key(EKeySignature nMinorKey)
             stringstream ss;
             ss << "[get_relative_major_key] Invalid key signature " << nMinorKey;
             LOMSE_LOG_ERROR(ss.str());
-            //throw runtime_error(ss.str());
             return k_key_c;
         }
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+EKeySignature key_components_to_key_type(int fifths, EKeyMode mode)
+{
+    if (mode == k_key_mode_major)
+    {
+        switch(fifths)
+        {
+            case -7:        return k_key_Cf;
+            case -6:        return k_key_Gf;
+            case -5:        return k_key_Df;
+            case -4:        return k_key_Af;
+            case -3:        return k_key_Ef;
+            case -2:        return k_key_Bf;
+            case -1:        return k_key_F;
+            case 0:         return k_key_C;
+            case 1:         return k_key_G;
+            case 2:         return k_key_D;
+            case 3:         return k_key_A;
+            case 4:         return k_key_E;
+            case 5:         return k_key_B;
+            case 6:         return k_key_Fs;
+            case 7:         return k_key_Cs;
+            default:
+            {
+                stringstream ss;
+                ss << "[get_key_type] Invalid number of fifths (" << fifths
+                   << ") for major key.";
+                LOMSE_LOG_ERROR(ss.str());
+                return k_key_C;
+            }
+        }
+    }
+    else if (mode == k_key_mode_minor)
+    {
+        switch(fifths)
+        {
+            case -7:        return k_key_af;
+            case -6:        return k_key_ef;
+            case -5:        return k_key_bf;
+            case -4:        return k_key_f;
+            case -3:        return k_key_c;
+            case -2:        return k_key_g;
+            case -1:        return k_key_d;
+            case 0:         return k_key_a;
+            case 1:         return k_key_e;
+            case 2:         return k_key_b;
+            case 3:         return k_key_fs;
+            case 4:         return k_key_cs;
+            case 5:         return k_key_gs;
+            case 6:         return k_key_ds;
+            case 7:         return k_key_as;
+            default:
+            {
+                stringstream ss;
+                ss << "[get_key_type] Invalid number of fifths (" << fifths
+                   << ") for minor key.";
+                LOMSE_LOG_ERROR(ss.str());
+                return k_key_a;
+            }
+        }
+    }
+    else
+    {
+        stringstream ss;
+        ss << "[get_key_type] Invalid key mode " << mode;
+        LOMSE_LOG_ERROR(ss.str());
+        return k_key_C;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+EKeyMode get_key_mode(EKeySignature type)
+{
+    return (is_major_key(type) ? k_key_mode_major : k_key_mode_minor);
 }
 
 
@@ -537,7 +611,7 @@ DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
             stringstream ss;
             ss << "[get_diatonic_pitch_for_first_line] Invalid clef " << nClef;
             LOMSE_LOG_ERROR(ss.str());
-            throw runtime_error(ss.str());
+            return NO_DPITCH;
         }
     }
     return NO_DPITCH;

@@ -45,6 +45,7 @@
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
 #include "lomse_measures_table.h"
+#include "lomse_score_utilities.h"
 
 
 using namespace std;
@@ -2821,6 +2822,19 @@ int ImoInstrGroup::get_num_instruments()
     return static_cast<int>( m_instruments.size() );
 }
 
+//=======================================================================================
+// ImoKeySignature implementation
+//=======================================================================================
+int ImoKeySignature::get_key_type()
+{
+    return int( key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
+}
+
+void ImoKeySignature::set_key_type(int type)
+{
+    m_keyMode = get_key_mode(EKeySignature(type));
+    m_fifths = key_signature_to_num_fifths(EKeySignature(type));
+}
 
 //=======================================================================================
 // ImoLink implementation

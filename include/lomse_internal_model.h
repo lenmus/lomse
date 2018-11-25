@@ -299,6 +299,53 @@ enum EKeySignature
 };
 #define k_num_keys k_max_key - k_min_key + 1
 
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes valid modes for standard key signatures.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EKeyMode
+{
+    k_key_mode_none = 0,
+    k_key_mode_major,
+    k_key_mode_minor,
+    k_key_mode_dorian,
+    k_key_mode_phrygian,
+    k_key_mode_lydian,
+    k_key_mode_mixolydian,
+    k_key_mode_aeolian,
+    k_key_mode_ionian,
+    k_key_mode_locrian,
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum describes valid values for the number of fifths in standard key signatures.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EKeyFifths
+{
+    k_fifths_Cf = -7,              ///< C-flat
+    k_fifths_Gf,                   ///< G-flat
+    k_fifths_Df,                   ///< D-flat
+    k_fifths_Af,                   ///< A-flat
+    k_fifths_Ef,                   ///< E-flat
+    k_fifths_Bf,                   ///< B-flat
+    k_fifths_F,                    ///< F
+    k_fifths_C,                    ///< C
+    k_fifths_G,                    ///< G
+    k_fifths_D,                    ///< D
+    k_fifths_A,                    ///< A
+    k_fifths_E,                    ///< E
+    k_fifths_B,                    ///< B
+    k_fifths_Fs,                   ///< F-sharp
+    k_fifths_Cs,                   ///< C-sharp
+};
+
 
 //-----------------------------------------------------------------------------
 /** @ingroup enumerations
@@ -5235,23 +5282,31 @@ public:
 class ImoKeySignature : public ImoStaffObj
 {
 protected:
-    int m_keyType;
+
+    //Variable only valid for standard key signatures
+    //Standard key signatures are represented by the number of flats and sharps, plus an
+    //optional mode for major/minor/other distinctions.
+    /** Number of flats or sharps (negative numbers are used for flats and positive
+        numbers for sharps), reflecting the key's placement within the circle of fifths
+        (hence the name of this variable).
+    */
+    int m_fifths;
+    int m_keyMode;      ///< A value from EKeyModes
 
     friend class ImFactory;
-    ImoKeySignature() : ImoStaffObj(k_imo_key_signature), m_keyType(k_key_undefined) {}
+    ImoKeySignature()
+        : ImoStaffObj(k_imo_key_signature)
+        , m_fifths(0)
+        , m_keyMode(k_key_mode_major)
+    {
+    }
 
 public:
     virtual ~ImoKeySignature() {}
 
     //getters and setters
-    inline int get_key_type()
-    {
-        return m_keyType;
-    }
-    inline void set_key_type(int type)
-    {
-        m_keyType = type;
-    }
+    int get_key_type();
+    void set_key_type(int type);
 
     //overrides: key signatures always in staff 0
     void set_staff(int UNUSED(staff))
