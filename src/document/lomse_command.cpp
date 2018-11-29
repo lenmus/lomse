@@ -1614,15 +1614,22 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
         //get applicable key signature, and save it if necessary
         ImoKeySignature* pKey = ScoreAlgorithms::get_applicable_key(pScore, pNote);
         EKeySignature nKey = k_key_C;
+        int fifths = 0;
         if (pKey)
         {
-            ImoId keyId = pKey->get_id();
-            nKey = EKeySignature(pKey->get_key_type());
             if (fSaveKeys)
             {
+                ImoId keyId = pKey->get_id();
                 if (std::find(m_keys.begin(), m_keys.end(), keyId) == m_keys.end())
                     m_keys.push_back(keyId);
             }
+            if (m_fChangeKey)
+            {
+                //temporarily transpose the key so that note is transposed properly
+                fifths = pKey->get_fifths();
+                pKey->transpose(m_semitones);
+            }
+            nKey = EKeySignature(pKey->get_key_type());
         }
 
         //transpose note
@@ -1632,6 +1639,10 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
         pitch.get_components(nKey, &step, &octave, &acc);
         pNote->set_pitch(step, octave, float(acc));
         pNote->set_dirty(true);
+
+        //restore key
+        if (m_fChangeKey && pKey)
+            pKey->set_fifths(fifths);
     }
 
     //transpose keys, if requested
@@ -1671,8 +1682,17 @@ void CmdChromaticTransposition::undo_action(Document* pDoc,
         //get applicable key signature
         ImoKeySignature* pKey = ScoreAlgorithms::get_applicable_key(pScore, pNote);
         EKeySignature nKey = k_key_C;
+        int fifths = 0;
         if (pKey)
+        {
+            if (m_fChangeKey)
+            {
+                //temporarily transpose the key so that note is transposed properly
+                fifths = pKey->get_fifths();
+                pKey->transpose(-m_semitones);
+            }
             nKey = EKeySignature(pKey->get_key_type());
+        }
 
         //transpose note
         MidiPitch pitch = pNote->get_midi_pitch();
@@ -1681,6 +1701,10 @@ void CmdChromaticTransposition::undo_action(Document* pDoc,
         pitch.get_components(nKey, &step, &octave, &acc);
         pNote->set_pitch(step, octave, float(acc));
         pNote->set_dirty(true);
+
+        //restore key
+        if (m_fChangeKey && pKey)
+            pKey->set_fifths(fifths);
     }
 
     //transpose keys, if requested

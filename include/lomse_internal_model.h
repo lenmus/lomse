@@ -5307,6 +5307,8 @@ public:
     //getters and setters
     int get_key_type();
     void set_key_type(int type);
+    inline int get_fifths() { return m_fifths; }
+    inline void set_fifths(int fifths) { m_fifths = fifths; }
 
     //operations
     void transpose(const int semitones);

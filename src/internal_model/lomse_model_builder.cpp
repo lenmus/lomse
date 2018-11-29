@@ -171,124 +171,138 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
 void PitchAssigner::compute_notated_accidentals(ImoNote* pNote, int context)
 {
     int required = int(round( pNote->get_actual_accidentals() ));
+    EAccidentals acc = k_no_accidentals;
 
-    if (pNote->is_display_accidentals_forced())
-    {
-        switch(required)
-        {
-            case -2:
-                pNote->set_notated_accidentals(k_flat_flat);
-                break;
-            case -1:
-                if (pNote->get_notated_accidentals() != k_natural_flat)
-                    pNote->set_notated_accidentals(k_flat);
-                break;
-            case 1:
-                if (pNote->get_notated_accidentals() != k_natural_sharp)
-                    pNote->set_notated_accidentals(k_sharp);
-                break;
-            case 2:
-                if (pNote->get_notated_accidentals() != k_sharp_sharp)
-                    pNote->set_notated_accidentals(k_double_sharp);
-                break;
-            case 0:
-            {
-                if (pNote->notated_accidentals_never_computed())
-                {
-                    if (pNote->get_notated_accidentals() == k_natural)
-                        pNote->force_to_display_naturals();
-                }
-                else
-                {
-                    if (pNote->is_display_naturals_forced())
-                        pNote->set_notated_accidentals(k_natural);
-                    else
-                        pNote->set_notated_accidentals(k_no_accidentals);
-                }
-                break;
-            }
-            default:
-                pNote->set_notated_accidentals(k_invalid_accidentals);
-        }
-        pNote->mark_notated_accidentals_as_computed();
-        return;
-    }
-
+    //determine notated accidentals, as required by music notation rules
     switch(context)
     {
         case 0:
         {
             switch(required)
             {
-                case -2:    pNote->set_notated_accidentals(k_flat_flat);            break;
-                case -1:    pNote->set_notated_accidentals(k_flat);                 break;
-                case 0:     pNote->set_notated_accidentals(k_no_accidentals);       break;
-                case 1:     pNote->set_notated_accidentals(k_sharp);                break;
-                case 2:     pNote->set_notated_accidentals(k_double_sharp);         break;
-                default:    pNote->set_notated_accidentals(k_invalid_accidentals);  break;
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_no_accidentals;       break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
             }
-            return;
+            break;
         }
 
         case 1:
         {
             switch(required)
             {
-                case -2:    pNote->set_notated_accidentals(k_flat_flat);            break;
-                case -1:    pNote->set_notated_accidentals(k_flat);                 break;
-                case 0:     pNote->set_notated_accidentals(k_natural);              break;
-                case 1:     pNote->set_notated_accidentals(k_no_accidentals);       break;
-                case 2:     pNote->set_notated_accidentals(k_double_sharp);         break;
-                default:    pNote->set_notated_accidentals(k_invalid_accidentals);  break;
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_no_accidentals;       break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
             }
-            return;
+            break;
         }
 
         case 2:
         {
             switch(required)
             {
-                case -2:    pNote->set_notated_accidentals(k_flat_flat);            break;
-                case -1:    pNote->set_notated_accidentals(k_flat);                 break;
-                case 0:     pNote->set_notated_accidentals(k_natural);              break;
-                case 1:     pNote->set_notated_accidentals(k_natural_sharp);        break;
-                case 2:     pNote->set_notated_accidentals(k_no_accidentals);       break;
-                default:    pNote->set_notated_accidentals(k_invalid_accidentals);  break;
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_natural_sharp;        break;
+                case 2:     acc = k_no_accidentals;       break;
+                default:    acc = k_invalid_accidentals;  break;
             }
-            return;
+            break;
         }
 
         case -1:
         {
             switch(required)
             {
-                case -2:    pNote->set_notated_accidentals(k_flat_flat);            break;
-                case -1:    pNote->set_notated_accidentals(k_no_accidentals);       break;
-                case 0:     pNote->set_notated_accidentals(k_natural);              break;
-                case 1:     pNote->set_notated_accidentals(k_sharp);                break;
-                case 2:     pNote->set_notated_accidentals(k_double_sharp);         break;
-                default:    pNote->set_notated_accidentals(k_invalid_accidentals);  break;
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_no_accidentals;       break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
             }
-            return;
+            break;
         }
 
         case -2:
         {
             switch(required)
             {
-                case -2:    pNote->set_notated_accidentals(k_no_accidentals);       break;
-                case -1:    pNote->set_notated_accidentals(k_natural_flat);         break;
-                case 0:     pNote->set_notated_accidentals(k_natural);              break;
-                case 1:     pNote->set_notated_accidentals(k_sharp);                break;
-                case 2:     pNote->set_notated_accidentals(k_double_sharp);         break;
-                default:    pNote->set_notated_accidentals(k_invalid_accidentals);  break;
+                case -2:    acc = k_no_accidentals;       break;
+                case -1:    acc = k_natural_flat;         break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
             }
-            return;
+            break;
         }
 
         default:
-            pNote->set_notated_accidentals(k_invalid_accidentals);
+            acc = k_invalid_accidentals;
     }
+
+    //decide what accidentals to display. It must be always the computed accidentals but
+    //there are two exceptions:
+    //  1. when the user has set the accidentals and they are not inconsistent
+    //  2. when courtesy accidentals are requested
+    if (pNote->is_display_accidentals_forced())     //user has set accidentals
+    {
+        //acceptable inconsistencies: cases in which the user has provided alternative
+        //notations with the same meaning (e.g.two sharps instead of double sharp)
+        if (pNote->get_notated_accidentals() == k_natural_flat && acc == k_flat)
+            acc = k_natural_flat;
+        else if (pNote->get_notated_accidentals() == k_flat && acc == k_natural_flat)
+            acc = k_flat;
+        else if (pNote->get_notated_accidentals() == k_natural_sharp && acc == k_sharp)
+            acc = k_natural_sharp;
+        else if (pNote->get_notated_accidentals() == k_sharp_sharp && acc == k_double_sharp)
+            acc = k_sharp_sharp;
+        else if (pNote->get_notated_accidentals() == k_sharp && acc == k_natural_sharp)
+            acc = k_sharp;
+
+        //no accidental is required. Deal with cases the user has requested to display
+        //the accidentals (courtesy accidentals)
+        else if (acc == k_no_accidentals)
+        {
+            if (pNote->is_display_naturals_forced())
+                acc = k_natural;
+            else if (pNote->get_notated_accidentals() == k_natural)
+            {
+                acc = k_natural;
+                //AWARE: notated_accidentals_never_computed() is "true" the first time the
+                //score is loaded, when importing or re-loading the file. Score source
+                //format is irrelevant.
+                if (pNote->notated_accidentals_never_computed())
+                    pNote->force_to_display_naturals();
+            }
+            else
+            {
+                //context == required. No accidental is required but user has set
+                //the accidental (courtesy acc.)
+                switch(context)
+                {
+                    case -2:    acc = k_flat_flat;            break;
+                    case -1:    acc = k_flat;                 break;
+                    case 0:     acc = k_no_accidentals;       break;
+                    case 1:     acc = k_sharp;                break;
+                    case 2:     acc = k_double_sharp;         break;
+                    default:    acc = k_invalid_accidentals;  break;
+                }
+            }
+        }
+    }
+
+    pNote->mark_notated_accidentals_as_computed();
+    pNote->set_notated_accidentals(acc);
 }
 
 //---------------------------------------------------------------------------------------

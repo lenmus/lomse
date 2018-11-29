@@ -367,6 +367,28 @@ SUITE(PitchAssignerTest)
         CHECK( pNote->get_notated_accidentals() == k_flat );
     }
 
+    TEST_FIXTURE(PitchAssignerTestFixture, pitch_assigner_08)
+    {
+        //@08. Incoherent accidentals.
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)(n xc4 q)(n +c4 q)(barline)"
+            ")))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        StaffObjsCursor cursor(pScore);
+        while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
+        {
+            cursor.move_next();
+        }
+        ImoNote* pNote1 = static_cast<ImoNote*>( cursor.get_staffobj() );
+        cursor.move_next();
+        ImoNote* pNote2 = static_cast<ImoNote*>( cursor.get_staffobj() );
+
+        CHECK( pNote1->get_notated_accidentals() == k_double_sharp );
+        CHECK( pNote2->get_notated_accidentals() == k_sharp );
+    }
+
 };
 
 
