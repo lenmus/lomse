@@ -145,6 +145,7 @@ set(MODULE_FILES
     ${LOMSE_SRC_DIR}/module/lomse_events_dispatcher.cpp
     ${LOMSE_SRC_DIR}/module/lomse_image.cpp
     ${LOMSE_SRC_DIR}/module/lomse_injectors.cpp
+    ${LOMSE_SRC_DIR}/module/lomse_interval.cpp
     ${LOMSE_SRC_DIR}/module/lomse_logger.cpp
     ${LOMSE_SRC_DIR}/module/lomse_pitch.cpp
     ${LOMSE_SRC_DIR}/module/lomse_time.cpp
