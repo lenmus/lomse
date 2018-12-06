@@ -30,7 +30,8 @@
 #ifndef __LOMSE_PITCH_H__
 #define __LOMSE_PITCH_H__
 
-#include "lomse_internal_model.h"        //for EKeySignature enum
+#include "lomse_internal_model.h"       //for EKeySignature enum
+#include "lomse_interval.h"             //for class FIntval
 
 #include <string>
 using namespace std;
@@ -370,7 +371,7 @@ public:
     operator int() { return m_fp; }
 
     ///@{
-    /// Comparison operator
+    /// Comparison operators
     bool operator ==(FPitch fp) { return m_fp == int(fp); }
     bool operator !=(FPitch fp) { return m_fp != int(fp); }
     bool operator < (FPitch fp) { return m_fp < int(fp); }
@@ -405,6 +406,20 @@ public:
     /// Operations
     FPitch add_semitone(EKeySignature nKey);
     FPitch add_semitone(bool fUseSharps);
+    ///@}
+
+    ///@{
+    /// Add/substract an interval
+    FPitch operator -(FIntval intv) { return FPitch(m_fp - int(intv)); }
+    FPitch operator +(FIntval intv) { return FPitch(m_fp + int(intv)); }
+    FPitch operator -=(FIntval intv) {
+        m_fp -= int(intv);
+        return FPitch(m_fp);
+    }
+    FPitch operator +=(FIntval intv) {
+        m_fp += int(intv);
+        return FPitch(m_fp);
+    }
     ///@}
 
     // Interval between 2 steps

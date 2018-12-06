@@ -62,6 +62,7 @@
 #include <lomse_events.h>
 #include <lomse_tasks.h>
 #include <lomse_command.h>
+#include <lomse_interval.h>
 
 using namespace lomse;
 
@@ -101,7 +102,8 @@ protected:
     void on_open_file(wxCommandEvent& WXUNUSED(event));
     void on_zoom_in(wxCommandEvent& WXUNUSED(event));
     void on_zoom_out(wxCommandEvent& WXUNUSED(event));
-    void on_transpose(wxCommandEvent& WXUNUSED(event));
+    void on_transpose_notes(wxCommandEvent& WXUNUSED(event));
+    void on_transpose_key(wxCommandEvent& WXUNUSED(event));
     void on_edit_undo(wxCommandEvent& WXUNUSED(event));
     void on_edit_redo(wxCommandEvent& WXUNUSED(event));
 
@@ -134,7 +136,8 @@ public:
     void open_file(const wxString& fullname);
     void zoom_in();
     void zoom_out();
-    void transpose();
+    void transpose_notes();
+    void transpose_key();
     void undo();
     void redo();
 
@@ -156,7 +159,8 @@ protected:
     unsigned get_mouse_flags(wxMouseEvent& event);
 
     //edition related
-    void transpose(int numSemitones, bool fChangeKey=true);
+    void transpose_notes(int iInterval, bool fUp, bool fDiatonically);
+    void transpose_key(int iInterval, bool fUp, bool fDiatonically);
 
 
     // In this first example we are just going to display an score on the window.
@@ -183,26 +187,25 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-//A dialog for displaying transposition options
-class DlgTranspose : public wxDialog
+//A dialog for displaying transposition options for transposing notes
+class DlgTransposeNotes : public wxDialog
 {
 protected:
-    int m_semitones;
-    bool m_fTransposeKeys;
+    FIntval* m_interval;
+    bool* m_fUp;
+    bool* m_fDiatonically;
 
-    wxCheckBox* chkInterval;
-    wxCheckBox* chkByInterval;
-    wxRadioBox* radUpDown;
-    wxComboBox* cboInterval;
-    wxButton* btnOk;
-    wxButton* btnCancel;
+    wxRadioBox* m_radMethod;
+    wxRadioBox* m_radUpDown;
+    wxComboBox* m_cboInterval;
+    wxButton* m_btnOk;
+    wxButton* m_btnCancel;
 
 
 public:
-    DlgTranspose(wxWindow* parent, int& semitones, bool& fTransposeKeys);
-    virtual ~DlgTranspose();
-
-    void on_ok(wxCommandEvent& WXUNUSED(event));
+    DlgTransposeNotes(wxWindow* parent, FIntval* interval, bool* fUp,
+                      bool *fDiatonically);
+    virtual ~DlgTransposeNotes();
 
 protected:
 
@@ -244,7 +247,8 @@ enum
 {
     //new IDs
     k_menu_file_open = wxID_HIGHEST + 1,
-    k_menu_edit_transpose,
+    k_menu_edit_transpose_notes,
+    k_menu_edit_transpose_key,
     k_menu_edit_undo,
     k_menu_edit_redo,
 
@@ -266,7 +270,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(k_menu_file_open, MyFrame::on_open_file)
     EVT_MENU(k_menu_zoom_in, MyFrame::on_zoom_in)
     EVT_MENU(k_menu_zoom_out, MyFrame::on_zoom_out)
-    EVT_MENU(k_menu_edit_transpose, MyFrame::on_transpose)
+    EVT_MENU(k_menu_edit_transpose_notes, MyFrame::on_transpose_notes)
+    EVT_MENU(k_menu_edit_transpose_key, MyFrame::on_transpose_key)
     EVT_MENU      (k_menu_edit_undo, MyFrame::on_edit_undo)
 //    EVT_UPDATE_UI (k_menu_edit_undo, MyFrame::on_update_UI_edit)
     EVT_MENU      (k_menu_edit_redo, MyFrame::on_edit_redo)
@@ -306,7 +311,8 @@ void MyFrame::create_menu()
     zoomMenu->Append(k_menu_zoom_out);
 
     wxMenu* editMenu = new wxMenu;
-    editMenu->Append(k_menu_edit_transpose, _T("&Transpose"));
+    editMenu->Append(k_menu_edit_transpose_notes, _T("Transpose &notes"));
+    editMenu->Append(k_menu_edit_transpose_key, _T("Transpose &key"));
     editMenu->AppendSeparator();
     editMenu->Append(k_menu_edit_undo, _T("&Undo"));
     editMenu->Append(k_menu_edit_redo, _T("&Redo"));
@@ -423,9 +429,15 @@ void MyFrame::on_edit_redo(wxCommandEvent& WXUNUSED(event))
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::on_transpose(wxCommandEvent& WXUNUSED(event))
+void MyFrame::on_transpose_notes(wxCommandEvent& WXUNUSED(event))
 {
-    get_active_canvas()->transpose();
+    get_active_canvas()->transpose_notes();
+}
+
+//---------------------------------------------------------------------------------------
+void MyFrame::on_transpose_key(wxCommandEvent& WXUNUSED(event))
+{
+    get_active_canvas()->transpose_key();
 }
 
 
@@ -562,47 +574,11 @@ void MyCanvas::open_test_document()
     delete m_pPresenter;
     m_pPresenter = m_lomse.new_document(k_view_vertical_book,
         "(score (vers 2.0) "
-        "(instrument (staves 2) (musicData "
-        "(clef G p1)(clef F4 p2)(key C)(time 4 4)"
-        "(n c4 s g+ p1)(n d4 s)(n c4 s)(n d4 s g-)"
-        "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
-        "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
-        "(n g4 s g+ p1)(n a4 s)(n g4 s)(n a4 s g-)"
-        "//left hand\n"
-        "(chord (n c3 q v2 p2)(n e3 q)(n g3 q))"
-        "(r q)"
-        "(chord (n a2 q p2)(n c3 q)(n f3 q))"
-        "(r q)"
+        "(instrument (musicData "
+        "(clef G)(key G)(time 4 4)"
+        "(n g4 q)(n a4 q)(n b4 q)(n c5 q)"
         "(barline)"
-        "(chord (n g3 q v1 p1)(n d4 q))"
-        "(r e)(n g5 e)"
-        "(n g5 s g+)(n f5 s)(n g5 e g-)"
-        "(n c4 q)"
-        "//left hand\n"
-        "(n g2 q v2 p2)"
-        "(n d3 e g+)(n d3 e g-)"
-        "(n b3 e g+)(n a3 s)(n g3 s g-)"
-        "(chord (n g3 q)(n e3 q)(n c3 q))"
-        "(barline)"
-        "(n c4 s g+ v1 p1)(n d4 s)(n c4 s)(n d4 s g-)"
-        "(n e4 s g+ p1)(n f4 s)(n e4 s)(n f4 s g-)"
-        "(n f4 s g+ p1)(n g4 s)(n f4 s)(n g4 s g-)"
-        "(n g4 s g+ p1)(n a4 s)(n g4 s)(n a4 s g-)"
-        "//left hand\n"
-        "(chord (n c3 q v2 p2)(n e3 q)(n g3 q))"
-        "(r q)"
-        "(chord (n a2 q p2)(n c3 q)(n f3 q))"
-        "(r q)"
-        "(barline)"
-        "(chord (n g3 q v1 p1)(n d4 q))"
-        "(r e)(n g5 e)"
-        "(n g5 s g+)(n f5 s)(n g5 e g-)"
-        "(n c4 q)"
-        "//left hand\n"
-        "(n g2 q v2 p2)"
-        "(n d3 e g+)(n d3 e g-)"
-        "(n b3 e g+)(n a3 s)(n g3 s g-)"
-        "(chord (n g3 q)(n e3 q)(n c3 q))"
+        "(n d5 q)(n e5 q)(n f5 q)(n g5 q)"
         "(barline)"
         ")))",
         Document::k_format_ldp);
@@ -754,19 +730,39 @@ void MyCanvas::zoom_out()
 }
 
 //-------------------------------------------------------------------------
-void MyCanvas::transpose()
+void MyCanvas::transpose_notes()
 {
     if (!m_pPresenter) return;
 
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
-        int semitones = 0;
-        bool fTransposeKeys = false;
-        DlgTranspose dlg(this, semitones, fTransposeKeys);
+        FIntval interval("M2");
+        bool fUp = true;
+        bool fDiatonically = false;
+        DlgTransposeNotes dlg(this, &interval, &fUp, &fDiatonically);
         if (dlg.ShowModal() == wxID_OK)
         {
-            transpose(semitones, fTransposeKeys);
+            transpose_notes(interval, fUp, fDiatonically);
         }
+    }
+}
+
+//-------------------------------------------------------------------------
+void MyCanvas::transpose_key()
+{
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
+    {
+    //TODO
+//        FIntval interval("M2");
+//        bool fUp = true;
+//        bool fDiatonically = false;
+//        DlgTransposeNotes dlg(this, &interval, &fUp, &fDiatonically);
+//        if (dlg.ShowModal() == wxID_OK)
+//        {
+//            transpose(interval, fUp, fDiatonically);
+//        }
     }
 }
 
@@ -797,14 +793,28 @@ void MyCanvas::redo()
 }
 
 //-------------------------------------------------------------------------
-void MyCanvas::transpose(int numSemitones, bool fChangeKey)
+void MyCanvas::transpose_notes(int iInterval, bool fUp, bool fDiatonically)
 {
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
         ::wxBeginBusyCursor();
         string name = gettext("Chromatic transposition");
         spIntor->exec_command(
-            new CmdChromaticTransposition(numSemitones, fChangeKey, name) );
+            new CmdTransposeByInterval(FIntval(iInterval), fUp) );
+        ::wxEndBusyCursor();
+    }
+}
+
+//-------------------------------------------------------------------------
+void MyCanvas::transpose_key(int iInterval, bool fUp, bool fDiatonically)
+{
+    //TODO
+    if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
+    {
+        ::wxBeginBusyCursor();
+        string name = gettext("Chromatic transposition");
+//        spIntor->exec_command(
+//            new CmdTransposeByInterval(FIntval(iInterval), fUp) );
         ::wxEndBusyCursor();
     }
 }
@@ -870,65 +880,53 @@ void MyCanvas::on_mouse_event(wxMouseEvent& event)
 
 
 //=======================================================================================
-// DlgTranspose implementation
+// DlgTransposeNotes implementation
 //=======================================================================================
-DlgTranspose::DlgTranspose(wxWindow* parent, int& semitones, bool& fTransposeKeys)
-    : wxDialog(parent, wxID_ANY, _("Transpose"), wxDefaultPosition, wxDefaultSize,
+DlgTransposeNotes::DlgTransposeNotes(wxWindow* parent, FIntval* interval, bool* fUp,
+                                     bool* fDiatonically)
+    : wxDialog(parent, wxID_ANY, _("Transpose notes"), wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE)
-    , m_semitones(semitones)
-    , m_fTransposeKeys(fTransposeKeys)
+    , m_interval(interval)
+    , m_fUp(fUp)
+    , m_fDiatonically(fDiatonically)
 {
     create_controls();
     load_options();
 }
 
 //---------------------------------------------------------------------------------------
-DlgTranspose::~DlgTranspose()
+DlgTransposeNotes::~DlgTransposeNotes()
 {
 }
 
 //---------------------------------------------------------------------------------------
-void DlgTranspose::create_controls()
+void DlgTransposeNotes::create_controls()
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
 	wxBoxSizer* szrMain;
 	szrMain = new wxBoxSizer( wxVERTICAL );
 
-	wxBoxSizer* szrChromatic;
-	szrChromatic = new wxBoxSizer( wxVERTICAL );
+	wxString m_radMethodChoices[] = { _("Chromatically"), _("Diatonically") };
+	int m_radMethodNChoices = sizeof( m_radMethodChoices ) / sizeof( wxString );
+	m_radMethod = new wxRadioBox( this, wxID_ANY, _("Tranposition method "), wxDefaultPosition, wxDefaultSize, m_radMethodNChoices, m_radMethodChoices, 1, wxRA_SPECIFY_COLS );
+	m_radMethod->SetSelection( 1 );
+	szrMain->Add( m_radMethod, 1, wxALL|wxEXPAND, 5 );
 
-	chkInterval = new wxCheckBox( this, wxID_ANY, _("Chromatic transposition"), wxDefaultPosition, wxDefaultSize, 0 );
-	chkInterval->SetValue(true);
-	szrChromatic->Add( chkInterval, 0, wxBOTTOM|wxRIGHT, 5 );
+	wxString m_radUpDownChoices[] = { _("Up"), _("Down") };
+	int m_radUpDownNChoices = sizeof( m_radUpDownChoices ) / sizeof( wxString );
+	m_radUpDown = new wxRadioBox( this, wxID_ANY, _("Direction "), wxDefaultPosition, wxDefaultSize, m_radUpDownNChoices, m_radUpDownChoices, 1, wxRA_SPECIFY_COLS );
+	m_radUpDown->SetSelection( 0 );
+	szrMain->Add( m_radUpDown, 0, wxBOTTOM|wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 	wxStaticBoxSizer* szrInterval;
-	szrInterval = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, wxEmptyString ), wxVERTICAL );
+	szrInterval = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("Interval ") ), wxVERTICAL );
 
-	chkByInterval = new wxCheckBox( szrInterval->GetStaticBox(), wxID_ANY, _("By interval"), wxDefaultPosition, wxDefaultSize, 0 );
-	chkByInterval->SetValue(true);
-	szrInterval->Add( chkByInterval, 0, wxBOTTOM|wxRIGHT|wxLEFT, 5 );
-
-	wxBoxSizer* szrUpDown;
-	szrUpDown = new wxBoxSizer( wxHORIZONTAL );
-
-	wxString radUpDownChoices[] = { _("Up"), _("Down") };
-	int radUpDownNChoices = sizeof( radUpDownChoices ) / sizeof( wxString );
-	radUpDown = new wxRadioBox( szrInterval->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, radUpDownNChoices, radUpDownChoices, 1, wxRA_SPECIFY_COLS );
-	radUpDown->SetSelection( 0 );
-	szrUpDown->Add( radUpDown, 0, wxBOTTOM|wxRIGHT|wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
-
-	cboInterval = new wxComboBox( szrInterval->GetStaticBox(), wxID_ANY, _("Perfect unison"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
-	szrUpDown->Add( cboInterval, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	m_cboInterval = new wxComboBox( szrInterval->GetStaticBox(), wxID_ANY, _("Unison"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	szrInterval->Add( m_cboInterval, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
 
 
-	szrInterval->Add( szrUpDown, 1, wxEXPAND, 5 );
-
-
-	szrChromatic->Add( szrInterval, 1, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 5 );
-
-
-	szrMain->Add( szrChromatic, 1, wxEXPAND|wxALL, 5 );
+	szrMain->Add( szrInterval, 1, wxEXPAND|wxALL, 5 );
 
 	wxBoxSizer* szrButtons;
 	szrButtons = new wxBoxSizer( wxHORIZONTAL );
@@ -936,11 +934,11 @@ void DlgTranspose::create_controls()
 
 	szrButtons->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	btnOk = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	szrButtons->Add( btnOk, 0, wxALL, 5 );
+	m_btnOk = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	szrButtons->Add( m_btnOk, 0, wxALL, 5 );
 
-	btnCancel = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-	szrButtons->Add( btnCancel, 0, wxALL, 5 );
+	m_btnCancel = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	szrButtons->Add( m_btnCancel, 0, wxALL, 5 );
 
 
 	szrButtons->Add( 0, 0, 1, wxEXPAND, 5 );
@@ -956,51 +954,68 @@ void DlgTranspose::create_controls()
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTranspose::on_ok ), NULL, this );
-	btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTranspose::on_cancel ), NULL, this );
+	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), NULL, this );
+	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), NULL, this );
 }
 
 //---------------------------------------------------------------------------------------
-void DlgTranspose::load_options()
+void DlgTransposeNotes::load_options()
 {
     //Combo box for intervals
-    cboInterval->Append(_("Perfect unison"));
-    cboInterval->Append(_("Augmented unison"));
-    cboInterval->Append(_("Diminished second"));
-    cboInterval->Append(_("Minor second"));
-    cboInterval->Append(_("Major second"));
-    cboInterval->Append(_("Augmented second"));
-    cboInterval->Append(_("Diminished third"));
-    cboInterval->Append(_("Minor third"));
-    cboInterval->Append(_("Major third"));
-    cboInterval->Append(_("Augmented third"));
-    cboInterval->Append(_("Diminished fourth"));
-    cboInterval->Append(_("Perfect fourth"));
-    cboInterval->Append(_("Augmented fourth"));
-    cboInterval->Append(_("Diminished fifth"));
-    cboInterval->Append(_("Perfect fifth"));
-    cboInterval->Append(_("Augmented fifth"));
-    cboInterval->Append(_("Diminished sixth"));
-    cboInterval->Append(_("Minor sixth"));
-    cboInterval->Append(_("Major sixth"));
-    cboInterval->Append(_("Augmented sixth"));
-    cboInterval->Append(_("Diminished seventh"));
-    cboInterval->Append(_("Minor seventh"));
-    cboInterval->Append(_("Major seventh"));
-    cboInterval->Append(_("Augmented seventh"));
-    cboInterval->Append(_("Diminished octave"));
-    cboInterval->Append(_("Perfect octave"));
+    m_cboInterval->Clear();
+    m_cboInterval->Append(_("Perfect unison"));
+    m_cboInterval->Append(_("Augmented unison"));
+    m_cboInterval->Append(_("Diminished second"));
+    m_cboInterval->Append(_("Minor second"));
+    m_cboInterval->Append(_("Major second"));
+    m_cboInterval->Append(_("Augmented second"));
+    m_cboInterval->Append(_("Diminished third"));
+    m_cboInterval->Append(_("Minor third"));
+    m_cboInterval->Append(_("Major third"));
+    m_cboInterval->Append(_("Augmented third"));
+    m_cboInterval->Append(_("Diminished fourth"));
+    m_cboInterval->Append(_("Perfect fourth"));
+    m_cboInterval->Append(_("Augmented fourth"));
+    m_cboInterval->Append(_("Diminished fifth"));
+    m_cboInterval->Append(_("Perfect fifth"));
+    m_cboInterval->Append(_("Augmented fifth"));
+    m_cboInterval->Append(_("Diminished sixth"));
+    m_cboInterval->Append(_("Minor sixth"));
+    m_cboInterval->Append(_("Major sixth"));
+    m_cboInterval->Append(_("Augmented sixth"));
+    m_cboInterval->Append(_("Diminished seventh"));
+    m_cboInterval->Append(_("Minor seventh"));
+    m_cboInterval->Append(_("Major seventh"));
+    m_cboInterval->Append(_("Augmented seventh"));
+    m_cboInterval->Append(_("Diminished octave"));
+    m_cboInterval->Append(_("Perfect octave"));
+
+    //set values according received data
+    m_radMethod->Select(*m_fDiatonically ? 1 : 0);
+    m_radUpDown->Select(*m_fUp ? 0 : 1);
+    m_cboInterval->SetSelection(0);
+
 }
 
 //---------------------------------------------------------------------------------------
-void DlgTranspose::on_ok(wxMouseEvent& event)
+void DlgTransposeNotes::on_ok(wxMouseEvent& event)
 {
+    static string intervals[] = {
+        "p1",  "a1",  "d2", "m2",  "M2", "a2", "d3",  "m3",  "M3", "a3",
+        "d4",  "p4",  "a4", "d5",  "p5", "a5",  "d6",  "m6", "M6",  "a6",
+        "d7",  "m7",  "M7",  "a7", "d8", "p8"
+    };
+
+    *m_interval = FIntval( intervals[m_cboInterval->GetSelection()] );
+    *m_fUp = m_radUpDown->GetSelection() == 0;
+    *m_fDiatonically = m_radMethod->GetSelection() == 1;
+
     event.Skip();
     EndModal(wxID_OK);
 }
 
 //---------------------------------------------------------------------------------------
-void DlgTranspose::on_cancel(wxMouseEvent& event)
+void DlgTransposeNotes::on_cancel(wxMouseEvent& event)
 {
     event.Skip();
     EndModal(wxID_CANCEL);

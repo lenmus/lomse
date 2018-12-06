@@ -213,12 +213,18 @@ public:
         m_notated_acc = accidentals;
         m_actual_acc = k_acc_not_computed;
     }
-//    void set_pitch(FPitch fp) {
-//        m_step = fp.step();
-//        m_octave = fp.octave();
-//        m_notated_acc = fp.accidentals();
-//        m_actual_acc = float(fp.num_accidentals());
-//    }
+
+    /** Using this method could create inconsistencies between new pitch and notated
+        accidentals unless it is used in conjunction with set_notated_accidentals()
+        or PitchAssigner is later used for computing notated accidentals.
+    */
+    void set_pitch(FPitch fp) {
+        m_step = fp.step();
+        m_octave = fp.octave();
+        m_actual_acc = float(fp.num_accidentals());
+        m_notated_acc = k_invalid_accidentals;
+    }
+
     /** Using this method could create inconsistencies between new pitch and notated
         accidentals unless it is used in conjunction with set_notated_accidentals()
         or PitchAssigner is later used for computing notated accidentals.

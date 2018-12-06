@@ -307,6 +307,70 @@ int get_step_for_root_note(EKeySignature keyType)
 }
 
 //---------------------------------------------------------------------------------------
+int get_key_for_root_note(EKeySignature keyType)
+{
+    //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
+    //the Key signature. For example, if keyType is La sharp minor it returns
+    //step = 5 (La)
+
+    //compute root note
+    switch(keyType)
+    {
+        case k_key_C:
+        case k_key_c:
+        case k_key_cs:
+        case k_key_Cs:
+        case k_key_Cf:
+            return k_step_C;
+
+        case k_key_D:
+        case k_key_Df:
+        case k_key_ds:
+        case k_key_d:
+            return k_step_D;
+
+        case k_key_E:
+        case k_key_e:
+        case k_key_Ef:
+        case k_key_ef:
+            return k_step_E;
+
+        case k_key_F:
+        case k_key_fs:
+        case k_key_Fs:
+        case k_key_f:
+            return k_step_F;
+
+        case k_key_G:
+        case k_key_gs:
+        case k_key_g:
+        case k_key_Gf:
+            return k_step_G;
+
+        case k_key_A:
+        case k_key_a:
+        case k_key_as:
+        case k_key_Af:
+        case k_key_af:
+            return k_step_A;
+
+        case k_key_b:
+        case k_key_B:
+        case k_key_Bf:
+        case k_key_bf:
+            return k_step_B;
+
+        default:
+        {
+            stringstream ss;
+            ss << "[get_step_for_root_note] Invalid key signature " << keyType;
+            LOMSE_LOG_ERROR(ss.str());
+            return k_step_C;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
 int get_step_for_leading_note(EKeySignature keyType)
 {
     int nRoot = get_step_for_root_note(keyType);

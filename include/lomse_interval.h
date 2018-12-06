@@ -180,15 +180,18 @@ public:
     /** Returns the number of semitones implied by this interval.       */
     int get_num_semitones();
 
-    // comparison operators
+    ///@{
+    /// Comparison operators
     bool operator ==(FIntval intv) { return m_interval == int(intv); }
     bool operator !=(FIntval intv) { return m_interval != int(intv); }
     bool operator < (FIntval intv) { return m_interval < int(intv); }
     bool operator > (FIntval intv) { return m_interval > int(intv); }
     bool operator <= (FIntval intv) { return m_interval <= int(intv); }
     bool operator >= (FIntval intv) { return m_interval >= int(intv); }
+    ///@}
 
-    //operations
+    ///@{
+    /// Add/substract operators
     FIntval operator -(FIntval intv) { return FIntval(m_interval - int(intv)); }
     FIntval operator +(FIntval intv) { return FIntval(m_interval + int(intv)); }
     FIntval operator -=(FIntval intv) {
@@ -199,6 +202,7 @@ public:
         m_interval += int(intv);
         return FIntval(m_interval);
     }
+    ///@}
 
 protected:
 
