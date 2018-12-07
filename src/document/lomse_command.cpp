@@ -3003,4 +3003,125 @@ void CmdTransposeByInterval::undo_action(Document* pDoc, DocCursor* UNUSED(pCurs
 }
 
 
+//=======================================================================================
+// CmdTransposeDiatonically implementation
+//=======================================================================================
+CmdTransposeDiatonically::CmdTransposeDiatonically(int steps, bool fUp,
+                                                   const string& name)
+    : DocCmdSimple(name)
+    , m_steps(steps)
+    , m_fUp(fUp)
+{
+    m_flags = k_recordable | k_reversible;
+    if (m_name=="")
+        m_name = "Diatonic transposition";
+}
+
+//---------------------------------------------------------------------------------------
+int CmdTransposeDiatonically::set_target(Document* UNUSED(pDoc),
+                                         DocCursor* UNUSED(pCursor),
+                                         SelectionSet* pSelection)
+{
+    if (pSelection && !pSelection->empty())
+    {
+        m_notes = pSelection->filter(k_imo_note);
+        return k_success;
+    }
+    return k_failure;
+}
+
+//---------------------------------------------------------------------------------------
+int CmdTransposeDiatonically::perform_action(Document* pDoc,
+                                             DocCursor* UNUSED(pCursor))
+{
+    //Undo strategy: direct undo, as it only implies performing the symmetrical
+    //               transposition
+
+    ImoScore* pScore = nullptr;
+    list<ImoId>::iterator it;
+    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+    {
+        //get note and score
+        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
+        if (!pScore)
+            pScore = pNote->get_score();
+        if (!pScore)
+            return k_failure;
+
+        //transpose note
+        int step = pNote->get_step();
+        if (m_fUp)
+        {
+            step += m_steps;
+            if (step > 6)
+            {
+                step -= 7;
+                pNote->set_octave( pNote->get_octave() + 1 );
+            }
+        }
+        else
+        {
+            step -= m_steps;
+            if (step < 0)
+            {
+                step += 7;
+                pNote->set_octave( pNote->get_octave() - 1 );
+            }
+        }
+        pNote->set_step(step);
+        pNote->set_actual_accidentals(k_acc_not_computed);
+        pNote->set_dirty(true);
+    }
+
+    //assign pitch to all notes
+    PitchAssigner tuner;
+    tuner.assign_pitch(pScore);
+
+    return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeDiatonically::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
+{
+    ImoScore* pScore = nullptr;
+    list<ImoId>::iterator it;
+    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+    {
+        //get note and score
+        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
+        if (!pScore)
+            pScore = pNote->get_score();
+        if (!pScore)
+            return;
+
+        //transpose note back
+        int step = pNote->get_step();
+        if (m_fUp)
+        {
+            step -= m_steps;
+            if (step < 0)
+            {
+                step += 7;
+                pNote->set_octave( pNote->get_octave() - 1 );
+            }
+        }
+        else
+        {
+            step += m_steps;
+            if (step > 6)
+            {
+                step -= 7;
+                pNote->set_octave( pNote->get_octave() + 1 );
+            }
+        }
+        pNote->set_step(step);
+        pNote->set_actual_accidentals(k_acc_not_computed);
+        pNote->set_dirty(true);
+    }
+
+    PitchAssigner tuner;
+    tuner.assign_pitch(pScore);
+}
+
+
 }  //namespace lomse

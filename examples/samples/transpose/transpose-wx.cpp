@@ -159,7 +159,8 @@ protected:
     unsigned get_mouse_flags(wxMouseEvent& event);
 
     //edition related
-    void transpose_notes(int iInterval, bool fUp, bool fDiatonically);
+    void transpose_notes_chromatically(FIntval interval, bool fUp);
+    void transpose_notes_diatonically(int steps, bool fUp);
     void transpose_key(int iInterval, bool fUp, bool fDiatonically);
 
 
@@ -192,6 +193,7 @@ class DlgTransposeNotes : public wxDialog
 {
 protected:
     FIntval* m_interval;
+    int* m_steps;
     bool* m_fUp;
     bool* m_fDiatonically;
 
@@ -203,18 +205,22 @@ protected:
 
 
 public:
-    DlgTransposeNotes(wxWindow* parent, FIntval* interval, bool* fUp,
+    DlgTransposeNotes(wxWindow* parent, FIntval* interval, int* steps, bool* fUp,
                       bool *fDiatonically);
     virtual ~DlgTransposeNotes();
 
 protected:
 
     //event handlers
+    virtual void on_method_changed(wxCommandEvent& event);
     virtual void on_ok(wxMouseEvent& event);
     virtual void on_cancel(wxMouseEvent& event);
 
     void create_controls();
     void load_options();
+    void load_combo_values();
+    void load_intervals();
+    void load_steps();
 };
 
 
@@ -737,12 +743,16 @@ void MyCanvas::transpose_notes()
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
         FIntval interval("M2");
+        int steps = 0;
         bool fUp = true;
         bool fDiatonically = false;
-        DlgTransposeNotes dlg(this, &interval, &fUp, &fDiatonically);
+        DlgTransposeNotes dlg(this, &interval, &steps, &fUp, &fDiatonically);
         if (dlg.ShowModal() == wxID_OK)
         {
-            transpose_notes(interval, fUp, fDiatonically);
+            if (fDiatonically)
+                transpose_notes_diatonically(steps, fUp);
+            else
+                transpose_notes_chromatically(interval, fUp);
         }
     }
 }
@@ -793,14 +803,27 @@ void MyCanvas::redo()
 }
 
 //-------------------------------------------------------------------------
-void MyCanvas::transpose_notes(int iInterval, bool fUp, bool fDiatonically)
+void MyCanvas::transpose_notes_chromatically(FIntval interval, bool fUp)
 {
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
         ::wxBeginBusyCursor();
         string name = gettext("Chromatic transposition");
         spIntor->exec_command(
-            new CmdTransposeByInterval(FIntval(iInterval), fUp) );
+            new CmdTransposeByInterval(interval, fUp) );
+        ::wxEndBusyCursor();
+    }
+}
+
+//-------------------------------------------------------------------------
+void MyCanvas::transpose_notes_diatonically(int steps, bool fUp)
+{
+    if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
+    {
+        ::wxBeginBusyCursor();
+        string name = gettext("Diatonic transposition");
+        spIntor->exec_command(
+            new CmdTransposeDiatonically(steps, fUp) );
         ::wxEndBusyCursor();
     }
 }
@@ -882,11 +905,12 @@ void MyCanvas::on_mouse_event(wxMouseEvent& event)
 //=======================================================================================
 // DlgTransposeNotes implementation
 //=======================================================================================
-DlgTransposeNotes::DlgTransposeNotes(wxWindow* parent, FIntval* interval, bool* fUp,
-                                     bool* fDiatonically)
+DlgTransposeNotes::DlgTransposeNotes(wxWindow* parent, FIntval* interval, int* steps,
+                                     bool* fUp, bool* fDiatonically)
     : wxDialog(parent, wxID_ANY, _("Transpose notes"), wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE)
     , m_interval(interval)
+    , m_steps(steps)
     , m_fUp(fUp)
     , m_fDiatonically(fDiatonically)
 {
@@ -954,12 +978,37 @@ void DlgTransposeNotes::create_controls()
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	m_radMethod->Connect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), NULL, this );
 	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), NULL, this );
 	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), NULL, this );
 }
 
 //---------------------------------------------------------------------------------------
 void DlgTransposeNotes::load_options()
+{
+    m_radMethod->Select(*m_fDiatonically ? 1 : 0);
+    m_radUpDown->Select(*m_fUp ? 0 : 1);
+    load_combo_values();
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeNotes::on_method_changed(wxCommandEvent& event)
+{
+    load_combo_values();
+    event.Skip();
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeNotes::load_combo_values()
+{
+    if (m_radMethod->GetSelection() == 1)
+        load_steps();
+    else
+        load_intervals();
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeNotes::load_intervals()
 {
     //Combo box for intervals
     m_cboInterval->Clear();
@@ -990,11 +1039,23 @@ void DlgTransposeNotes::load_options()
     m_cboInterval->Append(_("Diminished octave"));
     m_cboInterval->Append(_("Perfect octave"));
 
-    //set values according received data
-    m_radMethod->Select(*m_fDiatonically ? 1 : 0);
-    m_radUpDown->Select(*m_fUp ? 0 : 1);
     m_cboInterval->SetSelection(0);
+}
 
+//---------------------------------------------------------------------------------------
+void DlgTransposeNotes::load_steps()
+{
+    //Combo box for intervals
+    m_cboInterval->Clear();
+    m_cboInterval->Append(_("Second (1 step)"));
+    m_cboInterval->Append(_("Third (2 steps)"));
+    m_cboInterval->Append(_("Fourth (3 steps)"));
+    m_cboInterval->Append(_("Fifth (4 steps)"));
+    m_cboInterval->Append(_("Sixth (5 steps)"));
+    m_cboInterval->Append(_("Seventh (6 steps)"));
+    m_cboInterval->Append(_("Octave (7 steps)"));
+
+    m_cboInterval->SetSelection(0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1006,9 +1067,12 @@ void DlgTransposeNotes::on_ok(wxMouseEvent& event)
         "d7",  "m7",  "M7",  "a7", "d8", "p8"
     };
 
-    *m_interval = FIntval( intervals[m_cboInterval->GetSelection()] );
     *m_fUp = m_radUpDown->GetSelection() == 0;
     *m_fDiatonically = m_radMethod->GetSelection() == 1;
+    if (*m_fDiatonically)
+        *m_steps = m_cboInterval->GetSelection() + 1;
+    else
+        *m_interval = FIntval( intervals[m_cboInterval->GetSelection()] );
 
     event.Skip();
     EndModal(wxID_OK);

@@ -4815,7 +4815,7 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, transpose_by_interval_2833)
     {
-        //@2831. Do. Whole score. Down, Success. Cursor doesn't move.
+        //@2833. Do. Whole score. Down, Success. Cursor doesn't move.
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
             "(clef G)(key C)(n c4 q)(n +f4 q)"
@@ -4934,6 +4934,260 @@ SUITE(DocCommandTest)
         c.move_next();         //points to +c4 (now transposed back to +f4)
         pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
         CHECK( pNote && pNote->get_step() == k_step_F );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+    }
+
+    //@ CmdTransposeDiatonically --------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2851)
+    {
+        //@2851. Do. Whole score. Success. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
+            "(clef G)(key C)(n c4 q)(n +b4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        MySelectionSet sel(&doc);
+
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to key
+        cursor.move_next();         //points to c4 q
+        sel.debug_add( *cursor );
+        cursor.move_next();         //points to +b4 q
+        sel.debug_add( *cursor );
+        ImoId idCur = cursor.get_pointee_id();
+
+        DocCommand* pCmd = LOMSE_NEW
+            CmdTransposeDiatonically(3);
+        CHECK( pCmd->get_name() == "Diatonic transposition" );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        //selection unchanged
+        CHECK( sel.num_selected() == 2 );
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == idCur );
+
+        //the score is transposed
+        CHECK( doc.is_dirty() == true );
+        DocCursor c(&doc);
+        c.enter_element();     //points to clef
+        c.move_next();         //points to key
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( c.get_pointee() );
+        CHECK( pKey && pKey->get_key_type() == k_key_C );   //key is not changed
+        c.move_next();         //points to c4 (now transposed to f4)
+        ImoNote* pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_F );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        c.move_next();         //points to +b4 (now transposed to +e5)
+        pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_E );
+        CHECK( pNote && pNote->get_octave() == 5 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2852)
+    {
+        //@2852. Undo. Whole score. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
+            "(clef G)(key C)(n c4 q)(n +b4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        MySelectionSet sel(&doc);
+
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to key
+        cursor.move_next();         //points to c4 q
+        sel.debug_add( *cursor );
+        cursor.move_next();         //points to +b4 q
+        sel.debug_add( *cursor );
+        ImoId idCur = cursor.get_pointee_id();
+
+        DocCommand* pCmd = LOMSE_NEW
+            CmdTransposeDiatonically(3);
+        CHECK( pCmd->get_name() == "Diatonic transposition" );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+        executer.undo(&cursor, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        //selection unchanged
+        CHECK( sel.num_selected() == 2 );
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == idCur );
+
+        //the score is transposed
+        CHECK( doc.is_dirty() == true );
+        DocCursor c(&doc);
+        c.enter_element();     //points to clef
+        c.move_next();         //points to key
+        c.move_next();         //points to f4 (now transposed back to c4)
+        ImoNote* pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        c.move_next();         //points to +e5 (now transposed back to +b4)
+        pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_B );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2853)
+    {
+        //@2853. Do. Whole score. Down, Success. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
+            "(clef G)(key C)(n c4 q)(n +b4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        MySelectionSet sel(&doc);
+
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to key
+        cursor.move_next();         //points to c4 q
+        sel.debug_add( *cursor );
+        cursor.move_next();         //points to +b4 q
+        sel.debug_add( *cursor );
+        ImoId idCur = cursor.get_pointee_id();
+
+        DocCommand* pCmd = LOMSE_NEW
+            CmdTransposeDiatonically(3, false /*down*/);
+        CHECK( pCmd->get_name() == "Diatonic transposition" );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        //selection unchanged
+        CHECK( sel.num_selected() == 2 );
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == idCur );
+
+        //the score is transposed
+        CHECK( doc.is_dirty() == true );
+        DocCursor c(&doc);
+        c.enter_element();     //points to clef
+        c.move_next();         //points to key
+        ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>( c.get_pointee() );
+        CHECK( pKey && pKey->get_key_type() == k_key_C );   //key is not changed
+        c.move_next();         //points to c4 (now transposed to g3)
+        ImoNote* pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_G );
+        CHECK( pNote && pNote->get_octave() == 3 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        c.move_next();         //points to +b4 (now transposed to +f4)
+        pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_F );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, transpose_diatonically_2854)
+    {
+        //@2854. Undo. Whole score. Down. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument#121 (musicData "
+            "(clef G)(key C)(n c4 q)(n +b4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        MySelectionSet sel(&doc);
+
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to key
+        cursor.move_next();         //points to c4 q
+        sel.debug_add( *cursor );
+        cursor.move_next();         //points to +b4 q
+        sel.debug_add( *cursor );
+        ImoId idCur = cursor.get_pointee_id();
+
+        DocCommand* pCmd = LOMSE_NEW
+            CmdTransposeDiatonically(3, false /*down*/);
+        CHECK( pCmd->get_name() == "Diatonic transposition" );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+        executer.undo(&cursor, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        //selection unchanged
+        CHECK( sel.num_selected() == 2 );
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == idCur );
+
+        //the score is transposed
+        CHECK( doc.is_dirty() == true );
+        DocCursor c(&doc);
+        c.enter_element();     //points to clef
+        c.move_next();         //points to key
+        c.move_next();         //points to g3 (now transposed back to c4)
+        ImoNote* pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_C );
+        CHECK( pNote && pNote->get_octave() == 4 );
+        CHECK( pNote && pNote->get_actual_accidentals() == 0.0f );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        c.move_next();         //points to +f4 (now transposed back to +b4)
+        pNote = dynamic_cast<ImoNote*>( c.get_pointee() );
+        CHECK( pNote && pNote->get_step() == k_step_B );
         CHECK( pNote && pNote->get_octave() == 4 );
         CHECK( pNote && pNote->get_actual_accidentals() == 1.0f );
         CHECK( pNote && pNote->get_notated_accidentals() == k_sharp );
