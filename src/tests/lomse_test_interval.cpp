@@ -169,6 +169,34 @@ SUITE(IntervalTest)
         CHECK( FIntval("p8").get_type() == k_perfect );
     }
 
+    TEST_FIXTURE(IntervalTestFixture, fintval_08)
+    {
+        //@08. negative intervals. Properties
+
+        FIntval intv = FIntval("M2") - FIntval("M3");
+        CHECK( int(intv) == -int(FIntval("M2")) );
+        CHECK( intv.get_number() == 2 );
+        CHECK( intv.get_type() == k_major );
+        CHECK( intv.get_num_semitones() == 2 );
+        CHECK( intv.get_code() == "M2" );
+        CHECK( intv.is_descending() == true );
+//        cout << "intv=" << int(intv) << ", number=" << intv.get_number()
+//             << ", semitones=" << intv.get_num_semitones() << endl;
+    }
+
+    TEST_FIXTURE(IntervalTestFixture, fintval_09)
+    {
+        //@09. contructor from components. Negative intervals
+
+        FIntval intv(-9, k_major);
+        CHECK( int(intv) == -int(FIntval(9, k_major)) );
+        CHECK( intv.get_number() == 9 );
+        CHECK( intv.get_type() == k_major );
+        CHECK( intv.get_num_semitones() == 14 );
+        CHECK( intv.get_code() == "M9" );
+        CHECK( intv.is_descending() == true );
+    }
+
 
 }
 

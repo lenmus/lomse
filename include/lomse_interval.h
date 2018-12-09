@@ -42,7 +42,7 @@ namespace lomse
 
 
 //---------------------------------------------------------------------------------------
-// Interval types: 'step' refers to the diatonic note name in the octave
+// Interval types
 /** @ingroup enumerations
 
     This enum describes valid interval types.
@@ -83,6 +83,26 @@ enum EIntervalType
     FIntval(10, k_major) == FIntval(3, k_major) + FIntval(8, k_perfect)
     @endcode
 
+    Intervals have sign: positive intervals are ascending and negative ones are
+    descending but, appart from the sign, all other properties do not change.
+    For example:
+    @code
+    FIntval intv == FIntval(3, k_major) - FIntval(8, k_perfect);
+
+    // intv is a negative interval (minor 6th, descending). Thus, the following
+    // assertions are true:
+
+    assert(intv < 0);
+    assert(intv.is_descending() == true);
+
+    // But all other properties do not change by being descending:
+    assert( intv.get_number() == 3 );
+    assert( intv.get_type() == k_major );
+    assert( intv.get_num_semitones() == 5 );
+    assert( intv.get_code() == "M3" );
+    @endcode
+
+
     Macros for all the simple intervals are also defined, for convenience. They are
     named 'k_interval_xxxx', where 'xxxx' is the abbreviated name. See get_code().
     @code
@@ -96,18 +116,30 @@ protected:
     int m_interval;
 
 public:
-    /** Constructor for building an interval from its number and its type. Examples:
+    /** Constructor for building an interval from its number and its type.
+
+        @param number The interval number. Positive for ascending intervals or negative
+            for descending intervals.
+
+        @param type A value from enum EIntervalType.
+
+        Examples:
 
         @code
-        FInval(3, k_minor);         //a third minor
-        FInval(9, k_augmented);     //an augmented ninth
+        FInval(3, k_minor);         //a third minor, ascending
+        FInval(9, k_augmented);     //an augmented ninth, ascending
+        FInval(-2, k_major);        //a major second, descending
         @endcode
     */
     FIntval(int number, EIntervalType type);
 
-    /** Constructor for building an interval from its code. See get_code(). This
-        constructor is only valid for intervals up to one octave. The maximum allowed
-        is "da8" (double augmented octave).
+    /** Constructor for building an interval from its code. See get_code().
+
+        @important
+        - This constructor is only valid for intervals up to one octave. The maximum
+          allowed is "da8" (double augmented octave).
+        - This constructor is only for ascending intervals.
+
         Examples:
 
         @code
@@ -126,14 +158,17 @@ public:
     FIntval(int value) : m_interval(value) {}
 
     /** Default empty constructor. Builds an invalid, null interval.    */
-    FIntval() : m_interval(-1) {}
+    FIntval();
 
-    /** Operator to cast to an int      */
+    /** Operator to cast to an int. Negative for descending intervals.     */
     operator int() { return m_interval; }
 
         //get interval attributes
     /** Return string representing the interval code (its abbreviated name). Examples:
         "m2", "p4", "M3".
+
+        The code is the same for ascending and descending intervals. To check for a
+        descending interval use is_descending() method.
 
         The codes are formed by concatenating one or two characters with the interval
         number. The valid characters are as follows:
@@ -169,16 +204,32 @@ public:
 
     /** Returns the interval number: 1 for unison, 2 for second, 3 for third, ... ,
         8 for octave, 9 for ninth, ..., 15 for two octaves, and so on.
+
+        The number is the same for ascending and descending intervals. To check for a
+        descending interval use is_descending() method.
     */
     int get_number();
 
     /** Returns the interval type (diminished, major, etc.) as a value from enum
         EIntervalType.
+
+        The type is the same for ascending and descending intervals. To check for a
+        descending interval use is_descending() method.
     */
     EIntervalType get_type();
 
-    /** Returns the number of semitones implied by this interval.       */
+    /** Returns the number of semitones implied by this interval.
+
+        The numebr of semitones is always positive. It doesn't matter if the interval
+        is ascending or descending. To check for a
+        descending interval use is_descending() method.
+    */
     int get_num_semitones();
+
+    /** Returns @true if the interval is descending and @false when it is unison or
+        ascending.
+    */
+    inline bool is_descending() { return m_interval < 0; }
 
     ///@{
     /// Comparison operators
@@ -306,7 +357,7 @@ protected:
 
 // Define a 'null interval'. It is usefull to signal special situations such as
 // 'no interval defined', 'end of list', etc.
-#define k_interval_null  FIntval(-1)
+#define k_interval_null  FIntval(-15151)
 
 
 

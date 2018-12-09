@@ -106,6 +106,12 @@ static const IntervalData m_intvlData[43] =
 };
 
 //---------------------------------------------------------------------------------------
+FIntval::FIntval()
+{
+    m_interval = k_interval_null;
+}
+
+//---------------------------------------------------------------------------------------
 FIntval::FIntval(const string& code)
 {
     // unison
@@ -165,26 +171,33 @@ FIntval::FIntval(const string& code)
 //---------------------------------------------------------------------------------------
 FIntval::FIntval (int number, EIntervalType type)
 {
-    int octaves = (number - 1) / 7;     // 0 .. n
-    number = ((number-1) % 7) + 1;          // 1 .. 8
+    int num = abs(number);
+    int octaves = (num - 1) / 7;     // 0 .. n
+    num = ((num-1) % 7) + 1;          // 1 .. 8
 
     int i;
     for (i=0; i < 43; i++)
     {
-        if (m_intvlData[i].numIntv == number && m_intvlData[i].type == type)
+        if (m_intvlData[i].numIntv == num && m_intvlData[i].type == type)
             break;
     }
+
     if (i < 43)
+    {
         m_interval = i + octaves * 40;
+        if (number < 0)
+            m_interval = -m_interval;
+    }
     else
-        m_interval = -1;    //invalid interval
+        m_interval = k_interval_null;    //invalid interval
 }
 
 //---------------------------------------------------------------------------------------
 int FIntval::get_number()
 {
-    int octaves = (m_interval / 40);    //octaves = 0..n
-    int num = m_interval % 40;          //num = 0..39
+    int interval = abs(m_interval);
+    int octaves = (interval / 40);    //octaves = 0..n
+    int num = interval % 40;          //num = 0..39
 
     return m_intvlData[num].numIntv + octaves * 7;
 }
@@ -213,15 +226,17 @@ string FIntval::get_code()
 //---------------------------------------------------------------------------------------
 EIntervalType FIntval::get_type()
 {
-    int num = m_interval % 40;   //num = 0..39
+    int interval = abs(m_interval);
+    int num = interval % 40;   //num = 0..39
     return m_intvlData[num].type;
 }
 
 //---------------------------------------------------------------------------------------
 int FIntval::get_num_semitones()
 {
-    int num = m_interval % 40;   //num = 0..39
-    int octaves = (m_interval / 40) * 12;
+    int interval = abs(m_interval);
+    int num = interval % 40;   //num = 0..39
+    int octaves = (interval / 40) * 12;
     return m_intvlData[num].numSemitones + octaves;
 }
 
