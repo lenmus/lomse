@@ -340,7 +340,7 @@ void PitchAssigner::reset_accidentals(ImoKeySignature* pKey, int idx)
     {
         int keyType = pKey->get_key_type();
         int accidentals[7];
-        get_accidentals_for_key(keyType, accidentals);
+        KeyUtilities::get_accidentals_for_key(keyType, accidentals);
         for (int i=0; i < 7; ++i)
             m_context[idx][i] = accidentals[i];
     }

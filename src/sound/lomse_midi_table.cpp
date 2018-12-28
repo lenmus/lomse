@@ -649,7 +649,7 @@ void SoundEventsTable::reset_accidentals(ImoKeySignature* pKey)
     if (pKey)
     {
         int keyType = pKey->get_key_type();
-        get_accidentals_for_key(keyType, m_accidentals);
+        KeyUtilities::get_accidentals_for_key(keyType, m_accidentals);
     }
     else
     {

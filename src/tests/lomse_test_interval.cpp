@@ -197,6 +197,19 @@ SUITE(IntervalTest)
         CHECK( intv.is_descending() == true );
     }
 
+    TEST_FIXTURE(IntervalTestFixture, fintval_10)
+    {
+        //@10. contructor from code. Negative intervals
+
+        FIntval intv("m7", true);
+        CHECK( int(intv) == -int(FIntval(7, k_minor)) );
+        CHECK( intv.get_number() == 7 );
+        CHECK( intv.get_type() == k_minor );
+        CHECK( intv.get_num_semitones() == 10 );
+        CHECK( intv.get_code() == "m7" );
+        CHECK( intv.is_descending() == true );
+    }
+
 
 }
 

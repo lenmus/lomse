@@ -1991,12 +1991,44 @@ public:
 
 };
 
-//some constants for legibility
-    enum EChangeKey : bool
-    {
-        k_change_key = true,
-        k_do_not_change_key = false,
-    };
+
+//---------------------------------------------------------------------------------------
+/** Abstract class, base for all transposition commands
+*/
+class CmdTranspose : public DocCmdSimple
+{
+protected:
+    list<ImoId> m_notes;
+    list<ImoId> m_keys;
+
+public:
+
+    CmdTranspose(const string& name="");
+
+    virtual ~CmdTranspose() {};
+
+    int get_cursor_update_policy() { return k_do_nothing; }
+    int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
+
+protected:
+
+    //methods to be overriden as needed in derived classes
+    virtual void transpose_note(ImoNote* pNote) = 0;
+    virtual void transpose_note_back(ImoNote* pNote) = 0;
+    virtual void transpose_key(ImoKeySignature* UNUSED(pKey)) {};
+    virtual void transpose_key_back(ImoKeySignature* UNUSED(pKey)) {};
+
+    //helper methods
+    void transpose_chromatically(ImoNote* pNote, FIntval interval, bool fUp);
+
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -2004,23 +2036,26 @@ public:
 
     See constructor for details.
 */
-class CmdChromaticTransposition : public DocCmdSimple
+class CmdTransposeChromatically : public CmdTranspose
 {
 protected:
-    int m_semitones;
-    bool m_fChangeKey;
-    list<ImoId> m_notes;
-    list<ImoId> m_keys;
+    FIntval m_interval;
+    bool m_fUp;
 
 public:
 
     /**
-        This command shifts every pitch by a fixed number of semitones.
+        This command shifts chromatically every pitch, up or down, by the interval you
+        specify, adding or subtracting accidentals as necessary to maintain original
+        intervals between notes.
         The command applies only to the notes in the current selection set.
 
-        @param numSemitones Positive up, negative down
-        @param fChangeKey Controls whether to change key signatures or not. If
-            fChangeKey == true, key signatures will also be changed.
+        This kind of transposition has nothing to do with the key signature which
+        remains unchanged.
+
+        @param interval The interval by which you want the selected music transposed.
+            If the interval is negative, the direction of the transposition will be
+            'down'; otherwise it will be 'up'.
 
         @param name The displayable name for the command. If not specified or empty
             will be replaced by "Chromatic transposition".
@@ -2035,117 +2070,38 @@ public:
         <b>Example</b>
 
         @code
-        void CommandHandler::transpose(int numSemitones, bool fChangeKey=true)
+        void CommandHandler::transpose(FIntval interval)
         {
             if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
             {
 	            string name = gettext("Chromatic transposition");
 	            SpInteractor->exec_command(
-                    new CmdChromaticTransposition(numSemitones, fChangeKey, name) );
+                    new CmdTransposeChromatically(interval, name) );
             }
         }
         @endcode
     */
-    CmdChromaticTransposition(int numSemitones, bool fChangeKey=true,
-                              const string& name="");
+    CmdTransposeChromatically(FIntval interval, const string& name="");
 
-    virtual ~CmdChromaticTransposition() {};
-
-    int get_cursor_update_policy() { return k_do_nothing; }
-    int get_undo_policy() { return k_undo_policy_specific; }
-    int get_selection_update_policy() { return k_sel_do_nothing; }
-
-    ///@cond INTERNALS
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
-    ///@endcond
+    virtual ~CmdTransposeChromatically() {};
 
 protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
 
 };
 
-
-//---------------------------------------------------------------------------------------
-/** A command for applying a chromatic transposition to the score or to a selection.
-
-    See constructor for details.
-*/
-class CmdTransposeByInterval : public DocCmdSimple
-{
-protected:
-    FIntval m_interval;
-    bool m_fUp;
-    list<ImoId> m_notes;
-
-public:
-
-    /**
-        This command shifts chromatically every pitch, up or down, by the interval you
-        specify, adding or subtracting accidentals as necessary to maintain original
-        intervals between notes.
-        The command applies only to the notes in the current selection set.
-
-        This kind of transposition has nothing to do with the key signature which
-        remains unchanged.
-
-        @param interval The interval by which you want the selected music transposed.
-        @param fUp  Boolean for choosing the direction of the transposition: value
-            @true means 'up', value @false means 'down'.
-
-        @param name The displayable name for the command. If not specified or empty
-            will be replaced by "Transposition by interval".
-
-        <b>Remarks</b>
-        - If the selection is empty or does not contain notes, the command
-            will not be executed and will return a failure code.
-        - After executing the command:
-            - the selection set will be unmodified.
-            - the cursor will not change its position.
-
-        <b>Example</b>
-
-        @code
-        void CommandHandler::transpose(FIntval interval, bool fUp=true)
-        {
-            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
-            {
-	            string name = gettext("Transposition by interval");
-	            SpInteractor->exec_command(
-                    new CmdTransposeByInterval(interval, fUp, name) );
-            }
-        }
-        @endcode
-    */
-    CmdTransposeByInterval(FIntval interval, bool fUp=true,
-                           const string& name="");
-
-    virtual ~CmdTransposeByInterval() {};
-
-    int get_cursor_update_policy() { return k_do_nothing; }
-    int get_undo_policy() { return k_undo_policy_specific; }
-    int get_selection_update_policy() { return k_sel_do_nothing; }
-
-    ///@cond INTERNALS
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
-    ///@endcond
-
-protected:
-
-};
 //---------------------------------------------------------------------------------------
 /** A command for applying a diatonic transposition to the score or to a selection.
 
     See constructor for details.
 */
-class CmdTransposeDiatonically : public DocCmdSimple
+class CmdTransposeDiatonically : public CmdTranspose
 {
 protected:
     int m_steps;
     bool m_fUp;
-    list<ImoId> m_notes;
 
 public:
 
@@ -2189,17 +2145,86 @@ public:
 
     virtual ~CmdTransposeDiatonically() {};
 
-    int get_cursor_update_policy() { return k_do_nothing; }
-    int get_undo_policy() { return k_undo_policy_specific; }
-    int get_selection_update_policy() { return k_sel_do_nothing; }
+protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
 
-    ///@cond INTERNALS
-    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
-    ///@endcond
+    //helper
+    void transpose(ImoNote* pNote, bool fUp);
+};
+
+//---------------------------------------------------------------------------------------
+/** A command for transposing the score or a selection to a different key signature.
+
+    See constructor for details.
+*/
+class CmdTransposeKey : public CmdTranspose
+{
+protected:
+    FIntval m_interval;
+    bool m_fUp;
+
+public:
+
+    /**
+        This command changes all the keys in the selection or in all the score if
+        selection is empty, and transposes chromatically all the notes in the selection
+        or in all the score if the selection set is empty.
+
+        @param interval The interval by which you want the selected music transposed.
+            If the interval is negative, the direction of the transposition will be
+            'down'; otherwise it will be 'up'.
+
+        <b>Remarks</b>
+        - If the selection does not contain key signatures, only the notes will be
+            transposed.
+        - If the selection only contains key signatures they will be changed but no notes
+            will be transposed.
+        - After executing the command:
+            - the selection set will be unmodified.
+            - the cursor will not change its position.
+
+        <b>Example</b>
+
+        @code
+        void CommandHandler::transpose(FIntval interval)
+        {
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+	            string name = gettext("Transpose key signature");
+	            SpInteractor->exec_command(
+                    new CmdTransposeKey(interval) );
+            }
+        }
+        @endcode
+    */
+    CmdTransposeKey(FIntval interval, const string& name="");
+
+    virtual ~CmdTransposeKey() {};
+
+//    enum EHowToMoveNotes {
+//        k_move_up = 0,    ///< Move the notes up.
+//        k_move_down,      ///< Move the notes down.
+//        k_move_closest,   ///< Move the notes by the smallest required interval (closest).
+//    };
+
+//    int get_cursor_update_policy() { return k_do_nothing; }
+//    int get_undo_policy() { return k_undo_policy_specific; }
+//    int get_selection_update_policy() { return k_sel_do_nothing; }
+//
+//    ///@cond INTERNALS
+//    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+//    int perform_action(Document* pDoc, DocCursor* pCursor);
+//    void undo_action(Document* pDoc, DocCursor* pCursor);
+//    ///@endcond
 
 protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
+    virtual void transpose_key(ImoKeySignature* pKey) override;
+    virtual void transpose_key_back(ImoKeySignature* pKey) override;
 
 };
 

@@ -233,7 +233,7 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
     // Each element of the array refers to one note: 0=Do, 1=Re, 2=Mi, 3=Fa, ... , 6=Si
     // and its value can be one of: 0=no accidental, -1 = a flat, 1 = a sharp
     int nAccidentals[7];
-    get_accidentals_for_key(nKey, nAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, nAccidentals);
 
     //compute note accidentals
     string sAnswer;
@@ -272,7 +272,7 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
 EAccidentals FPitch::notated_accidentals_for(EKeySignature key)
 {
     int accidentals[7];
-    get_accidentals_for_key(key, accidentals);
+    KeyUtilities::get_accidentals_for_key(key, accidentals);
 
     int step = this->step();
     int keyAcc = accidentals[step];
@@ -363,7 +363,7 @@ FPitch FPitch::add_semitone(EKeySignature nKey)
     // signature received: one accidental at maximum, of the same type than the
     // accidentals in the key signature.
 
-    return add_semitone(key_signature_to_num_fifths(nKey) >= 0);
+    return add_semitone(KeyUtilities::key_signature_to_num_fifths(nKey) >= 0);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -450,7 +450,7 @@ FPitch FPitch::add_semitone(bool fUseSharps)
 bool FPitch::is_natural_note_for(EKeySignature nKey)
 {
     int keyAccidentals[7];
-    get_accidentals_for_key(nKey, keyAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, keyAccidentals);
     int noteAcc = num_accidentals();
     return noteAcc == keyAccidentals[step()];
 }
@@ -686,7 +686,7 @@ FPitch DiatonicPitch::to_FPitch(EKeySignature nKey)
     // 2=Mi, 3=Fa, ... , 6=Si and its value can be one of: 0=no accidental,
     // -1 = a flat, 1 = a sharp
     int nAccidentals[7];
-    get_accidentals_for_key(nKey, nAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, nAccidentals);
 
     int nStep = step();
     return FPitch(nStep, octave(), nAccidentals[nStep]);

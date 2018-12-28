@@ -112,7 +112,7 @@ FIntval::FIntval()
 }
 
 //---------------------------------------------------------------------------------------
-FIntval::FIntval(const string& code)
+FIntval::FIntval(const string& code, bool fDescending)
 {
     // unison
     if (code == "p1") m_interval = k_interval_p1;
@@ -166,6 +166,9 @@ FIntval::FIntval(const string& code)
     else if (code == "da8") m_interval = k_interval_da8;
     else
         m_interval = k_interval_null;
+
+    if (fDescending)
+        make_descending();
 }
 
 //---------------------------------------------------------------------------------------

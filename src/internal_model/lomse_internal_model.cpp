@@ -2827,14 +2827,14 @@ int ImoInstrGroup::get_num_instruments()
 //=======================================================================================
 int ImoKeySignature::get_key_type()
 {
-    return int( key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
+    return int( KeyUtilities::key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
 }
 
 //---------------------------------------------------------------------------------------
 void ImoKeySignature::set_key_type(int type)
 {
-    m_keyMode = get_key_mode(EKeySignature(type));
-    m_fifths = key_signature_to_num_fifths(EKeySignature(type));
+    m_keyMode = KeyUtilities::get_key_mode(EKeySignature(type));
+    m_fifths = KeyUtilities::key_signature_to_num_fifths(EKeySignature(type));
 }
 
 //---------------------------------------------------------------------------------------

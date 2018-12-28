@@ -106,10 +106,10 @@ TimeUnits get_duration_for_ref_note(int bottomNumber)
 
 
 //=======================================================================================
-// global functions related to key signatures
+// KeyUtilities implementation
 //=======================================================================================
 
-void get_accidentals_for_key(int keyType, int nAccidentals[])
+void KeyUtilities::get_accidentals_for_key(int keyType, int nAccidentals[])
 {
     // Given a key signature (keyType) this function fills the array
     // nAccidentals with the accidentals implied by the key signature.
@@ -243,7 +243,7 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
 }
 
 //---------------------------------------------------------------------------------------
-int get_step_for_root_note(EKeySignature keyType)
+int KeyUtilities::get_step_for_root_note(EKeySignature keyType)
 {
     //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
     //the Key signature. For example, if keyType is La sharp minor it returns
@@ -307,90 +307,26 @@ int get_step_for_root_note(EKeySignature keyType)
 }
 
 //---------------------------------------------------------------------------------------
-int get_key_for_root_note(EKeySignature keyType)
-{
-    //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
-    //the Key signature. For example, if keyType is La sharp minor it returns
-    //step = 5 (La)
-
-    //compute root note
-    switch(keyType)
-    {
-        case k_key_C:
-        case k_key_c:
-        case k_key_cs:
-        case k_key_Cs:
-        case k_key_Cf:
-            return k_step_C;
-
-        case k_key_D:
-        case k_key_Df:
-        case k_key_ds:
-        case k_key_d:
-            return k_step_D;
-
-        case k_key_E:
-        case k_key_e:
-        case k_key_Ef:
-        case k_key_ef:
-            return k_step_E;
-
-        case k_key_F:
-        case k_key_fs:
-        case k_key_Fs:
-        case k_key_f:
-            return k_step_F;
-
-        case k_key_G:
-        case k_key_gs:
-        case k_key_g:
-        case k_key_Gf:
-            return k_step_G;
-
-        case k_key_A:
-        case k_key_a:
-        case k_key_as:
-        case k_key_Af:
-        case k_key_af:
-            return k_step_A;
-
-        case k_key_b:
-        case k_key_B:
-        case k_key_Bf:
-        case k_key_bf:
-            return k_step_B;
-
-        default:
-        {
-            stringstream ss;
-            ss << "[get_step_for_root_note] Invalid key signature " << keyType;
-            LOMSE_LOG_ERROR(ss.str());
-            return k_step_C;
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-int get_step_for_leading_note(EKeySignature keyType)
+int KeyUtilities::get_step_for_leading_note(EKeySignature keyType)
 {
     int nRoot = get_step_for_root_note(keyType);
     return (nRoot == 0 ? 6 : nRoot-1);      //scale degree seven
 }
 
 //---------------------------------------------------------------------------------------
-bool is_major_key(EKeySignature keyType)
+bool KeyUtilities::is_major_key(EKeySignature keyType)
 {
     return (keyType < k_key_a);
 }
 
 //---------------------------------------------------------------------------------------
-bool is_minor_key(EKeySignature keyType)
+bool KeyUtilities::is_minor_key(EKeySignature keyType)
 {
     return (keyType >= k_key_a);
 }
 
 //---------------------------------------------------------------------------------------
-int key_signature_to_num_fifths(int keyType)
+int KeyUtilities::key_signature_to_num_fifths(int keyType)
 {
     // Retunrs the number of fifths that corresponds to the encoded key signature
 
@@ -473,7 +409,7 @@ int key_signature_to_num_fifths(int keyType)
 }
 
 //---------------------------------------------------------------------------------------
-EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
+EKeySignature KeyUtilities::get_relative_minor_key(EKeySignature nMajorKey)
 {
     switch(nMajorKey) {
         case k_key_C:
@@ -518,7 +454,7 @@ EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
 }
 
 //---------------------------------------------------------------------------------------
-EKeySignature get_relative_major_key(EKeySignature nMinorKey)
+EKeySignature KeyUtilities::get_relative_major_key(EKeySignature nMinorKey)
 {
     switch(nMinorKey) {
         case k_key_a:
@@ -563,7 +499,7 @@ EKeySignature get_relative_major_key(EKeySignature nMinorKey)
 }
 
 //---------------------------------------------------------------------------------------
-EKeySignature key_components_to_key_type(int fifths, EKeyMode mode)
+EKeySignature KeyUtilities::key_components_to_key_type(int fifths, EKeyMode mode)
 {
     if (mode == k_key_mode_major)
     {
@@ -633,9 +569,200 @@ EKeySignature key_components_to_key_type(int fifths, EKeyMode mode)
 }
 
 //---------------------------------------------------------------------------------------
-EKeyMode get_key_mode(EKeySignature type)
+EKeyMode KeyUtilities::get_key_mode(EKeySignature type)
 {
     return (is_major_key(type) ? k_key_mode_major : k_key_mode_minor);
+}
+
+//---------------------------------------------------------------------------------------
+EKeySignature KeyUtilities::transpose(EKeySignature oldKey, FIntval interval, bool fUp)
+{
+    FPitch fp = KeyUtilities::get_root_pitch(oldKey);
+    bool fMajor = KeyUtilities::is_major_key(oldKey);
+
+    if (fUp)
+        fp += interval;
+    else
+        fp -= interval;
+
+
+    return KeyUtilities::key_type_for_root_pitch(fp, fMajor);
+}
+
+//---------------------------------------------------------------------------------------
+FPitch KeyUtilities::get_root_pitch(EKeySignature key)
+{
+    switch(key)
+    {
+        case k_key_C:
+        case k_key_c:
+            return FPitch(k_step_C, 4, 0);
+        case k_key_cs:
+        case k_key_Cs:
+            return FPitch(k_step_C, 4, 1);
+        case k_key_Cf:
+            return FPitch(k_step_C, 4, -1);
+
+        case k_key_D:
+        case k_key_d:
+            return FPitch(k_step_D, 4, 0);
+        case k_key_Df:
+            return FPitch(k_step_D, 4, -1);
+        case k_key_ds:
+            return FPitch(k_step_D, 4, +1);
+
+        case k_key_E:
+        case k_key_e:
+            return FPitch(k_step_E, 4, 0);
+        case k_key_Ef:
+        case k_key_ef:
+            return FPitch(k_step_E, 4, -1);
+
+        case k_key_F:
+        case k_key_f:
+            return FPitch(k_step_F, 4, 0);
+        case k_key_fs:
+        case k_key_Fs:
+            return FPitch(k_step_F, 4, +1);
+
+        case k_key_G:
+        case k_key_g:
+            return FPitch(k_step_G, 4, 0);
+        case k_key_gs:
+            return FPitch(k_step_G, 4, +1);
+        case k_key_Gf:
+            return FPitch(k_step_G, 4, -1);
+
+        case k_key_A:
+        case k_key_a:
+            return FPitch(k_step_A, 4, 0);
+        case k_key_as:
+            return FPitch(k_step_A, 4, +1);
+        case k_key_Af:
+        case k_key_af:
+            return FPitch(k_step_A, 4, -1);
+
+        case k_key_B:
+        case k_key_b:
+            return FPitch(k_step_B, 4, 0);
+        case k_key_Bf:
+        case k_key_bf:
+            return FPitch(k_step_B, 4, -1);
+
+        default:
+        {
+            stringstream ss;
+            ss << "[get_root_pitch] Invalid key signature " << key;
+            LOMSE_LOG_ERROR(ss.str());
+            return FPitch(k_step_C, 4, 0);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+EKeySignature KeyUtilities::key_type_for_root_pitch(FPitch fp, bool fMajor)
+{
+    int step = fp.step();
+    int acc = fp.num_accidentals();
+    switch(step)
+    {
+        case k_step_C:
+        {
+            if (acc == 0)   return (fMajor ? k_key_C : k_key_c);
+            if (acc == 1)   return (fMajor ? k_key_Cs : k_key_cs);
+            if (acc == -1)  return k_key_Cf;
+            break;
+        }
+        case k_step_D:
+        {
+            if (acc == 0)   return (fMajor ? k_key_D : k_key_d);
+            if (acc == 1)   return k_key_ds;
+            if (acc == -1)  return k_key_Df;
+            break;
+        }
+        case k_step_E:
+        {
+            if (acc == 0)   return (fMajor ? k_key_E : k_key_e);
+            if (acc == -1)  return (fMajor ? k_key_Ef : k_key_ef);
+            break;
+        }
+        case k_step_F:
+        {
+            if (acc == 0)   return (fMajor ? k_key_F : k_key_f);
+            if (acc == 1)   return (fMajor ? k_key_Fs : k_key_fs);
+            break;
+        }
+        case k_step_G:
+        {
+            if (acc == 0)   return (fMajor ? k_key_G : k_key_g);
+            if (acc == 1)   return k_key_gs;
+            if (acc == -1)  return k_key_Gf;
+            break;
+        }
+        case k_step_A:
+        {
+            if (acc == 0)   return (fMajor ? k_key_A : k_key_a);
+            if (acc == 1)   return k_key_as;
+            if (acc == -1)  return (fMajor ? k_key_Af : k_key_af);
+            break;
+        }
+        case k_step_B:
+        {
+            if (acc == 0)   return (fMajor ? k_key_B : k_key_b);
+            if (acc == -1)  return (fMajor ? k_key_Bf : k_key_bf);
+            break;
+        }
+
+        default:
+        {
+            stringstream ss;
+            ss << "[key_type_for_root_pitch] Invalid step " << step
+               << ", root=" << int(fp);
+            LOMSE_LOG_ERROR(ss.str());
+            return k_key_C;
+        }
+    }
+
+    stringstream ss;
+    ss << "[key_type_for_root_pitch] Invalid accidentals " << acc
+       << ", root=" << int(fp);
+    LOMSE_LOG_ERROR(ss.str());
+    return k_key_C;
+}
+
+//---------------------------------------------------------------------------------------
+FIntval KeyUtilities::up_interval(EKeySignature oldKey, EKeySignature newKey)
+{
+    FPitch oldPitch = KeyUtilities::get_root_pitch(oldKey);
+    FPitch newPitch = KeyUtilities::get_root_pitch(newKey);
+    FIntval fp(newPitch - oldPitch);
+    if (fp.is_ascending())
+        return fp;
+    else
+        return k_interval_p8 + fp;
+}
+
+//---------------------------------------------------------------------------------------
+FIntval KeyUtilities::down_interval(EKeySignature oldKey, EKeySignature newKey)
+{
+    FPitch oldPitch = KeyUtilities::get_root_pitch(oldKey);
+    FPitch newPitch = KeyUtilities::get_root_pitch(newKey);
+    FIntval fp(newPitch - oldPitch);
+    if (fp.is_ascending())
+        return fp - k_interval_p8;
+    else
+        return fp;
+}
+
+//---------------------------------------------------------------------------------------
+FIntval KeyUtilities::closest_interval(EKeySignature oldKey, EKeySignature newKey)
+{
+    FIntval up = up_interval(oldKey, newKey);
+    FIntval down = down_interval(oldKey, newKey);
+    if (abs(up) > abs(down))
+        return down;
+    else
+        return up;
 }
 
 

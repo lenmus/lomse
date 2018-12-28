@@ -45,6 +45,7 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_internal_model.h"
 #include "lomse_score_algorithms.h"
+#include "lomse_score_utilities.h"
 
 #include <sstream>
 using namespace std;
@@ -2754,95 +2755,59 @@ void CmdSelection::set_default_name()
 
 
 //=======================================================================================
-// CmdChromaticTransposition implementation
+// CmdTranspose implementation
 //=======================================================================================
-CmdChromaticTransposition::CmdChromaticTransposition(int numSemitones, bool fChangeKey,
-                                                     const string& name)
+CmdTranspose::CmdTranspose(const string& name)
     : DocCmdSimple(name)
-    , m_semitones(numSemitones)
-    , m_fChangeKey(fChangeKey)
 {
     m_flags = k_recordable | k_reversible;
-    if (m_name=="")
-        m_name = "Chromatic transposition";
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChromaticTransposition::set_target(Document* UNUSED(pDoc),
-                                          DocCursor* UNUSED(pCursor),
-                                          SelectionSet* pSelection)
+int CmdTranspose::set_target(Document* UNUSED(pDoc),
+                             DocCursor* UNUSED(pCursor),
+                             SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
     {
         m_notes = pSelection->filter(k_imo_note);
+        m_keys = pSelection->filter(k_imo_key_signature);
         return k_success;
     }
     return k_failure;
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChromaticTransposition::perform_action(Document* pDoc,
-                                              DocCursor* UNUSED(pCursor))
+int CmdTranspose::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies performing the symmetrical
     //               transposition
 
-    bool fSaveKeys = (m_keys.size() == 0);  //AWARE: for redo, keys are already saved
     ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+
+    //transpose notes
+    list<ImoId>::iterator itN;
+    for (itN = m_notes.begin(); itN != m_notes.end(); ++itN)
     {
         //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
+        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*itN) );
         if (!pScore)
             pScore = pNote->get_score();
         if (!pScore)
             return k_failure;
 
-        //get applicable key signature, and save it if necessary
-        ImoKeySignature* pKey = ScoreAlgorithms::get_applicable_key(pScore, pNote);
-        EKeySignature nKey = k_key_C;
-        int fifths = 0;
-        if (pKey)
-        {
-            if (fSaveKeys)
-            {
-                ImoId keyId = pKey->get_id();
-                if (std::find(m_keys.begin(), m_keys.end(), keyId) == m_keys.end())
-                    m_keys.push_back(keyId);
-            }
-            if (m_fChangeKey)
-            {
-                //temporarily transpose the key so that note is transposed properly
-                fifths = pKey->get_fifths();
-                pKey->transpose(m_semitones);
-            }
-            nKey = EKeySignature(pKey->get_key_type());
-        }
-
         //transpose note
-        MidiPitch pitch = pNote->get_midi_pitch();
-        pitch += m_semitones;
-        int step, octave, acc;
-        pitch.get_components(nKey, &step, &octave, &acc);
-        pNote->set_pitch(step, octave, float(acc));
+        transpose_note(pNote);
         pNote->set_dirty(true);
-
-        //restore key
-        if (m_fChangeKey && pKey)
-            pKey->set_fifths(fifths);
     }
 
-    //transpose keys, if requested
-    if (m_fChangeKey)
+    //transpose keys
+    list<ImoId>::iterator itK;
+    for (itK=m_keys.begin(); itK != m_keys.end(); ++itK)
     {
-        list<ImoId>::iterator it;
-        for (it=m_keys.begin(); it != m_keys.end(); ++it)
-        {
-            ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*it) );
-            if (pKey)
-                pKey->transpose(m_semitones);
-        }
+        ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*itK) );
+        if (pKey)
+            transpose_key(pKey);
     }
 
     //assign pitch to all notes
@@ -2853,153 +2818,77 @@ int CmdChromaticTransposition::perform_action(Document* pDoc,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdChromaticTransposition::undo_action(Document* pDoc,
-                                            DocCursor* UNUSED(pCursor))
+void CmdTranspose::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+
+    //transpose notes back
+    list<ImoId>::iterator itN;
+    for (itN = m_notes.begin(); itN != m_notes.end(); ++itN)
     {
         //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
-        if (!pScore)
-            pScore = pNote->get_score();
-        if (!pScore)
-            return;
-
-        //get applicable key signature
-        ImoKeySignature* pKey = ScoreAlgorithms::get_applicable_key(pScore, pNote);
-        EKeySignature nKey = k_key_C;
-        int fifths = 0;
-        if (pKey)
-        {
-            if (m_fChangeKey)
-            {
-                //temporarily transpose the key so that note is transposed properly
-                fifths = pKey->get_fifths();
-                pKey->transpose(-m_semitones);
-            }
-            nKey = EKeySignature(pKey->get_key_type());
-        }
-
-        //transpose note
-        MidiPitch pitch = pNote->get_midi_pitch();
-        pitch -= m_semitones;
-        int step, octave, acc;
-        pitch.get_components(nKey, &step, &octave, &acc);
-        pNote->set_pitch(step, octave, float(acc));
-        pNote->set_dirty(true);
-
-        //restore key
-        if (m_fChangeKey && pKey)
-            pKey->set_fifths(fifths);
-    }
-
-    //transpose keys, if requested
-    if (m_fChangeKey)
-    {
-        list<ImoId>::iterator it;
-        for (it=m_keys.begin(); it != m_keys.end(); ++it)
-        {
-            ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*it) );
-            if (pKey)
-                pKey->transpose(-m_semitones);
-        }
-    }
-
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
-}
-
-
-//=======================================================================================
-// CmdTransposeByInterval implementation
-//=======================================================================================
-CmdTransposeByInterval::CmdTransposeByInterval(FIntval interval, bool fUp,
-                                               const string& name)
-    : DocCmdSimple(name)
-    , m_interval(interval)
-    , m_fUp(fUp)
-{
-    m_flags = k_recordable | k_reversible;
-    if (m_name=="")
-        m_name = "Transposition by interval";
-}
-
-//---------------------------------------------------------------------------------------
-int CmdTransposeByInterval::set_target(Document* UNUSED(pDoc),
-                                       DocCursor* UNUSED(pCursor),
-                                       SelectionSet* pSelection)
-{
-    if (pSelection && !pSelection->empty())
-    {
-        m_notes = pSelection->filter(k_imo_note);
-        return k_success;
-    }
-    return k_failure;
-}
-
-//---------------------------------------------------------------------------------------
-int CmdTransposeByInterval::perform_action(Document* pDoc,
-                                           DocCursor* UNUSED(pCursor))
-{
-    //Undo strategy: direct undo, as it only implies performing the symmetrical
-    //               transposition
-
-    ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
-    {
-        //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
-        if (!pScore)
-            pScore = pNote->get_score();
-        if (!pScore)
-            return k_failure;
-
-        //transpose note
-        FPitch fp = pNote->get_fpitch();
-        if (m_fUp)
-            fp += m_interval;
-        else
-            fp -= m_interval;
-        pNote->set_pitch(fp);
-        pNote->set_dirty(true);
-    }
-
-    //assign pitch to all notes
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
-
-    return k_success;
-}
-
-//---------------------------------------------------------------------------------------
-void CmdTransposeByInterval::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
-{
-    ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
-    {
-        //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
+        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*itN) );
         if (!pScore)
             pScore = pNote->get_score();
         if (!pScore)
             return;
 
         //transpose note back
-        FPitch fp = pNote->get_fpitch();
-        if (m_fUp)
-            fp -= m_interval;
-        else
-            fp += m_interval;
-        pNote->set_pitch(fp);
+        transpose_note_back(pNote);
         pNote->set_dirty(true);
     }
 
+    //transpose keys back
+    list<ImoId>::iterator itK;
+    for (itK=m_keys.begin(); itK != m_keys.end(); ++itK)
+    {
+        ImoKeySignature* pKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(*itK) );
+        if (pKey)
+            transpose_key_back(pKey);
+    }
+
+    //assign pitch to all notes
     PitchAssigner tuner;
     tuner.assign_pitch(pScore);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTranspose::transpose_chromatically(ImoNote* pNote, FIntval interval, bool fUp)
+{
+    FPitch fp = pNote->get_fpitch();
+    if (fUp)
+        fp += interval;
+    else
+        fp -= interval;
+    pNote->set_pitch(fp);
+}
+
+
+//=======================================================================================
+// CmdTransposeChromatically implementation
+//=======================================================================================
+CmdTransposeChromatically::CmdTransposeChromatically(FIntval interval,
+                                                     const string& name)
+    : CmdTranspose(name)
+    , m_interval(interval)
+    , m_fUp(interval.is_ascending())
+{
+    m_interval.make_ascending();
+    m_flags = k_recordable | k_reversible;
+    if (m_name=="")
+        m_name = "Chromatic transposition";
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeChromatically::transpose_note(ImoNote* pNote)
+{
+    transpose_chromatically(pNote, m_interval, m_fUp);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeChromatically::transpose_note_back(ImoNote* pNote)
+{
+    transpose_chromatically(pNote, m_interval, !m_fUp);
 }
 
 
@@ -3008,7 +2897,7 @@ void CmdTransposeByInterval::undo_action(Document* pDoc, DocCursor* UNUSED(pCurs
 //=======================================================================================
 CmdTransposeDiatonically::CmdTransposeDiatonically(int steps, bool fUp,
                                                    const string& name)
-    : DocCmdSimple(name)
+    : CmdTranspose(name)
     , m_steps(steps)
     , m_fUp(fUp)
 {
@@ -3018,110 +2907,86 @@ CmdTransposeDiatonically::CmdTransposeDiatonically(int steps, bool fUp,
 }
 
 //---------------------------------------------------------------------------------------
-int CmdTransposeDiatonically::set_target(Document* UNUSED(pDoc),
-                                         DocCursor* UNUSED(pCursor),
-                                         SelectionSet* pSelection)
+void CmdTransposeDiatonically::transpose_note(ImoNote* pNote)
 {
-    if (pSelection && !pSelection->empty())
-    {
-        m_notes = pSelection->filter(k_imo_note);
-        return k_success;
-    }
-    return k_failure;
+    transpose(pNote, m_fUp);
 }
 
 //---------------------------------------------------------------------------------------
-int CmdTransposeDiatonically::perform_action(Document* pDoc,
-                                             DocCursor* UNUSED(pCursor))
+void CmdTransposeDiatonically::transpose_note_back(ImoNote* pNote)
 {
-    //Undo strategy: direct undo, as it only implies performing the symmetrical
-    //               transposition
-
-    ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
-    {
-        //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
-        if (!pScore)
-            pScore = pNote->get_score();
-        if (!pScore)
-            return k_failure;
-
-        //transpose note
-        int step = pNote->get_step();
-        if (m_fUp)
-        {
-            step += m_steps;
-            if (step > 6)
-            {
-                step -= 7;
-                pNote->set_octave( pNote->get_octave() + 1 );
-            }
-        }
-        else
-        {
-            step -= m_steps;
-            if (step < 0)
-            {
-                step += 7;
-                pNote->set_octave( pNote->get_octave() - 1 );
-            }
-        }
-        pNote->set_step(step);
-        pNote->set_actual_accidentals(k_acc_not_computed);
-        pNote->set_dirty(true);
-    }
-
-    //assign pitch to all notes
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
-
-    return k_success;
+    transpose(pNote, !m_fUp);
 }
 
 //---------------------------------------------------------------------------------------
-void CmdTransposeDiatonically::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
+void CmdTransposeDiatonically::transpose(ImoNote* pNote, bool fUp)
 {
-    ImoScore* pScore = nullptr;
-    list<ImoId>::iterator it;
-    for (it = m_notes.begin(); it != m_notes.end(); ++it)
+    int step = pNote->get_step();
+    if (fUp)
     {
-        //get note and score
-        ImoNote* pNote = static_cast<ImoNote*>( pDoc->get_pointer_to_imo(*it) );
-        if (!pScore)
-            pScore = pNote->get_score();
-        if (!pScore)
-            return;
-
-        //transpose note back
-        int step = pNote->get_step();
-        if (m_fUp)
+        step += m_steps;
+        if (step > 6)
         {
-            step -= m_steps;
-            if (step < 0)
-            {
-                step += 7;
-                pNote->set_octave( pNote->get_octave() - 1 );
-            }
+            step -= 7;
+            pNote->set_octave( pNote->get_octave() + 1 );
         }
-        else
-        {
-            step += m_steps;
-            if (step > 6)
-            {
-                step -= 7;
-                pNote->set_octave( pNote->get_octave() + 1 );
-            }
-        }
-        pNote->set_step(step);
-        pNote->set_actual_accidentals(k_acc_not_computed);
-        pNote->set_dirty(true);
     }
-
-    PitchAssigner tuner;
-    tuner.assign_pitch(pScore);
+    else
+    {
+        step -= m_steps;
+        if (step < 0)
+        {
+            step += 7;
+            pNote->set_octave( pNote->get_octave() - 1 );
+        }
+    }
+    pNote->set_step(step);
+    pNote->set_actual_accidentals(k_acc_not_computed);
 }
+
+
+//=======================================================================================
+// CmdTransposeKey implementation
+//=======================================================================================
+CmdTransposeKey::CmdTransposeKey(FIntval interval, const string& name)
+    : CmdTranspose(name)
+    , m_interval(interval)
+    , m_fUp(interval.is_ascending())
+{
+    m_interval.make_ascending();
+    m_flags = k_recordable | k_reversible;
+    if (m_name=="")
+        m_name = "Transpose key signature";
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeKey::transpose_note(ImoNote* pNote)
+{
+    transpose_chromatically(pNote, m_interval, m_fUp);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeKey::transpose_note_back(ImoNote* pNote)
+{
+    transpose_chromatically(pNote, m_interval, !m_fUp);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeKey::transpose_key(ImoKeySignature* pKey)
+{
+    EKeySignature oldType = static_cast<EKeySignature>(pKey->get_key_type());
+    EKeySignature newType = KeyUtilities::transpose(oldType, m_interval, m_fUp);
+    pKey->set_key_type(newType);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdTransposeKey::transpose_key_back(ImoKeySignature* pKey)
+{
+    EKeySignature oldType = static_cast<EKeySignature>(pKey->get_key_type());
+    EKeySignature newType = KeyUtilities::transpose(oldType, m_interval, !m_fUp);
+    pKey->set_key_type(newType);
+}
+
 
 
 }  //namespace lomse

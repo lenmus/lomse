@@ -138,16 +138,16 @@ public:
         @important
         - This constructor is only valid for intervals up to one octave. The maximum
           allowed is "da8" (double augmented octave).
-        - This constructor is only for ascending intervals.
 
         Examples:
 
         @code
-        FInval("m3");     //a third minor
-        FInval("a6");     //an augmented sixth
+        FInval("m3");                   //a third minor, ascending
+        FInval("a6");                   //an augmented sixth, ascending
+        FIntval"m7", k_descending);     //a minor seventh, descending
         @endcode
     */
-    FIntval(const string& code);
+    FIntval(const string& code, bool fDescending=false);
 
     /** Contructor for building an interval from an integer representing the
         interval value.
@@ -231,6 +231,21 @@ public:
     */
     inline bool is_descending() { return m_interval < 0; }
 
+    /** Transforms the interval in a descending interval. If it is already descending
+        this method does nothing.
+    */
+    inline void make_descending() { if (m_interval > 0) m_interval = -m_interval; }
+
+    /** Returns @true if the interval is ascending or unison and @false when it is
+        descending.
+    */
+    inline bool is_ascending() { return m_interval >= 0; }
+
+    /** Transforms the interval in an ascending interval. If it is already ascending
+        this method does nothing.
+    */
+    inline void make_ascending() { m_interval = abs(m_interval); }
+
     ///@{
     /// Comparison operators
     bool operator ==(FIntval intv) { return m_interval == int(intv); }
@@ -258,6 +273,10 @@ public:
 protected:
 
 };
+
+#define k_descending    true
+#define k_ascending     false
+
 
 
     //unison
