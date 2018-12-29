@@ -1,28 +1,30 @@
 //---------------------------------------------------------------------------------------
-// This is free and unencumbered software released into the public domain.
+// This file is part of the Lomse library.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
-// Anyone is free to copy, modify, publish, use, compile, sell, or
-// distribute this software, either in source code form or as a compiled
-// binary, for any purpose, commercial or non-commercial, and by any
-// means.
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
 //
-// In jurisdictions that recognize copyright laws, the author or authors
-// of this software dedicate any and all copyright interest in the
-// software to the public domain. We make this dedication for the benefit
-// of the public at large and to the detriment of our heirs and
-// successors. We intend this dedication to be an overt act of
-// relinquishment in perpetuity of all present and future rights to this
-// software under copyright law.
+//    * Redistributions of source code must retain the above copyright notice, this
+//      list of conditions and the following disclaimer.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-// IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-// OTHER DEALINGS IN THE SOFTWARE.
+//    * Redistributions in binary form must reproduce the above copyright notice, this
+//      list of conditions and the following disclaimer in the documentation and/or
+//      other materials provided with the distribution.
 //
-// For more information, please refer to <http:unlicense.org>
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+// OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+// SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+// INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+// BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+// ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+// DAMAGE.
+//
+// For any comment, suggestion or feature request, please contact the manager of
+// the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -63,6 +65,7 @@
 #include <lomse_tasks.h>
 #include <lomse_command.h>
 #include <lomse_interval.h>
+#include <lomse_score_utilities.h>
 
 using namespace lomse;
 
@@ -161,7 +164,6 @@ protected:
     //edition related
     void transpose_notes_chromatically(FIntval interval, bool fUp);
     void transpose_notes_diatonically(int steps, bool fUp);
-    void transpose_key(int iInterval, bool fUp, bool fDiatonically);
 
 
     // In this first example we are just going to display an score on the window.
@@ -210,17 +212,45 @@ public:
     virtual ~DlgTransposeNotes();
 
 protected:
-
-    //event handlers
-    virtual void on_method_changed(wxCommandEvent& event);
-    virtual void on_ok(wxMouseEvent& event);
-    virtual void on_cancel(wxMouseEvent& event);
-
     void create_controls();
     void load_options();
     void load_combo_values();
     void load_intervals();
     void load_steps();
+
+    //event handlers
+    virtual void on_method_changed(wxCommandEvent& event);
+    virtual void on_ok(wxMouseEvent& event);
+    virtual void on_cancel(wxMouseEvent& event);
+};
+
+//---------------------------------------------------------------------------------------
+//A dialog for displaying transposition options for transposing keys
+class DlgTransposeKey : public wxDialog
+{
+protected:
+    EKeySignature* m_newKey;
+    int* m_mode;
+    bool m_fMayor;
+
+    wxRadioBox* m_radDirection;
+    wxComboBox* m_cboKeySignature;
+    wxButton* m_btnOk;
+    wxButton* m_btnCancel;
+
+public:
+    DlgTransposeKey(wxWindow* parent, EKeySignature oldKey, EKeySignature* newKey,
+                    int* mode);
+    virtual ~DlgTransposeKey();
+
+protected:
+    void create_controls();
+    void load_options();
+    void load_combo_values();
+
+    //event handlers
+    virtual void on_ok( wxMouseEvent& event );
+    virtual void on_cancel( wxMouseEvent& event );
 };
 
 
@@ -760,19 +790,88 @@ void MyCanvas::transpose_notes()
 //-------------------------------------------------------------------------
 void MyCanvas::transpose_key()
 {
+    //AWARE: Although tansposing a key signature is just changing that key signature and
+    //transposing chromatically the affected notes, this generic behaviour
+    //needs much more details for a real application because there are many scenarios to
+    //consider: scores with key changes; transposing instruments with a different key;
+    //scope of the command (the command must affect to all the score? or only to a
+    //selection? e.g. selected notes, a certain number of measures, other); what to do
+    //when in the scope of the command there is a key signature change? e.g. apply the
+    //same transposition interval to any key signature found in the selection set, stop
+    //transposing, other; what to do when not all notes are transposed: e.g. nothing,
+    //insert the old key signature after the last transposed note, other.
+    //
+    //In this sample, a very simple behaviour is implemented:
+    //- the transposition is applied only to the key signatures and notes included in
+    //  the selection.
+    //- the transposition to apply will be defined by the first key signature in the
+    //  selection and the key signature the user chooses in the transposition options
+    //  dialog. If the selection does not includes a key signature the command will not
+    //  be executed.
+    //- the transposition is applied to all notes in the selection without more
+    //  considerations (i.e. whether the key signatures applies to them or not). If
+    //  the selection does not contains notes but contains a key signature the key
+    //  signature will be transposed.
+    //- If the selection contains more than one key signature all them will be
+    //  transposed.
+
     if (!m_pPresenter) return;
 
     if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
     {
-    //TODO
-//        FIntval interval("M2");
-//        bool fUp = true;
-//        bool fDiatonically = false;
-//        DlgTransposeNotes dlg(this, &interval, &fUp, &fDiatonically);
-//        if (dlg.ShowModal() == wxID_OK)
-//        {
-//            transpose(interval, fUp, fDiatonically);
-//        }
+        //get the document
+        SpDocument pDoc = m_pPresenter->get_document_shared_ptr();
+
+        //get the set containing all user selected objects
+        SelectionSet* pSelection = spIntor->get_selection_set();
+        if (pSelection == nullptr || pSelection->empty())
+        {
+            wxMessageBox("Nothing selected!");
+            return;
+        }
+
+        //filter out the key signatures
+        list<ImoId> keys = pSelection->filter(k_imo_key_signature);
+        if (keys.empty())
+        {
+            wxMessageBox("No key selected!");
+            return;
+        }
+
+        //get the first key signature in the selection
+        ImoId oldKeyId = keys.front();
+        ImoKeySignature* pOldKey = static_cast<ImoKeySignature*>( pDoc->get_pointer_to_imo(oldKeyId) );
+        if (pOldKey == nullptr)
+        {
+            wxMessageBox("Program error: no key signature found!");
+            return;
+        }
+        EKeySignature oldKey = EKeySignature(pOldKey->get_key_type());
+
+        //ask user for the new key signature
+        EKeySignature newKey = oldKey;
+        int mode = 0;
+        DlgTransposeKey dlg(this, oldKey, &newKey, &mode);
+        if (dlg.ShowModal() == wxID_OK)
+        {
+            ::wxBeginBusyCursor();
+
+            //determine the interval to apply
+            FIntval intval;
+            if (mode == 0)          //transpose up
+                intval = KeyUtilities::up_interval(oldKey, newKey);
+            else if (mode == 1)     //transpose down
+                intval = KeyUtilities::down_interval(oldKey, newKey);
+            else                    //transpose closest
+                intval = KeyUtilities::closest_interval(oldKey, newKey);
+
+            //transpose the key signatures and the notes
+            string name = gettext("Key transposition");
+            spIntor->exec_command(
+                new CmdTransposeKey(intval, name) );
+
+            ::wxEndBusyCursor();
+       }
     }
 }
 
@@ -809,8 +908,13 @@ void MyCanvas::transpose_notes_chromatically(FIntval interval, bool fUp)
     {
         ::wxBeginBusyCursor();
         string name = gettext("Chromatic transposition");
+        if (fUp)
+            interval.make_ascending();
+        else
+            interval.make_descending();
+
         spIntor->exec_command(
-            new CmdTransposeByInterval(interval, fUp) );
+            new CmdTransposeChromatically(interval) );
         ::wxEndBusyCursor();
     }
 }
@@ -824,20 +928,6 @@ void MyCanvas::transpose_notes_diatonically(int steps, bool fUp)
         string name = gettext("Diatonic transposition");
         spIntor->exec_command(
             new CmdTransposeDiatonically(steps, fUp) );
-        ::wxEndBusyCursor();
-    }
-}
-
-//-------------------------------------------------------------------------
-void MyCanvas::transpose_key(int iInterval, bool fUp, bool fDiatonically)
-{
-    //TODO
-    if (SpInteractor spIntor = m_pPresenter->get_interactor(0).lock())
-    {
-        ::wxBeginBusyCursor();
-        string name = gettext("Chromatic transposition");
-//        spIntor->exec_command(
-//            new CmdTransposeByInterval(FIntval(iInterval), fUp) );
         ::wxEndBusyCursor();
     }
 }
@@ -921,6 +1011,10 @@ DlgTransposeNotes::DlgTransposeNotes(wxWindow* parent, FIntval* interval, int* s
 //---------------------------------------------------------------------------------------
 DlgTransposeNotes::~DlgTransposeNotes()
 {
+	// Disconnect Events
+	m_radMethod->Disconnect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DlgTransposeNotes::on_method_changed ), NULL, this );
+	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_ok ), NULL, this );
+	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeNotes::on_cancel ), NULL, this );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1083,4 +1177,163 @@ void DlgTransposeNotes::on_cancel(wxMouseEvent& event)
 {
     event.Skip();
     EndModal(wxID_CANCEL);
+}
+
+
+//=======================================================================================
+// DlgTransposeNotes implementation
+//=======================================================================================
+DlgTransposeKey::DlgTransposeKey(wxWindow* parent, EKeySignature oldKey,
+                                 EKeySignature* newKey, int* mode)
+    : wxDialog(parent, wxID_ANY, _("Transpose by key"), wxDefaultPosition, wxDefaultSize,
+               wxDEFAULT_DIALOG_STYLE)
+    , m_newKey(newKey)
+    , m_mode(mode)
+    , m_fMayor(KeyUtilities::is_major_key(oldKey))
+{
+    create_controls();
+    load_options();
+}
+
+//---------------------------------------------------------------------------------------
+DlgTransposeKey::~DlgTransposeKey()
+{
+	// Disconnect Events
+	m_btnOk->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), NULL, this );
+	m_btnCancel->Disconnect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), NULL, this );
+
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeKey::create_controls()
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* szrMain;
+	szrMain = new wxBoxSizer( wxVERTICAL );
+
+	wxString m_radDirectionChoices[] = { _("Up"), _("Down"), _("Closest") };
+	int m_radDirectionNChoices = sizeof( m_radDirectionChoices ) / sizeof( wxString );
+	m_radDirection = new wxRadioBox( this, wxID_ANY, _("Direction"), wxDefaultPosition, wxDefaultSize, m_radDirectionNChoices, m_radDirectionChoices, 1, wxRA_SPECIFY_COLS );
+	m_radDirection->SetSelection( 0 );
+	szrMain->Add( m_radDirection, 1, wxALL|wxEXPAND, 5 );
+
+	wxStaticBoxSizer* szrNewKey;
+	szrNewKey = new wxStaticBoxSizer( new wxStaticBox( this, wxID_ANY, _("New key signature") ), wxVERTICAL );
+
+	m_cboKeySignature = new wxComboBox( szrNewKey->GetStaticBox(), wxID_ANY, "", wxDefaultPosition, wxSize( 200,-1 ), 0, NULL, 0 );
+	szrNewKey->Add( m_cboKeySignature, 0, wxALL|wxALIGN_CENTER_VERTICAL|wxEXPAND, 5 );
+
+
+	szrMain->Add( szrNewKey, 1, wxEXPAND|wxALL, 5 );
+
+	wxBoxSizer* szrButtons;
+	szrButtons = new wxBoxSizer( wxHORIZONTAL );
+
+
+	szrButtons->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_btnOk = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	szrButtons->Add( m_btnOk, 0, wxALL, 5 );
+
+	m_btnCancel = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	szrButtons->Add( m_btnCancel, 0, wxALL, 5 );
+
+
+	szrButtons->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	szrMain->Add( szrButtons, 0, wxTOP|wxBOTTOM|wxEXPAND, 5 );
+
+
+	this->SetSizer( szrMain );
+	this->Layout();
+	szrMain->Fit( this );
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_btnOk->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_ok ), NULL, this );
+	m_btnCancel->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( DlgTransposeKey::on_cancel ), NULL, this );
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeKey::load_options()
+{
+    load_combo_values();
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeKey::on_ok(wxMouseEvent& event)
+{
+    static EKeySignature major[] = {
+        k_key_C, k_key_G, k_key_D,  k_key_A,  k_key_E,  k_key_B,  k_key_Fs, k_key_Cs,
+                 k_key_F, k_key_Bf, k_key_Ef, k_key_Af, k_key_Df, k_key_Gf, k_key_Cf
+    };
+
+    static EKeySignature minor[] = {
+        k_key_a, k_key_e, k_key_b, k_key_fs, k_key_cs, k_key_gs, k_key_ds, k_key_as,
+                 k_key_d, k_key_g, k_key_c,  k_key_f,  k_key_bf, k_key_ef, k_key_af
+    };
+
+    *m_mode = m_radDirection->GetSelection();
+
+    if (m_fMayor)
+        *m_newKey = major[m_cboKeySignature->GetSelection()];
+    else
+        *m_newKey = minor[m_cboKeySignature->GetSelection()];
+
+    event.Skip();
+    EndModal(wxID_OK);
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeKey::on_cancel(wxMouseEvent& event)
+{
+    event.Skip();
+    EndModal(wxID_CANCEL);
+}
+
+//---------------------------------------------------------------------------------------
+void DlgTransposeKey::load_combo_values()
+{
+    if (m_fMayor)
+    {
+        m_cboKeySignature->Clear();
+        m_cboKeySignature->Append(_("C major (no accidentals)"));
+        m_cboKeySignature->Append(_("G major (1 sharp)"));
+        m_cboKeySignature->Append(_("D major (2 sharps)"));
+        m_cboKeySignature->Append(_("A major (3 sharps)"));
+        m_cboKeySignature->Append(_("E major (4 sharps)"));
+        m_cboKeySignature->Append(_("B major (5 sharps)"));
+        m_cboKeySignature->Append(_("F sharp major (6 sharps)"));
+        m_cboKeySignature->Append(_("C sharp major (7 sharps)"));
+        m_cboKeySignature->Append(_("F major (1 flat)"));
+        m_cboKeySignature->Append(_("B flat major (2 flats)"));
+        m_cboKeySignature->Append(_("E flat major (3 flats)"));
+        m_cboKeySignature->Append(_("A flat major (4 flats)"));
+        m_cboKeySignature->Append(_("D flat major (5 flats)"));
+        m_cboKeySignature->Append(_("G flat major (6 flats)"));
+        m_cboKeySignature->Append(_("C flat major (7 flats)"));
+    }
+    else
+    {
+        m_cboKeySignature->Clear();
+        m_cboKeySignature->Append(_("A minor (no accidentals)"));
+        m_cboKeySignature->Append(_("E minor (1 sharp)"));
+        m_cboKeySignature->Append(_("B minor (2 sharps)"));
+        m_cboKeySignature->Append(_("F sharp minor (3 sharps)"));
+        m_cboKeySignature->Append(_("C sharp minor (4 sharps)"));
+        m_cboKeySignature->Append(_("G sharp minor (5 sharps)"));
+        m_cboKeySignature->Append(_("D sharp minor (6 sharps)"));
+        m_cboKeySignature->Append(_("A sharp minor (7 sharps)"));
+        m_cboKeySignature->Append(_("D minor (1 flat)"));
+        m_cboKeySignature->Append(_("G minor (2 flats)"));
+        m_cboKeySignature->Append(_("C minor (3 flats)"));
+        m_cboKeySignature->Append(_("F minor (4 flats)"));
+        m_cboKeySignature->Append(_("B flat minor (5 flats)"));
+        m_cboKeySignature->Append(_("E flat minor (6 flats)"));
+        m_cboKeySignature->Append(_("A flat minor (7 flats)"));
+    }
+    m_cboKeySignature->SetSelection(0);
 }

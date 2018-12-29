@@ -2168,9 +2168,8 @@ protected:
 public:
 
     /**
-        This command changes all the keys in the selection or in all the score if
-        selection is empty, and transposes chromatically all the notes in the selection
-        or in all the score if the selection set is empty.
+        This command changes all the keys in the selection, and transposes chromatically
+        all the notes in the selection.
 
         @param interval The interval by which you want the selected music transposed.
             If the interval is negative, the direction of the transposition will be
@@ -2202,22 +2201,6 @@ public:
     CmdTransposeKey(FIntval interval, const string& name="");
 
     virtual ~CmdTransposeKey() {};
-
-//    enum EHowToMoveNotes {
-//        k_move_up = 0,    ///< Move the notes up.
-//        k_move_down,      ///< Move the notes down.
-//        k_move_closest,   ///< Move the notes by the smallest required interval (closest).
-//    };
-
-//    int get_cursor_update_policy() { return k_do_nothing; }
-//    int get_undo_policy() { return k_undo_policy_specific; }
-//    int get_selection_update_policy() { return k_sel_do_nothing; }
-//
-//    ///@cond INTERNALS
-//    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
-//    int perform_action(Document* pDoc, DocCursor* pCursor);
-//    void undo_action(Document* pDoc, DocCursor* pCursor);
-//    ///@endcond
 
 protected:
     //mandatory overrides
