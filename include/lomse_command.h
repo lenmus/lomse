@@ -2175,18 +2175,17 @@ protected:
     key signature symbol by the new key signature and transpose the affected notes,
     chromatically, by the interval between the new key and the old key signatures.
 
-    Therefore, for transposing by key there is not necessary to use any special command.
-    The only need is a method to compute the interval between two key signatures. Class
-    KeyUtilities provides three methods for this:
+    Therefore, for transposing by key no special command is needed, just
+    CmdTransposeChromatically; and also a method to compute the interval between two key
+    signatures. Class KeyUtilities provides three methods for this:
         KeyUtilities::up_interval()
         KeyUtilities::down_interval()
         KeyUtilities::closest_interval()
 
-    Commands CmdTransposeDiatonically and CmdTransposeChromatically, only deals with
-    user selected notes. But a command for transposing to a different key signature must
-    deal with notes and with keys, and how to deal with them is an application
-    behaviour decision that can not be generalized because there are many scenarios to
-    consider:
+    Take into account that a command for transposing to a different key signature can
+    not be a general basic command because it must deal with notes and with keys, and
+    how to deal with them is an application behaviour decision that can not be
+    generalized. There are many scenarios to consider:
     - scores with key changes;
     - transposing instruments with a different key;
     - scope of the command: the command must affect to all the score? or only to a
@@ -2201,7 +2200,7 @@ protected:
         - insert the old key signature after the last transposed note,
         - other.
 
-    Because all of these considerations and possible applicacion scenarios, Lomse can
+    Because all of these considerations and possible application scenarios, Lomse can
     not provide a generic key transposition command. Nevertheless, for convenience, the
     CmdTransposeKey command has been created to be used in simple cases.
 

@@ -1,7 +1,7 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.25.0
+[Since last version] 0.26.0
 =============================
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.25.0
@@ -10,6 +10,28 @@
 
 ##### COMPATIBLE CHANGES
 
+- None.
+
+
+
+Version [0.26.0] (29/Dec/2018)
+=============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.25.0
+
+- Pitch representation in Lomse internal model was not the best representation for
+  supporting transposition or other pitch changes. So, it was necessary to review and
+  change all this in the internal model. This change should not create backwards 
+  incompatibilities in user applications, but it is an important change.
+
+- External methods related to key signatures have been packaged as static methods in
+  a new class KeyUtilities. Probably, current applications using Lomse never used
+  these methods, so this change should not create backwards incompatibilities.
+
+##### COMPATIBLE CHANGES
+
+- Added new edition commands for transposition.
+- Added class FIntval for managing intervals.
 - MusicXML importer now accepts metronome directions.
 - The algorithm for auto-scroll has been improved.
 - During playback, when the time signature changes, metronome clicks
@@ -20,7 +42,7 @@
 - Added Interactor method to customize visual tracking effects
 - Added Interactor method to define what is a beat. This allows, for
   example, to subdivide metronome or to decide which note duration
-  corresponds to a metronome click. It is also usefull for methods that
+  corresponds to a metronome click. It is also useful for methods that
   specify a location by using measure/beat parameters.
 - The internal model now has information about measure attributes, such
   as the displayed measure number. All importers now parse and
@@ -33,7 +55,7 @@
 - Defined a new barline type: alternative rendering for double repetition,
   using two thick barlines instead of thin barlines (E.Gould, p.234)
 - Fixes for removing Microsoft compiler warnings.
-- Fixes for all high impact oustanding defects detected with coverity scan.
+- Fixes for all high impact outstanding defects detected with coverity scan.
 - Fixes for a few bugs causing a crash in specific scenarios:
     - Visual tracking effects now cleared after deleting the graphic model.
     - The sound thread is now not deleted when it has finished.
@@ -42,14 +64,14 @@
 	  the next document page.
 - Fixes for a few bugs related to scores layout:
     - Fixed bug preventing to modify spacing value parameter from score
-	  option "Render.SpacingValue". Also it was incorrectly trated as
+	  option "Render.SpacingValue". Also it was incorrectly treated as
 	  float in ScoreMeter and in LDP parser.
     - Fixed bugs related to Gourlay's lines justification and value for Dmin
 	  parameter.
     - Spacing when there are invisible shapes (e.g. spacers) where
 	  incorrectly computed
     - A clef change after prolog was not engraved in smaller size because
-	  it was considered part of the prolog.   
+	  it was considered part of the prolog.
 - Fixed some bugs related to visual tracking effects:
     - Color for highlight notes visual tracking was not initialized.
     - Bug in tempo line positioning preventing to move the line to the correct page.
@@ -58,10 +80,11 @@
     - Removed unused method `Interactor::move_tempo_line_to(ImoStaffobj* pSO)`.
     - Incorrect computation of beat type (strong, weak, off-beat), that
 	  affected to the computation of note volume, for stressing strong beats.
-	  It also affected Lomse user applications that could be using this method, such as LenMus Phonascus.
+	  It also affected Lomse user applications that could be using this method, such
+      as LenMus Phonascus.
     - Spacing algorithm has been refactored to facilitate maintenance. All
 	  spacing methods have been reviewed and more tests added. All test
-	  has been documented as well as the reasons for the differente rules.
+	  has been documented as well as the reasons for the different rules.
 	  Fixes in a couple of spacing rules.
 
 
@@ -718,7 +741,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.25.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.26.0...HEAD
+[0.26.0]: https://github.com/lenmus/lomse/compare/0.25.0...0.26.0
 [0.25.0]: https://github.com/lenmus/lomse/compare/0.24.0...0.25.0
 [0.24.0]: https://github.com/lenmus/lomse/compare/0.23.0...0.24.0
 [0.23.0]: https://github.com/lenmus/lomse/compare/0.22.0...0.23.0
