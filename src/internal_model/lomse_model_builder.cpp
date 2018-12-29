@@ -39,6 +39,8 @@
 #include "lomse_im_factory.h"
 #include "lomse_measures_table.h"
 
+#include <math.h>       //round
+
 #include <algorithm>
 using namespace std;
 
@@ -119,8 +121,18 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
 {
     StaffObjsCursor cursor(pScore);
 
-    ImoKeySignature* pKey = nullptr;
-    reset_accidentals(pKey);
+    int staves = cursor.get_num_staves();
+    m_context.assign(staves, {0,0,0,0,0,0,0});          //alterations, per staff index
+
+    int numInstrs = cursor.get_num_instruments();
+    vector<ImoKeySignature*> keys;                      //key, per instrument
+    keys.assign(numInstrs, nullptr);
+
+    vector<int> numStaves;                              //num. staves, per instrument
+    for (int i=0; i< numInstrs; ++i)
+    {
+        numStaves.push_back( pScore->get_instrument(i)->get_num_staves() );
+    }
 
     while(!cursor.is_end())
     {
@@ -128,16 +140,27 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
         if (pSO->is_note())
         {
             ImoNote* pNote = static_cast<ImoNote*>(pSO);
-            compute_pitch(pNote);
+            int idx = cursor.staff_index();
+            compute_pitch(pNote, idx);
         }
         else if (pSO->is_barline())
         {
-            reset_accidentals(pKey);
+            int iInstr = cursor.num_instrument();
+            for (int iStaff=0; iStaff < numStaves[iInstr]; ++iStaff)
+            {
+                int idx = cursor.staff_index_for(iInstr, iStaff);
+                reset_accidentals(keys[iInstr], idx);
+            }
         }
         else if (pSO->is_key_signature())
         {
-            pKey = static_cast<ImoKeySignature*>( pSO );
-            reset_accidentals(pKey);
+            int iInstr = cursor.num_instrument();
+            keys[iInstr] = static_cast<ImoKeySignature*>( pSO );
+            for (int iStaff=0; iStaff < numStaves[iInstr]; ++iStaff)
+            {
+                int idx = cursor.staff_index_for(iInstr, iStaff);
+                reset_accidentals(keys[iInstr], idx);
+            }
         }
 
         cursor.move_next();
@@ -145,34 +168,186 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
-void PitchAssigner::compute_pitch(ImoNote* pNote)
+void PitchAssigner::compute_notated_accidentals(ImoNote* pNote, int context)
+{
+    int required = int(round( pNote->get_actual_accidentals() ));
+    EAccidentals acc = k_no_accidentals;
+
+    //determine notated accidentals, as required by music notation rules
+    switch(context)
+    {
+        case 0:
+        {
+            switch(required)
+            {
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_no_accidentals;       break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
+            }
+            break;
+        }
+
+        case 1:
+        {
+            switch(required)
+            {
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_no_accidentals;       break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
+            }
+            break;
+        }
+
+        case 2:
+        {
+            switch(required)
+            {
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_flat;                 break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_natural_sharp;        break;
+                case 2:     acc = k_no_accidentals;       break;
+                default:    acc = k_invalid_accidentals;  break;
+            }
+            break;
+        }
+
+        case -1:
+        {
+            switch(required)
+            {
+                case -2:    acc = k_flat_flat;            break;
+                case -1:    acc = k_no_accidentals;       break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
+            }
+            break;
+        }
+
+        case -2:
+        {
+            switch(required)
+            {
+                case -2:    acc = k_no_accidentals;       break;
+                case -1:    acc = k_natural_flat;         break;
+                case 0:     acc = k_natural;              break;
+                case 1:     acc = k_sharp;                break;
+                case 2:     acc = k_double_sharp;         break;
+                default:    acc = k_invalid_accidentals;  break;
+            }
+            break;
+        }
+
+        default:
+            acc = k_invalid_accidentals;
+    }
+
+    //decide what accidentals to display. It must be always the computed accidentals but
+    //there are two exceptions:
+    //  1. when the user has set the accidentals and they are not inconsistent
+    //  2. when courtesy accidentals are requested
+    if (pNote->is_display_accidentals_forced())     //user has set accidentals
+    {
+        //acceptable inconsistencies: cases in which the user has provided alternative
+        //notations with the same meaning (e.g.two sharps instead of double sharp)
+        if (pNote->get_notated_accidentals() == k_natural_flat && acc == k_flat)
+            acc = k_natural_flat;
+        else if (pNote->get_notated_accidentals() == k_flat && acc == k_natural_flat)
+            acc = k_flat;
+        else if (pNote->get_notated_accidentals() == k_natural_sharp && acc == k_sharp)
+            acc = k_natural_sharp;
+        else if (pNote->get_notated_accidentals() == k_sharp_sharp && acc == k_double_sharp)
+            acc = k_sharp_sharp;
+        else if (pNote->get_notated_accidentals() == k_sharp && acc == k_natural_sharp)
+            acc = k_sharp;
+
+        //no accidental is required. Deal with cases the user has requested to display
+        //the accidentals (courtesy accidentals)
+        else if (acc == k_no_accidentals)
+        {
+            if (pNote->is_display_naturals_forced())
+                acc = k_natural;
+            else if (pNote->get_notated_accidentals() == k_natural)
+            {
+                acc = k_natural;
+                //AWARE: notated_accidentals_never_computed() is "true" the first time the
+                //score is loaded, when importing or re-loading the file. Score source
+                //format is irrelevant.
+                if (pNote->notated_accidentals_never_computed())
+                    pNote->force_to_display_naturals();
+            }
+            else
+            {
+                //context == required. No accidental is required but user has set
+                //the accidental (courtesy acc.)
+                switch(context)
+                {
+                    case -2:    acc = k_flat_flat;            break;
+                    case -1:    acc = k_flat;                 break;
+                    case 0:     acc = k_no_accidentals;       break;
+                    case 1:     acc = k_sharp;                break;
+                    case 2:     acc = k_double_sharp;         break;
+                    default:    acc = k_invalid_accidentals;  break;
+                }
+            }
+        }
+    }
+
+    pNote->mark_notated_accidentals_as_computed();
+    pNote->set_notated_accidentals(acc);
+}
+
+//---------------------------------------------------------------------------------------
+void PitchAssigner::compute_pitch(ImoNote* pNote, int idx)
 {
     float alter = pNote->get_actual_accidentals();
     int step = pNote->get_step();
-    if (alter == k_acc_not_computed && step != k_no_pitch)
+    if (step == k_no_pitch)
     {
-        update_context_accidentals(pNote);
-        pNote->set_actual_accidentals( float(m_accidentals[step]) );
+        pNote->set_actual_accidentals(k_acc_not_computed);
+        pNote->set_notated_accidentals(k_no_accidentals);
+    }
+    else
+    {
+        int context = m_context[idx][step];
+        bool fContextUpdated = false;
+        if (alter == k_acc_not_computed)
+        {
+            update_context_accidentals(pNote, idx);
+            fContextUpdated = true;
+            pNote->set_actual_accidentals( float(m_context[idx][step]) );
+        }
+
+        compute_notated_accidentals(pNote, context);
+
+        if (!fContextUpdated)
+            m_context[idx][step] = int( round(alter) );
     }
 }
 
 //---------------------------------------------------------------------------------------
-void PitchAssigner::reset_accidentals(ImoKeySignature* pKey)
+void PitchAssigner::reset_accidentals(ImoKeySignature* pKey, int idx)
 {
     if (pKey)
     {
         int keyType = pKey->get_key_type();
-        get_accidentals_for_key(keyType, m_accidentals);
-    }
-    else
-    {
-        for (int iStep=0; iStep < 7; ++iStep)
-            m_accidentals[iStep] = 0;
+        int accidentals[7];
+        KeyUtilities::get_accidentals_for_key(keyType, accidentals);
+        for (int i=0; i < 7; ++i)
+            m_context[idx][i] = accidentals[i];
     }
 }
 
 //---------------------------------------------------------------------------------------
-void PitchAssigner::update_context_accidentals(ImoNote* pNote)
+void PitchAssigner::update_context_accidentals(ImoNote* pNote, int idx)
 {
     int step = pNote->get_step();
     EAccidentals acc = pNote->get_notated_accidentals();
@@ -183,32 +358,32 @@ void PitchAssigner::update_context_accidentals(ImoNote* pNote)
             break;
         case k_natural:
             //force 'natural' (=no accidentals)
-            m_accidentals[step] = 0;
+            m_context[idx][step] = 0;
             break;
         case k_flat:
             //Force one flat
-            m_accidentals[step] = -1;
+            m_context[idx][step] = -1;
             break;
         case k_natural_flat:
             //Force one flat
-            m_accidentals[step] = -1;
+            m_context[idx][step] = -1;
             break;
         case k_sharp:
             //force one sharp
-            m_accidentals[step] = 1;
+            m_context[idx][step] = 1;
             break;
         case k_natural_sharp:
             //force one sharp
-            m_accidentals[step] = 1;
+            m_context[idx][step] = 1;
             break;
         case k_flat_flat:
             //Force two flats
-            m_accidentals[step] = -2;
+            m_context[idx][step] = -2;
             break;
         case k_sharp_sharp:
         case k_double_sharp:
             //force two sharps
-            m_accidentals[step] = 2;
+            m_context[idx][step] = 2;
             break;
         default:
             ;

@@ -146,6 +146,7 @@ message(STATUS "** EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
 message(STATUS "** LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
 message(STATUS "** OUTDIR: ${OUTDIR}")
 
+
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
 if(CMAKE_NO_STD_NAMESPACE)
@@ -177,7 +178,7 @@ endif()
 
 
 # directories to search for CMake modules
-set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LOMSE_ROOT_DIR}/cmake-modules")
 
 #define path were fonts will be installed.
 set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
@@ -214,41 +215,69 @@ include_directories(
 
 # Check for UnitTest++. Required for unit test
 if (LOMSE_BUILD_TESTS)
-    find_package(UnitTest++)
-    if(UNITTEST++_FOUND)
-        get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
-        include_directories(${UNITTEST++_INCLUDE_DIR})
-        link_libraries( ${UNITTEST++_LIBRARY} )
-        link_directories( ${UNITTEST++_LINK_DIR} )        
-        message(STATUS "UnitTest++ found: libraries= ${UNITTEST++_LIBRARY}" )
-        message(STATUS "UnitTest++ found: include= ${UNITTEST++_INCLUDE_DIR}" )
-        message(STATUS "UnitTest++ found: libdir= ${UNITTEST++_LINK_DIR}" )
-    else()
-        message(STATUS "UnitTest++ package not found. Test program will not be built" )
-        set (LOMSE_BUILD_TESTS OFF)
-    endif()
+	#if(WIN32)
+	#	#for Windows use the pre-installed packages
+	#	set(UNITTEST++_INCLUDE_DIR "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/include/UnitTest++")
+	#	set(UNITTEST++_LIBRARY "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/lib/UnitTest++.lib")
+	#	set(UNITTEST++_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/lib")        
+	#	include_directories(${UNITTEST++_INCLUDE_DIR})
+	#	link_libraries( ${UNITTEST++_LIBRARY} )
+	#	link_directories( ${UNITTEST++_LINK_DIR} )        
+	#	message(STATUS "UnitTest++ pre-packaged: libraries= ${UNITTEST++_LIBRARY}" )
+	#	message(STATUS "UnitTest++ pre-packaged: include= ${UNITTEST++_INCLUDE_DIR}" )
+	#	message(STATUS "UnitTest++ pre-packaged: libdir= ${UNITTEST++_LINK_DIR}" )
+	#else()
+		find_package(UnitTest++)
+		if(UNITTEST++_FOUND)
+			get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
+			include_directories(${UNITTEST++_INCLUDE_DIR})
+			link_libraries( ${UNITTEST++_LIBRARY} )
+			link_directories( ${UNITTEST++_LINK_DIR} )        
+			message(STATUS "UnitTest++ found: libraries= ${UNITTEST++_LIBRARY}" )
+			message(STATUS "UnitTest++ found: include= ${UNITTEST++_INCLUDE_DIR}" )
+			message(STATUS "UnitTest++ found: libdir= ${UNITTEST++_LINK_DIR}" )
+		else()
+			message(STATUS "UnitTest++ package not found. Test program will not be built" )
+			set (LOMSE_BUILD_TESTS OFF)
+		endif()
+	#endif(WIN32)
 endif(LOMSE_BUILD_TESTS)
 
-
 # Check for FreeType
-find_package(Freetype REQUIRED)                    
+#if(WIN32)
+#	#for Windows use the pre-installed packages
+#	set(FREETYPE_FOUND 1)
+#	set(FREETYPE_INCLUDE_DIRS "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/include/freetype")
+#	set(FREETYPE_LIBRARY "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64/freetype.lib")
+#	set(FREETYPE_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64")        
+#else()
+	find_package(Freetype REQUIRED)                 
+#endif(WIN32)
 if( FREETYPE_FOUND )
-    include_directories( ${FREETYPE_INCLUDE_DIRS} )
-    link_libraries( ${FREETYPE_LIBRARIES} )
-    link_directories( ${FREETYPE_LINK_DIR} )        
-    message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
-    message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
-    message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
-    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
-    set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libfreetype6")
+	include_directories( ${FREETYPE_INCLUDE_DIRS} )
+	link_libraries( ${FREETYPE_LIBRARY} )
+	link_directories( ${FREETYPE_LINK_DIR} )        
+	message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARY}" )
+	message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
+	message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
+	set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
+	set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libfreetype6")
 else()
-    message(SEND_ERROR "FreeType package not found.")
-endif()
-
+	message(SEND_ERROR "FreeType package not found.")
+endif(FREETYPE_FOUND)
 
 # Check for libpng
 if( LOMSE_ENABLE_PNG )
-    find_package(PNG REQUIRED)                    
+	if(0)
+		#for Windows use the pre-installed packages
+		set(PNG_FOUND 1)
+		set(PNG_INCLUDE_DIRS "${LOMSE_ROOT_DIR}/../../win_packages/zlib/include")
+		set(PNG_LIBRARIES "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib/zlib.lib")
+		set(PNG_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib")
+		set(PNG_VERSION_STRING "1.2.11")
+	else()
+	    find_package(PNG REQUIRED)  
+	endif(0)
     if( PNG_FOUND )
         include_directories( ${PNG_INCLUDE_DIRS} )
         link_libraries( ${PNG_LIBRARIES} )
@@ -257,22 +286,31 @@ if( LOMSE_ENABLE_PNG )
         message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
         message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
         set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
-        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libpng12-0 (>=1.2.42)")
+        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, 
+			libpng12-0 (>=1.2.42) | libpng16-16" )
     else()
         message(SEND_ERROR "libpng package not found.")
     endif()
-endif()
-
+endif(LOMSE_ENABLE_PNG)
 
 if( LOMSE_ENABLE_COMPRESSION )
     # Check for zlib
-    find_package(ZLIB REQUIRED)
+	if(WIN32)
+		#for Windows use the pre-installed packages
+		set(ZLIB_FOUND 1)
+		set(ZLIB_INCLUDE_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/include")
+		set(ZLIB_LIBRARIES "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib/zlib.lib")
+		set(ZLIB_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib")
+		set(ZLIB_VERSION_STRING "1.2.11")
+	else()
+		find_package(ZLIB REQUIRED)
+	endif(WIN32)
     if( ZLIB_FOUND )
         include_directories( ${ZLIB_INCLUDE_DIR} )
         link_libraries( ${ZLIB_LIBRARIES} )
         link_directories( ${ZLIB_LINK_DIR} )        
         message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
-        message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+        message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIR}" )
         message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
         message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
         set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
@@ -281,8 +319,7 @@ if( LOMSE_ENABLE_COMPRESSION )
     else()
         message(SEND_ERROR "zlib package not found.")
     endif()
-endif()
-
+endif(LOMSE_ENABLE_COMPRESSION)
 
 # strip leading commas from LOMSE_REQUIRES and LOMSE_DEPENDENCIES
 string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
@@ -367,7 +404,7 @@ if(LOMSE_BUILD_TESTS)
 
     set (TESTLIB  testlib)
 
-    file(GLOB TESTLIB_SRC "${LOMSE_SRC_DIR}/tests/*.cpp" )
+    file(GLOB TESTLIB_SRC "${LOMSE_SRC_DIR}/tests/lomse_*.cpp" )
     add_executable(${TESTLIB} ${TESTLIB_SRC})
 
     # Check for pthreads
@@ -375,10 +412,10 @@ if(LOMSE_BUILD_TESTS)
     
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
-        target_link_libraries ( ${TESTLIB} lomse-shared libunittest++.a ${CMAKE_THREAD_LIBS_INIT} )
+        target_link_libraries ( ${TESTLIB} lomse-shared ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
         add_dependencies(testlib lomse-shared)
     else()      
-        target_link_libraries ( ${TESTLIB} lomse unittest++ ${CMAKE_THREAD_LIBS_INIT} )
+        target_link_libraries ( ${TESTLIB} lomse ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
         add_dependencies(testlib lomse-static)
     endif()
 
@@ -430,7 +467,7 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries( ${EXAMPLE1}
             lomse.lib
-            ${FREETYPE_LIBRARIES}
+            ${FREETYPE_LIBRARY}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
         )
@@ -450,7 +487,7 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries ( ${EXAMPLE1} 
             liblomse.so
-            ${FREETYPE_LIBRARIES}
+            ${FREETYPE_LIBRARY}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
         )

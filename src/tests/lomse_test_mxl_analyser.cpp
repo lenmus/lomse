@@ -2693,7 +2693,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -2730,7 +2730,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 4 );
@@ -2766,7 +2766,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_quarter );
         CHECK( pNote && pNote->get_octave() == 4 );
@@ -2803,7 +2803,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_eighth );
         CHECK( pNote && pNote->get_octave() == 5 );
@@ -2879,7 +2879,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_whole );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -2918,7 +2918,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( pNote && pNote->get_actual_accidentals() == k_no_accidentals );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_quarter );
         CHECK( pNote && pNote->get_octave() == 3 );
@@ -3073,7 +3073,7 @@ SUITE(MxlAnalyserTest)
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
         CHECK( is_equal_float(pNote->get_actual_accidentals(), -1.0f) );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_half );
         CHECK( pNote && pNote->get_octave() == 5 );
@@ -3952,7 +3952,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
-        CHECK( pNote && pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote && pNote->get_dots() == 0 );
         CHECK( pNote && pNote->get_note_type() == k_eighth );
         CHECK( pNote && pNote->get_octave() == 5 );

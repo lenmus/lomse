@@ -647,6 +647,7 @@ INPUT     = mainpages \
 			../../include/lomse_import_options.h \
 			../../include/lomse_interactor.h \
 			../../include/lomse_internal_model.h \
+			../../include/lomse_interval.h \
 			../../include/lomse_pitch.h \
 			../../include/lomse_pixel_formats.h \
 			../../include/lomse_presenter.h \

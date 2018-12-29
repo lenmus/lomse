@@ -120,9 +120,7 @@ SUITE(GmoShapeTest)
     {
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        pNote->set_step(0);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_no_accidentals);
+        pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
@@ -158,9 +156,7 @@ SUITE(GmoShapeTest)
     {
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        pNote->set_step(0);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_flat);
+        pNote->set_notated_pitch(k_step_C, k_octave_4, k_flat);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);

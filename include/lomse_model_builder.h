@@ -35,6 +35,7 @@
 #include <map>
 #include <list>
 #include <vector>
+#include <array>
 using namespace std;
 
 namespace lomse
@@ -69,13 +70,14 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// PitchAssigner. Implements the algorithm to traverse the score and assign pitch to
-// notes, based on notated pitch, and taking into account key signature and notated
-// accidentals introduced by previous notes on the same measure.
+/** PitchAssigner. Implements the algorithm to traverse the score and assign pitch to
+    notes, based on notated pitch, and taking into account key signature and notated
+    accidentals introduced by previous notes on the same measure.
+*/
 class PitchAssigner
 {
 protected:
-    int m_accidentals[7];
+    vector<std::array<int, 7> > m_context;
 
 public:
     PitchAssigner() {}
@@ -83,11 +85,11 @@ public:
 
     void assign_pitch(ImoScore* pScore);
 
-
 protected:
-    void reset_accidentals(ImoKeySignature* pKey);
-    void update_context_accidentals(ImoNote* pNote);
-    void compute_pitch(ImoNote* pNote);
+    void reset_accidentals(ImoKeySignature* pKey, int idx);
+    void update_context_accidentals(ImoNote* pNote, int idx);
+    void compute_pitch(ImoNote* pNote, int idx);
+    void compute_notated_accidentals(ImoNote* pNote, int context);
 
 };
 

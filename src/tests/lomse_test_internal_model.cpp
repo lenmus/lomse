@@ -121,7 +121,7 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         CHECK( pNote->get_num_attachments() == 0 );
-        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_invalid_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
@@ -883,9 +883,7 @@ SUITE(InternalModelTest)
         //@ IncludeInRelation
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        pNote->set_step(1);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_no_accidentals);
+        pNote->set_notated_pitch(1, 4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 
@@ -906,9 +904,7 @@ SUITE(InternalModelTest)
         //@ RemoveFromRelation
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        pNote->set_step(1);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_no_accidentals);
+        pNote->set_notated_pitch(1, 4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 
@@ -930,9 +926,7 @@ SUITE(InternalModelTest)
         //@ RemoveFromAllRelations
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
-        pNote->set_step(1);
-        pNote->set_octave(4);
-        pNote->set_notated_accidentals(k_no_accidentals);
+        pNote->set_notated_pitch(1, 4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 

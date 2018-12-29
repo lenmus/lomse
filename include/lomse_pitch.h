@@ -30,7 +30,8 @@
 #ifndef __LOMSE_PITCH_H__
 #define __LOMSE_PITCH_H__
 
-#include "lomse_internal_model.h"        //for EKeySignature enum
+#include "lomse_internal_model.h"       //for EKeySignature enum
+#include "lomse_interval.h"             //for class FIntval
 
 #include <string>
 using namespace std;
@@ -105,8 +106,8 @@ enum EAccidentals
     k_flat_flat,                    ///< Two consecutive flat signs (bb)
     k_double_sharp,                 ///< The double sharp symbol (x)
     k_sharp_sharp,                  ///< Two consecutive sharp signs (##)
-    k_natural_flat,                 ///< Natural sign follwed by flat sign
-    k_natural_sharp,                ///< Natural sign follwed by sharp sign
+    k_natural_flat,                 ///< Natural sign followed by flat sign
+    k_natural_sharp,                ///< Natural sign followed by sharp sign
 };
 
 //---------------------------------------------------------------------------------------
@@ -151,7 +152,6 @@ public:
 
     ///@{
     /// Increment / decrement pitch by a certain number of steps.
-    //DiatonicPitch operator - (DiatonicPitch pitch) { return DiatonicPitch(m_dp - pitch); }
     DiatonicPitch operator -(int i) { return DiatonicPitch(m_dp - i); }
     DiatonicPitch operator +(int i) { return DiatonicPitch(m_dp + i); }
     DiatonicPitch operator -=(int i) {
@@ -287,11 +287,12 @@ public:
     MidiPitch(int step, int octave, int acc=0);
 
     //operations
-    //MidiPitch operator - (MidiPitch pitch) { return MidiPitch(m_pitch - pitch); }
     ///@{
     /// Increment / decrement pitch by an arbitrary number of MIDI steps
     MidiPitch operator -(int i) { return MidiPitch(m_pitch - i); }
     MidiPitch operator +(int i) { return MidiPitch(m_pitch + i); }
+    MidiPitch operator +=(int i) { m_pitch += i; return *this; }
+    MidiPitch operator -=(int i) { m_pitch -= i; return *this; }
     ///@}
 
     /// Operator to cast to an int
@@ -305,6 +306,17 @@ public:
         key signature.    */
     bool is_natural_note_for(EKeySignature nKey);
 
+    ///@{
+    ///Components extraction
+    int octave(EKeySignature nKey);
+    int step(EKeySignature nKey);
+    int accidentals(EKeySignature nKey);
+    void get_components(EKeySignature nKey, int* step, int* octave, int* acc);
+    ///@}
+
+protected:
+    int extract_octave(int step);
+    int extract_accidentals(int step, int octave);
 };
 
 #define C4_MPITCH               MidiPitch(60)
@@ -321,15 +333,15 @@ public:
         interval-invariant, that is, the number obtained by subtracting two pitches
         represents the interval between them. Therefore, this representation is
         specially useful to deal with intervals.
-    - Each octave requires an range of 40 values. So to represent 10 octaves (C0-B9) a
+    - Each octave requires a range of 40 values. So to represent 10 octaves (C0-B9) a
         range of 400 is required. An <i>int</i> is enough.
 
     FPitch representation has shown to be optimal for representing pitch in cases where
     music analysis is an objective, as it greatly simplifies the analysis of intervals
     and chords.
 
-    This representation was taken from Walter B. Hewlett paper "<i>A Base-40 Number-line
-    Representation of Musical Pitch Notation</i>", CCARH Publications, Stanford,
+    This representation was taken from Walter B. Hewlett paper <i>"A Base-40 Number-line
+    Representation of Musical Pitch Notation"</i>, CCARH Publications, Stanford,
     California, 1986.
 */
 class FPitch
@@ -359,7 +371,7 @@ public:
     operator int() { return m_fp; }
 
     ///@{
-    /// Comparison operator
+    /// Comparison operators
     bool operator ==(FPitch fp) { return m_fp == int(fp); }
     bool operator !=(FPitch fp) { return m_fp != int(fp); }
     bool operator < (FPitch fp) { return m_fp < int(fp); }
@@ -396,6 +408,20 @@ public:
     FPitch add_semitone(bool fUseSharps);
     ///@}
 
+    ///@{
+    /// Add/substract an interval
+    FPitch operator -(FIntval intv) { return FPitch(m_fp - int(intv)); }
+    FPitch operator +(FIntval intv) { return FPitch(m_fp + int(intv)); }
+    FPitch operator -=(FIntval intv) {
+        m_fp -= int(intv);
+        return FPitch(m_fp);
+    }
+    FPitch operator +=(FIntval intv) {
+        m_fp += int(intv);
+        return FPitch(m_fp);
+    }
+    ///@}
+
     // Interval between 2 steps
     //extern FPitch FPitchStepsInterval(int nStep1, int nStep2, EKeySignature nKey);
 
@@ -411,6 +437,9 @@ protected:
 #define C4_FPITCH   FPitch(163)
 #define k_undefined_fpitch   FPitch(-1)
 
+
+// UPitch not yet implemented. This is just tentative skeleton code.
+///@cond INTERNALS
 
 //---------------------------------------------------------------------------------------
 // UPitch: Microtonal pitch
@@ -463,6 +492,7 @@ public:
     //string get_ldp_name() const;
     //MidiPitch to_MidiPitch() const;
 };
+///@endcond
 
 } //namespace lomse
 

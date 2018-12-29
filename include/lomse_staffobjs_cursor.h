@@ -97,7 +97,7 @@ public:
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
     inline ColStaffObjsEntry* cur_entry() { return *m_scoreIt; }
-    int staff_index() { return m_staffIndex[num_instrument()] + staff(); }
+    int staff_index() { return staff_index_for(num_instrument(), staff()); }
 
     //access next/prev object without moving cursor position
     inline ColStaffObjsEntry* next_entry() { return m_scoreIt.next(); }
@@ -126,6 +126,9 @@ public:
 
     //helper
     void staff_index_to_instr_staff(int idx, int* iInstr, int* iStaff);
+    inline int staff_index_for(int iInstr, int iStaff) {
+        return m_staffIndex[iInstr] + iStaff;
+    }
 
     //iterators management
     void go_back_to_saved_position();

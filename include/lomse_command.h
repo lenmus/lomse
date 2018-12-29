@@ -36,6 +36,7 @@
 #include "lomse_pitch.h"            //EAccidentals
 #include "lomse_im_attributes.h"
 #include "lomse_selections.h"
+#include "lomse_interval.h"
 
 #include <sstream>
 using namespace std;
@@ -740,7 +741,7 @@ public:
         @param name The displayable name for the command. If not specified will default to "Change accidentals".
 
         <b>Remarks</b>
-        - If the selection is empy or does not contain notes, the command
+        - If the selection is empty or does not contain notes, the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -1903,7 +1904,7 @@ public:
     };
 
     /**
-        This command changes clears the set of selected objects.
+        This command clears the set of selected objects.
         @param cmd The type of action to do on the selection set. Must be CmdSelection::k_clear
         @param name The displayable name for the command. If not specified or empty will be replaced
             by "Selection: clear selection".
@@ -1913,8 +1914,8 @@ public:
             - the selection will be empty.
             - the cursor will not change its position.
 
-        @todo Remove redundant parameter <i>cmd</i> as it always must be <i>k_clear</i>, and
-            rename this command (e.g. CmdClearSelection)
+        As parameter <i>cmd</i> must be always <i>k_clear</i>, a convenience class
+        CmdClearSelection(const string& name="") has been defined.
     */
     CmdSelection(int cmd, const string& name="");
 
@@ -1929,6 +1930,7 @@ public:
             - k_set: "Selection: set selection".
             - k_add: "Selection: add obj. to selection".
             - k_remove: "Selection: remove obj. from selection".
+            - k_clear: "Selection: clear selection"
 
         <b>Remarks</b>
         - After executing the command:
@@ -1966,6 +1968,296 @@ public:
 protected:
     void set_default_name();
     void initialize();
+
+};
+
+////Alias for CmdSelection(k_clear, x) commands
+//#define CmdClearSelection( name )   CmdSelection(ESelectionAction::k_clear, name)
+//#define CmdClearSelection()         CmdSelection(ESelectionAction::k_clear)
+
+
+//---------------------------------------------------------------------------------------
+/** A command for clearing the current set of selected objects.
+
+    See constructor for details.
+*/
+class CmdClearSelection : public CmdSelection
+{
+public:
+    /**
+        This command clears the set of selected objects.
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Selection: clear selection".
+
+        <b>Remarks</b>
+        - After executing the command:
+            - the selection will be empty.
+            - the cursor will not change its position.
+
+        This command is just a convenience class for a CmdSelection command using the
+        parameter <i>k_clear</i>.
+    */
+    CmdClearSelection(const string& name="")
+        : CmdSelection(ESelectionAction::k_clear, name)
+    {
+    }
+    virtual ~CmdClearSelection() {}
+
+};
+
+
+//---------------------------------------------------------------------------------------
+/** Abstract class, base for all transposition commands
+*/
+class CmdTranspose : public DocCmdSimple
+{
+protected:
+    list<ImoId> m_notes;
+    list<ImoId> m_keys;
+
+    CmdTranspose(const string& name="");
+
+public:
+
+    virtual ~CmdTranspose() {};
+
+    int get_cursor_update_policy() { return k_do_nothing; }
+    int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+    ///@cond INTERNALS
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    ///@endcond
+
+protected:
+
+    //methods to be overriden as needed in derived classes
+    virtual void transpose_note(ImoNote* pNote) = 0;
+    virtual void transpose_note_back(ImoNote* pNote) = 0;
+    virtual void transpose_key(ImoKeySignature* UNUSED(pKey)) {};
+    virtual void transpose_key_back(ImoKeySignature* UNUSED(pKey)) {};
+
+    //helper methods
+    void transpose_chromatically(ImoNote* pNote, FIntval interval, bool fUp);
+
+};
+
+
+//---------------------------------------------------------------------------------------
+/** A command for applying a chromatic transposition to the score or to a selection.
+
+    See constructor for details.
+*/
+class CmdTransposeChromatically : public CmdTranspose
+{
+protected:
+    FIntval m_interval;
+    bool m_fUp;
+
+public:
+
+    /**
+        This command shifts chromatically every pitch, up or down, by the interval you
+        specify, adding or subtracting accidentals as necessary to maintain original
+        intervals between notes.
+        The command applies only to the notes in the current selection set.
+
+        This kind of transposition has nothing to do with the key signature which
+        remains unchanged.
+
+        @param interval The interval by which you want the selected music transposed.
+            If the interval is negative, the direction of the transposition will be
+            'down'; otherwise it will be 'up'.
+
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Chromatic transposition".
+
+        <b>Remarks</b>
+        - If the selection is empty or does not contain notes, the command
+            will not be executed and will return a failure code.
+        - After executing the command:
+            - the selection set will be unmodified.
+            - the cursor will not change its position.
+
+        <b>Example</b>
+
+        @code
+        void CommandHandler::transpose(FIntval interval)
+        {
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+	            string name = gettext("Chromatic transposition");
+	            SpInteractor->exec_command(
+                    new CmdTransposeChromatically(interval, name) );
+            }
+        }
+        @endcode
+    */
+    CmdTransposeChromatically(FIntval interval, const string& name="");
+
+    virtual ~CmdTransposeChromatically() {};
+
+protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
+
+};
+
+//---------------------------------------------------------------------------------------
+/** A command for applying a diatonic transposition to the score or to a selection.
+
+    See constructor for details.
+*/
+class CmdTransposeDiatonically : public CmdTranspose
+{
+protected:
+    int m_steps;
+    bool m_fUp;
+
+public:
+
+    /**
+        This command shifts diatonically every pitch, up or down, by the number of steps
+        you specify. Only note steps changed and displayed accidentals are maintained.
+        The command applies only to the notes in the current selection set.
+
+        This kind of transposition has nothing to do with the key signature which
+        remains unchanged.
+
+        @param steps The interval by which you want the selected music transposed.
+        @param fUp  Boolean for choosing the direction of the transposition: value
+            @true means 'up', value @false means 'down'.
+
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Diatonic transposition".
+
+        <b>Remarks</b>
+        - If the selection is empty or does not contain notes, the command
+            will not be executed and will return a failure code.
+        - After executing the command:
+            - the selection set will be unmodified.
+            - the cursor will not change its position.
+
+        <b>Example</b>
+
+        @code
+        void CommandHandler::transpose(int steps, bool fUp=true)
+        {
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+	            string name = gettext("Diatonic transposition");
+	            SpInteractor->exec_command(
+                    new CmdTransposeDiatonically(steps, fUp, name) );
+            }
+        }
+        @endcode
+    */
+    CmdTransposeDiatonically(int steps, bool fUp=true, const string& name="");
+
+    virtual ~CmdTransposeDiatonically() {};
+
+protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
+
+    //helper
+    void transpose(ImoNote* pNote, bool fUp);
+};
+
+//---------------------------------------------------------------------------------------
+/** A command for transposing a selection to a different key signature.
+
+    Transposing a melody to a new key signature is a two steps process: replace the
+    key signature symbol by the new key signature and transpose the affected notes,
+    chromatically, by the interval between the new key and the old key signatures.
+
+    Therefore, for transposing by key there is not necessary to use any special command.
+    The only need is a method to compute the interval between two key signatures. Class
+    KeyUtilities provides three methods for this:
+        KeyUtilities::up_interval()
+        KeyUtilities::down_interval()
+        KeyUtilities::closest_interval()
+
+    Commands CmdTransposeDiatonically and CmdTransposeChromatically, only deals with
+    user selected notes. But a command for transposing to a different key signature must
+    deal with notes and with keys, and how to deal with them is an application
+    behaviour decision that can not be generalized because there are many scenarios to
+    consider:
+    - scores with key changes;
+    - transposing instruments with a different key;
+    - scope of the command: the command must affect to all the score? or only to a
+      selection? (e.g. selected notes, a certain number of measures, other);
+    - what to do when in the scope of the command there is a key signature change?:
+        - apply the same transposition interval to any key signature found in the
+          selection set,
+        - stop transposing,
+        - other;
+    - what to do when not all notes are transposed:
+        - nothing,
+        - insert the old key signature after the last transposed note,
+        - other.
+
+    Because all of these considerations and possible applicacion scenarios, Lomse can
+    not provide a generic key transposition command. Nevertheless, for convenience, the
+    CmdTransposeKey command has been created to be used in simple cases.
+
+    See constructor for details.
+*/
+class CmdTransposeKey : public CmdTranspose
+{
+protected:
+    FIntval m_interval;
+    bool m_fUp;
+
+public:
+
+    /**
+        This command changes all the keys in the selection, and transposes chromatically
+        all the notes in the selection.
+
+        @param interval The interval by which you want the selected music transposed.
+            If the interval is negative, the direction of the transposition will be
+            'down'; otherwise it will be 'up'.
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Transpose key signature".
+
+        <b>Remarks</b>
+        - If the selection does not contain key signatures, only the notes will be
+            transposed.
+        - If the selection only contains key signatures they will be changed but no notes
+            will be transposed.
+        - After executing the command:
+            - the selection set will be unmodified.
+            - the cursor will not change its position.
+
+        <b>Example</b>
+
+        @code
+        void CommandHandler::transpose(FIntval interval)
+        {
+            if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            {
+	            string name = gettext("Transpose key signature");
+	            SpInteractor->exec_command(
+                    new CmdTransposeKey(interval) );
+            }
+        }
+        @endcode
+    */
+    CmdTransposeKey(FIntval interval, const string& name="");
+
+    virtual ~CmdTransposeKey() {};
+
+protected:
+    //mandatory overrides
+    virtual void transpose_note(ImoNote* pNote) override;
+    virtual void transpose_note_back(ImoNote* pNote) override;
+    virtual void transpose_key(ImoKeySignature* pKey) override;
+    virtual void transpose_key_back(ImoKeySignature* pKey) override;
 
 };
 

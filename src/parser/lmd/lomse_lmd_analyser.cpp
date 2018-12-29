@@ -3250,7 +3250,11 @@ protected:
                 pNote->set_notated_pitch(k_step_C, 4, k_no_accidentals);
             }
             else
+            {
                 pNote->set_notated_pitch(step, octave, accidentals);
+                if (accidentals != k_no_accidentals)
+                    pNote->force_to_display_accidentals();
+            }
         }
     }
 

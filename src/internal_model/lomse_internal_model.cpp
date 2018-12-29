@@ -45,6 +45,7 @@
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
 #include "lomse_measures_table.h"
+#include "lomse_score_utilities.h"
 
 
 using namespace std;
@@ -2821,6 +2822,52 @@ int ImoInstrGroup::get_num_instruments()
     return static_cast<int>( m_instruments.size() );
 }
 
+//=======================================================================================
+// ImoKeySignature implementation
+//=======================================================================================
+int ImoKeySignature::get_key_type()
+{
+    return int( KeyUtilities::key_components_to_key_type(m_fifths, EKeyMode(m_keyMode)) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::set_key_type(int type)
+{
+    m_keyMode = KeyUtilities::get_key_mode(EKeySignature(type));
+    m_fifths = KeyUtilities::key_signature_to_num_fifths(EKeySignature(type));
+}
+
+//---------------------------------------------------------------------------------------
+void ImoKeySignature::transpose(const int semitones)
+{
+                       //fifths  -7 -6 -5 -4  -3 -2 -1  0  1  2  3   4  5  6  7
+                       //Key:     C- G- D- A-  E- B- F  C  G  D  A   E  B  F+ C+
+    static int fifthsToIndex[] = {1, 8, 3, 10, 5, 0, 7, 2, 9, 4, 11, 6, 1, 8, 3};
+
+    int index = fifthsToIndex[m_fifths+7];
+    int newIndex = index + semitones;
+    //normalize 0..11
+    while (newIndex < 0)
+        newIndex += 11;
+    while (newIndex > 11)
+        newIndex -= 11;
+
+                       //index    0   1   2   3   4   5   6   7   8   9  10  11
+                       //newKey:  b-  b   c   c+  d   e-  e   f   f+  g  a-  a
+                       //             c-      d-                  g-
+    static int indexToFifths[] = {-2, 5,  0,  7,  2, -3,  4, -1,  6,  1, -4, 3};
+
+    m_fifths = indexToFifths[newIndex];
+    if (semitones < 0)
+    {
+        if (newIndex == 1)      //key can be B or C flat
+            m_fifths = -7;          //use C flat
+        else if (newIndex == 3) //key can be C sharp or D flat
+            m_fifths = -5;          //key D flat
+        else if (newIndex == 8) //key can be F sharp or G flat
+            m_fifths = -6;          //key G flat
+    }
+}
 
 //=======================================================================================
 // ImoLink implementation

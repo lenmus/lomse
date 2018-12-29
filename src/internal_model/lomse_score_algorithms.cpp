@@ -99,6 +99,29 @@ ImoNote* ScoreAlgorithms::find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
 }
 
 //---------------------------------------------------------------------------------------
+ImoKeySignature* ScoreAlgorithms::get_applicable_key(ImoScore* pScore, ImoNote* pNote)
+{
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    ImoKeySignature* pKey = nullptr;
+    ImoInstrument* pInstr = pNote->get_instrument();
+    int iInstr = pScore->get_instr_number_for(pInstr);
+    int iStaff = pNote->get_staff();
+    ColStaffObjsIterator it;
+    for (it=pColStaffObjs->begin(); it != pColStaffObjs->end(); ++it)
+    {
+        if ((*it)->imo_object() == static_cast<ImoObj*>(pNote))
+            break;
+        if ((*it)->num_instrument() == iInstr && (*it)->staff() == iStaff)
+        {
+            ImoObj* pImo = (*it)->imo_object();
+            if (pImo->is_key_signature())
+                pKey = static_cast<ImoKeySignature*>(pImo);
+        }
+    }
+    return pKey;
+}
+
+//---------------------------------------------------------------------------------------
 int ScoreAlgorithms::get_applicable_clef_for(ImoScore* pScore,
                                              int iInstr, int iStaff, TimeUnits time)
 {

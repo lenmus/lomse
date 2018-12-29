@@ -103,9 +103,8 @@ SUITE(ZipInputStreamTest)
         string path = m_scores_path + "10011-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
         ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
-        CHECK( zs != nullptr );
-        CHECK( zs->eof() == false );
-        CHECK( zs->get_num_entries() == 1 );
+        CHECK( zs && zs->eof() == false );
+        CHECK( zs && zs->get_num_entries() == 1 );
         delete file;
     }
 
@@ -128,7 +127,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10012-source-and-image.zip#zip:test-image-1.png";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
         CHECK( info.filename == "test-image-1.png" );
@@ -140,7 +139,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10012-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         CHECK( zs != nullptr );
         CHECK( zs->eof() == false );
         CHECK( zs->get_num_entries() == 2 );
@@ -151,7 +150,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10011-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
 
@@ -176,7 +175,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10012-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
         CHECK( info.filename == "08042-read-png-image.lms" );
@@ -190,7 +189,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10012-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         zs->move_to_entry("test-image-1.png");
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
@@ -380,7 +379,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10014-compressed-flat-lmd.zip#zip:lenmusdoc-example.lmd";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
         CHECK( info.filename == "lenmusdoc-example.lmd" );
@@ -393,7 +392,7 @@ SUITE(ZipInputStreamTest)
     {
         string path = m_scores_path + "10014-compressed-flat-lmd.zip#zip:lenmusdoc-example.lmd";
         InputStream* file = FileSystem::open_input_stream(path);
-        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipInputStream* zs  = static_cast<ZipInputStream*>(file);
         unsigned char* data = zs->get_as_string();
         ////cout << data << endl;
         CHECK( int(strlen( (char*)data )) == zs->get_size() );

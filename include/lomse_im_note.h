@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,7 +63,7 @@ enum ENoteStem
 };
 
 //---------------------------------------------------------------------------------------
-// actaul accidentals are, normally, not specified in LDP. Therefore, note pitch is
+// actual accidentals are, normally, not specified in LDP. Therefore, note pitch is
 // computed from notated accidentals. But for this, it is necessary to know when it
 // is specified and when not.
 #define k_acc_not_computed      10000.0f    //an absurd value
@@ -150,14 +150,23 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+/** ImoNote represents a note in the score.
+**/
 class ImoNote : public ImoNoteRest
 {
 protected:
+    //pitch (step, octave, actual_acc) represents the sound, not what is notated.
     int     m_step;
     int     m_octave;
-    EAccidentals m_notated_acc;
     float   m_actual_acc;           //number of semitones (i.e, -1 for flat). Decimal
                                     //values like 0.5 (quarter tone sharp) are also valid.
+
+    //notated accidentals. Accidentals to display are deduced from key signature and
+    //context, but can be overridden
+    EAccidentals m_notated_acc;
+    int          m_options;
+
+    //stem and ties
     int     m_stemDirection;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
@@ -175,16 +184,28 @@ protected:
 public:
     virtual ~ImoNote();
 
+    //options for notated accidentals
+    enum ENotatedAcc
+    {
+        k_computed      = 0x0001, ///< Flag for detecting the first time notated accidentals are computed
+        k_force         = 0x0002, ///< Force to display accidentals
+        k_also_natural  = 0x0004, ///< When 'forced', this option will also display 'natural' accidentals.
+        k_parenthesis   = 0x0008, ///< Add parentheses to displayed accidentals
+        k_never         = 0x0010, ///< Do not display accidentals
+        k_non_standard  = 0x0020, ///< Use non-standard acc. if necessary
+    };
+
+
     //pitch
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
-    inline EAccidentals get_notated_accidentals() { return m_notated_acc; }
     inline float get_actual_accidentals() { return m_actual_acc; }
     inline bool is_pitch_defined() { return m_step != k_no_pitch; }
-    inline bool accidentals_are_cautionary() { return false; }  //TODO method accidentals_are_cautionary
-    inline void set_step(int step) { m_step = step; }
-    inline void set_octave(int octave) { m_octave = octave; }
-    inline void set_notated_accidentals(EAccidentals accidentals) { m_notated_acc = accidentals; }
+
+    /** Using this method could create inconsistencies between new pitch and notated
+        accidentals unless it is used in conjunction with set_actual_accidentals()
+        or PitchAssigner is later used for computing actual accidentals.
+    */
     inline void set_notated_pitch(int step, int octave, EAccidentals accidentals)
     {
         m_step = step;
@@ -192,15 +213,51 @@ public:
         m_notated_acc = accidentals;
         m_actual_acc = k_acc_not_computed;
     }
-    void set_actual_accidentals(float value) { m_actual_acc = value; }
+
+    /** Using this method could create inconsistencies between new pitch and notated
+        accidentals unless it is used in conjunction with set_notated_accidentals()
+        or PitchAssigner is later used for computing notated accidentals.
+    */
     void set_pitch(FPitch fp) {
         m_step = fp.step();
         m_octave = fp.octave();
-        m_notated_acc = fp.accidentals();
         m_actual_acc = float(fp.num_accidentals());
+        m_notated_acc = k_invalid_accidentals;
+    }
+
+    /** Using this method could create inconsistencies between new pitch and notated
+        accidentals unless it is used in conjunction with set_notated_accidentals()
+        or PitchAssigner is later used for computing notated accidentals.
+    */
+    void set_pitch(int step, int octave, float actualAcc)
+    {
+        m_step = step;
+        m_octave = octave;
+        m_actual_acc = actualAcc;
     }
 
 
+    ///@{
+    /** Methods for doing atomic changes in ImoNote internal variables. They will create
+        inconsistencies unless you know what you are doing.
+        These methods are intended for notes's construction/modification and should not
+        be used by your application unless you understand well what you are doing.
+    */
+    inline void set_step(int step) { m_step = step; }
+    inline void set_octave(int octave) { m_octave = octave; }
+    inline void set_actual_accidentals(float value) { m_actual_acc = value; }
+    inline void set_notated_accidentals(EAccidentals accidentals) { m_notated_acc = accidentals; }
+    inline void request_pitch_recomputation() { m_actual_acc = k_acc_not_computed; }
+    ///@}
+
+    //notated accidentals
+    inline EAccidentals get_notated_accidentals() { return m_notated_acc; }
+    inline void force_to_display_accidentals() { m_options |= k_force; }
+    inline bool is_display_accidentals_forced() { return (m_options & k_force) != 0; }
+    inline void force_to_display_naturals() { m_options |= k_also_natural; }
+    inline bool is_display_naturals_forced() { return (m_options & k_also_natural) != 0; }
+    inline void mark_notated_accidentals_as_computed() { m_options |= k_computed; }
+    inline bool notated_accidentals_never_computed() { return !(m_options & k_computed); }
 
     //ties
     inline ImoTie* get_tie_next() { return m_pTieNext; }

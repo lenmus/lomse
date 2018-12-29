@@ -44,11 +44,11 @@ echo "HTML = ${HTML}"
 # unfortunately not always (in fact, practically never) compatible.
 doxygen_version=`doxygen --version`
 doxygen_version_required=1.8.6
-if [[ $doxygen_version != $doxygen_version_required ]]; then
-    echo -e "${enhanced}Doxygen version $doxygen_version is not supported.${reset}"
-    echo -e "${enhanced}Please use Doxygen $doxygen_version_required or update the doxyfile configuration file.${reset}"
-    exit $E_ERROR
-fi
+#if [[ $doxygen_version != $doxygen_version_required ]]; then
+#    echo -e "${enhanced}Doxygen version $doxygen_version is not supported.${reset}"
+#    echo -e "${enhanced}Please use Doxygen $doxygen_version_required or update the doxyfile configuration file.${reset}"
+#    exit $E_ERROR
+#fi
 
 
 # Now run doxygen and generate the documentation
@@ -66,7 +66,7 @@ rm temp
 
 echo "Done. Generated at file://${HTML}/html/index.html"
 echo "Generation log at ${HTML}/doxygen.log"
-gedit "${HTML}/doxygen.log" &
+xed "${HTML}/doxygen.log" &
 exit $E_SUCCESS
 
 

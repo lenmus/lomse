@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -233,7 +233,7 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
     // Each element of the array refers to one note: 0=Do, 1=Re, 2=Mi, 3=Fa, ... , 6=Si
     // and its value can be one of: 0=no accidental, -1 = a flat, 1 = a sharp
     int nAccidentals[7];
-    get_accidentals_for_key(nKey, nAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, nAccidentals);
 
     //compute note accidentals
     string sAnswer;
@@ -272,7 +272,7 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
 EAccidentals FPitch::notated_accidentals_for(EKeySignature key)
 {
     int accidentals[7];
-    get_accidentals_for_key(key, accidentals);
+    KeyUtilities::get_accidentals_for_key(key, accidentals);
 
     int step = this->step();
     int keyAcc = accidentals[step];
@@ -363,7 +363,7 @@ FPitch FPitch::add_semitone(EKeySignature nKey)
     // signature received: one accidental at maximum, of the same type than the
     // accidentals in the key signature.
 
-    return add_semitone(key_signature_to_num_fifths(nKey) >= 0);
+    return add_semitone(KeyUtilities::key_signature_to_num_fifths(nKey) >= 0);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -450,7 +450,7 @@ FPitch FPitch::add_semitone(bool fUseSharps)
 bool FPitch::is_natural_note_for(EKeySignature nKey)
 {
     int keyAccidentals[7];
-    get_accidentals_for_key(nKey, keyAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, keyAccidentals);
     int noteAcc = num_accidentals();
     return noteAcc == keyAccidentals[step()];
 }
@@ -686,7 +686,7 @@ FPitch DiatonicPitch::to_FPitch(EKeySignature nKey)
     // 2=Mi, 3=Fa, ... , 6=Si and its value can be one of: 0=no accidental,
     // -1 = a flat, 1 = a sharp
     int nAccidentals[7];
-    get_accidentals_for_key(nKey, nAccidentals);
+    KeyUtilities::get_accidentals_for_key(nKey, nAccidentals);
 
     int nStep = step();
     return FPitch(nStep, octave(), nAccidentals[nStep]);
@@ -804,6 +804,203 @@ bool MidiPitch::is_natural_note_for(EKeySignature nKey)
     int nRemainder = m_pitch % 12;      //nRemainder goes from 0 (Do) to 11 (Si)
     return (sScale.substr(nRemainder, 1) == "1");
 
+}
+
+//---------------------------------------------------------------------------------------
+int MidiPitch::step(EKeySignature nKey)
+{
+    int remainder = m_pitch % 12;      //remainder goes from 0 (Do) to 11 (Si)
+    switch (nKey)
+    {
+        case k_key_C:
+        case k_key_a:
+        {
+            //               scale: C D E F G A B   semitones E B
+            //                      T T S T T T S
+            //               C C+ D D+ E  F F+ G G+ A A+ B
+            //
+            int steps[12] = {0,0, 1,1, 2, 3,3, 4,4, 5,5, 6};
+            return steps[remainder];
+        }
+
+        //sharps ---------------------------------------
+        case k_key_G:
+        case k_key_e:
+        {
+            //               scale: G A B C D E F+   semitones B F+
+            //                      T T S T T T S
+            //               C C+ D D+ E E+ F  G G+ A A+ B
+            int steps[12] = {0,0, 1,1, 2,2, 3, 4,4, 5,5, 6};
+            return steps[remainder];
+        }
+        case k_key_D:
+        case k_key_b:
+        {
+            //               scale: D E F+ G A B C+   semitones F+ C+
+            //                      T T S  T T T S
+            //               B+ C+ D D+ E E+ F  G G+ A A+ B
+            int steps[12] = {6, 0, 1,1, 2,2, 3, 4,4, 5,5, 6};
+            return steps[remainder];
+        }
+        case k_key_A:
+        case k_key_fs:
+        {
+            //               scale: A B C+ D E F+ G+   semitones C+, G+
+            //                      T T S  T T T  S
+            //               B+ C+ D D+ E E+ F+ Fx G+ A A+ B
+            int steps[12] = {6, 0, 1,1, 2,2, 3, 3, 4, 5,5, 6};
+            return steps[remainder];
+        }
+        case k_key_E:
+        case k_key_cs:
+        {
+            //               scale: E F+ G+ A B C+ D+   semitones G+, D+
+            //                      T T  S  T T T  S
+            //               B+ C+ Cx D+ E E+ F+ Fx G+ A A+ B
+            int steps[12] = {6, 0, 0, 1, 2,2, 3, 3, 4, 5,5, 6};
+            return steps[remainder];
+        }
+        case k_key_B:
+        case k_key_gs:
+        {
+            //               scale: B C+ D+ E F+ G+ A+   semitones D+ A+
+            //                      T T  S  T T  T  S
+            //               B+ C+ Cx D+ E E+ F+ Fx G+ Gx A+ B
+            int steps[12] = {6, 0, 0, 1, 2,2, 3, 3, 4, 4, 5, 6};
+            return steps[remainder];
+        }
+        case k_key_Fs:
+        case k_key_ds:
+        {
+            //               scale: F+ G+ A+ B C+ D+ E+   semitones A+ E+
+            //                      T  T  S  T T  T  S
+            //               B+ C+ Cx D+ Dx E+ F+ Fx G+ Gx A+ B
+            int steps[12] = {6, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 6};
+            return steps[remainder];
+        }
+        case k_key_Cs:
+        case k_key_as:
+        {
+            //               scale: C+ D+ E+ F+ G+ A+ B+   semitones E+ B+
+            //                      T  T  S  T  T  T  S
+            //               B+ C+ Cx D+ Dx E+ F+ Fx G+ Gx A+ Ax
+            int steps[12] = {6, 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5};
+            return steps[remainder];
+        }
+
+        //flats -------------------------------------------
+        case k_key_F:
+        case k_key_d:
+        {
+            //               scale: F G A B- C D E   semitones A E
+            //                      T T S T  T T S
+            //               C C+ D D+ E  F F+ G G+ A  B- B
+            int steps[12] = {0,0, 1,1, 2, 3,3, 4,4, 5, 6, 6};
+            return steps[remainder];
+        }
+        case k_key_Bf:
+        case k_key_g:
+        {
+            //               scale: B- C D E- F G A  semitones D A
+            //                      T  T S T  T T S
+            //               C C+ D  E- E  F F+ G G+ A  B- B
+            int steps[12] = {0,0, 1, 2, 2, 3,3, 4,4, 5, 6, 6};
+            return steps[remainder];
+        }
+        case k_key_Ef:
+        case k_key_c:
+        {
+            //               scale: E- F G A- B- C D  semitones G D
+            //                      T  T S T  T  T S
+            //               C C+ D  E- E  F F+  G  A- A  B- B
+            int steps[12] = {0,0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6};
+            return steps[remainder];
+        }
+        case k_key_Af:
+        case k_key_f:
+        {
+            //               scale: A- B- C  D- E- F G  semitones C G
+            //                      T  T  S  T  T  T S
+            //               C  D- D  E- E  F F+ G  A- A  B- B
+            int steps[12] = {0, 1, 1, 2, 2, 3,3, 4, 5, 5, 6, 6};
+            return steps[remainder];
+        }
+        case k_key_Df:
+        case k_key_bf:
+        {
+            //               scale: D- E- F G- A- B- C   semitones F C
+            //                      T  T  S T  T  T  S
+            //               C  D- D  E- E  F  G- G  A- A  B- B
+            int steps[12] = {0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6};
+            return steps[remainder];
+        }
+        case k_key_Gf:
+        case k_key_ef:
+        {
+            //               scale: G- A- B- C- D- E- F   semitones B- F
+            //                      T  T  S  T  T  T  S
+            //               C  D- D  E- E  F  G- G  A- A  B- C-
+            int steps[12] = {0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 0};
+            return steps[remainder];
+        }
+        case k_key_Cf:
+        case k_key_af:
+        {
+            //               scale: C- D- E- F- G- A- B-   semitones E- B-
+            //                      T  T  S  T  T  T  S
+            //               C  D- D  E- F- F  G- G  A- A  B- C-
+            int steps[12] = {0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6, 0};
+            return steps[remainder];
+        }
+
+        default:
+        {
+            LOMSE_LOG_ERROR("Invalid key signature %d. C major assumed.", nKey);
+            int steps[12] = {0,0,1,1,2,3,3,4,4,5,5,6};
+            return steps[remainder];
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int MidiPitch::octave(EKeySignature nKey)
+{
+    int step = this->step(nKey);
+    return extract_octave(step);
+}
+
+//---------------------------------------------------------------------------------------
+int MidiPitch::accidentals(EKeySignature nKey)
+{
+    int step = this->step(nKey);
+    int octave = extract_octave(step);
+    return extract_accidentals(step, octave);
+}
+
+//---------------------------------------------------------------------------------------
+void MidiPitch::get_components(EKeySignature nKey, int* step, int* octave, int* acc)
+{
+    *step = this->step(nKey);
+    *octave = extract_octave(*step);
+    *acc = extract_accidentals(*step, *octave);
+}
+
+//---------------------------------------------------------------------------------------
+int MidiPitch::extract_octave(int step)
+{
+    int remainder = m_pitch % 12;      //remainder goes from 0 (Do) to 11 (Si)
+    int octave = (m_pitch - 12) / 12;
+    if (step == k_step_B && remainder == 0)
+        return octave - 1;
+    if (step == k_step_C && remainder == 11)
+        return octave + 1;
+    return octave;
+}
+
+//---------------------------------------------------------------------------------------
+int MidiPitch::extract_accidentals(int step, int octave)
+{
+    return m_pitch - int( MidiPitch(step, octave));
 }
 
 

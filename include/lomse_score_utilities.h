@@ -74,34 +74,68 @@ class ImoTimeSignature;
 
 //---------------------------------------------------------------------------------------
 // Key signature related functions
+class KeyUtilities
+{
+public:
+    /** This function fills the array nAccidentals with the accidentals implied by
+        the key signature. Each element of the array refers to one note: 0=Do, 1=Re,
+        2=Mi, 3=Fa, ... , 6=Si, and its value can be one of:
+         0  = no accidental
+        -1  = a flat
+         1  = a sharp
+    */
+    static void get_accidentals_for_key(int keyType, int nAccidentals[]);
 
     //-----------------------------------------------------------------------------------
-    // This function fills the array nAccidentals with the accidentals implied by
-    // the key signature. Each element of the array refers to one note: 0=Do, 1=Re,
-    // 2=Mi, 3=Fa, ... , 6=Si, and its value can be one of:
-    //     0  = no accidental
-    //    -1  = a flat
-    //     1  = a sharp
-    extern void get_accidentals_for_key(int keyType, int nAccidentals[]);
-
-    //-----------------------------------------------------------------------------------
-    extern int key_signature_to_num_fifths(int keyType);
+    static int key_signature_to_num_fifths(int keyType);
 
     //-----------------------------------------------------------------------------------
     //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
     //the Key signature. For example, if keyType is A sharp minor it returns 5 (step A)
-    int get_step_for_root_note(EKeySignature keyType);
+    static int get_step_for_root_note(EKeySignature keyType);
 
     //-----------------------------------------------------------------------------------
     //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the leading note in
     //the Key signature. For example, if keyType is A sharp minor it returns 4 (step G)
-    int get_step_for_leading_note(EKeySignature keyType);
+    static int get_step_for_leading_note(EKeySignature keyType);
 
     //-----------------------------------------------------------------------------------
-    extern bool is_major_key(EKeySignature keyType);
-    extern bool is_minor_key(EKeySignature keyType);
-    extern EKeySignature get_relative_minor_key(EKeySignature majorKey);
-    extern EKeySignature get_relative_major_key(EKeySignature minorKey);
+    static bool is_major_key(EKeySignature keyType);
+    static bool is_minor_key(EKeySignature keyType);
+    static EKeySignature get_relative_minor_key(EKeySignature majorKey);
+    static EKeySignature get_relative_major_key(EKeySignature minorKey);
+
+    //-----------------------------------------------------------------------------------
+    static EKeySignature key_components_to_key_type(int fifths, EKeyMode mode);
+    static EKeyMode get_key_mode(EKeySignature type);
+
+    //-----------------------------------------------------------------------------------
+    static EKeySignature transpose(EKeySignature oldKey, FIntval interval, bool fUp);
+
+    /** Return the pitch for the root note in the tonality implied by the provided
+        key signature. The octave is arbitrarily set to octave 4.
+    */
+    static FPitch get_root_pitch(EKeySignature key);
+
+    //-----------------------------------------------------------------------------------
+    static EKeySignature key_type_for_root_pitch(FPitch fp, bool fMajor);
+
+    /** Returns the interval for transposing up from <i>oldKey</i> to <i>newKey</i>.
+        Be aware that interval is always ascending.
+    */
+    static FIntval up_interval(EKeySignature oldKey, EKeySignature newKey);
+
+    /** Returns the interval for transposing down from <i>oldKey</i> to <i>newKey</i>.
+        Be aware that interval is always descending (negative).
+    */
+    static FIntval down_interval(EKeySignature oldKey, EKeySignature newKey);
+
+    /** Returns the shortest interval for transposing from <i>oldKey</i> to <i>newKey</i>.
+        Be aware that interval can be ascending (positive) or descending (negative).
+    */
+    static FIntval closest_interval(EKeySignature oldKey, EKeySignature newKey);
+
+};
 
 
 //---------------------------------------------------------------------------------------

@@ -106,13 +106,16 @@ SUITE(ScoreIteratorTest)
         CHECK( (*it)->is_score() == true );
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
         CHECK( pScore != nullptr );
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        CHECK( pTable->num_entries() == 2 );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            CHECK( pTable->num_entries() == 2 );
 
-        StaffObjsIterator sit(pTable);
+            StaffObjsIterator sit(pTable);
 
-        CHECK( sit.is_first() == true );
-        CHECK( sit.is_end() == false );
+            CHECK( sit.is_first() == true );
+            CHECK( sit.is_end() == false );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, ScoreIteratorNext)
@@ -123,19 +126,23 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
 
-        ++sit;
+            ++sit;
 
-        CHECK( (*sit)->imo_object()->is_rest() == true );
-        CHECK( (*sit)->line() == 0 );
-        CHECK( (*sit)->measure() == 0 );
-        CHECK( (*sit)->time() == 64.0f );
-        CHECK( (*sit)->num_instrument() == 0 );
-        CHECK( (*sit)->staff() == 0 );
-        CHECK( sit.is_first() == false );
-        CHECK( sit.is_end() == false );
+            CHECK( (*sit)->imo_object()->is_rest() == true );
+            CHECK( (*sit)->line() == 0 );
+            CHECK( (*sit)->measure() == 0 );
+            CHECK( (*sit)->time() == 64.0f );
+            CHECK( (*sit)->num_instrument() == 0 );
+            CHECK( (*sit)->staff() == 0 );
+            CHECK( sit.is_first() == false );
+            CHECK( sit.is_end() == false );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, ScoreIteratorEndOfTable)
@@ -146,14 +153,18 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
 
-        ++sit;
-        ++sit;
+            ++sit;
+            ++sit;
 
-        CHECK( sit.is_first() == false );
-        CHECK( sit.is_end() == true );
+            CHECK( sit.is_first() == false );
+            CHECK( sit.is_end() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, ScoreIteratorPrev)
@@ -164,14 +175,18 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
 
-        ++sit;
-        --sit;
+            ++sit;
+            --sit;
 
-        CHECK( (*sit)->imo_object()->is_note() == true );
-        CHECK( sit.is_first() == true );
+            CHECK( (*sit)->imo_object()->is_note() == true );
+            CHECK( sit.is_first() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_0)
@@ -183,12 +198,16 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
 
-        CHECK( sit.prev() == nullptr );
-        CHECK( (*sit)->imo_object()->is_note() == true );
-        CHECK( sit.is_first() == true );
+            CHECK( sit.prev() == nullptr );
+            CHECK( (*sit)->imo_object()->is_note() == true );
+            CHECK( sit.is_first() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_1)
@@ -200,14 +219,18 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ColStaffObjsEntry* pEntry = *sit;
-        ++sit;
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ColStaffObjsEntry* pEntry = *sit;
+            ++sit;
 
-        CHECK( sit.prev() == pEntry );
-        CHECK( (*sit)->imo_object()->is_rest() == true );
-        CHECK( sit.is_first() == false );
+            CHECK( sit.prev() == pEntry );
+            CHECK( (*sit)->imo_object()->is_rest() == true );
+            CHECK( sit.is_first() == false );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_2)
@@ -219,14 +242,18 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ++sit;
-        ColStaffObjsEntry* pEntry = *sit;
-        ++sit;
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ++sit;
+            ColStaffObjsEntry* pEntry = *sit;
+            ++sit;
 
-        CHECK( sit.prev() == pEntry );
-        CHECK( sit.is_end() == true );
+            CHECK( sit.prev() == pEntry );
+            CHECK( sit.is_end() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_0)
@@ -238,13 +265,17 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ++sit;
-        ++sit;
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ++sit;
+            ++sit;
 
-        CHECK( sit.next() == nullptr );
-        CHECK( sit.is_end() == true );
+            CHECK( sit.next() == nullptr );
+            CHECK( sit.is_end() == true );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_1)
@@ -256,14 +287,18 @@ SUITE(ScoreIteratorTest)
         DocIterator it(&doc);
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
-        ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        StaffObjsIterator sit(pTable);
-        ColStaffObjsEntry* pEntry = sit.next();
-        ++sit;
+        CHECK( pScore != nullptr );
+        if (pScore)
+        {
+            ColStaffObjs* pTable = pScore->get_staffobjs_table();
+            StaffObjsIterator sit(pTable);
+            ColStaffObjsEntry* pEntry = sit.next();
+            ++sit;
 
-        CHECK( *sit == pEntry );
-        CHECK( (*sit)->imo_object()->is_rest() == true );
-        CHECK( sit.is_first() == false );
+            CHECK( *sit == pEntry );
+            CHECK( (*sit)->imo_object()->is_rest() == true );
+            CHECK( sit.is_first() == false );
+        }
     }
 
     TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_2)
