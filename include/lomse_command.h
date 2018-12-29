@@ -1914,7 +1914,7 @@ public:
             - the selection will be empty.
             - the cursor will not change its position.
 
-        As parameter <i>cmd</i> must be always <i>k_clear</i>, a convenience macro
+        As parameter <i>cmd</i> must be always <i>k_clear</i>, a convenience class
         CmdClearSelection(const string& name="") has been defined.
     */
     CmdSelection(int cmd, const string& name="");
@@ -1930,6 +1930,7 @@ public:
             - k_set: "Selection: set selection".
             - k_add: "Selection: add obj. to selection".
             - k_remove: "Selection: remove obj. from selection".
+            - k_clear: "Selection: clear selection"
 
         <b>Remarks</b>
         - After executing the command:
@@ -1983,6 +1984,19 @@ protected:
 class CmdClearSelection : public CmdSelection
 {
 public:
+    /**
+        This command clears the set of selected objects.
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Selection: clear selection".
+
+        <b>Remarks</b>
+        - After executing the command:
+            - the selection will be empty.
+            - the cursor will not change its position.
+
+        This command is just a convenience class for a CmdSelection command using the
+        parameter <i>k_clear</i>.
+    */
     CmdClearSelection(const string& name="")
         : CmdSelection(ESelectionAction::k_clear, name)
     {
@@ -2001,9 +2015,9 @@ protected:
     list<ImoId> m_notes;
     list<ImoId> m_keys;
 
-public:
-
     CmdTranspose(const string& name="");
+
+public:
 
     virtual ~CmdTranspose() {};
 
@@ -2174,6 +2188,8 @@ public:
         @param interval The interval by which you want the selected music transposed.
             If the interval is negative, the direction of the transposition will be
             'down'; otherwise it will be 'up'.
+        @param name The displayable name for the command. If not specified or empty
+            will be replaced by "Transpose key signature".
 
         <b>Remarks</b>
         - If the selection does not contain key signatures, only the notes will be

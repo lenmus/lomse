@@ -61,10 +61,8 @@ enum EIntervalType
 };
 
 //---------------------------------------------------------------------------------------
-/** Class %FIntval represents an interval.
-
-    Intervals are defined using the properties of FPitch representation: an
-    interval is just the difference between the two FPitches.
+/** Class %FIntval represents an interval. Intervals are defined using the properties
+    of FPitch representation: An interval is just the difference between the two FPitches.
 
     Intervals can be added and substracted. For example, a perfect fifth minus a major
     third is a minor third (p5-M3 = m3)
@@ -135,8 +133,7 @@ public:
 
     /** Constructor for building an interval from its code. See get_code().
 
-        @important
-        - This constructor is only valid for intervals up to one octave. The maximum
+        @warning This constructor is only valid for intervals up to one octave. The maximum
           allowed is "da8" (double augmented octave).
 
         Examples:
@@ -144,7 +141,7 @@ public:
         @code
         FInval("m3");                   //a third minor, ascending
         FInval("a6");                   //an augmented sixth, ascending
-        FIntval"m7", k_descending);     //a minor seventh, descending
+        FIntval("m7", k_descending);     //a minor seventh, descending
         @endcode
     */
     FIntval(const string& code, bool fDescending=false);
@@ -152,7 +149,7 @@ public:
     /** Contructor for building an interval from an integer representing the
         interval value.
 
-        @important The interval value is not the interval number but an internal code
+        @warning The interval value is not the interval number but an internal code
             that is returned when casting an FIntval object to an int.
     */
     FIntval(int value) : m_interval(value) {}

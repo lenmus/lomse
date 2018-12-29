@@ -121,6 +121,10 @@ This section presents a list of available commands (but more commands need to be
 - CmdInsertManyStaffObjs() - Insert a group of consecutive staff objects (e.g. note, rest, clef, barline, etc.).
 - CmdInsertStaffObj() - Insert one staff object (e.g. a note, rest, clef, barline, etc.)  at current cursor position.
 - CmdJoinBeam() - Create and join beams, and add notes to a beam, depending on current selection.
+- CmdTransposeChromatically() - Shift chromatically every pitch, up or down, by the interval you specify.
+- CmdTransposeDiatonically() - Shift diatonically every pitch, up or down, by the number of steps you specify.
+- CmdTransposeKey() - Changes all the keys in the selection, and transposes chromatically
+        			  all the notes in the selection.
 
 <b>Selection commands:</b>
 

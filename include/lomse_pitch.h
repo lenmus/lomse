@@ -340,8 +340,8 @@ protected:
     music analysis is an objective, as it greatly simplifies the analysis of intervals
     and chords.
 
-    This representation was taken from Walter B. Hewlett paper "<i>A Base-40 Number-line
-    Representation of Musical Pitch Notation</i>", CCARH Publications, Stanford,
+    This representation was taken from Walter B. Hewlett paper <i>"A Base-40 Number-line
+    Representation of Musical Pitch Notation"</i>, CCARH Publications, Stanford,
     California, 1986.
 */
 class FPitch
