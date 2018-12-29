@@ -43,7 +43,7 @@ build_script:
   # Compile Lomse
   - mkdir build
   - cd build
-  - cmake -DLOMSE_ENABLE_COMPRESSION=OFF -DLOMSE_ENABLE_PNG=OFF  -DFREETYPE_INCLUDE_DIRS=C:\projects\ExternalLibraries\freetype\include -DFREETYPE_LIBRARY=C:\projects\ExternalLibraries\freetype\win32\freetype.lib -DUNITTEST++_INCLUDE_DIR=C:\projects\ExternalLibraries\unittest-cpp-2.0.0\UnitTest++ -DUNITTEST++_LIBRARY=C:\projects\ExternalLibraries\unittest-cpp-2.0.0\Debug\UnitTest++.lib ../lomse
+  - cmake -DLOMSE_ENABLE_COMPRESSION=OFF -DLOMSE_ENABLE_PNG=OFF  -DFREETYPE_INCLUDE_DIRS=C:\projects\ExternalLibraries\freetype\include -DFREETYPE_LIBRARIES=C:\projects\ExternalLibraries\freetype\win32\freetype.lib -DUNITTEST++_INCLUDE_DIR=C:\projects\ExternalLibraries\unittest-cpp-2.0.0\UnitTest++ -DUNITTEST++_LIBRARY=C:\projects\ExternalLibraries\unittest-cpp-2.0.0\Debug\UnitTest++.lib ../lomse
   - cmake --build .
   - copy ..\ExternalLibraries\freetype\win32\freetype.dll .\bin\Debug
 
