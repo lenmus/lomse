@@ -169,8 +169,8 @@ TaskOnlyClicks::TaskOnlyClicks(Interactor* pIntor)
     : Task(TaskFactory::k_task_only_clicks, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
-    , m_xStart(0.0f)
-    , m_yStart(0.0f)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 
@@ -249,8 +249,8 @@ TaskSelection::TaskSelection(Interactor* pIntor)
     : Task(TaskFactory::k_task_selection, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
-    , m_xStart(0.0f)
-    , m_yStart(0.0f)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 
@@ -347,8 +347,8 @@ TaskSelectionRectangle::TaskSelectionRectangle(Interactor* pIntor)
     : Task(TaskFactory::k_task_selection_rectangle, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
-    , m_xStart(0.0f)
-    , m_yStart(0.0f)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 
@@ -435,8 +435,8 @@ TaskMoveObject::TaskMoveObject(Interactor* pIntor)
     : Task(TaskFactory::k_task_move_object, pIntor)
     , m_state(k_start)
     , m_pGView(pIntor)
-    , m_xStart(0.0f)
-    , m_yStart(0.0f)
+    , m_xStart(0)
+    , m_yStart(0)
 {
 }
 
