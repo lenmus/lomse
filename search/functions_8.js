@@ -2,7 +2,9 @@ var searchData=
 [
   ['init_5flibrary',['init_library',['../classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f',1,'LomseDoorway']]],
   ['insert_5fblock_5flevel_5fobj',['insert_block_level_obj',['../classDocument.html#a2d917f0c4bd82ff944a27f0d858e8d45',1,'Document']]],
+  ['is_5fascending',['is_ascending',['../classFIntval.html#aee43cd4b0f3860aaa1cd53a386353229',1,'FIntval']]],
   ['is_5fcomposite',['is_composite',['../classDocCommand.html#ab5d4341275844b9a597064effc09442b',1,'DocCommand::is_composite()'],['../classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd',1,'DocCmdSimple::is_composite()'],['../classDocCmdComposite.html#a3a91a0c793395377a4ec95e9d3273ba4',1,'DocCmdComposite::is_composite()']]],
+  ['is_5fdescending',['is_descending',['../classFIntval.html#ac58cb6b9e44e7347369dfa6134f325c6',1,'FIntval']]],
   ['is_5fdirty',['is_dirty',['../classDocument.html#a89876730919eaea7a497fcfda63e83ec',1,'Document']]],
   ['is_5fdocument_5feditable',['is_document_editable',['../classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b',1,'Interactor']]],
   ['is_5feditable',['is_editable',['../classDocument.html#af6fa50c1bc66a6cc0516af29fbece700',1,'Document']]],

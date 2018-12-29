@@ -8,6 +8,7 @@ var searchData=
   ['cmdchangeaccidentals',['CmdChangeAccidentals',['../classCmdChangeAccidentals.html',1,'']]],
   ['cmdchangeattribute',['CmdChangeAttribute',['../classCmdChangeAttribute.html',1,'']]],
   ['cmdchangedots',['CmdChangeDots',['../classCmdChangeDots.html',1,'']]],
+  ['cmdclearselection',['CmdClearSelection',['../classCmdClearSelection.html',1,'']]],
   ['cmdcursor',['CmdCursor',['../classCmdCursor.html',1,'']]],
   ['cmddelete',['CmdDelete',['../classCmdDelete.html',1,'']]],
   ['cmddeleteblocklevelobj',['CmdDeleteBlockLevelObj',['../classCmdDeleteBlockLevelObj.html',1,'']]],
@@ -20,5 +21,9 @@ var searchData=
   ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html',1,'']]],
   ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'']]],
   ['cmdmoveobjectpoint',['CmdMoveObjectPoint',['../classCmdMoveObjectPoint.html',1,'']]],
-  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]]
+  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]],
+  ['cmdtranspose',['CmdTranspose',['../classCmdTranspose.html',1,'']]],
+  ['cmdtransposechromatically',['CmdTransposeChromatically',['../classCmdTransposeChromatically.html',1,'']]],
+  ['cmdtransposediatonically',['CmdTransposeDiatonically',['../classCmdTransposeDiatonically.html',1,'']]],
+  ['cmdtransposekey',['CmdTransposeKey',['../classCmdTransposeKey.html',1,'']]]
 ];

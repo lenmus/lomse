@@ -29,7 +29,14 @@ var hierarchy =
         ] ],
         [ "CmdJoinBeam", "classCmdJoinBeam.html", null ],
         [ "CmdMoveObjectPoint", "classCmdMoveObjectPoint.html", null ],
-        [ "CmdSelection", "classCmdSelection.html", null ]
+        [ "CmdSelection", "classCmdSelection.html", [
+          [ "CmdClearSelection", "classCmdClearSelection.html", null ]
+        ] ],
+        [ "CmdTranspose", "classCmdTranspose.html", [
+          [ "CmdTransposeChromatically", "classCmdTransposeChromatically.html", null ],
+          [ "CmdTransposeDiatonically", "classCmdTransposeDiatonically.html", null ],
+          [ "CmdTransposeKey", "classCmdTransposeKey.html", null ]
+        ] ]
       ] ]
     ] ],
     [ "DocCommandExecuter", "classDocCommandExecuter.html", null ],
@@ -59,6 +66,7 @@ var hierarchy =
       [ "Document", "classDocument.html", null ],
       [ "Interactor", "classInteractor.html", null ]
     ] ],
+    [ "FIntval", "classFIntval.html", null ],
     [ "FPitch", "classFPitch.html", null ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
     [ "MidiPitch", "classMidiPitch.html", null ],
@@ -78,7 +86,6 @@ var hierarchy =
     ] ],
     [ "ScorePlayer", "classScorePlayer.html", null ],
     [ "UndoElement", "classUndoElement.html", null ],
-    [ "UPitch", "classUPitch.html", null ],
     [ "View", null, [
       [ "GraphicView", "classGraphicView.html", [
         [ "HorizontalBookView", "classHorizontalBookView.html", null ],

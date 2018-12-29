@@ -19,6 +19,10 @@ var searchData=
   ['eimoattribute',['EImoAttribute',['../group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029',1,'lomse_im_attributes.h']]],
   ['eimoobjtype',['EImoObjType',['../group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f',1,'lomse_internal_model.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
+  ['eintervaltype',['EIntervalType',['../group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4',1,'lomse_interval.h']]],
+  ['ejustifylastsystemopts',['EJustifyLastSystemOpts',['../group__enumerations.html#gacd2c86d4cb42425fe100cf900fe1fa1c',1,'lomse_internal_model.h']]],
+  ['ekeyfifths',['EKeyFifths',['../group__enumerations.html#gaa89f79f04de6649710664ae10a64490a',1,'lomse_internal_model.h']]],
+  ['ekeymode',['EKeyMode',['../group__enumerations.html#ga739bfda953d140bdb2b94ed052a266bc',1,'lomse_internal_model.h']]],
   ['ekeysignature',['EKeySignature',['../group__enumerations.html#ga6fcf17d0c9110b9471e695a30cf81959',1,'lomse_internal_model.h']]],
   ['elineshape',['ELineShape',['../group__enumerations.html#ga330f908c8714832e484a019624e7ccc9',1,'lomse_internal_model.h']]],
   ['elinetype',['ELineType',['../group__enumerations.html#ga3408dff8976b942845051c1a08287e30',1,'lomse_internal_model.h']]],
@@ -31,6 +35,7 @@ var searchData=
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
   ['eplacement',['EPlacement',['../group__enumerations.html#ga314c59562f7d4c993a0e5330fa59df50',1,'lomse_internal_model.h']]],
   ['erenderoptions',['ERenderOptions',['../group__enumerations.html#ga1903a90921a42ab8abc8857c21f08c15',1,'lomse_drawer.h']]],
+  ['erenderspacingopts',['ERenderSpacingOpts',['../group__enumerations.html#ga0a3a333681a099f4d078b4a67b9ca556',1,'lomse_internal_model.h']]],
   ['erepeatmark',['ERepeatMark',['../group__enumerations.html#gacac9195eea9eb03fe42f193136d4d729',1,'lomse_internal_model.h']]],
   ['erequesttype',['ERequestType',['../group__enumerations.html#ga0dc84b6205af6b43ac7867cd9779dfcc',1,'lomse_events.h']]],
   ['eselectionaction',['ESelectionAction',['../classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec',1,'CmdSelection']]],
@@ -38,6 +43,7 @@ var searchData=
   ['etechnical',['ETechnical',['../group__enumerations.html#ga603173cd8f31b8852b951f52043d114a',1,'lomse_internal_model.h']]],
   ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
   ['etrackingevent',['ETrackingEvent',['../classEventVisualTracking.html#a62388a1f4bdf67d6146471807251f721',1,'EventVisualTracking']]],
+  ['etruncatestafflinesopts',['ETruncateStaffLinesOpts',['../group__enumerations.html#gab47a5104f35d3198e53c7d41865e40a3',1,'lomse_internal_model.h']]],
   ['eviewtype',['EViewType',['../group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea',1,'lomse_graphic_view.h']]],
   ['evisualtrackingmode',['EVisualTrackingMode',['../group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9',1,'lomse_interactor.h']]]
 ];

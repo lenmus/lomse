@@ -50,6 +50,7 @@ var group__enumerations =
       [ "k_barline_start_repetition", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98aecce70b7009558faacbe055d0aa54bba", null ],
       [ "k_barline_end_repetition", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98abc885c476200e1443177fbb924215b78", null ],
       [ "k_barline_double_repetition", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98ac2ffd054cc652ff48b690f05af0a3239", null ],
+      [ "k_barline_double_repetition_alt", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98ad077d8d3661b9815993bec28f652d3b2", null ],
       [ "k_max_barline", "group__enumerations.html#ggac2b9227b141b8d8aff14a30886e81b98a9fef0aa6901437147bf06ccc14cf2568", null ]
     ] ],
     [ "EBarlineWings", "group__enumerations.html#ga76688a92a7723eab3a493292d3f81e54", [
@@ -151,16 +152,15 @@ var group__enumerations =
       [ "k_imo_figured_bass", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651faf148d4ddf6ab8845c110c15a3f68d1ae", null ],
       [ "k_imo_go_back_fwd", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa5a3a24134a73190630a6a798addad0eb", null ],
       [ "k_imo_key_signature", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa93e8e80e2b2d0dfb37acbc08ac930fd0", null ],
-      [ "k_imo_metronome_mark", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa16419da5fcdcbd3883d09df63526d0f9", null ],
       [ "k_imo_note", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa26b91ca57f2fa0d8a5055e49eaed9bcc", null ],
       [ "k_imo_rest", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fad29ade5c596af53da787a38030b64502", null ],
       [ "k_imo_sound_change", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa7120bfd880efbb890bcbf84feeffa72b", null ],
-      [ "k_imo_spacer", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa3429b7722d762ddc0d49a5d1e96bee4a", null ],
       [ "k_imo_system_break", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa4c4a4a4a62e050fe5c7f3cf3384519e7", null ],
       [ "k_imo_time_signature", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa5a936dffbfa47a70e4cb0fb869102167", null ],
       [ "k_imo_auxobj", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa4329b4c9d0c8a78ac0c97bf95735cbdb", null ],
       [ "k_imo_dynamics_mark", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa3c4c3b145f871b79440aaabd0c461c0c", null ],
       [ "k_imo_fermata", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa210e69d6fd359df89c1d11d7a1995692", null ],
+      [ "k_imo_metronome_mark", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa16419da5fcdcbd3883d09df63526d0f9", null ],
       [ "k_imo_ornament", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fafa8b4507ed16881bbb2eec5f7ee7dd2a", null ],
       [ "k_imo_symbol_repetition_mark", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa29c87323c5063fdc4ccbae0f6749e786", null ],
       [ "k_imo_technical", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fafd3dcc94ca174e1f536d069bb63e0d93", null ],
@@ -187,6 +187,39 @@ var group__enumerations =
       [ "k_imo_button", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651faddfa0df4a420836d614e65435a2ac303", null ],
       [ "k_imo_link", "group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa91dd5a185dd159aefc1ec2d13ba8c5d1", null ]
     ] ],
+    [ "EIntervalType", "group__enumerations.html#gae068fb94856ef833f5f757db5fe079b4", [
+      [ "k_double_diminished", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4a4404efe7f24ce16a48d11478d65d6ff3", null ],
+      [ "k_diminished", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4a9b50085298f841f4acd7ec6f181d4806", null ],
+      [ "k_minor", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4acadf1451c6b61a87816ecb80bdd4630e", null ],
+      [ "k_major", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4a1ee5accc052577a0a9ad69cd700fd81f", null ],
+      [ "k_perfect", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4ae4ba99816273d5a3f48014d410e6edd5", null ],
+      [ "k_augmented", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4a4e14d149681a8aa1799c928d7a53a123", null ],
+      [ "k_double_augmented", "group__enumerations.html#ggae068fb94856ef833f5f757db5fe079b4a8479094dc91c2088993c4c86320f0576", null ]
+    ] ],
+    [ "EJustifyLastSystemOpts", "group__enumerations.html#gacd2c86d4cb42425fe100cf900fe1fa1c", [
+      [ "k_justify_never", "group__enumerations.html#ggacd2c86d4cb42425fe100cf900fe1fa1caf84637fbda3c1d9dc2f5380dbb2bd869", null ],
+      [ "k_justify_barline_final", "group__enumerations.html#ggacd2c86d4cb42425fe100cf900fe1fa1ca7dda64e1ca445d6c9612e292caf91dcc", null ],
+      [ "k_justify_barline_any", "group__enumerations.html#ggacd2c86d4cb42425fe100cf900fe1fa1ca79ecddcdf4acba59ac98e327b2cd705f", null ],
+      [ "k_justify_always", "group__enumerations.html#ggacd2c86d4cb42425fe100cf900fe1fa1ca7d5bab2d0304f7791d5b69edbfa1ad58", null ]
+    ] ],
+    [ "EKeyFifths", "group__enumerations.html#gaa89f79f04de6649710664ae10a64490a", [
+      [ "k_fifths_Cf", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aae65c815dc7b0d08b0846cda3b2ce792d", null ],
+      [ "k_fifths_Gf", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3b29ceb2d41cd6a0bfd05e8595f83a93", null ],
+      [ "k_fifths_Df", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa2b11b727b4c46ec5ca41cec8a2f25176", null ],
+      [ "k_fifths_Af", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3c2b358067e3a2d23c440ea39ffa5d74", null ],
+      [ "k_fifths_Ef", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa70b8aa9c339fb77d08a8c0a1b929eee2", null ],
+      [ "k_fifths_Bf", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa1de4ed49a7250de7b111287e7ef1bb73", null ],
+      [ "k_fifths_F", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa0e39681197b7cc4f14127708375434a0", null ],
+      [ "k_fifths_C", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aad77846f5bc33c556b9bdbf858a2d142f", null ],
+      [ "k_fifths_G", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aaca6c5bb4f23a37ce58000b708b3155f8", null ],
+      [ "k_fifths_D", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa0ccff809b508d6f14d846376655dd279", null ],
+      [ "k_fifths_A", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa7692d6c0c5502fea5644ddf6fc1036f5", null ],
+      [ "k_fifths_E", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aae9ecb6e239e566446b742e2b73830b68", null ],
+      [ "k_fifths_B", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa15743030c45a293606f98b7ae43fcd71", null ],
+      [ "k_fifths_Fs", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3f6d0b56aca470a3b9dbe896d7c0c7af", null ],
+      [ "k_fifths_Cs", "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa380201efaf4657c1772782c1e402a70a", null ]
+    ] ],
+    [ "EKeyMode", "group__enumerations.html#ga739bfda953d140bdb2b94ed052a266bc", null ],
     [ "EKeySignature", "group__enumerations.html#ga6fcf17d0c9110b9471e695a30cf81959", [
       [ "k_key_undefined", "group__enumerations.html#gga6fcf17d0c9110b9471e695a30cf81959a449176772279127c29cebe5bc4e6d8a1", null ],
       [ "k_key_C", "group__enumerations.html#gga6fcf17d0c9110b9471e695a30cf81959adbaf9afeb1a4e44bcbc3ef2fe294a2f1", null ],
@@ -345,6 +378,13 @@ var group__enumerations =
       [ "k_option_draw_box_inline_flag", "group__enumerations.html#gga1903a90921a42ab8abc8857c21f08c15a2a2814a1ad3b8acc2cba1d59709a877f", null ],
       [ "k_option_display_voices_in_colours", "group__enumerations.html#gga1903a90921a42ab8abc8857c21f08c15a7936b0f9c4c1fe7fc296600e4d20b7c8", null ]
     ] ],
+    [ "ERenderSpacingOpts", "group__enumerations.html#ga0a3a333681a099f4d078b4a67b9ca556", [
+      [ "k_render_opt_breaker_simple", "group__enumerations.html#gga0a3a333681a099f4d078b4a67b9ca556aff85c91d3ecd6fa8a122055b277d2ea4", null ],
+      [ "k_render_opt_breaker_optimal", "group__enumerations.html#gga0a3a333681a099f4d078b4a67b9ca556a71f7a984876a8ab2a4d57106fa08b243", null ],
+      [ "k_render_opt_breaker_no_shrink", "group__enumerations.html#gga0a3a333681a099f4d078b4a67b9ca556a95cc7b81da7f37b3b8eef1795dce31fc", null ],
+      [ "k_render_opt_dmin_fixed", "group__enumerations.html#gga0a3a333681a099f4d078b4a67b9ca556ad0272607badcd4270b4fff9862340cc1", null ],
+      [ "k_render_opt_dmin_global", "group__enumerations.html#gga0a3a333681a099f4d078b4a67b9ca556a2c4e8b3fc772b01b0c4b8941751a2bfc", null ]
+    ] ],
     [ "ERepeatMark", "group__enumerations.html#gacac9195eea9eb03fe42f193136d4d729", [
       [ "k_repeat_none", "group__enumerations.html#ggacac9195eea9eb03fe42f193136d4d729ad8a4a5f41762bb28bfc081a16eea07ff", null ],
       [ "k_repeat_segno", "group__enumerations.html#ggacac9195eea9eb03fe42f193136d4d729af2259a8a0ce04ad6eeadc47335c1814a", null ],
@@ -382,6 +422,12 @@ var group__enumerations =
       [ "k_technical_hole", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aaa608db30d2af9d50c2b3259c14d3386b", null ],
       [ "k_technical_handbell", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aad657cff681da0fb103237a1bcbff3002", null ],
       [ "k_max_technical", "group__enumerations.html#gga603173cd8f31b8852b951f52043d114aa58d72c835e5bd9d9b5ab22996e1babe1", null ]
+    ] ],
+    [ "ETruncateStaffLinesOpts", "group__enumerations.html#gab47a5104f35d3198e53c7d41865e40a3", [
+      [ "k_truncate_never", "group__enumerations.html#ggab47a5104f35d3198e53c7d41865e40a3a7b2a76a71c534d272306c2251b56cd18", null ],
+      [ "k_truncate_barline_final", "group__enumerations.html#ggab47a5104f35d3198e53c7d41865e40a3a6771e7d669ad73bea2c0885c6bf6d26e", null ],
+      [ "k_truncate_barline_any", "group__enumerations.html#ggab47a5104f35d3198e53c7d41865e40a3a4e01c66e1b1a90ea62ccf68bf878a8ad", null ],
+      [ "k_truncate_always", "group__enumerations.html#ggab47a5104f35d3198e53c7d41865e40a3ab9411caf0037a9d6515c9e1b1061c58d", null ]
     ] ],
     [ "EViewType", "group__enumerations.html#ga27f5a7e67fbf1c82ab6217e6fec0ecea", null ],
     [ "EVisualTrackingMode", "group__enumerations.html#ga5428193fc11653b86ce227a4c89bb2b9", [

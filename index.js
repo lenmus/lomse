@@ -59,6 +59,9 @@ var index =
         [ "Auxiliary objects: classes ImoAuxObj and ImoRelObj", "page-internal-model.html#internal-model-scores-auxobjs", [
           [ "Attachments: the ImoAuxObj class", "page-internal-model.html#internal-model-scores-attachments", null ],
           [ "Relationships: the ImoRelObj class", "page-internal-model.html#internal-model-scores-relationships", null ]
+        ] ],
+        [ "How measures are modelled", "page-internal-model.html#internal-model-scores-measures-intro", [
+          [ "Tables related to measures", "page-internal-model.html#internal-model-scores-measures-needs", null ]
         ] ]
       ] ]
     ] ],

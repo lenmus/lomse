@@ -44,7 +44,7 @@ var searchData=
   ['speventupdateviewport',['SpEventUpdateViewport',['../group__typedefs.html#gaff7479a518c7017d5be9b4fdc1e33af3',1,'lomse_events.h']]],
   ['speventvisualtracking',['SpEventVisualTracking',['../group__typedefs.html#ga47be70345a2479a5149d0fbc11e14e6a',1,'lomse_events.h']]],
   ['spinteractor',['SpInteractor',['../group__typedefs.html#gaf7c3a6370d1e16d2cbb8b4cd4d5ef8f1',1,'lomse_presenter.h']]],
-  ['step',['step',['../classDiatonicPitch.html#a470c4c777e7fae4a1af057df12a808bf',1,'DiatonicPitch::step()'],['../classFPitch.html#a1096be9af9f02019e9585ac613d05bdb',1,'FPitch::step()'],['../classUPitch.html#ab21286b9f2a07fda57cc11b2638bf315',1,'UPitch::step()']]],
+  ['step',['step',['../classDiatonicPitch.html#a470c4c777e7fae4a1af057df12a808bf',1,'DiatonicPitch::step()'],['../classMidiPitch.html#ae2f5b6a3bb9f9569c5f27d26a09e2a37',1,'MidiPitch::step()'],['../classFPitch.html#a1096be9af9f02019e9585ac613d05bdb',1,'FPitch::step()']]],
   ['stop',['stop',['../classScorePlayer.html#a483c27df7c046f56517f6b610576636d',1,'ScorePlayer']]],
   ['switch_5ftask',['switch_task',['../classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f',1,'Interactor']]]
 ];

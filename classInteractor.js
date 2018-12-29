@@ -42,7 +42,6 @@ var classInteractor =
     [ "highlight_object", "classInteractor.html#ab4dcd3324a54fa2055aa0bf1b9d732e2", null ],
     [ "is_document_editable", "classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b", null ],
     [ "model_point_to_screen", "classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e", null ],
-    [ "move_tempo_line", "classInteractor.html#abdabbfee6aadbb77b6c9348e1c71e6e0", null ],
     [ "move_tempo_line", "classInteractor.html#a59a34de84e5ca08186be15ee25818868", null ],
     [ "move_tempo_line", "classInteractor.html#a6d866749780f71c0e6297b8932c24fdb", null ],
     [ "move_tempo_line", "classInteractor.html#a3e7204ac53e7d18126273e31d42dc56c", null ],
