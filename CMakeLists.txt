@@ -248,16 +248,16 @@ endif(LOMSE_BUILD_TESTS)
 #	#for Windows use the pre-installed packages
 #	set(FREETYPE_FOUND 1)
 #	set(FREETYPE_INCLUDE_DIRS "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/include/freetype")
-#	set(FREETYPE_LIBRARIES "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64/freetype.lib")
+#	set(FREETYPE_LIBRARY "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64/freetype.lib")
 #	set(FREETYPE_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64")        
 #else()
 	find_package(Freetype REQUIRED)                 
 #endif(WIN32)
 if( FREETYPE_FOUND )
 	include_directories( ${FREETYPE_INCLUDE_DIRS} )
-	link_libraries( ${FREETYPE_LIBRARIES} )
+	link_libraries( ${FREETYPE_LIBRARY} )
 	link_directories( ${FREETYPE_LINK_DIR} )        
-	message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
+	message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARY}" )
 	message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
 	message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
 	set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
@@ -467,7 +467,7 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries( ${EXAMPLE1}
             lomse.lib
-            ${FREETYPE_LIBRARIES}
+            ${FREETYPE_LIBRARY}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
         )
@@ -487,7 +487,7 @@ if (LOMSE_BUILD_EXAMPLE)
 
         target_link_libraries ( ${EXAMPLE1} 
             liblomse.so
-            ${FREETYPE_LIBRARIES}
+            ${FREETYPE_LIBRARY}
             ${PNG_LIBRARIES}
             ${ZLIB_LIBRARIES}
         )
