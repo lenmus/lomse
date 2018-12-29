@@ -253,9 +253,9 @@ public:
     //notated accidentals
     inline EAccidentals get_notated_accidentals() { return m_notated_acc; }
     inline void force_to_display_accidentals() { m_options |= k_force; }
-    inline bool is_display_accidentals_forced() { return m_options & k_force; }
+    inline bool is_display_accidentals_forced() { return bool(m_options & k_force); }
     inline void force_to_display_naturals() { m_options |= k_also_natural; }
-    inline bool is_display_naturals_forced() { return m_options & k_also_natural; }
+    inline bool is_display_naturals_forced() { return bool(m_options & k_also_natural); }
     inline void mark_notated_accidentals_as_computed() { m_options |= k_computed; }
     inline bool notated_accidentals_never_computed() { return !(m_options & k_computed); }
 
