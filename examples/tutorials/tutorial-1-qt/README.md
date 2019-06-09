@@ -598,7 +598,7 @@ make
 
 You should see something as:
 
-[[image-1](../../images/tutorial-1-qt.png)]
+![Output when running tutorial 1 for Qt](../../images/tutorial-1-qt.png)
 
 
 
