@@ -598,7 +598,7 @@ make
 
 You should see something as:
 
-[[image-1](../images/tutorial-1-qt.png)]
+[[image-1](../../images/tutorial-1-qt.png)]
 
 
 
