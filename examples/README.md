@@ -12,7 +12,7 @@ The name of the tutorials and sample code has a suffix for marking the environme
 - x11 = For Linux with X11, e.g.: *tutorial-1-x11*.
 - win = For Microsoft Windows, e.g.: *tutorial-1-win*.
 
-Folder *wxMidi* contains the sources for the wxMidi package, that is used in some tutorials and samples for MIDI playback.
+Folder *wxMidi* contains the sources for the wxMidi package. It is used in some tutorials and samples, for MIDI playback.
 
 This is a summary of available tutorials and sample code:
 ```
