@@ -628,7 +628,7 @@ cd <projects>/lomse/examples/tutorials/tutorial-1-wx		# move to tutorial folder
 g++ -std=c++11 tutorial-1-wx.cpp -o tutorial-1-wx    \
     `pkg-config --cflags liblomse` `wx-config --cflags`   \
     `pkg-config --libs liblomse` `wx-config --libs` \
-    -lstdc+
+    -lstdc++
 ```
 
 And now, execute your first program using Lomse:
