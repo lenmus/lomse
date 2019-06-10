@@ -569,6 +569,8 @@ With this, I finish the explanation of the code. In the next section we are goin
 
 ## <a name="compile" />Compiling your code and building
 
+Before starting, ensure that you have installed the Lomse library. See the [installation](https://github.com/lenmus/lomse/wiki/Installation) page for detailed instructions.
+
 A .pro file is always nedeed for building a Qt program. Therefore it must be created from sources (using qmake) or you should use the provided file. 
 
 The simplest way to build the sample is by using the provided .pro file:
