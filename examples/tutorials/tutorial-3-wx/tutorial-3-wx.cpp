@@ -168,7 +168,7 @@ protected:
     unsigned get_keyboard_flags(wxKeyEvent& event);
     unsigned get_mouse_flags(wxMouseEvent& event);
 
-    // In this first example we are just going to display an score on the window.
+    // In this first tutorial we are just going to display an score on the window.
     // Let's define the necessary variables:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;

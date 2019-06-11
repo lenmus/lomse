@@ -2,9 +2,9 @@
 // wxMidi: A MIDI interface based on PortMidi, the Portable Real-Time MIDI Library
 // --------------------------------------------------------------------------------
 //
-// Author:      Cecilio Salmeron
-// Copyright:   (c) 2005-20011 Cecilio Salmeron
-// Licence:     wxWidgets licence, version 3.1 or later at your choice.
+// Author:      Cecilio Salmeron <s.cecilio@gmail.com>
+// Copyright:   (c) 2005-2015 Cecilio Salmeron
+// Licence:     wxWidgets license, version 3.1 or later at your choice.
 //=====================================================================================
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
 #pragma implementation "wxMidi.h"
@@ -40,25 +40,47 @@ DEFINE_EVENT_TYPE(wxEVT_MIDI_INPUT)
 #define SYSEX_CHUNK_SIZE		4								// PmEvent size
 #define SYSEX_BUFFER_SIZE		(SYSEX_CHUNK_SIZE * 1024)		// alloc in 4K chunks
 
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+/// Default constructor, intended for wxMidi internal use.
 wxMidiSysExMessage::wxMidiSysExMessage()
-		: wxMidiMessage()
+    : wxMidiMessage()
+	, m_pMessage(NULL)
+	, m_timestamp(0)
+	, m_nError(wxMIDI_NO_ERROR)
+	, m_nSize(0L)
 {
 	m_type = wxMIDI_SYSEX_MSG;
-	m_pMessage = (wxByte*) NULL;
-	m_nSize = 0;
-	m_nError = 	wxMIDI_NO_ERROR;
-	m_timestamp = 0;
 }
 
+//-----------------------------------------------------------------------------
+/** Constructor, creating a wxMidiSysExMessage object from a string
+    of wxBytes.
 
+    In case of error during construction, subsequent
+    calls to Error() will return a error code with more
+    information about the error.
+    \param msg  The raw MIDI message, as string of wxBytes. It must
+           include the start-of-sysex status byte (0xF0) at the
+           beginning and the end-of-sysex status byte (0xF7) at the
+           end.
+    \param timestamp  The timestamp value. It is milliseconds elapsed
+           since the wxMidi package initialization. Current time can be
+           obtained by calling wxMidi::GetTime(). Only meaningful if
+           the wxOutDevice is open with latency time different from
+           zero. In any case, if no timestamp is specified or if a
+           value of zero is specified, the message will be delivered
+           immediately. See wxMidiOutDevice::Write().
+*/
 wxMidiSysExMessage::wxMidiSysExMessage(wxByte* msg, wxMidiTimestamp timestamp)
-		: wxMidiMessage()
+    : wxMidiMessage()
+	, m_pMessage(NULL)
+	, m_timestamp(timestamp)
+	, m_nError(wxMIDI_NO_ERROR)
+	, m_nSize(0L)
 {
 	m_type = wxMIDI_SYSEX_MSG;
-	m_pMessage = (wxByte*) NULL;
-	m_nSize = 0;
-	m_nError = 	wxMIDI_NO_ERROR;
-	m_timestamp = timestamp;
 
 	//verify start of message
 	if (*msg != 0xF0) {
@@ -68,12 +90,8 @@ wxMidiSysExMessage::wxMidiSysExMessage(wxByte* msg, wxMidiTimestamp timestamp)
 
 	//determine size of message
 	wxByte* pData = msg;
-	for (; m_nSize < 10000 && *pData != 0xF7; pData++) {
+	for (; *pData != 0xF7; pData++) {
 		m_nSize++;
-	}
-	if (m_nSize == 10000) {
-		m_nError = wxMIDI_ERROR_BadSysExMsg_Length;
-		return;
 	}
 
 	// allocate the buffer
@@ -82,9 +100,10 @@ wxMidiSysExMessage::wxMidiSysExMessage(wxByte* msg, wxMidiTimestamp timestamp)
 
 	// copy the data
 	memcpy(m_pMessage, msg, m_nSize);
-
 }
 
+//-----------------------------------------------------------------------------
+/// Destructor
 wxMidiSysExMessage::~wxMidiSysExMessage()
 {
 	if (m_pMessage) {
@@ -99,8 +118,8 @@ wxMidiSysExMessage::~wxMidiSysExMessage()
 
 
 wxMidiDevice::wxMidiDevice(wxMidiDeviceID nDevice)
+    : m_nDevice(nDevice)
 {
-	m_nDevice = nDevice;
 	int devices = Pm_CountDevices();
 	if (m_nDevice > devices-1) m_nDevice = 0;
 	m_pInfo = Pm_GetDeviceInfo(m_nDevice);
@@ -109,12 +128,11 @@ wxMidiDevice::wxMidiDevice(wxMidiDeviceID nDevice)
 
 wxMidiDevice::~wxMidiDevice()
 {
-	/*
-    WARNING: Pm_GetDeviceInfo() returns a pointer to a PmDeviceInfo structure
-    referring to the device specified by id. The returned structure is owned by
-	the PortMidi implementation and must not be manipulated or freed.
-	*/
-	//if (m_pInfo) delete m_pInfo;
+    //AWARE: Pm_GetDeviceInfo() returns a pointer to a PmDeviceInfo structure
+    //referring to the device specified by id. The returned structure is owned by
+    //the PortMidi implementation and must not be manipulated or freed.
+
+	//delete m_pInfo;
 }
 
 const wxString wxMidiDevice::DeviceName()
@@ -168,10 +186,9 @@ bool wxMidiDevice::IsOutputPort()
 // Class wxMidiOutDevice implementation
 //================================================================================
 
-wxMidiError wxMidiOutDevice::Open(long latency, void *DriverInfo)
+wxMidiError wxMidiOutDevice::Open(long latency, void* pDriverInfo)
 {
-	// bufferSize = 0    How to set up an optimum value?
-	return (wxMidiError)Pm_OpenOutput(&m_stream, m_nDevice, DriverInfo,
+	return (wxMidiError)Pm_OpenOutput(&m_stream, m_nDevice, pDriverInfo,
 									  0, NULL, NULL, latency );
 }
 
@@ -200,39 +217,36 @@ wxMidiError wxMidiOutDevice::Write(wxByte* msg, wxMidiTimestamp when)
 
 wxMidiError	wxMidiOutDevice::NoteOff(int channel, int note, int velocity)
 {
-	//0x80?0x8F		Note off
+	//0x80-0x8F		Note off
 	wxMidiShortMessage msg(0x80+channel, note, velocity);
 	return Write(&msg);
 }
 
 wxMidiError	wxMidiOutDevice::NoteOn(int channel, int note, int velocity)
 {
-    //0x90?0x9F		Note on
+    //0x90-0x9F		Note on
 	wxMidiShortMessage msg(0x90+channel, note, velocity);
 	return Write(&msg);
 }
 
 wxMidiError	wxMidiOutDevice::ProgramChange(int channel, int instrument)
 {
-    //0xC0?0xCF		Program change
+    //0xC0-0xCF		Program change
 	wxMidiShortMessage msg(0xC0+channel, instrument, 0);
 	return Write(&msg);
 }
 
 wxMidiError wxMidiOutDevice::AllSoundsOff()
 {
-	wxMidiPmEvent buffer[32];
-	wxMidiTimestamp now = ::wxMidiGetTime();
-	int channel, i;
-	for (i=0, channel=0; channel < 16; channel++) {
-		buffer[i].message = Pm_Message(0xB0+channel, 0x78, 0);
-		buffer[i].timestamp = now;
-		i++;
-		buffer[i].message = Pm_Message(0xB0+channel, 0x7B, 0);
-		buffer[i].timestamp = now;
-		i++;
-	}
-	return (wxMidiError)Pm_Write(m_stream, buffer, 32);
+    //  http://www.midi.org/techspecs/midimessages.php
+
+    for (int channel=0; channel < 16; ++channel)
+    {
+        wxMidiShortMessage msg(0xB0+channel, 0x78, 0);      //all sound off
+        Write(&msg);
+    }
+    return wxMIDI_NO_ERROR;
+
 }
 
 
@@ -240,13 +254,17 @@ wxMidiError wxMidiOutDevice::AllSoundsOff()
 // Class wxMidiInDevice implementation
 //================================================================================
 
-wxMidiInDevice::wxMidiInDevice(wxMidiDeviceID nDevice)
+wxMidiInDevice::wxMidiInDevice(wxMidiDeviceID nDevice, double timeoutSeconds)
 	: wxMidiDevice(nDevice)
+	, m_pThread(NULL)
+	, m_fUseTimeAlgorithm(true)
+    , m_timeCounter(time_t(-1))
+	, m_timeoutSeconds(timeoutSeconds)
+	, m_numNullReads(0)
+	, m_SysexBuffer(NULL)
+	, m_fReadingSysex(false)
+	, m_fEventPending(false)
 {
-	m_pThread = (wxMidiThread*)NULL;
-	m_SysexBuffer = (wxByte*)NULL;
-	m_fReadingSysex = false;
-	m_fEventPending = false;
 }
 
 wxMidiInDevice::~wxMidiInDevice()
@@ -257,14 +275,13 @@ wxMidiInDevice::~wxMidiInDevice()
 	if (m_SysexBuffer) delete [] m_SysexBuffer;
 }
 
-wxMidiError wxMidiInDevice::Open(void *DriverInfo)
+wxMidiError wxMidiInDevice::Open(void* pDriverInfo, int buffersize)
 {
-	// bufferSize = 50    How to set up an optimum value?
-	return (wxMidiError)Pm_OpenInput(&m_stream, m_nDevice, DriverInfo,
-									 50, NULL, NULL);
+	return (wxMidiError)Pm_OpenInput(&m_stream, m_nDevice, pDriverInfo,
+									 buffersize, NULL, NULL);
 }
 
-wxMidiError wxMidiInDevice::Read(wxMidiPmEvent *buffer, long* length )
+wxMidiError wxMidiInDevice::Read(wxMidiPmEvent* buffer, long* length )
 {
 	/*
 	If no error, the real number of buffers read is returned in "length" and
@@ -278,9 +295,9 @@ wxMidiError wxMidiInDevice::Read(wxMidiPmEvent *buffer, long* length )
     in which case a wxMidiError value will be returned. */
 	if (nErr < 0)
 		//error
-		return (wxMidiError)nErr;
+		return wxMidiError(nErr);
 	else {
-		*length = (long)nErr;
+		*length = long(nErr);
 		return wxMIDI_NO_ERROR;
 	}
 
@@ -296,9 +313,11 @@ wxMidiMessage* wxMidiInDevice::Read(wxMidiError* pError)
 	To deal with this, xMidiInDevice will maintain buffers with data not yet delivered.
 	Flag m_fReadingSysex will signal that a sysex message was interrupted by a real-time one
 	Flag m_fEventPending will signal that there is a PmEvent pending to be processed and
-	delivered, as consecuence of a previous truncated sysex message.
+	delivered, as consequence of a previous truncated sysex message.
 
 	*/
+
+    reset_timeout_counters();
 
 	// get data from midi stream
 	PmEvent buffer;
@@ -309,7 +328,7 @@ wxMidiMessage* wxMidiInDevice::Read(wxMidiError* pError)
 		m_fEventPending = false;
 	}
 	else {
-		nError = (wxMidiError) Pm_Read( m_stream, &buffer, 1 );
+        nError = (wxMidiError) Pm_Read( m_stream, &buffer, 1 );
 
 		// if read was not successful return the error
 		if (nError < wxMIDI_NO_ERROR) {
@@ -349,8 +368,10 @@ wxMidiMessage* wxMidiInDevice::Read(wxMidiError* pError)
 		//move data to buffer and continue reading until end of sysex message
 		bool fEndSysex = MoveDataToSysExBuffer(buffer.message);
 
-		while(!fEndSysex) {
-			nError = (wxMidiError) Pm_Read( m_stream, &buffer, 1 );
+		while(!fEndSysex)
+        {
+            nError = (wxMidiError) Pm_Read( m_stream, &buffer, 1 );
+
 			if (nError < wxMIDI_NO_ERROR) {
 				*pError = nError;
 				delete pSysExMsg;
@@ -360,44 +381,64 @@ wxMidiMessage* wxMidiInDevice::Read(wxMidiError* pError)
 				return (wxMidiMessage*)NULL;
 			}
 
-			// check if it is a real-time message inserted into the sysex chunks stream
-			if (Pm_MessageStatus( buffer.message ) == 0xF8) {
-				//it is a real time message. Deliver it inmediately and save sysex buffer
-				*pError = wxMIDI_NO_ERROR;
-				wxMidiShortMessage* pShortMsg = new wxMidiShortMessage(
-														Pm_MessageStatus( buffer.message ),
-														0, 0 );
-				pShortMsg->SetTimestamp( buffer.timestamp );
-				delete pSysExMsg;
-				return pShortMsg;
-			}
+            //Read operations can be faster than arrival of bytes (3.8 KB/sec at max.).
+            //Therefore, some read operations will return 0 bytes
+            if (nError == 0)
+            {
+                //nothing read. Connection failure?
+                if (should_report_timeout())
+                {
+                    *pError = wxMIDI_ERROR_TimeOut;
+                    delete pSysExMsg;
+                    return (wxMidiMessage*)NULL;
+                }
+            }
+            else
+            {
+                //some bytes received
+                reset_timeout_counters();
 
-			/*
-			When receiving sysex messages, if you get a non-real-time status byte
-			but there was no EOX byte, it means the sysex message was somehow truncated.
-			This is not	considered an error; e.g., a missing EOX can result from the user
-			disconnecting a MIDI cable during sysex transmission.
-			*/
+                //check if it is a real-time message inserted into the sysex chunks stream
+                if (Pm_MessageStatus( buffer.message ) == 0xF8)
+                {
+                    //it is a real time message. Deliver it immediately and save sysex buffer
+                    *pError = wxMIDI_NO_ERROR;
+                    wxMidiShortMessage* pShortMsg = new wxMidiShortMessage(
+                                                            Pm_MessageStatus( buffer.message ),
+                                                            0, 0 );
+                    pShortMsg->SetTimestamp( buffer.timestamp );
+                    delete pSysExMsg;
+                    return pShortMsg;
+                }
 
-			// lets check if there is a status byte different from end-of-sysex
-			if (Pm_MessageStatus( buffer.message ) != 0xF7 &&
-				Pm_MessageStatus( buffer.message ) & 0x80 )
-			{
-				//The systex message is somehow truncated. Return the sysex message
-				// and store the new message received
+                /*
+                When receiving sysex messages, if you get a non-real-time status byte
+                but there was no EOX byte, it means the sysex message was somehow truncated.
+                This is not	considered an error; e.g., a missing EOX can result from the user
+                disconnecting a MIDI cable during sysex transmission.
+                */
 
-				// save the PmEvent
-				m_fEventPending = true;
-				m_event.message = buffer.message;
-				m_event.timestamp = buffer.timestamp;
+                // lets check if there is a status byte different from end-of-sysex
+                if (Pm_MessageStatus( buffer.message ) & 0x80  &&
+                    Pm_MessageStatus( buffer.message ) != 0xF7)
+                {
+                    //The systex message is somehow truncated. Return the sysex message
+                    // and store the new message received
 
-				//terminate the current sysex message
-				fEndSysex = true;
-			}
-			else {
-				// it is a chunck of the sysex message. Move data to the sysex buffer
-				fEndSysex = MoveDataToSysExBuffer(buffer.message);
-			}
+                    // save the PmEvent
+                    m_fEventPending = true;
+                    m_event.message = buffer.message;
+                    m_event.timestamp = buffer.timestamp;
+
+                    //terminate the current sysex message
+                    fEndSysex = true;
+                }
+                else
+                {
+                    // it is a chunck of the sysex message. Move data to the sysex buffer
+                    fEndSysex = MoveDataToSysExBuffer(buffer.message);
+                }
+            }
 		}
 
 		//prepare the sysex message to return it
@@ -447,8 +488,8 @@ bool wxMidiInDevice::MoveDataToSysExBuffer(PmMessage message)
 		// allocate the new buffer
 		wxByte* newSysexBuffer = new wxByte[ m_SizeOfSysexBuffer ];
 
-		//wxLogMessage(wxString::Format(
-		//	_T("Increasing buffer size from %d to %d"), oldSize, m_SizeOfSysexBuffer ));
+//		wxLogDebug(wxString::Format(
+//			_T("Increasing buffer size from %ld to %ld"), oldSize, m_SizeOfSysexBuffer ));
 
 		// move the data from old buffer
 		memcpy( newSysexBuffer, m_SysexBuffer, oldSize );
@@ -511,7 +552,6 @@ void wxMidiInDevice::Flush()
 
 wxMidiError wxMidiInDevice::StartListening(wxWindow* pWindow, unsigned long nPollingRate)
 {
-
 	if (m_pThread) return wxMIDI_ERROR_AlreadyListening;
 
     //Create a new thread. The thread object is created in the suspended state
@@ -541,6 +581,48 @@ wxMidiError wxMidiInDevice::StopListening()
 	return wxMIDI_NO_ERROR;
 }
 
+bool wxMidiInDevice::should_report_timeout()
+{
+    return use_time_algorithm() ?
+           too_much_time_without_receiving_bytes() :
+           too_much_reads_without_receiving_bytes();
+}
+
+bool wxMidiInDevice::too_much_time_without_receiving_bytes()
+{
+    //true when elapsed time since first void Read operation is greater
+    //than the user specified timeout (in wxMidiInDevice constructor)
+
+    time_t currentTime = time(NULL);    //current time (in seconds elapsed since the Epoch)
+
+    if (currentTime == time_t(-1))
+    {
+        //failure to compute current time
+        switch_to_alternate_algorithm();
+        return false;
+    }
+
+    if (m_timeCounter == time_t(0))
+    {
+        m_timeCounter = currentTime;
+        return false;
+    }
+    else
+    {
+        double iddleTime = difftime(currentTime, m_timeCounter);
+        return iddleTime > m_timeoutSeconds;
+    }
+}
+
+bool wxMidiInDevice::too_much_reads_without_receiving_bytes()
+{
+    //true when too much consecutive Read operations without receiving bytes
+
+    int maxReads = int(m_timeoutSeconds / 0.01);    //assume 10ms per Read operation
+    return ++m_numNullReads > maxReads;
+}
+
+
 //================================================================================
 // Class wxMidiThread implementation
 //================================================================================
@@ -561,23 +643,27 @@ wxMidiThread::~wxMidiThread()
 
 void* wxMidiThread::Entry()
 {
-    while(true)
-	{
-        // check if the thread was asked to exit and do it
-        if (TestDestroy()) break;
+    try
+    {
+        while(true)
+        {
+            // check if the thread was asked to exit and do it
+            if (TestDestroy()) break;
 
-		// check if Midi data is available
-		if ( m_pDev->Poll() ) {
-			// Data available. Create a Midi event
-			wxCommandEvent event( wxEVT_MIDI_INPUT );
-			::wxPostEvent( m_pWindow, event );
-			//m_pWindow->GetEventHandler()->AddPendingEvent(event);	// Add it to the queue
-		}
+            // check if Midi data is available
+            if ( m_pDev->Poll() ) {
+                // Data available. Create a Midi event
+                wxCommandEvent event( wxEVT_MIDI_INPUT );
+                ::wxPostEvent( m_pWindow, event );
+            }
 
-        // pause the thread execution during polling rate interval
-        wxThread::Sleep(m_nMilliseconds);
+            // pause the thread execution during polling rate interval
+            wxThread::Sleep(m_nMilliseconds);
+        }
     }
-
+    catch(...)
+    {
+    }
     return NULL;
 }
 
@@ -586,12 +672,13 @@ void* wxMidiThread::Entry()
 //================================================================================
 // Class wxMidiSystem implementation
 //
-//	Acording to documentation Pm_Initialize and Pm_Terminate return a error code, but
+//	According to documentation Pm_Initialize and Pm_Terminate return a error code, but
 //	looking at the source code they always return pmNoError. So it is useless to
 //	try to preserve the return code by forcing the user to explicitly call
 //	these methods. It is easier to initialize and terminate in
 //	the constructor and destructor, respectively
 //================================================================================
+
 
 wxMidiSystem* wxMidiSystem::m_pInstance = (wxMidiSystem*)NULL;
 
@@ -663,11 +750,14 @@ const wxString wxMidiSystem::GetErrorText( wxMidiError errnum )
 	case wxMIDI_ERROR_BadSysExMsg_Start:
 		sError = _("wxMidi. 'Bad sysex msg: It does not start with 0xF0'");
 		return sError;
-	case wxMIDI_ERROR_BadSysExMsg_Length:
-		sError = _("wxMidi. 'Bad sysex msg: Length greater than 10000 or no final byte 0xF7'");
-		return sError;
+//	case wxMIDI_ERROR_BadSysExMsg_Length:
+//		sError = _("wxMidi. 'Bad sysex msg: Length greater than 10000 or no final byte 0xF7'");
+//		return sError;
 	case wxMIDI_ERROR_NoDataAvailable:
 		sError = _("wxMidi. 'There are no MIDI messages pending to be read'");
+		return sError;
+	case wxMIDI_ERROR_TimeOut:
+		sError = _("wxMidi: Timeout while receiving a SysEx message");
 		return sError;
 
 	default:
@@ -676,7 +766,7 @@ const wxString wxMidiSystem::GetErrorText( wxMidiError errnum )
    }
 }
 
-
+//-----------------------------------------------------------------------------
 wxString wxMidiSystem::GetHostErrorText()
 {
 	//TODO: review this

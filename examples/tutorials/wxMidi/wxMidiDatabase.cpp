@@ -2,9 +2,9 @@
 // wxMidi: A MIDI interface based on PortMidi, the Portable Real-Time MIDI Library
 // --------------------------------------------------------------------------------
 //
-// Author:      Cecilio Salmeron
-// Copyright:   (c) 2005-2011 Cecilio Salmeron
-// Licence:     wxWidgets licence, version 3.1 or later at your choice.
+// Author:      Cecilio Salmeron <s.cecilio@gmail.com>
+// Copyright:   (c) 2005-2015 Cecilio Salmeron
+// Licence:     wxWidgets license, version 3.1 or later at your choice.
 //=====================================================================================
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
 #pragma implementation "wxMidiDatabase.h"

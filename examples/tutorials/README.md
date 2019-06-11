@@ -20,6 +20,10 @@ They are adapted for the following platforms / frameworks:
 I've only tested these tutorials in Linux and Windows. For Apple and other
 platforms they probably will work, perhaps with a few minor of changes.
 
+Folder **wxMidi** contains, for your convenience, the sources of the [wxMidi component](https://github.com/lenmus/wxmidi). wxMidi is just a wrapper for using MIDI in wxWidgets applications. These sources are used in some of the tutorials.
+
+
+
 
 
 

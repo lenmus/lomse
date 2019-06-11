@@ -18,6 +18,8 @@ This is a summary of available tutorials and sample code:
 ```
 examples
   |
+  + images			  Just some images used in the tutorials explanations.
+  |
   + tutorials
   |    |
   |    +-- tutorial-1-xxx   Displaying a music score. 
