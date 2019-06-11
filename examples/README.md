@@ -2,11 +2,9 @@
 
 This folder contains tutorials and sample code for using Lomse.
 
-**tutorials** should be studied first. They are functional apps. Apart from the source code each tutorial include a README.md file with a detailed step-by-step explanation of how the application is designed and coded, and about how Lomse works. It also includes instructions for building.
+**Tutorials** should be studied first. They are functional apps. Apart from the source code each tutorial include a README.md file with a detailed step-by-step explanation of how the application is designed and coded, and about how Lomse works. It also includes instructions for building.
 
-**samples**, on the contrary, are just minimal functional apps for highlighting how to do or to use some functionality, and they do not include normally any explanatory document, just a README.md file explaining the purpose of the sample. I created these samples for testing some functionality.
-
-**images** are just some images used in the tutoriasl explanations.
+**Samples**, on the contrary, are just minimal functional apps for highlighting how to do or to use some functionality, and they do not include normally any explanatory document, just a README.md file explaining the purpose of the sample. I created these samples for testing some functionality.
 
 The name of the tutorials and sample code has a suffix for marking the environment/platform used by that code. The meaning of the suffix is as follows:
 - wx = [wxWidgets framework](https://www.wxwidgets.org/) (platform independent), e.g.: *tutorial-1-wx*.
@@ -19,6 +17,8 @@ Folder *wxMidi* contains the sources for the wxMidi package. It is used in some 
 This is a summary of available tutorials and sample code:
 ```
 examples
+  |
+  + images			  Just some images used in the tutorials explanations.
   |
   + tutorials
   |    |
