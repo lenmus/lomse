@@ -41,7 +41,7 @@ To avoid this burden in your application, probably the best solution will be to 
 
 ## <a name="receiving" />Changes for receiving visual tracking events
 
-In this tutorial we will use the code from tutorial 3 and modify it for handling _visual tracking_ events. First step is to prepare our application to handle these events. For this, we will define a callback method in <tt>MyFrame</tt>. This is the standard procedure for handling events, of any type, sent by Lomse. As explained in tutorial 2 (see section [Events sent by Lomse](tutorial-2-wx.htm#paint)) setting a callback requires defining two methods: an static one (the wrapper method) and the real one that will do the job. Here is our definition:
+In this tutorial we will use the code from tutorial 3 and modify it for handling _visual tracking_ events. First step is to prepare our application to handle these events. For this, we will define a callback method in <tt>MyFrame</tt>. This is the standard procedure for handling events, of any type, sent by Lomse. As explained in tutorial 2 (see section [Events sent by Lomse](../tutorial-2-wx/README.md#paint) setting a callback requires defining two methods: an static one (the wrapper method) and the real one that will do the job. Here is our definition:
 
 ```c++
 class MyFrame: public wxFrame
@@ -78,7 +78,7 @@ void MyFrame::wrapper_lomse_event(void* pThis, SpEventInfo pEvent)
 }
 ```
 
-As to the method doing the real work, it has to create an application event and to enqueue it in the application events system, as explained in previous section [Lomse playback: visual tracking events](#highlight). Therefore, before coding this method we have to define our own application event.
+As to the method doing the real work, it has to create an application event and to enqueue it in the application events system, as explained in previous section [Lomse playback: visual tracking events](#tracking). Therefore, before coding this method we have to define our own application event.
 
 
 
