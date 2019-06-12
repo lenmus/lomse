@@ -408,7 +408,7 @@ g++ -std=c++11 tutorial-2-wx.cpp -o tutorial-2-wx    \
     -lstdc++
 ```
 
-And now, execute your first program using Lomse:
+And now, execute the program:
 
 ```bash
 ./tutorial-2-wx

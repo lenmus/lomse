@@ -96,7 +96,7 @@ private:
 
 //---------------------------------------------------------------------------------------
 // Global variables
-// In this first example we are just going to display an score on the main window.
+// In this first tutorial we are just going to display an score on the main window.
 // Let's define the necessary variables:
 //
 LomseDoorway    m_lomse;        //the Lomse library doorway
