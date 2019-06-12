@@ -10,7 +10,7 @@ In this first example we are just going to open a window and display the text "H
 
 ## <a name="" />Table of content
 
-- [How does Lomse work](lomse)
+- [How does Lomse work](#lomse)
 - [Header files to use Lomse](#headers)
 - [Important variables](#variables)
 - [The application: main function](#main)
