@@ -25,6 +25,14 @@
 // For more information, please refer to <http:unlicense.org>
 //---------------------------------------------------------------------------------------
 
+//lomse headers
+#include <lomse_doorway.h>
+#include <lomse_document.h>
+#include <lomse_graphic_view.h>
+#include <lomse_interactor.h>
+#include <lomse_presenter.h>
+#include <lomse_events.h>
+
 // header files required for X11. The order is important:
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -34,19 +42,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//lomse headers
-#include <lomse_doorway.h>
-#include <lomse_document.h>
-#include <lomse_graphic_view.h>
-#include <lomse_interactor.h>
-#include <lomse_presenter.h>
-#include <lomse_events.h>
-
 using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-// In this first example we are just going to display an score on the main window.
+// In this first tutorial we are just going to display an score on the main window.
 // Let's define the necessary variables:
 //
 LomseDoorway    m_lomse;        //the Lomse library doorway
@@ -418,7 +418,7 @@ void create_main_window(unsigned width, unsigned height)
     //set window title
     XSetStandardProperties(m_pDisplay,
                            m_window,
-                           "Lomse examples. Example_1",     //window title
+                           "Lomse tutorials. Tutorial 1",     //window title
                            "Lomse_1",                       //name in tasks bar
                            None,
                            NULL,
