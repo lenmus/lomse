@@ -36,36 +36,36 @@
 using namespace std;
 
 
-//---------------------------------------------------------------------------------------
-//AWARE: Microsoft deprecated fopen() but the "security enhanced" new function
-//fopen_s() is only defined by Microsoft which "coincidentally" makes your code
-//non-portable.
+////---------------------------------------------------------------------------------------
+////AWARE: Microsoft deprecated fopen() but the "security enhanced" new function
+////fopen_s() is only defined by Microsoft which "coincidentally" makes your code
+////non-portable.
+////
+////The addressed security issue is, basically, for files opened for writing.
+////Microsoft improves security by opening the file with exclusive access.
+////
+////This is not needed in this source code, as the file is opened for read, but there
+////is a need to suppress the annoying Microsoft warnings, which is not easy.
+////Thanks Microsoft!
+////
+////See:
+////  https://stackoverflow.com/questions/906599/why-cant-i-use-fopen
+////  https://stackoverflow.com/questions/858252/alternatives-to-ms-strncpy-s
+////
+//#if (defined(_MSC_VER) && (_MSC_VER >= 1400) )
+//    #include <cstdio>
 //
-//The addressed security issue is, basically, for files opened for writing.
-//Microsoft improves security by opening the file with exclusive access.
-//
-//This is not needed in this source code, as the file is opened for read, but there
-//is a need to suppress the annoying Microsoft warnings, which is not easy.
-//Thanks Microsoft!
-//
-//See:
-//  https://stackoverflow.com/questions/906599/why-cant-i-use-fopen
-//  https://stackoverflow.com/questions/858252/alternatives-to-ms-strncpy-s
-//
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400) )
-    #include <cstdio>
-
-    inline extern FILE* my_fopen_s(const char *fname, char *mode)
-    {
-        FILE *fptr;
-        fopen_s(&fptr, fname, mode);
-        return fptr;
-    }
-    #define fopen(fname, mode)               my_fopen_s((fname), (mode))
-#else
-    #define fopen_s(fp, fmt, mode)          *(fp)=fopen((fmt), (mode))
-#endif
-//---------------------------------------------------------------------------------------
+//    inline extern FILE* my_fopen_s(const char *fname, char *mode)
+//    {
+//        FILE *fptr;
+//        fopen_s(&fptr, fname, mode);
+//        return fptr;
+//    }
+//    #define fopen(fname, mode)               my_fopen_s((fname), (mode))
+//#else
+//    #define fopen_s(fp, fmt, mode)          *(fp)=fopen((fmt), (mode))
+//#endif
+////---------------------------------------------------------------------------------------
 
 
 
