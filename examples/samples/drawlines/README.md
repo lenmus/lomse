@@ -18,6 +18,6 @@ After running `make`, you will find a executable file, named drawlines, in curre
 
 When you click on "menu > Lines > Add lines" you should see something as:
 
-![Output when adding lines](../../drawlines/drawlines.png)
+![Output when adding lines](../../samples/drawlines/drawlines.png)
 
 
