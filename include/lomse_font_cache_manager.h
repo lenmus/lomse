@@ -49,29 +49,29 @@
 
 using namespace agg;
 
-//---------------------------------------------------------------------------------------
-//AWARE: Microsoft deprecated strncpy() but the "security enhanced" new function
-//strncpy_s() is only defined by Microsoft which "coincidentally" makes your code
-//non-portable.
+////---------------------------------------------------------------------------------------
+////AWARE: Microsoft deprecated strncpy() but the "security enhanced" new function
+////strncpy_s() is only defined by Microsoft which "coincidentally" makes your code
+////non-portable.
+////
+////The addressed security issue is, basically, that strncpy does not ensure that the
+////string is properly ended with '\0'. But this is not needed in this source code.
+////
+////This code addresses the need to suppress the annoying Microsoft warnings, which
+////is not easy. Thanks Microsoft!
+////
+////See:
+////  https://stackoverflow.com/questions/858252/alternatives-to-ms-strncpy-s
+////
+//#if (defined(_MSC_VER) && (_MSC_VER >= 1400) )
+//    #include <string>
+//    using namespace std;
 //
-//The addressed security issue is, basically, that strncpy does not ensure that the
-//string is properly ended with '\0'. But this is not needed in this source code.
-//
-//This code addresses the need to suppress the annoying Microsoft warnings, which
-//is not easy. Thanks Microsoft!
-//
-//See:
-//  https://stackoverflow.com/questions/858252/alternatives-to-ms-strncpy-s
-//
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400) )
-    #include <string>
-    using namespace std;
-
-    #define strncpy(dest, source, count)     strcpy_s((dest), (count), (source))
-#else
-    #define strncpy_s(dest, source, count)   strncpy((dest), (source), (count))
-#endif
-//---------------------------------------------------------------------------------------
+//    #define strncpy(dest, source, count)     strcpy_s((dest), (count), (source))
+//#else
+//    #define strncpy_s(dest, source, count)   strncpy((dest), (source), (count))
+//#endif
+////---------------------------------------------------------------------------------------
 
 
 namespace lomse
@@ -123,7 +123,7 @@ struct glyph_cache
         //--------------------------------------------------------------------
         void signature(const char* font_signature)
         {
-            int len = strlen(font_signature) + 1;
+            int len = int( strlen(font_signature) + 1 );
             m_font_signature = (char*)m_allocator.allocate(len);
             strncpy(m_font_signature, font_signature, len);
             memset(m_glyphs, 0, sizeof(m_glyphs));

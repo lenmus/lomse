@@ -29,6 +29,7 @@ examples
   |
   + samples
        |
+       +-- drawlines   Drawing marker lines on the score and removing them
        +-- extplayer   Controlling scroll and the tempo line when using an external player.
        +-- transpose   An example for testing transposition commands.
        +-- viewtypes   A test for displaying and playing back scores using the different Lomse View types.

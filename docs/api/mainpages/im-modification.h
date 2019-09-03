@@ -120,7 +120,7 @@ if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
         //for updating the internal data structures. This equivalent to
 		//invoking pDoc->end_of_changes(); but will only rebuild
 		//the structures associated to the modified score
-        pScore->close();      
+        pScore->end_of_changes();      
     }
 }
 @endcode

@@ -298,7 +298,7 @@ GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos, int
             *iPage = pPage->get_page_number();
 
         //find system in this page
-        GmoBoxSystem* pSystem;
+        GmoBoxSystem* pSystem = nullptr;
         int i = pPage->get_num_first_system();
         int maxSystem = pPage->get_num_systems() + i;
         LOMSE_LOG_DEBUG(Logger::k_events, "get_system_for(%f), i=%d, maxSystem=%d",
