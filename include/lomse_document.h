@@ -263,7 +263,7 @@ public:
     inline std::string& get_version() { return m_pImoDoc->m_version; }
 
     /** Returns a pointer to the internal model object with the given ID or
-        value `k_no_imoid` (-1) if no object found with the given ID. */
+        nullptr if no object found with the given ID. */
     ImoObj* get_pointer_to_imo(ImoId id) const;
 
     /** Returns a pointer to the ImoControl object with the given ID or

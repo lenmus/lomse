@@ -45,8 +45,6 @@ namespace lomse
 ///@endcond
 
 //forward declarations
-class ScreenDrawer;
-class GraphicView;
 class GmoBoxSystem;
 
 

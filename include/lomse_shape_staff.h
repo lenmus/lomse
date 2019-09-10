@@ -74,6 +74,12 @@ public:
     //other
     int line_space_at(LUnits yPos);
 
+    //API oriented
+    LUnits get_staff_line_spacing();
+    int get_staff_num_lines();
+    LUnits get_staff_margin();
+
+
 //protected:
 //    //temporary data to be used when mouse tool moving over the staff
 //    int         m_nOldSteps;		//to clear leger lines while dragging

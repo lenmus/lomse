@@ -153,7 +153,7 @@ public:
 
     //drawing
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
-    void highlight_object(ImoStaffObj* pSO, bool value);
+    //void highlight_object(ImoStaffObj* pSO, bool value);
 
     //hit testing and related
     GmoObj* hit_test(int iPage, LUnits x, LUnits y);
@@ -180,11 +180,8 @@ public:
 
     //active and pointed elements
 
-    /** Returns pointer to GmoBoxSystem containing the requested timepos. If pointer
-        @c iPage is not @nullptr, it also updates its
-        content with the index of the GmoBoxScorePage in which the system is
-        contained. If there is no system for the given timepos, returns @nullptr and
-        iPage is set to -1.
+    /** Returns pointer to GmoBoxSystem containing the requested timepos.
+        If there is no system for the given timepos, returns @nullptr.
 
         This method gives preference to finding a system containing an event at the
         given @c tiempos instead of non-timed staff objects. For example, the last
@@ -193,11 +190,12 @@ public:
 
         @param scoreId
         @param time The time position (absolute time units) for the requested system.
-        @param iPage Pointer to an int that will be updated with the page index in
-            which the returned system is included.
     */
-    GmoBoxSystem* get_system_for(ImoId scoreId, TimeUnits timepos, int* iPage=nullptr);
+    GmoBoxSystem* get_system_for(ImoId scoreId, TimeUnits timepos);
     GmoBoxSystem* get_system_box(int iSystem);
+
+    GmoBoxSystem* get_system_for_staffobj(ImoId id);
+
 
     //tests
     void dump_page(int iPage, ostream& outStream);

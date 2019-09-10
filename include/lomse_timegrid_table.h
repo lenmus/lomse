@@ -108,18 +108,18 @@ public:
         this method provides an approximated interpolated value.
         @param timepos Absolute time units for the requested position.
 
-        See get_x_for_staffobj_at_time()
+        See get_x_for_barline_at_time()
     */
     LUnits get_x_for_note_rest_at_time(TimeUnits timepos);
 
-    /** Returns the x position for the given timepos. This method takes all staff objects
+    /** Returns the x position for the given timepos. This method takes only barlines
         into account. Therefore, the returned value is the x position occupied by the
-        first found staffobj at the provided @c timepos.
+        first found barline at the provided @c timepos.
         @param timepos Absolute time units for the requested position.
 
         See get_x_for_note_rest_at_time()
     */
-    LUnits get_x_for_staffobj_at_time(TimeUnits timepos);
+    LUnits get_x_for_barline_at_time(TimeUnits timepos);
 
     //debug
     string dump();

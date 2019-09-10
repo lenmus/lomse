@@ -178,9 +178,11 @@ void GraphicModel::add_to_map_imo_to_box(GmoBox* pBox)
             LOMSE_LOG_ERROR(
                 "Duplicated Imo id %d. Existing Gmo: %s. Adding Gmo: %s",
                 id, (it->second)->get_name().c_str(), pBox->get_name().c_str() );
-            //TO_INVESTIGATE: This is nor an error. An Imo can create two
-            //boxes (currently DocPage and DocPageContent boxes). Maybe the
-            //error is in the implications if this is accepted.
+            //TO_INVESTIGATE: This is not an error for DocPage and DocPageContent
+            //boxes, as they can create more boxes when the content
+            //is split in two or more physical pages. Maybe the
+            //error is in not having considered the implications for these
+            //detected cases.
         }
         //END_DBG --------------------------------------------------------
         m_imoToBox[id] = pBox;
@@ -286,7 +288,7 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId sco
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos, int* iPage)
+GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos)
 {
     //if not found returns nullptr
 
@@ -294,9 +296,6 @@ GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos, int
     GmoBoxScorePage* pPage = pStub->get_page_for(timepos);
     if (pPage)
     {
-        if (iPage)
-            *iPage = pPage->get_page_number();
-
         //find system in this page
         GmoBoxSystem* pSystem = nullptr;
         int i = pPage->get_num_first_system();
@@ -330,10 +329,22 @@ GmoBoxSystem* GraphicModel::get_system_for(ImoId scoreId, TimeUnits timepos, int
         if (i < maxSystem)
             return pSystem;
     }
-
-    if (iPage)
-        *iPage = -1;
     return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxSystem* GraphicModel::get_system_for_staffobj(ImoId id)
+{
+    GmoShape* pShape = get_main_shape_for_imo(id);
+    if (!pShape)
+        return nullptr;
+
+    GmoBoxSliceInstr* pBSI = dynamic_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
+    if (!pBSI)
+        return nullptr;
+
+    GmoBoxSlice* pBS = static_cast<GmoBoxSlice*>( pBSI->get_parent_box() );
+    return static_cast<GmoBoxSystem*>( pBS->get_parent_box() );
 }
 
 //---------------------------------------------------------------------------------------

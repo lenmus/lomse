@@ -86,17 +86,6 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
-////---------------------------------------------------------------------------------------
-//void GmoShapeStaff::Shift(LUnits xIncr, LUnits yIncr)
-//{
-//	//TODO
-//    ShiftBoundsAndSelRec(xIncr, yIncr);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
 //---------------------------------------------------------------------------------------
 int GmoShapeStaff::line_space_at(LUnits yPos)
 {
@@ -120,89 +109,23 @@ int GmoShapeStaff::line_space_at(LUnits yPos)
 	return  10 + nStep;     //AWARE: remember: y axis is reversed.
 }
 
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeStaff::OnMouseStartMoving(lmPaper* pPaper, const UPoint& uPos)
-//{
-//    m_uxOldPos = lmNO_LEDGER_LINES;
-//
-//    //wxLogMessage(_T("[GmoShapeStaff::OnMouseStartMoving] nStaff=%d"), m_nStaff);
-//    return OnMouseMoving(pPaper, uPos);
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeStaff::OnMouseMoving(lmPaper* pPaper, const UPoint& uPos)
-//{
-//	//The user continues moving the mouse (tool: insert note) over a valid area for
-//    //inserting a note/rest in this staff. We receive the mouse position and we
-//    //must return the valid notehead position. We must also erase any previously drawn ledger
-//    //lines and draw new ones if necessary
-//
-//    //A note only can be placed in discrete vertical steps (staff lines/spaces)
-//    UPoint pos = uPos;
-//	int nSteps;
-//    pos.y = lmCheckNoteNewPosition((lmStaff*)GetScoreOwner(), GetYTop(), uPos.y, &nSteps);
-//
-//		//draw leger lines
-//
-//    lmVStaff* pVStaff = (lmVStaff*)GetScoreOwner()->GetParentScoreObj();
-//
-//	//as painting uses XOR we need the complementary color
-//	wxColour color = *wxBLUE;
-//	wxColour colorC(255 - (int)color.Red(), 255 - (int)color.Green(), 255 - (int)color.Blue() );
-//	pPaper->SetLogicalFunction(wxXOR);
-//
-//    //wxLogMessage(_T("[GmoShapeStaff::OnMouseMoving] VStaff=0x%x, nStaff=%d, OldSteps=%d, oldPos=%.2f, newSteps=%d, newPos=%.2f"),
-//    //             pVStaff, m_nStaff, m_nOldSteps, m_uxOldPos, nSteps, uPos.x );
-//
-//	//remove old ledger lines
-//    LUnits uLineLength = 2.5f * m_uSpacing;
-//	if (m_uxOldPos != -100000.0f)
-//        lmDrawLegerLines(m_nOldSteps+10, m_uxOldPos, pVStaff, m_nStaff,
-//                         uLineLength, m_uBoundsTop.y, pPaper, colorC);
-//
-//	//draw new ledger lines and save data for erasing them the next time
-//	m_uxOldPos = uPos.x - m_uSpacing;
-//    lmDrawLegerLines(nSteps+10, m_uxOldPos, pVStaff, m_nStaff,
-//                        uLineLength, m_uBoundsTop.y, pPaper, colorC);
-//	m_nOldSteps = nSteps;
-//
-//	return pos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeStaff::OnMouseEndMoving(lmPaper* pPaper, UPoint uPos)
-//{
-//	// End drag. Receives the final position of the object (logical units referred
-//    // to page origin).
-//	// This method must remove any XOR painted lines.
-//
-//	//remove old ledger lines
-//	if (m_uxOldPos != lmNO_LEDGER_LINES)
-//    {
-//	    //as painting uses XOR we need the complementary color
-//	    wxColour color = *wxBLUE;
-//	    wxColour colorC(255 - (int)color.Red(), 255 - (int)color.Green(), 255 - (int)color.Blue() );
-//	    pPaper->SetLogicalFunction(wxXOR);
-//
-//        LUnits uLineLength = 2.5f * m_uSpacing;
-//        lmVStaff* pVStaff = (lmVStaff*)GetScoreOwner()->GetParentScoreObj();
-//
-// 	    //wxLogMessage(_T("[GmoShapeStaff::OnMouseEndMoving] VStaff=0x%x, nStaff=%d, OldSteps=%d, oldPos=%.2f"),
-//		    //         pVStaff, m_nStaff, m_nOldSteps, m_uxOldPos);
-//
-//        lmDrawLegerLines(m_nOldSteps+10, m_uxOldPos, pVStaff, m_nStaff,
-//                        uLineLength, m_uBoundsTop.y, pPaper, colorC);
-//    }
-//    //else
-//	   // wxLogMessage(_T("[GmoShapeStaff::OnMouseEndMoving] No ledger lines to remove") );
-//
-//}
-//
-////---------------------------------------------------------------------------------------
-//lmVStaff* GmoShapeStaff::GetOwnerVStaff()
-//{
-//    return ((lmStaff*)m_pOwner)->GetOwnerVStaff();
-//}
-//
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeStaff::get_staff_line_spacing()
+{
+    return m_pStaff->get_line_spacing();
+}
+
+//---------------------------------------------------------------------------------------
+int GmoShapeStaff::get_staff_num_lines()
+{
+    return m_pStaff->get_num_lines();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeStaff::get_staff_margin()
+{
+    return m_pStaff->get_staff_margin();
+}
+
 
 }  //namespace lomse

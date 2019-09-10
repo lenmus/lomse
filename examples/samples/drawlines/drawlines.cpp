@@ -27,6 +27,9 @@
 
 #include "drawlines.h"
 
+#include "lomse_score_algorithms.h"
+
+
 //=======================================================================================
 // main: the entry point
 //=======================================================================================
@@ -118,7 +121,7 @@ void MainWindow::on_add_lines()
     SpDocument doc = m_canvas->get_document();
     if (doc)
     {
-        //get the a raw pointer to the document
+        //get a raw pointer to the document
         Document* pDoc = doc.get();
         //Use the document to get the score to edit
         //The next line of code is just an example, in which it is assumed that
@@ -140,17 +143,12 @@ void MainWindow::on_add_lines()
             //the score, the clef in this example
             ScoreCursor cursor(pDoc, pScore);
 
-            //Now move the cursor to the start of second measure.
-            //As I write this sample, I realize that there is no method for pointing
-            //directly to a measure, so I add this to the TODO list. Therefore,
-            //I will position the cursor using the time position of the barline.
-            //The score is in 6/8 time, and has anacrusis start. The end of second
-            //barline is after seven eight notes.
-            //Aan eight note last for 32 lomse time units; therefore, the position
-            //after second barline is at 7*32 = 224 time units
-            TimeUnits timepos = 224;
-            cursor.to_time(0, 0, timepos);  //now cursor points to first object after
-                                            //the second barline
+            //Now move the cursor to the first barline
+            int measure = 1;            //0 based. Measure 1 is the measure that starts after first barline
+            int instr = 0;              //0 based. First and only instrument
+            int staff = 0;              //0 based. First staff of the selected instrument
+            cursor.to_measure(measure, instr, staff);     //cursor will point to first note after first barline
+            cursor.move_prev();         //move back to point to the barline
 
             //get the pointed object
             ImoStaffObj* pAt = cursor.staffobj();
@@ -203,7 +201,7 @@ void MainWindow::on_add_lines()
                 cursor.move_next();
                 pAt = cursor.staffobj();
             }
-            pAt = cursor.staffobj();;
+            pAt = cursor.staffobj();
 
             //attach the line to the object and save its reference
             if (pAO)

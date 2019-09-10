@@ -744,7 +744,7 @@ void SoundEventsTable::add_events_to_jumps()
     for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
     {
         int measure = (*it)->get_measure();
-        int nEntry = m_events.size() - 1;
+        int nEntry = int(m_events.size() - 1);
         if (measure >= 0)
             nEntry = m_measures[measure];
         (*it)->set_event(nEntry);

@@ -61,6 +61,7 @@ class ImoStaffObj;
 class PlayerGui;
 class Task;
 class VisualEffect;
+class FragmentMark;
 
 class Document;
 typedef std::shared_ptr<Document>     SpDocument;
@@ -1015,6 +1016,86 @@ public:
 
     //@}    //Visual effects during playback
 
+
+
+    //interface to GraphicView. Application markings on the score
+    /// @name Interface to GraphicView. Application markings on the score
+    //@{
+
+    /** Create a new FragmentMark on the score at the given time position for notes and
+        rest. If no note/rest exists in the passed timepos, the mark will be placed at
+        the estimated position at which the note would be placed.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param timepos The position for the mark, in Time Units from the start
+               of the score.
+
+        The mark will cover all staves of the system and its height will be that of
+        the system box. After creation you can use methods top() and bottom() to define
+        the instruments and staves range to cover, as well as to change the extra height
+        with method extension().
+
+        By default, the properties of the created mark are as follows:
+        - Marker type is <tt>k_mark_line</tt>, that is, a vertical line.
+        - Line color is transparent red (#ff000080).
+        - Line thickness is 1 millimeter.
+        - Line style solid.
+
+        The mark properties (type, color, position, length, etc.) can later be
+        changed. See methods: type(), color(), top(), bottom(), x_shift(), line_style(),
+        extension().
+
+        <b>Example of use:</b>
+
+        @code
+        ImoId scoreId = ...
+        TimeUnits timepos = ...
+        FragmentMark* mark = pInteractor->add_fragment_mark(scoreId, timepos);
+
+        //customize the mark. Will cover second and third instruments
+        mark->color("#00ff00")->thickness(5)->top(1)->bottom(2);
+            ...
+
+        //change its appearance
+        mark->type(k_mark_open_bracket)->color("ffff00");
+            ...
+
+        //when no longer needed remove it
+        pInteractor->remove_mark(mark);
+
+        Marks cannot be repositioned. If this is needed, just delete current mark and
+        create a new one at the desired new position.
+
+        @endcode
+    */
+    FragmentMark* const add_fragment_mark_at_note_rest(ImoId scoreId, TimeUnits timepos);
+
+    /** Create a new FragmentMark on the score at the barline at the given time position.
+        Take into account that barlines have the same timepos than the first
+        note/rest after the barline. If there is no a barline at the given timepos, this
+        method will place the mark on the note/rest position for the passed timepos.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param timepos The position for the mark, in Time Units from the start
+               of the score.
+
+        See add_fragment_mark_at_note_rest() for more details.
+    */
+    FragmentMark* const add_fragment_mark_at_barline(ImoId scoreId, TimeUnits timepos);
+
+    /** Create a new FragmentMark on the score at the given staff object position.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param pSO Pointer to the staff object defining the position for the mark.
+
+        See add_fragment_mark_at_note_rest() for more details.
+    */
+    FragmentMark* const add_fragment_mark_at_staffobj(ImoId scoreId, ImoStaffObj* pSO);
+
+    /** Hide the mark and delete it.
+        @param mark  Pointer to the mark to remove. After executing this method the
+            pointer will no longer be valid.
+    */
+    void remove_mark(VisualEffect* mark);
+
+    //@}    //Application markings on the score
 
 
     //interface to GraphicView. Printing

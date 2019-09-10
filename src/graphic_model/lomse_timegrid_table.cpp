@@ -163,7 +163,7 @@ LUnits TimeGridTable::get_x_for_note_rest_at_time(TimeUnits timepos)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits TimeGridTable::get_x_for_staffobj_at_time(TimeUnits timepos)
+LUnits TimeGridTable::get_x_for_barline_at_time(TimeUnits timepos)
 {
     //xPos = 0 if table is empty or timepos < first entry timepos
     if (m_PosTimes.size() == 0 || is_lower_time(timepos, m_PosTimes.front().rTimepos))
