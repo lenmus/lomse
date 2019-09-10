@@ -78,7 +78,7 @@ GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iInstr, int iStaff)
 
     if (iStaff == -1)   //last staff for instrument
     {
-        if (iInstr == m_firstStaff.size() - 1)
+        if (iInstr == int(m_firstStaff.size() - 1) )
             return m_staffShapes.back();
         else
             return m_staffShapes[ m_firstStaff[iInstr] - 1 ];

@@ -49,6 +49,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_box_system.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_caret.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_caret_positioner.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_fragment_mark.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_basic.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_graphical_model.cpp
