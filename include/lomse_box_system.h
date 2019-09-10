@@ -65,7 +65,8 @@ public:
     inline TimeGridTable* get_time_grid_table() { return m_pGridTable; }
     TimeUnits start_time();
     TimeUnits end_time();
-    LUnits get_x_for_time(TimeUnits timepos);
+    LUnits get_x_for_note_rest_at_time(TimeUnits timepos);
+    LUnits get_x_for_barline_at_time(TimeUnits timepos);
 
 	//miscellaneous info
     GmoShapeStaff* get_staff_shape(int absStaff);
@@ -82,6 +83,12 @@ public:
 
     //hit tests related
     int nearest_staff_to_point(LUnits y);
+
+    //helper. User API related
+    int get_num_instruments();
+
+    //debug
+    string dump_timegrid_table();
 
 protected:
 

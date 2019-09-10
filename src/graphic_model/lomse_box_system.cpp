@@ -73,6 +73,18 @@ GmoShapeStaff* GmoBoxSystem::get_staff_shape(int absStaff)
 //---------------------------------------------------------------------------------------
 GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iInstr, int iStaff)
 {
+    if (iInstr == -1)   //last instrument
+        iInstr = get_num_instruments() - 1;
+
+    if (iStaff == -1)   //last staff for instrument
+    {
+        if (iInstr == m_firstStaff.size() - 1)
+            return m_staffShapes.back();
+        else
+            return m_staffShapes[ m_firstStaff[iInstr] - 1 ];
+    }
+
+
     if (iInstr == 0)
         return m_staffShapes[iStaff];
     else
@@ -149,9 +161,28 @@ TimeUnits GmoBoxSystem::end_time()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits GmoBoxSystem::get_x_for_time(TimeUnits timepos)
+LUnits GmoBoxSystem::get_x_for_note_rest_at_time(TimeUnits timepos)
 {
     return m_pGridTable->get_x_for_note_rest_at_time(timepos);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoBoxSystem::get_x_for_barline_at_time(TimeUnits timepos)
+{
+    return m_pGridTable->get_x_for_barline_at_time(timepos);
+}
+
+//---------------------------------------------------------------------------------------
+string GmoBoxSystem::dump_timegrid_table()
+{
+    return m_pGridTable->dump();
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxSystem::get_num_instruments()
+{
+    ImoScore* pScore = static_cast<ImoScore*>( get_creator_imo() );
+    return pScore->get_num_instruments();
 }
 
 

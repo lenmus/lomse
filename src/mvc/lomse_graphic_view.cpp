@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -41,6 +41,7 @@
 #include "lomse_time_grid.h"
 #include "lomse_visual_effect.h"
 #include "lomse_tempo_line.h"
+#include "lomse_fragment_mark.h"
 #include "lomse_overlays_generator.h"
 #include "lomse_handler.h"
 #include "lomse_box_slice.h"
@@ -340,14 +341,15 @@ bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnit
     if (!pGModel)
         return false;    //error
 
-    m_pScrollSystem = pGModel->get_system_for(scoreId, timepos, &m_iScrollPage);
+    m_pScrollSystem = pGModel->get_system_for(scoreId, timepos);
     //LOMSE_LOG_DEBUG(Logger::k_events,
-    //                "scoreId=%d, timepos=%f, system=%s, m_iScrollPage=%d",
+    //                "scoreId=%d, timepos=%f, system=%s",
     //                scoreId, timepos, (m_pScrollSystem != nullptr ? "found" : "not found"));
     if (!m_pScrollSystem)
         return false;    //error
 
-    m_xScrollLeft = m_pScrollSystem->get_x_for_time(timepos);
+    m_iScrollPage = m_pScrollSystem->get_page_number();
+    m_xScrollLeft = m_pScrollSystem->get_x_for_note_rest_at_time(timepos);
     m_xScrollRight = m_xScrollLeft + 1000;   //1 cm
 
     //LOMSE_LOG_DEBUG(Logger::k_events, "new scroll pos = %f, %f", m_xScrollLeft, m_xScrollRight);
@@ -1539,6 +1541,68 @@ bool GraphicView::is_valid_viewport()
         return m_viewportSize.width > 0 && m_viewportSize.height > 0;
     }
     return false;
+}
+
+//---------------------------------------------------------------------------------------
+FragmentMark* const GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
+                                                      bool fBarline)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return nullptr;
+
+    GmoBoxSystem* pBoxSystem = pGModel->get_system_for(scoreId, timepos);
+    if (!pBoxSystem)
+        return nullptr;
+
+    LUnits xLeft = 0.0;
+    if (fBarline)
+        xLeft = pBoxSystem->get_x_for_barline_at_time(timepos);
+    else
+        xLeft = pBoxSystem->get_x_for_note_rest_at_time(timepos);
+
+    FragmentMark* pMark = LOMSE_NEW FragmentMark(this, m_libraryScope);
+    pMark->set_visible(true);
+    pMark->move_to(xLeft, pBoxSystem);
+
+    add_visual_effect(pMark);
+    return pMark;
+}
+
+//---------------------------------------------------------------------------------------
+FragmentMark* const GraphicView::add_fragment_mark_at_staffobj(ImoId scoreId,
+                                                               ImoStaffObj* pSO)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (!pGModel)
+        return nullptr;
+
+    GmoBoxSystem* pBoxSystem = pGModel->get_system_for_staffobj(pSO->get_id());
+    if (!pBoxSystem)
+        return nullptr;
+
+    GmoShape* pShape = pGModel->get_main_shape_for_imo(pSO->get_id());
+    if (!pShape)
+    {
+        LOMSE_LOG_ERROR("No shape found for Imo id: %d",
+                        pSO->get_id() );
+        return nullptr;
+    }
+
+    LUnits xLeft = pShape->get_left();
+    FragmentMark* pMarker = LOMSE_NEW FragmentMark(this, m_libraryScope);
+    pMarker->set_visible(true);
+    pMarker->move_to(xLeft, pBoxSystem);
+    pMarker->set_visible(true);
+
+    add_visual_effect(pMarker);
+    return pMarker;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::remove_mark(VisualEffect* mark)
+{
+    m_pOverlaysGenerator->remove_visual_effect(mark);
 }
 
 ////---------------------------------------------------------------------------------------

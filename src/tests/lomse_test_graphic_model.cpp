@@ -953,7 +953,7 @@ SUITE(GraphicModelTest)
     }
 
 
-    //@2xx. TimeGridTable::get_x_for_staffobj_at_time() ---------------------------------
+    //@2xx. TimeGridTable::get_x_for_barline_at_time() ---------------------------------
 
     TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_200)
     {
@@ -974,11 +974,11 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 64.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( pGrid->get_x_for_staffobj_at_time(-1.0) == 0.0f );
+        CHECK( pGrid->get_x_for_barline_at_time(-1.0) == 0.0f );
 
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=-1.0) = " << pGrid->get_x_for_staffobj_at_time(-1.0) << endl;
+//        cout << "x(t=-1.0) = " << pGrid->get_x_for_barline_at_time(-1.0) << endl;
 
         delete pIntor;
     }
@@ -1004,10 +1004,14 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(128.0), pGrid->get_x_pos(3)) );
+        CHECK( is_equal_pos(pGrid->get_x_for_barline_at_time(0.0), pGrid->get_x_pos(0)) );
+//        cout << test_name() << endl;
+//        cout << "x(t=0.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(0.0) << endl;
+
+        CHECK( is_equal_pos(pGrid->get_x_for_barline_at_time(128.0), pGrid->get_x_pos(3)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(128.0) << endl;
+//        cout << "x(t=128.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(128.0) << endl;
 
         delete pIntor;
     }
@@ -1037,10 +1041,10 @@ SUITE(GraphicModelTest)
                     / double(192.0 - 128.0);
         LUnits xPos = pGrid->get_x_pos(4) + LUnits( double(160.0 - 128.0) * dx );
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(160.0), xPos) );
+        CHECK( is_equal_pos(pGrid->get_x_for_barline_at_time(160.0), xPos) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(160.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(160.0) << endl;
 //        cout << "expected xPos = " << xPos << endl;
 
         delete pIntor;
@@ -1067,11 +1071,11 @@ SUITE(GraphicModelTest)
         GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
         TimeGridTable* pGrid = pBSys->get_time_grid_table();
 
-        CHECK( is_equal_pos(pGrid->get_x_for_staffobj_at_time(260.0),
+        CHECK( is_equal_pos(pGrid->get_x_for_barline_at_time(260.0),
                             pGrid->get_x_pos(pGrid->get_size()-1)) );
 //        cout << test_name() << endl;
 //        cout << pGrid->dump();
-//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_staffobj_at_time(260.0) << endl;
+//        cout << "x(t=160.0) = " << fixed << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(260.0) << endl;
 
         delete pIntor;
     }
@@ -1111,6 +1115,37 @@ SUITE(GraphicModelTest)
         //pGModel->dump_page(0, cout);
 
         CHECK( is_equal_pos(pGrid->get_x_for_note_rest_at_time(128.0), pGrid->get_x_pos(5)) );
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, time_grid_table_201b)
+    {
+        //@201b. Get first staffobj position when more staffobjs at that timepos
+
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(score (vers 2.0) "
+            "(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key D)(time 2 4)"
+            "(n f4 q. p1 v1)(clef F4 p1)(n f3 e)"
+            "(n c3 q p2 v2)(n e3 e)(n a3 e)(barline)"
+            "(n c3 q p1 v1)(clef G p1)(n d4 e)"
+            ")))" );
+        VerticalBookView* pView = static_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, nullptr);
+        GraphicModel* pGModel = pIntor->get_graphic_model();
+        ImoId scoreId = spDoc->get_im_root()->get_content_item(0)->get_id();
+        GmoBoxSystem* pBSys = pGModel->get_system_for(scoreId, 128.0);
+        TimeGridTable* pGrid = pBSys->get_time_grid_table();
+
+        CHECK( is_equal_pos(pGrid->get_x_for_barline_at_time(192.0), pGrid->get_x_pos(7)) );
+//        cout << test_name() << endl;
+//        cout << pGrid->dump();
+//        cout << "x(t=160.0) = " << std::fixed << setprecision(5) << pGrid->get_x_for_barline_at_time(192.0) << endl;
 
         delete pIntor;
     }

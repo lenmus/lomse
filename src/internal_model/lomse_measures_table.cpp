@@ -142,7 +142,7 @@ ImMeasuresTableEntry* ImMeasuresTable::get_measure_at(TimeUnits timepos)
         return nullptr;
 
     int first = 0;
-    int last = m_theTable.size() - 1;
+    int last = int(m_theTable.size() - 1);
     int const max = last;
     //cout << "looking for=" << timepos << "--------------------------------------" << endl;
     while (first <= last)

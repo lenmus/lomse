@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -69,6 +69,7 @@ class Handler;
 class SelectionHighlight;
 class SelectionSet;
 class AreaInfo;
+class FragmentMark;
 
 typedef std::shared_ptr<GmoShape>  SpGmoShape;
 
@@ -302,6 +303,37 @@ public:
 	VisualEffect* get_tracking_effect(int effect);
 
     ///@}    //Visual effects for tracking during playback
+
+
+    /// @name Application markings on the score
+    ///@{
+
+    /** Create a new FragmentMark on the score at the given time position for a note/rest
+        or a barline.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param timepos The position for the mark, in Time Units from the start
+               of the score.
+        @param fBarline Barlines have the same timepos than the first note/rest after
+               the barline. This flag is for selecting the position for the mark, either
+               on the barline (if exists) or in the note/rest.
+    */
+    virtual FragmentMark* const add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
+                                                     bool fBarline);
+
+    /** Create a new FragmentMark on the score at the given staff object position.
+        @param scoreId  Id. of the score on which the mark will be added.
+        @param pSO Pointer to the staff object defining the position for the mark.
+    */
+    virtual FragmentMark* const add_fragment_mark_at_staffobj(ImoId scoreId,
+                                                              ImoStaffObj* pSO);
+
+    /** Hide the mark and delete it.
+        @param mark  Pointer to the mark to remove. After executing this method the
+            pointer will no longer be valid.
+    */
+    virtual void remove_mark(VisualEffect* mark);
+
+    ///@}    //Application markings on the score
 
 
     /** The View is requested to re-paint itself onto the window */

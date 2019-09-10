@@ -73,7 +73,6 @@ protected:
 //excluded from public API. Only for internal use.
 
 public:
-    virtual ~VisualEffect() {}
 
     //state
     inline void set_visible(bool value) { m_fVisible = value; }
@@ -88,7 +87,14 @@ public:
     //size when rendered
     virtual URect get_bounds() = 0;
 
+
 protected:
+    friend class OverlaysGenerator;
+    virtual ~VisualEffect() {}
+
+    //Returns the GraphicView to which this visual effect is associated
+    inline GraphicView* get_view() { return m_pView; }
+
 
 ///@endcond
 };
