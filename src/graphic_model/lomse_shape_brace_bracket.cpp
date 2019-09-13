@@ -154,7 +154,6 @@ Vertex m_BracketVertices2[] = {
 };
 
 
-float m_dxBracket = 479.0f;
 float m_dyBracket = 606.0f;
 float m_dxBracketBar = 307.0f;
 const int m_nNumVerticesBracket = sizeof(m_BracketVertices)/sizeof(Vertex);

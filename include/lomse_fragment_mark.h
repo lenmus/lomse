@@ -63,6 +63,8 @@ enum EFragmentMark
     k_mark_close_bracket,     ///< Squared bracket with horizontal lines at left
     k_mark_open_curly,        ///< Squared bracket with horizontal lines at right
     k_mark_close_curly,       ///< Squared bracket with horizontal lines at left
+    k_mark_open_rounded,      ///< Bracket with curved horizontal lines at right
+    k_mark_close_rounded,     ///< Bracket with curved horizontal lines at left
 };
 
 
@@ -76,7 +78,6 @@ class FragmentMark : public VisualEffect
 protected:
     EFragmentMark   m_type;
     Color           m_color;
-    LUnits          m_thickness;
     ELineStyle      m_lineStyle;
     GmoBoxSystem*   m_pBoxSystem;
     int             m_iPage;
@@ -147,7 +148,7 @@ public:
     inline EFragmentMark get_type() const { return m_type; }
 
     /** Return the current line thickness in use for drawing the mark. */
-    inline LUnits get_thickness() const { return m_thickness; }
+    inline LUnits get_thickness() const { return m_bounds.width; }
 
     /** Return the current line style in use for drawing the mark. */
     inline ELineStyle get_line_style() const { return m_lineStyle; }

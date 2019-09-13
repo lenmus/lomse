@@ -74,6 +74,7 @@ class GmoShapeBrace : public GmoShapeBracketBrace
 {
     friend class InstrumentEngraver;
     friend class GroupEngraver;
+    friend class FragmentMark;
     GmoShapeBrace(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                     LUnits xRight, LUnits yBottom, Color color);
 

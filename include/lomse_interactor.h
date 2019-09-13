@@ -1036,7 +1036,7 @@ public:
 
         By default, the properties of the created mark are as follows:
         - Marker type is <tt>k_mark_line</tt>, that is, a vertical line.
-        - Line color is transparent red (#ff000080).
+        - Line color is transparent red (\#ff000080).
         - Line thickness is 1 millimeter.
         - Line style solid.
 
