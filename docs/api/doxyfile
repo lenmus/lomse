@@ -642,6 +642,7 @@ INPUT     = mainpages \
 			../../include/lomse_doorway.h \
 			../../include/lomse_drawer.h \
 			../../include/lomse_events.h \
+			../../include/lomse_fragment_mark.h \
 			../../include/lomse_graphic_view.h \
 			../../include/lomse_im_attributes.h \
 			../../include/lomse_import_options.h \
@@ -655,7 +656,6 @@ INPUT     = mainpages \
 			../../include/lomse_tempo_line.h \
 			../../include/lomse_view.h \
 			../../include/lomse_visual_effect.h \
-			examples \
             groups
 
 INPUT_ENCODING         = UTF-8
@@ -702,7 +702,8 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = ../../examples/
+#EXAMPLE_PATH           = ../../examples/
+EXAMPLE_PATH           =
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and

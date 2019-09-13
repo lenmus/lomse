@@ -1,8 +1,8 @@
 /**
-@page page-code-license License for code samples
+@page page-tutorials-license License for tutorials and samples
 
 
-The code samples and code examples included in this API documentation are intended to show how the Lomse library can be used and so, to be copied. Therefore, they are licensed under the following terms:
+The tutorials and code samples included in the library as well as code examples included in this API documentation are intended to show how the Lomse library can be used and so, to be copied. Therefore, they are licensed under the following terms:
 
     Any code sample and code example in this Lomse API documentation is free 
     and unencumbered software released into the public domain.
