@@ -52,19 +52,62 @@ protected:
     int                 m_nContour;     //current countour
     agg::trans_affine   m_trans;        //affine transformation to apply
 
-    double              m_rBracketBarHeight;
+    double              m_rBarlineHeight;
 
     static Vertex m_topHookVertices[];
     static Vertex m_bottomHookVertices[];
-    static float m_dxRoundedBracketBar;
+    static float m_dxBarline;
     static float m_hooksHeight;
 
-    int m_nNumVerticesRoundedBracket;
-    int m_nNumVerticesRoundedBracket2;
+    int m_numVerticesTop;
+    int m_numVerticesBottom;
 
 
 public:
     RoundedBracketGlyph();
+
+    void draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+              LUnits xRight, LUnits yBottom, bool fOpen, Color color = Color(0,0,0));
+
+    //URect get_bounds();
+
+protected:
+    void set_affine_transform(LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom, bool fOpen);
+
+    //VertexSource
+    unsigned vertex(double* px, double* py) override;
+    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
+};
+
+//=======================================================================================
+// Class CurlyBracketGlyph. Helper class to draw open/close curly brackets
+//=======================================================================================
+class CurlyBracketGlyph : public VertexSource
+{
+protected:
+    int                 m_nCurVertex;   //index to current vertex
+    int                 m_nContour;     //current countour
+    agg::trans_affine   m_trans;        //affine transformation to apply
+
+    double  m_rBarlineHeight;
+    double  m_rBarlineHalf;
+
+    static Vertex m_topVertices[];
+    static Vertex m_centerDownVertices[];
+    static Vertex m_bottomVertices[];
+    static Vertex m_centerUpVertices[];
+    static float m_dxBarline;
+    static float m_hooksHeight;
+    static float m_centerHeight;
+
+    int m_numVerticesTop;
+    int m_numVerticesCenterDown;
+    int m_numVerticesBottom;
+    int m_numVerticesCenterUp;
+
+
+public:
+    CurlyBracketGlyph();
 
     void draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
               LUnits xRight, LUnits yBottom, bool fOpen, Color color = Color(0,0,0));
@@ -94,11 +137,11 @@ FragmentMark::FragmentMark(GraphicView* view, LibraryScope& libraryScope)
     , m_yBottom(2000.0)     //arbitrary, to have a valid value
     , m_extension(300.0)    //3.0 mm
 {
-    m_bounds.width = 100.0;     // 1.00 mm
+    m_bounds.width = 100.0;     // 1.00 mm. Arbitrary, to have a valid value
 }
 
 //---------------------------------------------------------------------------------------
-void FragmentMark::move_to(LUnits xPos, GmoBoxSystem* pBoxSystem)
+void FragmentMark::initialize(LUnits xPos, GmoBoxSystem* pBoxSystem)
 {
     //This method is protected. It is only invoked one time, when the mark is created.
 
@@ -120,6 +163,9 @@ void FragmentMark::move_to(LUnits xPos, GmoBoxSystem* pBoxSystem)
         ImoStyle* pStyle = pBoxSystem->get_style();
         if (pStyle)
             xLeft += pStyle->margin_left();
+
+        //line thickness
+        thickness(6.0f);    //tenths
     }
 
     m_bounds.left(xLeft);
@@ -170,24 +216,71 @@ FragmentMark* const FragmentMark::bottom(int instr, int staff)
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::x_shift(LUnits dx)
+FragmentMark* const FragmentMark::x_shift(Tenths dx)
 {
-    m_bounds.left( m_bounds.left() + dx );
+    if (!m_pBoxSystem)
+        return this;
+
+    m_bounds.left( m_bounds.left() + m_pBoxSystem->tenths_to_logical(dx) );
+    return this;
+}
+
+//---------------------------------------------------------------------------------------
+FragmentMark* const FragmentMark::extra_height(Tenths value)
+{
+    if (!m_pBoxSystem)
+        return this;
+
+    m_extension = m_pBoxSystem->tenths_to_logical(value);
+    return this;
+}
+
+//---------------------------------------------------------------------------------------
+FragmentMark* const FragmentMark::thickness(Tenths value)
+{
+    if (!m_pBoxSystem)
+        return this;
+
+    m_bounds.width = m_pBoxSystem->tenths_to_logical(value);
     return this;
 }
 
 //---------------------------------------------------------------------------------------
 void FragmentMark::on_draw(ScreenDrawer* pDrawer)
 {
+    if (!m_pBoxSystem)
+        return;
+
     LUnits yTop = m_yTop - m_extension;
     LUnits yBottom = m_yBottom + m_extension;
     LUnits hookLength = 200.0;
 
-    if (m_type == k_mark_open_rounded || m_type == k_mark_close_rounded)
+    UPoint org = m_pView->get_page_origin_for(m_iPage);
+    pDrawer->set_shift(-org.x, -org.y);
+
+    if (m_type == k_mark_open_rounded)
+    {
+        RoundedBracketGlyph glyph;
+        glyph.draw(pDrawer, m_bounds.left() - m_bounds.width, yTop, m_bounds.left(),
+                   yBottom, true, m_color);
+    }
+    else if (m_type == k_mark_close_rounded)
     {
         RoundedBracketGlyph glyph;
         glyph.draw(pDrawer, m_bounds.left(), yTop, m_bounds.left() + m_bounds.width,
-                   yBottom, (m_type == k_mark_open_rounded), m_color);
+                   yBottom, false, m_color);
+    }
+    else if (m_type == k_mark_open_curly)
+    {
+        CurlyBracketGlyph glyph;
+        glyph.draw(pDrawer, m_bounds.left() - m_bounds.width, yTop, m_bounds.left(),
+                   yBottom, true, m_color);
+    }
+    else if (m_type == k_mark_close_curly)
+    {
+        CurlyBracketGlyph glyph;
+        glyph.draw(pDrawer, m_bounds.left(), yTop, m_bounds.left() + m_bounds.width,
+                   yBottom, false, m_color);
     }
     else
     {
@@ -196,32 +289,37 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
         pDrawer->stroke(m_color);
         pDrawer->stroke_width(m_bounds.width);
 
-        UPoint org = m_pView->get_page_origin_for(m_iPage);
-        pDrawer->set_shift(-org.x, -org.y);
-
-        if (m_type == k_mark_open_bracket)
+        if (m_type == k_mark_open_squared)
         {
+            LUnits xLeft = m_bounds.left() - m_bounds.width / 2;
+            yTop -= m_bounds.width / 2;
+            yBottom += m_bounds.width / 2;
+
             //top hook
-            pDrawer->move_to(m_bounds.left() + hookLength, yTop);
-            pDrawer->hline_to(m_bounds.left());
+            pDrawer->move_to(xLeft + hookLength, yTop);
+            pDrawer->hline_to(xLeft);
 
             //vertical line
             pDrawer->vline_to(yBottom);
 
             //bottom hook
-            pDrawer->hline_to(m_bounds.left() + hookLength);
+            pDrawer->hline_to(xLeft + hookLength);
         }
-        else if (m_type == k_mark_close_bracket)
+        else if (m_type == k_mark_close_squared)
         {
+            LUnits xLeft = m_bounds.left() + m_bounds.width / 2;
+            yTop -= m_bounds.width / 2;
+            yBottom += m_bounds.width / 2;
+
             //top hook
-            pDrawer->move_to(m_bounds.left() - hookLength, yTop);
-            pDrawer->hline_to(m_bounds.left());
+            pDrawer->move_to(xLeft - hookLength, yTop);
+            pDrawer->hline_to(xLeft);
 
             //vertical line
             pDrawer->vline_to(yBottom);
 
             //bottom hook
-            pDrawer->hline_to(m_bounds.left() - hookLength);
+            pDrawer->hline_to(xLeft - hookLength);
         }
         else
         {
@@ -297,14 +395,14 @@ Vertex RoundedBracketGlyph::m_bottomHookVertices[] = {
     {   0.0,     0.0, agg::path_cmd_stop }
 };
 
-float RoundedBracketGlyph::m_dxRoundedBracketBar = 81.0f;   //width of the vertical line (105 - 24)
+float RoundedBracketGlyph::m_dxBarline = 81.0f;   //width of the vertical line (105 - 24)
 float RoundedBracketGlyph::m_hooksHeight = 330.0;    //2 * height of one hook = 2*(547-712) = 2*165 = 330
 
 //---------------------------------------------------------------------------------------
 RoundedBracketGlyph::RoundedBracketGlyph()
 {
-    m_nNumVerticesRoundedBracket = sizeof(m_topHookVertices)/sizeof(Vertex);
-    m_nNumVerticesRoundedBracket2 = sizeof(m_bottomHookVertices)/sizeof(Vertex);
+    m_numVerticesTop = sizeof(m_topHookVertices)/sizeof(Vertex);
+    m_numVerticesBottom = sizeof(m_bottomHookVertices)/sizeof(Vertex);
 }
 
 
@@ -312,9 +410,9 @@ RoundedBracketGlyph::RoundedBracketGlyph()
 void RoundedBracketGlyph::set_affine_transform(LUnits xLeft, LUnits yTop,
                                                LUnits xRight, LUnits yBottom, bool fOpen)
 {
-    m_rBracketBarHeight = (double)(yBottom - yTop);
+    m_rBarlineHeight = (double)(yBottom - yTop);
 
-    double rxScale((xRight - xLeft) / m_dxRoundedBracketBar);
+    double rxScale((xRight - xLeft) / m_dxBarline);
     double ryScale = rxScale;
     if (!fOpen)
         rxScale = -rxScale;
@@ -337,8 +435,8 @@ unsigned RoundedBracketGlyph::vertex(double* px, double* py)
 
 			unsigned cmd = m_topHookVertices[m_nCurVertex++].cmd;
 
-			//change to rectangle contour?
-			if(m_nCurVertex == m_nNumVerticesRoundedBracket)
+			//change to next contour?
+			if(m_nCurVertex == m_numVerticesTop)
             {
 				m_nContour++;
                 m_nCurVertex = 0;
@@ -348,14 +446,14 @@ unsigned RoundedBracketGlyph::vertex(double* px, double* py)
 		}
 		case 1:		//bottom hook
 		{
-		    if(m_nCurVertex >= m_nNumVerticesRoundedBracket2)
+		    if(m_nCurVertex >= m_numVerticesBottom)
 			    return agg::path_cmd_stop;
 
 			*px = m_bottomHookVertices[m_nCurVertex].ux_coord;
 			*py = m_bottomHookVertices[m_nCurVertex].uy_coord;
 			m_trans.transform(px, py);
 
-            *py += m_rBracketBarHeight;
+            *py += m_rBarlineHeight;
 
 			return m_bottomHookVertices[m_nCurVertex++].cmd;
 		}
@@ -366,6 +464,178 @@ unsigned RoundedBracketGlyph::vertex(double* px, double* py)
 
 //---------------------------------------------------------------------------------------
 void RoundedBracketGlyph::draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
+                               LUnits xRight, LUnits yBottom, bool fOpen, Color color)
+{
+    set_affine_transform(xLeft, yTop, xRight, yBottom, fOpen);
+    m_nCurVertex = 0;
+    m_nContour = 0;
+
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->add_path(*this);
+    pDrawer->end_path();
+}
+
+
+
+//=======================================================================================
+// CurlyBracketGlyph implementation
+//=======================================================================================
+
+Vertex CurlyBracketGlyph::m_topVertices[] = {
+	{  73.0,    0.0, agg::path_cmd_move_to },
+	{  82.0,  -30.0, agg::path_cmd_curve3 },	//ctrol
+	{ 103.5,  -51.0, agg::path_cmd_curve3 },	//on-curve
+	{ 125.0,  -72.0, agg::path_cmd_curve3 },	//ctrol
+	{ 155.0,  -82.0, agg::path_cmd_curve3 },	//on-curve
+	{ 155.0, -110.0, agg::path_cmd_line_to },
+	{ 112.0, -106.0, agg::path_cmd_curve3 },	//ctrol
+	{  73.0,  -89.5, agg::path_cmd_curve3 },	//on-curve
+	{  34.0,  -73.0, agg::path_cmd_curve3 },	//ctrol
+	{   0.0,  -45.0, agg::path_cmd_curve3 },	//on-curve
+};
+
+Vertex CurlyBracketGlyph::m_centerDownVertices[] = {
+	{   0.0,    0.0, agg::path_cmd_line_to },
+	{ -66.0,   71.0, agg::path_cmd_line_to },
+	{   0.0,  142.0, agg::path_cmd_line_to },
+};
+
+Vertex CurlyBracketGlyph::m_bottomVertices[] = {
+
+	{   0.0,  187.0, agg::path_cmd_line_to },
+	{  34.0,  215.0, agg::path_cmd_curve3 },	//ctrol
+	{  73.0,  231.5, agg::path_cmd_curve3 },	//on-curve
+	{ 112.0,  248.0, agg::path_cmd_curve3 },	//ctrol
+	{ 155.0,  252.0, agg::path_cmd_curve3 },	//on-curve
+	{ 155.0,  224.0, agg::path_cmd_line_to },
+	{ 125.0,  214.0, agg::path_cmd_curve3 },	//ctrol
+	{ 103.5,  193.0, agg::path_cmd_curve3 },	//on-curve
+	{  82.0,  172.0, agg::path_cmd_curve3 },	//ctrol
+	{  73.0,  142.0, agg::path_cmd_curve3 },	//on-curve
+};
+
+Vertex CurlyBracketGlyph::m_centerUpVertices[] = {
+
+	{  73.0,  117.0, agg::path_cmd_line_to },
+	{  29.0,   71.0, agg::path_cmd_line_to },
+	{  73.0,   25.0, agg::path_cmd_line_to },
+    {   0.0,    0.0, agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw }, //close polygon
+    {   0.0,    0.0, agg::path_cmd_stop }
+};
+
+float CurlyBracketGlyph::m_dxBarline = 73.0f;   //width of the vertical line (73 - 0)
+float CurlyBracketGlyph::m_hooksHeight = 220.0f;  //2 * height of one hook = 2*(110 - 0) = 220
+float CurlyBracketGlyph::m_centerHeight = 92.0f;  //459-367 = 92
+
+//---------------------------------------------------------------------------------------
+CurlyBracketGlyph::CurlyBracketGlyph()
+{
+    m_numVerticesTop = sizeof(m_topVertices)/sizeof(Vertex);
+    m_numVerticesCenterDown = sizeof(m_centerDownVertices)/sizeof(Vertex);
+    m_numVerticesBottom = sizeof(m_bottomVertices)/sizeof(Vertex);
+    m_numVerticesCenterUp = sizeof(m_centerUpVertices)/sizeof(Vertex);
+}
+
+
+//---------------------------------------------------------------------------------------
+void CurlyBracketGlyph::set_affine_transform(LUnits xLeft, LUnits yTop,
+                                             LUnits xRight, LUnits yBottom, bool fOpen)
+{
+    double rxScale((xRight - xLeft) / m_dxBarline);
+    double ryScale = rxScale;
+    if (!fOpen)
+        rxScale = -rxScale;
+
+    m_trans = agg::trans_affine(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    m_trans *= agg::trans_affine_scaling(rxScale, ryScale);
+    m_trans *= agg::trans_affine_translation(xLeft, yTop);
+
+    m_rBarlineHeight = double(yBottom - yTop) - m_centerHeight * ryScale;
+    m_rBarlineHeight -= (xRight - xLeft);   //BUG FIX: otherwise the bracked is too large. I don't know why!
+
+    m_rBarlineHalf = m_rBarlineHeight / 2.0;
+
+}
+
+//---------------------------------------------------------------------------------------
+unsigned CurlyBracketGlyph::vertex(double* px, double* py)
+{
+	switch(m_nContour)
+	{
+		case 0:		//top hook
+		{
+			*px = m_topVertices[m_nCurVertex].ux_coord;
+			*py = m_topVertices[m_nCurVertex].uy_coord;
+			m_trans.transform(px, py);
+
+			unsigned cmd = m_topVertices[m_nCurVertex++].cmd;
+
+			//change to next contour?
+			if(m_nCurVertex == m_numVerticesTop)
+            {
+				m_nContour++;
+                m_nCurVertex = 0;
+            }
+
+            return cmd;
+		}
+		case 1:		//center down hook
+		{
+			*px = m_centerDownVertices[m_nCurVertex].ux_coord;
+			*py = m_centerDownVertices[m_nCurVertex].uy_coord;
+			m_trans.transform(px, py);
+            *py += m_rBarlineHalf;
+
+			unsigned cmd = m_centerDownVertices[m_nCurVertex++].cmd;
+
+			//change to next contour?
+			if(m_nCurVertex == m_numVerticesCenterDown)
+            {
+				m_nContour++;
+                m_nCurVertex = 0;
+            }
+
+            return cmd;
+		}
+		case 2:		//bottom hook
+		{
+			*px = m_bottomVertices[m_nCurVertex].ux_coord;
+			*py = m_bottomVertices[m_nCurVertex].uy_coord;
+			m_trans.transform(px, py);
+            *py += m_rBarlineHeight;
+
+			unsigned cmd = m_bottomVertices[m_nCurVertex++].cmd;
+
+			//change to next contour?
+			if(m_nCurVertex == m_numVerticesBottom)
+            {
+				m_nContour++;
+                m_nCurVertex = 0;
+            }
+
+            return cmd;
+		}
+		case 3:		//center up hook
+		{
+		    if(m_nCurVertex >= m_numVerticesCenterUp)
+			    return agg::path_cmd_stop;
+
+			*px = m_centerUpVertices[m_nCurVertex].ux_coord;
+			*py = m_centerUpVertices[m_nCurVertex].uy_coord;
+			m_trans.transform(px, py);
+
+            *py += m_rBarlineHalf;
+
+			return m_centerUpVertices[m_nCurVertex++].cmd;
+		}
+		default:
+			return agg::path_cmd_stop;
+	}
+}
+
+//---------------------------------------------------------------------------------------
+void CurlyBracketGlyph::draw(ScreenDrawer* pDrawer, LUnits xLeft, LUnits yTop,
                                LUnits xRight, LUnits yBottom, bool fOpen, Color color)
 {
     set_affine_transform(xLeft, yTop, xRight, yBottom, fOpen);

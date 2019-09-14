@@ -59,12 +59,12 @@ class GmoBoxSystem;
 enum EFragmentMark
 {
     k_mark_line = 0,          ///< Vertical line
-    k_mark_open_bracket,      ///< Squared bracket with horizontal lines at right
-    k_mark_close_bracket,     ///< Squared bracket with horizontal lines at left
-    k_mark_open_curly,        ///< Squared bracket with horizontal lines at right
-    k_mark_close_curly,       ///< Squared bracket with horizontal lines at left
-    k_mark_open_rounded,      ///< Bracket with curved horizontal lines at right
-    k_mark_close_rounded,     ///< Bracket with curved horizontal lines at left
+    k_mark_open_squared,      ///< Squared bracket with horizontal lines at right
+    k_mark_close_squared,     ///< Squared bracket with horizontal lines at left
+    k_mark_open_curly,        ///< Curly bracket with curved lines pointing to right
+    k_mark_close_curly,       ///< Curly bracket with curved lines pointing to left
+    k_mark_open_rounded,      ///< Rounded bracket with curved lines pointing to right
+    k_mark_close_rounded,     ///< Rounded bracket with curved lines pointing to left
 };
 
 
@@ -72,6 +72,34 @@ enum EFragmentMark
 /** %FragmentMark is a visual effect to display brackets and vertical lines,
     spanning one or several staves, to define on the score the start and end points of
     a section or fragment.
+
+    FragmentMark objects are created by the Interactor associated to the View on which
+    the mark is going to be displayed.
+
+    See @ref Interactor::add_fragment_mark_at_note_rest(),
+        Interactor::add_fragment_mark_at_barline(),
+        Interactor::add_fragment_mark_at_staffobj().
+
+    <b>Example of use:</b>
+
+    @code
+    ImoId scoreId = ...
+    TimeUnits timepos = ...
+    FragmentMark* mark = pInteractor->add_fragment_mark(scoreId, timepos);
+
+    //customize the mark: rounded open bracket, magenta solid color, covering
+    //the second and third instruments
+    mark->color(Color(255,0,255))->thickness(5)->top(1)->bottom(2);
+    mark->type(k_mark_open_rounded);
+        ...
+
+    //when no longer needed remove it
+    pInteractor->remove_mark(mark);
+    @endcode
+
+    Marks cannot be repositioned. If this is needed, just delete current mark (by
+    invoking Interactor::remove_mark() ) and create a new one at the new
+    desired position.
 */
 class FragmentMark : public VisualEffect
 {
@@ -92,9 +120,10 @@ public:
     ///@{
 
     /** Define the horizontal shift to add to the default place for the mark.
-        @param dx The shift to add (logical units: cents of one millimeter).
+        @param dx The shift to add. The shift is specified in tenths, referred to the
+        first staff in the system on which the mark is placed.
     */
-    FragmentMark* const x_shift(LUnits dx);
+    FragmentMark* const x_shift(Tenths dx);
 
     /** Place the start of the mark at top line of the specified staff of an instrument.
         @param instr The instrument number (0..n-1) of the instrument.
@@ -120,8 +149,11 @@ public:
     /** Define the additional height to add, at top and bottom of the mark line. Please
         note that the line heigth will be incremented in twice the passed value, as the
         extra height value will be added at top and also at bottom.
+
+        This extra lenght is specified in tenths, referred to the first staff in the
+        system on which the mark is placed.
     */
-    FragmentMark* const extra_height(LUnits value=0) { m_extension = value; return this; }
+    FragmentMark* const extra_height(Tenths value=0);
 
     /** Set the color of the mark.  */
     inline FragmentMark* const color(Color value) { m_color = value; return this; }
@@ -129,8 +161,13 @@ public:
     /** Set the type of the mark.  */
     inline FragmentMark* const type(EFragmentMark value) { m_type = value; return this; }
 
-    /** Set the line thickness, in tenths.  */
-    inline FragmentMark* const thickness(Tenths value) { m_bounds.width = value; return this; }
+    /** Change the thickness of the mark vertical line. When the mark is created, it has
+        a default thickness of six tenths.
+
+        The thickness is specified in tenths, referred to the first staff in the
+        system on which the mark is placed.
+    */
+    FragmentMark* const thickness(Tenths value);
 
     /** Set the line style.  */
     inline FragmentMark* const line_style(ELineStyle value) { m_lineStyle = value; return this; }
@@ -147,15 +184,8 @@ public:
     /** Return the current mark type. */
     inline EFragmentMark get_type() const { return m_type; }
 
-    /** Return the current line thickness in use for drawing the mark. */
-    inline LUnits get_thickness() const { return m_bounds.width; }
-
     /** Return the current line style in use for drawing the mark. */
     inline ELineStyle get_line_style() const { return m_lineStyle; }
-
-    /** Return the current additional height to add, at top and bottom of the
-        mark line. */
-    inline LUnits get_extra_height() const { return m_extension; }
 
     ///@}    //Access to current values
 
@@ -169,8 +199,8 @@ public:
     void on_draw(ScreenDrawer* pDrawer);
     URect get_bounds();
 
-    //other
-    void move_to(LUnits xPos, GmoBoxSystem* pBoxSystem);
+    //initial data for position and context
+    void initialize(LUnits xPos, GmoBoxSystem* pBoxSystem);
 
 protected:
     friend class OverlaysGenerator;
