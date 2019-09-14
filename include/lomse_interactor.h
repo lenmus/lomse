@@ -1036,8 +1036,9 @@ public:
 
         By default, the properties of the created mark are as follows:
         - Marker type is <tt>k_mark_line</tt>, that is, a vertical line.
-        - Line color is transparent red (#ff000080).
-        - Line thickness is 1 millimeter.
+        - Line color is transparent red (Color(255,0,0,128)).
+        - Line thickness is six tenths, referred to the first staff of the system at
+            which the mark is placed.
         - Line style solid.
 
         The mark properties (type, color, position, length, etc.) can later be
@@ -1051,12 +1052,12 @@ public:
         TimeUnits timepos = ...
         FragmentMark* mark = pInteractor->add_fragment_mark(scoreId, timepos);
 
-        //customize the mark. Will cover second and third instruments
-        mark->color("#00ff00")->thickness(5)->top(1)->bottom(2);
+        //customize the mark: magenta solid color, covering second and third instruments
+        mark->color(Color(255,0,255))->thickness(5)->top(1)->bottom(2);
             ...
 
-        //change its appearance
-        mark->type(k_mark_open_bracket)->color("ffff00");
+        //change its appearance: rounded open bracket, cyan transparent color
+        mark->type(k_mark_open_rounded)->color(Color(0,255,255,128));
             ...
 
         //when no longer needed remove it

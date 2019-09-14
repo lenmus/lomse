@@ -1563,7 +1563,7 @@ FragmentMark* const GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits t
 
     FragmentMark* pMark = LOMSE_NEW FragmentMark(this, m_libraryScope);
     pMark->set_visible(true);
-    pMark->move_to(xLeft, pBoxSystem);
+    pMark->initialize(xLeft, pBoxSystem);
 
     add_visual_effect(pMark);
     return pMark;
@@ -1592,7 +1592,7 @@ FragmentMark* const GraphicView::add_fragment_mark_at_staffobj(ImoId scoreId,
     LUnits xLeft = pShape->get_left();
     FragmentMark* pMarker = LOMSE_NEW FragmentMark(this, m_libraryScope);
     pMarker->set_visible(true);
-    pMarker->move_to(xLeft, pBoxSystem);
+    pMarker->initialize(xLeft, pBoxSystem);
     pMarker->set_visible(true);
 
     add_visual_effect(pMarker);

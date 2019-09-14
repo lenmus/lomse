@@ -86,6 +86,7 @@ public:
 
     //helper. User API related
     int get_num_instruments();
+    LUnits tenths_to_logical(Tenths value, int iInstr=0, int iStaff=0);
 
     //debug
     string dump_timegrid_table();

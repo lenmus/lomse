@@ -128,7 +128,7 @@ Lets start with the y-axis orientation. Lomse needs to know if your presentation
 
 The next decision is how your application will allocate memory for the rendering buffer and the bitmap format to use. Depending on your application operating system and on the application framework used for coding it, the solution is different. You should take these decissions by analyzing the most convenient and fast method for rendering the bitmaps. Sometimes the options are very limited.
 
-Here are some tested configurations that work (see <a href="examples.html">Examples</a> for full application samples):
+Here are some tested configurations that work (see page @ref page-examples for full application code samples):
 
 | Application framework | Operating system | Memory for the bitmap | Bitmap format           | Lomse bitmap format |
 |-----------------------|------------------|-----------------------|-------------------------|---------------------|

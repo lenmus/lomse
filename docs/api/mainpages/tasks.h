@@ -100,7 +100,7 @@ unsigned DocumentWindow::get_mouse_flags(MouseEvent& event)
 @endcode
 
 
-See <a href="examples.html">Examples</a> for a full application sample.
+See page @ref page-examples for a full application sample.
 
 
 
