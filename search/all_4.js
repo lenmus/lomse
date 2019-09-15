@@ -16,6 +16,7 @@ var searchData=
   ['eeventflag',['EEventFlag',['../group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107',1,'lomse_interactor.h']]],
   ['eeventtype',['EEventType',['../group__enumerations.html#gabfcf510bafec7c6429906a6ecaac656d',1,'lomse_events.h']]],
   ['efileformat',['EFileFormat',['../classDocument.html#a0af272723339cb2f42e33aeadeb55b24',1,'Document']]],
+  ['efragmentmark',['EFragmentMark',['../group__enumerations.html#gaad40cbca030c13d3d8e319ce26d462e1',1,'lomse_fragment_mark.h']]],
   ['eimoattribute',['EImoAttribute',['../group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029',1,'lomse_im_attributes.h']]],
   ['eimoobjtype',['EImoObjType',['../group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f',1,'lomse_internal_model.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
@@ -67,6 +68,7 @@ var searchData=
   ['exec_5fredo',['exec_redo',['../classInteractor.html#a6571c803f6a3626793756119821101e8',1,'Interactor']]],
   ['exec_5fundo',['exec_undo',['../classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa',1,'Interactor']]],
   ['execute',['execute',['../classDocCommandExecuter.html#a0fb19b64759c038f349f88188527e5a1',1,'DocCommandExecuter']]],
+  ['extra_5fheight',['extra_height',['../classFragmentMark.html#ad79ed633937f5cdb04ca6a27c0171246',1,'FragmentMark']]],
   ['editing_20documents_20overview',['Editing documents overview',['../page-edit-overview.html',1,'index']]],
   ['events_20and_20requests',['Events and Requests',['../page-events.html',1,'index']]]
 ];

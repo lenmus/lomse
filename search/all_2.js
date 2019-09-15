@@ -27,6 +27,7 @@ var searchData=
   ['cmdtransposechromatically',['CmdTransposeChromatically',['../classCmdTransposeChromatically.html',1,'CmdTransposeChromatically'],['../classCmdTransposeChromatically.html#ac251db6b271ca3c3b39e464e276d9f01',1,'CmdTransposeChromatically::CmdTransposeChromatically()']]],
   ['cmdtransposediatonically',['CmdTransposeDiatonically',['../classCmdTransposeDiatonically.html',1,'CmdTransposeDiatonically'],['../classCmdTransposeDiatonically.html#af8b1715ba06b761209e84b51235978b2',1,'CmdTransposeDiatonically::CmdTransposeDiatonically()']]],
   ['cmdtransposekey',['CmdTransposeKey',['../classCmdTransposeKey.html',1,'CmdTransposeKey'],['../classCmdTransposeKey.html#a255d20c7fdef759570d747f5f6753ba5',1,'CmdTransposeKey::CmdTransposeKey()']]],
+  ['color',['color',['../classFragmentMark.html#aa282a383517bd657caba7231b7b33722',1,'FragmentMark']]],
   ['create_5fempty',['create_empty',['../classDocument.html#acc2ba25bf6cce524930f91e50f02082f',1,'Document']]],
   ['create_5fprivate_5fstyle',['create_private_style',['../classDocument.html#a110f8e0e8ad2cc6339903ef431d604c7',1,'Document']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],

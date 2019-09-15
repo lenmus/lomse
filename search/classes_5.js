@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['horizontalbookview',['HorizontalBookView',['../classHorizontalBookView.html',1,'']]]
+  ['graphicview',['GraphicView',['../classGraphicView.html',1,'']]]
 ];

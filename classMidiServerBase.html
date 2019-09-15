@@ -96,8 +96,7 @@ $(document).ready(function(){initNavTree('classMidiServerBase.html','');});
 <p>Lomse sends sound events directly to your MidiServerBase derived class just by invoking any of the virtual methods. Invocation of these methods is done in real time, that is, Lomse will determine the exact time at which a note on / note off has to take place, and will invoke the respective method, <code><a class="el" href="classMidiServerBase.html#a0ccd958292bf0153bfc5ef80e9671d51">note_on()</a></code> or <code><a class="el" href="classMidiServerBase.html#a67b42d5394adde88fd7aac2f779bed04">note_off()</a></code>, at the appropriate time. This implies that your midi server implementation is only responsible for generating or stopping sounds when requested, and no time computations are needed.</p>
 <p>Lomse does not impose any restriction about how to generate sounds other than low latency. Perhaps, the simpler method to generate sounds is to rely on the MIDI synthesizer of the PC sound card.</p>
 <dl class="section attention"><dt>Attention</dt><dd>As playback is a real-time task, your code must return quickly. If it needs to do some significant amount of work then you must schedule this work asynchronously, for example by posting a windows message, or you should use a separate thread. Your application should not retain control for much time as this would result in freezing Lomse playback thread. </dd></dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_3_wxwidgets_8cpp-example.html#_a3">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#_a3">example_4_wxwidgets.cpp</a>.</dd>
-</dl></div><table class="memberdecls">
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac96968b04c1d60f5acad32cf9e90dd0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMidiServerBase.html#ac96968b04c1d60f5acad32cf9e90dd0c">MidiServerBase</a> ()</td></tr>
@@ -365,7 +364,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classMidiServerBase.html">MidiServerBase</a></li>
-    <li class="footer">Generated on Sat Dec 29 2018 16:44:31 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Sep 15 2019 13:39:24 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

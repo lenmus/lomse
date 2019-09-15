@@ -96,8 +96,7 @@ $(document).ready(function(){initNavTree('classLomseDoorway.html','');});
 <li>For your application it is entry point for interacting with the library: the way for configuring Lomse, for accessing Lomse version information and for creating/opening documents and scores, which in turn provides accessors for managing the open documents.</li>
 <li>For the Lomse library, it is the way to access platform dependent information and methods, by using callbacks initialized by the user during Lomse configuration. </li>
 </ul>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_qt_8cpp-example.html#_a1">example_1_qt.cpp</a>, <a class="el" href="example_1_qt_8h-example.html#_a0">example_1_qt.h</a>, <a class="el" href="example_1_win32_8cpp-example.html#_a0">example_1_win32.cpp</a>, <a class="el" href="example_1_wxwidgets_8cpp-example.html#_a0">example_1_wxwidgets.cpp</a>, <a class="el" href="example_1_x11_8cpp-example.html#_a0">example_1_x11.cpp</a>, <a class="el" href="example_2_wxwidgets_8cpp-example.html#_a0">example_2_wxwidgets.cpp</a>, <a class="el" href="example_2_x11_8cpp-example.html#_a0">example_2_x11.cpp</a>, <a class="el" href="example_3_wxwidgets_8cpp-example.html#_a0">example_3_wxwidgets.cpp</a>, and <a class="el" href="example_4_wxwidgets_8cpp-example.html#_a0">example_4_wxwidgets.cpp</a>.</dd>
-</dl></div><table class="memberdecls">
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c49065371b1185e0d04b690c1cb6b05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a> ()</td></tr>
@@ -442,8 +441,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <p>For instance, assume we are writing an application for Linux to display scores on screen:</p>
-<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a> m_lomse;                   <span class="comment">//the only instance, representing the lomse library</span></div><div class="line"><span class="keywordtype">int</span> pixel_format = <a class="code" href="group__enumerations.html#ggafb559e26bc610db43ba605230a142898a048c5c0cc2b0abf5dc1b0354b6ea0005">k_pix_format_rgb24</a>;  <span class="comment">//pixel format: RGB 24bits</span></div><div class="line"><span class="keywordtype">int</span> resolution = 96;                    <span class="comment">//96 ppi</span></div><div class="line"><span class="keywordtype">bool</span> reverse_y_axis = <span class="keyword">false</span>;            <span class="comment">//y-axis coordinate 0 is at top of screen and increases downwards</span></div><div class="line"></div><div class="line"><span class="comment">//initialize the library with these values</span></div><div class="line">m_lomse.<a class="code" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a>(pixel_format, resolution, reverse_y_axis);</div></div><!-- fragment --> <dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_win32_8cpp-example.html#a6">example_1_win32.cpp</a>, <a class="el" href="example_1_x11_8cpp-example.html#a13">example_1_x11.cpp</a>, and <a class="el" href="example_2_x11_8cpp-example.html#a17">example_2_x11.cpp</a>.</dd>
-</dl>
+<div class="fragment"><div class="line"><a class="code" href="classLomseDoorway.html">LomseDoorway</a> m_lomse;                   <span class="comment">//the only instance, representing the lomse library</span></div><div class="line"><span class="keywordtype">int</span> pixel_format = <a class="code" href="group__enumerations.html#ggafb559e26bc610db43ba605230a142898a048c5c0cc2b0abf5dc1b0354b6ea0005">k_pix_format_rgb24</a>;  <span class="comment">//pixel format: RGB 24bits</span></div><div class="line"><span class="keywordtype">int</span> resolution = 96;                    <span class="comment">//96 ppi</span></div><div class="line"><span class="keywordtype">bool</span> reverse_y_axis = <span class="keyword">false</span>;            <span class="comment">//y-axis coordinate 0 is at top of screen and increases downwards</span></div><div class="line"></div><div class="line"><span class="comment">//initialize the library with these values</span></div><div class="line">m_lomse.<a class="code" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a>(pixel_format, resolution, reverse_y_axis);</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a1b00546f591c2041df5ed86ea0681948"></a>
@@ -471,8 +469,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the <a class="el" href="classPresenter.html">Presenter</a> to be used for interacting with this document.</dd></dl>
 <dl class="section attention"><dt>Attention</dt><dd>As <a class="el" href="classPresenter.html">Presenter</a> ownership is transferred to user application, you have to take care of deleting the <a class="el" href="classPresenter.html">Presenter</a> when no longer needed. Deleting the <a class="el" href="classPresenter.html">Presenter</a> will automatically cause deletion of all MVC involved objects: the <a class="el" href="classDocument.html">Document</a>, all existing Views and Interactors, etc.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="page-render-overview.html">Rendering documents overview</a> </dd></dl>
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_win32_8cpp-example.html#a2">example_1_win32.cpp</a>, <a class="el" href="example_1_x11_8cpp-example.html#a2">example_1_x11.cpp</a>, and <a class="el" href="example_2_x11_8cpp-example.html#a2">example_2_x11.cpp</a>.</dd>
-</dl>
+
 </div>
 </div>
 <a id="aeb01dedc72fc5e973e3dcf65a26a68ed"></a>
@@ -760,7 +757,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Sat Dec 29 2018 16:44:31 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Sep 15 2019 13:39:24 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

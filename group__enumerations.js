@@ -125,6 +125,15 @@ var group__enumerations =
       [ "k_update_viewport_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da69ffde08f815f2645b1de82acf6a3e51", null ],
       [ "k_end_of_playback_event", "group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daddaeb68131c02cdfa6b88deaa7c6a89b", null ]
     ] ],
+    [ "EFragmentMark", "group__enumerations.html#gaad40cbca030c13d3d8e319ce26d462e1", [
+      [ "k_mark_line", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1a438e0de5b07f3d22332ce890e99609db", null ],
+      [ "k_mark_open_squared", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1aae5286a73d2f316f268d86e609a87fe3", null ],
+      [ "k_mark_close_squared", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1af4c209b008e5fd1a4c196e678e006787", null ],
+      [ "k_mark_open_curly", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1a99be20cf3fc79fafb881e3db8c5a0ad6", null ],
+      [ "k_mark_close_curly", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1a4da6dda66637a109abd9051716e3162e", null ],
+      [ "k_mark_open_rounded", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1ab34b9b99388af4925ea055a35216866c", null ],
+      [ "k_mark_close_rounded", "group__enumerations.html#ggaad40cbca030c13d3d8e319ce26d462e1ab06f8af9a680935399d68dd9cceb1162", null ]
+    ] ],
     [ "EImoAttribute", "group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029", [
       [ "k_attr_barline", "group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029aff5b02773adb5e5d382bfd738d865230", null ],
       [ "k_attr_color", "group__enumerations.html#gga6d2f4212f1b35b75797fd57153826029a7679a62ff03867c78c82e13c5995db88", null ],

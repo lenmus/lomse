@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['playbackhighlight',['PlaybackHighlight',['../classPlaybackHighlight.html',1,'']]],
-  ['presenter',['Presenter',['../classPresenter.html',1,'']]]
+  ['observable',['Observable',['../classObservable.html',1,'']]],
+  ['observer',['Observer',['../classObserver.html',1,'']]]
 ];
