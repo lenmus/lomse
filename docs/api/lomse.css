@@ -264,7 +264,9 @@ a.el {
   font-weight: normal;
 }
 
-
+div.fragment {
+	padding: 1em;
+}
 
 /*----------------------------------------------------------------------------
 CSS selectors summary:
