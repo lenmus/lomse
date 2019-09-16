@@ -4,13 +4,16 @@
 [Since last version] 0.26.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.25.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.26.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
-- None.
+- Added methods in `Interactor` to add/remove visual application markings. Created the
+  first application markings class: `FragmentMark`. This class allows to display on any
+  score brackets and vertical lines, spanning one or several staves, to define the start
+  and end points of a score section or fragment.
 
 
 
