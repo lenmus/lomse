@@ -183,11 +183,12 @@ FragmentMark::FragmentMark(GraphicView* view, LibraryScope& libraryScope)
 }
 
 //---------------------------------------------------------------------------------------
-void FragmentMark::initialize(LUnits xPos, GmoBoxSystem* pBoxSystem)
+void FragmentMark::initialize(LUnits xPos, GmoBoxSystem* pBoxSystem, bool fBarline)
 {
     //This method is protected. It is only invoked one time, when the mark is created.
 
     m_xLeft = xPos;
+    m_fCentered = fBarline;
 
     if (pBoxSystem)
     {
@@ -300,30 +301,42 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
 
     if (m_type == k_mark_open_rounded)
     {
+        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xLeft = m_xLeft - m_thickness + xShift;
+        LUnits xRight = m_xLeft + xShift;
+
         RawShapeRoundedBracket glyph;
-        glyph.draw(pDrawer, m_xLeft - m_thickness, yTop, m_xLeft,
-                   yBottom, true, m_color);
+        glyph.draw(pDrawer, xLeft, yTop, xRight, yBottom, true, m_color);
         m_bounds = glyph.get_bounds();
     }
     else if (m_type == k_mark_close_rounded)
     {
+        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xLeft = m_xLeft + xShift;
+        LUnits xRight = m_xLeft + m_thickness + xShift;
+
         RawShapeRoundedBracket glyph;
-        glyph.draw(pDrawer, m_xLeft, yTop, m_xLeft + m_thickness,
-                   yBottom, false, m_color);
+        glyph.draw(pDrawer, xLeft, yTop, xRight, yBottom, false, m_color);
         m_bounds = glyph.get_bounds();
     }
     else if (m_type == k_mark_open_curly)
     {
+        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xLeft = m_xLeft - m_thickness + xShift;
+        LUnits xRight = m_xLeft + xShift;
+
         RawShapeCurlyBracket glyph;
-        glyph.draw(pDrawer, m_xLeft - m_thickness, yTop, m_xLeft,
-                   yBottom, true, m_color);
+        glyph.draw(pDrawer, xLeft, yTop, xRight, yBottom, true, m_color);
         m_bounds = glyph.get_bounds();
     }
     else if (m_type == k_mark_close_curly)
     {
+        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xLeft = m_xLeft + xShift;
+        LUnits xRight = m_xLeft + m_thickness + xShift;
+
         RawShapeCurlyBracket glyph;
-        glyph.draw(pDrawer, m_xLeft, yTop, m_xLeft + m_thickness,
-                   yBottom, false, m_color);
+        glyph.draw(pDrawer, xLeft, yTop, xRight, yBottom, false, m_color);
         m_bounds = glyph.get_bounds();
     }
     else
@@ -335,8 +348,9 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
 
         if (m_type == k_mark_open_squared)
         {
-            LUnits xLeft = m_xLeft - m_thickness / 2.0;
-            m_bounds.left(m_xLeft - m_thickness);
+            LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+            LUnits xLeft = m_xLeft - m_thickness / 2.0 + xShift;
+            m_bounds.left(xLeft - m_thickness/2.0);
             m_bounds.right(xLeft + hookLength);
 
             m_bounds.top(yTop);
@@ -356,9 +370,10 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
         }
         else if (m_type == k_mark_close_squared)
         {
-            LUnits xLeft = m_xLeft + m_thickness / 2.0;
+            LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+            LUnits xLeft = m_xLeft - m_thickness / 2.0 + xShift;
             m_bounds.left(xLeft - hookLength);
-            m_bounds.right(m_xLeft + m_thickness);
+            m_bounds.right(xLeft + m_thickness/2.0);
 
             m_bounds.top(yTop);
             m_bounds.bottom(yBottom);

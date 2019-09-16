@@ -134,23 +134,28 @@ enum EFragmentMark
 
     <h3>Marks' horizontal position</h3>
 
-    Marks of type `k_mark_line` are displayed centered on the reference timepos vertical
-    line.
-    For all other types:
-    - Type `open` are displayed with the inner bracket vertical border aligned with the
-        timepos vertical line.
-    - Type `close` are displayed with the outside bracket vertical border aligned with
-        the timepos vertical line.
+    Marks of type `k_mark_line` are positioned centered on the reference timepos
+    vertical line.
 
-    It is possible to add an horizontal shift to the mark default position. See x_shift().
-    The horizontal shift can be modified when necessary.
+    For all other types:
+    - When created using method Interactor::add_fragment_mark_at_barline() the marks are
+        also positioned centered on the reference timepos vertical line, that is the
+        barline left border.
+    - When created by any other Interactor methods:
+        - Type `open` are displayed with the inner bracket vertical border aligned with
+            the timepos vertical line.
+        - Type `close` are displayed with the outside bracket vertical border aligned
+            with the timepos vertical line.
+
+    It is possible to add an horizontal shift to the mark default position.
+    See x_shift(). The horizontal shift can be modified when necessary.
 
     But marks cannot be repositioned, that is, its reference timepos can not be changed.
     If this is needed, just delete current mark (by invoking Interactor::remove_mark() )
     and create a new one at the new desired position.
 
 
-    <h3>Marks' height</h3>
+    <h3>Marks' vertical position and height</h3>
 
     By default, the mark will cover the whole staff from top line of first staff to
     bottom line of bottom staff, plus an additional height of the spacing between
@@ -264,6 +269,7 @@ protected:
     LUnits          m_yBottom;      //bottom point, without any added extension
     LUnits          m_extension;    //added on top and bottom
     LUnits          m_thickness;    //line thickness
+    bool            m_fCentered;    //the mark must be centered
 
 public:
 
@@ -351,7 +357,7 @@ public:
     URect get_bounds();
 
     //initial data for position and context
-    void initialize(LUnits xPos, GmoBoxSystem* pBoxSystem);
+    void initialize(LUnits xPos, GmoBoxSystem* pBoxSystem, bool fBarline=false);
 
 protected:
     friend class OverlaysGenerator;
