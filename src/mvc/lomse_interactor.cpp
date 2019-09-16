@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -2127,7 +2127,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_staffobj(ImoId scoreId,
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::remove_mark(VisualEffect* mark)
+void Interactor::remove_mark(ApplicationMark* mark)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     pGView->remove_mark(mark);
