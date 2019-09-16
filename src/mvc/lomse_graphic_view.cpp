@@ -1563,7 +1563,7 @@ FragmentMark* const GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits t
 
     FragmentMark* pMark = LOMSE_NEW FragmentMark(this, m_libraryScope);
     pMark->set_visible(true);
-    pMark->initialize(xLeft, pBoxSystem);
+    pMark->initialize(xLeft, pBoxSystem, fBarline);
 
     add_visual_effect(pMark);
     return pMark;
