@@ -34,6 +34,7 @@
 #include "lomse_shape_staff.h"
 #include "lomse_timegrid_table.h"
 #include "lomse_drawer.h"
+#include "lomse_gm_measures_table.h"
 
 namespace lomse
 {
@@ -42,9 +43,9 @@ namespace lomse
 GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)
     : GmoBox(GmoObj::k_box_system, pCreatorImo)
     , m_pGridTable(nullptr)
+    , m_pMeasures(nullptr)
     , m_iPage(0)
 {
-//    set_left_margin(pScore->GetSystemLeftSpace(iSystem));
 }
 
 //---------------------------------------------------------------------------------------

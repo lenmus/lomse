@@ -263,6 +263,11 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
         }
     }
 
+    //save data about full-measure rests
+    if (pSO->is_rest() && static_cast<ImoRest*>(pSO)->is_full_measure())
+        m_pCurColumn->include_full_measure_rest(pShape, pCurEntry);
+
+
     m_pLastEntry = pCurEntry;
     ++m_numEntries;
 }
@@ -517,6 +522,16 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
         set_slice_width(iCol, colWidth);
 
         xLeft += colWidth;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SpAlgGourlay::reposition_full_measure_rests(int iFirstCol, int iLastCol,
+                                                 GmoBoxSystem* pBox)
+{
+    for (int iCol = iFirstCol; iCol < iLastCol; ++iCol)
+    {
+        m_columns[iCol]->reposition_full_measure_rests(pBox);
     }
 }
 
@@ -1858,6 +1873,10 @@ ColumnDataGourlay::ColumnDataGourlay(TimeSlice* pSlice)
 //---------------------------------------------------------------------------------------
 ColumnDataGourlay::~ColumnDataGourlay()
 {
+    list<FullMeasureRestData*>::iterator itR;
+    for (itR = m_rests.begin(); itR != m_rests.end(); ++itR)
+        delete *itR;
+    m_rests.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1893,6 +1912,13 @@ void ColumnDataGourlay::dump(ostream& outStream, bool fOrdered)
         }
         outStream << endl;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnDataGourlay::include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry)
+{
+    FullMeasureRestData* pRest = LOMSE_NEW FullMeasureRestData(pShape, pEntry);
+    m_rests.push_back(pRest);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2006,6 +2032,28 @@ void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& da
         xPos += pSlice->get_width();
         pSlice = pSlice->next();
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnDataGourlay::reposition_full_measure_rests(GmoBoxSystem* pBox)
+{
+    //TODO. Uncomment and finish when GmMeasuresTable is implemented
+//    list<FullMeasureRestData*>::iterator it;
+//    for (it = m_rests.begin(); it != m_rests.end(); ++it)
+//    {
+////        ColStaffObjsEntry* pEntry = (*it)->get_entry();
+////        int iInstr = pEntry->num_instrument();
+////        int iMeasure = pEntry->measure();
+////        GmMeasuresTableEntry* pInfo = pBox->get_measure_info(iInstr, iMeasure);
+//        GmoShape* pShape = (*it)->get_shape();
+////        LUnits space = pInfo->inner_width() - pShape->get_width();
+//        LUnits xOld = pShape->get_left();     //test
+//        LUnits xLeft = 700.0 + xOld;          //test
+//        pShape->set_origin_and_notify_observers(xLeft, 0.0);
+//
+//        dbgLogger << "reposition_full_measure_rest: xOld="
+//                  << xOld << ", xNew=" << xLeft << endl;
+//    }
 }
 
 //---------------------------------------------------------------------------------------

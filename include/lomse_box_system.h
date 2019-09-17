@@ -41,6 +41,7 @@ namespace lomse
 //forward declarations
 class GmoBoxScorePage;
 class TimeGridTable;
+class GmMeasuresTable;
 
 //---------------------------------------------------------------------------------------
 //GmoBoxSystem represents a line of music in the printed score.
@@ -50,6 +51,7 @@ protected:
 	vector<GmoShapeStaff*> m_staffShapes;
 	vector<int> m_firstStaff;       //index to first staff for each instrument
     TimeGridTable* m_pGridTable;
+    GmMeasuresTable* m_pMeasures;
     int m_iPage;        //number of score page (0..n-1) in which this system is contained
 
 public:

@@ -132,6 +132,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     justify_current_system();
     truncate_current_system(indent);
     build_system_timegrid();
+    reposition_full_measure_rests();
     engrave_system_details(m_iSystem);
 
     engrave_measure_numbers();
@@ -470,6 +471,13 @@ void SystemLayouter::reposition_slices_and_staffobjs()
     LUnits yShift = m_pScoreLyt->determine_top_space(0);
     m_pSpAlgorithm->reposition_slices_and_staffobjs(m_iFirstCol, m_iLastCol, yShift,
                                                     &m_yMin, &m_yMax);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::reposition_full_measure_rests()
+{
+    GmoBoxSystem* pBox = get_box_system();
+    m_pSpAlgorithm->reposition_full_measure_rests(m_iFirstCol, m_iLastCol, pBox);
 }
 
 //---------------------------------------------------------------------------------------

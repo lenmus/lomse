@@ -134,6 +134,7 @@ protected:
     void collect_last_column_information();
     void justify_current_system();
     void build_system_timegrid();
+    void reposition_full_measure_rests();
     void engrave_instrument_details();
     void truncate_current_system(LUnits indent);
     void add_column_to_system(int iCol);

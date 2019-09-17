@@ -55,6 +55,7 @@ class ImoLyric;
 class ColumnDataGourlay;
 class TimeSlice;
 class StaffObjData;
+class FullMeasureRestData;
 class TextMeter;
 class ImoStyle;
 
@@ -143,8 +144,8 @@ public:
     void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
     void delete_shapes(int iCol);
     void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-            LUnits yShift,
-            LUnits* yMin, LUnits* yMax);
+                                         LUnits yShift, LUnits* yMin, LUnits* yMax);
+    void reposition_full_measure_rests(int iFirstCol, int iLastCol, GmoBoxSystem* pBox);
 
 protected:
     void new_column(TimeSlice* pSlice);
@@ -168,6 +169,7 @@ class ColumnDataGourlay
 public:
     TimeSlice* m_pFirstSlice;            //first slice in natural order
     vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
+    list<FullMeasureRestData*> m_rests;  //data for full-measure rests in this column
 
     float   m_slope;            //slope of approximated sff() for this column
     float   m_minFi;            //minimum force at which this column reacts
@@ -188,6 +190,7 @@ public:
     void set_num_entries(int numSlices);
     void order_slices();
     void determine_minimum_width();
+    void include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry);
 
     //spacing
     LUnits determine_extent_for(float force);
@@ -225,6 +228,7 @@ public:
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter);
+    void reposition_full_measure_rests(GmoBoxSystem* pBox);
 
     //debug
     void dump(ostream& outStream, bool fOrdered=false);
@@ -249,6 +253,26 @@ public:
     virtual ~StaffObjData();
 
     inline GmoShape* get_shape() { return m_pShape; }
+};
+
+
+
+//---------------------------------------------------------------------------------------
+// FullMeasureRestData
+// Data associated to a full-measure rests
+class FullMeasureRestData
+{
+public:
+    GmoShape* m_pShape;             //shape for this rest
+    ColStaffObjsEntry* m_pEntry;    //the rest entry in ColStaffObjs
+
+public:
+    FullMeasureRestData(GmoShape* pShape, ColStaffObjsEntry* pEntry)
+        : m_pShape(pShape), m_pEntry(pEntry) {}
+    ~FullMeasureRestData() {}
+
+    inline GmoShape* get_shape() { return m_pShape; }
+    inline ColStaffObjsEntry* get_entry() { return m_pEntry; }
 };
 
 

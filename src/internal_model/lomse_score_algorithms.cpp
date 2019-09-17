@@ -33,7 +33,7 @@
 #include "lomse_im_note.h"
 #include "lomse_time.h"
 #include "lomse_staffobjs_table.h"
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 //specific for ScoreAlgorithms
 #include "lomse_pitch.h"

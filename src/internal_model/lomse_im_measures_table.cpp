@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 #include "lomse_build_options.h"
 #include "lomse_staffobjs_table.h"

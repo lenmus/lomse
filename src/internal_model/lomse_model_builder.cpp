@@ -37,7 +37,7 @@
 #include "lomse_score_utilities.h"
 #include "lomse_logger.h"
 #include "lomse_im_factory.h"
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 #include <math.h>       //round
 
