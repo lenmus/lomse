@@ -184,13 +184,13 @@ enum EFragmentMark
     ScoreCursor cursor(pDoc, pScore);     //cursor points to clef
     cursor.move_next();         //now points to key signature
     ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*(cursor));
-    FragmentMark* mark = spInteractor->add_fragment_mark_at_staffobj(scoreId, pSO);
+    FragmentMark* mark = spInteractor->add_fragment_mark_at_staffobj(pSO);
     mark->color(Color(0,255,0))->top(1);
     mark->type(k_mark_open_rounded);
 
     cursor.move_next();         //now points to time signature
     pSO = dynamic_cast<ImoStaffObj*>(*(cursor));
-    mark = spInteractor->add_fragment_mark_at_staffobj(scoreId, pSO);
+    mark = spInteractor->add_fragment_mark_at_staffobj(pSO);
     mark->color(Color(0,255,0))->top(1);
     mark->type(k_mark_close_rounded);
 
