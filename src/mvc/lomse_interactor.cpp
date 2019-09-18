@@ -2078,7 +2078,7 @@ string Interactor::dump_selection()
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
+FragmentMark* Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
                                                                TimeUnits timepos)
 {
     FragmentMark* pMark = nullptr;
@@ -2092,7 +2092,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_barline(ImoId scoreId,
+FragmentMark* Interactor::add_fragment_mark_at_barline(ImoId scoreId,
                                                                TimeUnits timepos)
 {
     FragmentMark* pMark = nullptr;
@@ -2106,7 +2106,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_barline(ImoId scoreId,
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_staffobj(ImoId scoreId,
+FragmentMark* Interactor::add_fragment_mark_at_staffobj(ImoId scoreId,
                                                               ImoStaffObj* pSO)
 {
     FragmentMark* pMark = nullptr;

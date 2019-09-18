@@ -1544,7 +1544,7 @@ bool GraphicView::is_valid_viewport()
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
+FragmentMark* GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
                                                       bool fBarline)
 {
     GraphicModel* pGModel = get_graphic_model();
@@ -1570,7 +1570,7 @@ FragmentMark* const GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits t
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const GraphicView::add_fragment_mark_at_staffobj(ImoId scoreId,
+FragmentMark* GraphicView::add_fragment_mark_at_staffobj(ImoId scoreId,
                                                                ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();

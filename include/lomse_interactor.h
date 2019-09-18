@@ -1071,7 +1071,7 @@ public:
 
         @endcode
     */
-    FragmentMark* const add_fragment_mark_at_note_rest(ImoId scoreId, TimeUnits timepos);
+    FragmentMark* add_fragment_mark_at_note_rest(ImoId scoreId, TimeUnits timepos);
 
     /** Create a new FragmentMark on the score at the barline at the given time position.
         Take into account that barlines have the same timepos than the first
@@ -1083,7 +1083,7 @@ public:
 
         See add_fragment_mark_at_note_rest() for more details.
     */
-    FragmentMark* const add_fragment_mark_at_barline(ImoId scoreId, TimeUnits timepos);
+    FragmentMark* add_fragment_mark_at_barline(ImoId scoreId, TimeUnits timepos);
 
     /** Create a new FragmentMark on the score at the given staff object position.
         @param scoreId  Id. of the score on which the mark will be added.
@@ -1091,7 +1091,7 @@ public:
 
         See add_fragment_mark_at_note_rest() for more details.
     */
-    FragmentMark* const add_fragment_mark_at_staffobj(ImoId scoreId, ImoStaffObj* pSO);
+    FragmentMark* add_fragment_mark_at_staffobj(ImoId scoreId, ImoStaffObj* pSO);
 
     /** Hide the mark and delete it.
         @param mark  Pointer to the mark to remove. After executing this method the
