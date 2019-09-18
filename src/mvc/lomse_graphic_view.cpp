@@ -1570,8 +1570,7 @@ FragmentMark* GraphicView::add_fragment_mark_at(ImoId scoreId, TimeUnits timepos
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* GraphicView::add_fragment_mark_at_staffobj(ImoId scoreId,
-                                                               ImoStaffObj* pSO)
+FragmentMark* GraphicView::add_fragment_mark_at_staffobj(ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();
     if (!pGModel)

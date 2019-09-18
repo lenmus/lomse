@@ -1086,12 +1086,11 @@ public:
     FragmentMark* add_fragment_mark_at_barline(ImoId scoreId, TimeUnits timepos);
 
     /** Create a new FragmentMark on the score at the given staff object position.
-        @param scoreId  Id. of the score on which the mark will be added.
         @param pSO Pointer to the staff object defining the position for the mark.
 
         See add_fragment_mark_at_note_rest() for more details.
     */
-    FragmentMark* add_fragment_mark_at_staffobj(ImoId scoreId, ImoStaffObj* pSO);
+    FragmentMark* add_fragment_mark_at_staffobj(ImoStaffObj* pSO);
 
     /** Hide the mark and delete it.
         @param mark  Pointer to the mark to remove. After executing this method the
