@@ -49,6 +49,13 @@ GmoBoxSliceInstr::~GmoBoxSliceInstr()
 {
 }
 
+//---------------------------------------------------------------------------------------
+GmoBoxSystem* GmoBoxSliceInstr::get_system_box()
+{
+    GmoBoxSlice* pSlice = dynamic_cast<GmoBoxSlice*>(m_pParentBox);
+    return (pSlice ? pSlice->get_system_box() : nullptr);
+}
+
 
 //=======================================================================================
 // GmoBoxSliceStaff implementation

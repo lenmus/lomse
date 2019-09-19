@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,77 +27,70 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_BOX_SLICE_H__        //to avoid nested includes
-#define __LOMSE_BOX_SLICE_H__
+#ifndef __LOMSE_GM_MEASURES_TABLE_H__
+#define __LOMSE_GM_MEASURES_TABLE_H__
 
 #include "lomse_basic.h"
-#include "lomse_gm_basic.h"
-//#include <sstream>
-//
+
 //using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
+class ImoScore;
+class GmoShapeBarline;
 class GmoBoxSystem;
-class GmoBoxSliceInstr;
-class ImoInstrument;
-
 
 //---------------------------------------------------------------------------------------
-// GmoBoxSlice: a system column
-class GmoBoxSlice : public GmoBox
+/** %GmMeasuresTable object is responsible for storing and managing a table with
+    the measures graphical information.
+*/
+class GmMeasuresTable
 {
 protected:
-//    int             m_nAbsMeasure;		//number of this measure (absolute, 1..n)
-//	int				m_nNumInSystem;		//number of slice for this system (0..n-1)
-//
-//    //start and end positions
-//    LUnits    m_xStart;
-//    LUnits    m_xEnd;
-//
+    typedef vector<GmoShapeBarline*> BarlinesVector;    //barlines for one instrument
+
+    vector<BarlinesVector*> m_instrument;       //pointers to each instrument barlines
+    vector<int> m_numBarlines;                  //num.added barlines in each instrument
 
 public:
-    GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo);    //, int nNumInSystem,
-			    //LUnits xStart=0, LUnits xEnd=0);
-    ~GmoBoxSlice();
+    GmMeasuresTable(ImoScore* pScore);
+    ///Destructor
+    ~GmMeasuresTable();
 
-//    inline void UpdateSize(LUnits xStart, LUnits xEnd) {
-//            m_xStart = xStart;
-//            m_xEnd = xEnd;
-//        }
-//
-//	//render
-//	void DrawSelRectangle(lmPaper* pPaper);
-//
-//    //info
-//    inline int GetNumMeasure() const { return m_nAbsMeasure; }
-//
-	//instrument slices
-    GmoBoxSliceInstr* add_box_for_instrument(ImoInstrument* pInstr);
-//	GmoBoxSliceInstr* GetSliceInstr(int i) const { return (GmoBoxSliceInstr*)m_Boxes[i]; }
-//
-//    //implementation of virtual methods from base class
-//	int GetPageNumber() const;
-//
-//	//owners and related
-//	GmoBoxSystem* GetOwnerSystem() { return m_pBoxSystem; }
-//    GmoBoxScore* GetOwnerBoxScore();
-//    GmoBoxPage* GetOwnerBoxPage();
-//
-//    //overrides
-//    void SetBottomSpace(LUnits uyValue);
+    //creation
+    //invoked when a non-middle barline is found
+    void finish_measure(int iInstr, GmoShapeBarline* pBarlineShape);
 
-//    TimeUnits GetGridTimeForPosition(LUnits uxPos);
-//    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
-//                       LUnits uyBottom);
-    GmoBoxSystem* get_system_box();
+    //info
+    int get_num_measures(int iInstr);
+    inline int get_num_instruments() { return int(m_instrument.size()); }
 
+    /** Returns the measure end barline left border position.
+
+        When measure has no end barline (e.g. last measure in the score, when ended
+        without barline), the end barline position will be the system left border.
+    */
+    LUnits get_end_barline_left(int iInstr, int iMeasure, GmoBoxSystem* pBox);
+
+    /** Returns the measure start barline right border position.
+
+        For first measure in the system, the start barline is the first available
+        position after system prolog.
+    */
+    LUnits get_start_barline_right(int iInstr, int iMeasure, GmoBoxSystem* pBox);
+
+    //debug
+    void dump_gm_measures();
+
+protected:
+    void initialize_vectors(ImoScore* pScore);
 
 };
 
 
+
 }   //namespace lomse
 
-#endif    // __LOMSE_BOX_SLICE_H__
+#endif      //__LOMSE_GM_MEASURES_TABLE_H__

@@ -317,15 +317,13 @@ public:
                the barline. This flag is for selecting the position for the mark, either
                on the barline (if exists) or in the note/rest.
     */
-    virtual FragmentMark* const add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
-                                                     bool fBarline);
+    virtual FragmentMark* add_fragment_mark_at(ImoId scoreId, TimeUnits timepos,
+                                               bool fBarline);
 
     /** Create a new FragmentMark on the score at the given staff object position.
-        @param scoreId  Id. of the score on which the mark will be added.
         @param pSO Pointer to the staff object defining the position for the mark.
     */
-    virtual FragmentMark* const add_fragment_mark_at_staffobj(ImoId scoreId,
-                                                              ImoStaffObj* pSO);
+    virtual FragmentMark* add_fragment_mark_at_staffobj(ImoStaffObj* pSO);
 
     /** Hide the mark and delete it.
         @param mark  Pointer to the mark to remove. After executing this method the

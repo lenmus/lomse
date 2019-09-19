@@ -2078,7 +2078,7 @@ string Interactor::dump_selection()
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
+FragmentMark* Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
                                                                TimeUnits timepos)
 {
     FragmentMark* pMark = nullptr;
@@ -2092,7 +2092,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_note_rest(ImoId scoreId,
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_barline(ImoId scoreId,
+FragmentMark* Interactor::add_fragment_mark_at_barline(ImoId scoreId,
                                                                TimeUnits timepos)
 {
     FragmentMark* pMark = nullptr;
@@ -2106,8 +2106,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_barline(ImoId scoreId,
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const Interactor::add_fragment_mark_at_staffobj(ImoId scoreId,
-                                                              ImoStaffObj* pSO)
+FragmentMark* Interactor::add_fragment_mark_at_staffobj(ImoStaffObj* pSO)
 {
     FragmentMark* pMark = nullptr;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -2119,7 +2118,7 @@ FragmentMark* const Interactor::add_fragment_mark_at_staffobj(ImoId scoreId,
         if (!pSO)
             return nullptr;
 
-        pMark = pGView->add_fragment_mark_at_staffobj(scoreId, pSO);
+        pMark = pGView->add_fragment_mark_at_staffobj(pSO);
         request_window_update();
     }
 

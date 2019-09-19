@@ -192,6 +192,10 @@ public:
     virtual LUnits get_column_width(int iCol);
     virtual bool column_has_system_break(int iCol);
 
+    //support for building the GmMeasuresTable
+        //invoked when a non-middle barline is found
+    void finish_measure(int iInstr, GmoShapeBarline* pBarlineShape);
+
     //support for debugging and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
     void delete_not_used_objects();

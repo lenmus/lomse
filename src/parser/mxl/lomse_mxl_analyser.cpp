@@ -4204,14 +4204,16 @@ protected:
         TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
         if (!type.empty())
             noteType = to_note_type(type);
-        else if (pNR->is_rest() && static_cast<ImoRest*>(pNR)->is_full_measure())
+        else if (pNR->is_rest())
         {
+            //<type> is not required for full-measure rests
             dots = 0;
             noteType = k_whole;
+            static_cast<ImoRest*>(pNR)->mark_as_full_measure(true);
         }
         else
         {
-            //<type> is not required in multi-metric rests. And, in any
+            //<type> is not required in full-measure rests. And, in any
             //case it is not mandatory. If not present, <type>
             //must be derived from <duration>.
             if (is_equal_time(units, k_duration_longa))
@@ -4238,7 +4240,7 @@ protected:
             {
                 stringstream msg;
                 msg << "Invalid <duration> value " << duration << " ("
-                    << units << " TimeUnits). Multi-rest?";
+                    << units << " TimeUnits).";
                 error_msg2(msg.str());
                 noteType = k_256th;
             }

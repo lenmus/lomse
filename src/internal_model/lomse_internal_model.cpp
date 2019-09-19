@@ -44,7 +44,7 @@
 #include "lomse_ldp_exporter.h"
 #include "lomse_autobeamer.h"
 #include "lomse_im_attributes.h"
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 #include "lomse_score_utilities.h"
 
 

@@ -132,6 +132,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     justify_current_system();
     truncate_current_system(indent);
     build_system_timegrid();
+    reposition_full_measure_rests();
     engrave_system_details(m_iSystem);
 
     engrave_measure_numbers();
@@ -152,6 +153,8 @@ void SystemLayouter::set_position_and_width_for_staves(LUnits indent)
     UPoint org = m_pBoxSystem->get_origin();
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
+
+    m_pBoxSystem->add_shift_to_start_measure(indent);
 
     m_pPartsEngraver->set_position_and_width_for_staves(indent, org, m_pBoxSystem);
 }
@@ -313,6 +316,8 @@ void SystemLayouter::add_system_prolog_if_necessary()
 
         m_pagePos.x += uPrologWidth;
         m_uFreeSpace -= uPrologWidth;
+
+        m_pBoxSystem->add_shift_to_start_measure(uPrologWidth);
 	}
 }
 
@@ -470,6 +475,13 @@ void SystemLayouter::reposition_slices_and_staffobjs()
     LUnits yShift = m_pScoreLyt->determine_top_space(0);
     m_pSpAlgorithm->reposition_slices_and_staffobjs(m_iFirstCol, m_iLastCol, yShift,
                                                     &m_yMin, &m_yMax);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::reposition_full_measure_rests()
+{
+    GmoBoxSystem* pBox = get_box_system();
+    m_pSpAlgorithm->reposition_full_measure_rests(m_iFirstCol, m_iLastCol, pBox);
 }
 
 //---------------------------------------------------------------------------------------

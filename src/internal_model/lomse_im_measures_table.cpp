@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 #include "lomse_build_options.h"
 #include "lomse_staffobjs_table.h"
@@ -120,7 +120,7 @@ string ImMeasuresTable::dump()
 {
     stringstream s;
     vector<ImMeasuresTableEntry*>::iterator it;
-    s << "Num.entries = " << num_entries() << endl;
+    s << "ImMeasuresTable. Num.entries = " << num_entries() << endl;
     //    +.......+.......+.......+.......+.......+.......+
     s << "meas.   time    beat    object" << endl;
     s << "--------------------------------------------" << endl;

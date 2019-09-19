@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,8 +46,8 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_document_cursor.h"
-//#include "lomse_spacing_algorithm_timetable.h"
 #include "lomse_timegrid_table.h"
+#include "lomse_gm_measures_table.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -892,6 +892,179 @@ SUITE(ScoreLayouterTest)
         CHECK( pCol->get_shape_for_start_barline() == nullptr );
 
         scoreLyt.my_delete_all();
+    }
+
+
+    //@2xx. ColumnBuilder builds the GmMeasuresTable
+
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_200)
+//    {
+//        //@200. Empty scores have no measures
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0)(instrument (musicData)))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//        scoreLyt.prepare_to_start_layout();
+//
+//        GmMeasuresTable* table = gmodel.get_measures_table( pImoScore->get_id() );
+//
+//        CHECK( table->get_num_instruments() == 1 );
+//        CHECK( table->get_num_measures(0) == 0 );
+//
+//        scoreLyt.my_delete_all();
+//    }
+
+//    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_201)
+//    {
+//        //@121. Scores without barlines have one not-finished measure
+//
+//        Document doc(m_libraryScope);
+//        doc.from_string("(score (vers 2.0) "
+//            "(instrument (musicData (clef G)(n c4 q) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//        scoreLyt.prepare_to_start_layout();
+//
+//        CHECK( scoreLyt.get_num_columns() == 1 );
+//        ColumnData* pCol = scoreLyt.get_column(0);
+//        CHECK( pCol->is_start_of_measure() == true );
+//        TypeMeasureInfo* pInfo = pCol->get_measure_info();
+//        CHECK( pInfo && pInfo->count == 1 );
+//        CHECK( pCol->get_shape_for_start_barline() == nullptr );
+//
+//        scoreLyt.my_delete_all();
+//    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// GmMeasuresTable tests
+//---------------------------------------------------------------------------------------
+
+class GmMeasuresTableTestFixture
+{
+public:
+    LibraryScope m_libraryScope;
+
+    GmMeasuresTableTestFixture()   // setUp()
+        : m_libraryScope(cout)
+    {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+    }
+
+    ~GmMeasuresTableTestFixture()  // tearDown()
+    {
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+};
+
+
+SUITE(GmMeasuresTableTest)
+{
+
+    //@0xx. ColumnsBuilder creates columns ----------------------------------------------
+
+    TEST_FIXTURE(GmMeasuresTableTestFixture, GmMeasuresTable_001)
+    {
+        //@001. Correctly initialized. Empty score
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData)))" );
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        GmMeasuresTable table(pImoScore);
+
+        CHECK( table.get_num_instruments() == 1 );
+        CHECK( table.get_num_measures(0) == 0 );
+    }
+
+    TEST_FIXTURE(GmMeasuresTableTestFixture, GmMeasuresTable_002)
+    {
+        //@002. Correctly initialized. Score with one instrument ended with barline
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
+            "(n e4 q)(barline)"
+            ")))" );
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        GmMeasuresTable table(pImoScore);
+
+        CHECK( table.get_num_instruments() == 1 );
+        CHECK( table.get_num_measures(0) == 3 );
+
+        //cout << test_name() << ". num.measures = " << table.get_num_measures(0) << endl;
+    }
+
+    TEST_FIXTURE(GmMeasuresTableTestFixture, GmMeasuresTable_003)
+    {
+        //@003. Correctly initialized. Score with one instrument ended without barline
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
+            "(n e4 q)"
+            ")))" );
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        GmMeasuresTable table(pImoScore);
+
+        CHECK( table.get_num_instruments() == 1 );
+        CHECK( table.get_num_measures(0) == 3 );
+
+        //cout << test_name() << ". num.measures = " << table.get_num_measures(0) << endl;
+    }
+
+    TEST_FIXTURE(GmMeasuresTableTestFixture, GmMeasuresTable_004)
+    {
+        //@004. Correctly initialized. Score with two instruments different endings
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0) "
+            "(instrument (musicData "
+            "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+            "(n e2 q)(n e3 q)(barline)"
+            "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+                "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+            "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+                "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+            "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+            "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+            "(n -b2 q)(n =b3 q)(barline)"
+            "(n xc3 q)(n ++c4 q)(barline)"
+            "(n d3 q)(n --d4 q)(barline)"
+            "(n e3 q)(n e4 q)(barline)"
+            "(n f3 q)(n f4 q)(barline end)"
+            "))"
+            "(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+            "(n c5 e. p1)(barline)"
+            "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+            "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+            "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+                "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+            "(n c5 q p1)(barline)"
+            ")))" );
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+
+        GmMeasuresTable table(pImoScore);
+
+        CHECK( table.get_num_instruments() == 2 );
+        CHECK( table.get_num_measures(0) == 11 );
+        CHECK( table.get_num_measures(1) == 3 );
+
+//        cout << test_name() << ", num.measures 1 = " << table.get_num_measures(0)
+//             << ", num.measures 2 = " << table.get_num_measures(1) << endl;
     }
 
 };

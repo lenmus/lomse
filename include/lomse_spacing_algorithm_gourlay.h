@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,8 +55,12 @@ class ImoLyric;
 class ColumnDataGourlay;
 class TimeSlice;
 class StaffObjData;
+class FullMeasureRestData;
 class TextMeter;
 class ImoStyle;
+class GmMeasuresTable;
+class GraphicModel;
+
 
 //---------------------------------------------------------------------------------------
 // SpAlgGourlay
@@ -65,14 +69,6 @@ class ImoStyle;
 class SpAlgGourlay : public SpAlgColumn
 {
 protected:
-    LibraryScope&   m_libraryScope;
-    ScoreMeter*     m_pScoreMeter;
-    ScoreLayouter*  m_pScoreLyt;
-    ImoScore*       m_pScore;
-    ShapesStorage&  m_shapesStorage;
-    ShapesCreator*  m_pShapesCreator;
-    PartsEngraver*  m_pPartsEngraver;
-
     list<TimeSlice*> m_slices;              //list of TimeSlices
     vector<ColumnDataGourlay*> m_columns;   //columns
     vector<StaffObjData*> m_data;           //data associated to each staff object
@@ -137,14 +133,16 @@ public:
     void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr,
                         ImoStaffObj* pSO, TimeUnits rTime, int nStaff, GmoShape* pShape,
                         bool fInProlog=false);
+    void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
+                                   GmoShape* pNonTimedShape);
     void finish_column_measurements(int iCol);
 
     //auxiliary: shapes and boxes
     void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
     void delete_shapes(int iCol);
     void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-            LUnits yShift,
-            LUnits* yMin, LUnits* yMax);
+                                         LUnits yShift, LUnits* yMin, LUnits* yMax);
+    void reposition_full_measure_rests(int iFirstCol, int iLastCol, GmoBoxSystem* pBox);
 
 protected:
     void new_column(TimeSlice* pSlice);
@@ -168,6 +166,7 @@ class ColumnDataGourlay
 public:
     TimeSlice* m_pFirstSlice;            //first slice in natural order
     vector<TimeSlice*> m_orderedSlices;  //slices ordered by pre-stretching force fi
+    list<FullMeasureRestData*> m_rests;  //data for full-measure rests in this column
 
     float   m_slope;            //slope of approximated sff() for this column
     float   m_minFi;            //minimum force at which this column reacts
@@ -188,6 +187,8 @@ public:
     void set_num_entries(int numSlices);
     void order_slices();
     void determine_minimum_width();
+    void include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry,
+                                   GmoShape* pNonTimedShape);
 
     //spacing
     LUnits determine_extent_for(float force);
@@ -225,6 +226,7 @@ public:
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter);
+    void reposition_full_measure_rests(GmoBoxSystem* pBox, GmMeasuresTable* pMeasures);
 
     //debug
     void dump(ostream& outStream, bool fOrdered=false);
@@ -249,6 +251,34 @@ public:
     virtual ~StaffObjData();
 
     inline GmoShape* get_shape() { return m_pShape; }
+};
+
+
+
+//---------------------------------------------------------------------------------------
+// FullMeasureRestData
+// Data associated to a full-measure rests
+class FullMeasureRestData
+{
+public:
+    GmoShape* m_pRestShape;         //shape for this rest
+    ColStaffObjsEntry* m_pEntry;    //the rest entry in ColStaffObjs
+    GmoShape* m_pNonTimedShape;     //the last non-timed before the rest, if any
+
+public:
+    FullMeasureRestData(GmoShape* pRestShape, ColStaffObjsEntry* pEntry,
+                        GmoShape* pNonTimedShape)
+        : m_pRestShape(pRestShape)
+        , m_pEntry(pEntry)
+        , m_pNonTimedShape(pNonTimedShape)
+    {
+    }
+
+    ~FullMeasureRestData() {}
+
+    inline GmoShape* get_rest_shape() { return m_pRestShape; }
+    inline ColStaffObjsEntry* get_rest_entry() { return m_pEntry; }
+    inline GmoShape* get_non_timed_shape() { return m_pNonTimedShape; }
 };
 
 

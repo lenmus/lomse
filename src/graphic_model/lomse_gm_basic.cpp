@@ -38,6 +38,7 @@
 #include "lomse_control.h"
 #include "lomse_box_system.h"
 #include "lomse_logger.h"
+#include "lomse_gm_measures_table.h"
 
 #include <cstdlib>      //abs
 #include <iomanip>
@@ -1071,6 +1072,19 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
 //=======================================================================================
 // ScoreStub implementation
 //=======================================================================================
+ScoreStub::ScoreStub(ImoScore* pScore)
+    : m_scoreId(pScore->get_id())
+{
+    m_measures = LOMSE_NEW GmMeasuresTable(pScore);
+}
+
+//---------------------------------------------------------------------------------------
+ScoreStub::~ScoreStub()
+{
+    delete m_measures;
+}
+
+//---------------------------------------------------------------------------------------
 GmoBoxScorePage* ScoreStub::get_page_for(TimeUnits timepos)
 {
     //find page with end time greater or equal than requested time

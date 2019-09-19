@@ -184,13 +184,13 @@ enum EFragmentMark
     ScoreCursor cursor(pDoc, pScore);     //cursor points to clef
     cursor.move_next();         //now points to key signature
     ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*(cursor));
-    FragmentMark* mark = spInteractor->add_fragment_mark_at_staffobj(scoreId, pSO);
+    FragmentMark* mark = spInteractor->add_fragment_mark_at_staffobj(pSO);
     mark->color(Color(0,255,0))->top(1);
     mark->type(k_mark_open_rounded);
 
     cursor.move_next();         //now points to time signature
     pSO = dynamic_cast<ImoStaffObj*>(*(cursor));
-    mark = spInteractor->add_fragment_mark_at_staffobj(scoreId, pSO);
+    mark = spInteractor->add_fragment_mark_at_staffobj(pSO);
     mark->color(Color(0,255,0))->top(1);
     mark->type(k_mark_close_rounded);
 
@@ -280,7 +280,7 @@ public:
         @param dx The shift to add. The shift is specified in tenths, referred to the
         first staff in the system on which the mark is placed.
     */
-    FragmentMark* const x_shift(Tenths dx);
+    FragmentMark* x_shift(Tenths dx);
 
     /** Place the start of the mark at top line of the specified staff of an instrument.
         @param instr The instrument number (0..n-1) of the instrument.
@@ -290,7 +290,7 @@ public:
         When invoking this method, the extra height for the mark will be changed to be
         the staves margin. You can later change this value by using method extra_height().
     */
-    FragmentMark* const top(int instr, int staff=0);
+    FragmentMark* top(int instr, int staff=0);
 
     /** Place the bottom of the mark at first line of the specified staff of an
         instrument.
@@ -301,7 +301,7 @@ public:
         When invoking this method, the extra height for the mark will be changed to be
         the staves margin. You can later change this value by using method extra_height().
     */
-    FragmentMark* const bottom(int instr, int staff=-1);
+    FragmentMark* bottom(int instr, int staff=-1);
 
     /** Define the additional height to add, at top and bottom of the mark line. Please
         note that the line heigth will be incremented in twice the passed value, as the
@@ -310,13 +310,13 @@ public:
         This extra lenght is specified in tenths, referred to the first staff in the
         system on which the mark is placed.
     */
-    FragmentMark* const extra_height(Tenths value=0);
+    FragmentMark* extra_height(Tenths value=0);
 
     /** Set the color of the mark.  */
-    inline FragmentMark* const color(Color value) { m_color = value; return this; }
+    inline FragmentMark* color(Color value) { m_color = value; return this; }
 
     /** Set the type of the mark.  */
-    inline FragmentMark* const type(EFragmentMark value) { m_type = value; return this; }
+    inline FragmentMark* type(EFragmentMark value) { m_type = value; return this; }
 
     /** Change the thickness of the mark vertical line. When the mark is created, it has
         a default thickness of six tenths.
@@ -324,10 +324,10 @@ public:
         The thickness is specified in tenths, referred to the first staff in the
         system on which the mark is placed.
     */
-    FragmentMark* const thickness(Tenths value);
+    FragmentMark* thickness(Tenths value);
 
     /** Set the line style.  */
-    inline FragmentMark* const line_style(ELineStyle value) { m_lineStyle = value; return this; }
+    inline FragmentMark* line_style(ELineStyle value) { m_lineStyle = value; return this; }
 
     ///@}    //Customizable properties
 

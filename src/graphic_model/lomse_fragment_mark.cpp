@@ -213,7 +213,7 @@ void FragmentMark::initialize(LUnits xPos, GmoBoxSystem* pBoxSystem, bool fBarli
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::top(int instr, int staff)
+FragmentMark* FragmentMark::top(int instr, int staff)
 {
     if (!m_pBoxSystem)
         return this;
@@ -235,7 +235,7 @@ FragmentMark* const FragmentMark::top(int instr, int staff)
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::bottom(int instr, int staff)
+FragmentMark* FragmentMark::bottom(int instr, int staff)
 {
     if (!m_pBoxSystem)
         return this;
@@ -257,7 +257,7 @@ FragmentMark* const FragmentMark::bottom(int instr, int staff)
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::x_shift(Tenths dx)
+FragmentMark* FragmentMark::x_shift(Tenths dx)
 {
     if (!m_pBoxSystem)
         return this;
@@ -267,7 +267,7 @@ FragmentMark* const FragmentMark::x_shift(Tenths dx)
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::extra_height(Tenths value)
+FragmentMark* FragmentMark::extra_height(Tenths value)
 {
     if (!m_pBoxSystem)
         return this;
@@ -277,7 +277,7 @@ FragmentMark* const FragmentMark::extra_height(Tenths value)
 }
 
 //---------------------------------------------------------------------------------------
-FragmentMark* const FragmentMark::thickness(Tenths value)
+FragmentMark* FragmentMark::thickness(Tenths value)
 {
     if (!m_pBoxSystem)
         return this;

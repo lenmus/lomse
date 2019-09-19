@@ -72,6 +72,7 @@
 #include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_volta_engraver.h"
 #include "lomse_coda_segno_engraver.h"
+#include "lomse_gm_measures_table.h"
 
 namespace lomse
 {
@@ -485,7 +486,7 @@ void ScoreLayouter::move_cursor_to_top_left_corner()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::create_stub()
 {
-    m_pStub = m_pGModel->add_stub_for(m_pScore->get_id());
+    m_pStub = m_pGModel->add_stub_for(m_pScore);
 }
 
 //---------------------------------------------------------------------------------------
@@ -770,6 +771,17 @@ void ScoreLayouter::trace_column(int iCol, int level)
     m_iColumnToTrace = iCol;
     m_nTraceLevel = level;
     m_pSpAlgorithm->set_trace_level(iCol, level);
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::finish_measure(int iInstr, GmoShapeBarline* pBarlineShape)
+{
+    //invoked when a non-middle barline is found
+    //  pShape - the barline shape
+    //  iInstr - the instrument owning the barline
+
+    GmMeasuresTable* pTable = m_pStub->get_measures_table();
+    pTable->finish_measure(iInstr, pBarlineShape);
 }
 
 

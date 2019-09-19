@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -62,6 +62,7 @@ class SpAlgColumn;
 class StaffObjsCursor;
 class TimeGridTable;
 class TypeMeasureInfo;
+class GmoBoxSystem;
 
 //---------------------------------------------------------------------------------------
 // Barlines at the end of a column
@@ -74,11 +75,11 @@ enum EColumnBarlinesInfo
 
 
 //---------------------------------------------------------------------------------------
-// SpacingAlgorithm
-// Abstract class providing the public interface for any spacing algorithm.
-// The idea is to facilitate testing different algorithms without having to
-// rewrite other parts of the code.
-//
+/** %SpacingAlgorithm
+    Abstract class providing the public interface for any spacing algorithm.
+    The idea is to facilitate testing different algorithms without having to
+    rewrite other parts of the code.
+*/
 class SpacingAlgorithm
 {
 protected:
@@ -142,6 +143,8 @@ public:
     //boxes and shapes management
     virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
                                         LUnits yShift, LUnits* yMin, LUnits* yMax) = 0;
+    virtual void reposition_full_measure_rests(int iFirstCol, int iLastCol,
+                                               GmoBoxSystem* pBox) = 0;
     virtual void add_shapes_to_boxes(int iCol, ShapesStorage* pStorage) = 0;
     virtual void delete_shapes(int iCol) = 0;
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr) = 0;
@@ -250,13 +253,6 @@ protected:
 class SpAlgColumn: public SpacingAlgorithm
 {
 protected:
-    LibraryScope&   m_libraryScope;
-    ScoreMeter*     m_pScoreMeter;
-    ScoreLayouter*  m_pScoreLyt;
-    ImoScore*       m_pScore;
-    ShapesStorage&  m_shapesStorage;
-    ShapesCreator*  m_pShapesCreator;
-    PartsEngraver*  m_pPartsEngraver;
     ColumnsBuilder* m_pColsBuilder;
     std::vector<ColumnData*> m_colsData;
 
@@ -330,6 +326,9 @@ public:
     virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
                                 TimeUnits rTime, int nStaff, GmoShape* pShape,
                                 bool fInProlog=false) = 0;
+    ///save info for a full-measure rest
+    virtual void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
+                                           GmoShape* pNonTimedShape) = 0;
     ///terminate current column
     virtual void finish_column_measurements(int iCol) = 0;
 
