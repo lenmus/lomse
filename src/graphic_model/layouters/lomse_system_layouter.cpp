@@ -154,6 +154,8 @@ void SystemLayouter::set_position_and_width_for_staves(LUnits indent)
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
 
+    m_pBoxSystem->add_shift_to_start_measure(indent);
+
     m_pPartsEngraver->set_position_and_width_for_staves(indent, org, m_pBoxSystem);
 }
 
@@ -314,6 +316,8 @@ void SystemLayouter::add_system_prolog_if_necessary()
 
         m_pagePos.x += uPrologWidth;
         m_uFreeSpace -= uPrologWidth;
+
+        m_pBoxSystem->add_shift_to_start_measure(uPrologWidth);
 	}
 }
 

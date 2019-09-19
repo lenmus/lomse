@@ -66,6 +66,8 @@ class GmoLayer;
 class SelectionSet;
 class Control;
 class ScoreStub;
+class GmMeasuresTable;
+
 
 //---------------------------------------------------------------------------------------
 //valid areas for mouse interaction
@@ -147,6 +149,7 @@ public:
     inline bool is_modified() { return m_modified; }
     inline long get_model_id() { return m_modelId; }
     int get_page_number_containing(GmoObj* pGmo);
+    GmMeasuresTable* get_measures_table(ImoId scoreId);
 
     //special accessors
     GmoShapeStaff* get_shape_for_first_staff_in_first_system(ImoId scoreId);
@@ -168,7 +171,7 @@ public:
     GmoShape* get_shape_for_noterest(ImoNoteRest* pNR);
 
     //creation
-    ScoreStub* add_stub_for(ImoId scoreId);
+    ScoreStub* add_stub_for(ImoScore* pScore);
     void store_in_map_imo_shape(ImoObj* pImo, GmoShape* pShape);
     void add_to_map_imo_to_box(GmoBox* child);
     void add_to_map_ref_to_box(GmoBox* pBox);
@@ -199,6 +202,7 @@ public:
 
     //tests
     void dump_page(int iPage, ostream& outStream);
+
 
 protected:
     ScoreStub* get_stub_for(ImoId scoreId);

@@ -225,8 +225,7 @@ GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
         return it->second;
     else
     {
-        LOMSE_LOG_DEBUG(Logger::k_score_player,
-            "No shape found for Imo id: %d", id );
+        LOMSE_LOG_INFO("No shape found for Imo id: %d", id );
         return nullptr;
     }
 }
@@ -355,10 +354,10 @@ GmoBoxSystem* GraphicModel::get_system_box(int UNUSED(iSystem))
 }
 
 //---------------------------------------------------------------------------------------
-ScoreStub* GraphicModel::add_stub_for(ImoId scoreId)
+ScoreStub* GraphicModel::add_stub_for(ImoScore* pScore)
 {
-    ScoreStub* pStub = LOMSE_NEW ScoreStub(scoreId);
-    m_scores[scoreId] = pStub;
+    ScoreStub* pStub = LOMSE_NEW ScoreStub(pScore);
+    m_scores[pScore->get_id()] = pStub;
     return pStub;
 }
 
@@ -370,6 +369,13 @@ ScoreStub* GraphicModel::get_stub_for(ImoId scoreId)
 		return it->second;
     else
         return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmMeasuresTable* GraphicModel::get_measures_table(ImoId scoreId)
+{
+	ScoreStub* pStub = get_stub_for(scoreId);
+	return (pStub ? pStub->get_measures_table() : nullptr);
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,13 +82,6 @@ SpAlgColumn::SpAlgColumn(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          PartsEngraver* pPartsEngraver)
     :SpacingAlgorithm(libraryScope, pScoreMeter, pScoreLyt, pScore, shapesStorage,
                       pShapesCreator, pPartsEngraver)
-    , m_libraryScope(libraryScope)
-    , m_pScoreMeter(pScoreMeter)
-    , m_pScoreLyt(pScoreLyt)
-    , m_pScore(pScore)
-    , m_shapesStorage(shapesStorage)
-    , m_pShapesCreator(pShapesCreator)
-    , m_pPartsEngraver(pPartsEngraver)
     , m_pColsBuilder(nullptr)
 {
     m_pColsBuilder = LOMSE_NEW ColumnsBuilder(m_pScoreMeter, m_colsData,
@@ -331,6 +324,10 @@ void ColumnsBuilder::collect_content_for_this_column()
     GmoShapeBarline* pPrevBarlineShape = nullptr;
     GmoShape* pShape = nullptr;
 
+    bool fSaveNonTimed = (m_iColumn == 0);
+    vector<GmoShape*> nonTimed;     //last non-timed shape at start or after a barline
+    nonTimed.assign(m_pScoreMeter->num_instruments(), nullptr);
+
     while(!m_pSysCursor->is_end() )
     {
         pPrevSO = pSO;
@@ -394,12 +391,35 @@ void ColumnsBuilder::collect_content_for_this_column()
                 TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iLine, iInstr, pSO, time, iStaff, pShape);
+
+                //save data about full-measure rests
+                if (pSO->is_rest() && static_cast<ImoRest*>(pSO)->is_full_measure())
+                {
+                    m_pSpAlgorithm->include_full_measure_rest(pShape, m_pSysCursor->cur_entry(),
+                                                              nonTimed[iInstr]);
+                }
             }
 
             store_info_about_attached_objects(pSO, pShape, iInstr, iStaff,
                                               m_iColumn, iLine, pInstr);
-        }
 
+            //save shapes for non-timed after barline
+            if (fSaveNonTimed &&
+                (pSO->is_clef() || pSO->is_key_signature() || pSO->is_time_signature()))
+            {
+                nonTimed[iInstr] = pShape;
+            }
+
+            //save data for building the GmMeasuresTable and reset non-timed table
+            if (pSO->is_barline() && !static_cast<ImoBarline*>(pSO)->is_middle())
+            {
+                m_pScoreLyt->finish_measure(iInstr, static_cast<GmoShapeBarline*>(pShape));
+
+                fSaveNonTimed = false;
+                nonTimed.assign(nonTimed.size(), nullptr);
+            }
+
+        }
 
         m_pSysCursor->move_next();
     }

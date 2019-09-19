@@ -67,11 +67,12 @@ class SelectionSet;
 class Control;
 class ScoreStub;
 class GraphicModel;
-
+class GmMeasuresTable;
 
 //---------------------------------------------------------------------------------------
 /** %ScoreStub is a helper class containing information related to graphical model for
     one score.
+
     As the graphic model is a general model, it has no specific information about the
     details for each score graphic model. Therefore, to store and manage tables and
     other information related to each score graphic model, this helper class
@@ -82,9 +83,11 @@ class ScoreStub
 protected:
     ImoId m_scoreId;
     vector<GmoBoxScorePage*> m_pages;
+    GmMeasuresTable* m_measures;
 
 public:
-    ScoreStub(ImoId id) : m_scoreId(id) {}
+    ScoreStub(ImoScore* pScore);
+    ~ScoreStub();
 
     inline void add_page(GmoBoxScorePage* pPage) { m_pages.push_back(pPage); }
     inline vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
@@ -98,6 +101,9 @@ public:
         @param time The time position (absolute time units) for the requested page.
     */
     GmoBoxScorePage* get_page_for(TimeUnits time);
+
+    /** Returns the table of measures for this score */
+    inline GmMeasuresTable* get_measures_table() { return m_measures; }
 
 };
 

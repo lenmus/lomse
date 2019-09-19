@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -58,6 +58,9 @@ class StaffObjData;
 class FullMeasureRestData;
 class TextMeter;
 class ImoStyle;
+class GmMeasuresTable;
+class GraphicModel;
+
 
 //---------------------------------------------------------------------------------------
 // SpAlgGourlay
@@ -66,14 +69,6 @@ class ImoStyle;
 class SpAlgGourlay : public SpAlgColumn
 {
 protected:
-    LibraryScope&   m_libraryScope;
-    ScoreMeter*     m_pScoreMeter;
-    ScoreLayouter*  m_pScoreLyt;
-    ImoScore*       m_pScore;
-    ShapesStorage&  m_shapesStorage;
-    ShapesCreator*  m_pShapesCreator;
-    PartsEngraver*  m_pPartsEngraver;
-
     list<TimeSlice*> m_slices;              //list of TimeSlices
     vector<ColumnDataGourlay*> m_columns;   //columns
     vector<StaffObjData*> m_data;           //data associated to each staff object
@@ -138,6 +133,8 @@ public:
     void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr,
                         ImoStaffObj* pSO, TimeUnits rTime, int nStaff, GmoShape* pShape,
                         bool fInProlog=false);
+    void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
+                                   GmoShape* pNonTimedShape);
     void finish_column_measurements(int iCol);
 
     //auxiliary: shapes and boxes
@@ -190,7 +187,8 @@ public:
     void set_num_entries(int numSlices);
     void order_slices();
     void determine_minimum_width();
-    void include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry);
+    void include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry,
+                                   GmoShape* pNonTimedShape);
 
     //spacing
     LUnits determine_extent_for(float force);
@@ -228,7 +226,7 @@ public:
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter);
-    void reposition_full_measure_rests(GmoBoxSystem* pBox);
+    void reposition_full_measure_rests(GmoBoxSystem* pBox, GmMeasuresTable* pMeasures);
 
     //debug
     void dump(ostream& outStream, bool fOrdered=false);
@@ -263,16 +261,24 @@ public:
 class FullMeasureRestData
 {
 public:
-    GmoShape* m_pShape;             //shape for this rest
+    GmoShape* m_pRestShape;         //shape for this rest
     ColStaffObjsEntry* m_pEntry;    //the rest entry in ColStaffObjs
+    GmoShape* m_pNonTimedShape;     //the last non-timed before the rest, if any
 
 public:
-    FullMeasureRestData(GmoShape* pShape, ColStaffObjsEntry* pEntry)
-        : m_pShape(pShape), m_pEntry(pEntry) {}
+    FullMeasureRestData(GmoShape* pRestShape, ColStaffObjsEntry* pEntry,
+                        GmoShape* pNonTimedShape)
+        : m_pRestShape(pRestShape)
+        , m_pEntry(pEntry)
+        , m_pNonTimedShape(pNonTimedShape)
+    {
+    }
+
     ~FullMeasureRestData() {}
 
-    inline GmoShape* get_shape() { return m_pShape; }
-    inline ColStaffObjsEntry* get_entry() { return m_pEntry; }
+    inline GmoShape* get_rest_shape() { return m_pRestShape; }
+    inline ColStaffObjsEntry* get_rest_entry() { return m_pEntry; }
+    inline GmoShape* get_non_timed_shape() { return m_pNonTimedShape; }
 };
 
 

@@ -37,56 +37,55 @@
 namespace lomse
 {
 
-
-//an entry in the GmMeasuresTable
-typedef struct
-{
-    TimeUnits rTimepos;
-    TimeUnits rDuration;
-    LUnits uxPos;
-}
-GmMeasuresTableEntry;
+//forward declarations
+class ImoScore;
+class GmoShapeBarline;
+class GmoBoxSystem;
 
 //---------------------------------------------------------------------------------------
 /** %GmMeasuresTable object is responsible for storing and managing a table with
     the measures graphical information.
-
-    The table is, in practice, split in several %GmMeasuresTable objects, and there is
-    one %GmMeasuresTable object stored in each GmoBoxSystem object, to contain and
-    manage the measures contained in each system.
 */
 class GmMeasuresTable
 {
 protected:
-    vector<GmMeasuresTableEntry> m_measures;         //the table
+    typedef vector<GmoShapeBarline*> BarlinesVector;    //barlines for one instrument
+
+    vector<BarlinesVector*> m_instrument;       //pointers to each instrument barlines
+    vector<int> m_numBarlines;                  //num.added barlines in each instrument
 
 public:
-    GmMeasuresTable();
+    GmMeasuresTable(ImoScore* pScore);
     ///Destructor
     ~GmMeasuresTable();
 
-//    //creation
-//    void add_entries(vector<GmMeasuresTableEntry>& entries);
-//    void add_entry(GmMeasuresTableEntry& entry);
-//
-//    //info
-//    inline int get_size() { return (int)m_measures.size(); }
-//    TimeUnits start_time();
-//    TimeUnits end_time();
-//
-//    //access to an entry values
-//    inline TimeUnits get_timepos(int iItem) { return m_measures[iItem].rTimepos; }
-//    inline TimeUnits get_duration(int iItem) { return m_measures[iItem].rDuration; }
-//    inline LUnits get_x_pos(int iItem) { return m_measures[iItem].uxPos; }
-//    inline GmMeasuresTableEntry& get_entry(int iItem) { return m_measures[iItem]; }
-//    inline vector<GmMeasuresTableEntry>& get_entries() { return m_measures; }
-//
-//    //access by position
-//
-//    //debug
-//    string dump();
+    //creation
+    //invoked when a non-middle barline is found
+    void finish_measure(int iInstr, GmoShapeBarline* pBarlineShape);
+
+    //info
+    int get_num_measures(int iInstr);
+    inline int get_num_instruments() { return int(m_instrument.size()); }
+
+    /** Returns the measure end barline left border position.
+
+        When measure has no end barline (e.g. last measure in the score, when ended
+        without barline), the end barline position will be the system left border.
+    */
+    LUnits get_end_barline_left(int iInstr, int iMeasure, GmoBoxSystem* pBox);
+
+    /** Returns the measure start barline right border position.
+
+        For first measure in the system, the start barline is the first available
+        position after system prolog.
+    */
+    LUnits get_start_barline_right(int iInstr, int iMeasure, GmoBoxSystem* pBox);
+
+    //debug
+    void dump_gm_measures();
 
 protected:
+    void initialize_vectors(ImoScore* pScore);
 
 };
 

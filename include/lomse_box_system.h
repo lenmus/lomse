@@ -51,11 +51,14 @@ protected:
 	vector<GmoShapeStaff*> m_staffShapes;
 	vector<int> m_firstStaff;       //index to first staff for each instrument
     TimeGridTable* m_pGridTable;
-    GmMeasuresTable* m_pMeasures;
-    int m_iPage;        //number of score page (0..n-1) in which this system is contained
+    int m_iPage;            //number of score page (0..n-1) in which this system is contained
+
+	vector<int> m_iFirstMeasure;    //index to first measure, per instrument
+    vector<int> m_nMeasures;        //number of measures in this system, per instrument
+    LUnits m_dxFirstMeasure;        //shift from box left (virtual end barline of previous measure)
 
 public:
-    GmoBoxSystem(ImoObj* pCreatorImo);
+    GmoBoxSystem(ImoScore* pScore);
     ~GmoBoxSystem();
 
     //slices
@@ -78,6 +81,22 @@ public:
     inline void set_page_number(int iPage) { m_iPage = iPage; }
 	inline int get_page_number() { return m_iPage; }
 
+	//measures info
+	/** Returns the index (0..n-1) for the measure that starts in this system, or
+	    -1 if no measures in this instrument
+    */
+	int get_first_measure(int iInstr);
+
+	/** Lomse considers two positions for barlines at the end of a system:
+	    - the real position at end of previous system, and
+	    - the virtual position at start of next system (the first
+          available position after prolog).
+
+        This method returns the virtual start position for the mesaure starting
+        the system.
+	*/
+    inline LUnits get_start_measure_xpos() { return m_origin.x + m_dxFirstMeasure; }
+
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
     void add_num_staves_for_instrument(int staves);
@@ -92,8 +111,16 @@ public:
 
     //debug
     string dump_timegrid_table();
+    string dump_measures_info();
 
 protected:
+    //building measures table
+    friend class TimeSlice;
+    void add_barline_info(int iMeasure, int iInstr);
+
+    friend class SystemLayouter;
+    inline void add_shift_to_start_measure(LUnits width) { m_dxFirstMeasure += width; }
+
 
 };
 

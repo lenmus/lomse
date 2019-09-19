@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,9 +36,11 @@
 #include "lomse_score_meter.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_slice.h"
+#include "lomse_box_system.h"
 #include "lomse_score_layouter.h"
-
+#include "lomse_gm_measures_table.h"
 #include "lomse_calligrapher.h"
+#include "lomse_graphical_model.h"
 
 #include <vector>
 #include <cmath>   //abs
@@ -62,14 +64,6 @@ SpAlgGourlay::SpAlgGourlay(LibraryScope& libraryScope,
                                        PartsEngraver* pPartsEngraver)
     : SpAlgColumn(libraryScope, pScoreMeter, pScoreLyt, pScore, shapesStorage,
                   pShapesCreator, pPartsEngraver)
-    , m_libraryScope(libraryScope)
-    , m_pScoreMeter(pScoreMeter)
-    , m_pScoreLyt(pScoreLyt)
-    , m_pScore(pScore)
-    , m_shapesStorage(shapesStorage)
-    , m_pShapesCreator(pShapesCreator)
-    , m_pPartsEngraver(pPartsEngraver)
-    //
     , m_pCurSlice(nullptr)
     , m_pLastEntry(nullptr)
     , m_prevType(TimeSlice::k_undefined)
@@ -263,13 +257,20 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UN
         }
     }
 
-    //save data about full-measure rests
-    if (pSO->is_rest() && static_cast<ImoRest*>(pSO)->is_full_measure())
-        m_pCurColumn->include_full_measure_rest(pShape, pCurEntry);
+//    //save data about full-measure rests
+//    if (pSO->is_rest() && static_cast<ImoRest*>(pSO)->is_full_measure())
+//        m_pCurColumn->include_full_measure_rest(pShape, pCurEntry);
 
 
     m_pLastEntry = pCurEntry;
     ++m_numEntries;
+}
+//---------------------------------------------------------------------------------------
+void SpAlgGourlay::include_full_measure_rest(GmoShape* pRestShape,
+                                             ColStaffObjsEntry* pCurEntry,
+                                             GmoShape* pNonTimedShape)
+{
+    m_pCurColumn->include_full_measure_rest(pRestShape, pCurEntry, pNonTimedShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -529,9 +530,12 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
 void SpAlgGourlay::reposition_full_measure_rests(int iFirstCol, int iLastCol,
                                                  GmoBoxSystem* pBox)
 {
+    GraphicModel* pGM = m_pScoreLyt->get_graphic_model();
+    GmMeasuresTable* pMeasures = pGM->get_measures_table( m_pScore->get_id() );
+
     for (int iCol = iFirstCol; iCol < iLastCol; ++iCol)
     {
-        m_columns[iCol]->reposition_full_measure_rests(pBox);
+        m_columns[iCol]->reposition_full_measure_rests(pBox, pMeasures);
     }
 }
 
@@ -1097,8 +1101,9 @@ void TimeSlice::dump(ostream& ss)
 
 //---------------------------------------------------------------------------------------
 void TimeSlice::add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
-                                         vector<StaffObjData*>& data)
+                                  vector<StaffObjData*>& data)
 {
+    GmoBoxSystem* pBoxSystem = pSliceInstrBox->get_system_box();
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
     for (int i=m_iFirstData; i < iMax; ++i, pEntry = pEntry->get_next())
@@ -1108,7 +1113,21 @@ void TimeSlice::add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
         {
             GmoShape* pShape = pData->get_shape();
             if (pShape)
+			{
                 pSliceInstrBox->add_shape(pShape, GmoShape::k_layer_notes);
+
+                //collect barlines info for box system (measures table)
+				if (pBoxSystem && pShape->is_shape_barline())
+				{
+				    ImoStaffObj* pSO = pEntry->imo_object();
+				    if (pSO && pSO->is_barline()
+                        && !static_cast<ImoBarline*>(pSO)->is_middle())
+                    {
+                        pBoxSystem->add_barline_info(pEntry->measure(),
+                                                     pEntry->num_instrument());
+                    }
+				}
+            }
         }
     }
 }
@@ -1915,9 +1934,11 @@ void ColumnDataGourlay::dump(ostream& outStream, bool fOrdered)
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnDataGourlay::include_full_measure_rest(GmoShape* pShape, ColStaffObjsEntry* pEntry)
+void ColumnDataGourlay::include_full_measure_rest(GmoShape* pShape,
+                                                  ColStaffObjsEntry* pEntry,
+                                                  GmoShape* pNonTimedShape)
 {
-    FullMeasureRestData* pRest = LOMSE_NEW FullMeasureRestData(pShape, pEntry);
+    FullMeasureRestData* pRest = LOMSE_NEW FullMeasureRestData(pShape, pEntry,pNonTimedShape);
     m_rests.push_back(pRest);
 }
 
@@ -2035,25 +2056,30 @@ void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& da
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnDataGourlay::reposition_full_measure_rests(GmoBoxSystem* pBox)
+void ColumnDataGourlay::reposition_full_measure_rests(GmoBoxSystem* pBox,
+                                                      GmMeasuresTable* pMeasures)
 {
-    //TODO. Uncomment and finish when GmMeasuresTable is implemented
-//    list<FullMeasureRestData*>::iterator it;
-//    for (it = m_rests.begin(); it != m_rests.end(); ++it)
-//    {
-////        ColStaffObjsEntry* pEntry = (*it)->get_entry();
-////        int iInstr = pEntry->num_instrument();
-////        int iMeasure = pEntry->measure();
-////        GmMeasuresTableEntry* pInfo = pBox->get_measure_info(iInstr, iMeasure);
-//        GmoShape* pShape = (*it)->get_shape();
-////        LUnits space = pInfo->inner_width() - pShape->get_width();
-//        LUnits xOld = pShape->get_left();     //test
-//        LUnits xLeft = 700.0 + xOld;          //test
-//        pShape->set_origin_and_notify_observers(xLeft, 0.0);
-//
-//        dbgLogger << "reposition_full_measure_rest: xOld="
-//                  << xOld << ", xNew=" << xLeft << endl;
-//    }
+    list<FullMeasureRestData*>::iterator it;
+    for (it = m_rests.begin(); it != m_rests.end(); ++it)
+    {
+        ColStaffObjsEntry* pEntry = (*it)->get_rest_entry();
+        int iInstr = pEntry->num_instrument();
+        int iMeasure = pEntry->measure();
+
+        //determine space for centering the rest
+        //discount the width of any non-timed after start measure barline
+        GmoShape* pShapeNT = (*it)->get_non_timed_shape();
+        LUnits xStart = (pShapeNT ? pShapeNT->get_right()
+                                  : pMeasures->get_start_barline_right(iInstr, iMeasure, pBox));
+
+        GmoShape* pRestShape = (*it)->get_rest_shape();
+        LUnits xEnd = pMeasures->get_end_barline_left(iInstr, iMeasure, pBox);
+        LUnits space = xEnd - xStart - pRestShape->get_width();
+
+        //determine new xPos for the rest and move there
+        LUnits xNew = space/2.0 + xStart;
+        pRestShape->set_origin_and_notify_observers(xNew, 0.0);
+    }
 }
 
 //---------------------------------------------------------------------------------------

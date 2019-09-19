@@ -40,12 +40,18 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)
-    : GmoBox(GmoObj::k_box_system, pCreatorImo)
+GmoBoxSystem::GmoBoxSystem(ImoScore* pScore)
+    : GmoBox(GmoObj::k_box_system, pScore)
     , m_pGridTable(nullptr)
-    , m_pMeasures(nullptr)
     , m_iPage(0)
+    , m_dxFirstMeasure(0.0)
 {
+    //for unit tests it assumes a maximum of 10 instruments
+    //TODO: Fix test by providing a ptr to ImoScore.
+    int numInstruments = (pScore ? pScore->get_num_instruments() : 10);
+
+	m_iFirstMeasure.assign(numInstruments, -1);
+    m_nMeasures.assign(numInstruments, 0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -191,6 +197,37 @@ LUnits GmoBoxSystem::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 {
     GmoShapeStaff* pStaff = get_staff_shape(iInstr, iStaff);
     return (value * pStaff->get_staff_line_spacing()) / 10.0;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::add_barline_info(int iMeasure, int iInstr)
+{
+	if (m_iFirstMeasure[iInstr] == -1)
+	    m_iFirstMeasure[iInstr] = iMeasure;
+
+    m_nMeasures[iInstr]++;
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxSystem::get_first_measure(int iInstr)
+{
+    return m_iFirstMeasure[iInstr];
+}
+
+//---------------------------------------------------------------------------------------
+string GmoBoxSystem::dump_measures_info()
+{
+    stringstream s;
+    s << endl << "BoxSystem (first, total):";
+    vector<int>::iterator it;
+    int iInstr = 0;
+    for (it = m_nMeasures.begin(); it != m_nMeasures.end(); ++it, ++iInstr)
+    {
+        s << " (" << fixed << setprecision(2) << m_iFirstMeasure[iInstr] << ", "
+          << *it << ")";
+    }
+    s << endl;
+    return s.str();
 }
 
 

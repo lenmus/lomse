@@ -120,7 +120,7 @@ string ImMeasuresTable::dump()
 {
     stringstream s;
     vector<ImMeasuresTableEntry*>::iterator it;
-    s << "Num.entries = " << num_entries() << endl;
+    s << "ImMeasuresTable. Num.entries = " << num_entries() << endl;
     //    +.......+.......+.......+.......+.......+.......+
     s << "meas.   time    beat    object" << endl;
     s << "--------------------------------------------" << endl;

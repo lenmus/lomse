@@ -92,7 +92,6 @@ public:
 //    TimeUnits GetGridTimeForPosition(LUnits uxPos);
 //    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
 //                       LUnits uyBottom);
-protected:
     GmoBoxSystem* get_system_box();
 
 

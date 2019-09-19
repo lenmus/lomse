@@ -44,7 +44,7 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_xml_parser.h"
 #include "lomse_mxl_analyser.h"
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 using namespace UnitTest;
 using namespace std;

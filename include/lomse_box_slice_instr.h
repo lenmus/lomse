@@ -48,6 +48,9 @@ private:
 public:
     GmoBoxSliceInstr(ImoInstrument* pInstr);
     ~GmoBoxSliceInstr();
+
+    GmoBoxSystem* get_system_box();
+
 };
 
 

@@ -39,7 +39,7 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_document_cursor.h"
 #include "lomse_score_algorithms.h"
-#include "lomse_measures_table.h"
+#include "lomse_im_measures_table.h"
 
 
 using namespace UnitTest;
