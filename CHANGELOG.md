@@ -14,6 +14,7 @@
   first application markings class: `FragmentMark`. This class allows to display on any
   score brackets and vertical lines, spanning one or several staves, to define the start
   and end points of a score section or fragment.
+- Fix. Full-measure rests are now centered in the measure.
 
 
 

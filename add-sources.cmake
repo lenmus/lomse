@@ -54,6 +54,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_basic.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_graphical_model.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_handler.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_measures_table.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_overlays_generator.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_selections.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_barline.cpp
@@ -133,7 +134,7 @@ set(INTERNAL_MODEL_FILES
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_measures_table.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_im_measures_table.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_model_builder.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
