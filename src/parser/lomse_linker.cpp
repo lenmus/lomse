@@ -311,8 +311,8 @@ ImoObj* Linker::add_sound_change(ImoSoundChange* pInfo)
     }
     else
     {
-        LOMSE_LOG_ERROR("Parent of ImoSoundChange is neither <music-data> nor <direction>.");
-        return pInfo;
+       LOMSE_LOG_ERROR("Parent of ImoSoundChange is neither <music-data> nor <direction>.");
+       return pInfo;
     }
 
 //        //TODO: Move this to linker

@@ -506,6 +506,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
         m_TypeToName[k_imo_tuplet_dto] = "tuplet-dto";
         m_TypeToName[k_imo_volta_bracket_dto] = "volta_bracket_dto";
+        m_TypeToName[k_imo_wedge_dto] = "wedge_dto";
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
@@ -555,6 +556,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
         m_TypeToName[k_imo_volta_bracket] = "volta-bracket";
+        m_TypeToName[k_imo_wedge] = "wedge";
 
         //abstract and non-valid objects
         m_TypeToName[k_imo_obj] = "non-valid";
@@ -1856,6 +1858,7 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_slur] = 5;
         priority[k_imo_fermata] = 6;
         priority[k_imo_text_repetition_mark] = 7;
+        priority[k_imo_wedge] = 8;
 
         fMapInitialized = true;
     };
@@ -5434,19 +5437,55 @@ void ImoVoltaBracket::reorganize_after_object_deletion()
 }
 
 
-////=======================================================================================
-//// ImoVoltaBracketData implementation
-////=======================================================================================
-//ImoVoltaBracketData::ImoVoltaBracketData(ImoVoltaBracketDto* pDto)
-//    : ImoRelDataObj(k_imo_volta_bracket_data)
-//    , m_fStart( pDto->is_start() )
+//=======================================================================================
+// ImoSlur implementation
+//=======================================================================================
+//ImoNote* ImoWedge::get_start_note()
 //{
+//    return static_cast<ImoNote*>( get_start_object() );
 //}
 //
 ////---------------------------------------------------------------------------------------
-//ImoVoltaBracketData::~ImoVoltaBracketData()
+//ImoNote* ImoWedge::get_end_note()
+//{
+//    return static_cast<ImoNote*>( get_end_object() );
+//}
+
+//---------------------------------------------------------------------------------------
+void ImoWedge::reorganize_after_object_deletion()
+{
+    //TODO
+    //Nothing to do. As a wedge involves only two objects, the wedge is removed when
+    //one of the ImoDirections is deleted. Also, in note destructor, the other note is informed.
+}
+
+
+
+////=======================================================================================
+//// ImoWedgeData implementation
+////=======================================================================================
+//ImoWedgeData::ImoWedgeData(ImoWedgeDto* pDto)
+//    : ImoRelDataObj(k_imo_wedge_data)
+//    , m_fStart( pDto->is_start() )
+//    , m_slurNum( pDto->get_slur_number() )
+//    , m_orientation(k_orientation_default)
+//    , m_pBezier(nullptr)
 //{
 //}
+
+////---------------------------------------------------------------------------------------
+//ImoWedgeData::~ImoWedgeData()
+//{
+//    delete m_pBezier;
+//}
+
+//=======================================================================================
+// ImoWedgeDto implementation
+//=======================================================================================
+ImoWedgeDto::~ImoWedgeDto()
+{
+}
+
 
 
 
