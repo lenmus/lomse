@@ -7598,7 +7598,8 @@ public:
 class ImoWedge : public ImoRelObj
 {
 protected:
-    Tenths  m_spread;
+    Tenths  m_startSpread;
+    Tenths  m_endSpread;
     bool    m_fNiente;
     bool    m_fCrescendo;
     int     m_wedgeNum;
@@ -7606,22 +7607,29 @@ protected:
 
     friend class ImFactory;
     ImoWedge(int num=0)
-        : ImoRelObj(k_imo_wedge), m_spread(0.0f), m_fNiente(false), m_fCrescendo(false)
+        : ImoRelObj(k_imo_wedge)
+        , m_startSpread(0.0f)
+        , m_endSpread(0.0f)
+        , m_fNiente(false)
+        , m_fCrescendo(false)
         , m_wedgeNum(num)
-    {}
+    {
+    }
 
 public:
     virtual ~ImoWedge() {}
 
     //setters
-    inline void set_spread(Tenths value) { m_spread = value; }
+    inline void set_start_spread(Tenths value) { m_startSpread = value; }
+    inline void set_end_spread(Tenths value) { m_endSpread = value; }
     inline void set_niente(bool value) { m_fNiente = value; }
     inline void set_crescendo(bool value) { m_fCrescendo = value; }
     inline void set_wedge_number(int value) { m_wedgeNum = value; }
     inline void set_color(Color value) { m_color = value; }
 
     //getters
-    inline Tenths get_spread() { return m_spread; }
+    inline Tenths get_start_spread() { return m_startSpread; }
+    inline Tenths get_end_spread() { return m_endSpread; }
     inline bool is_niente() { return m_fNiente; }
     inline bool is_crescendo() { return m_fCrescendo; }
     inline int get_wedge_number() { return m_wedgeNum; }

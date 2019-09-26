@@ -6942,25 +6942,29 @@ protected:
 
     void set_wedge_type_and_id(const string& value, int num)
     {
-        if (value == "crescendo")
-        {
-            m_pInfo1->set_start(true);
-            m_pInfo1->set_crescendo(true);
-            int wedgeId =  m_pAnalyser->new_wedge_id(num);
-            m_pInfo1->set_wedge_number(wedgeId);
-        }
-        else if (value == "diminuendo")
-        {
-            m_pInfo1->set_start(true);
-            m_pInfo1->set_crescendo(false);
-            int wedgeId =  m_pAnalyser->new_wedge_id(num);
-            m_pInfo1->set_wedge_number(wedgeId);
-        }
-        else if (value == "stop")
+        //AWARE: The values of start, stop, and continue refer to how an element appears
+        //in musical score order, not in MusicXML document order. An element with a stop
+        //attribute may precede the corresponding element with a start attribute within
+        //a MusicXML document. Therefore, the following combinations are valid:
+        //  (stop, crescendo)           (crescendo, stop)
+        //  (continue, crescendo)       (continue, continue)
+        //  (continue, stop)            (stop, continue)
+        //  (diminuendo, stop)          (diminuendo, continue)
+
+        if (m_pAnalyser->wedge_id_exists(num) && value != "continue")
         {
             m_pInfo1->set_start(false);
             int wedgeId =  m_pAnalyser->get_wedge_id_and_close(num);
             m_pInfo1->set_wedge_number(wedgeId);
+            if (value == "crescendo")
+                m_pInfo1->set_crescendo(true);
+        }
+        else if (value == "crescendo" || value == "diminuendo" || value == "stop")
+        {
+            m_pInfo1->set_start(true);
+            int wedgeId =  m_pAnalyser->new_wedge_id(num);
+            m_pInfo1->set_wedge_number(wedgeId);
+            m_pInfo1->set_crescendo(value == "crescendo");
         }
         else if (value == "continue")
         {
@@ -6972,7 +6976,7 @@ protected:
             m_pInfo2 = static_cast<ImoWedgeDto*>(
                                 ImFactory::inject(k_imo_wedge_dto, pDoc));
             m_pInfo2->set_start(true);
-            m_pInfo1->set_crescendo(true);  //TODO
+//            m_pInfo1->set_crescendo(true);  //TODO
             m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
             wedgeId =  m_pAnalyser->new_wedge_id(num);
             m_pInfo2->set_wedge_number(wedgeId);
@@ -7512,6 +7516,12 @@ int MxlAnalyser::new_wedge_id(int numWedge)
 }
 
 //---------------------------------------------------------------------------------------
+bool MxlAnalyser::wedge_id_exists(int numWedge)
+{
+    return numWedge <= m_wedgeNum && m_wedgeIds[numWedge] != -1;
+}
+
+//---------------------------------------------------------------------------------------
 int MxlAnalyser::get_wedge_id(int numWedge)
 {
     return m_wedgeIds[numWedge];
@@ -7520,7 +7530,9 @@ int MxlAnalyser::get_wedge_id(int numWedge)
 //---------------------------------------------------------------------------------------
 int MxlAnalyser::get_wedge_id_and_close(int numWedge)
 {
-    return m_wedgeIds[numWedge];
+    int id = m_wedgeIds[numWedge];
+    m_wedgeIds[numWedge] = -1;
+    return id;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7930,15 +7942,24 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
     ImoWedge* pWedge = static_cast<ImoWedge*>(
                                 ImFactory::inject(k_imo_wedge, pDoc));
 
-    //set data taken from end dto
-    //pWedge->set_wedge_number( pEndDto->get_wedge_number() );
-
     //set data taken from start dto
-    pWedge->set_spread( pStartDto->get_spread() );
+    pWedge->set_start_spread( pStartDto->get_spread() );
     pWedge->set_niente( pStartDto->is_niente() );
     pWedge->set_crescendo( pStartDto->is_crescendo() );
     pWedge->set_wedge_number( pStartDto->get_wedge_number() );
     pWedge->set_color( pStartDto->get_color() );
+
+    //set data taken from end dto
+    pWedge->set_end_spread( pEndDto->get_spread() );
+
+    //set default spread when no spread is specified
+    if (pEndDto->get_spread() == 0.0f && pStartDto->get_spread() == 0.0f)
+    {
+        if (pStartDto->is_crescendo())
+            pWedge->set_end_spread(15.0f);
+        else
+            pWedge->set_start_spread(15.0f);
+    }
 
     std::list<ImoWedgeDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)

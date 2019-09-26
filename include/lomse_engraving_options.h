@@ -103,6 +103,8 @@ namespace lomse
 #define LOMSE_VOLTA_BRACKET_THICKNESS   1.0f
 #define LOMSE_VOLTA_LEFT_SPACE_TO_TEXT  6.0f
 
+//wedges
+#define LOMSE_WEDGE_LINE_THICKNESS      1.5f    //line thickness for wedges/hairpins
 
 
 

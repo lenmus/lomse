@@ -183,7 +183,7 @@ public:
                 k_shape_time_signature,
                 k_shape_tie,
                 k_shape_time_signature_glyph, k_shape_tuplet,
-                k_shape_volta_bracket, k_shape_word,
+                k_shape_volta_bracket, k_shape_wedge, k_shape_word,
             k_max
          };
 
@@ -253,6 +253,7 @@ public:
     inline bool is_shape_time_signature_glyph() { return m_objtype == k_shape_time_signature_glyph; }
     inline bool is_shape_tuplet() { return m_objtype == k_shape_tuplet; }
     inline bool is_shape_volta_bracket() { return m_objtype == k_shape_volta_bracket; }
+    inline bool is_shape_wedge() { return m_objtype == k_shape_wedge; }
     inline bool is_shape_word() { return m_objtype == k_shape_word; }
 
     //size

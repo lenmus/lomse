@@ -4729,7 +4729,8 @@ SUITE(MxlAnalyserTest)
                     CHECK( pWedge != nullptr );
                     if (pWedge)
                     {
-                        CHECK( pWedge->get_spread() == 0.0f );
+                        CHECK( pWedge->get_start_spread() == 0.0f );
+                        CHECK( pWedge->get_end_spread() == 15.0f );
                         CHECK( pWedge->is_niente() == false );
                         CHECK( pWedge->is_crescendo() == true );
                         CHECK( pWedge->get_wedge_number() == 1 );

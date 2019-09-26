@@ -220,6 +220,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_tuplet]            = "tuplet         ";
         m_typeToName[k_shape_volta_bracket]     = "volta-bracket  ";
         m_typeToName[k_shape_word]              = "word           ";
+        m_typeToName[k_shape_wedge]             = "wedge          ";
 
         m_fNamesLoaded = true;
     }

@@ -406,6 +406,7 @@ public:
 
     //interface for building wedges
     int new_wedge_id(int numWedge);
+    bool wedge_id_exists(int numWedge);
     int get_wedge_id(int numWedge);
     int get_wedge_id_and_close(int numWedge);
 
