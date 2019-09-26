@@ -41,7 +41,7 @@ namespace lomse
 #define LOMSE_THIN_LINE_WIDTH            1.5f   // thin line width
 #define LOMSE_THICK_LINE_WIDTH           6.0f   // thick line width
 #define LOMSE_LINES_SPACING              4.0f   // space between lines: 4 tenths
-#define LOMSE_BARLINE_RADIOUS            2.0f   // dots radius: 2 tenths
+#define LOMSE_BARLINE_RADIUS             2.0f   // dots radius: 2 tenths
 
 //Beams
 //  according to http://www2.coloradocollege.edu/dept/mu/Musicpress/engraving.html
@@ -105,6 +105,7 @@ namespace lomse
 
 //wedges
 #define LOMSE_WEDGE_LINE_THICKNESS      1.5f    //line thickness for wedges/hairpins
+#define LOMSE_WEDGE_NIENTE_RADIUS       4.0f    //radius for niente circles in wedges
 
 
 

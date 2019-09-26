@@ -44,10 +44,11 @@ namespace lomse
 // GmoShapeWedge implementation
 //=======================================================================================
 GmoShapeWedge::GmoShapeWedge(ImoObj* pCreatorImo, ShapeId idx, UPoint points[],
-                             LUnits thickness, Color color)
+                             LUnits thickness, Color color, int niente, LUnits radius)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_wedge, idx, color)
     , m_thickness(thickness)
-    , m_fNiente(false)
+    , m_niente(niente)
+    , m_radiusNiente(radius)
 {
     save_points(points);
     compute_bounds();
@@ -92,16 +93,24 @@ void GmoShapeWedge::save_points(UPoint* points)
 //---------------------------------------------------------------------------------------
 void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    Color color = determine_color_to_use(opt);      //Color(255,0,0);
+    Color color = determine_color_to_use(opt);
 
     pDrawer->begin_path();
-    pDrawer->fill(color);
+    pDrawer->fill_none();
     pDrawer->stroke(color);
     pDrawer->stroke_width(m_thickness);
+
+    //draw lines
     pDrawer->move_to(m_points[0].x, m_points[0].y);
     pDrawer->line_to(m_points[1].x, m_points[1].y);
     pDrawer->move_to(m_points[2].x, m_points[2].y);
     pDrawer->line_to(m_points[3].x, m_points[3].y);
+
+    //draw niente circle
+    if (m_niente == k_niente_at_start)
+        pDrawer->circle(m_points[0].x - m_radiusNiente, m_points[0].y, m_radiusNiente);
+    else if (m_niente == k_niente_at_end)
+        pDrawer->circle(m_points[1].x + m_radiusNiente, m_points[1].y, m_radiusNiente);
 
     pDrawer->end_path();
     pDrawer->render();

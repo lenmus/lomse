@@ -7944,18 +7944,21 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
 
     //set data taken from start dto
     pWedge->set_start_spread( pStartDto->get_spread() );
-    pWedge->set_niente( pStartDto->is_niente() );
-    pWedge->set_crescendo( pStartDto->is_crescendo() );
     pWedge->set_wedge_number( pStartDto->get_wedge_number() );
     pWedge->set_color( pStartDto->get_color() );
 
     //set data taken from end dto
     pWedge->set_end_spread( pEndDto->get_spread() );
 
+    //set data that can be on any of them
+    pWedge->set_niente( pStartDto->is_niente() || pEndDto->is_niente() );
+    pWedge->set_crescendo( pStartDto->is_crescendo() || pEndDto->is_crescendo());
+
+
     //set default spread when no spread is specified
     if (pEndDto->get_spread() == 0.0f && pStartDto->get_spread() == 0.0f)
     {
-        if (pStartDto->is_crescendo())
+        if (pWedge->is_crescendo())
             pWedge->set_end_spread(15.0f);
         else
             pWedge->set_start_spread(15.0f);

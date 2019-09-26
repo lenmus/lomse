@@ -65,7 +65,7 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
     LUnits thinLineWidth = m_pMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, m_iInstr, 0);
     LUnits thickLineWidth = m_pMeter->tenths_to_logical(LOMSE_THICK_LINE_WIDTH, m_iInstr, 0);
     LUnits spacing = m_pMeter->tenths_to_logical(LOMSE_LINES_SPACING, m_iInstr, 0);
-    LUnits radius = m_pMeter->tenths_to_logical(LOMSE_BARLINE_RADIOUS, m_iInstr, 0);
+    LUnits radius = m_pMeter->tenths_to_logical(LOMSE_BARLINE_RADIUS, m_iInstr, 0);
 
     //force selection rectangle to have at least a width of half line (5 tenths)
     LUnits uMinWidth = 0;   //m_pMeter->tenths_to_logical(5.0f, m_iInstr, 0);

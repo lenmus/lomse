@@ -4744,42 +4744,335 @@ SUITE(MxlAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-//    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_slur_01)
-//    {
-//        //@01. double definition error detected
-//
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        XmlParser parser(errormsg);
-//        stringstream expected;
-//        expected << "Line 0. A slur with the same number is already defined for this "
-//            "element in line 0. This slur will be ignored." << endl;
-//        parser.parse_text(
-//            "<note>"
-//                "<pitch><step>A</step>"
-//                "<octave>3</octave></pitch>"
-//                "<duration>1</duration><type>quarter</type>"
-//                "<notations>"
-//                    "<slur number='1' type='start'/>"
-//                    "<slur number='1' type='stop'/>"
-//                "</notations>"
-//            "</note>");
-//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//        XmlNode* tree = parser.get_tree_root();
-//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//
-////        cout << test_name() << endl;
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_02)
+    {
+        //@02. (stop, crescendo) order parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction>"
+                "<direction-type><wedge type='stop'/></direction-type>"
+            "</direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction>"
+                "<direction-type><wedge type='crescendo'/></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pRoot != nullptr);
-//        CHECK( pRoot && pRoot->is_note() == true );
-//        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
-//        CHECK( pNote != nullptr );
-//
-//        a.do_not_delete_instruments_in_destructor();
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 0 );
+                    CHECK( pDir->get_placement() == k_placement_default );
+
+                    ImoWedge* pWedge = dynamic_cast<ImoWedge*>(
+                                           pDir->find_relation(k_imo_wedge) );
+                    CHECK( pWedge != nullptr );
+                    if (pWedge)
+                    {
+                        CHECK( pWedge->get_start_spread() == 0.0f );
+                        CHECK( pWedge->get_end_spread() == 15.0f );
+                        CHECK( pWedge->is_niente() == false );
+                        CHECK( pWedge->is_crescendo() == true );
+                        CHECK( pWedge->get_wedge_number() == 1 );
+                        CHECK( !is_different(pWedge->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_03)
+    {
+        //@03. (stop, diminuendo) is valid
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction>"
+                "<direction-type><wedge type='stop'/></direction-type>"
+            "</direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction>"
+                "<direction-type><wedge type='diminuendo'/></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 0 );
+                    CHECK( pDir->get_placement() == k_placement_default );
+
+                    ImoWedge* pWedge = dynamic_cast<ImoWedge*>(
+                                           pDir->find_relation(k_imo_wedge) );
+                    CHECK( pWedge != nullptr );
+                    if (pWedge)
+                    {
+                        CHECK( pWedge->get_start_spread() == 15.0f );
+                        CHECK( pWedge->get_end_spread() == 0.0f );
+                        CHECK( pWedge->is_niente() == false );
+                        CHECK( pWedge->is_crescendo() == false );
+                        CHECK( pWedge->get_wedge_number() == 1 );
+                        CHECK( !is_different(pWedge->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_04)
+    {
+        //@04. niente at end
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction>"
+                "<direction-type><wedge type='diminuendo' niente='yes'/></direction-type>"
+            "</direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction>"
+                "<direction-type><wedge type='stop'/></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 0 );
+                    CHECK( pDir->get_placement() == k_placement_default );
+
+                    ImoWedge* pWedge = dynamic_cast<ImoWedge*>(
+                                           pDir->find_relation(k_imo_wedge) );
+                    CHECK( pWedge != nullptr );
+                    if (pWedge)
+                    {
+                        CHECK( pWedge->get_start_spread() == 15.0f );
+                        CHECK( pWedge->get_end_spread() == 0.0f );
+                        CHECK( pWedge->is_niente() == true );
+                        CHECK( pWedge->is_crescendo() == false );
+                        CHECK( pWedge->get_wedge_number() == 1 );
+                        CHECK( !is_different(pWedge->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_05)
+    {
+        //@05. niente at start
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction>"
+                "<direction-type><wedge type='crescendo' niente='yes'/></direction-type>"
+            "</direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction>"
+                "<direction-type><wedge type='stop'/></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+
+                it = pMD->begin();
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 0 );
+                    CHECK( pDir->get_placement() == k_placement_default );
+
+                    ImoWedge* pWedge = dynamic_cast<ImoWedge*>(
+                                           pDir->find_relation(k_imo_wedge) );
+                    CHECK( pWedge != nullptr );
+                    if (pWedge)
+                    {
+                        CHECK( pWedge->get_start_spread() == 0.0f );
+                        CHECK( pWedge->get_end_spread() == 15.0f );
+                        CHECK( pWedge->is_niente() == true );
+                        CHECK( pWedge->is_crescendo() == true );
+                        CHECK( pWedge->get_wedge_number() == 1 );
+                        CHECK( !is_different(pWedge->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
 
 
     //@ miscellaneous -------------------------------------------------------------

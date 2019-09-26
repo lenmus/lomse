@@ -54,14 +54,22 @@ class GmoShapeWedge : public GmoSimpleShape
 protected:
     LUnits  m_thickness;
     UPoint  m_points[4];
-    bool    m_fNiente;
+    int     m_niente;
+    LUnits  m_radiusNiente;
 
 public:
     GmoShapeWedge(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
-                  Color color);
+                  Color color, int niente, LUnits radius);
     virtual ~GmoShapeWedge();
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+    //construction
+    enum {
+        k_niente_at_start = 0,
+        k_niente_at_end,
+        k_no_niente,
+    };
 
     //support for handlers
     int get_num_handlers();

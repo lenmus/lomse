@@ -7675,7 +7675,7 @@ public:
         , m_spread(0.0f)
         , m_fNiente(false)
         , m_fStart(true)
-        , m_fCrescendo(true)
+        , m_fCrescendo(false)
         , m_wedgeNum(0)
         , m_pDirection(nullptr)
         , m_color(Color(0,0,0))
