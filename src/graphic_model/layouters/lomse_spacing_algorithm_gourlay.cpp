@@ -2077,7 +2077,7 @@ void ColumnDataGourlay::reposition_full_measure_rests(GmoBoxSystem* pBox,
         LUnits space = xEnd - xStart - pRestShape->get_width();
 
         //determine new xPos for the rest and move there
-        LUnits xNew = space/2.0 + xStart;
+        LUnits xNew = space/2.0f + xStart;
         pRestShape->set_origin_and_notify_observers(xNew, 0.0);
     }
 }

@@ -6907,7 +6907,7 @@ public:
         // attrib: spread %tenths; #IMPLIED
         if (has_attribute("spread"))
         {
-            int spread = get_attribute_as_integer("spread", 0);
+            Tenths spread = get_attribute_as_float("spread", 0.0f);
             m_pInfo1->set_spread(spread);
         }
 
