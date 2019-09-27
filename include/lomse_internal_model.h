@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -136,6 +136,8 @@ class ImoTimeModificationDto;
 class ImoTimeSignature;
 class ImoTupletDto;
 class ImoTuplet;
+class ImoWedge;
+class ImoWedgeDto;
 class ImoWrapperBox;
 
 
@@ -596,6 +598,7 @@ enum EImoObjType
     k_imo_time_modification_dto,
     k_imo_tuplet_dto,
     k_imo_volta_bracket_dto,
+    k_imo_wedge_dto,
     k_imo_dto_last,
 
     // ImoSimpleObj (A)
@@ -703,13 +706,14 @@ enum EImoObjType
     k_imo_auxobj_last,
 
     // ImoRelObj (A)
-    k_imo_relobj,               ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Relation objects. Any of the following:</b>
+    k_imo_relobj,           ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Relation objects. Any of the following:</b>
     k_imo_beam,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beam
     k_imo_chord,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chord
     k_imo_slur,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Slur
     k_imo_tie,              ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tie
     k_imo_tuplet,           ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tuplet
-    k_imo_volta_bracket,
+    k_imo_volta_bracket,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Volta bracket
+    k_imo_wedge,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Wedge
     k_imo_relobj_last,
 
     k_imo_scoreobj_last,
@@ -1490,6 +1494,8 @@ public:
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
     inline bool is_volta_bracket() { return m_objtype == k_imo_volta_bracket; }
     inline bool is_volta_bracket_dto() { return m_objtype == k_imo_volta_bracket_dto; }
+    inline bool is_wedge() { return m_objtype == k_imo_wedge; }
+    inline bool is_wedge_dto() { return m_objtype == k_imo_wedge_dto; }
 
     //special checkers
     inline bool is_mouse_over_generator() { return   m_objtype == k_imo_link
@@ -7588,6 +7594,121 @@ public:
     }
 };
 
+//---------------------------------------------------------------------------------------
+class ImoWedge : public ImoRelObj
+{
+protected:
+    Tenths  m_startSpread;
+    Tenths  m_endSpread;
+    bool    m_fNiente;
+    bool    m_fCrescendo;
+    int     m_wedgeNum;
+    Color   m_color;
+
+    friend class ImFactory;
+    ImoWedge(int num=0)
+        : ImoRelObj(k_imo_wedge)
+        , m_startSpread(0.0f)
+        , m_endSpread(0.0f)
+        , m_fNiente(false)
+        , m_fCrescendo(false)
+        , m_wedgeNum(num)
+    {
+    }
+
+public:
+    virtual ~ImoWedge() {}
+
+    //setters
+    inline void set_start_spread(Tenths value) { m_startSpread = value; }
+    inline void set_end_spread(Tenths value) { m_endSpread = value; }
+    inline void set_niente(bool value) { m_fNiente = value; }
+    inline void set_crescendo(bool value) { m_fCrescendo = value; }
+    inline void set_wedge_number(int value) { m_wedgeNum = value; }
+    inline void set_color(Color value) { m_color = value; }
+
+    //getters
+    inline Tenths get_start_spread() { return m_startSpread; }
+    inline Tenths get_end_spread() { return m_endSpread; }
+    inline bool is_niente() { return m_fNiente; }
+    inline bool is_crescendo() { return m_fCrescendo; }
+    inline int get_wedge_number() { return m_wedgeNum; }
+    inline Color get_color() { return m_color; }
+
+    void reorganize_after_object_deletion();
+};
+
+////---------------------------------------------------------------------------------------
+//class ImoWedgeData : public ImoRelDataObj
+//{
+//protected:
+////    bool    m_fStart;
+////    int     m_wedgeNum;
+////    int     m_orientation;
+////    ImoBezierInfo* m_pBezier;
+//
+//    friend class ImFactory;
+//    ImoWedgeData(ImoWedgeDto* pDto);
+//
+//public:
+//    virtual ~ImoWedgeData();
+//
+//};
+
+// raw info about a pending wedge
+//---------------------------------------------------------------------------------------
+class ImoWedgeDto : public ImoSimpleObj
+{
+protected:
+    Tenths m_spread;
+    bool m_fNiente;
+    bool m_fStart;
+    bool m_fCrescendo;
+    int m_wedgeNum;
+    ImoDirection* m_pDirection;
+    Color m_color;
+    int m_lineNum;
+
+public:
+    ImoWedgeDto()
+        : ImoSimpleObj(k_imo_wedge_dto)
+        , m_spread(0.0f)
+        , m_fNiente(false)
+        , m_fStart(true)
+        , m_fCrescendo(false)
+        , m_wedgeNum(0)
+        , m_pDirection(nullptr)
+        , m_color(Color(0,0,0))
+        , m_lineNum(0)
+    {
+    }
+    virtual ~ImoWedgeDto();
+
+    //setters
+    inline void set_line_number(int value) { m_lineNum = value; }
+    inline void set_spread(Tenths value) { m_spread = value; }
+    inline void set_niente(bool value) { m_fNiente = value; }
+    inline void set_staffobj(ImoDirection* pDirection) { m_pDirection = pDirection; }
+    inline void set_crescendo(bool value) { m_fCrescendo = value; }
+    inline void set_start(bool value) { m_fStart = value; }
+    inline void set_wedge_number(int value) { m_wedgeNum = value; }
+    inline void set_color(Color value) { m_color = value; }
+
+    //getters
+    inline int get_line_number() { return m_lineNum; }
+    inline Tenths get_spread() { return m_spread; }
+    inline bool is_niente() { return m_fNiente; }
+    inline bool is_crescendo() { return m_fCrescendo; }
+    inline bool is_start() { return m_fStart; }
+    inline int get_wedge_number() { return m_wedgeNum; }
+    inline Color get_color() { return m_color; }
+
+    //required by RelationBuilder
+    inline int get_item_number() { return get_wedge_number(); }
+    bool is_start_of_relation() { return is_start(); }
+    bool is_end_of_relation() { return !is_start(); }
+    inline ImoDirection* get_staffobj() { return m_pDirection; }
+};
 
 
 //---------------------------------------------------------------------------------------

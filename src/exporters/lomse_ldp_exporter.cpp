@@ -867,7 +867,7 @@ public:
 
     string generate_source(ImoObj* UNUSED(pParent) =nullptr)
     {
-        if (m_pObj->has_attachments())
+        if (m_pObj->has_attachments() || m_pObj->get_num_relations() > 0)
             start_element("dir", m_pObj->get_id());
         else if (m_pObj->get_width() > 0.0f)
             start_element("spacer", m_pObj->get_id());
@@ -875,6 +875,7 @@ public:
             return string("");
 
         add_space_width();
+        add_spanners();
         source_for_staffobj_options(m_pObj);
         source_for_attachments(m_pObj);
         end_element(k_in_same_line);
@@ -887,6 +888,20 @@ protected:
     {
         m_source << " " << m_pObj->get_width();
         space_needed();
+    }
+
+    void add_spanners()
+    {
+        if (m_pObj->get_num_relations() > 0)
+        {
+            ImoRelations* pRelObjs = m_pObj->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                source_for_relobj(pRO, m_pObj);
+            }
+        }
     }
 
 };

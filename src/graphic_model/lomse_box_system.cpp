@@ -196,7 +196,7 @@ int GmoBoxSystem::get_num_instruments()
 LUnits GmoBoxSystem::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 {
     GmoShapeStaff* pStaff = get_staff_shape(iInstr, iStaff);
-    return (value * pStaff->get_staff_line_spacing()) / 10.0;
+    return (value * pStaff->get_staff_line_spacing()) / 10.0f;
 }
 
 //---------------------------------------------------------------------------------------

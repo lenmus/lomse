@@ -10,6 +10,8 @@
 
 ##### COMPATIBLE CHANGES
 
+- Added support to render crescendo/diminuendo wedges (hairpins). The MusicXML importer
+  now also imports the wedges.
 - Added methods in `Interactor` to add/remove visual application markings. Created the
   first application markings class: `FragmentMark`. This class allows to display on any
   score brackets and vertical lines, spanning one or several staves, to define the start

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,30 +48,31 @@
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_shape_barline.h"
 #include "lomse_shape_line.h"
+#include "lomse_articulation_engraver.h"
 #include "lomse_barline_engraver.h"
 #include "lomse_beam_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_clef_engraver.h"
+#include "lomse_coda_segno_engraver.h"
+#include "lomse_dynamics_mark_engraver.h"
 #include "lomse_fermata_engraver.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_key_engraver.h"
 #include "lomse_line_engraver.h"
+#include "lomse_lyric_engraver.h"
 #include "lomse_metronome_engraver.h"
 #include "lomse_note_engraver.h"
+#include "lomse_ornament_engraver.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_slur_engraver.h"
+#include "lomse_technical_engraver.h"
 #include "lomse_text_engraver.h"
 #include "lomse_tie_engraver.h"
 #include "lomse_time_engraver.h"
 #include "lomse_tuplet_engraver.h"
-#include "lomse_articulation_engraver.h"
-#include "lomse_dynamics_mark_engraver.h"
-#include "lomse_ornament_engraver.h"
-#include "lomse_technical_engraver.h"
-#include "lomse_lyric_engraver.h"
-#include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_volta_engraver.h"
-#include "lomse_coda_segno_engraver.h"
+#include "lomse_wedge_engraver.h"
+#include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_gm_measures_table.h"
 
 namespace lomse
@@ -1197,6 +1198,10 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 {
     //factory method to create the engraver for relation auxobjs
 
+    InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+    LUnits xRight = pInstrEngrv->get_staves_right();
+    LUnits xLeft = pInstrEngrv->get_staves_left();
+
     RelObjEngraver* pEngrv = nullptr;
     switch (pRO->get_obj_type())
     {
@@ -1208,16 +1213,12 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 
         case k_imo_slur:
         {
-            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
             pEngrv = LOMSE_NEW SlurEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
             break;
         }
 
         case k_imo_tie:
         {
-            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-            LUnits xRight = pInstrEngrv->get_staves_right();
-            LUnits xLeft = pInstrEngrv->get_staves_left();
             pEngrv = LOMSE_NEW TieEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
             break;
         }
@@ -1230,11 +1231,14 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 
         case k_imo_volta_bracket:
         {
-            InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-            LUnits xRight = pInstrEngrv->get_staves_right();
-            LUnits xLeft = pInstrEngrv->get_staves_left();
             pEngrv = LOMSE_NEW VoltaBracketEngraver(m_libraryScope, m_pScoreMeter,
                                                     xLeft, xRight);
+            break;
+        }
+
+        case k_imo_wedge:
+        {
+            pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);   //xLeft, xRight);
             break;
         }
 
@@ -1244,9 +1248,6 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 
     if (pEngrv)
     {
-        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
-        LUnits xRight = pInstrEngrv->get_staves_right();
-        LUnits xLeft = pInstrEngrv->get_staves_left();
         LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
         pEngrv->set_start_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff,
                                    iSystem, iCol, xLeft, xRight, yTop);

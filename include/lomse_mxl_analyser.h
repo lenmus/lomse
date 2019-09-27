@@ -135,6 +135,26 @@ public:
 
 
 //---------------------------------------------------------------------------------------
+// helper class to save volta bracket dto items, match them and build the volta brackets
+class MxlWedgesBuilder : public RelationBuilder<ImoWedgeDto, MxlAnalyser>
+{
+protected:
+    ImoWedgeDto* m_pFirstWedge;        //ptr to 1st wedge of current repetition set
+
+public:
+    MxlWedgesBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoWedgeDto, MxlAnalyser>(
+                reporter, pAnalyser, "wedge", "Wedge")
+        , m_pFirstWedge(nullptr)
+    {
+    }
+    virtual ~MxlWedgesBuilder() {}
+
+    void add_relation_to_staffobjs(ImoWedgeDto* pEndInfo);
+};
+
+
+//---------------------------------------------------------------------------------------
 // helper class to save part-list info
 class PartList
 {
@@ -218,6 +238,7 @@ protected:
     MxlTupletsBuilder*  m_pTupletsBuilder;
     MxlSlursBuilder*    m_pSlursBuilder;
     MxlVoltasBuilder*   m_pVoltasBuilder;
+    MxlWedgesBuilder*   m_pWedgesBuilder;
     map<string, int>    m_lyricIndex;
     vector<ImoLyric*>   m_lyrics;
     map<string, int>    m_soundIdToIdx;     //conversion sound-instrument id to index
@@ -231,6 +252,9 @@ protected:
     map<int, ImoId> m_slurIds;
     int             m_slurNum;
     int             m_voltaNum;
+    map<int, ImoId> m_wedgeIds;
+    int             m_wedgeNum;
+
 
     //analysis input
     XmlNode* m_pTree;
@@ -271,6 +295,7 @@ public:
 
     //analysis
     ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
+    bool analyse_node_bool(XmlNode* pNode, ImoObj* pAnchor=nullptr);
     void prepare_for_new_instrument_content();
 
     //part-list
@@ -378,6 +403,12 @@ public:
     int new_slur_id(int numSlur);
     int get_slur_id(int numSlur);
     int get_slur_id_and_close(int numSlur);
+
+    //interface for building wedges
+    int new_wedge_id(int numWedge);
+    bool wedge_id_exists(int numWedge);
+    int get_wedge_id(int numWedge);
+    int get_wedge_id_and_close(int numWedge);
 
     //interface for building volta brackets
     int new_volta_id();

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -342,11 +342,13 @@ public:
         , m_pAnchor(pAnchor) {}
     virtual ~MxlElementAnalyser() {}
     ImoObj* analyse_node(XmlNode* pNode);
+    bool analyse_node_bool(XmlNode* pNode);
 
 protected:
 
     //analysis
     virtual ImoObj* do_analysis() = 0;
+    virtual bool do_analysis_bool() { return false; }
 
     //error reporting
     bool error_missing_element(const string& tag);
@@ -1117,6 +1119,14 @@ ImoObj* MxlElementAnalyser::analyse_node(XmlNode* pNode)
     m_analysedNode = *pNode;
     move_to_first_child();
     return do_analysis();
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlElementAnalyser::analyse_node_bool(XmlNode* pNode)
+{
+    m_analysedNode = *pNode;
+    move_to_first_child();
+    return do_analysis_bool();
 }
 
 //---------------------------------------------------------------------------------------
@@ -2545,8 +2555,18 @@ public:
         //TODO
 
         // direction-type+
-        analyse_optional("direction-type", pDirection);
-        while (analyse_optional("direction-type", pDirection));
+        bool fSpanner = false;;
+        while (more_children_to_analyse())
+        {
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "direction-type")
+            {
+                fSpanner |= m_pAnalyser->analyse_node_bool(&m_childToAnalyse, pDirection);
+                move_to_next_child();
+            }
+            else
+                break;
+        }
 
         // offset?
         if (get_optional("offset"))
@@ -2576,7 +2596,7 @@ public:
 
         error_if_more_elements();
 
-        if (pDirection->get_num_attachments() > 0)
+        if (fSpanner || pDirection->get_num_attachments() > 0)
             add_to_model(pDirection);
         else
         {
@@ -2606,36 +2626,54 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() { return nullptr; }
+
+    bool do_analysis_bool()
     {
+        bool fSpanner = false;
         while (more_children_to_analyse())
         {
-            analyse_optional("rehearsal", m_pAnchor)
-            || analyse_optional("segno", m_pAnchor)
-            || analyse_optional("words", m_pAnchor)
-            || analyse_optional("coda", m_pAnchor)
-            || analyse_optional("wedge", m_pAnchor)
-            || analyse_optional("dynamics", m_pAnchor)
-            || analyse_optional("dashes", m_pAnchor)
-            || analyse_optional("bracket", m_pAnchor)
-            || analyse_optional("pedal", m_pAnchor)
-            || analyse_optional("metronome", m_pAnchor)
-            || analyse_optional("octave-shift", m_pAnchor)
-            || analyse_optional("harp-pedals", m_pAnchor)
-            || analyse_optional("damp", m_pAnchor)
-            || analyse_optional("damp-all", m_pAnchor)
-            || analyse_optional("eyeglasses", m_pAnchor)
-            || analyse_optional("string-mute", m_pAnchor)
-            || analyse_optional("scordatura", m_pAnchor)
-            || analyse_optional("image", m_pAnchor)
-            || analyse_optional("principal-voice", m_pAnchor)
-            || analyse_optional("accordion-registration", m_pAnchor)
-            || analyse_optional("percussion", m_pAnchor)
-            || analyse_optional("other-direction", m_pAnchor)
-            ;
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "rehearsal"
+                || m_childToAnalyse.name() == "segno"
+                || m_childToAnalyse.name() == "words"
+                || m_childToAnalyse.name() == "coda"
+                || m_childToAnalyse.name() == "dynamics"
+                || m_childToAnalyse.name() == "dashes"
+                || m_childToAnalyse.name() == "bracket"
+                || m_childToAnalyse.name() == "metronome"
+                || m_childToAnalyse.name() == "octave-shift"
+                || m_childToAnalyse.name() == "harp-pedals"
+                || m_childToAnalyse.name() == "damp"
+                || m_childToAnalyse.name() == "damp-all"
+                || m_childToAnalyse.name() == "eyeglasses"
+                || m_childToAnalyse.name() == "string-mute"
+                || m_childToAnalyse.name() == "scordatura"
+                || m_childToAnalyse.name() == "image"
+                || m_childToAnalyse.name() == "principal-voice"
+                || m_childToAnalyse.name() == "accordion-registration"
+                || m_childToAnalyse.name() == "percussion"
+                || m_childToAnalyse.name() == "other-direction"
+               )
+            {
+                m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
+            }
+            else if (m_childToAnalyse.name() == "wedge"
+                     || m_childToAnalyse.name() == "pedal"
+                    )
+            {
+                m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
+                fSpanner = true;
+            }
+            else
+            {
+                error_msg("Invalid direction-type <" + m_childToAnalyse.name()
+                    + ">. Ignored.");
+            }
+            move_to_next_child();
         }
 
-        return nullptr;
+        return fSpanner;
     }
 };
 
@@ -5896,13 +5934,16 @@ public:
 
         set_slur_type_and_id(type, num);
 
-        m_pInfo1->set_note(pNote);
-        m_pAnalyser->add_relation_info(m_pInfo1);
-
-        if (m_pInfo2)
+        if (m_pInfo1)
         {
-            m_pInfo2->set_note(pNote);
-            m_pAnalyser->add_relation_info(m_pInfo2);
+            m_pInfo1->set_note(pNote);
+            m_pAnalyser->add_relation_info(m_pInfo1);
+
+            if (m_pInfo2)
+            {
+                m_pInfo2->set_note(pNote);
+                m_pAnalyser->add_relation_info(m_pInfo2);
+            }
         }
 
         return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
@@ -6812,18 +6853,142 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <wedge>
+//@<!ELEMENT wedge EMPTY>
+//@<!ATTLIST wedge
+//@    type (crescendo | diminuendo | stop | continue) #REQUIRED
+//@    number %number-level; #IMPLIED
+//@    spread %tenths; #IMPLIED
+//@    niente %yes-no; #IMPLIED
+//@    %line-type;
+//@    %dashed-formatting;
+//@    %position;
+//@    %color;
+//@    %optional-unique-id;
+//@>
+//
 class WedgeMxlAnalyser : public MxlElementAnalyser
 {
+protected:
+    ImoWedgeDto* m_pInfo1;
+    ImoWedgeDto* m_pInfo2;
+
 public:
     WedgeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                      LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_pInfo1(nullptr)
+        , m_pInfo2(nullptr)
+    {
+    }
 
     ImoObj* do_analysis()
     {
-		//TODO
-        return nullptr;
+        ImoDirection* pDirection = nullptr;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
+            error_msg("<direction-type> <wedge> is not child of <direction>. Ignored.");
+            return nullptr;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo1 = static_cast<ImoWedgeDto*>(
+                                ImFactory::inject(k_imo_wedge_dto, pDoc));
+        m_pInfo1->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+
+        // attrib: type (crescendo | diminuendo | stop | continue) #REQUIRED
+        const string& type = get_mandatory_string_attribute("type", "", "wedge");
+
+        // attrib: number %number-level; #IMPLIED
+        int num = get_optional_int_attribute("number", 1);
+
+        // attrib: spread %tenths; #IMPLIED
+        if (has_attribute("spread"))
+        {
+            Tenths spread = get_attribute_as_float("spread", 0.0f);
+            m_pInfo1->set_spread(spread);
+        }
+
+        // attrib: niente %yes-no; #IMPLIED
+        m_pInfo1->set_niente( get_optional_yes_no_attribute("niente", false) );
+
+        // attrib: %line-type;
+        // attrib: %dashed-formatting;
+        // attrib: %position;
+        // attrib: %color;
+        // attrib: %optional-unique-id;
+        //TODO
+
+        set_wedge_type_and_id(type, num);
+
+        if (m_pInfo1)
+        {
+            m_pInfo1->set_staffobj(pDirection);
+            m_pAnalyser->add_relation_info(m_pInfo1);
+
+            if (m_pInfo2)
+            {
+                m_pInfo2->set_staffobj(pDirection);
+                m_pAnalyser->add_relation_info(m_pInfo2);
+            }
+        }
+
+        return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
     }
+
+protected:
+
+    void set_wedge_type_and_id(const string& value, int num)
+    {
+        //AWARE: The values of start, stop, and continue refer to how an element appears
+        //in musical score order, not in MusicXML document order. An element with a stop
+        //attribute may precede the corresponding element with a start attribute within
+        //a MusicXML document. Therefore, the following combinations are valid:
+        //  (stop, crescendo)           (crescendo, stop)
+        //  (continue, crescendo)       (continue, continue)
+        //  (continue, stop)            (stop, continue)
+        //  (diminuendo, stop)          (diminuendo, continue)
+
+        if (m_pAnalyser->wedge_id_exists(num) && value != "continue")
+        {
+            m_pInfo1->set_start(false);
+            int wedgeId =  m_pAnalyser->get_wedge_id_and_close(num);
+            m_pInfo1->set_wedge_number(wedgeId);
+            if (value == "crescendo")
+                m_pInfo1->set_crescendo(true);
+        }
+        else if (value == "crescendo" || value == "diminuendo" || value == "stop")
+        {
+            m_pInfo1->set_start(true);
+            int wedgeId =  m_pAnalyser->new_wedge_id(num);
+            m_pInfo1->set_wedge_number(wedgeId);
+            m_pInfo1->set_crescendo(value == "crescendo");
+        }
+        else if (value == "continue")
+        {
+            m_pInfo1->set_start(false);
+            int wedgeId =  m_pAnalyser->get_wedge_id_and_close(num);
+            m_pInfo1->set_wedge_number(wedgeId);
+
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            m_pInfo2 = static_cast<ImoWedgeDto*>(
+                                ImFactory::inject(k_imo_wedge_dto, pDoc));
+            m_pInfo2->set_start(true);
+//            m_pInfo1->set_crescendo(true);  //TODO
+            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+            wedgeId =  m_pAnalyser->new_wedge_id(num);
+            m_pInfo2->set_wedge_number(wedgeId);
+        }
+        else
+        {
+            error_msg("Missing or invalid wedge type. Wedge ignored.");
+            delete m_pInfo1;
+            m_pInfo1 = nullptr;
+        }
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -6958,11 +7123,13 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pTupletsBuilder(nullptr)
     , m_pSlursBuilder(nullptr)
     , m_pVoltasBuilder(nullptr)
+    , m_pWedgesBuilder(nullptr)
     , m_musicxmlVersion(0)
     , m_pNodeImo(nullptr)
     , m_tieNum(0)
     , m_slurNum(0)
     , m_voltaNum(0)
+    , m_wedgeNum(0)
     , m_pTree()
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
@@ -7059,6 +7226,7 @@ void MxlAnalyser::delete_relation_builders()
     delete m_pTupletsBuilder;
     delete m_pSlursBuilder;
     delete m_pVoltasBuilder;
+    delete m_pWedgesBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7070,6 +7238,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
     m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
     m_pVoltasBuilder = LOMSE_NEW MxlVoltasBuilder(m_reporter, this);
+    m_pWedgesBuilder = LOMSE_NEW MxlWedgesBuilder(m_reporter, this);
 
     m_pTree = root;
 //    m_curStaff = 0;
@@ -7092,6 +7261,13 @@ ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
     ImoObj* pImo = a->analyse_node(pNode);
     delete a;
     return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlAnalyser::analyse_node_bool(XmlNode* pNode, ImoObj* pAnchor)
+{
+    MxlElementAnalyser* a = new_analyser( pNode->name(), pAnchor );
+    return a->analyse_node_bool(pNode);
 }
 
 //---------------------------------------------------------------------------------------
@@ -7165,6 +7341,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
     else if (pDto->is_volta_bracket_dto())
         m_pVoltasBuilder->add_item_info(static_cast<ImoVoltaBracketDto*>(pDto));
+    else if (pDto->is_wedge_dto())
+        m_pWedgesBuilder->add_item_info(static_cast<ImoWedgeDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -7175,6 +7353,7 @@ void MxlAnalyser::clear_pending_relations()
     m_pBeamsBuilder->clear_pending_items();
     m_pTupletsBuilder->clear_pending_items();
     m_pVoltasBuilder->clear_pending_items();
+    m_pWedgesBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -7330,6 +7509,33 @@ int MxlAnalyser::get_slur_id_and_close(int numSlur)
 }
 
 //---------------------------------------------------------------------------------------
+int MxlAnalyser::new_wedge_id(int numWedge)
+{
+    m_wedgeIds[numWedge] = ++m_wedgeNum;
+    return m_wedgeNum;
+}
+
+//---------------------------------------------------------------------------------------
+bool MxlAnalyser::wedge_id_exists(int numWedge)
+{
+    return numWedge <= m_wedgeNum && m_wedgeIds[numWedge] != -1;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_wedge_id(int numWedge)
+{
+    return m_wedgeIds[numWedge];
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_wedge_id_and_close(int numWedge)
+{
+    int id = m_wedgeIds[numWedge];
+    m_wedgeIds[numWedge] = -1;
+    return id;
+}
+
+//---------------------------------------------------------------------------------------
 int MxlAnalyser::new_volta_id()
 {
     return ++m_voltaNum;
@@ -7472,7 +7678,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_tuplet_actual:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_normal:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_virtual_instr:        return LOMSE_NEW VirtualInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_wedge:                return LOMSE_NEW WedgeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_wedge:                return LOMSE_NEW WedgeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_words:                return LOMSE_NEW WordsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         default:
             return LOMSE_NEW NullMxlAnalyser(this, m_reporter, m_libraryScope, name);
@@ -7721,6 +7927,49 @@ void MxlVoltasBuilder::add_relation_to_staffobjs(ImoVoltaBracketDto* pEndDto)
     //set number of repetitions in barline
     ImoBarline* pBarline = static_cast<ImoBarline*>( pVB->get_end_object() );
     pBarline->set_num_repeats( pVB->get_number_of_repetitions() );
+}
+
+
+//=======================================================================================
+// MxlWedgesBuilder implementation
+//=======================================================================================
+void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
+{
+    ImoWedgeDto* pStartDto = m_matches.front();
+    m_matches.push_back(pEndDto);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+    ImoWedge* pWedge = static_cast<ImoWedge*>(
+                                ImFactory::inject(k_imo_wedge, pDoc));
+
+    //set data taken from start dto
+    pWedge->set_start_spread( pStartDto->get_spread() );
+    pWedge->set_wedge_number( pStartDto->get_wedge_number() );
+    pWedge->set_color( pStartDto->get_color() );
+
+    //set data taken from end dto
+    pWedge->set_end_spread( pEndDto->get_spread() );
+
+    //set data that can be on any of them
+    pWedge->set_niente( pStartDto->is_niente() || pEndDto->is_niente() );
+    pWedge->set_crescendo( pStartDto->is_crescendo() || pEndDto->is_crescendo());
+
+
+    //set default spread when no spread is specified
+    if (pEndDto->get_spread() == 0.0f && pStartDto->get_spread() == 0.0f)
+    {
+        if (pWedge->is_crescendo())
+            pWedge->set_end_spread(15.0f);
+        else
+            pWedge->set_start_spread(15.0f);
+    }
+
+    std::list<ImoWedgeDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoDirection* pDirection = (*it)->get_staffobj();
+        pDirection->include_in_relation(pDoc, pWedge, nullptr);
+    }
 }
 
 

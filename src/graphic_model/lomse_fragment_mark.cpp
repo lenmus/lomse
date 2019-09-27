@@ -200,7 +200,7 @@ void FragmentMark::initialize(LUnits xPos, GmoBoxSystem* pBoxSystem, bool fBarli
 
         //determine extensiton to reach system bounds
         LUnits height = m_yBottom - m_yTop;
-        m_extension = (pBoxSystem->get_height() - height) / 2.0;
+        m_extension = (pBoxSystem->get_height() - height) / 2.0f;
 
         //fix xLeft with style margins
         ImoStyle* pStyle = pBoxSystem->get_style();
@@ -222,14 +222,14 @@ FragmentMark* FragmentMark::top(int instr, int staff)
     if (!pStaff)
         return this;
 
-    m_extension = pStaff->get_staff_margin() / 2.0;
+    m_extension = pStaff->get_staff_margin() / 2.0f;
 
     //set top point
     URect staffBounds = pStaff->get_bounds();
     m_yTop = staffBounds.y;
     ImoStyle* pStyle = m_pBoxSystem->get_style();
     if (pStyle)
-        m_yTop -= double(pStyle->margin_top());
+        m_yTop -= pStyle->margin_top();
 
     return this;
 }
@@ -244,14 +244,14 @@ FragmentMark* FragmentMark::bottom(int instr, int staff)
     if (!pStaff)
         return this;
 
-    m_extension = pStaff->get_staff_margin() / 2.0;
+    m_extension = pStaff->get_staff_margin() / 2.0f;
 
     //set bottom point
     URect staffBounds = pStaff->get_bounds();
     m_yBottom = staffBounds.y + staffBounds.height;
     ImoStyle* pStyle = m_pBoxSystem->get_style();
     if (pStyle)
-        m_yBottom -= double(pStyle->margin_top());
+        m_yBottom -= pStyle->margin_top();
 
     return this;
 }
@@ -301,7 +301,7 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
 
     if (m_type == k_mark_open_rounded)
     {
-        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
         LUnits xLeft = m_xLeft - m_thickness + xShift;
         LUnits xRight = m_xLeft + xShift;
 
@@ -311,7 +311,7 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
     }
     else if (m_type == k_mark_close_rounded)
     {
-        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
         LUnits xLeft = m_xLeft + xShift;
         LUnits xRight = m_xLeft + m_thickness + xShift;
 
@@ -321,7 +321,7 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
     }
     else if (m_type == k_mark_open_curly)
     {
-        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
         LUnits xLeft = m_xLeft - m_thickness + xShift;
         LUnits xRight = m_xLeft + xShift;
 
@@ -331,7 +331,7 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
     }
     else if (m_type == k_mark_close_curly)
     {
-        LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
+        LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
         LUnits xLeft = m_xLeft + xShift;
         LUnits xRight = m_xLeft + m_thickness + xShift;
 
@@ -348,15 +348,15 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
 
         if (m_type == k_mark_open_squared)
         {
-            LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
-            LUnits xLeft = m_xLeft - m_thickness / 2.0 + xShift;
-            m_bounds.left(xLeft - m_thickness/2.0);
+            LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
+            LUnits xLeft = m_xLeft - m_thickness / 2.0f + xShift;
+            m_bounds.left(xLeft - m_thickness/2.0f);
             m_bounds.right(xLeft + hookLength);
 
             m_bounds.top(yTop);
             m_bounds.bottom(yBottom);
-            yTop += m_thickness / 2.0;
-            yBottom -= m_thickness / 2.0;
+            yTop += m_thickness / 2.0f;
+            yBottom -= m_thickness / 2.0f;
 
             //top hook
             pDrawer->move_to(xLeft + hookLength, yTop);
@@ -370,15 +370,15 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
         }
         else if (m_type == k_mark_close_squared)
         {
-            LUnits xShift = (m_fCentered ? m_thickness/2.0 : 0.0);
-            LUnits xLeft = m_xLeft - m_thickness / 2.0 + xShift;
+            LUnits xShift = (m_fCentered ? m_thickness/2.0f : 0.0f);
+            LUnits xLeft = m_xLeft - m_thickness / 2.0f + xShift;
             m_bounds.left(xLeft - hookLength);
-            m_bounds.right(xLeft + m_thickness/2.0);
+            m_bounds.right(xLeft + m_thickness/2.0f);
 
             m_bounds.top(yTop);
             m_bounds.bottom(yBottom);
-            yTop += m_thickness / 2.0;
-            yBottom -= m_thickness / 2.0;
+            yTop += m_thickness / 2.0f;
+            yBottom -= m_thickness / 2.0f;
 
             //top hook
             pDrawer->move_to(xLeft - hookLength, yTop);
@@ -396,10 +396,10 @@ void FragmentMark::on_draw(ScreenDrawer* pDrawer)
             pDrawer->move_to(m_xLeft, yTop);
             pDrawer->vline_to(yBottom);
 
-            m_bounds.left(m_xLeft - m_thickness / 2.0);
+            m_bounds.left(m_xLeft - m_thickness / 2.0f);
             m_bounds.top(yTop);
             m_bounds.bottom(yBottom);
-            m_bounds.right(m_xLeft + m_thickness / 2.0);
+            m_bounds.right(m_xLeft + m_thickness / 2.0f);
        }
 
         pDrawer->end_path();
@@ -548,10 +548,10 @@ void RawShapeRoundedBracket::set_position_bounds(LUnits xLeft, LUnits yTop,
     double yMax = m_yMax;
     m_trans.transform(&xMax, &yMax);
 
-    m_bounds.left(fOpen ? xMin : xMax);
-    m_bounds.top(yMin);
-    m_bounds.set_height( abs(yMax - yMin) + m_rBarlineHeight );
-    m_bounds.set_width( abs(xMax - xMin) );
+    m_bounds.left( float(fOpen ? xMin : xMax) );
+    m_bounds.top(float(yMin));
+    m_bounds.set_height( float(abs(yMax - yMin) + m_rBarlineHeight) );
+    m_bounds.set_width( float(abs(xMax - xMin)) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -702,10 +702,10 @@ void RawShapeCurlyBracket::set_position_bounds(LUnits xLeft, LUnits yTop,
     double yMax = m_yMax;
     m_trans.transform(&xMax, &yMax);
 
-    m_bounds.left(fOpen ? xMin : xMax);
-    m_bounds.top(yMin);
-    m_bounds.set_height( abs(yMax - yMin) + m_rBarlineHeight );
-    m_bounds.set_width( abs(xMax - xMin) );
+    m_bounds.left( float(fOpen ? xMin : xMax) );
+    m_bounds.top(float(yMin));
+    m_bounds.set_height( float(abs(yMax - yMin) + m_rBarlineHeight) );
+    m_bounds.set_width( float(abs(xMax - xMin)) );
 }
 
 //---------------------------------------------------------------------------------------
