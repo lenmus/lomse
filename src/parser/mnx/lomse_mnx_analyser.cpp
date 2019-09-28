@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,6 +49,7 @@
 #include "lomse_ldp_analyser.h"
 #include "lomse_time.h"
 #include "lomse_autobeamer.h"
+#include "lomse_im_measures_table.h"
 
 
 #include <iostream>
@@ -273,7 +274,6 @@ enum EMnxTag
     k_mnx_tag_beamed,
 //    k_mnx_tag_bracket,
     k_mnx_tag_clef,
-    k_mnx_tag_cwmnx,
 //    k_mnx_tag_coda,
 //    k_mnx_tag_damp,
 //    k_mnx_tag_damp_all,
@@ -300,6 +300,7 @@ enum EMnxTag
 //    k_mnx_tag_midi_device,
 //    k_mnx_tag_midi_instrument,
     k_mnx_tag_mnx,
+    k_mnx_tag_mnx_common,
 //    k_mnx_tag_notations,
     k_mnx_tag_note,
 //    k_mnx_tag_octave_shift,
@@ -1630,9 +1631,9 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <cwmnx>
-//@<!ELEMENT cwmnx (global, part*) )>
-//@<!ATTLIST cwmnx
+//@ <mnx-common>
+//@<!ELEMENT mnx-common (global, part*) )>
+//@<!ATTLIST mnx-common
 //@    profile="standard"
 //@>
 //
@@ -1646,10 +1647,10 @@ protected:
 //@Attributes:
 //@    profile — profile describing constraints on the contents of this score
 //
-class CwmnxMnxAnalyser : public MnxElementAnalyser
+class MnxCommonMnxAnalyser : public MnxElementAnalyser
 {
 public:
-    CwmnxMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
+    MnxCommonMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter,
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
@@ -1658,7 +1659,7 @@ public:
         // attrb: profile
         if (get_attribute("profile") != "standard")
         {
-            error_msg("Invalid or unsupported cwmnx score profile '"
+            error_msg("Invalid or unsupported mnx-common score profile '"
                       + get_attribute("profile") + "'.");
             set_result(nullptr);
             return false;
@@ -2072,7 +2073,7 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <global>
 //@Contexts:
-//@    <cwmnx>
+//@    <mnx-common>
 //@Content Model:
 //@    Measure content, which must not include any sequence content
 //@Attributes:
@@ -2091,10 +2092,37 @@ public:
     bool do_analysis()
     {
         // attrib: parts
-        string parts = get_optional_string_attribute("parts", "");
+        string parts = get_optional_string_attribute("parts", "*$SINGLE-PART$*");
 
-		//TODO: implement Analyser
+        // attrib 'parts' is an optional set of IDs of part elements to which this
+        // global content applies. The parts attribute is a list of part element IDs
+        // as an unordered set of space-separated tokens.
+
+        //create the measures table for this global
+        MeasuresVector* pMeasures = m_pAnalyser->new_global(parts);
+
+        //fill the table
+        int numMeasures = 0;
+        while (more_children_to_analyse())
+        {
+            ++numMeasures;
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "measure")
+            {
+                pMeasures->push_back(m_childToAnalyse);
+                move_to_next_child();
+            }
+            else
+                break;
+        }
+
         set_result(nullptr);
+        if (numMeasures == 0)
+        {
+            error_msg("<global>: missing mandatory element <measure>.");
+            return false;       //error
+        }
+
         return true;    //success
     }
 };
@@ -2326,10 +2354,16 @@ protected:
 //@    barline - an optional ending barline type for the measure //
 class MeasureMnxAnalyser : public MnxElementAnalyser
 {
+protected:
+    bool m_fGlobalMeasure;      //parsing a <measure> included in <global> element
+
 public:
     MeasureMnxAnalyser(MnxAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
-        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+                    ImoObj* pAnchor, bool fGlobalMeasure=false)
+        : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_fGlobalMeasure(fGlobalMeasure)
+    {
+    }
 
 
     bool do_analysis()
@@ -2344,23 +2378,35 @@ public:
         }
         bool fSomethingAdded = false;
 
-        //attrb: number
-        string num = get_optional_string_attribute("number", "");
-        m_pAnalyser->save_current_measure_num(num);
+        //attributes are only parsed for normal measures, not for global measures
+        TypeMeasureInfo* pInfo = nullptr;
+        if (!m_fGlobalMeasure)
+        {
+            //attrb: number
+            string num = get_optional_string_attribute("number", "");
+            m_pAnalyser->save_current_measure_num(num);
 
-        TypeMeasureInfo* pInfo = create_measure_info(num);
+            pInfo = create_measure_info(num);
 
-        //attrb: index
-        //TODO
+            //attrb: index
+            //TODO
 
-        //attrb: barline
-        //TODO
+            //attrb: barline
+            //TODO
+        }
+
+
+        //before adding measure content, add global content. But not when parsing global
+        //measures
+        if (!m_fGlobalMeasure)
+            m_pAnalyser->add_data_from_global_measure(pMD);
+
 
         // directions?
         analyse_optional("directions", pMD);
 
-        // sequence+
-        if (analyse_mandatory("sequence", pMD))
+        // sequence+ (only for normal measures)
+        if (!m_fGlobalMeasure && analyse_mandatory("sequence", pMD))
         {
             fSomethingAdded = true;
             while (analyse_optional("sequence", pMD))
@@ -2369,24 +2415,32 @@ public:
 
         //error_if_more_elements();
 
-        if (fSomethingAdded)
+        //For normal measures, delete the measure if empty. And if it has
+        //content, add implicit barline if necessary
+        if (!m_fGlobalMeasure)
         {
-            ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
-            if (pSO == nullptr || !pSO->is_barline())
-                add_barline(pInfo);
-            else
-                delete pInfo;
+            if (fSomethingAdded)
+            {
+                ImoObj* pSO = static_cast<ImoStaffObj*>(pMD->get_last_child());
+                if (pSO == nullptr || !pSO->is_barline())
+                    add_barline(pInfo);
+                else
+                    delete pInfo;
 
-            set_result(pMD);
-            return true;    //success
+                set_result(pMD);
+                return true;    //success
+            }
+            else
+            {
+                delete pInfo;
+                delete pMD;
+                set_result(nullptr);
+                return false;    //error
+            }
         }
-        else
-        {
-            delete pInfo;
-            delete pMD;
-            set_result(nullptr);
-            return false;    //error
-        }
+        set_result(pMD);
+        return true;    //success
+
     }
 
 protected:
@@ -2640,7 +2694,7 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@Contexts:
-//@    cwmnx
+//@    mnx-common
 //@Content Model:
 //@    Part description content =
 //@         part-name?, part-abbreviation?, instrument-sound?
@@ -2657,6 +2711,10 @@ public:
     bool do_analysis()
     {
         ImoInstrument* pInstrument = create_instrument();
+
+        // attrib: id  e.g.: id="p1"
+        string id = get_optional_string_attribute("id", "*$SINGLE-PART$*");
+        m_pAnalyser->save_current_part_id(id);
 
         // part-name
         analyse_optional("part-name", pInstrument);
@@ -2853,7 +2911,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <score>
-//@<!ELEMENT score (cwmnx) )>
+//@<!ELEMENT score (mnx-common) )>
 //@<!ATTLIST score
 //@    src
 //@>
@@ -2885,11 +2943,12 @@ public:
 
         ImoScore* pScore = create_score();
 
-        // cwmnx
-        analyse_mandatory("cwmnx", pScore);
+        // mnx-common
+        analyse_mandatory("mnx-common", pScore);
 
         m_pAnalyser->add_all_instruments(pScore);
 
+        set_options(pScore);
         set_result(pScore);
         return true;    //success
     }
@@ -2906,7 +2965,6 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(200);   //2.0
-        set_options(pScore);
         pScore->add_required_text_styles();
 
         return pScore;
@@ -2914,9 +2972,18 @@ protected:
 
     void set_options(ImoScore* pScore)
     {
+        //justify last system except for very short scores (less than 5 measures)
         ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
-        pOpt->set_long_value(k_justify_always);
+        if (m_pAnalyser->get_measures_counter() < 5)
+        {
+            pOpt->set_long_value(k_justify_never);
+            pOpt = pScore->get_option("StaffLines.Truncate");
+            pOpt->set_long_value(k_truncate_always);
+        }
+        else
+            pOpt->set_long_value(k_justify_always);
 
+        //spacing options
         pOpt = pScore->get_option("Render.SpacingOptions");
         pOpt->set_long_value(k_render_opt_breaker_optimal
                              | k_render_opt_dmin_global);
@@ -3440,7 +3507,6 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["beamed"] = k_mnx_tag_beamed;
 //    m_NameToEnum["bracket"] = k_mnx_tag_bracket;
     m_NameToEnum["clef"] = k_mnx_tag_clef;
-    m_NameToEnum["cwmnx"] = k_mnx_tag_cwmnx;
 //    m_NameToEnum["coda"] = k_mnx_tag_coda;
 //    m_NameToEnum["damp"] = k_mnx_tag_damp;
 //    m_NameToEnum["damp-all"] = k_mnx_tag_damp_all;
@@ -3467,6 +3533,7 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 //    m_NameToEnum["midi-device"] = k_mnx_tag_midi_device;
 //    m_NameToEnum["midi-instrument"] = k_mnx_tag_midi_instrument;
     m_NameToEnum["mnx"] = k_mnx_tag_mnx;
+    m_NameToEnum["mnx-common"] = k_mnx_tag_mnx_common;
 //    m_NameToEnum["notations"] = k_mnx_tag_notations;
     m_NameToEnum["note"] = k_mnx_tag_note;
 //    m_NameToEnum["octave-shift"] = k_mnx_tag_octave_shift;
@@ -3511,9 +3578,23 @@ MnxAnalyser::MnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 MnxAnalyser::~MnxAnalyser()
 {
     delete_relation_builders();
+    delete_globals();
     m_NameToEnum.clear();
     m_lyrics.clear();
     m_lyricIndex.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::delete_globals()
+{
+    map<string, MeasuresVector*>::iterator it;
+    for (it=m_globals.begin(); it != m_globals.end(); ++it)
+    {
+        MeasuresVector* measures = it->second;
+        measures->clear();
+        it->second = nullptr;
+    }
+    m_globals.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3558,6 +3639,17 @@ bool MnxAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 {
     //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
     MnxElementAnalyser* a = new_analyser( pNode->name(), pAnchor );
+    m_pResult = nullptr;
+    bool res = a->analyse_node(pNode);
+    delete a;
+    return res;
+}
+
+//---------------------------------------------------------------------------------------
+bool MnxAnalyser::analyse_global_measure(XmlNode* pNode, ImoObj* pAnchor)
+{
+    //m_reporter << "DBG. Analysing node: " << pNode->name() << endl;
+    MnxElementAnalyser* a = LOMSE_NEW MeasureMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor, true);
     m_pResult = nullptr;
     bool res = a->analyse_node(pNode);
     delete a;
@@ -3848,7 +3940,6 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
     {
         case k_mnx_tag_beamed:              return LOMSE_NEW BeamedMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_clef:                return LOMSE_NEW ClefMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_mnx_tag_cwmnx:               return LOMSE_NEW CwmnxMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_directions:          return LOMSE_NEW DirectionsMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_dynamics:            return LOMSE_NEW DynamicsMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_event:               return LOMSE_NEW EventMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -3859,6 +3950,7 @@ MnxElementAnalyser* MnxAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mnx_tag_key:                 return LOMSE_NEW KeyMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_measure:             return LOMSE_NEW MeasureMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_mnx:                 return LOMSE_NEW MnxMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mnx_tag_mnx_common:          return LOMSE_NEW MnxCommonMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_note:                return LOMSE_NEW NoteMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_part:                return LOMSE_NEW PartMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mnx_tag_part_name:           return LOMSE_NEW PartNameMnxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -4041,6 +4133,55 @@ EAccidentals MnxAnalyser::to_accidentals(const std::string& accidentals)
     }
 }
 
+//---------------------------------------------------------------------------------------
+MeasuresVector* MnxAnalyser::new_global(const string& partList)
+{
+    //'parts' is a list of part element IDs, an unordered set of space-separated tokens.
+
+    MeasuresVector* pVector = LOMSE_NEW MeasuresVector;
+
+    vector<string> result = MnxAnalyser::tokenize_spaces(partList);
+    vector<string>::const_iterator it;
+    for (it=result.begin(); it != result.end(); ++it)
+        m_globals[*it] = pVector;
+
+    return pVector;
+}
+
+//---------------------------------------------------------------------------------------
+void MnxAnalyser::add_data_from_global_measure(ImoMusicData* pMD)
+{
+    map<string, MeasuresVector*>::iterator it = m_globals.find(m_curPartId);
+    if (it == m_globals.end())
+        return;
+
+    MeasuresVector* pMeasures = it->second;
+
+    int idx = m_measuresCounter - 1;
+    if (idx < int(pMeasures->size()))
+    {
+        XmlNode node = pMeasures->at(idx);
+        XmlParser parser;
+        MnxAnalyser a(m_reporter, m_libraryScope, m_pDoc, &parser);
+        a.analyse_global_measure(&node, pMD);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+vector<string> MnxAnalyser::tokenize_spaces(const string& input)
+{
+    char sep = ' ';
+    string::size_type b = 0;
+    vector<string> result;
+
+    while ((b = input.find_first_not_of(sep, b)) != string::npos)
+    {
+        auto e = input.find_first_of(sep, b);
+        result.push_back(input.substr(b, e-b));
+        b = e;
+    }
+    return result;
+}
 
 //=======================================================================================
 // MnxTiesBuilder implementation
