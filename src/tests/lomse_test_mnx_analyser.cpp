@@ -53,6 +53,22 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
+//Helper, to access protected members
+class MyMnxAnalyser : public MnxAnalyser
+{
+public:
+    MyMnxAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc,
+                  XmlParser* parser)
+        : MnxAnalyser(reporter, libraryScope, pDoc, parser)
+    {
+    }
+
+    virtual ~MyMnxAnalyser() {}
+
+    map<string, MeasuresVector*>& my_get_globals() { return m_globals; }
+};
+
+//---------------------------------------------------------------------------------------
 class MnxAnalyserTestFixture
 {
 public:
@@ -103,54 +119,25 @@ public:
 SUITE(MnxAnalyserTest)
 {
 
-    //@ mnx element ---------------------------------------------------------------------
-
-    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_mnx_001)
-    {
-        //@00001. empty content: returns empty document
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        XmlParser parser;
-        stringstream expected;
-        expected << "Line 0. <mnx>: missing mandatory element <head>." << endl;
-        parser.parse_text("<mnx></mnx>");
-        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-
-        XmlNode* tree = parser.get_tree_root();
-        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( pRoot != nullptr );
-        CHECK( pRoot && pRoot->is_document() == true );
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
-
-        if (pRoot && !pRoot->is_document()) delete pRoot;
-    }
-
-
     //@ global --------------------------------------------------------------------------
 
-    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_100)
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_001)
     {
-        //@00100. Error: at least one global element is required.
-        //@       Doc with empty score returned
+        //@001. Error: at least one global element is required.
+        //@     Doc with empty score returned
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        expected << "Line 0. <mnx-common>: missing mandatory element <global>." << endl;
         parser.parse_text(
             "<mnx>"
             "<head></head>"
-            "<score><cwmnx profile='standard'>"
+            "<score><mnx-common profile='standard'>"
                 "<part>"
                 "</part>"
-            "</cwmnx></score>"
+            "</mnx-common></score>"
             "</mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
@@ -173,62 +160,197 @@ SUITE(MnxAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-//    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_101)
-//    {
-//
-//        //@00101. Error: at least one measure required in global
-//
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        XmlParser parser;
-//        stringstream expected;
-//        expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
-//        parser.parse_text(
-//            "<mnx>"
-//            "<head></head>"
-//            "<score><cwmnx profile='standard'>"
-//                "<global></global>"
-//                "<part>"
-//                "</part>"
-//            "</cwmnx></score>"
-//            "</mnx>");
-//        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//
-//        XmlNode* tree = parser.get_tree_root();
-//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
-//
-//        cout << test_name() << endl;
-//        cout << "[" << errormsg.str() << "]" << endl;
-//        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pRoot != nullptr );
-//        CHECK( pRoot && pRoot->is_document() == true );
-//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
-//        CHECK( doc.is_dirty() == true );
-//        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
-//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-//        pScore->end_of_changes();
-//        cout << pScore->to_string_with_ids() << endl;
-//
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-
-
-    //@ measure -------------------------------------------------------------------------
-
-    TEST_FIXTURE(MnxAnalyserTestFixture, measure_01)
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_002)
     {
-        //@01. MeasuresInfo in Barline but not in Instrument
+
+        //@002. Error: at least one measure required in global
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
         parser.parse_text(
             "<mnx>"
             "<head></head>"
-            "<score><cwmnx profile='standard'>"
+            "<score><mnx-common profile='standard'>"
+                "<global></global>"
+                "<part>"
+                "</part>"
+            "</mnx-common></score>"
+            "</mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_003)
+    {
+
+        //@003. Global without parts. Only one vector of measures
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><mnx-common profile='standard'>"
+                "<global><measure/></global>"
+                "<part>"
+                "</part>"
+            "</mnx-common></score>"
+            "</mnx>");
+        MyMnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+
+        map<string, MeasuresVector*>& globals = a.my_get_globals();
+        CHECK (globals.size() == 1);
+        map<string, MeasuresVector*>::iterator it;
+        it=globals.begin();
+        CHECK( it->first == "*$SINGLE-PART$*");
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_004)
+    {
+
+        //@004. Global with several parts. One vector of measures for all
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><mnx-common profile='standard'>"
+                "<global parts='P1 P2'><measure/></global>"
+                "<part>"
+                "</part>"
+            "</mnx-common></score>"
+            "</mnx>");
+        MyMnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+
+        map<string, MeasuresVector*>& globals = a.my_get_globals();
+        CHECK (globals.size() == 2);
+        map<string, MeasuresVector*>::iterator it;
+        it=globals.begin();
+        MeasuresVector* pMeasures1 = it->second;
+        CHECK( it->first == "P1");
+        ++it;
+        MeasuresVector* pMeasures2 = it->second;
+        CHECK (it->first == "P2");
+        CHECK (pMeasures1 == pMeasures2);
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_005)
+    {
+
+        //@005. Global measures points to measures
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. <global>: missing mandatory element <measure>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><mnx-common profile='standard'>"
+                "<global>"
+                    "<measure><directions><time signature='4/4'/></directions></measure>"
+                    "<measure/>"
+                    "<measure><directions><time signature='2/4'/></directions></measure>"
+                "</global>"
+                "<part>"
+                "</part>"
+            "</mnx-common></score>"
+            "</mnx>");
+        MyMnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+
+        map<string, MeasuresVector*>& globals = a.my_get_globals();
+        CHECK (globals.size() == 1);
+        map<string, MeasuresVector*>::iterator it;
+        it=globals.begin();
+        MeasuresVector* pMeasures = it->second;
+        CHECK (pMeasures->size() == 3);
+
+        XmlNode node = pMeasures->at(0);
+        CHECK (node.name() == "measure");
+        XmlNode child = node.first_child();
+        CHECK (child.name() == "directions");
+        XmlNode time = child.first_child();
+        CHECK (time.name() == "time");
+        CHECK (time.attribute_value("signature") == "4/4");
+
+        node = pMeasures->at(1);
+        CHECK (node.name() == "measure");
+        CHECK (node.value() == "");
+
+        node = pMeasures->at(2);
+        CHECK (node.name() == "measure");
+        child = node.first_child();
+        CHECK (child.name() == "directions");
+        time = child.first_child();
+        CHECK (time.name() == "time");
+        CHECK (time.attribute_value("signature") == "2/4");
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+
+    //@ measure -------------------------------------------------------------------------
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, measure_001)
+    {
+        //@001. MeasuresInfo in Barline but not in Instrument
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <mnx-common>: missing mandatory element <global>." << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score><mnx-common profile='standard'>"
                 "<part>"
                     "<part-name>Piano</part-name>"
                     "<measure>"
@@ -242,7 +364,7 @@ SUITE(MnxAnalyserTest)
                       "</sequence>"
                     "</measure>"
                 "</part>"
-            "</cwmnx></score>"
+            "</mnx-common></score>"
             "</mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
@@ -285,19 +407,19 @@ SUITE(MnxAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-    TEST_FIXTURE(MnxAnalyserTestFixture, measure_02)
+    TEST_FIXTURE(MnxAnalyserTestFixture, measure_002)
     {
-        //@02. Two measures
+        //@002. Two measures
 
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. <cwmnx>: missing mandatory element <global>." << endl;
+        expected << "Line 0. <mnx-common>: missing mandatory element <global>." << endl;
         parser.parse_text(
             "<mnx>"
             "<head></head>"
-            "<score><cwmnx profile='standard'>"
+            "<score><mnx-common profile='standard'>"
                 "<part>"
                     "<part-name>Piano</part-name>"
                     "<measure number='1'>"
@@ -317,7 +439,7 @@ SUITE(MnxAnalyserTest)
                       "</sequence>"
                     "</measure>"
                 "</part>"
-            "</cwmnx></score>"
+            "</mnx-common></score>"
             "</mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 
@@ -381,13 +503,121 @@ SUITE(MnxAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+    TEST_FIXTURE(MnxAnalyserTestFixture, measure_003)
+    {
+        //@003. Global content copied in part
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "<mnx>"
+            "<head></head>"
+            "<score>"
+                "<mnx-common profile='standard'>"
+                "<global>"
+                    "<measure><directions><time signature='4/4'/></directions></measure>"
+                "</global>"
+                "<part>"
+                    "<part-name>Piano</part-name>"
+                    "<measure>"
+                      "<directions>"
+                        "<staves number='1'/>"
+                        "<clef line='2' sign='G'/>"
+                      "</directions>"
+                      "<sequence staff='1'>"
+                        "<event value='/4'><note pitch='C4'/></event>"
+                        "<event value='/2'><note pitch='E4'/></event>"
+                      "</sequence>"
+                    "</measure>"
+                "</part>"
+            "</mnx-common></score>"
+            "</mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc && pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+
+//        cout << test_name() << endl;
+//        pScore->end_of_changes();
+//        cout << pScore->to_string_with_ids() << endl;
+
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+        CHECK( pInfo == nullptr );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != nullptr );
+
+        CHECK( pMD && pMD->get_num_children() == 5 );
+        ImoObj::children_iterator it = pMD->begin();    //time signature
+        CHECK( (*it)->is_time_signature() );
+        ++it;   //clef
+        CHECK( (*it)->is_clef() );
+        ++it;   //note c4
+        CHECK( (*it)->is_note() );
+        ++it;   //note e4
+        CHECK( (*it)->is_note() );
+        ++it;   //barline
+        CHECK( (*it)->is_barline() );
+        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( *it );
+        CHECK( pBarline != nullptr );
+        CHECK( pBarline && pBarline->get_type() == k_barline_simple );
+        CHECK( pBarline && pBarline->is_visible() );
+        pInfo = pBarline->get_measure_info();
+        CHECK( pInfo != nullptr );
+        CHECK( pInfo && pInfo->count == 1 );
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+
+    //@ mnx element ---------------------------------------------------------------------
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, mnx_001)
+    {
+        //@001. empty content: returns empty document
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <mnx>: missing mandatory element <head>." << endl;
+        parser.parse_text("<mnx></mnx>");
+        MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr );
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
+
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
 
     //@ z. miscellaneous ----------------------------------------------------------------
 
 
-    TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_pitch_99001)
+    TEST_FIXTURE(MnxAnalyserTestFixture, miscellaneous_001)
     {
-        //@99001. pitch_to_components() method
+        //@001. pitch_to_components() method
 
         int step;
         int octave;
@@ -435,6 +665,40 @@ SUITE(MnxAnalyserTest)
         CHECK (MnxAnalyser::pitch_to_components("C12", &step, &octave, &acc, &alt) == true );
         CHECK (MnxAnalyser::pitch_to_components("C4##", &step, &octave, &acc, &alt) == true );
         CHECK (MnxAnalyser::pitch_to_components("C4+1,25", &step, &octave, &acc, &alt) == true );
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, miscellaneous_100)
+    {
+        //@100. tokenizer. Single space
+
+        vector<string> result = MnxAnalyser::tokenize_spaces("p1 p2 p3");
+
+        CHECK (result.size() == 3);
+        CHECK (result[0] == "p1");
+        CHECK (result[1] == "p2");
+        CHECK (result[2] == "p3");
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, miscellaneous_101)
+    {
+        //@101. tokenizer. Single item
+
+        vector<string> result = MnxAnalyser::tokenize_spaces("p1");
+
+        CHECK (result.size() == 1);
+        CHECK (result[0] == "p1");
+    }
+
+    TEST_FIXTURE(MnxAnalyserTestFixture, miscellaneous_102)
+    {
+        //@102. tokenizer. Several spaces
+
+        vector<string> result = MnxAnalyser::tokenize_spaces("p1  p2   p3");
+
+        CHECK (result.size() == 3);
+        CHECK (result[0] == "p1");
+        CHECK (result[1] == "p2");
+        CHECK (result[2] == "p3");
     }
 
 }

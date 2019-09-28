@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@ class ImoObj;
 class ImoNote;
 class ImoRest;
 
+typedef vector<XmlNode> MeasuresVector;    //global measures for a part
 
 //---------------------------------------------------------------------------------------
 // helper class to save start of tie info, match them and build the tie
@@ -265,14 +266,17 @@ protected:
     ImoNote*        m_pLastNote;        //last note added to the score
     ImoBarline*     m_pLastBarline;     //last barline added to current instrument
     ImoDocument*    m_pImoDoc;          //the document containing the score
-    MnxPartList        m_partList;         //the list of instruments
-    MnxPartGroups      m_partGroups;       //the list of intrument groups
+    MnxPartList     m_partList;         //the list of instruments
+    MnxPartGroups   m_partGroups;       //the list of intrument groups
     TimeUnits       m_time;             //time-position counter
     TimeUnits       m_maxTime;          //max time-position reached
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
     string          m_curPartId;        //Part Id being analysed
     string          m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
+
+    //for dealing with <global> elements
+	map<string, MeasuresVector*> m_globals;     //ptrs for each global element
 
     //current values
     int m_curStaff;
@@ -297,6 +301,7 @@ public:
 
     //analysis
     bool analyse_node(XmlNode* pNode, ImoObj* pAnchor=nullptr);
+    bool analyse_global_measure(XmlNode* pNode, ImoObj* pAnchor);
     void prepare_for_new_instrument_content();
     void* get_result() { return m_pResult; }
 
@@ -376,10 +381,16 @@ public:
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
     inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+    inline int get_measures_counter() { return m_measuresCounter; }
 
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
     inline ImoBarline* get_last_barline() { return m_pLastBarline; }
+
+    //for dealing with <global> elements
+    MeasuresVector* new_global(const string& partList);
+    void add_data_from_global_measure(ImoMusicData* pMD);
+
 
     //interface for building relations
     void add_relation_info(ImoObj* pDto);
@@ -439,7 +450,7 @@ public:
     //public utilities
     static bool pitch_to_components(const string& pitch, int *step, int* octave,
                                     EAccidentals* accidentals, float* alterations);
-
+    static vector<string> tokenize_spaces(const string& input);
 
 
 protected:
@@ -448,6 +459,7 @@ protected:
     void set_result(void* pValue) { m_pResult = pValue; }
 
     void delete_relation_builders();
+    void delete_globals();
     void add_marging_space_for_lyrics(ImoNote* pNote, ImoLyric* pLyric);
 
     //auxiliary. for pitch analysis
