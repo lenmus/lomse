@@ -2639,10 +2639,7 @@ public:
                 || m_childToAnalyse.name() == "words"
                 || m_childToAnalyse.name() == "coda"
                 || m_childToAnalyse.name() == "dynamics"
-                || m_childToAnalyse.name() == "dashes"
-                || m_childToAnalyse.name() == "bracket"
                 || m_childToAnalyse.name() == "metronome"
-                || m_childToAnalyse.name() == "octave-shift"
                 || m_childToAnalyse.name() == "harp-pedals"
                 || m_childToAnalyse.name() == "damp"
                 || m_childToAnalyse.name() == "damp-all"
@@ -2650,7 +2647,6 @@ public:
                 || m_childToAnalyse.name() == "string-mute"
                 || m_childToAnalyse.name() == "scordatura"
                 || m_childToAnalyse.name() == "image"
-                || m_childToAnalyse.name() == "principal-voice"
                 || m_childToAnalyse.name() == "accordion-registration"
                 || m_childToAnalyse.name() == "percussion"
                 || m_childToAnalyse.name() == "other-direction"
@@ -2659,7 +2655,11 @@ public:
                 m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
             }
             else if (m_childToAnalyse.name() == "wedge"
+                     || m_childToAnalyse.name() == "dashes"
+                     || m_childToAnalyse.name() == "bracket"
                      || m_childToAnalyse.name() == "pedal"
+                     || m_childToAnalyse.name() == "octave-shift"
+                     || m_childToAnalyse.name() == "principal-voice"
                     )
             {
                 m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
@@ -4561,17 +4561,127 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <octave-shift>
+//@
+//@ <!ELEMENT octave-shift EMPTY>
+//@ <!ATTLIST octave-shift
+//@     type (up | down | stop | continue) #REQUIRED
+//@     number %number-level; #IMPLIED
+//@     size CDATA "8"
+//@     %dashed-formatting;
+//@     %print-style;
+//@     %optional-unique-id;
+//@ >
+//@
 class OctaveShiftMxlAnalyser : public MxlElementAnalyser
 {
+protected:
+    ImoOctaveShiftDto* m_pInfo1;
+    ImoOctaveShiftDto* m_pInfo2;
+
 public:
     OctaveShiftMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
                             LibraryScope& libraryScope, ImoObj* pAnchor)
-        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_pInfo1(nullptr)
+        , m_pInfo2(nullptr)
+    {
+    }
 
     ImoObj* do_analysis()
     {
-		//TODO
-        return nullptr;
+        ImoDirection* pDirection = nullptr;
+        if (m_pAnchor && m_pAnchor->is_direction())
+            pDirection = static_cast<ImoDirection*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is nullptr or it is not ImoDirection");
+            error_msg("<direction-type> <octave-shift> is not child of <direction>. Ignored.");
+            return nullptr;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo1 = static_cast<ImoOctaveShiftDto*>(
+                                ImFactory::inject(k_imo_octave_shift_dto, pDoc));
+        m_pInfo1->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+
+        // attrib: type (up | down | stop | continue) #REQUIRED
+        const string& type = get_mandatory_string_attribute("type", "", "octave-shift");
+
+        // attrib: number %number-level; #IMPLIED
+        int num = get_optional_int_attribute("number", 1);
+
+        // attrib: size CDATA "8"
+        int size = get_optional_int_attribute("size", 8);
+        if (!(size == 8 || size == 15))
+        {
+            const string& value = get_optional_string_attribute("size", "");
+            error_msg("Invalid octave-shift size '" + value + "'. Changed to 8.");
+            size = 8;
+        }
+
+        set_mandatory_data(type, num, size);
+
+        //TODO
+        // attrib: %dashed-formatting;
+        // attrib: %print-style;
+        // attrib: %optional-unique-id;
+
+        if (m_pInfo1)
+        {
+            m_pInfo1->set_staffobj(pDirection);
+            m_pAnalyser->add_relation_info(m_pInfo1);
+
+            if (m_pInfo2)
+            {
+                m_pInfo2->set_staffobj(pDirection);
+                m_pAnalyser->add_relation_info(m_pInfo2);
+            }
+        }
+
+        return nullptr;     //m_pInfo1 has been deleted in add_relation_info()
+    }
+
+protected:
+
+    void set_mandatory_data(const string& value, int num, int size)
+    {
+        if (value == "up" || value == "down")
+        {
+            m_pInfo1->set_start(true);
+            int id =  m_pAnalyser->new_octave_shift_id(num);
+            m_pInfo1->set_octave_shift_number(id);
+            --size;
+            if (value == "down")
+                size = -size;
+            m_pInfo1->set_shift_steps(size);
+        }
+        else if (value == "stop")
+        {
+            m_pInfo1->set_start(false);
+            int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
+            m_pInfo1->set_octave_shift_number(id);
+        }
+//        else if (value == "continue")
+//        {
+//            m_pInfo1->set_start(false);
+//            int id =  m_pAnalyser->get_octave_shift_id_and_close(num);
+//            m_pInfo1->set_octave_shift_number(id);
+//
+//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//            m_pInfo2 = static_cast<ImoWedgeDto*>(
+//                                ImFactory::inject(k_imo_octave_shift_dto, pDoc));
+//            m_pInfo2->set_start(true);
+//            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
+//            id =  m_pAnalyser->new_octave_shift_id(num);
+//            m_pInfo2->set_octave_shift_number(wedgeId);
+//        }
+        else
+        {
+            error_msg("Missing or invalid octave-shift type '" + value
+                      + "'. Octave-shift ignored.");
+            delete m_pInfo1;
+            m_pInfo1 = nullptr;
+        }
     }
 };
 
@@ -6976,14 +7086,14 @@ protected:
             m_pInfo2 = static_cast<ImoWedgeDto*>(
                                 ImFactory::inject(k_imo_wedge_dto, pDoc));
             m_pInfo2->set_start(true);
-//            m_pInfo1->set_crescendo(true);  //TODO
             m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
             wedgeId =  m_pAnalyser->new_wedge_id(num);
             m_pInfo2->set_wedge_number(wedgeId);
         }
         else
         {
-            error_msg("Missing or invalid wedge type. Wedge ignored.");
+            error_msg("Missing or invalid wedge type '" + value
+                      + "'. Wedge ignored.");
             delete m_pInfo1;
             m_pInfo1 = nullptr;
         }
@@ -7124,12 +7234,14 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pSlursBuilder(nullptr)
     , m_pVoltasBuilder(nullptr)
     , m_pWedgesBuilder(nullptr)
+    , m_pOctaveShiftBuilder(nullptr)
     , m_musicxmlVersion(0)
     , m_pNodeImo(nullptr)
     , m_tieNum(0)
     , m_slurNum(0)
     , m_voltaNum(0)
     , m_wedgeNum(0)
+    , m_octaveShiftNum(0)
     , m_pTree()
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
@@ -7227,6 +7339,7 @@ void MxlAnalyser::delete_relation_builders()
     delete m_pSlursBuilder;
     delete m_pVoltasBuilder;
     delete m_pWedgesBuilder;
+    delete m_pOctaveShiftBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7239,6 +7352,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
     m_pVoltasBuilder = LOMSE_NEW MxlVoltasBuilder(m_reporter, this);
     m_pWedgesBuilder = LOMSE_NEW MxlWedgesBuilder(m_reporter, this);
+    m_pOctaveShiftBuilder = LOMSE_NEW MxlOctaveShiftBuilder(m_reporter, this);
 
     m_pTree = root;
 //    m_curStaff = 0;
@@ -7343,6 +7457,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pVoltasBuilder->add_item_info(static_cast<ImoVoltaBracketDto*>(pDto));
     else if (pDto->is_wedge_dto())
         m_pWedgesBuilder->add_item_info(static_cast<ImoWedgeDto*>(pDto));
+    else if (pDto->is_octave_shift_dto())
+        m_pOctaveShiftBuilder->add_item_info(static_cast<ImoOctaveShiftDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -7354,6 +7470,7 @@ void MxlAnalyser::clear_pending_relations()
     m_pTupletsBuilder->clear_pending_items();
     m_pVoltasBuilder->clear_pending_items();
     m_pWedgesBuilder->clear_pending_items();
+    m_pOctaveShiftBuilder->clear_pending_items();
 
     m_lyrics.clear();
     m_lyricIndex.clear();
@@ -7509,6 +7626,18 @@ int MxlAnalyser::get_slur_id_and_close(int numSlur)
 }
 
 //---------------------------------------------------------------------------------------
+int MxlAnalyser::new_volta_id()
+{
+    return ++m_voltaNum;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_volta_id()
+{
+    return m_voltaNum;
+}
+
+//---------------------------------------------------------------------------------------
 int MxlAnalyser::new_wedge_id(int numWedge)
 {
     m_wedgeIds[numWedge] = ++m_wedgeNum;
@@ -7536,15 +7665,30 @@ int MxlAnalyser::get_wedge_id_and_close(int numWedge)
 }
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::new_volta_id()
+int MxlAnalyser::new_octave_shift_id(int num)
 {
-    return ++m_voltaNum;
+    m_octaveShiftIds[num] = ++m_octaveShiftNum;
+    return m_octaveShiftNum;
 }
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::get_volta_id()
+bool MxlAnalyser::octave_shift_id_exists(int num)
 {
-    return m_voltaNum;
+    return num <= m_octaveShiftNum && m_octaveShiftIds[num] != -1;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_octave_shift_id(int num)
+{
+    return m_octaveShiftIds[num];
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_octave_shift_id_and_close(int num)
+{
+    int id = m_octaveShiftIds[num];
+    m_octaveShiftIds[num] = -1;
+    return id;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7649,7 +7793,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_midi_instrument:      return LOMSE_NEW MidiInstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_notations:            return LOMSE_NEW NotationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_mxl_tag_octave_shift:         return LOMSE_NEW OctaveShiftMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_octave_shift:         return LOMSE_NEW OctaveShiftMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_group:           return LOMSE_NEW PartGroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -7969,6 +8113,38 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
     {
         ImoDirection* pDirection = (*it)->get_staffobj();
         pDirection->include_in_relation(pDoc, pWedge, nullptr);
+    }
+}
+
+
+//=======================================================================================
+// MxlOctaveShiftBuilder implementation
+//=======================================================================================
+void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto)
+{
+    ImoOctaveShiftDto* pStartDto = m_matches.front();
+    m_matches.push_back(pEndDto);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
+
+    ImoOctaveShift* pOctave = static_cast<ImoOctaveShift*>(
+                                        ImFactory::inject(k_imo_octave_shift, pDoc));
+
+    //set data taken from start dto
+    pOctave->set_octave_shift_number( pStartDto->get_octave_shift_number() );
+    pOctave->set_shift_steps( pStartDto->get_shift_steps() );
+    pOctave->set_color( pStartDto->get_color() );
+
+    //set data taken from end dto
+        //none
+
+    //set data that can be on any of them
+        //none
+
+    std::list<ImoOctaveShiftDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoDirection* pDirection = (*it)->get_staffobj();
+        pDirection->include_in_relation(pDoc, pOctave, nullptr);
     }
 }
 
