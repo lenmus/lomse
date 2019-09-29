@@ -362,7 +362,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 unsigned flags = fInProlog ? 0 : ShapesCreator::k_flag_small_clef;
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType, flags);
+                         m_pagePos, clefType, 0, flags);
                 pShape->assign_id_as_main_shape();
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iLine, iInstr, pSO, -1.0f, iStaff,
@@ -376,7 +376,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType, flags);
+                         m_pagePos, clefType, 0, flags);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iLine, iInstr, pSO, -1.0f, iStaff,
@@ -386,8 +386,9 @@ void ColumnsBuilder::collect_content_for_this_column()
             else
             {
                 int clefType = m_pSysCursor->get_applicable_clef_type();
+                int octaveShift = m_pSysCursor->get_applicable_octave_shift();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType);
+                         m_pagePos, clefType, octaveShift);
                 TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iLine, iInstr, pSO, time, iStaff, pShape);

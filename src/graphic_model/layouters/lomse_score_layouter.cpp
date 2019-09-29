@@ -62,6 +62,7 @@
 #include "lomse_lyric_engraver.h"
 #include "lomse_metronome_engraver.h"
 #include "lomse_note_engraver.h"
+#include "lomse_octave_shift_engraver.h"
 #include "lomse_ornament_engraver.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_slur_engraver.h"
@@ -993,7 +994,8 @@ ShapesCreator::ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
-                                               UPoint pos, int clefType, unsigned flags)
+                                               UPoint pos, int clefType, int octaveShift,
+                                               unsigned flags)
 {
     //factory method to create shapes for staffobjs
 
@@ -1037,7 +1039,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
                                iInstr, iStaff);
             Color color = pImo->get_color();
-            GmoShape* pShape = engrv.create_shape(pImo, clefType, pos, color);
+            GmoShape* pShape = engrv.create_shape(pImo, clefType, octaveShift, pos, color);
 
             //AWARE: Chords are an exception to the way relations are engraved. This
             //is because chords affect to note positions (reverse noteheads, shift
@@ -1239,6 +1241,12 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
         case k_imo_wedge:
         {
             pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);   //xLeft, xRight);
+            break;
+        }
+
+        case k_imo_octave_shift:
+        {
+            pEngrv = LOMSE_NEW OctaveShiftEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);   //xLeft, xRight);
             break;
         }
 

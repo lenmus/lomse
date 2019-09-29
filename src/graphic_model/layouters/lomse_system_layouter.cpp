@@ -649,10 +649,11 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
     if (pSO->get_num_relations() > 0)
     {
         ImoRelations* pRelObjs = pSO->get_relations();
-        int size = pRelObjs->get_num_items();
-	    for (int i=0; i < size; ++i)
-	    {
-            ImoRelObj* pRO = pRelObjs->get_item(i);
+        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
+        list<ImoRelObj*>::iterator it;
+        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
 
             if (!pRO->is_chord())
             {

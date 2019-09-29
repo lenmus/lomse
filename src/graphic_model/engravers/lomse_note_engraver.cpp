@@ -57,6 +57,7 @@ NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pNote(nullptr)
     , m_clefType(k_clef_undefined)
+    , m_octaveShift(0)
     , m_pShapesStorage(pShapesStorage)
     , m_fStemDown(false)
     , m_nPosOnStaff(0)
@@ -75,12 +76,13 @@ NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
-                                     Color color)
+GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, int octaveShift,
+                                     UPoint uPos, Color color)
 {
     //save data and initialize
     m_pNote = pNote;
     m_clefType = clefType;
+    m_octaveShift = octaveShift;
     m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
     m_color = color;
     m_pNoteShape = nullptr;
@@ -363,6 +365,7 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
     //        etc.
 
     DiatonicPitch dpitch(m_pNote->get_step(), m_pNote->get_octave());
+    dpitch += m_octaveShift;
 
 	// pitch is defined. Position will depend on key
     switch (clefType)
