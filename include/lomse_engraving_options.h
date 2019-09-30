@@ -107,7 +107,10 @@ namespace lomse
 #define LOMSE_WEDGE_LINE_THICKNESS      1.5f    //line thickness for wedges/hairpins
 #define LOMSE_WEDGE_NIENTE_RADIUS       4.0f    //radius for niente circles in wedges
 
-
+//octave-shift lines
+#define LOMSE_OCTAVE_SHIFT_LINE_THICKNESS  1.0f //thickness for octave-shift lines
+#define LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE   2.0f //space from numeral glyph to line start
+#define LOMSE_OCTAVE_SHIFT_LINE_SHIFT      3.0f //vertical line shift to compensate glyph baseline
 
 }   //namespace lomse
 

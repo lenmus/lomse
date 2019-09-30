@@ -56,7 +56,8 @@ protected:
 
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
-    bool m_fOctaveShiftAbove;
+    GmoShape* m_pShapeNumeral[2];
+    GmoShapeOctaveShift* m_pMainShape[2];
     LUnits m_uPrologWidth;
 
     ImoDirection* m_pStartDirection;
@@ -64,9 +65,9 @@ protected:
     GmoShapeInvisible* m_pStartDirectionShape;
     GmoShapeInvisible* m_pEndDirectionShape;
 
-    bool m_fTwoOctaveShifts;
-    UPoint m_points1[4];    //points for first wedge
-    UPoint m_points2[4];    //points for second wedge, when fisrt one is split
+    bool m_fUseTwoShapes;
+    bool m_fPlaceAtTop;
+    UPoint m_points[2][2];  //points for shapes, 2 points per shape (top-left, bottom-left).
     ShapeBoxInfo m_shapesInfo[2];
 
 public:
@@ -91,10 +92,16 @@ public:
 
 protected:
     void decide_placement();
-    void decide_if_one_or_two_wedges();
-    inline bool two_wedges_needed() { return m_fTwoOctaveShifts; }
+    void decide_if_one_or_two_shapes();
+    inline bool two_shapes_needed() { return m_fUseTwoShapes; }
     void create_two_shapes();
     void create_one_shape();
+    inline bool octave_shift_at_top() { return m_fPlaceAtTop; }
+
+    void create_main_container_shape(int iShape);
+    void add_shape_numeral(int iShape);
+    void add_line_info(int iShape);
+    int find_glyph(int shift);
 
     void compute_first_shape_position();
     void compute_second_shape_position();

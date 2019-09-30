@@ -173,7 +173,7 @@ public:
                 k_shape_invisible, k_shape_key_signature, k_shape_lyrics,
                 k_shape_metronome_glyph, k_shape_metronome_mark,
                 k_shape_line, k_shape_note, k_shape_notehead,
-                k_shape_ornament,
+                k_shape_octave_shift, k_shape_octave_glyph, k_shape_ornament,
                 k_shape_rectangle, k_shape_rest, k_shape_rest_glyph,
                 k_shape_slur, k_shape_squared_bracket,
                 k_shape_stem, k_shape_staff,
@@ -237,6 +237,8 @@ public:
     inline bool is_shape_metronome_mark() { return m_objtype == k_shape_metronome_mark; }
     inline bool is_shape_note() { return m_objtype == k_shape_note; }
     inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
+    inline bool is_shape_octave_shift() { return m_objtype == k_shape_octave_shift; }
+    inline bool is_shape_octave_num() { return m_objtype == k_shape_octave_glyph; }
     inline bool is_shape_ornament() { return m_objtype == k_shape_ornament; }
     inline bool is_shape_rectangle() { return m_objtype == k_shape_rectangle; }
     inline bool is_shape_rest() { return m_objtype == k_shape_rest; }
