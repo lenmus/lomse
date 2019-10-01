@@ -649,14 +649,32 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
     if (pSO->get_num_relations() > 0)
     {
         ImoRelations* pRelObjs = pSO->get_relations();
-        int size = pRelObjs->get_num_items();
-	    for (int i=0; i < size; ++i)
-	    {
-            ImoRelObj* pRO = pRelObjs->get_item(i);
+        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
+        list<ImoRelObj*>::iterator it;
+        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
 
             if (!pRO->is_chord())
             {
-		        if (pSO == pRO->get_start_object())
+                //special case: start and end in the same object
+		        if (pSO == pRO->get_start_object() && pSO == pRO->get_end_object())
+		        {
+                    m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
+                                                            iInstr, iStaff, iSystem, iCol,
+                                                            iLine, pInstr);
+
+                    SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
+                    LUnits prologWidth( pSysLyt->get_prolog_width() );
+
+                    m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
+                                                            iInstr, iStaff, iSystem, iCol,
+                                                            iLine, prologWidth, pInstr);
+                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs);
+		        }
+
+		        //normal cases: start and end in different objects
+		        else if (pSO == pRO->get_start_object())
                     m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, pInstr);

@@ -2671,7 +2671,6 @@ SUITE(MxlAnalyserTest)
 
     //@ note -----------------------------------------------------------------------------
 
-
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_00)
     {
         //@00 minimum content parsed ok. Note saved
@@ -3121,6 +3120,171 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_in_chord() == false );
         CHECK( pNote && pNote->is_start_of_chord() == false );
         CHECK( pNote && pNote->is_end_of_chord() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+
+    //@ octave-shift --------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, octave_shift_01)
+    {
+        //@01. minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<octave-shift type='down'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<octave-shift type='stop'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 2 );
+
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+//                it = pMD->begin();
+
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoOctaveShift* pOctave = dynamic_cast<ImoOctaveShift*>(
+                                                    pNote->find_relation(k_imo_octave_shift) );
+                    CHECK( pOctave != nullptr );
+                    if (pOctave)
+                    {
+                        CHECK( pOctave->get_shift_steps() == -7 );
+                        CHECK( pOctave->get_octave_shift_number() == 1 );
+                        CHECK( !is_different(pOctave->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, octave_shift_02)
+    {
+        //@02. invalid size
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        expected << "Line 0. Invalid octave-shift size '6'. Changed to 8." << endl;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<direction><direction-type>"
+                "<octave-shift type='up' size='6'/>"
+            "</direction-type></direction>"
+            "<note><pitch><step>G</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><pitch><step>E</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<direction><direction-type>"
+                "<octave-shift type='stop'/>"
+            "</direction-type></direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 3 );
+
+//                cout << test_name() << endl;
+//                cout << "num.children=" << pMD->get_num_children() << endl;
+//                while (it != pMD->end())
+//                {
+//                    cout << (*it)->to_string() << ", " << (*it)->get_name() << endl;
+//                    ++it;
+//                }
+//                it = pMD->begin();
+
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoOctaveShift* pOctave = dynamic_cast<ImoOctaveShift*>(
+                                                    pNote->find_relation(k_imo_octave_shift) );
+                    CHECK( pOctave != nullptr );
+                    if (pOctave)
+                    {
+                        CHECK( pOctave->get_shift_steps() == 7 );
+                        CHECK( pOctave->get_octave_shift_number() == 1 );
+                        CHECK( !is_different(pOctave->get_color(), Color(0,0,0)) );
+                    }
+                }
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;

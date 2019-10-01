@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,6 +68,7 @@ void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
     m_clefs.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);     //GCC complains if nullptr not casted
     m_keys.assign(m_numStaves, (ColStaffObjsEntry*)nullptr);
     m_times.assign(m_numInstruments, (ColStaffObjsEntry*)nullptr);
+    m_octave_shifts.assign(m_numStaves, 0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -82,8 +83,17 @@ void StaffObjsCursor::move_next()
         save_time_signature();
     else if (pSO->is_barline())
         save_barline();
+    else if (pSO->is_note())
+        save_octave_shift_at_end( static_cast<ImoStaffObj*>(pSO) );
 
     ++m_scoreIt;
+
+    if (!is_end())
+    {
+        pSO = imo_object();
+        if (pSO && pSO->is_note())
+            save_octave_shift_at_start( static_cast<ImoStaffObj*>(pSO) );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -92,6 +102,63 @@ void StaffObjsCursor::save_clef()
     int iInstr = num_instrument();
     int idx = m_staffIndex[iInstr] + staff();
     m_clefs[idx] = *m_scoreIt;
+}
+
+//---------------------------------------------------------------------------------------
+void StaffObjsCursor::save_octave_shift_at_end(ImoStaffObj* pSO)
+{
+    if (pSO->get_num_relations() > 0)
+    {
+        ImoRelations* pRelObjs = pSO->get_relations();
+        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
+        list<ImoRelObj*>::iterator it;
+        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+
+            if (pRO->is_octave_shift())
+            {
+		        if (pSO == pRO->get_end_object())
+		        {
+                    int idx = m_staffIndex[num_instrument()] + staff();
+                    m_octave_shifts[idx] = 0;
+                    break;
+		        }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void StaffObjsCursor::save_octave_shift_at_start(ImoStaffObj* pSO)
+{
+    int steps = 0;
+    bool fOctaveShift = false;
+    if (pSO->get_num_relations() > 0)
+    {
+        ImoRelations* pRelObjs = pSO->get_relations();
+        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
+        list<ImoRelObj*>::iterator it;
+        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+
+            if (pRO->is_octave_shift())
+            {
+		        if (pSO == pRO->get_start_object())
+		        {
+                    fOctaveShift = true;
+		            steps = static_cast<ImoOctaveShift*>(pRO)->get_shift_steps();
+		        }
+            }
+        }
+    }
+
+    if (fOctaveShift)
+    {
+        int idx = m_staffIndex[num_instrument()] + staff();
+        m_octave_shifts[idx] = steps;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -164,6 +231,13 @@ int StaffObjsCursor::get_applicable_clef_type()
         return k_clef_undefined;
     else
         return get_clef_type_for_instr_staff( num_instrument(), staff() );
+}
+
+//---------------------------------------------------------------------------------------
+int StaffObjsCursor::get_applicable_octave_shift()
+{
+    int idx = m_staffIndex[num_instrument()] + staff();
+    return m_octave_shifts[idx];
 }
 
 //---------------------------------------------------------------------------------------

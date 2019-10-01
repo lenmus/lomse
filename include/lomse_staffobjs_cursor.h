@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,6 +68,7 @@ private:
     std::vector<ColStaffObjsEntry*> m_clefs;
     std::vector<ColStaffObjsEntry*> m_keys;
     std::vector<ColStaffObjsEntry*> m_times;
+    std::vector<int> m_octave_shifts;
 
 public:
     StaffObjsCursor(ImoScore* pScore);
@@ -115,6 +116,7 @@ public:
     ImoTimeSignature* get_applicable_time_signature();
     ImoTimeSignature* get_time_signature_for_instrument(int iInstr);
     int get_applicable_clef_type();
+    int get_applicable_octave_shift();
     int get_clef_type_for_instr_staff(int iInstr, int iStaff);
     int get_applicable_key_type();
     int get_key_type_for_instr_staff(int iInstr, int iStaff);
@@ -140,6 +142,8 @@ protected:
     void save_key_signature();
     void save_time_signature();
     void save_barline();
+    void save_octave_shift_at_start(ImoStaffObj* pSO);
+    void save_octave_shift_at_end(ImoStaffObj* pSO);
 
 };
 

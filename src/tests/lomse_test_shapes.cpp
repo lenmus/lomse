@@ -107,7 +107,7 @@ SUITE(GmoShapeTest)
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != nullptr );
         CHECK( pShape && pShape->is_locked() == true );
@@ -127,7 +127,7 @@ SUITE(GmoShapeTest)
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != nullptr);
         if (pShape)
@@ -163,7 +163,7 @@ SUITE(GmoShapeTest)
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != nullptr);
         if (pShape)

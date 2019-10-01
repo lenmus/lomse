@@ -130,12 +130,12 @@ public:
         m_pStorage = LOMSE_NEW ShapesStorage();
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, k_clef_G2, 0, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, k_clef_G2, 0, UPoint(10.0f, 15.0f)) );
         if (step3 >= 0)
             m_pShape3 =
-                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, k_clef_G2, UPoint(10.0f, 15.0f)) );
+                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, k_clef_G2, 0, UPoint(10.0f, 15.0f)) );
         else
             m_pShape3 = nullptr;
     }

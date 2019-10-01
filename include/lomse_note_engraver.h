@@ -56,6 +56,7 @@ class NoteEngraver : public Engraver
 protected:
     ImoNote* m_pNote;
     int m_clefType;
+    int m_octaveShift;
     ShapesStorage* m_pShapesStorage;
 
 public:
@@ -63,7 +64,7 @@ public:
                  ShapesStorage* pShapesStorage, int iInstr, int iStaff);
     virtual ~NoteEngraver() {}
 
-    GmoShape* create_shape(ImoNote* pNote, int clefType, UPoint uPos,
+    GmoShape* create_shape(ImoNote* pNote, int clefType, int octaveShift, UPoint uPos,
                            Color color=Color(0,0,0));
     GmoShape* create_tool_dragged_shape(int noteType, EAccidentals acc, int dots);
     UPoint get_drag_offset();

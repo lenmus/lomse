@@ -433,6 +433,19 @@ protected:
     }
 };
 
+//---------------------------------------------------------------------------------------
+class GmoShapeOctaveGlyph : public GmoShapeGlyph
+{
+protected:
+    friend class OctaveShiftEngraver;
+    GmoShapeOctaveGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
+                        Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_octave_glyph, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
+    {
+    }
+};
+
 
 }   //namespace lomse
 

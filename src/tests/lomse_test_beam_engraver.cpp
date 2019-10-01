@@ -138,7 +138,7 @@ public:
         {
             ImoNote* pNote = static_cast<ImoNote*>( (*it).first );
             GmoShapeNote* pShape = dynamic_cast<GmoShapeNote*>(
-                m_pNoteEngrv->create_shape(pNote, k_clef_G2,
+                m_pNoteEngrv->create_shape(pNote, k_clef_G2, 0,
                                            UPoint(10.0f, 15.0f)) );
             m_shapes.push_back(pShape);
         }

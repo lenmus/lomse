@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -218,9 +218,6 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE048),  // Coda sign
     GlyphData(0xE047),  // Segno sign
 
-//Octaves (U+E510 - U+E51F)
-    GlyphData(0xE510),  // Ottava alta sign
-
 //figured bass (U+EA50 - U+EA6F)
     GlyphData(0xEA50),  // Figured bass. Number 0
     GlyphData(0xEA51),  // Figured bass. Number 1
@@ -304,6 +301,24 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE222),  // Combining tremolo 3
     GlyphData(0xE223),  // Combining tremolo 4
     GlyphData(0xE224),  // Combining tremolo 5
+
+//Octaves (U+E510 - U+E51F)
+    GlyphData(0xE510),  //Ottava: 8
+    GlyphData(0xE511),  //Ottava alta: 8va ('va' at top)
+    GlyphData(0xE512),  //Ottava bassa: 8va ('va' at bottom)
+    GlyphData(0xE513),  //Ottava bassa: 8ba
+    GlyphData(0xE514),  //Quindicesima: 15
+    GlyphData(0xE515),  //Quindicesima alta: 15ma ('ma' at top)
+    GlyphData(0xE516),  //Quindicesima bassa: 15ma ('ma' at bottom)
+    GlyphData(0xE517),  //Ventiduesima: 22
+    GlyphData(0xE518),  //Ventiduesima alta: 22ma ('ma' at top)
+    GlyphData(0xE519),  //Ventiduesima bassa: 22ma ('ma' at bottom)
+    GlyphData(0xE51A),  //Left parenthesis for octave signs
+    GlyphData(0xE51B),  //Right parenthesis for octave signs
+    GlyphData(0xE51C),  //Ottava bassa: 8vb
+    GlyphData(0xE51D),  //Quindicesima bassa: 15mb
+    GlyphData(0xE51E),  //Ventiduesima bassa: 22mb
+    GlyphData(0xE51F),  //'bassa' word
 
 //Brass techniques (U+E5D0 - U+E5EF)
     GlyphData(0xE5D0),  // Scoop

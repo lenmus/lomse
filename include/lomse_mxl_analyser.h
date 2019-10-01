@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -135,22 +135,35 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-// helper class to save volta bracket dto items, match them and build the volta brackets
+// helper class to save wedge dto items, match them and build the wedges
 class MxlWedgesBuilder : public RelationBuilder<ImoWedgeDto, MxlAnalyser>
 {
-protected:
-    ImoWedgeDto* m_pFirstWedge;        //ptr to 1st wedge of current repetition set
-
 public:
     MxlWedgesBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
         : RelationBuilder<ImoWedgeDto, MxlAnalyser>(
                 reporter, pAnalyser, "wedge", "Wedge")
-        , m_pFirstWedge(nullptr)
     {
     }
     virtual ~MxlWedgesBuilder() {}
 
     void add_relation_to_staffobjs(ImoWedgeDto* pEndInfo);
+};
+
+
+//---------------------------------------------------------------------------------------
+// helper class to save octave-shift dto items, match them and build the octave-shift lines
+class MxlOctaveShiftBuilder : public RelationBuilder<ImoOctaveShiftDto, MxlAnalyser>
+{
+public:
+    MxlOctaveShiftBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoOctaveShiftDto, MxlAnalyser>(
+                reporter, pAnalyser, "octave-shift", "Octave-shift")
+    {
+    }
+    virtual ~MxlOctaveShiftBuilder() {}
+
+    void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo);
+    void add_to_open_octave_shifts(ImoNote* pNote);
 };
 
 
@@ -239,6 +252,7 @@ protected:
     MxlSlursBuilder*    m_pSlursBuilder;
     MxlVoltasBuilder*   m_pVoltasBuilder;
     MxlWedgesBuilder*   m_pWedgesBuilder;
+    MxlOctaveShiftBuilder*  m_pOctaveShiftBuilder;
     map<string, int>    m_lyricIndex;
     vector<ImoLyric*>   m_lyrics;
     map<string, int>    m_soundIdToIdx;     //conversion sound-instrument id to index
@@ -254,6 +268,8 @@ protected:
     int             m_voltaNum;
     map<int, ImoId> m_wedgeIds;
     int             m_wedgeNum;
+    map<int, ImoId> m_octaveShiftIds;
+    int             m_octaveShiftNum;
 
 
     //analysis input
@@ -274,6 +290,8 @@ protected:
     string          m_curPartId;        //Part Id being analysed
     string          m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
+
+    vector<ImoNote*> m_notes;           //last note for each staff
 
     //inherited values
 //    int m_curStaff;
@@ -351,8 +369,9 @@ public:
 //    inline void set_current_show_tuplet_number(int value) { m_nShowTupletNumber = value; }
 //    inline int get_current_show_tuplet_number() { return m_nShowTupletNumber; }
 
-    inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
+    void save_last_note(ImoNote* pNote);
     inline ImoNote* get_last_note() { return m_pLastNote; }
+    ImoNote* get_last_note_for(int iStaff);
 
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
@@ -363,7 +382,7 @@ public:
     inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
 
     //access to instrument being analysed
-    inline void save_current_instrument(ImoInstrument* pInstr) { m_pCurInstrument = pInstr; }
+    void save_current_instrument(ImoInstrument* pInstr);
     inline ImoInstrument* get_current_instrument() { return m_pCurInstrument; }
 
     //access to document being analysed
@@ -404,15 +423,21 @@ public:
     int get_slur_id(int numSlur);
     int get_slur_id_and_close(int numSlur);
 
+    //interface for building volta brackets
+    int new_volta_id();
+    int get_volta_id();
+
     //interface for building wedges
     int new_wedge_id(int numWedge);
     bool wedge_id_exists(int numWedge);
     int get_wedge_id(int numWedge);
     int get_wedge_id_and_close(int numWedge);
 
-    //interface for building volta brackets
-    int new_volta_id();
-    int get_volta_id();
+    //interface for building octave-shift lines
+    int new_octave_shift_id(int num);
+    bool octave_shift_id_exists(int num);
+    int get_octave_shift_id(int num);
+    int get_octave_shift_id_and_close(int num);
 
     //interface for MxlTupletsBuilder
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
@@ -422,6 +447,11 @@ public:
     inline void get_factors_from_nested_tuplets(int* pTop, int* pBottom)
     {
         m_pTupletsBuilder->get_factors_from_nested_tuplets(pTop, pBottom);
+    }
+
+    //interface for MxlOctaveShiftBuilder
+    inline void add_to_open_octave_shifts(ImoNote* pNote) {
+        m_pOctaveShiftBuilder->add_to_open_octave_shifts(pNote);
     }
 
     //information for reporting errors

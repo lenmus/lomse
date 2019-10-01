@@ -63,6 +63,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_line.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_note.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_octave_shift.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_staff.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_text.cpp
     ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_tie.cpp
@@ -94,6 +95,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_lyric_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_metronome_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_octave_shift_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_ornament_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_slur_engraver.cpp

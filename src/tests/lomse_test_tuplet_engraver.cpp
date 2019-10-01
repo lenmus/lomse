@@ -123,7 +123,7 @@ public:
             if (pNR->is_note())
             {
                 ImoNote* pNote = static_cast<ImoNote*>(pNR);
-                pShape = m_pNoteEngrv->create_shape(pNote, k_clef_G2,
+                pShape = m_pNoteEngrv->create_shape(pNote, k_clef_G2, 0,
                                                     UPoint(10.0f, 15.0f) );
             }
             else

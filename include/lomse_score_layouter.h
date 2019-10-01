@@ -341,7 +341,8 @@ public:
 
     //StaffObj shapes
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
-                                    UPoint pos, int clefType=0, unsigned flags=0);
+                                    UPoint pos, int clefType=0, int octaveShift=0,
+                                    unsigned flags=0);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
                                   GmoShape* pParentShape);
     GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -243,9 +243,6 @@ enum EGlyphIndex
     k_glyph_coda,
     k_glyph_segno,
 
-    //Octaves (U+E510 - U+E51F)
-    k_glyph_octava,
-
     //Figured bass. Numbers and other symbols
     k_glyph_figured_bass_0,                   //number 0
     k_glyph_figured_bass_1,                   //number 1
@@ -328,6 +325,24 @@ enum EGlyphIndex
     k_glyph_tremolo_3,     // Combining tremolo 3
     k_glyph_tremolo_4,     // Combining tremolo 4
     k_glyph_tremolo_5,     // Combining tremolo 5
+
+    //Octaves (U+E510 - U+E51F)
+    k_glyph_ottava,                 //Ottava: 8
+    k_glyph_ottavaAlta,             //Ottava alta: 8va ('va' at top)
+    k_glyph_ottavaBassa,            //Ottava bassa: 8va ('va' at bottom)
+    k_glyph_ottavaBassaBa,          //Ottava bassa: 8ba
+    k_glyph_quindicesima,           //Quindicesima: 15
+    k_glyph_quindicesimaAlta,       //Quindicesima alta: 15ma ('ma' at top)
+    k_glyph_quindicesimaBassa,      //Quindicesima bassa: 15ma ('ma' at bottom)
+    k_glyph_ventiduesima,           //Ventiduesima: 22
+    k_glyph_ventiduesimaAlta,       //Ventiduesima alta: 22ma ('ma' at top)
+    k_glyph_ventiduesimaBassa,      //Ventiduesima bassa: 22ma ('ma' at bottom)
+    k_glyph_octaveParensLeft,       //Left parenthesis for octave signs
+    k_glyph_octaveParensRight,      //Right parenthesis for octave signs
+    k_glyph_ottavaBassaVb,          //Ottava bassa: 8vb
+    k_glyph_quindicesimaBassaMb,    //Quindicesima bassa: 15mb
+    k_glyph_ventiduesimaBassaMb,    //Ventiduesima bassa: 22mb
+    k_glyph_octaveBassa,            //'bassa' word
 
     //Brass techniques (U+E5D0 –U+E5EF)
     k_glyph_brass_scoop,                        //Scoop

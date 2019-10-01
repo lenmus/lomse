@@ -488,6 +488,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_line_style] = "line-style";
         m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
+        m_TypeToName[k_imo_octave_shift] = "octave-shift";
+        m_TypeToName[k_imo_octave_shift_dto] = "octave-shift-dto";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";
         m_TypeToName[k_imo_param_info] = "param";
@@ -552,6 +554,7 @@ const string& ImoObj::get_name(int type)
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
+        m_TypeToName[k_imo_octave_shift] = "octave-shift";
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
@@ -1859,7 +1862,7 @@ int ImoRelations::get_priority(int type)
         priority[k_imo_fermata] = 6;
         priority[k_imo_text_repetition_mark] = 7;
         priority[k_imo_wedge] = 8;
-
+        priority[k_imo_octave_shift] = 8;
         fMapInitialized = true;
     };
 
@@ -5438,46 +5441,13 @@ void ImoVoltaBracket::reorganize_after_object_deletion()
 
 
 //=======================================================================================
-// ImoSlur implementation
+// ImoWedge implementation
 //=======================================================================================
-//ImoNote* ImoWedge::get_start_note()
-//{
-//    return static_cast<ImoNote*>( get_start_object() );
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoNote* ImoWedge::get_end_note()
-//{
-//    return static_cast<ImoNote*>( get_end_object() );
-//}
-
-//---------------------------------------------------------------------------------------
 void ImoWedge::reorganize_after_object_deletion()
 {
-    //TODO
     //Nothing to do. As a wedge involves only two objects, the wedge is removed when
-    //one of the ImoDirections is deleted. Also, in note destructor, the other note is informed.
+    //one of the ImoDirections is deleted.
 }
-
-
-
-////=======================================================================================
-//// ImoWedgeData implementation
-////=======================================================================================
-//ImoWedgeData::ImoWedgeData(ImoWedgeDto* pDto)
-//    : ImoRelDataObj(k_imo_wedge_data)
-//    , m_fStart( pDto->is_start() )
-//    , m_slurNum( pDto->get_slur_number() )
-//    , m_orientation(k_orientation_default)
-//    , m_pBezier(nullptr)
-//{
-//}
-
-////---------------------------------------------------------------------------------------
-//ImoWedgeData::~ImoWedgeData()
-//{
-//    delete m_pBezier;
-//}
 
 //=======================================================================================
 // ImoWedgeDto implementation
@@ -5485,6 +5455,17 @@ void ImoWedge::reorganize_after_object_deletion()
 ImoWedgeDto::~ImoWedgeDto()
 {
 }
+
+
+//=======================================================================================
+// ImoOctaveShift implementation
+//=======================================================================================
+void ImoOctaveShift::reorganize_after_object_deletion()
+{
+    //Nothing to do. As an octave-shift involves only two objects, the wedge is removed when
+    //one of the ImoDirections is deleted.
+}
+
 
 
 
