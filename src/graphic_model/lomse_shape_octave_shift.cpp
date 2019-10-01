@@ -46,6 +46,7 @@ namespace lomse
 GmoShapeOctaveShift::GmoShapeOctaveShift(ImoObj* pCreatorImo, ShapeId idx, Color color)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_octave_shift, idx, color)
     , m_fTwoLines(false)
+    , m_fEndCorner(true)
     , m_xLineStart(0.0f)
     , m_xLineEnd(0.0f)
     , m_yLineStart(0.0f)
@@ -61,7 +62,7 @@ GmoShapeOctaveShift::~GmoShapeOctaveShift()
 
 //---------------------------------------------------------------------------------------
 void GmoShapeOctaveShift::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yStart,
-                                          LUnits yEnd, LUnits uLineThick)
+                                          LUnits yEnd, LUnits uLineThick, bool fEndCorner)
 {
     //save data
     m_xLineStart = xStart;
@@ -69,8 +70,10 @@ void GmoShapeOctaveShift::set_layout_data(LUnits xStart, LUnits xEnd, LUnits ySt
     m_yLineStart = yStart;
     m_yLineEnd = yEnd;
     m_uLineThick = uLineThick;
+    m_fEndCorner = fEndCorner;
 
-//    compute_bounds(xStart, xEnd, yPos);       //TODO
+    //fix bounds
+    m_size.width = abs(xEnd - m_origin.x);
 }
 
 //---------------------------------------------------------------------------------------
@@ -96,31 +99,18 @@ void GmoShapeOctaveShift::on_draw(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->move_to(xPos, m_yLineStart);
         xPos += dxLine;
     }
-
-    //vertical line
     xPos -= (dxLine + dxSpace);
     pDrawer->move_to(xPos, m_yLineStart);       //to end of last stroke
     pDrawer->hline_to(m_xLineEnd);              //continue it to end point
-    pDrawer->vline_to(m_yLineEnd);              //add vertical stroke
+
+    //end corner
+    if (m_fEndCorner)
+        pDrawer->vline_to(m_yLineEnd);      //add vertical stroke
 
     pDrawer->end_path();
     pDrawer->render();
 
     GmoCompositeShape::on_draw(pDrawer, opt);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShapeOctaveShift::compute_bounds(LUnits xStart, LUnits xEnd, LUnits yPos)
-{
-//TODO
-//    m_origin.x = xStart;
-//    m_size.width = abs(xEnd - xStart);
-//    m_origin.y = yPos;
-//
-//    if (m_pShapeText)
-//        m_size.height = max(m_uJogLength, m_pShapeText->get_height());
-//    else
-//        m_size.height = m_uJogLength;
 }
 
 //---------------------------------------------------------------------------------------

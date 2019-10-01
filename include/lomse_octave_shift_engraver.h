@@ -94,8 +94,6 @@ protected:
     void decide_placement();
     void decide_if_one_or_two_shapes();
     inline bool two_shapes_needed() { return m_fUseTwoShapes; }
-    void create_two_shapes();
-    void create_one_shape();
     inline bool octave_shift_at_top() { return m_fPlaceAtTop; }
 
     void create_main_container_shape(int iShape);

@@ -55,6 +55,7 @@ class GmoShapeOctaveShift : public GmoCompositeShape
 {
 protected:
     bool m_fTwoLines;
+    bool m_fEndCorner;
     LUnits m_xLineStart;
     LUnits m_xLineEnd;
     LUnits m_yLineStart;
@@ -68,10 +69,7 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     void set_layout_data(LUnits xStart, LUnits xEnd, LUnits yStart, LUnits yEnd,
-                         LUnits uLineThick);
-    void add_label(GmoShapeText* pShape);
-//    inline void enable_final_jog(bool value) { m_fStopJog = value; }
-    inline void set_two_brackets() { m_fTwoLines = true; }
+                         LUnits uLineThick, bool fEndCorner);
 
     //support for handlers
     int get_num_handlers();
@@ -80,7 +78,6 @@ public:
     void on_end_of_handler_drag(int iHandler, UPoint newPos);
 
 protected:
-    void compute_bounds(LUnits xStart, LUnits xEnd, LUnits yPos);
 
 };
 

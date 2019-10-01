@@ -117,59 +117,26 @@ int OctaveShiftEngraver::create_shapes(Color color)
     m_color = color;
     decide_placement();
     decide_if_one_or_two_shapes();
-//    if (two_shapes_needed())
-//        create_two_shapes();
-//    else
-        create_one_shape();
-    return m_numShapes;
-}
 
-//---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::create_one_shape()
-{
-    m_numShapes = 1;
-
+    //create first shape
     compute_first_shape_position();
-//    //add_user_displacements(0, &m_points[0][0]);
-
+    //add_user_displacements(0, &m_points[0][0]);
     create_main_container_shape(0);
     add_shape_numeral(0);
     add_line_info(0);
 
     m_shapesInfo[1].pShape = nullptr;
-}
+    if (two_shapes_needed())
+    {
+        //create second shape
+        compute_second_shape_position();
+        //add_user_displacements(1, &m_points[1][0]);
+        create_main_container_shape(1);
+        add_shape_numeral(1);
+        add_line_info(1);
+    }
 
-//---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::create_two_shapes()
-{
-    m_numShapes = 2;
-//    LUnits thickness = tenths_to_logical(LOMSE_WEDGE_LINE_THICKNESS);
-//
-//    //determine if 'niente' circle should be drawn
-//    int niente1 = GmoShapeOctaveShift::k_no_niente;
-//    int niente2 = GmoShapeOctaveShift::k_no_niente;
-//    LUnits radius = 0.0f;
-//    if (m_pOctaveShift->is_niente())
-//    {
-//        radius = tenths_to_logical(LOMSE_WEDGE_NIENTE_RADIUS);
-//        if (m_pOctaveShift->is_crescendo())
-//            niente1 = GmoShapeOctaveShift::k_niente_at_start;
-//        else
-//            niente2 = GmoShapeOctaveShift::k_niente_at_end;
-//    }
-//
-//    //create first shape
-//    compute_first_shape_position();
-//    //add_user_displacements(0, &m_points[0][0]);
-//    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeOctaveShift(m_pOctaveShift, 0, &m_points[0][0],
-//                                                     thickness, m_pOctaveShift->get_color(),
-//                                                     niente1, radius);
-//    //create second shape
-//    compute_second_shape_position();
-//    //add_user_displacements(1, &m_points2[0]);
-//    m_shapesInfo[1].pShape = LOMSE_NEW GmoShapeOctaveShift(m_pOctaveShift, 0, &m_points2[0],
-//                                                     thickness, m_pOctaveShift->get_color(),
-//                                                     niente2, radius);
+    return m_numShapes;
 }
 
 //---------------------------------------------------------------------------------------
@@ -190,16 +157,16 @@ void OctaveShiftEngraver::add_shape_numeral(int iShape)
 
     //adjust position
     Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 10.0f;
-    LUnits y = m_points[0][0].y
+    LUnits y = m_points[iShape][0].y
                + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
 
     //determine font size to use
     double fontSize = 16.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 
    //create the shape
-    GmoShape* pShape =
-        LOMSE_NEW GmoShapeOctaveGlyph(m_pOctaveShift, 0, iGlyph, UPoint(m_points[0][0].x, y),
-                                      m_color, m_libraryScope, fontSize);
+    GmoShape* pShape = LOMSE_NEW GmoShapeOctaveGlyph(m_pOctaveShift, 0, iGlyph,
+                                                     UPoint(m_points[iShape][0].x, y),
+                                                     m_color, m_libraryScope, fontSize);
     m_pShapeNumeral[iShape] = pShape;
 
     m_pMainShape[iShape]->add(pShape);
@@ -212,9 +179,10 @@ void OctaveShiftEngraver::add_line_info(int iShape)
     LUnits xStart = m_points[iShape][0].x + m_pShapeNumeral[iShape]->get_width()
                     + tenths_to_logical(LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE);
 
-    LUnits yStart = m_points[iShape][0].y - tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_SHIFT);
+    LUnits yShift = tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_SHIFT);
+    LUnits yStart = m_points[iShape][0].y - yShift;
     if (!octave_shift_at_top())
-        yStart += m_pShapeNumeral[iShape]->get_height();
+        yStart += (m_pShapeNumeral[iShape]->get_height() - yShift);
 
     //locate last applicable note in this instr/staff
 
@@ -223,8 +191,9 @@ void OctaveShiftEngraver::add_line_info(int iShape)
     LUnits yEnd = yStart + (octave_shift_at_top() ? 200.0f : -200.0f);
 
     LUnits thickness = tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_THICKNESS);
+    bool fEndCorner = (iShape==1 || (iShape==0 && !two_shapes_needed()));
 
-    m_pMainShape[iShape]->set_layout_data(xStart, xEnd, yStart, yEnd, thickness);
+    m_pMainShape[iShape]->set_layout_data(xStart, xEnd, yStart, yEnd, thickness, fEndCorner);
 }
 
 //---------------------------------------------------------------------------------------
@@ -276,33 +245,19 @@ void OctaveShiftEngraver::compute_first_shape_position()
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::compute_second_shape_position()
 {
-//    m_points2[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
-//                     - tenths_to_logical(10.0f);
-//    m_points2[2].x = m_points2[0].x;
-//    m_points2[1].x = m_pEndDirectionShape->get_left();
-//    m_points2[3].x = m_points2[1].x;
-//
-//    //determine center line of shape box
-//    LUnits yRef = m_uStaffTopEnd;
-//    if (m_fOctaveShiftAbove)
-//        yRef -= tenths_to_logical(50.0f);   //5 lines above top staff line
-//    else
-//        yRef += tenths_to_logical(90.0f);   //5 lines bellow first staff line
-//
-//    //determine spread to apply
-//    LUnits endSpread = tenths_to_logical(m_pOctaveShift->get_end_spread()) / 2.0f;
-//    LUnits startSpread = tenths_to_logical(m_pOctaveShift->get_start_spread()) / 2.0f;
-//    if (m_pOctaveShift->is_crescendo())
-//        startSpread = endSpread / 2.0f;
-//    else
-//        startSpread /= 2.0f;
-//
-//    //compute points
-//    m_points2[0].y = yRef - startSpread;
-//    m_points2[2].y = yRef + startSpread;
-//
-//    m_points2[1].y = yRef - endSpread;
-//    m_points2[3].y = yRef + endSpread;
+    //compute xLeft and xRight positions
+    m_points[1][0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
+                     - tenths_to_logical(10.0f);
+    m_points[1][1].x = m_pEndDirectionShape->get_left();
+
+    //determine top line of shape box
+    m_points[1][0].y = m_uStaffTopEnd;
+    if (octave_shift_at_top())
+        m_points[1][0].y -= tenths_to_logical(40.0f);   //4 lines above top staff line
+    else
+        m_points[1][0].y += tenths_to_logical(80.0f);   //4 lines bellow first staff line
+
+    m_points[1][1].y = m_points[1][0].y;
 }
 
 //---------------------------------------------------------------------------------------
@@ -315,6 +270,7 @@ void OctaveShiftEngraver::decide_placement()
 void OctaveShiftEngraver::decide_if_one_or_two_shapes()
 {
     m_fUseTwoShapes = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
+    m_numShapes = (m_fUseTwoShapes ? 2 : 1);
 }
 
 ////---------------------------------------------------------------------------------------
