@@ -40,9 +40,9 @@ namespace lomse
 //forward declarations
 class ImoOctaveShiftData;
 class ImoOctaveShift;
-class ImoDirection;
+class ImoNote;
 class GmoShapeOctaveShift;
-class GmoShapeInvisible;
+class GmoShapeNote;
 class ScoreMeter;
 class InstrumentEngraver;
 
@@ -60,10 +60,10 @@ protected:
     GmoShapeOctaveShift* m_pMainShape[2];
     LUnits m_uPrologWidth;
 
-    ImoDirection* m_pStartDirection;
-    ImoDirection* m_pEndDirection;
-    GmoShapeInvisible* m_pStartDirectionShape;
-    GmoShapeInvisible* m_pEndDirectionShape;
+    ImoNote* m_pStartNote;
+    ImoNote* m_pEndNote;
+    GmoShapeNote* m_pStartNoteShape;
+    GmoShapeNote* m_pEndNoteShape;
 
     bool m_fUseTwoShapes;
     bool m_fPlaceAtTop;

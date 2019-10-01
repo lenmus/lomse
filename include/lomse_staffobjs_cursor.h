@@ -142,7 +142,8 @@ protected:
     void save_key_signature();
     void save_time_signature();
     void save_barline();
-    void save_octave_shift(ImoDirection* pSO);
+    void save_octave_shift_at_start(ImoStaffObj* pSO);
+    void save_octave_shift_at_end(ImoStaffObj* pSO);
 
 };
 

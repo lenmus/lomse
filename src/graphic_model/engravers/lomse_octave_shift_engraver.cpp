@@ -33,6 +33,7 @@
 #include "lomse_im_note.h"
 #include "lomse_engraving_options.h"
 #include "lomse_shapes.h"
+#include "lomse_shape_note.h"
 #include "lomse_shape_octave_shift.h"
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
@@ -46,7 +47,7 @@ namespace lomse
 // OctaveShiftEngraver implementation
 //---------------------------------------------------------------------------------------
 OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           InstrumentEngraver* pInstrEngrv)
+                                         InstrumentEngraver* pInstrEngrv)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
     , m_uStaffTopStart(0.0f)
@@ -54,10 +55,10 @@ OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter*
     , m_numShapes(0)
     , m_pOctaveShift(nullptr)
     , m_uPrologWidth(0.0f)
-    , m_pStartDirection(nullptr)
-    , m_pEndDirection(nullptr)
-    , m_pStartDirectionShape(nullptr)
-    , m_pEndDirectionShape(nullptr)
+    , m_pStartNote(nullptr)
+    , m_pEndNote(nullptr)
+    , m_pStartNoteShape(nullptr)
+    , m_pEndNoteShape(nullptr)
     , m_fUseTwoShapes(false)
     , m_fPlaceAtTop(true)
 {
@@ -73,14 +74,14 @@ void OctaveShiftEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_iStaff = iStaff;
     m_pOctaveShift = static_cast<ImoOctaveShift*>(pRO);
 
-    m_pStartDirection = static_cast<ImoDirection*>(pSO);
-    m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
+    m_pStartNote = static_cast<ImoNote*>(pSO);
+    m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
     m_shapesInfo[0].iCol = iCol;
     m_shapesInfo[0].iInstr = iInstr;
     m_shapesInfo[0].iSystem = iSystem;
 
-    m_points[0][0].x = m_pStartDirectionShape->get_left();
+    m_points[0][0].x = m_pStartNoteShape->get_left();
     m_points[0][0].y = yTop;
 
     m_uStaffTopStart = yTop;
@@ -93,14 +94,14 @@ void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* 
                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
                                      LUnits yTop)
 {
-    m_pEndDirection = static_cast<ImoDirection*>(pSO);
-    m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
+    m_pEndNote = static_cast<ImoNote*>(pSO);
+    m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
     m_shapesInfo[1].iCol = iCol;
     m_shapesInfo[1].iInstr = iInstr;
     m_shapesInfo[1].iSystem = iSystem;
 
-    m_points[0][1].x = m_pEndDirectionShape->get_left();
+    m_points[0][1].x = m_pEndNoteShape->get_left();
     m_points[0][1].y = yTop;
 
     m_uStaffTopEnd = yTop;
@@ -223,13 +224,13 @@ void OctaveShiftEngraver::compute_first_shape_position()
     //compute xLeft and xRight positions
     if (two_shapes_needed())
     {
-        m_points[0][0].x = m_pStartDirectionShape->get_left();    //xLeft at Direction tag
+        m_points[0][0].x = m_pStartNoteShape->get_left();    //xLeft at Note tag
         m_points[0][1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
     }
     else
     {
-        m_points[0][0].x = m_pStartDirectionShape->get_left();
-        m_points[0][1].x = m_pEndDirectionShape->get_left();
+        m_points[0][0].x = m_pStartNoteShape->get_left();
+        m_points[0][1].x = m_pEndNoteShape->get_right();
     }
 
     //determine top line of shape box
@@ -248,7 +249,7 @@ void OctaveShiftEngraver::compute_second_shape_position()
     //compute xLeft and xRight positions
     m_points[1][0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
                      - tenths_to_logical(10.0f);
-    m_points[1][1].x = m_pEndDirectionShape->get_left();
+    m_points[1][1].x = m_pEndNoteShape->get_right();
 
     //determine top line of shape box
     m_points[1][0].y = m_uStaffTopEnd;

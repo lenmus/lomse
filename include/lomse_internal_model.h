@@ -7394,18 +7394,12 @@ public:
 class ImoOctaveShift : public ImoRelObj
 {
 protected:
-//    Tenths  m_startSpread;
-//    Tenths  m_endSpread;
-//    bool    m_fNiente;
     int     m_steps;
     int     m_octaveShiftNum;
 
     friend class ImFactory;
     ImoOctaveShift(int num=0)
         : ImoRelObj(k_imo_octave_shift)
-//        , m_startSpread(0.0f)
-//        , m_endSpread(0.0f)
-//        , m_fNiente(false)
         , m_steps(0)
         , m_octaveShiftNum(num)
     {
@@ -7415,75 +7409,65 @@ public:
     virtual ~ImoOctaveShift() {}
 
     //setters
-//    inline void set_start_spread(Tenths value) { m_startSpread = value; }
-//    inline void set_end_spread(Tenths value) { m_endSpread = value; }
-//    inline void set_niente(bool value) { m_fNiente = value; }
     inline void set_shift_steps(int value) { m_steps = value; }
     inline void set_octave_shift_number(int value) { m_octaveShiftNum = value; }
 
     //getters
-//    inline Tenths get_start_spread() { return m_startSpread; }
-//    inline Tenths get_end_spread() { return m_endSpread; }
-//    inline bool is_niente() { return m_fNiente; }
     inline int get_shift_steps() { return m_steps; }
     inline int get_octave_shift_number() { return m_octaveShiftNum; }
 
     void reorganize_after_object_deletion();
 };
 
-// raw info about a pending wedge
 //---------------------------------------------------------------------------------------
+// raw info about a pending octave-shift line
 class ImoOctaveShiftDto : public ImoSimpleObj
 {
 protected:
-//    Tenths m_spread;
-//    bool m_fNiente;
     bool m_fStart;
     int m_steps;
     int m_octaveShiftNum;
-    ImoDirection* m_pDirection;
+    ImoNote* m_pNote;
     Color m_color;
     int m_lineNum;
+    int m_iStaff;
 
 public:
     ImoOctaveShiftDto()
         : ImoSimpleObj(k_imo_octave_shift_dto)
-//        , m_spread(0.0f)
-//        , m_fNiente(false)
         , m_fStart(true)
         , m_steps(0)
         , m_octaveShiftNum(0)
-        , m_pDirection(nullptr)
+        , m_pNote(nullptr)
         , m_color(Color(0,0,0))
         , m_lineNum(0)
+        , m_iStaff(0)
     {
     }
     virtual ~ImoOctaveShiftDto() {}
 
     //setters
     inline void set_line_number(int value) { m_lineNum = value; }
-//    inline void set_spread(Tenths value) { m_spread = value; }
-//    inline void set_niente(bool value) { m_fNiente = value; }
-    inline void set_staffobj(ImoDirection* pDirection) { m_pDirection = pDirection; }
+    inline void set_staffobj(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_shift_steps(int value) { m_steps = value; }
     inline void set_start(bool value) { m_fStart = value; }
     inline void set_octave_shift_number(int value) { m_octaveShiftNum = value; }
     inline void set_color(Color value) { m_color = value; }
+    inline void set_staff(int value) { m_iStaff = value; }
 
     //getters
     inline int get_line_number() { return m_lineNum; }
-//    inline Tenths get_spread() { return m_spread; }
-//    inline bool is_niente() { return m_fNiente; }
     inline int get_shift_steps() { return m_steps; }
     inline bool is_start() { return m_fStart; }
     inline int get_octave_shift_number() { return m_octaveShiftNum; }
     inline Color get_color() { return m_color; }
+    inline int get_staff() { return m_iStaff; }
 
     //required by RelationBuilder
     inline int get_item_number() { return get_octave_shift_number(); }
     bool is_start_of_relation() { return is_start(); }
     bool is_end_of_relation() { return !is_start(); }
-    inline ImoDirection* get_staffobj() { return m_pDirection; }
+    inline ImoNote* get_staffobj() { return m_pNote; }
 };
 
 

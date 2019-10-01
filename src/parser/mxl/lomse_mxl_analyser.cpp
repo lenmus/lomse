@@ -2650,6 +2650,9 @@ public:
                 || m_childToAnalyse.name() == "accordion-registration"
                 || m_childToAnalyse.name() == "percussion"
                 || m_childToAnalyse.name() == "other-direction"
+                //
+                // spanners attached to notes instead of attaching them to ImoDirection
+                || m_childToAnalyse.name() == "octave-shift"
                )
             {
                 m_pAnalyser->analyse_node(&m_childToAnalyse, m_pAnchor);
@@ -2658,7 +2661,6 @@ public:
                      || m_childToAnalyse.name() == "dashes"
                      || m_childToAnalyse.name() == "bracket"
                      || m_childToAnalyse.name() == "pedal"
-                     || m_childToAnalyse.name() == "octave-shift"
                      || m_childToAnalyse.name() == "principal-voice"
                     )
             {
@@ -4174,6 +4176,7 @@ public:
         error_if_more_elements();
 
         add_to_model(pNR);
+        add_to_spanners(pNote);
 
         //deal with notes in chord
         if (!fIsRest && fInChord)
@@ -4459,6 +4462,12 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
+    void add_to_spanners(ImoNote* pNote)
+    {
+        m_pAnalyser->add_to_open_octave_shifts(pNote);
+    }
+
+    //----------------------------------------------------------------------------------
     void set_voice(ImoNoteRest* pNR, int voice)
     {
         m_pAnalyser->set_current_voice(voice);
@@ -4628,12 +4637,16 @@ public:
 
         if (m_pInfo1)
         {
-            m_pInfo1->set_staffobj(pDirection);
+            int iStaff = pDirection->get_staff();
+
+            m_pInfo1->set_staffobj(nullptr);
+            m_pInfo1->set_staff(iStaff);
             m_pAnalyser->add_relation_info(m_pInfo1);
 
             if (m_pInfo2)
             {
-                m_pInfo2->set_staffobj(pDirection);
+                m_pInfo2->set_staffobj(nullptr);
+                m_pInfo2->set_staff(iStaff);
                 m_pAnalyser->add_relation_info(m_pInfo2);
             }
         }
@@ -7319,6 +7332,8 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["virtual-instrument"] = k_mxl_tag_virtual_instr;
     m_NameToEnum["wedge"] = k_mxl_tag_wedge;
     m_NameToEnum["words"] = k_mxl_tag_words;
+
+    m_notes.assign(50, nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -7398,6 +7413,31 @@ void MxlAnalyser::prepare_for_new_instrument_content()
     m_maxTime = 0.0;
     save_last_barline(nullptr);
     m_measuresCounter = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::save_last_note(ImoNote* pNote)
+{
+    m_pLastNote = pNote;
+
+    int iStaff = pNote->get_staff();
+    if (m_notes.size() > size_t(iStaff))
+        m_notes[iStaff] = pNote;
+}
+
+//---------------------------------------------------------------------------------------
+ImoNote* MxlAnalyser::get_last_note_for(int iStaff)
+{
+    return m_notes[iStaff];
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::save_current_instrument(ImoInstrument* pInstr)
+{
+    m_pCurInstrument = pInstr;
+
+    int numStaves = pInstr->get_num_staves();
+    m_notes.assign( max(numStaves, 10), nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -8143,8 +8183,35 @@ void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto
     std::list<ImoOctaveShiftDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
-        ImoDirection* pDirection = (*it)->get_staffobj();
-        pDirection->include_in_relation(pDoc, pOctave, nullptr);
+        ImoNote* pNote = (*it)->get_staffobj();
+        if ((*it)->is_end_of_relation() && pNote==nullptr)
+        {
+            int iStaff = (*it)->get_staff();
+            pNote = m_pAnalyser->get_last_note_for(iStaff);
+            (*it)->set_staffobj(pNote);
+        }
+
+        pNote->include_in_relation(pDoc, pOctave, nullptr);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void MxlOctaveShiftBuilder::add_to_open_octave_shifts(ImoNote* pNote)
+{
+    if (m_pendingItems.size() > 0)
+    {
+        ListIterator it;
+        for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
+        {
+            ImoOctaveShiftDto* pInfo = *it;
+            if (pInfo->is_start_of_relation()
+                && pInfo->get_staffobj() == nullptr
+                && pInfo->get_staff() == pNote->get_staff()
+               )
+            {
+                pInfo->set_staffobj(pNote);
+            }
+        }
     }
 }
 

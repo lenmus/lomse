@@ -3175,7 +3175,7 @@ SUITE(MxlAnalyserTest)
                 CHECK( pMD != nullptr );
 
                 ImoObj::children_iterator it = pMD->begin();
-                CHECK( pMD->get_num_children() == 4 );
+                CHECK( pMD->get_num_children() == 2 );
 
 //                cout << test_name() << endl;
 //                cout << "num.children=" << pMD->get_num_children() << endl;
@@ -3186,15 +3186,12 @@ SUITE(MxlAnalyserTest)
 //                }
 //                it = pMD->begin();
 
-                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
-                CHECK( pDir != nullptr );
-                if (pDir)
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
                 {
-                    CHECK( pDir->get_num_attachments() == 0 );
-                    CHECK( pDir->get_placement() == k_placement_default );
-
                     ImoOctaveShift* pOctave = dynamic_cast<ImoOctaveShift*>(
-                                                    pDir->find_relation(k_imo_octave_shift) );
+                                                    pNote->find_relation(k_imo_octave_shift) );
                     CHECK( pOctave != nullptr );
                     if (pOctave)
                     {
@@ -3230,6 +3227,9 @@ SUITE(MxlAnalyserTest)
             "<note><pitch><step>G</step><octave>5</octave></pitch>"
                 "<duration>4</duration><type>16th</type>"
             "</note>"
+            "<note><pitch><step>E</step><octave>5</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
             "<direction><direction-type>"
                 "<octave-shift type='stop'/>"
             "</direction-type></direction>"
@@ -3244,6 +3244,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
+
         CHECK( pRoot != nullptr);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         if (pDoc)
@@ -3257,7 +3258,7 @@ SUITE(MxlAnalyserTest)
                 CHECK( pMD != nullptr );
 
                 ImoObj::children_iterator it = pMD->begin();
-                CHECK( pMD->get_num_children() == 4 );
+                CHECK( pMD->get_num_children() == 3 );
 
 //                cout << test_name() << endl;
 //                cout << "num.children=" << pMD->get_num_children() << endl;
@@ -3268,15 +3269,12 @@ SUITE(MxlAnalyserTest)
 //                }
 //                it = pMD->begin();
 
-                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
-                CHECK( pDir != nullptr );
-                if (pDir)
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
                 {
-                    CHECK( pDir->get_num_attachments() == 0 );
-                    CHECK( pDir->get_placement() == k_placement_default );
-
                     ImoOctaveShift* pOctave = dynamic_cast<ImoOctaveShift*>(
-                                                    pDir->find_relation(k_imo_octave_shift) );
+                                                    pNote->find_relation(k_imo_octave_shift) );
                     CHECK( pOctave != nullptr );
                     if (pOctave)
                     {

@@ -163,6 +163,7 @@ public:
     virtual ~MxlOctaveShiftBuilder() {}
 
     void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo);
+    void add_to_open_octave_shifts(ImoNote* pNote);
 };
 
 
@@ -290,6 +291,8 @@ protected:
     string          m_curMeasureNum;    //Num of measure being analysed
     int             m_measuresCounter;  //counter for measures in current instrument
 
+    vector<ImoNote*> m_notes;           //last note for each staff
+
     //inherited values
 //    int m_curStaff;
     int m_curVoice;
@@ -366,8 +369,9 @@ public:
 //    inline void set_current_show_tuplet_number(int value) { m_nShowTupletNumber = value; }
 //    inline int get_current_show_tuplet_number() { return m_nShowTupletNumber; }
 
-    inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
+    void save_last_note(ImoNote* pNote);
     inline ImoNote* get_last_note() { return m_pLastNote; }
+    ImoNote* get_last_note_for(int iStaff);
 
     //last barline added to current instrument
     inline void save_last_barline(ImoBarline* pBarline) { m_pLastBarline = pBarline; }
@@ -378,7 +382,7 @@ public:
     inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
 
     //access to instrument being analysed
-    inline void save_current_instrument(ImoInstrument* pInstr) { m_pCurInstrument = pInstr; }
+    void save_current_instrument(ImoInstrument* pInstr);
     inline ImoInstrument* get_current_instrument() { return m_pCurInstrument; }
 
     //access to document being analysed
@@ -443,6 +447,11 @@ public:
     inline void get_factors_from_nested_tuplets(int* pTop, int* pBottom)
     {
         m_pTupletsBuilder->get_factors_from_nested_tuplets(pTop, pBottom);
+    }
+
+    //interface for MxlOctaveShiftBuilder
+    inline void add_to_open_octave_shifts(ImoNote* pNote) {
+        m_pOctaveShiftBuilder->add_to_open_octave_shifts(pNote);
     }
 
     //information for reporting errors

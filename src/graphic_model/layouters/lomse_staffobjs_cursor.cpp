@@ -83,10 +83,17 @@ void StaffObjsCursor::move_next()
         save_time_signature();
     else if (pSO->is_barline())
         save_barline();
-    else if (pSO->is_direction())
-        save_octave_shift( static_cast<ImoDirection*>(pSO) );
+    else if (pSO->is_note())
+        save_octave_shift_at_end( static_cast<ImoStaffObj*>(pSO) );
 
     ++m_scoreIt;
+
+    if (!is_end())
+    {
+        pSO = imo_object();
+        if (pSO && pSO->is_note())
+            save_octave_shift_at_start( static_cast<ImoStaffObj*>(pSO) );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -98,9 +105,35 @@ void StaffObjsCursor::save_clef()
 }
 
 //---------------------------------------------------------------------------------------
-void StaffObjsCursor::save_octave_shift(ImoDirection* pSO)
+void StaffObjsCursor::save_octave_shift_at_end(ImoStaffObj* pSO)
+{
+    if (pSO->get_num_relations() > 0)
+    {
+        ImoRelations* pRelObjs = pSO->get_relations();
+        list<ImoRelObj*>& relObjs = pRelObjs->get_relations();
+        list<ImoRelObj*>::iterator it;
+        for(it = relObjs.begin(); it != relObjs.end(); ++it)
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>(*it);
+
+            if (pRO->is_octave_shift())
+            {
+		        if (pSO == pRO->get_end_object())
+		        {
+                    int idx = m_staffIndex[num_instrument()] + staff();
+                    m_octave_shifts[idx] = 0;
+                    break;
+		        }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void StaffObjsCursor::save_octave_shift_at_start(ImoStaffObj* pSO)
 {
     int steps = 0;
+    bool fOctaveShift = false;
     if (pSO->get_num_relations() > 0)
     {
         ImoRelations* pRelObjs = pSO->get_relations();
@@ -113,13 +146,19 @@ void StaffObjsCursor::save_octave_shift(ImoDirection* pSO)
             if (pRO->is_octave_shift())
             {
 		        if (pSO == pRO->get_start_object())
+		        {
+                    fOctaveShift = true;
 		            steps = static_cast<ImoOctaveShift*>(pRO)->get_shift_steps();
+		        }
             }
         }
     }
 
-    int idx = m_staffIndex[num_instrument()] + staff();
-    m_octave_shifts[idx] = steps;
+    if (fOctaveShift)
+    {
+        int idx = m_staffIndex[num_instrument()] + staff();
+        m_octave_shifts[idx] = steps;
+    }
 }
 
 //---------------------------------------------------------------------------------------
