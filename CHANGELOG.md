@@ -10,6 +10,7 @@
 
 ##### COMPATIBLE CHANGES
 
+- Added support to render octave-shift lines. MusicXML importer now also imports them.
 - Added support to render crescendo/diminuendo wedges (hairpins). The MusicXML importer
   now also imports the wedges.
 - Added methods in `Interactor` to add/remove visual application markings. Created the

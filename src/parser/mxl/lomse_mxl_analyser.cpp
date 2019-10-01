@@ -8163,6 +8163,7 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
 void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto)
 {
     ImoOctaveShiftDto* pStartDto = m_matches.front();
+    ImoNote* pStartNote = pStartDto->get_staffobj();
     m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
@@ -8189,9 +8190,11 @@ void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto
             int iStaff = (*it)->get_staff();
             pNote = m_pAnalyser->get_last_note_for(iStaff);
             (*it)->set_staffobj(pNote);
+            if (pStartNote != pNote)
+                pNote->include_in_relation(pDoc, pOctave, nullptr);
         }
-
-        pNote->include_in_relation(pDoc, pOctave, nullptr);
+        else
+            pNote->include_in_relation(pDoc, pOctave, nullptr);
     }
 }
 
