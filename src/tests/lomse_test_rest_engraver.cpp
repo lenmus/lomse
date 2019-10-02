@@ -40,7 +40,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;
@@ -77,7 +77,7 @@ SUITE(RestEngraverTest)
         pRest->set_dots(0);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
-        ShapesStorage storage;
+        EngraversMap storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,
@@ -101,7 +101,7 @@ SUITE(RestEngraverTest)
         pRest->set_dots(1);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
-        ShapesStorage storage;
+        EngraversMap storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
             dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest,

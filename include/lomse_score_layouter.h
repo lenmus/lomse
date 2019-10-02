@@ -35,7 +35,7 @@
 #include "lomse_injectors.h"
 #include "lomse_score_enums.h"
 #include "lomse_logger.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_spacing_algorithm.h"
 
 #include <vector>
@@ -134,7 +134,7 @@ protected:
     ImoScore*       m_pScore;
     ScoreMeter*     m_pScoreMeter;
     SpacingAlgorithm* m_pSpAlgorithm;
-    ShapesStorage   m_shapesStorage;
+    EngraversMap    m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
     UPoint          m_cursor;
@@ -328,13 +328,13 @@ class ShapesCreator
 protected:
     LibraryScope& m_libraryScope;
     ScoreMeter* m_pScoreMeter;
-    ShapesStorage& m_shapesStorage;
+    EngraversMap& m_engravers;
     PartsEngraver* m_pPartsEngraver;
     map<string, LyricEngraver*> m_lyricEngravers;
 
 public:
     ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                  ShapesStorage& shapesStorage, PartsEngraver* pPartsEngraver);
+                  EngraversMap& engravers, PartsEngraver* pPartsEngraver);
     ~ShapesCreator() {}
 
     enum {k_flag_small_clef=0x01, };

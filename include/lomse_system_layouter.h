@@ -60,7 +60,7 @@ class PartsEngraver;
 class ScoreLayouter;
 class ScoreMeter;
 class ShapesCreator;
-class ShapesStorage;
+class EngraversMap;
 class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
@@ -75,7 +75,7 @@ protected:
     LibraryScope&   m_libraryScope;
     ScoreMeter*     m_pScoreMeter;
     ImoScore*       m_pScore;
-    ShapesStorage&  m_shapesStorage;
+    EngraversMap&  m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
 
@@ -100,7 +100,7 @@ protected:
 public:
     SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& libraryScope,
                    ScoreMeter* pScoreMeter, ImoScore* pScore,
-                   ShapesStorage& shapesStorage,
+                   EngraversMap& engravers,
                    ShapesCreator* pShapesCreator,
                    PartsEngraver* pPartsEngraver,
                    SpacingAlgorithm* pSpAlgorithm);
@@ -138,7 +138,7 @@ protected:
     void engrave_instrument_details();
     void truncate_current_system(LUnits indent);
     void add_column_to_system(int iCol);
-    void add_shapes_for_column(int iCol, ShapesStorage* pStorage);
+    void add_shapes_for_column(int iCol);
     bool system_must_be_justified();
     void add_initial_line_joining_all_staves_in_system();
     void reposition_slices_and_staffobjs();

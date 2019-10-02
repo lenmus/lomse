@@ -27,36 +27,36 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_SHAPES_STORAGE_H__        //to avoid nested includes
-#define __LOMSE_SHAPES_STORAGE_H__
+#ifndef __LOMSE_ENGRAVERS_MAP_H__        //to avoid nested includes
+#define __LOMSE_ENGRAVERS_MAP_H__
 
 #include "lomse_basic.h"
+
 #include <map>
-#include <list>
 using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
-class GmoShape;
-class GmoBox;
 class Engraver;
 class ImoObj;
 
 
-// helper class to store shapes under construction and its engravers
 //---------------------------------------------------------------------------------------
-class ShapesStorage
+// Helper class to store the engravers for shapes under construction so that they can
+//  later be retrieved.
+//  It is used when the shap creation process involves two or more ImoStaffObj objects.
+//  This is the case, for example, of lyrics, chords, ImoRelObj and ImoAuxRelObj.
+class EngraversMap
 {
 protected:
-	std::map<ImoObj*, Engraver*> m_engravers;
-	std::map<string, Engraver*> m_engravers2;
-	std::list< pair<GmoShape*, int> > m_readyShapes;
+	std::map<ImoObj*, Engraver*> m_engravers;   //engraver for an ImoObj
+	std::map<string, Engraver*> m_engravers2;   //engraver for a tag (for lyrics)
 
 public:
-    ShapesStorage() {}
-    ~ShapesStorage();
+    EngraversMap() {}
+    ~EngraversMap() {}
 
     //engravers
     inline void save_engraver(Engraver* pEngrv, ImoObj* pImo) {
@@ -70,10 +70,6 @@ public:
     inline void remove_engraver(ImoObj* pImo) { m_engravers.erase(pImo); }
     inline void remove_engraver(const string& tag) { m_engravers2.erase(tag); }
 
-    //final shapes
-    void add_ready_shapes_to_model(GmoBox* pBox);
-    void delete_ready_shapes();
-
     //suppor for debug and unit tests
     void delete_engravers();
 
@@ -82,5 +78,5 @@ public:
 
 }   //namespace lomse
 
-#endif    // __LOMSE_SHAPES_STORAGE_H__
+#endif    // __LOMSE_ENGRAVERS_MAP_H__
 

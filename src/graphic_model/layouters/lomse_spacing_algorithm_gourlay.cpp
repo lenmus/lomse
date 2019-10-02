@@ -59,10 +59,10 @@ namespace lomse
 SpAlgGourlay::SpAlgGourlay(LibraryScope& libraryScope,
                                        ScoreMeter* pScoreMeter,
                                        ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                                       ShapesStorage& shapesStorage,
+                                       EngraversMap& engravers,
                                        ShapesCreator* pShapesCreator,
                                        PartsEngraver* pPartsEngraver)
-    : SpAlgColumn(libraryScope, pScoreMeter, pScoreLyt, pScore, shapesStorage,
+    : SpAlgColumn(libraryScope, pScoreMeter, pScoreLyt, pScore, engravers,
                   pShapesCreator, pPartsEngraver)
     , m_pCurSlice(nullptr)
     , m_pLastEntry(nullptr)

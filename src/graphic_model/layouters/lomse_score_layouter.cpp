@@ -229,10 +229,10 @@ void ScoreLayouter::initialice_score_layouter()
     create_parts_engraver();
 
     m_pShapesCreator = LOMSE_NEW ShapesCreator(m_libraryScope, m_pScoreMeter,
-                                               m_shapesStorage, m_pPartsEngraver);
+                                               m_engravers, m_pPartsEngraver);
 
     m_pSpAlgorithm = LOMSE_NEW SpAlgGourlay(m_libraryScope, m_pScoreMeter,
-                                            this, m_pScore, m_shapesStorage,
+                                            this, m_pScore, m_engravers,
                                             m_pShapesCreator, m_pPartsEngraver);
 
     get_score_renderization_options();
@@ -296,7 +296,7 @@ void ScoreLayouter::delete_system()
 void ScoreLayouter::create_system_layouter()
 {
     m_pCurSysLyt = LOMSE_NEW SystemLayouter(this, m_libraryScope, m_pScoreMeter,
-                                      m_pScore, m_shapesStorage, m_pShapesCreator,
+                                      m_pScore, m_engravers, m_pShapesCreator,
                                       m_pPartsEngraver, m_pSpAlgorithm);
     m_pCurSysLyt->set_constrains(m_constrains);
     m_sysLayouters.push_back(m_pCurSysLyt);
@@ -674,13 +674,12 @@ void ScoreLayouter::delete_not_used_objects()
 
     //not used shapes
     for (int iCol = 0; iCol < get_num_columns(); ++iCol)
-        //m_pSpAlgorithm->delete_box_and_shapes(iCol, &m_shapesStorage);
+        //m_pSpAlgorithm->delete_box_and_shapes(iCol, &m_engravers);
         m_pSpAlgorithm->delete_box_and_shapes(iCol);
-    m_shapesStorage.delete_ready_shapes();
 
 
     //not used engravers
-    m_shapesStorage.delete_engravers();
+    m_engravers.delete_engravers();
 
     //system boxes
     std::vector<SystemLayouter*>::iterator it;
@@ -984,10 +983,10 @@ public:
 
 //---------------------------------------------------------------------------------------
 ShapesCreator::ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                             ShapesStorage& shapesStorage, PartsEngraver* pPartsEngraver)
+                             EngraversMap& engravers, PartsEngraver* pPartsEngraver)
     : m_libraryScope(libraryScope)
     , m_pScoreMeter(pScoreMeter)
-    , m_shapesStorage(shapesStorage)
+    , m_engravers(engravers)
     , m_pPartsEngraver(pPartsEngraver)
 {
 }
@@ -1036,7 +1035,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         case k_imo_note:
         {
             ImoNote* pImo = static_cast<ImoNote*>(pSO);
-            NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
+            NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_engravers,
                                iInstr, iStaff);
             Color color = pImo->get_color();
             GmoShape* pShape = engrv.create_shape(pImo, clefType, octaveShift, pos, color);
@@ -1058,7 +1057,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             }
             else
             {
-                RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
+                RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_engravers,
                                    iInstr, iStaff);
                 Color color = pImo->get_color();
                 return engrv.create_shape(pImo, pos, color);
@@ -1259,7 +1258,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
         LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
         pEngrv->set_start_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff,
                                    iSystem, iCol, xLeft, xRight, yTop);
-        m_shapesStorage.save_engraver(pEngrv, pRO);
+        m_engravers.save_engraver(pEngrv, pRO);
     }
 }
 
@@ -1277,7 +1276,7 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
     LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
 
     RelObjEngraver* pEngrv
-        = static_cast<RelObjEngraver*>(m_shapesStorage.get_engraver(pRO));
+        = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
     pEngrv->set_middle_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
                                 xLeft, xRight, yTop);
 }
@@ -1297,7 +1296,7 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
     LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
 
     RelObjEngraver* pEngrv
-        = static_cast<RelObjEngraver*>(m_shapesStorage.get_engraver(pRO));
+        = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
     pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
                              xLeft, xRight, yTop);
     pEngrv->set_prolog_width( prologWidth );
@@ -1336,7 +1335,7 @@ void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* p
         LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
         pEngrv->set_start_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff,
                                    iSystem, iCol, xLeft, xRight, yTop);
-        m_shapesStorage.save_engraver(pEngrv, tag);
+        m_engravers.save_engraver(pEngrv, tag);
     }
 }
 
@@ -1353,7 +1352,7 @@ void ShapesCreator::continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj
     LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
 
     AuxRelObjEngraver* pEngrv
-        = static_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
+        = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
     pEngrv->set_middle_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
                                 xLeft, xRight, yTop);
 }
@@ -1372,7 +1371,7 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
     LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
 
     AuxRelObjEngraver* pEngrv
-        = static_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
+        = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
     pEngrv->set_end_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
                              xLeft, xRight, yTop);
     pEngrv->set_prolog_width( prologWidth );

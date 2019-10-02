@@ -36,7 +36,7 @@
 #include "lomse_im_note.h"
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_logger.h"
 #include "lomse_shape_barline.h"
 #include "lomse_score_layouter.h"
@@ -68,7 +68,7 @@ namespace lomse
 //=======================================================================================
 SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& libraryScope,
                                ScoreMeter* pScoreMeter, ImoScore* pScore,
-                               ShapesStorage& shapesStorage,
+                               EngraversMap& engravers,
                                ShapesCreator* pShapesCreator,
                                PartsEngraver* pPartsEngraver,
                                SpacingAlgorithm* pSpAlgorithm)
@@ -76,7 +76,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_libraryScope(libraryScope)
     , m_pScoreMeter(pScoreMeter)
     , m_pScore(pScore)
-    , m_shapesStorage(shapesStorage)
+    , m_engravers(engravers)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
     , m_uPrologWidth(0.0f)
@@ -294,7 +294,7 @@ void SystemLayouter::add_column_to_system(int iCol)
     LUnits size = determine_column_size(iCol);
 
     create_boxes_for_column(iCol, m_pagePos.x, size);
-    add_shapes_for_column(iCol, &m_shapesStorage);
+    add_shapes_for_column(iCol);
 
     m_uFreeSpace -= size;
     m_pagePos.x += size;
@@ -416,9 +416,9 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_shapes_for_column(int iCol, ShapesStorage* pStorage)
+void SystemLayouter::add_shapes_for_column(int iCol)
 {
-    m_pSpAlgorithm->add_shapes_to_boxes(iCol, pStorage);
+    m_pSpAlgorithm->add_shapes_to_boxes(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -755,7 +755,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
 {
     RelObjEngraver* pEngrv
-        = dynamic_cast<RelObjEngraver*>(m_shapesStorage.get_engraver(pAO));
+        = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pAO));
 
     if (pEngrv == nullptr)
     {
@@ -772,7 +772,7 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
             add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
    }
 
-    m_shapesStorage.remove_engraver(pAO);
+    m_engravers.remove_engraver(pAO);
     delete pEngrv;
 }
 
@@ -780,7 +780,7 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
 void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer)
 {
     AuxRelObjEngraver* pEngrv
-        = static_cast<AuxRelObjEngraver*>(m_shapesStorage.get_engraver(tag));
+        = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
 
     int numShapes = pEngrv->get_num_shapes();
     for (int i=0; i < numShapes; ++i)
@@ -791,7 +791,7 @@ void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer
             add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
    }
 
-    m_shapesStorage.remove_engraver(tag);
+    m_engravers.remove_engraver(tag);
     delete pEngrv;
 }
 

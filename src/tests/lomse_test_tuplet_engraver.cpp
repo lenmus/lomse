@@ -43,7 +43,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_shape_tuplet.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_im_factory.h"
 
@@ -59,7 +59,7 @@ public:
     LibraryScope    m_libraryScope;
     ImoScore*       m_pScore;
     ScoreMeter*     m_pMeter;
-    ShapesStorage*  m_pStorage;
+    EngraversMap*  m_pStorage;
     NoteEngraver*   m_pNoteEngrv;
     RestEngraver*   m_pRestEngrv;
     TupletEngraver* m_pTupletEngrv;
@@ -109,7 +109,7 @@ public:
 
         m_shapes.reserve(numNotes);
         m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, 180.0f);
-        m_pStorage = LOMSE_NEW ShapesStorage();
+        m_pStorage = LOMSE_NEW EngraversMap();
 
         //engrave notes/rests
         list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;

@@ -41,7 +41,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_im_factory.h"
 
 #include <cmath>
@@ -127,7 +127,7 @@ public:
             m_pNote3 = nullptr;
 
         m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, 180.0f);
-        m_pStorage = LOMSE_NEW ShapesStorage();
+        m_pStorage = LOMSE_NEW EngraversMap();
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
             dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, k_clef_G2, 0, UPoint(10.0f, 15.0f)) );
@@ -197,7 +197,7 @@ public:
     GmoShapeNote* m_pShape1;
     GmoShapeNote* m_pShape2;
     GmoShapeNote* m_pShape3;
-    ShapesStorage* m_pStorage;
+    EngraversMap* m_pStorage;
     MyChordEngraver* m_pChordEngrv;
     Document* m_pDoc;
 

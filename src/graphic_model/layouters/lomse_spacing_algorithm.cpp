@@ -53,14 +53,14 @@ namespace lomse
 //=====================================================================================
 SpacingAlgorithm::SpacingAlgorithm(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                                    ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                                   ShapesStorage& shapesStorage,
+                                   EngraversMap& engravers,
                                    ShapesCreator* pShapesCreator,
                                    PartsEngraver* pPartsEngraver)
     : m_libraryScope(libraryScope)
     , m_pScoreMeter(pScoreMeter)
     , m_pScoreLyt(pScoreLyt)
     , m_pScore(pScore)
-    , m_shapesStorage(shapesStorage)
+    , m_engravers(engravers)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
 {
@@ -77,15 +77,15 @@ SpacingAlgorithm::~SpacingAlgorithm()
 //=====================================================================================
 SpAlgColumn::SpAlgColumn(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                          ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                         ShapesStorage& shapesStorage,
+                         EngraversMap& engravers,
                          ShapesCreator* pShapesCreator,
                          PartsEngraver* pPartsEngraver)
-    :SpacingAlgorithm(libraryScope, pScoreMeter, pScoreLyt, pScore, shapesStorage,
+    :SpacingAlgorithm(libraryScope, pScoreMeter, pScoreLyt, pScore, engravers,
                       pShapesCreator, pPartsEngraver)
     , m_pColsBuilder(nullptr)
 {
     m_pColsBuilder = LOMSE_NEW ColumnsBuilder(m_pScoreMeter, m_colsData,
-                     m_pScoreLyt, m_pScore, m_shapesStorage,
+                     m_pScoreLyt, m_pScore, m_engravers,
                      m_pShapesCreator,
                      m_pPartsEngraver, this);
 }
@@ -115,9 +115,9 @@ LUnits SpAlgColumn::get_staves_height()
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgColumn::add_shapes_to_boxes(int iCol, ShapesStorage* pStorage)
+void SpAlgColumn::add_shapes_to_boxes(int iCol)
 {
-    m_pColsBuilder->add_shapes_to_boxes(iCol, pStorage);
+    m_pColsBuilder->add_shapes_to_boxes(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -246,14 +246,14 @@ void SpAlgColumn::set_trace_level(int iColumnToTrace, int nTraceLevel)
 //=======================================================================================
 ColumnsBuilder::ColumnsBuilder(ScoreMeter* pScoreMeter, vector<ColumnData*>& colsData,
                                ScoreLayouter* pScoreLyt, ImoScore* m_pScore,
-                               ShapesStorage& shapesStorage,
+                               EngraversMap& engravers,
                                ShapesCreator* pShapesCreator,
                                PartsEngraver* pPartsEngraver,
                                SpAlgColumn* pSpAlgorithm)
     : m_pScoreMeter(pScoreMeter)
     , m_pScoreLyt(pScoreLyt)
     , m_pScore(m_pScore)
-    , m_shapesStorage(shapesStorage)
+    , m_engravers(engravers)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
     , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
@@ -625,9 +625,9 @@ bool ColumnsBuilder::determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnsBuilder::add_shapes_to_boxes(int iCol, ShapesStorage* pStorage)
+void ColumnsBuilder::add_shapes_to_boxes(int iCol)
 {
-    m_colsData[iCol]->add_shapes_to_boxes(iCol, pStorage);
+    m_colsData[iCol]->add_shapes_to_boxes(iCol);
 }
 
 //---------------------------------------------------------------------------------------
@@ -679,12 +679,11 @@ GmoBoxSliceInstr* ColumnData::create_slice_instr(ImoInstrument* pInstr, LUnits y
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnData::add_shapes_to_boxes(int iCol, ShapesStorage* pStorage)
+void ColumnData::add_shapes_to_boxes(int iCol)
 {
     for (int iInstr=0; iInstr < int(m_sliceInstrBoxes.size()); ++iInstr)
     {
         m_pSpAlgorithm->add_shapes_to_box(iCol, m_sliceInstrBoxes[iInstr], iInstr);
-        pStorage->add_ready_shapes_to_model( m_sliceInstrBoxes[iInstr] );
     }
 }
 

@@ -27,10 +27,8 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 
-#include "lomse_gm_basic.h"
-#include "lomse_shape_beam.h"
 #include "lomse_engraver.h"
 #include "lomse_internal_model.h"
 
@@ -39,35 +37,9 @@ namespace lomse
 {
 
 //=======================================================================================
-// ShapesStorage implementation
+// EngraversMap implementation
 //=======================================================================================
-ShapesStorage::~ShapesStorage()
-{
-	delete_ready_shapes();
-}
-
-//---------------------------------------------------------------------------------------
-void ShapesStorage::add_ready_shapes_to_model(GmoBox* pBox)
-{
-	std::list< pair<GmoShape*, int> >::iterator it;
-    for (it = m_readyShapes.begin(); it != m_readyShapes.end(); ++it)
-        pBox->add_shape(it->first, it->second);
-
-    m_readyShapes.clear();
-}
-
-//---------------------------------------------------------------------------------------
-void ShapesStorage::delete_ready_shapes()
-{
-	std::list< pair<GmoShape*, int> >::iterator it;
-    for (it = m_readyShapes.begin(); it != m_readyShapes.end(); ++it)
-        delete it->first;
-
-    m_readyShapes.clear();
-}
-
-//---------------------------------------------------------------------------------------
-Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
+Engraver* EngraversMap::get_engraver(ImoObj* pImo)
 {
     map<ImoObj*, Engraver*>::const_iterator it = m_engravers.find(pImo);
     if (it !=  m_engravers.end())
@@ -77,7 +49,7 @@ Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-Engraver* ShapesStorage::get_engraver(const string& tag)
+Engraver* EngraversMap::get_engraver(const string& tag)
 {
     map<string, Engraver*>::const_iterator it = m_engravers2.find(tag);
     if (it !=  m_engravers2.end())
@@ -87,7 +59,7 @@ Engraver* ShapesStorage::get_engraver(const string& tag)
 }
 
 //---------------------------------------------------------------------------------------
-void ShapesStorage::delete_engravers()
+void EngraversMap::delete_engravers()
 {
 	std::map<ImoObj*, Engraver*>::const_iterator it;
     for (it = m_engravers.begin(); it != m_engravers.end(); ++it)
