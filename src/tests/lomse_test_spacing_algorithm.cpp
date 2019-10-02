@@ -72,9 +72,9 @@ class MySpAlgGourlay : public SpAlgGourlay
 public:
     MySpAlgGourlay(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                    ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                   ShapesStorage& shapesStorage, ShapesCreator* pShapesCreator,
+                   EngraversMap& engravers, ShapesCreator* pShapesCreator,
                    PartsEngraver* pPartsEngraver)
-        : SpAlgGourlay(libraryScope, pScoreMeter, pScoreLyt, pScore, shapesStorage,
+        : SpAlgGourlay(libraryScope, pScoreMeter, pScoreLyt, pScore, engravers,
                        pShapesCreator, pPartsEngraver)
     {
     }

@@ -47,7 +47,7 @@ class GmoShapeStem;
 class GmoShapeAccidentals;
 class GmoShapeFlag;
 class ScoreMeter;
-class ShapesStorage;
+class EngraversMap;
 class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
@@ -57,11 +57,11 @@ protected:
     ImoNote* m_pNote;
     int m_clefType;
     int m_octaveShift;
-    ShapesStorage* m_pShapesStorage;
+    EngraversMap* m_pEngravers;
 
 public:
     NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ShapesStorage* pShapesStorage, int iInstr, int iStaff);
+                 EngraversMap* pEngravers, int iInstr, int iStaff);
     virtual ~NoteEngraver() {}
 
     GmoShape* create_shape(ImoNote* pNote, int clefType, int octaveShift, UPoint uPos,

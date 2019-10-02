@@ -45,7 +45,7 @@
 #include "lomse_beam_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_tuplet_engraver.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_accidentals_engraver.h"
 
 using namespace std;
@@ -57,9 +57,9 @@ namespace lomse
 // NoterestEngraver implementation
 //=======================================================================================
 NoterestEngraver::NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ShapesStorage* pShapesStorage, int iInstr, int iStaff)
+                           EngraversMap* pEngravers, int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
-    , m_pShapesStorage(pShapesStorage)
+    , m_pEngravers(pEngravers)
     , m_pNoteRest(nullptr)
     , m_pNoteRestShape(nullptr)
     , m_pStartBeamShape(nullptr)

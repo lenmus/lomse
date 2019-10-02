@@ -39,7 +39,7 @@
 #include "lomse_shapes.h"
 #include "lomse_pitch.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_accidentals_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_internal_model.h"
@@ -53,12 +53,12 @@ namespace lomse
 // NoteEngraver implementation
 //=======================================================================================
 NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ShapesStorage* pShapesStorage, int iInstr, int iStaff)
+                           EngraversMap* pEngravers, int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pNote(nullptr)
     , m_clefType(k_clef_undefined)
     , m_octaveShift(0)
-    , m_pShapesStorage(pShapesStorage)
+    , m_pEngravers(pEngravers)
     , m_fStemDown(false)
     , m_nPosOnStaff(0)
     , m_uyStaffTopLine(0.0f)
@@ -517,7 +517,7 @@ void NoteEngraver::add_to_chord_if_in_chord()
     {
         ImoChord* pChord = m_pNote->get_chord();
         ChordEngraver* pEngrv
-            = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+            = dynamic_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
 
         if (!pEngrv)
             create_chord();
@@ -535,7 +535,7 @@ void NoteEngraver::create_chord()
     int numNotes = pChord->get_num_objects();
     ChordEngraver* pEngrv =
         LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
-    m_pShapesStorage->save_engraver(pEngrv, pChord);
+    m_pEngravers->save_engraver(pEngrv, pChord);
 
     pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
                                0, 0, 0.0f, 0.0f, 0.0f);
@@ -546,7 +546,7 @@ void NoteEngraver::add_to_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
-        = static_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+        = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
 
     pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
                                 0.0f, 0.0f, 0.0f);
@@ -557,13 +557,13 @@ void NoteEngraver::layout_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
-        = static_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+        = static_cast<ChordEngraver*>(m_pEngravers->get_engraver(pChord));
     pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
                              0.0f, 0.0f, 0.0f);
 
     pEngrv->create_shapes(pChord->get_color());
 
-    m_pShapesStorage->remove_engraver(pChord);
+    m_pEngravers->remove_engraver(pChord);
     delete pEngrv;
 }
 

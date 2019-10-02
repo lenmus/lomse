@@ -42,7 +42,7 @@
 #include "lomse_im_note.h"
 #include "lomse_note_engraver.h"
 #include "lomse_score_meter.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_document.h"
 #include "lomse_im_factory.h"
 
@@ -104,7 +104,7 @@ SUITE(GmoShapeTest)
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
-        ShapesStorage storage;
+        EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
@@ -124,7 +124,7 @@ SUITE(GmoShapeTest)
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
-        ShapesStorage storage;
+        EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );
@@ -160,7 +160,7 @@ SUITE(GmoShapeTest)
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(nullptr, 1, 1, 180.0f);
-        ShapesStorage storage;
+        EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
             dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, 0, UPoint(10.0f, 15.0f)) );

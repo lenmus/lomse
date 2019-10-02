@@ -33,7 +33,7 @@
 #include "lomse_engraving_options.h"
 #include "lomse_glyphs.h"
 #include "lomse_shape_note.h"
-#include "lomse_shapes_storage.h"
+#include "lomse_engravers_map.h"
 #include "lomse_score_meter.h"
 #include "lomse_beam_engraver.h"
 #include "lomse_shape_beam.h"
@@ -46,7 +46,7 @@ namespace lomse
 // RestEngraver implementation
 //---------------------------------------------------------------------------------------
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ShapesStorage* UNUSED(pShapesStorage), int iInstr, int iStaff)
+                           EngraversMap* UNUSED(pEngravers), int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_restType(k_quarter)
     , m_numDots(0)

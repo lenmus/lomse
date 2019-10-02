@@ -42,7 +42,7 @@ class ImoRest;
 class GmoShapeRest;
 class GmoShapeRestGlyph;
 class ScoreMeter;
-class ShapesStorage;
+class EngraversMap;
 class GmoShapeBeam;
 class VoiceRelatedShape;
 
@@ -58,7 +58,7 @@ protected:
 
 public:
     RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ShapesStorage* pShapesStorage, int iInstr, int iStaff);
+                 EngraversMap* pEngravers, int iInstr, int iStaff);
     ~RestEngraver() {}
 
     GmoShapeRest* create_shape(ImoRest* pRest, UPoint uPos, Color color=Color(0,0,0));

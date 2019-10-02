@@ -44,7 +44,7 @@ class FontStorage;
 class GmoShapeBeam;
 class GmoShapeTuplet;
 class ScoreMeter;
-class ShapesStorage;
+class EngraversMap;
 class BeamEngraver;
 class TupletEngraver;
 
@@ -52,7 +52,7 @@ class TupletEngraver;
 class NoterestEngraver : public Engraver
 {
 protected:
-    ShapesStorage* m_pShapesStorage;
+    EngraversMap* m_pEngravers;
     LUnits m_lineSpacing;
     Color m_color;
     double m_fontSize;
@@ -65,7 +65,7 @@ public:
 
 protected:
     NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ShapesStorage* pShapesStorage, int iInstr, int iStaff);
+                 EngraversMap* pEngravers, int iInstr, int iStaff);
 
 //    void layout_tuplet();
 

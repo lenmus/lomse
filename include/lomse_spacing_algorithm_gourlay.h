@@ -44,7 +44,7 @@ class ImoScore;
 class ScoreMeter;
 class LibraryScope;
 class ScoreLayouter;
-class ShapesStorage;
+class EngraversMap;
 class ShapesCreator;
 class PartsEngraver;
 class GmoBoxSlice;
@@ -103,7 +103,7 @@ protected:
 public:
     SpAlgGourlay(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ScoreLayouter* pScoreLyt, ImoScore* pScore,
-                 ShapesStorage& shapesStorage, ShapesCreator* pShapesCreator,
+                 EngraversMap& engravers, ShapesCreator* pShapesCreator,
                  PartsEngraver* pPartsEngraver);
     virtual ~SpAlgGourlay();
 
