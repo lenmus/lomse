@@ -142,7 +142,6 @@ void NoteEngraver::create_shape()
 	//create the note container shape
     m_pNoteShape = LOMSE_NEW GmoShapeNote(m_pNote, m_uxLeft, m_uyTop, m_color,
                                           m_libraryScope);
-
     add_voice(m_pNoteShape);
 
     //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines

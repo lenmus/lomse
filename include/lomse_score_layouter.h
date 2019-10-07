@@ -84,9 +84,10 @@ struct PendingAuxObjs
     int m_iStaff;
     int m_iCol;
     int m_iLine;
+    int m_idxStaff;
 
     PendingAuxObjs(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
-                   int iCol, int iLine, ImoInstrument* pInstr)
+                   int iCol, int iLine, ImoInstrument* pInstr, int idxStaff)
         : m_pSO(pSO)
         , m_pMainShape(pMainShape)
         , m_pInstr(pInstr)
@@ -94,6 +95,7 @@ struct PendingAuxObjs
         , m_iStaff(iStaff)
         , m_iCol(iCol)
         , m_iLine(iLine)
+        , m_idxStaff(idxStaff)
     {
     }
 
@@ -335,7 +337,8 @@ protected:
 public:
     ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                   EngraversMap& engravers, PartsEngraver* pPartsEngraver);
-    ~ShapesCreator() {}
+    ~ShapesCreator();
+
 
     enum {k_flag_small_clef=0x01, };
 
@@ -344,6 +347,7 @@ public:
                                     UPoint pos, int clefType=0, int octaveShift=0,
                                     unsigned flags=0);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
+                                  int idxStaff, VerticalProfile* pVProfile,
                                   GmoShape* pParentShape);
     GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
                                      UPoint uPos, LUnits width);
@@ -351,11 +355,13 @@ public:
     //RelObj shapes
     void start_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                 GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                int iSystem, int iCol, int iLine, ImoInstrument* pInstr);
+                                int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
+                                int idxStaff, VerticalProfile* pVProfile);
     void continue_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                    int iSystem, int iCol, int iLine,
-                                   ImoInstrument* pInstr);
+                                   ImoInstrument* pInstr, int idxStaff,
+                                   VerticalProfile* pVProfile);
     void finish_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                  int iSystem, int iCol, int iLine, LUnits prologWidth,

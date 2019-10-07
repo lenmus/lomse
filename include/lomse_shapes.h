@@ -34,6 +34,10 @@
 #include "lomse_injectors.h"
 #include "lomse_image.h"
 
+//GmoShapeDebug
+#include "lomse_vertex_source.h"
+#include "agg_trans_affine.h"
+
 namespace lomse
 {
 
@@ -121,6 +125,33 @@ public: //TO_FIX: constructor used in tests.
                         libraryScope, fontSize )
     {
     }
+};
+
+//---------------------------------------------------------------------------------------
+//A shape for debug purposes, to draw lines, points, etc. used during design and debug
+class GmoShapeDebug : public GmoSimpleShape, public VertexSource
+{
+protected:
+    std::list<Vertex> m_vertices;       //list of vertices
+    std::list<Vertex>::iterator m_it;   //points to current vertex
+
+    int m_nContour;                 //current countour
+    agg::trans_affine   m_trans;    //affine transformation to apply
+
+
+public:
+    GmoShapeDebug(Color color=Color(0,0,0), UPoint uPos=UPoint(0.0f, 0.0f),
+                  USize uSize=USize(1000.0f, 1000.0f));
+
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    virtual void add_vertex(Vertex& vertex);
+    virtual void add_vertex(char cmd, LUnits x, LUnits y);
+    virtual void close_vertex_list();
+
+    //VertexSource
+    unsigned vertex(double* px, double* py) override;
+    void rewind(int UNUSED(pathId) = 0) override;
+
 };
 
 //---------------------------------------------------------------------------------------

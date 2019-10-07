@@ -120,6 +120,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_table_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_text_splitter.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_vertical_profile.cpp
 )
 
 set(GUI_CONTROLS_FILES

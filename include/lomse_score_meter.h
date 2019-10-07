@@ -111,7 +111,7 @@ public:
     inline long truncate_staff_lines_opt() { return m_nTruncateStaffLines; }
 
     //spacing
-    LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);
+    LUnits tenths_to_logical(Tenths value, int iInstr=0, int iStaff=0);
     Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
     inline LUnits tenths_to_logical_max(Tenths value)     //using biggest staff

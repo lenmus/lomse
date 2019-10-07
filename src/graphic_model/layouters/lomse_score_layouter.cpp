@@ -75,6 +75,7 @@
 #include "lomse_wedge_engraver.h"
 #include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_gm_measures_table.h"
+#include "lomse_vertical_profile.h"
 
 namespace lomse
 {
@@ -992,6 +993,11 @@ ShapesCreator::ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
 }
 
 //---------------------------------------------------------------------------------------
+ShapesCreator::~ShapesCreator()
+{
+}
+
+//---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                                UPoint pos, int clefType, int octaveShift,
                                                unsigned flags)
@@ -1085,6 +1091,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
+                                             int idxStaff, VerticalProfile* pVProfile,
                                              GmoShape* pParentShape)
 {
     //factory method to create shapes for auxobjs
@@ -1142,7 +1149,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                               pImo->get_language(), pImo->get_style());
+                               pImo->get_language(), pImo->get_style(),
+                               idxStaff, pVProfile);
             return engrv.create_shape(pImo, pos.x, pos.y);
         }
         case k_imo_text_box:
@@ -1195,7 +1203,8 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
                                            GmoShape* pStaffObjShape,
                                            int iInstr, int iStaff, int iSystem,
                                            int iCol, int UNUSED(iLine),
-                                           ImoInstrument* UNUSED(pInstr))
+                                           ImoInstrument* UNUSED(pInstr),
+                                           int idxStaff, VerticalProfile* pVProfile)
 {
     //factory method to create the engraver for relation auxobjs
 
@@ -1208,7 +1217,8 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
     {
         case k_imo_beam:
         {
-            pEngrv = LOMSE_NEW BeamEngraver(m_libraryScope, m_pScoreMeter);
+            pEngrv = LOMSE_NEW BeamEngraver(m_libraryScope, m_pScoreMeter,
+                                            idxStaff, pVProfile);
             break;
         }
 
@@ -1268,7 +1278,8 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
                                               GmoShape* pStaffObjShape, int iInstr,
                                               int iStaff, int iSystem, int iCol,
                                               int UNUSED(iLine),
-                                              ImoInstrument* UNUSED(pInstr))
+                                              ImoInstrument* UNUSED(pInstr),
+                                              int idxStaff, VerticalProfile* pVProfile)
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();

@@ -157,7 +157,7 @@ protected:
     LUnits m_stavesWidth;
 
     std::vector<LUnits> m_staffTop;
-    std::vector<LUnits> m_staffTopLine;
+    std::vector<LUnits> m_staffBottom;
     std::vector<LUnits> m_lineThickness;
 
     //next instrument engraver
@@ -188,6 +188,8 @@ public:
     //staves position
     LUnits get_staff_top_position() { return m_stavesTop; }
     LUnits get_staff_bottom_position() { return m_stavesBottom; }
+    LUnits get_top_line_of_staff(int iStaff);
+    LUnits get_bottom_line_of_staff(int iStaff);
 
     //shapes
     void add_staff_lines(GmoBoxSystem* pBox);
@@ -196,7 +198,6 @@ public:
     inline LUnits get_staves_bottom() { return m_stavesBottom + m_org.y; }
     LUnits get_staves_top_line();
     LUnits get_staves_bottom_line();
-    LUnits get_top_line_of_staff(int iStaff);
     inline LUnits get_staves_width() { return m_stavesWidth; }
     inline LUnits get_staves_left() { return m_stavesLeft; }
     inline LUnits get_staves_right() { return m_stavesLeft + m_stavesWidth; }
@@ -207,6 +208,9 @@ public:
 
     //helper
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
+    inline ImoInstrument* get_instrument() { return m_pInstr; }
+    int get_num_staves();
+
 
 protected:
     void measure_name_abbrev();

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,6 +46,7 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_spacing_algorithm.h"
 #include "lomse_timegrid_table.h"
+#include "lomse_vertical_profile.h"
 
 #include <iostream>
 #include <iomanip>
@@ -79,6 +80,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_engravers(engravers)
     , m_pShapesCreator(pShapesCreator)
     , m_pPartsEngraver(pPartsEngraver)
+    , m_pVProfile(nullptr)
     , m_uPrologWidth(0.0f)
     , m_pBoxSystem(nullptr)
     , m_yMin(0.0f)
@@ -97,6 +99,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
 //---------------------------------------------------------------------------------------
 SystemLayouter::~SystemLayouter()
 {
+    delete m_pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
@@ -127,6 +130,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     m_pagePos = pos;
 
     set_position_and_width_for_staves(indent);
+    create_vertical_profile();
     fill_current_system_with_columns();
     collect_last_column_information();
     justify_current_system();
@@ -134,6 +138,8 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     build_system_timegrid();
     reposition_full_measure_rests();
     engrave_system_details(m_iSystem);
+
+    //dbg_add_vertical_profile_shape();   //<-- debug. Comment out!
 
     engrave_measure_numbers();
     engrave_instrument_details();
@@ -146,7 +152,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
 void SystemLayouter::set_position_and_width_for_staves(LUnits indent)
 {
     //For engraving staffobjs it is necessary to know the staves position.
-    //Now, once the system box is created, instrument engravers will compute
+    //In this method, once the system box is created, instrument engravers compute
     //staves position, width and vertical distance between staves. The
     //vertical distance is standard, based only on staves margins.
 
@@ -164,6 +170,32 @@ void SystemLayouter::on_origin_shift(LUnits yShift)
 {
     m_yMax += yShift;
     m_yMin += yShift;
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::create_vertical_profile()
+{
+    LUnits xStart = m_pBoxSystem->get_origin().x;
+    LUnits xEnd = xStart + m_pBoxSystem->get_width();
+    LUnits cellWidth = m_pScoreMeter->tenths_to_logical(2.5);
+    int numStaves = m_pScoreMeter->num_staves();
+
+    delete m_pVProfile;
+    m_pVProfile = LOMSE_NEW VerticalProfile(xStart, xEnd, cellWidth, numStaves);
+
+    //initialize the profile with the position of each staff
+    int numInstrs = m_pScore->get_num_instruments();
+    for (int iInstr = 0; iInstr < numInstrs; iInstr++)
+    {
+        InstrumentEngraver* pInstrEngraver = m_pPartsEngraver->get_engraver_for(iInstr);
+        for (int iStaff=0; iStaff < pInstrEngraver->get_num_staves(); iStaff++)
+        {
+            LUnits yTop = pInstrEngraver->get_top_line_of_staff(iStaff);
+            LUnits yBottom = pInstrEngraver->get_bottom_line_of_staff(iStaff);
+            int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
+            m_pVProfile->initialize(idxStaff, yTop, yBottom);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -418,7 +450,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_shapes_for_column(int iCol)
 {
-    m_pSpAlgorithm->add_shapes_to_boxes(iCol);
+    m_pSpAlgorithm->add_shapes_to_boxes(iCol, m_pVProfile);
 }
 
 //---------------------------------------------------------------------------------------
@@ -550,8 +582,8 @@ void SystemLayouter::engrave_system_details(int iSystem)
             PendingAuxObjs* pPAO = *it;
             engrave_attached_objects((*it)->m_pSO, (*it)->m_pMainShape,
                                      (*it)->m_iInstr, (*it)->m_iStaff, objSystem,
-                                     iCol, (*it)->m_iLine,
-                                     (*it)->m_pInstr
+                                     iCol, (*it)->m_iLine, (*it)->m_pInstr,
+                                     (*it)->m_idxStaff
                                     );
 		    it = m_pScoreLyt->m_pendingAuxObjs.erase(it);
             delete pPAO;
@@ -643,7 +675,8 @@ bool SystemLayouter::measure_number_must_be_displayed(int policy, TypeMeasureInf
 void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainShape,
                                               int iInstr, int iStaff, int iSystem,
                                               int iCol, int iLine,
-                                              ImoInstrument* pInstr)
+                                              ImoInstrument* pInstr,
+                                              int idxStaff)
 {
     //rel objs
     if (pSO->get_num_relations() > 0)
@@ -662,7 +695,8 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 		        {
                     m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
-                                                            iLine, pInstr);
+                                                            iLine, pInstr, idxStaff,
+                                                            m_pVProfile);
 
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
                     LUnits prologWidth( pSysLyt->get_prolog_width() );
@@ -670,14 +704,16 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                     m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, prologWidth, pInstr);
-                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs);
+                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs,
+                                                idxStaff);
 		        }
 
 		        //normal cases: start and end in different objects
 		        else if (pSO == pRO->get_start_object())
                     m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
-                                                            iLine, pInstr);
+                                                            iLine, pInstr, idxStaff,
+                                                            m_pVProfile);
 		        else if (pSO == pRO->get_end_object())
 		        {
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
@@ -686,12 +722,14 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                     m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, prologWidth, pInstr);
-                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs);
+                    add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs,
+                                                idxStaff);
 		        }
                 else
                     m_pShapesCreator->continue_engraving_relobj(pRO, pSO, pMainShape,
                                                                 iInstr, iStaff, iSystem,
-                                                                iCol, iLine, pInstr);
+                                                                iCol, iLine, pInstr,
+                                                                idxStaff, m_pVProfile);
             }
         }
     }
@@ -741,10 +779,11 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
             {
                 GmoShape* pAuxShape =
                             m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
+                                                                  idxStaff, m_pVProfile,
                                                                   pMainShape);
     //            pMainShape->accept_link_from(pAuxShape);
                 add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
-                                       iCol, iInstr);
+                                       iCol, iInstr, idxStaff);
                 m_yMax = max(m_yMax, pAuxShape->get_bottom());
             }
         }
@@ -752,7 +791,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
+void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer, int idxStaff)
 {
     RelObjEngraver* pEngrv
         = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pAO));
@@ -769,7 +808,8 @@ void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer)
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
-            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
+            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr,
+                                   idxStaff);
    }
 
     m_engravers.remove_engraver(pAO);
@@ -788,7 +828,8 @@ void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
-            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr);
+            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr,
+                                   -1);
    }
 
     m_engravers.remove_engraver(tag);
@@ -798,12 +839,14 @@ void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_aux_shape_to_model(GmoShape* pShape, int layer,
-                                            int iCol, int iInstr)
+                                            int iCol, int iInstr, int idxStaff)
 {
     pShape->set_layer(layer);
     GmoBoxSliceInstr* pBox = m_pSpAlgorithm->get_slice_instr(iCol, iInstr);
     pBox->add_shape(pShape, layer);
     m_yMax = max(m_yMax, pShape->get_bottom());
+    if (idxStaff >= 0)
+        m_pVProfile->update(pShape, idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -837,6 +880,11 @@ void SystemLayouter::add_instruments_info()
     }
 }
 
+//---------------------------------------------------------------------------------------
+void SystemLayouter::dbg_add_vertical_profile_shape()
+{
+    m_pVProfile->dbg_add_vertical_profile_shapes(m_pBoxSystem);
+}
 
 
 }  //namespace lomse

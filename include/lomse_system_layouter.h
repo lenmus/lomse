@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -64,6 +64,7 @@ class EngraversMap;
 class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -75,9 +76,10 @@ protected:
     LibraryScope&   m_libraryScope;
     ScoreMeter*     m_pScoreMeter;
     ImoScore*       m_pScore;
-    EngraversMap&  m_engravers;
+    EngraversMap&   m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
+    VerticalProfile* m_pVProfile;
 
     LUnits m_uPrologWidth;
     GmoBoxSystem* m_pBoxSystem;
@@ -130,6 +132,7 @@ public:
 
 protected:
     void set_position_and_width_for_staves(LUnits indent);
+    void create_vertical_profile();
     void fill_current_system_with_columns();
     void collect_last_column_information();
     void justify_current_system();
@@ -158,15 +161,20 @@ protected:
 
     void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                   int iInstr, int iStaff, int iSystem,
-                                  int iCol, int iLine,
-                                  ImoInstrument* pInstr);
+                                  int iCol, int iLine, ImoInstrument* pInstr,
+                                  int idxStaff);
 
-    void add_relobjs_shapes_to_model(ImoObj* pAO, int layer);
+    void add_relobjs_shapes_to_model(ImoObj* pAO, int layer, int idxStaff);
     void add_relauxobjs_shapes_to_model(const string& tag, int layer);
-    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr);
+    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
+                                int idxStaff);
 
     //helpers
     inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }
+
+    //debug
+    void dbg_add_vertical_profile_shape();
+
 };
 
 

@@ -130,8 +130,8 @@ public:
 
     //column creation: collecting content
     void start_column_measurements(int iCol);
-    void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr,
-                        ImoStaffObj* pSO, TimeUnits rTime, int nStaff, GmoShape* pShape,
+    void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int idxStaff,
+                        ImoStaffObj* pSO, GmoShape* pShape,
                         bool fInProlog=false);
     void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
                                    GmoShape* pNonTimedShape);
@@ -225,7 +225,8 @@ public:
     void delete_shapes(vector<StaffObjData*>& data);
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                        ScoreMeter* pMeter);
+                                        ScoreMeter* pMeter,
+                                        VerticalProfile* pVProfile);
     void reposition_full_measure_rests(GmoBoxSystem* pBox, GmMeasuresTable* pMeasures);
 
     //debug
@@ -243,8 +244,9 @@ class StaffObjData
 {
 public:
     GmoShape*   m_pShape;       //shape for this staff object
-    LUnits m_xUserShift;
-    LUnits m_yUserShift;
+    int         m_idxStaff;     //staff index 0..n-1, relative to system
+    LUnits      m_xUserShift;
+    LUnits      m_yUserShift;
 
 public:
     StaffObjData();
@@ -377,7 +379,10 @@ public:
     void delete_shapes(vector<StaffObjData*>& data);
     virtual void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                                 LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                                ScoreMeter* pMeter);
+                                                ScoreMeter* pMeter,
+                                                VerticalProfile* pVProfile);
+    void update_vertical_profile(GmoShape* pShape, int idxStaff, VerticalProfile* pVProfile);
+
     //access to information
     inline LUnits get_width() { return m_width; }
 
@@ -426,7 +431,8 @@ public:
                                TextMeter& textMeter) override;
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                        ScoreMeter* pMeter) override;
+                                        ScoreMeter* pMeter,
+                                        VerticalProfile* pVProfile) override;
 
     //specific methods
     void remove_after_space_if_not_full(ScoreMeter* pMeter, int SOtype);
@@ -456,7 +462,8 @@ public:
                                TextMeter& textMeter) override;
     void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                        ScoreMeter* pMeter) override;
+                                        ScoreMeter* pMeter,
+                                        VerticalProfile* pVProfile) override;
 
     inline bool has_width() { return m_fHasWidth; }
     inline bool some_objects_visible() { return m_fSomeVisible; }

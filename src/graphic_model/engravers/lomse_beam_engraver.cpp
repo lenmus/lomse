@@ -46,10 +46,13 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // BeamEngraver implementation
 //---------------------------------------------------------------------------------------
-BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           int idxStaff, VerticalProfile* pVProfile)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pBeamShape(nullptr)
     , m_pBeam(nullptr)
+    , m_idxStaff(idxStaff)
+    , m_pVProfile(pVProfile)
     , m_uBeamThickness(0.0f)
     , m_fBeamAbove(false)
     , m_fStemForced(false)

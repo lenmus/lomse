@@ -561,13 +561,19 @@ InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
 {
     int numStaves = m_pInstr->get_num_staves();
     m_staffTop.resize(numStaves);
-    m_staffTopLine.resize(numStaves);
+    m_staffBottom.resize(numStaves);
     m_lineThickness.resize(numStaves);
 }
 
 //---------------------------------------------------------------------------------------
 InstrumentEngraver::~InstrumentEngraver()
 {
+}
+
+//---------------------------------------------------------------------------------------
+int InstrumentEngraver::get_num_staves()
+{
+    return m_pInstr->get_num_staves();
 }
 
 //---------------------------------------------------------------------------------------
@@ -739,8 +745,8 @@ LUnits InstrumentEngraver::set_staves_vertical_position(LUnits y)
         if (iStaff > 0)
             y += pStaff->get_staff_margin();
         m_staffTop[iStaff] = y;
-        m_staffTopLine[iStaff] = y;
         y += pStaff->get_height();
+        m_staffBottom[iStaff] = y;
         m_lineThickness[iStaff] = pStaff->get_line_thickness();
     }
     m_stavesBottom = y;
@@ -751,6 +757,12 @@ LUnits InstrumentEngraver::set_staves_vertical_position(LUnits y)
 LUnits InstrumentEngraver::get_top_line_of_staff(int iStaff)
 {
     return m_org.y + m_staffTop[iStaff] + m_lineThickness[iStaff] / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_bottom_line_of_staff(int iStaff)
+{
+    return m_org.y + m_staffBottom[iStaff] + m_lineThickness[iStaff] / 2.0f;
 }
 
 //---------------------------------------------------------------------------------------

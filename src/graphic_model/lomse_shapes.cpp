@@ -34,6 +34,8 @@
 #include "lomse_glyphs.h"
 #include "lomse_calligrapher.h"
 #include "lomse_gm_basic.h"
+#include "agg_trans_affine.h"
+
 
 namespace lomse
 {
@@ -377,6 +379,95 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
     m_origin.x = xLeft;
     m_origin.y = yNote;
 }
+
+
+
+//=======================================================================================
+// GmoShapeDebug
+//=======================================================================================
+GmoShapeDebug::GmoShapeDebug(Color color, UPoint uPos, USize uSize)
+	: GmoSimpleShape(nullptr, GmoObj::k_shape_debug, 0, color)
+    , m_nContour(0)
+{
+    rewind();
+
+    m_origin = uPos;
+    m_size = uSize;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeDebug::add_vertex(Vertex& vertex)
+{
+    m_vertices.push_back(vertex);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeDebug::add_vertex(char cmd, LUnits x, LUnits y)
+{
+    unsigned aggCmd = 0;
+    switch(cmd)
+    {
+        case 'M':   aggCmd = agg::path_cmd_move_to;     break;
+        case 'L':   aggCmd = agg::path_cmd_line_to;     break;
+        case 'Z':   aggCmd = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;     break; //close polygon
+
+        default:
+        {
+            LOMSE_LOG_ERROR("Invalid Command %c. Ignored.", cmd);
+            return;
+        }
+    }
+//    dbgLogger << "GmoShapeDebug::add_vertex(). cmd=" << cmd << ", x=" << x << ", y=" << y << endl;
+    Vertex v = { x, y, aggCmd};
+    m_vertices.push_back(v);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeDebug::close_vertex_list()
+{
+    Vertex v = { 0.0f, 0.0f, agg::path_cmd_stop};
+    m_vertices.push_back(v);
+    rewind();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeDebug::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    //set_affine_transform();
+
+    Color color = determine_color_to_use(opt);
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->add_path(*this);
+    pDrawer->end_path();
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeDebug::rewind(int UNUSED(pathId))
+{
+    m_it=m_vertices.begin();
+    m_nContour = 0;
+}
+
+//---------------------------------------------------------------------------------------
+unsigned GmoShapeDebug::vertex(double* px, double* py)
+{
+	if (m_it == m_vertices.end())
+		return agg::path_cmd_stop;
+
+	*px = (*m_it).ux_coord;
+	*py = (*m_it).uy_coord;
+//	m_trans.transform(px, py);
+
+	unsigned cmd = (*m_it).cmd;
+	++m_it;
+	return cmd;
+}
+
+
+
 
 
 

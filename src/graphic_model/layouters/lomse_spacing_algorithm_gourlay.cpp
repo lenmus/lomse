@@ -41,6 +41,7 @@
 #include "lomse_gm_measures_table.h"
 #include "lomse_calligrapher.h"
 #include "lomse_graphical_model.h"
+#include "lomse_vertical_profile.h"
 
 #include <vector>
 #include <cmath>   //abs
@@ -135,15 +136,14 @@ void SpAlgGourlay::new_column(TimeSlice* pSlice)
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int UNUSED(iLine),
-                                  int UNUSED(iInstr), ImoStaffObj* pSO,
-                                  TimeUnits UNUSED(rTime),
-                                  int UNUSED(nStaff), GmoShape* pShape, bool fInProlog)
+void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int idxStaff,
+                                  ImoStaffObj* pSO, GmoShape* pShape, bool fInProlog)
 {
     StaffObjData* pData = LOMSE_NEW StaffObjData();
     m_data.push_back(pData);
 
     pData->m_pShape = pShape;
+    pData->m_idxStaff = idxStaff;
 
     //determine slice type for the new object to include
 //    dbgLogger << "include_object(). StaffObj type = " << pSO->get_name()
@@ -516,7 +516,8 @@ void SpAlgGourlay::reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
 
         //reposition staffobjs
         m_columns[iCol]->move_shapes_to_final_positions(m_data, xLeft, yTop + yShift,
-                                                        yMin, yMax, m_pScoreMeter);
+                                                        yMin, yMax, m_pScoreMeter,
+                                                        m_pVProfile);
 
         //assign the final width to the boxes
         LUnits colWidth = m_columns[iCol]->get_column_width();
@@ -1119,7 +1120,7 @@ void TimeSlice::add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
                 //collect barlines info for box system (measures table)
 				if (pBoxSystem && pShape->is_shape_barline())
 				{
-				    ImoStaffObj* pSO = pEntry->imo_object();
+                    ImoStaffObj* pSO = pEntry->imo_object();
 				    if (pSO && pSO->is_barline()
                         && !static_cast<ImoBarline*>(pSO)->is_middle())
                     {
@@ -1146,7 +1147,8 @@ void TimeSlice::delete_shapes(vector<StaffObjData*>& data)
 //---------------------------------------------------------------------------------------
 void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
                                                LUnits yPos, LUnits* yMin, LUnits* yMax,
-                                               ScoreMeter* UNUSED(pMeter))
+                                               ScoreMeter* UNUSED(pMeter),
+                                               VerticalProfile* pVProfile)
 {
     int iMax = m_iFirstData + m_numEntries;
     for (int i=m_iFirstData; i < iMax; ++i)
@@ -1160,11 +1162,29 @@ void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUni
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
                                                     yPos + pData->m_yUserShift);
 
+            //save info for vertical profile
+            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
+
             //update system vertical limits
             *yMax = max(*yMax, pShape->get_bottom());
             *yMin = min(*yMin, pShape->get_top());
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void TimeSlice::update_vertical_profile(GmoShape* pShape, int idxStaff,
+                                        VerticalProfile* pVProfile)
+{
+    pVProfile->update(pShape, idxStaff);
+//    if (pShape->is_shape_note())
+//    {
+//        stringstream msg;
+//        msg << "note: shape.xleft=" << pShape->get_left()
+//            << ", xRight=" << pShape->get_right() << ", yTop=" << pShape->get_top()
+//            << ", yBottom=" << pShape->get_bottom();
+//        LOMSE_LOG_INFO(msg.str());
+//    }
 }
 
 
@@ -1235,7 +1255,8 @@ void TimeSliceProlog::assign_spacing_values(vector<StaffObjData*>& data,
 void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                      LUnits xPos, LUnits yPos,
                                                      LUnits* yMin, LUnits* yMax,
-                                                     ScoreMeter* UNUSED(pMeter))
+                                                     ScoreMeter* UNUSED(pMeter),
+                                                     VerticalProfile* pVProfile)
 {
     ColStaffObjsEntry* pEntry = m_firstEntry;
     int iMax = m_iFirstData + m_numEntries;
@@ -1257,6 +1278,9 @@ void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data
             //move shape
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
                                                     yPos + pData->m_yUserShift);
+
+            //save info for vertical profile
+            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
 
             //update system vertical limits
             *yMax = max(*yMax, pShape->get_bottom());
@@ -1445,7 +1469,8 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
 void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                        LUnits xPos, LUnits yPos,
                                                        LUnits* yMin, LUnits* yMax,
-                                                       ScoreMeter* pMeter)
+                                                       ScoreMeter* pMeter,
+                                                       VerticalProfile* pVProfile)
 {
     //vector for current position on each staff
     vector<LUnits> positions;
@@ -1470,6 +1495,9 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
             //move shape
             pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
                                                     yPos + pData->m_yUserShift);
+
+            //save info for vertical profile
+            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
 
             positions[iStaff] += pShape->get_width();
             if (!pShape->is_shape_invisible())
@@ -2042,14 +2070,16 @@ void ColumnDataGourlay::delete_shapes(vector<StaffObjData*>& data)
 void ColumnDataGourlay::move_shapes_to_final_positions(vector<StaffObjData*>& data,
                                                        LUnits xPos, LUnits yPos,
                                                        LUnits* yMin, LUnits* yMax,
-                                                       ScoreMeter* pMeter)
+                                                       ScoreMeter* pMeter,
+                                                       VerticalProfile* pVProfile)
 {
     m_xPos = xPos;
 
     TimeSlice* pSlice = m_pFirstSlice;
     for (int i=0; i < num_slices(); ++i)
     {
-        pSlice->move_shapes_to_final_positions(data, xPos, yPos, yMin, yMax, pMeter);
+        pSlice->move_shapes_to_final_positions(data, xPos, yPos, yMin, yMax, pMeter,
+                                               pVProfile);
         xPos += pSlice->get_width();
         pSlice = pSlice->next();
     }

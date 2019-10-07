@@ -163,12 +163,10 @@ public:
            k_shape,
                 k_shape_accidentals, k_shape_accidental_sign,
                 k_shape_articulation,
-                k_shape_barline,
-                k_shape_beam, k_shape_brace,
+                k_shape_barline, k_shape_beam, k_shape_brace,
                 k_shape_bracket, k_shape_button,
-                k_shape_clef,
-                k_shape_coda_segno,
-                k_shape_dot, k_shape_dynamics_mark,
+                k_shape_clef, k_shape_coda_segno,
+                k_shape_debug, k_shape_dot, k_shape_dynamics_mark,
                 k_shape_fermata, k_shape_flag, k_shape_image,
                 k_shape_invisible, k_shape_key_signature, k_shape_lyrics,
                 k_shape_metronome_glyph, k_shape_metronome_mark,
@@ -224,6 +222,7 @@ public:
     inline bool is_shape_button() { return m_objtype == k_shape_button; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
     inline bool is_shape_coda_segno() { return m_objtype == k_shape_coda_segno; }
+    inline bool is_shape_debug() { return m_objtype == k_shape_debug; }
     inline bool is_shape_dot() { return m_objtype == k_shape_dot; }
     inline bool is_shape_dynamics_mark() { return m_objtype == k_shape_dynamics_mark; }
     inline bool is_shape_fermata() { return m_objtype == k_shape_fermata; }

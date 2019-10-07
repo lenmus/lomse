@@ -57,7 +57,7 @@ class MyBeamEngraver : public BeamEngraver
 {
 public:
     MyBeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-        : BeamEngraver(libraryScope, pScoreMeter)
+        : BeamEngraver(libraryScope, pScoreMeter, -1, nullptr)
     {
     }
 

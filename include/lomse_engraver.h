@@ -42,6 +42,7 @@ class GmoShape;
 class ImoRelObj;
 class ImoStaffObj;
 class ImoAuxRelObj;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 // base class for all engravers

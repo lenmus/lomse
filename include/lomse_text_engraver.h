@@ -47,6 +47,7 @@ class GmoShapeText;
 class GmoShapeTextBox;
 class ImoStyle;
 class ImoScoreText;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 class TextEngraver : public Engraver
@@ -56,10 +57,13 @@ protected:
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     string m_language;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
 
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 const string& text, const string& language, ImoStyle* pStyle);
+                 const string& text, const string& language, ImoStyle* pStyle,
+                 int idxStaff=-1, VerticalProfile* pVProfile=nullptr);
     ~TextEngraver();
 
     GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);

@@ -33,6 +33,8 @@
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
+#include "lomse_vertical_profile.h"
+
 #include <list>
 using namespace std;
 
@@ -48,6 +50,7 @@ class ImoNote;
 class GmoShapeNote;
 class ImoNoteRest;
 class GmoShape;
+class VerticalProfile;
 
 
 //---------------------------------------------------------------------------------------
@@ -56,6 +59,8 @@ class BeamEngraver : public RelObjEngraver
 protected:
     GmoShapeBeam* m_pBeamShape;
     ImoBeam* m_pBeam;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
 
     ShapeBoxInfo m_shapesInfo[2];
@@ -68,7 +73,8 @@ protected:
     UPoint m_outerRightPoint;
 
 public:
-    BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
+    BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                 int idxStaff, VerticalProfile* pVProfile);
     ~BeamEngraver();
 
     //implementation of virtual methods from RelObjEngraver
