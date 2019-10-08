@@ -402,6 +402,7 @@ public:
     //for creating measures info
     inline int increment_measures_counter() { return ++m_measuresCounter; }
     inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+    inline int get_measures_counter() { return m_measuresCounter; }
 
     //interface for building relations
     void add_relation_info(ImoObj* pDto);

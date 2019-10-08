@@ -5750,8 +5750,16 @@ protected:
 
     void set_options(ImoScore* pScore)
     {
+        //justify last system except for very short scores (less than 5 measures)
         ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
-        pOpt->set_long_value(k_justify_always);
+        if (m_pAnalyser->get_measures_counter() < 5)
+        {
+            pOpt->set_long_value(k_justify_never);
+            pOpt = pScore->get_option("StaffLines.Truncate");
+            pOpt->set_long_value(k_truncate_always);
+        }
+        else
+            pOpt->set_long_value(k_justify_always);
 
         pOpt = pScore->get_option("Render.SpacingOptions");
         pOpt->set_long_value(k_render_opt_breaker_optimal | k_render_opt_dmin_global);
