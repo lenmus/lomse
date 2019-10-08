@@ -5713,6 +5713,7 @@ public:
         check_if_missing_parts();
 
         //m_pAnalyser->score_analysis_end();
+        set_options(pScore);
         return pImoDoc;
     }
 
@@ -5742,7 +5743,6 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
-        set_options(pScore);
         pScore->add_required_text_styles();
 
         return pScore;

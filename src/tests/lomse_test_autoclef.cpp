@@ -295,8 +295,8 @@ SUITE(AutoClefTest)
         MyAutoClef ac(pScore);
         ac.do_autoclef();
 
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score "
-              "(vers 2.0)(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
+              "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
               "(key C)(time 2 4)(n e4 e v1 p1 (beam 107 +))(n c3 e v2 p2 (beam 114 +))"
               "(n g4 e v1 p1 (beam 107 -))(n e3 e v2 p2 (beam 114 -))(n g3 e v2 p2 "
               "(beam 121 +))(n c4 e v2 p2 (beam 121 -))(barline simple)(n a3 q v2 p2)"
@@ -332,7 +332,7 @@ SUITE(AutoClefTest)
         ac.do_autoclef();
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(opt Render.SpacingOptions 514)(opt Score.JustifyLastSystem 3)"
+              "(opt Render.SpacingOptions 514)(opt StaffLines.Truncate 3)"
               "(instrument P1 (name \"Music\")"
               "(staves 1)(musicData (clef G p1)(key C)(time 4 4)(n c4 w v1 p1)"
               "(barline simple))))))" );

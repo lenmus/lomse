@@ -139,6 +139,11 @@ public:
         m_pDoc = nullptr;
     }
 
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
+    }
+
     void create_document_1()
     {
         //"(lenmusdoc#0 (vers 0.0) (content#3 "
@@ -372,10 +377,12 @@ SUITE(DocumentTest)
         CHECK( pClef->get_staff() == 0 );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(opt Render.SpacingOptions 514)(opt Score.JustifyLastSystem 3)"
+              "(opt Render.SpacingOptions 514)(opt StaffLines.Truncate 3)"
               "(instrument P1 (name \"Music\")"
               "(staves 1)(musicData (clef G p1)(key C)(time 4 4)(n c4 w v1 p1)"
               "(barline simple))))))" );
+//        cout << test_name() << endl;
+//        cout << doc.to_string() << endl;
     }
 
     TEST_FIXTURE(DocumentTestFixture, creation_011)
