@@ -147,6 +147,28 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
             pos.y += tenths_to_logical(45.0f);
     }
 
+    else if (is_accent_articulation() && m_pParentShape->is_shape_note())
+    {
+        m_fEnableShiftWhenCollision = true;
+        GmoShapeNote* pNote = static_cast<GmoShapeNote*>(m_pParentShape);
+        GmoShape* pShape = pNote->get_notehead_shape();
+
+//        //articulation must be centered of next staff space
+//        LUnits shift = pNote->is_on_staff_line() ? tenths_to_logical(15.0f)
+//                                                 : tenths_to_logical(5.0f);
+        LUnits shift = tenths_to_logical(5.0f);
+        if (m_fAbove)
+        {
+            pos.y = pShape->get_top();
+            pos.y -= shift;
+        }
+        else
+        {
+            pos.y = pShape->get_bottom();
+            pos.y += shift;
+        }
+    }
+
     else
     {
         m_fEnableShiftWhenCollision = true;
@@ -193,18 +215,18 @@ void ArticulationEngraver::center_on_parent()
         m_pArticulationShape->shift_origin(shift);
     }
 
-    //ensure that articulation does not collides with parent shape
-    URect overlap = m_pParentShape->get_bounds();
-    overlap.intersection( m_pArticulationShape->get_bounds() );
-    LUnits yShift = overlap.get_height();
-    if (yShift != 0.0f)
-    {
-        yShift += tenths_to_logical(5.0f);
-        yShift = m_fAbove ? - yShift : yShift;
-
-        USize shift(0.0f, yShift);
-        m_pArticulationShape->shift_origin(shift);
-    }
+//    //ensure that articulation does not collides with parent shape
+//    URect overlap = m_pParentShape->get_bounds();
+//    overlap.intersection( m_pArticulationShape->get_bounds() );
+//    LUnits yShift = overlap.get_height();
+//    if (yShift != 0.0f)
+//    {
+//        yShift += tenths_to_logical(5.0f);
+//        yShift = m_fAbove ? - yShift : yShift;
+//
+//        USize shift(0.0f, yShift);
+//        m_pArticulationShape->shift_origin(shift);
+//    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -428,6 +450,33 @@ bool ArticulationEngraver::must_be_placed_outside_staff()
             return true;
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+bool ArticulationEngraver::is_accent_articulation()
+{
+    int type = m_pArticulation->get_articulation_type();
+
+    return type == k_articulation_accent
+           || type == k_articulation_marccato
+           || type == k_articulation_staccato
+           || type == k_articulation_tenuto
+           || type == k_articulation_mezzo_staccato
+           || type == k_articulation_staccatissimo
+           || type == k_articulation_legato_duro
+           || type == k_articulation_marccato_legato
+           || type == k_articulation_marccato_staccato
+           || type == k_articulation_staccato_duro
+           || type == k_articulation_marccato_staccatissimo
+           || type == k_articulation_mezzo_staccatissimo
+           || type == k_articulation_staccatissimo_duro
+        //TODO There are more glyphs for articulations
+           || type == k_glyph_staccatissimo_wedge_above
+           || type == k_glyph_staccatissimo_stroke_above
+           || type == k_glyph_stress_above
+           || type == k_glyph_unstress_above
+           || type == k_glyph_laissez_vibrer_above
+           ;
 }
 
 

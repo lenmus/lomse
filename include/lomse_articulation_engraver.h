@@ -73,6 +73,7 @@ protected:
     void add_voice();
     int find_glyph();
     bool must_be_placed_outside_staff();
+    bool is_accent_articulation();
     void shift_shape_if_collision();
 
 };

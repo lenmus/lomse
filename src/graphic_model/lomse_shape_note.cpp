@@ -192,6 +192,8 @@ void GmoShapeNote::set_stem_down(bool down)
                        + get_notehead_top();
         m_pStemShape->set_stem_up(xRight, yNote);
     }
+
+    //recompute bounding box
 }
 
 //---------------------------------------------------------------------------------------
