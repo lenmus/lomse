@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,6 +35,7 @@
 #include "lomse_shapes.h"
 #include "lomse_glyphs.h"
 #include "lomse_shape_note.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -45,13 +46,17 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ArticulationEngraver::ArticulationEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff))
+                                           int UNUSED(iInstr), int UNUSED(iStaff),
+                                           int idxStaff, VerticalProfile* pVProfile)
     : Engraver(libraryScope, pScoreMeter)
     , m_pArticulation(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)
+    , m_fEnableShiftWhenCollision(false)
     , m_pParentShape(nullptr)
     , m_pArticulationShape(nullptr)
+    , m_idxStaff(idxStaff)
+    , m_pVProfile(pVProfile)
 {
 }
 
@@ -81,6 +86,9 @@ GmoShapeArticulation* ArticulationEngraver::create_shape(ImoArticulation* pArtic
     {
         center_on_parent();
     }
+
+    if (m_fEnableShiftWhenCollision)
+        shift_shape_if_collision();
 
     return m_pArticulationShape;
 }
@@ -132,6 +140,7 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
 
     else if ( must_be_placed_outside_staff() )
     {
+        m_fEnableShiftWhenCollision = true;
         if (m_fAbove)
             pos.y -= tenths_to_logical(5.0f);
         else
@@ -140,6 +149,7 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
 
     else
     {
+        m_fEnableShiftWhenCollision = true;
         if (m_fAbove)
         {
             pos.y = m_pParentShape->get_top();
@@ -215,6 +225,29 @@ void ArticulationEngraver::add_voice()
         }
         VoiceRelatedShape* pVRS = static_cast<VoiceRelatedShape*>(m_pArticulationShape);
         pVRS->set_voice(pNR->get_voice());
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ArticulationEngraver::shift_shape_if_collision()
+{
+    LUnits yCurPos = m_pArticulationShape->get_top();
+    if (m_fAbove)
+    {
+        LUnits yMin = m_pVProfile->get_min_for(m_pArticulationShape->get_left(),
+                                               m_pArticulationShape->get_right(),
+                                               m_idxStaff);
+        yMin -= m_pArticulationShape->get_height();
+        yMin -= tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+        m_pArticulationShape->set_top( min(yCurPos, yMin) );
+    }
+    else
+    {
+        LUnits yMax = m_pVProfile->get_max_for(m_pArticulationShape->get_left(),
+                                               m_pArticulationShape->get_right(),
+                                               m_idxStaff);
+        yMax += tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+        m_pArticulationShape->set_top( max(yCurPos, yMax) );
     }
 }
 

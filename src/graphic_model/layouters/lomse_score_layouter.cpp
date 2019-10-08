@@ -1106,7 +1106,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         case k_imo_articulation_symbol:
         {
             ImoArticulation* pImo = static_cast<ImoArticulation*>(pAO);
-            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
+                                       idxStaff, pVProfile);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }

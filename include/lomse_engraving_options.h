@@ -112,6 +112,9 @@ namespace lomse
 #define LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE   2.0f //space from numeral glyph to line start
 #define LOMSE_OCTAVE_SHIFT_LINE_SHIFT      3.0f //vertical line shift to compensate glyph baseline
 
+//articulations
+#define LOMSE_SPACING_STACKED_ARTICULATIONS  2.0f //space between two stacked articulation marks
+
 }   //namespace lomse
 
 #endif    // __LOMSE_ENGRAVING_OPTIONS_H__
