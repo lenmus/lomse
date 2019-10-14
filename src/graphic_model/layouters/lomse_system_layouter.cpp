@@ -139,7 +139,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     reposition_full_measure_rests();
     engrave_system_details(m_iSystem);
 
-    //dbg_add_vertical_profile_shape();   //<-- debug. Comment out!
+    dbg_add_vertical_profile_shape();   //<-- debug. Comment out!
 
     engrave_measure_numbers();
     engrave_instrument_details();
@@ -177,11 +177,10 @@ void SystemLayouter::create_vertical_profile()
 {
     LUnits xStart = m_pBoxSystem->get_origin().x;
     LUnits xEnd = xStart + m_pBoxSystem->get_width();
-    LUnits cellWidth = m_pScoreMeter->tenths_to_logical(2.5);
     int numStaves = m_pScoreMeter->num_staves();
 
     delete m_pVProfile;
-    m_pVProfile = LOMSE_NEW VerticalProfile(xStart, xEnd, cellWidth, numStaves);
+    m_pVProfile = LOMSE_NEW VerticalProfile(xStart, xEnd, numStaves);
 
     //initialize the profile with the position of each staff
     int numInstrs = m_pScore->get_num_instruments();

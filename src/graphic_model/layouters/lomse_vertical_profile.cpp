@@ -46,24 +46,19 @@ namespace lomse
 //=======================================================================================
 // VerticalProfile implementation
 //=======================================================================================
-VerticalProfile::VerticalProfile(LUnits xStart, LUnits xEnd, LUnits cellWidth,
-                                 int numStaves)
+VerticalProfile::VerticalProfile(LUnits xStart, LUnits xEnd, int numStaves)
     : m_numStaves(numStaves)
     , m_xStart(xStart)
     , m_xEnd(xEnd)
-    , m_cellWidth(cellWidth)
 {
-    m_numCells = int( (xEnd - xStart) / cellWidth );
-    if (m_numCells > 1000)
-    {
-        m_numCells = 1000;
-    }
-
-    m_yMax.resize(m_numStaves, nullptr);
-    m_yMin.resize(m_numStaves, nullptr);
+	m_yMin.resize(m_numStaves, LOMSE_PAPER_UPPER_LIMIT);
+	m_yMax.resize(m_numStaves, LOMSE_PAPER_LOWER_LIMIT);
 
 	m_yStaffTop.resize(m_numStaves, 0.0f);
 	m_yStaffBottom.resize(m_numStaves, 0.0f);
+
+    m_xMax.resize(m_numStaves, nullptr);
+    m_xMin.resize(m_numStaves, nullptr);
 }
 
 //---------------------------------------------------------------------------------------
@@ -71,37 +66,29 @@ VerticalProfile::~VerticalProfile()
 {
     for (int idxStaff=0; idxStaff < m_numStaves; ++idxStaff)
     {
-        delete m_yMax[idxStaff];
-        delete m_yMin[idxStaff];
+        delete m_xMax[idxStaff];
+        delete m_xMin[idxStaff];
     }
 }
 
 //---------------------------------------------------------------------------------------
-void VerticalProfile::initialize(int idxStaff, LUnits yTop, LUnits yBottom)
+void VerticalProfile::initialize(int idxStaff, LUnits yStaffTop, LUnits yStaffBottom)
 {
-    LUnits yCenter = (yTop + yBottom) / 2.0f;
-    m_yStaffTop[idxStaff] = yTop;
-    m_yStaffBottom[idxStaff] = yBottom;
+    m_yMin[idxStaff] = LOMSE_PAPER_UPPER_LIMIT;
+    m_yMax[idxStaff] = LOMSE_PAPER_LOWER_LIMIT;
 
-    CellsRow* pCells = LOMSE_NEW CellsRow;
-    pCells->assign(m_numCells, yCenter);
-    m_yMax[idxStaff] = pCells;
+    m_yStaffTop[idxStaff] = yStaffTop;
+    m_yStaffBottom[idxStaff] = yStaffBottom;
 
-    pCells = LOMSE_NEW CellsRow;
-    pCells->assign(m_numCells, yCenter);
-    m_yMin[idxStaff] = pCells;
-}
+    PointsRow* pPoints = LOMSE_NEW PointsRow;
+    m_xMax[idxStaff] = pPoints;
+    pPoints->push_back( {m_xStart, LOMSE_PAPER_LOWER_LIMIT, nullptr} );
+    pPoints->push_back( {m_xEnd, LOMSE_PAPER_LOWER_LIMIT, nullptr} );
 
-//---------------------------------------------------------------------------------------
-LUnits VerticalProfile::get_max_cell(int iCell, int idxStaff)
-{
-    return m_yMax[idxStaff]->at(iCell);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits VerticalProfile::get_min_cell(int iCell, int idxStaff)
-{
-    return m_yMin[idxStaff]->at(iCell);
+    pPoints = LOMSE_NEW PointsRow;
+    m_xMin[idxStaff] = pPoints;
+    pPoints->push_back( {m_xStart, LOMSE_PAPER_UPPER_LIMIT, nullptr} );
+    pPoints->push_back( {m_xEnd, LOMSE_PAPER_UPPER_LIMIT, nullptr} );
 }
 
 //---------------------------------------------------------------------------------------
@@ -125,35 +112,151 @@ void VerticalProfile::update_shape(GmoShape* pShape, int idxStaff)
     if (pShape->is_shape_invisible())
         return;
 
-    int iStart = cell_index( pShape->get_left() );
-    int iEnd = cell_index( pShape->get_right() );
+    LUnits xLeft = pShape->get_left();
+    LUnits xRight = pShape->get_right();
     LUnits yTop = pShape->get_top();
     LUnits yBottom = pShape->get_bottom();
-    for (int j=iStart; j <= iEnd; ++j)
+
+    if (xLeft < m_xStart || xRight > m_xEnd)
+        return;
+
+    //update limits
+    if (m_yMin[idxStaff] == LOMSE_PAPER_LOWER_LIMIT)
+        m_yMin[idxStaff] = yTop;
+    else
+        m_yMin[idxStaff] = min(m_yMin[idxStaff], yTop);
+
+    if (m_yMax[idxStaff] == LOMSE_PAPER_LOWER_LIMIT)
+        m_yMax[idxStaff] = yBottom;
+    else
+        m_yMax[idxStaff] = max(m_yMax[idxStaff], yBottom);
+
+
+    //update xPos and shapes, minimum profile
+    list<VProfilePoint>* pPointsMin = m_xMin[idxStaff];
+    update_profile(pPointsMin, yTop, false, xLeft, xRight, pShape);    //false -> minimum profile
+
+    //update xPos and shapes, maximum profile
+    list<VProfilePoint>* pPointsMax = m_xMax[idxStaff];
+    update_profile(pPointsMax, yBottom, true, xLeft, xRight, pShape);  //true -> maximum profile
+}
+
+//---------------------------------------------------------------------------------------
+void VerticalProfile::update_profile(list<VProfilePoint>* pPoints, LUnits yPos, bool fMax,
+                                     LUnits xLeft, LUnits xRight, GmoShape* pShape)
+{
+//    cout << "Update " << (fMax ? "Max" : "Min") << " ----------------------------------------------------" << endl;
+
+    PointsIterator itLeft = locate_insertion_point(pPoints, xLeft);
+    PointsIterator itPrevLeft = (itLeft != pPoints->begin() ? std::prev(itLeft) : itLeft);
+    VProfilePoint ptPrevLeft = *itPrevLeft;    //Data defining current level
+
+    PointsIterator itRight = locate_insertion_point(pPoints, xRight);
+    PointsIterator itPrevRight = (itRight != pPoints->begin() ? std::prev(itRight) : itRight);
+    VProfilePoint ptPrevRight = *itPrevRight;
+
+
+    //Insert/update point for left border of added shape
+    if ((fMax && (yPos > ptPrevLeft.y)) || (!fMax && (yPos < ptPrevLeft.y)))
     {
-        m_yMin[idxStaff]->at(j) = min(m_yMin[idxStaff]->at(j), yTop);
-        m_yMax[idxStaff]->at(j) = max(m_yMax[idxStaff]->at(j), yBottom);
+        update_point(pPoints, xLeft, yPos, pShape, itLeft);
+    }
+
+
+    //remove or update intermediate points if necessary
+    VProfilePoint ptRef = {xRight, yPos, pShape};   //left border of new added shape
+//    cout << "Ref.point: xPos=" << ptRef.x << ", ptRef.y=" << ptRef.y
+//         << ", ptRef.shape=" << (void*)(ptRef.shape) << endl;
+    LUnits yPrev = (*std::prev(itLeft)).y;
+    GmoShape* pPrevShape = (*std::prev(itLeft)).shape;
+//    cout << "itLeft: xPos=" << (*itLeft).x << ", itRight: xPos=" << (*itRight).x << endl;
+    while (itLeft != itRight)
+    {
+        VProfilePoint ptCur = *itLeft;
+//        cout << "Cur.point: xPos=" << ptCur.x << ", ptCur.y=" << ptCur.y
+//             << ", yPrev=" << yPrev << "--> ptRef.y=" << ptRef.y << endl;
+        if ( (!fMax && (ptCur.y > ptRef.y)) || (fMax && (ptCur.y < ptRef.y)) )
+        {
+            if (yPrev == ptRef.y && pPrevShape == ptRef.shape)
+            {
+                //remove point
+                itLeft = pPoints->erase(itLeft);
+//                cout << "    Point removed. New itLeft: xPos=" << (*itLeft).x << endl;
+            }
+            else
+            {
+                //update point
+                (*itLeft).y = ptRef.y;
+                (*itLeft).shape = ptRef.shape;
+//                cout << "    Point updated: xPos=" << ptCur.x << ", yPos=" << ptRef.y
+//                     << ", shape=" << (void*)(ptRef.shape) << endl;
+//
+                yPrev = ptRef.y;
+                pPrevShape = ptRef.shape;
+                ++itLeft;
+            }
+        }
+        else
+        {
+            //keep point as is
+//            cout << "    Point kept" << endl;
+            yPrev = (*itLeft).y;
+            pPrevShape = (*itLeft).shape;
+            ++itLeft;
+        }
+    }
+//    cout << endl;
+
+    //Insert/update point for right border of added shape
+    if ((fMax && (yPos > ptPrevRight.y)) || (!fMax && (yPos < ptPrevRight.y)))
+    {
+        update_point(pPoints, xRight, ptPrevRight.y, ptPrevRight.shape, itRight);
     }
 }
 
 //---------------------------------------------------------------------------------------
-int VerticalProfile::cell_index(LUnits xPos)
+void VerticalProfile::update_point(list<VProfilePoint>* pPoints, LUnits xPos,
+                                   LUnits yPos, GmoShape* pShape, PointsIterator itNext)
 {
-    if (xPos <= m_xStart)
-        return 0;
+    VProfilePoint ptNext = *itNext;    //Data for point greater or equal to xLeft
 
-    return min(int( floor((xPos - m_xStart) / m_cellWidth) ), m_numCells-1);
+    //update minimum profile
+    if (xPos == ptNext.x)
+    {
+        //replace point. But nothing to do as existing point either:
+        //- is valid (this is the case for the right border of the new shape, or
+        //- will be upated when dealing with intermediate points (left border of new shape)
+    }
+    else    //xPos < ptNext.x
+    {
+        //insert point
+        pPoints->insert(itNext, VProfilePoint(xPos, yPos, pShape));
+    }
+}
+
+//---------------------------------------------------------------------------------------
+PointsIterator VerticalProfile::locate_insertion_point(list<VProfilePoint>* pPoints,
+                                                       LUnits xPos)
+{
+    list<VProfilePoint>::iterator it;
+    for (it = pPoints->begin(); it != pPoints->end(); ++it)
+    {
+        if ((*it).x >= xPos)
+            break;
+    }
+    return it;
 }
 
 //---------------------------------------------------------------------------------------
 LUnits VerticalProfile::get_max_for(LUnits xStart, LUnits xEnd, int idxStaff)
 {
-    int i = cell_index(xStart);
-    int iEnd = cell_index(xEnd);
-    LUnits yMax = m_yMax[idxStaff]->at(i);
-    for (++i; i <= iEnd; ++i)
+    list<VProfilePoint>* pPoints = m_xMax[idxStaff];
+    PointsIterator it = locate_insertion_point(pPoints, xStart);
+    --it;
+    LUnits yMax = (*it).y;
+    for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {
-        yMax = max(yMax, m_yMax[idxStaff]->at(i));
+        yMax = max(yMax, (*it).y);
     }
     return yMax;
 }
@@ -161,12 +264,13 @@ LUnits VerticalProfile::get_max_for(LUnits xStart, LUnits xEnd, int idxStaff)
 //---------------------------------------------------------------------------------------
 LUnits VerticalProfile::get_min_for(LUnits xStart, LUnits xEnd, int idxStaff)
 {
-    int i = cell_index(xStart);
-    int iEnd = cell_index(xEnd);
-    LUnits yMin = m_yMin[idxStaff]->at(i);
-    for (++i; i <= iEnd; ++i)
+    list<VProfilePoint>* pPoints = m_xMin[idxStaff];
+    PointsIterator it = locate_insertion_point(pPoints, xStart);
+    --it;
+    LUnits yMin = (*it).y;
+    for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {
-        yMin = min(yMin, m_yMin[idxStaff]->at(i));
+        yMin = min(yMin, (*it).y);
     }
     return yMin;
 }
@@ -184,29 +288,30 @@ void VerticalProfile::dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem)
 //---------------------------------------------------------------------------------------
 GmoShape* VerticalProfile::dbg_generate_shape(bool fMax, int idxStaff)
 {
-    GmoShapeDebug* pShape = LOMSE_NEW GmoShapeDebug(Color(255,0,0,128));
+    GmoShapeDebug* pShape = LOMSE_NEW GmoShapeDebug(fMax ? Color(0,255,0,128)
+                                                         : Color(255,0,0,128));
 
-    LUnits base = (fMax ? -20.0f : 20.0f);
-    CellsRow* pCells = (fMax ? m_yMax[idxStaff] : m_yMin[idxStaff]);
+    LUnits yBase = (fMax ? get_max_limit(idxStaff) + 100.0f
+                         : get_min_limit(idxStaff) - 100.0f);
+    LUnits yInfinite = (fMax ? LOMSE_PAPER_LOWER_LIMIT : LOMSE_PAPER_UPPER_LIMIT);
+    LUnits yFloor = (fMax ? yBase + 100.0f : yBase - 100.0f);
+
     LUnits xStart = m_xStart;
-    LUnits yStart = pCells->at(0) + base;
+    LUnits yStart = yFloor;
     pShape->add_vertex('M', xStart, yStart);
 
     LUnits xLast = xStart;
     LUnits yLast = yStart;
 
-    vector<LUnits>::iterator it;
-    for (it=pCells->begin(); it != pCells->end(); ++it)
+    list<VProfilePoint>* pPoints = (fMax ? m_xMax[idxStaff] : m_xMin[idxStaff]);
+    PointsIterator it;
+    for (it=pPoints->begin(); it != pPoints->end(); ++it)
     {
-        if (*it != yLast)
-        {
-            pShape->add_vertex('L', xLast, yLast);
-            yLast = *it;
-            pShape->add_vertex('L', xLast, yLast);
-        }
-        xLast += m_cellWidth;
+        xLast = (*it).x;
+        pShape->add_vertex('L', xLast, yLast);
+        yLast = ((*it).y == yInfinite ? yBase : (*it).y);
+        pShape->add_vertex('L', xLast, yLast);
     }
-    pShape->add_vertex('L', xLast, yLast);
     pShape->add_vertex('L', xLast, yStart);
     pShape->add_vertex('Z',    0.0f,    0.0f);
     pShape->close_vertex_list();

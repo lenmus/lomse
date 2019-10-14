@@ -33,6 +33,7 @@
 #include "lomse_basic.h"
 
 #include <vector>
+#include <list>
 
 namespace lomse
 {
@@ -41,44 +42,74 @@ namespace lomse
 class GmoShape;
 class GmoBox;
 
+#define LOMSE_PAPER_LOWER_LIMIT   -100000000000000.0f  //any impossible low value
+#define LOMSE_PAPER_UPPER_LIMIT    100000000000000.0f  //any impossible high value
 
-/*---------------------------------------------------------------------------------------
-	VerticalProfile is responsible for maintaining and managing the information about
+//---------------------------------------------------------------------------------------
+/**	Helper class to store data for a point in the vertical profile
+*/
+class VProfilePoint
+{
+public:
+    LUnits x;
+    LUnits y;
+    GmoShape* shape;
+
+    VProfilePoint(LUnits xp, LUnits yp, GmoShape* sp) : x(xp), y(yp), shape(sp) {}
+    bool operator ==(const VProfilePoint &p) const { return x==p.x && y==p.y && shape==p.shape; }
+};
+
+//to simplify writing code
+typedef list<VProfilePoint>::iterator  PointsIterator;
+
+//---------------------------------------------------------------------------------------
+/**	VerticalProfile is responsible for maintaining and managing the information about
 	current max & min vertical positions ocupied in each staff of a system, as the
 	system is being engraved.
 
-	The profile is, basically, two vectors per staff containing, respectively, the max.
-	and min. vertical positions per horizontal resolution unit (cell).
+	The profile is, basically, two vectors per staff containing, respectively, the shapes
+	that define the max. and min. vertical positions along the x axis.
 
-	Vertical positions are referred to the top line of each staff.
+	Wen no shape occupies the space, the profile assigns to this space as max and min
+	values an upper and lower value of ten time the staff height. This is, the profile
+	height is 21 times the staff height.
 
-	Staff lines are never part of the profile, so that they can be taken or not into
-	account, depending on the needs.
+	Staff lines are never part of the profile. But %VerticalProfile stores information
+	about the staff to facilite measurements to Engraver and Layouter objects.
 */
 class VerticalProfile
 {
 protected:
     int m_numStaves;        //in system 0..n-1
-    int m_numCells;         //all staves have the same number of cells
     LUnits m_xStart;        //sytem left side
     LUnits m_xEnd;          //system right side
-    LUnits m_cellWidth;
 
-    typedef std::vector<LUnits> CellsRow;   //cells for one staff
-    std::vector<CellsRow*> m_yMax;          //ptrs. to max cells vector for each staff
-    std::vector<CellsRow*> m_yMin;          //ptrs. to min cells vector for each staff
+    std::vector<LUnits> m_yMin; //minimum reached value, for each staff
+    std::vector<LUnits> m_yMax; //maximum reached value, for each staff
 
 	std::vector<LUnits> m_yStaffTop;        //top line position for each staff
 	std::vector<LUnits> m_yStaffBottom;     //bottom line position for each staff
 
+    typedef std::list<VProfilePoint> PointsRow;  //data for a profile change, for one staff
+	std::vector<PointsRow*> m_xMax;         //ptrs. to max x pos vector for each staff
+	std::vector<PointsRow*> m_xMin;         //ptrs. to min x pos vector for each staff
+
+//    typedef std::vector<GmoShape*> ShapesRow;   //shape creating the profile change, for one staff
+//	std::vector<ShapesRow*> m_shapeMax;         //ptrs. to max shapes vector for each staff
+//	std::vector<ShapesRow*> m_shapeMin;         //ptrs. to max shapes vector for each staff
+
 public:
-    VerticalProfile(LUnits xStart, LUnits xEnd, LUnits cellWidth, int numStaves);
+    VerticalProfile(LUnits xStart, LUnits xEnd, int numStaves);
     virtual ~VerticalProfile();
 
-    void initialize(int idxStaff, LUnits yTop, LUnits yBottom);
-    LUnits get_max_cell(int iCell, int idxStaff);
-    LUnits get_min_cell(int iCell, int idxStaff);
+    void initialize(int idxStaff, LUnits yStaffTop, LUnits yStaffBottom);
     void update(GmoShape* pShape, int idxStaff);
+
+    /** Return minimum reached value for staff <i>idxStaff</i>. */
+    LUnits get_min_limit(int idxStaff) { return m_yMin[idxStaff]; }
+    /** Return maximum reached value for staff <i>idxStaff</i>. */
+    LUnits get_max_limit(int idxStaff) { return m_yMax[idxStaff]; }
+
     LUnits get_max_for(LUnits xStart, LUnits xEnd, int idxStaff);
     LUnits get_min_for(LUnits xStart, LUnits xEnd, int idxStaff);
 
@@ -86,7 +117,13 @@ public:
     void dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem);
 
 protected:
-    int cell_index(LUnits xPos);       //floor
+    void update_profile(list<VProfilePoint>* pPoints, LUnits yPos, bool fMax,
+                        LUnits xLeft, LUnits xRight, GmoShape* pShape);
+    PointsIterator locate_insertion_point(std::list<VProfilePoint>* pPoints, LUnits xLeft);
+    void update_point(std::list<VProfilePoint>* pPointsMin, LUnits xPos,
+                      LUnits yPos, GmoShape* pShape, PointsIterator itNext);
+
+
     void update_shape(GmoShape* pShape, int idxStaff);
 
     //debug
