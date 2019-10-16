@@ -65,6 +65,7 @@ class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
 class VerticalProfile;
+class PendingAuxObjs;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -159,10 +160,7 @@ protected:
                                           bool fFirstNumberInSystem);
 
 
-    void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
-                                  int iInstr, int iStaff, int iSystem,
-                                  int iCol, int iLine, ImoInstrument* pInstr,
-                                  int idxStaff);
+    void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
 
     void add_relobjs_shapes_to_model(ImoObj* pAO, int layer, int idxStaff);
     void add_relauxobjs_shapes_to_model(const string& tag, int layer);
