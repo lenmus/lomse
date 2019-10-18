@@ -44,15 +44,14 @@ namespace lomse
 // TextEngraver implementation
 //=======================================================================================
 TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           const string& text, const string& language, ImoStyle* pStyle,
-                           int idxStaff, VerticalProfile* pVProfile)
+                           const string& text, const string& language, ImoStyle* pStyle)
     : Engraver(libraryScope, pScoreMeter)
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_language(language)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
+    , m_idxStaff(-1)
+    , m_pVProfile(nullptr)
 {
 }
 

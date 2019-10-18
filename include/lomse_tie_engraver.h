@@ -49,47 +49,50 @@ class VoiceRelatedShape;
 class TieEngraver : public RelObjEngraver
 {
 protected:
+    LUnits m_uStaffTop;             //top line of current staff
     LUnits m_uStaffLeft;
     LUnits m_uStaffRight;
     ImoTie* m_pTie;
-    ShapeBoxInfo m_shapesInfo[2];
     int m_numShapes;
     ImoNote* m_pStartNote;
     ImoNote* m_pEndNote;
     GmoShapeNote* m_pStartNoteShape;
     GmoShapeNote* m_pEndNoteShape;
-    UPoint m_points1[4];    //bezier points for first arch
-    UPoint m_points2[4];    //bezier points for second arch
+    UPoint m_points[4];    //bezier points for an arch
     LUnits m_thickness;
     bool m_fTieBelowNote;
-    bool m_fTwoArches;
 
 public:
-    TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                LUnits uStaffLeft, LUnits uStaffRight);
+    TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~TieEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes();
-    ShapeBoxInfo* get_shape_box_info(int i);
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
 
-    inline void set_prolog_width(LUnits width) { m_uStaffLeft += width; }
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits width) override { m_uStaffLeft += width; }
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 
 protected:
     void decide_placement();
+    inline bool is_end_point_set() { return m_pEndNoteShape != nullptr; }
+    GmoShape* create_single_shape();
+    GmoShape* create_first_shape();
+    GmoShape* create_intermediate_shape();
+    GmoShape* create_final_shape();
+
+
     void decide_if_one_or_two_arches();
-    inline bool two_arches_needed() { return m_fTwoArches; }
-    void create_two_shapes();
-    void create_one_shape();
 
     void add_voice(VoiceRelatedShape* pVRS);
     void compute_start_point();

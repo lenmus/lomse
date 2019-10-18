@@ -62,8 +62,7 @@ protected:
 
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 const string& text, const string& language, ImoStyle* pStyle,
-                 int idxStaff=-1, VerticalProfile* pVProfile=nullptr);
+                 const string& text, const string& language, ImoStyle* pStyle);
     ~TextEngraver();
 
     GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);

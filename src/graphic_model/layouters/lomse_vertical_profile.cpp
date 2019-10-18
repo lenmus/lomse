@@ -33,10 +33,11 @@
 
 //for generating a debug shape
 #include "lomse_shapes.h"
+#include "lomse_shape_note.h"
 #include "lomse_vertex_source.h"
 #include "lomse_logger.h"
 
-#include <iostream>
+#include <sstream>
 using namespace std;
 
 
@@ -94,6 +95,26 @@ void VerticalProfile::initialize(int idxStaff, LUnits yStaffTop, LUnits yStaffBo
 //---------------------------------------------------------------------------------------
 void VerticalProfile::update(GmoShape* pShape, int idxStaff)
 {
+    //barlines are excluded because they could join two or more staves and this will
+    //hide the true boundaries of each staff. also, barlines have no effect of
+    //preventing collisions between auxiliary notations.
+    if (pShape->is_shape_barline())
+        return;
+
+    //for notes, only notehead and accidentals
+    if (pShape->is_shape_note())
+    {
+        GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(pShape);
+        update_shape(pNote->get_notehead_shape(), idxStaff);
+        update_shape(pNote->get_accidentals_shape(), idxStaff);
+        if (!pNote->is_beamed())
+        {
+            update_shape(pNote->get_stem_shape(), idxStaff);
+            update_shape(pNote->get_flag_shape(), idxStaff);
+        }
+        return;
+    }
+
     GmoCompositeShape* pCS = dynamic_cast<GmoCompositeShape*>(pShape);
     if (pCS)
     {
@@ -109,7 +130,7 @@ void VerticalProfile::update(GmoShape* pShape, int idxStaff)
 //---------------------------------------------------------------------------------------
 void VerticalProfile::update_shape(GmoShape* pShape, int idxStaff)
 {
-    if (pShape->is_shape_invisible())
+    if (pShape == nullptr || pShape->is_shape_invisible())
         return;
 
     LUnits xLeft = pShape->get_left();
@@ -119,6 +140,9 @@ void VerticalProfile::update_shape(GmoShape* pShape, int idxStaff)
 
     if (xLeft < m_xStart || xRight > m_xEnd)
         return;
+
+//    dbgLogger << "Update shape " << pShape->get_name() << ", yTop=" << yTop
+//        << ", yBottom=" << yBottom << ", staff=" << idxStaff << endl;
 
     //update limits
     if (m_yMin[idxStaff] == LOMSE_PAPER_LOWER_LIMIT)
@@ -317,6 +341,30 @@ GmoShape* VerticalProfile::dbg_generate_shape(bool fMax, int idxStaff)
     pShape->close_vertex_list();
 
     return pShape;
+}
+
+//---------------------------------------------------------------------------------------
+string VerticalProfile::dump_min(int idxStaff)
+{
+    return dump(m_xMin[idxStaff]);
+}
+
+//---------------------------------------------------------------------------------------
+string VerticalProfile::dump_max(int idxStaff)
+{
+    return dump(m_xMax[idxStaff]);
+}
+
+//---------------------------------------------------------------------------------------
+string VerticalProfile::dump(list<VProfilePoint>* pPoints)
+{
+    stringstream msg;
+    PointsIterator it;
+    for (it=pPoints->begin(); it != pPoints->end(); ++it)
+    {
+        msg << "(" << (*it).x << ", " << (*it).y << "),";
+    }
+    return msg.str();
 }
 
 

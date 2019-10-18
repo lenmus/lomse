@@ -38,8 +38,6 @@
 #include "lomse_spacing_algorithm.h"
 
 #include <list>
-#include <vector>
-using namespace std;
 
 namespace lomse
 {
@@ -51,6 +49,7 @@ class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBoxSystem;
 class ImoAuxObj;
+class ImoRelObj;
 class ImoInstrument;
 class ImoScore;
 class ImoStaff;
@@ -96,6 +95,8 @@ protected:
 
     //collected information
     int m_barlinesInfo;     //info about barlines at end of this system
+    typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
+    std::list<PendingRelObj> m_notFinished;    //RelObjs that continue in next system
 
     SpacingAlgorithm* m_pSpAlgorithm;
     int m_constrains;
@@ -161,8 +162,10 @@ protected:
 
 
     void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
+    void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO, int iSystem);
 
-    void add_relobjs_shapes_to_model(ImoObj* pAO, int layer, int idxStaff);
+    void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
+                                     int iCol, int iInstr, int idxStaff);
     void add_relauxobjs_shapes_to_model(const string& tag, int layer);
     void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
                                 int idxStaff);

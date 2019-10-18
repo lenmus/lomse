@@ -365,20 +365,26 @@ public:
     void finish_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                  int iSystem, int iCol, int iLine, LUnits prologWidth,
-                                 ImoInstrument* pInstr);
+                                 ImoInstrument* pInstr, int idxStaff,
+                                 VerticalProfile* pVProfile);
+    GmoShape* create_first_or_intermediate_shape(ImoRelObj* pRO);
+    GmoShape* create_last_shape(ImoRelObj* pRO);
 
     //AuxRelObj shapes
     void start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                   int iSystem, int iCol, int iLine, ImoInstrument* pInstr);
+                                   int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
+                                   int idxStaff, VerticalProfile* pVProfile);
     void continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                    int iSystem, int iCol, int iLine,
-                                   ImoInstrument* pInstr);
+                                   ImoInstrument* pInstr, int idxStaff,
+                                   VerticalProfile* pVProfile);
     void finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO, const string& tag,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol, int iLine, LUnits prologWidth,
-                                    ImoInstrument* pInstr);
+                                    ImoInstrument* pInstr, int idxStaff,
+                                    VerticalProfile* pVProfile);
 
     //other shapes
     GmoShape* create_measure_number_shape(ImoObj* pCreator, const string& number,

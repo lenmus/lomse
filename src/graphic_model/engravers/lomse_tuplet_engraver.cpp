@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -71,8 +71,10 @@ TupletEngraver::~TupletEngraver()
 //---------------------------------------------------------------------------------------
 void TupletEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                         GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                        int iSystem, int iCol, LUnits UNUSED(xRight),
-                                        LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                        int UNUSED(iSystem), int UNUSED(iCol),
+                                        LUnits UNUSED(xStaffLeft),
+                                        LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                        int idxStaff, VerticalProfile* pVProfile)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -81,35 +83,50 @@ void TupletEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
 void TupletEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                          GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                          int UNUSED(iStaff), int UNUSED(iSystem),
-                                         int UNUSED(iCol), LUnits UNUSED(xRight),
-                                         LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                         int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                         LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                         int idxStaff, VerticalProfile* pVProfile)
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
 void TupletEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                       int UNUSED(iStaff), int UNUSED(iSystem),
-                                      int UNUSED(iCol), LUnits UNUSED(xRight),
-                                      LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                      int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                      LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                      int idxStaff, VerticalProfile* pVProfile)
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-int TupletEngraver::create_shapes(Color color)
+GmoShape* TupletEngraver::create_first_or_intermediate_shape(Color color)
+{
+    //TODO: It has been assumed that a tuplet cannot be split. This has to be revised
+    m_color = color;
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* TupletEngraver::create_last_shape(Color color)
 {
     m_color = color;
     decide_tuplet_placement();
@@ -126,7 +143,7 @@ int TupletEngraver::create_shapes(Color color)
     else
         m_numShapes = 0;
 
-    return m_numShapes;
+    return m_pTupletShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -135,8 +152,6 @@ void TupletEngraver::create_shape()
     m_pStyle = m_pMeter->get_style_info("Tuplet numbers");
 
     m_pTupletShape = LOMSE_NEW GmoShapeTuplet(m_pTuplet, m_color);
-    m_pShape = m_pTupletShape;
-    m_shapesInfo[0].pShape = m_pTupletShape;
 
     if (m_fDrawNumber)
         add_text_shape();

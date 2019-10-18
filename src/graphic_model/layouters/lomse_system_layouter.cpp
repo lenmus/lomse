@@ -617,7 +617,6 @@ void SystemLayouter::engrave_system_details(int iSystem)
     std::bitset<k_imo_last> used;
     used.reset();
 
-
     std::list<PendingAuxObjs*>::iterator it;
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end(); ++it)
     {
@@ -677,6 +676,19 @@ void SystemLayouter::engrave_system_details(int iSystem)
         }
     }
 
+    //engrave RelObjs that continue in next system
+    list<PendingRelObj>::iterator itR;
+    for (itR = m_notFinished.begin(); itR != m_notFinished.end(); ++itR)
+    {
+//        if (((*itR).first)->is_wedge() || ((*itR).first)->is_slur()
+//            || ((*itR).first)->is_octave_shift() || ((*itR).first)->is_volta_bracket()
+//            || ((*itR).first)->is_tie() //|| ((*itR).first)->is_beam()
+//           )
+//        {
+            engrave_not_finished_relobj((*itR).first, (*itR).second, iSystem);
+//        }
+    }
+
     //delete engraved staffobjs
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end();)
     {
@@ -700,7 +712,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                              int iSystem)
 {
     ImoStaffObj* pSO = pPAO->m_pSO;
-    GmoShape* pMainShape = pPAO->m_pMainShape;
+    GmoShape* pMainShape = pPAO->m_pMainShape;      //parent staffObj shape
     int iInstr = pPAO->m_iInstr;
     int iStaff = pPAO->m_iStaff;
     int iCol = pPAO->m_iCol;
@@ -724,34 +736,55 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
             LUnits prologWidth( pSysLyt->get_prolog_width() );
 
             m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
-                                                    iInstr, iStaff, iSystem, iCol,
-                                                    iLine, prologWidth, pInstr);
-            add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs,
-                                        idxStaff);
+                                                      iInstr, iStaff, iSystem, iCol,
+                                                      iLine, prologWidth, pInstr,
+                                                      idxStaff, m_pVProfile);
+
+            GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
+            add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
+                                                iCol, iInstr, idxStaff);
         }
 
         //normal cases: start and end in different objects
         else if (pSO == pRO->get_start_object())
+        {
             m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
-                                                    iInstr, iStaff, iSystem, iCol,
-                                                    iLine, pInstr, idxStaff,
-                                                    m_pVProfile);
+                                                     iInstr, iStaff, iSystem, iCol,
+                                                     iLine, pInstr, idxStaff,
+                                                     m_pVProfile);
+            m_notFinished.push_back(make_pair(pRO, pPAO));
+        }
         else if (pSO == pRO->get_end_object())
         {
             SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
             LUnits prologWidth( pSysLyt->get_prolog_width() );
 
             m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
-                                                    iInstr, iStaff, iSystem, iCol,
-                                                    iLine, prologWidth, pInstr);
-            add_relobjs_shapes_to_model(pRO, GmoShape::k_layer_aux_objs,
-                                        idxStaff);
+                                                      iInstr, iStaff, iSystem, iCol,
+                                                      iLine, prologWidth, pInstr,
+                                                      idxStaff, m_pVProfile);
+            GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
+            add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
+                                            iCol, iInstr, idxStaff);
+
+            //remove from pending RelObjs
+            list<PendingRelObj>::iterator itR;
+            for (itR = m_notFinished.begin(); itR != m_notFinished.end(); ++itR)
+            {
+                if ((*itR).first == pRO)
+                {
+                    m_notFinished.erase(itR);
+                    break;
+                }
+            }
         }
         else
+        {
             m_pShapesCreator->continue_engraving_relobj(pRO, pSO, pMainShape,
                                                         iInstr, iStaff, iSystem,
                                                         iCol, iLine, pInstr,
                                                         idxStaff, m_pVProfile);
+        }
     }
 
     else
@@ -773,7 +806,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                 if (pLyric->is_start_of_relation())
                     m_pShapesCreator->start_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
-                                                iCol, iLine, pInstr);
+                                                iCol, iLine, pInstr, idxStaff, m_pVProfile);
                 else if (pLyric->is_end_of_relation())
                 {
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
@@ -781,13 +814,15 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 
                     m_pShapesCreator->finish_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
-                                                iCol, iLine, prologWidth, pInstr);
+                                                iCol, iLine, prologWidth, pInstr,
+                                                idxStaff, m_pVProfile);
                     add_relauxobjs_shapes_to_model(tag.str(), GmoShape::k_layer_aux_objs);
                 }
                 else
                     m_pShapesCreator->continue_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
-                                                iCol, iLine, pInstr);
+                                                iCol, iLine, pInstr,
+                                                idxStaff, m_pVProfile);
             }
         }
         else
@@ -799,10 +834,31 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 //            pMainShape->accept_link_from(pAuxShape);
             add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
                                    iCol, iInstr, idxStaff);
-            m_yMax = max(m_yMax, pAuxShape->get_bottom());
+//            m_yMax = max(m_yMax, pAuxShape->get_bottom());
         }
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO,
+                                                 int UNUSED(iSystem))
+{
+//    SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
+//    LUnits prologWidth( pSysLyt->get_prolog_width() );
+//    ImoStaffObj* pSO = pPAO->m_pSO;
+//    GmoShape* pMainShape = pPAO->m_pMainShape;      //parent staffObj shape
+    int iInstr = pPAO->m_iInstr;
+//    int iStaff = pPAO->m_iStaff;
+    int iCol = pPAO->m_iCol;
+//    int iLine = pPAO->m_iLine;
+//    ImoInstrument* pInstr = pPAO->m_pInstr;
+    int idxStaff = pPAO->m_idxStaff;
+
+    GmoShape* pAuxShape = m_pShapesCreator->create_first_or_intermediate_shape(pRO);
+    if (pAuxShape)
+        add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iCol, iInstr,
+                               idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -884,28 +940,20 @@ bool SystemLayouter::measure_number_must_be_displayed(int policy, TypeMeasureInf
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_relobjs_shapes_to_model(ImoObj* pAO, int layer, int idxStaff)
+void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO,
+                                                 int layer, int iCol, int iInstr,
+                                                 int idxStaff)
 {
-    RelObjEngraver* pEngrv
-        = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pAO));
+    add_aux_shape_to_model(pShape, layer, iCol, iInstr, idxStaff);
 
+    RelObjEngraver* pEngrv
+        = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
     if (pEngrv == nullptr)
     {
         LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
         return;
     }
-
-    int numShapes = pEngrv->get_num_shapes();
-    for (int i=0; i < numShapes; ++i)
-    {
-        ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
-        GmoShape* pAuxShape = pInfo->pShape;
-        if (pAuxShape)
-            add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr,
-                                   idxStaff);
-   }
-
-    m_engravers.remove_engraver(pAO);
+    m_engravers.remove_engraver(pRO);
     delete pEngrv;
 }
 

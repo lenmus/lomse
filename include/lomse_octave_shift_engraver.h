@@ -51,13 +51,12 @@ class OctaveShiftEngraver : public RelObjEngraver
 {
 protected:
     InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTopStart;    //top line of start system
-    LUnits m_uStaffTopEnd;      //top line of end system
+    LUnits m_uStaffTop;         //top line of current system
 
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
-    GmoShape* m_pShapeNumeral[2];
-    GmoShapeOctaveShift* m_pMainShape[2];
+    GmoShape* m_pShapeNumeral;
+    GmoShapeOctaveShift* m_pMainShape;
     LUnits m_uPrologWidth;
 
     ImoNote* m_pStartNote;
@@ -65,10 +64,8 @@ protected:
     GmoShapeNote* m_pStartNoteShape;
     GmoShapeNote* m_pEndNoteShape;
 
-    bool m_fUseTwoShapes;
     bool m_fPlaceAtTop;
-    UPoint m_points[2][2];  //points for shapes, 2 points per shape (top-left, bottom-left).
-    ShapeBoxInfo m_shapesInfo[2];
+    UPoint m_points[2];  //points for a shape (top-left, bottom-left).
 
 public:
     OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -78,32 +75,38 @@ public:
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color);
-    int create_shapes();
-    int get_num_shapes();
-    ShapeBoxInfo* get_shape_box_info(int i);
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
 
-    void set_prolog_width(LUnits width);
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits width) override;
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 protected:
     void decide_placement();
-    void decide_if_one_or_two_shapes();
-    inline bool two_shapes_needed() { return m_fUseTwoShapes; }
+    inline bool is_end_point_set() { return m_pEndNote != nullptr; }
+    GmoShape* create_single_shape();
+    GmoShape* create_first_shape();
+    GmoShape* create_intermediate_shape();
+    GmoShape* create_final_shape();
+
     inline bool octave_shift_at_top() { return m_fPlaceAtTop; }
 
-    void create_main_container_shape(int iShape);
-    void add_shape_numeral(int iShape);
-    void add_line_info(int iShape);
+    void create_main_container_shape();
+    void add_shape_numeral();
+    void add_line_info();
     int find_glyph(int shift);
 
     void compute_first_shape_position();
     void compute_second_shape_position();
     //void add_user_displacements(int iOctaveShift, UPoint* points);
+    LUnits determine_top_line_of_shape();
 
 };
 

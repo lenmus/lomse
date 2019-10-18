@@ -32,6 +32,7 @@
 #include "lomse_drawer.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
+#include "lomse_im_note.h"
 #include "lomse_calligrapher.h"
 
 
@@ -194,6 +195,7 @@ void GmoShapeNote::set_stem_down(bool down)
     }
 
     //recompute bounding box
+    recompute_bounds();
 }
 
 //---------------------------------------------------------------------------------------
@@ -273,6 +275,15 @@ LUnits GmoShapeNote::get_stem_y_note() const
 LUnits GmoShapeNote::get_stem_extra_length() const
 {
     return (m_pStemShape ? m_pStemShape->get_extra_length() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+bool GmoShapeNote::is_beamed()
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
+    if (pNote)
+        return pNote->is_beamed();
+    return false;
 }
 
 

@@ -97,6 +97,7 @@ public:
     inline GmoShapeNotehead* get_notehead_shape() const { return m_pNoteheadShape; }
 	inline GmoShapeStem* get_stem_shape() const { return m_pStemShape; }
     inline GmoShapeAccidentals* get_accidentals_shape() const { return m_pAccidentalsShape; }
+    inline GmoShapeFlag* get_flag_shape() const { return m_pFlagShape; }
     LUnits get_notehead_width() const;
 	LUnits get_notehead_left() const;
 	LUnits get_notehead_right() const;
@@ -120,6 +121,9 @@ public:
     //info
     inline bool is_up() { return m_fUpOriented; }
     inline void set_up_oriented(bool value) { m_fUpOriented = value; }
+
+    //info from parent ImoNote
+    bool is_beamed();
 
 protected:
     void draw_leger_lines(Drawer* pDrawer);

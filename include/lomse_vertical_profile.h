@@ -94,10 +94,6 @@ protected:
 	std::vector<PointsRow*> m_xMax;         //ptrs. to max x pos vector for each staff
 	std::vector<PointsRow*> m_xMin;         //ptrs. to min x pos vector for each staff
 
-//    typedef std::vector<GmoShape*> ShapesRow;   //shape creating the profile change, for one staff
-//	std::vector<ShapesRow*> m_shapeMax;         //ptrs. to max shapes vector for each staff
-//	std::vector<ShapesRow*> m_shapeMin;         //ptrs. to max shapes vector for each staff
-
 public:
     VerticalProfile(LUnits xStart, LUnits xEnd, int numStaves);
     virtual ~VerticalProfile();
@@ -115,6 +111,8 @@ public:
 
     //debug
     void dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem);
+    std::string dump_max(int idxStaff);
+    std::string dump_min(int idxStaff);
 
 protected:
     void update_profile(list<VProfilePoint>* pPoints, LUnits yPos, bool fMax,
@@ -128,6 +126,7 @@ protected:
 
     //debug
     GmoShape* dbg_generate_shape(bool fMax, int idxStaff);
+    std::string dump(list<VProfilePoint>* pPoints);
 
 };
 

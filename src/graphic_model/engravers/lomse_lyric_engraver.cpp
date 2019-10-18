@@ -69,7 +69,8 @@ LyricEngraver::~LyricEngraver()
 void LyricEngraver::set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO),
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                        int iSystem, int iCol, LUnits UNUSED(xRight),
-                                       LUnits UNUSED(xLeft), LUnits yTop)
+                                       LUnits UNUSED(xLeft), LUnits yTop,
+                                       int UNUSED(idxStaff), VerticalProfile* UNUSED(pVProfile))
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -86,7 +87,9 @@ void LyricEngraver::set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(
                                         GmoShape* pStaffObjShape, int iInstr,
                                         int UNUSED(iStaff), int iSystem, int iCol,
                                         LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                        LUnits yTop)
+                                        LUnits yTop, int UNUSED(idxStaff),
+                                        VerticalProfile* UNUSED(pVProfile))
+
 {
     ImoLyric* pLyric = dynamic_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );
@@ -101,7 +104,9 @@ void LyricEngraver::set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* UNUSED(pSO
                                      GmoShape* pStaffObjShape, int iInstr,
                                      int UNUSED(iStaff), int iSystem, int iCol,
                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                     LUnits yTop)
+                                     LUnits yTop, int UNUSED(idxStaff),
+                                     VerticalProfile* UNUSED(pVProfile))
+
 {
     ImoLyric* pLyric = static_cast<ImoLyric*>(pARO);
     m_lyrics.push_back( make_pair(pLyric, pStaffObjShape) );

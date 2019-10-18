@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,13 +46,10 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // BeamEngraver implementation
 //---------------------------------------------------------------------------------------
-BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           int idxStaff, VerticalProfile* pVProfile)
+BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pBeamShape(nullptr)
     , m_pBeam(nullptr)
-    , m_idxStaff(idxStaff)
-    , m_pVProfile(pVProfile)
     , m_uBeamThickness(0.0f)
     , m_fBeamAbove(false)
     , m_fStemForced(false)
@@ -73,9 +70,10 @@ BeamEngraver::~BeamEngraver()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int iSystem, int iCol,
-                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                      LUnits UNUSED(yTop))
+                                      int UNUSED(iSystem), int UNUSED(iCol),
+                                      LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                      LUnits UNUSED(yStaffTop),
+                                      int idxStaff, VerticalProfile* pVProfile)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -84,17 +82,18 @@ void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                        int UNUSED(iStaff), int UNUSED(iSystem),
-                                       int UNUSED(iCol), LUnits UNUSED(xRight),
-                                       LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                       int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                       LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                       int UNUSED(idxStaff),
+                                       VerticalProfile* UNUSED(pVProfile))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
@@ -104,15 +103,25 @@ void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                     int UNUSED(iStaff), int UNUSED(iSystem),
-                                    int UNUSED(iCol), LUnits UNUSED(xRight),
-                                    LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                    int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                    int UNUSED(idxStaff),
+                                    VerticalProfile* UNUSED(pVProfile))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-int BeamEngraver::create_shapes(Color color)
+GmoShape* BeamEngraver::create_first_or_intermediate_shape(Color color)
+{
+    //TODO: It has been assumed that a beam cannot be split. This has to be revised
+    m_color = color;
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* BeamEngraver::create_last_shape(Color color)
 {
     m_color = color;
     decide_on_stems_direction();
@@ -123,7 +132,7 @@ int BeamEngraver::create_shapes(Color color)
     compute_beam_segments();
     create_shape();
     add_shape_to_noterests();
-    return 1;
+    return m_pBeamShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -132,8 +141,6 @@ void BeamEngraver::create_shape()
     m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
-    m_pShape = m_pBeamShape;
-    m_shapesInfo[0].pShape = m_pBeamShape;
 }
 
 //---------------------------------------------------------------------------------------

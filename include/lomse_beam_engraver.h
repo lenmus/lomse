@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -59,11 +59,8 @@ class BeamEngraver : public RelObjEngraver
 protected:
     GmoShapeBeam* m_pBeamShape;
     ImoBeam* m_pBeam;
-    int m_idxStaff;
-    VerticalProfile* m_pVProfile;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
 
-    ShapeBoxInfo m_shapesInfo[2];
     std::list<LUnits> m_segments;
     UPoint m_origin;
     USize m_size;
@@ -73,30 +70,30 @@ protected:
     UPoint m_outerRightPoint;
 
 public:
-    BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 int idxStaff, VerticalProfile* pVProfile);
+    BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~BeamEngraver();
 
     //implementation of virtual methods from RelObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
-                             LUnits xRight, LUnits xLeft, LUnits yTop);
+                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                             int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return 1; }
-    ShapeBoxInfo* get_shape_box_info(int UNUSED(i))
-    {
-        //AWARE: Only one shape. Param i MUST be always 0
-        return &m_shapesInfo[0];
-    }
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
+
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits UNUSED(width)) override {}
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 
 protected:

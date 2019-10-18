@@ -124,8 +124,8 @@ void GmoShapeWedge::compute_bounds()
     m_origin.x = m_points[0].x;
     m_origin.y = min(m_points[0].y, m_points[1].y);
     m_size.width = abs(m_points[1].x - m_points[0].x);
-    m_size.height = max( abs(m_points[1].y - m_points[0].y),
-                         abs(m_points[3].y - m_points[2].y) );
+    m_size.height = max( abs(m_points[2].y - m_points[0].y),
+                         abs(m_points[1].y - m_points[3].y) );
 }
 
 //---------------------------------------------------------------------------------------

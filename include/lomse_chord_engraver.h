@@ -89,18 +89,19 @@ public:
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
-                             LUnits xRight, LUnits xLeft, LUnits yTop);
+                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                             int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
     int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return 0; }
-    ShapeBoxInfo* get_shape_box_info(int UNUSED(i)) { return nullptr; }
 
     inline int notes_missing() { return m_numNotesMissing; }
 
