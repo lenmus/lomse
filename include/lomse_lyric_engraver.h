@@ -86,9 +86,9 @@ public:
                           int iSystem, int iCol,
                           LUnits xRight, LUnits xLeft, LUnits yTop,
                           int idxStaff, VerticalProfile* pVProfile) override;
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return int(m_shapesInfo.size()); }
-    ShapeBoxInfo* get_shape_box_info(int i)
+    int create_shapes(Color color=Color(0,0,0)) override;
+    int get_num_shapes() override { return int(m_shapesInfo.size()); }
+    ShapeBoxInfo* get_shape_box_info(int i) override
     {
         return m_shapesInfo[i];
     }

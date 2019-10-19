@@ -143,7 +143,7 @@ public:
     GmoShapeDebug(Color color=Color(0,0,0), UPoint uPos=UPoint(0.0f, 0.0f),
                   USize uSize=USize(1000.0f, 1000.0f));
 
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
     virtual void add_vertex(Vertex& vertex);
     virtual void add_vertex(char cmd, LUnits x, LUnits y);
     virtual void close_vertex_list();

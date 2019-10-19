@@ -64,7 +64,7 @@ class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
 class VerticalProfile;
-class PendingAuxObjs;
+struct PendingAuxObjs;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
