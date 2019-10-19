@@ -276,7 +276,8 @@ LUnits VerticalProfile::get_max_for(LUnits xStart, LUnits xEnd, int idxStaff)
 {
     list<VProfilePoint>* pPoints = m_xMax[idxStaff];
     PointsIterator it = locate_insertion_point(pPoints, xStart);
-    --it;
+    if (it != pPoints->begin())
+        --it;
     LUnits yMax = (*it).y;
     for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {
@@ -290,7 +291,8 @@ LUnits VerticalProfile::get_min_for(LUnits xStart, LUnits xEnd, int idxStaff)
 {
     list<VProfilePoint>* pPoints = m_xMin[idxStaff];
     PointsIterator it = locate_insertion_point(pPoints, xStart);
-    --it;
+    if (it != pPoints->begin())
+        --it;
     LUnits yMin = (*it).y;
     for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {

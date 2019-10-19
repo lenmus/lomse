@@ -656,7 +656,31 @@ SUITE(VerticalProfileTest)
 
     TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_102)
     {
-        //@102 get_min_for(). Interval exactly equal than shape
+        //@102 get_max_for(). Interval starts at system start
+        LUnits xStart = 1500.0f;
+        LUnits xEnd = 19500.0f;
+        MyVerticalProfile vp(xStart, xEnd, 1);
+        vp.initialize(0, 3000.0f, 3400.0f);
+
+        GmoShapeRectangle shape1(nullptr);
+        shape1.set_origin(2000.0f, 1500.0f);
+        shape1.set_height(1000.0f);
+        shape1.set_width(7000.0f);
+        vp.update(&shape1, 0);
+
+        GmoShapeRectangle shape2(nullptr);
+        shape2.set_origin(3400.0f, 3500.0f);
+        shape2.set_height(2500.0f);
+        shape2.set_width(5000.0f);
+        vp.update(&shape2, 0);
+
+        CHECK( vp.get_max_for(1500.0f, 8400.0f, 0) == 6000.0f );
+
+    }
+
+    TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_111)
+    {
+        //@111 get_min_for(). Interval exactly equal than shape
         LUnits xStart = 1500.0f;
         LUnits xEnd = 19500.0f;
         MyVerticalProfile vp(xStart, xEnd, 1);
@@ -675,6 +699,29 @@ SUITE(VerticalProfileTest)
         vp.update(&shape2, 0);
 
         CHECK( vp.get_min_for(3400.0f, 8400.0f, 0) == 1500.0f );
+    }
+
+    TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_112)
+    {
+        //@112 get_min_for(). Interval starts at system start
+        LUnits xStart = 1500.0f;
+        LUnits xEnd = 19500.0f;
+        MyVerticalProfile vp(xStart, xEnd, 1);
+        vp.initialize(0, 3000.0f, 3400.0f);
+
+        GmoShapeRectangle shape1(nullptr);
+        shape1.set_origin(3400.0f, 1500.0f);
+        shape1.set_height(1000.0f);
+        shape1.set_width(5000.0f);
+        vp.update(&shape1, 0);
+
+        GmoShapeRectangle shape2(nullptr);
+        shape2.set_origin(2000.0f, 3500.0f);
+        shape2.set_height(2500.0f);
+        shape2.set_width(7000.0f);
+        vp.update(&shape2, 0);
+
+        CHECK( vp.get_min_for(1500.0f, 8400.0f, 0) == 1500.0f );
     }
 
 
