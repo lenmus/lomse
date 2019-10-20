@@ -42,24 +42,26 @@ namespace lomse
 // GmoShapeText implementation
 //=======================================================================================
 GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
-                           ImoStyle* pStyle, const string& language, LUnits x, LUnits y,
-                           LibraryScope& libraryScope)
+                           ImoStyle* pStyle, const string& language, LUnits xLeft,
+                           LUnits yBaseline, LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
     , m_language(language)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
+    , m_space(0.0f)
 {
     //bounds
     select_font();
     TextMeter meter(m_libraryScope);
     m_size.width = meter.measure_width(text);
-    m_size.height = meter.get_font_height();
+    m_size.height = meter.get_ascender() - meter.get_descender();   //meter.get_font_height();
 
     //position
-    m_origin.x = x;
-    m_origin.y = y - m_size.height;     //reference is at text bottom
+    m_space = m_size.height - meter.get_ascender() + meter.get_descender();
+    m_origin.x = xLeft;
+    m_origin.y = yBaseline - meter.get_ascender() + m_space;
 
     //color
     if (m_pStyle)
@@ -78,10 +80,21 @@ Color GmoShapeText::get_normal_color()
 //---------------------------------------------------------------------------------------
 void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    select_font();
+    //select_font();
+    TextMeter meter(m_libraryScope);
+    if (!m_pStyle)
+        meter.select_font(m_language, "", "Liberation serif", 12.0);
+    else
+        meter.select_font(m_language,
+                          m_pStyle->font_file(),
+                          m_pStyle->font_name(),
+                          m_pStyle->font_size(),
+                          m_pStyle->is_bold(),
+                          m_pStyle->is_italic() );
+
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_origin.x;
-    LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
+    LUnits y = m_origin.y + meter.get_ascender() - m_space;     //reference is at text baseline
     pDrawer->draw_text(x, y, m_text);
 
     //std::string str("¿This? is a test: Ñ € & abc. Ruso:Текст на кирилица");

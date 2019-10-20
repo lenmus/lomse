@@ -161,6 +161,9 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int id
             case k_imo_direction:
             case k_imo_metronome_mark:
             case k_imo_go_back_fwd:
+            case k_imo_figured_bass:
+            case k_imo_sound_change:
+            case k_imo_system_break:
                 curType = TimeSlice::k_non_timed;
                 break;
 
@@ -175,8 +178,8 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int id
 
             default:
                 stringstream ss;
-                ss << "Investigate: un-expected staff object. Type= "
-                   << pSO->get_obj_type();
+                ss << "Investigate: un-expected staff object. Name= "
+                   << pSO->get_name();
                 LOMSE_LOG_ERROR(ss.str());
                 curType = TimeSlice::k_non_timed;
         }

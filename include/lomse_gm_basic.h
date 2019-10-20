@@ -374,6 +374,7 @@ public:
 
     //test and debug
     void dump(ostream& outStream, int level);
+    void set_color(Color color) { m_color = color; }
 
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);

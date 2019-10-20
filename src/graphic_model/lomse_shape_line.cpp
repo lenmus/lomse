@@ -95,7 +95,7 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->stroke(color);
-    pDrawer->stroke_width(10.0);  //0.1 mm
+    pDrawer->stroke_width(m_uWidth);
     pDrawer->line_with_markers(start, end, m_uWidth, m_nStartCap, m_nEndCap);
     pDrawer->end_path();
 

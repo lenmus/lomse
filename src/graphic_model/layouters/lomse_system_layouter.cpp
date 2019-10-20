@@ -49,9 +49,7 @@
 #include "lomse_vertical_profile.h"
 #include "lomse_tree.h"
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <bitset>
 #include <math.h>
@@ -678,15 +676,16 @@ void SystemLayouter::engrave_system_details(int iSystem)
 
     //engrave RelObjs that continue in next system
     list<PendingRelObj>::iterator itR;
-    for (itR = m_notFinished.begin(); itR != m_notFinished.end(); ++itR)
+    for (itR = m_notFinishedRelObj.begin(); itR != m_notFinishedRelObj.end(); ++itR)
     {
-//        if (((*itR).first)->is_wedge() || ((*itR).first)->is_slur()
-//            || ((*itR).first)->is_octave_shift() || ((*itR).first)->is_volta_bracket()
-//            || ((*itR).first)->is_tie() //|| ((*itR).first)->is_beam()
-//           )
-//        {
-            engrave_not_finished_relobj((*itR).first, (*itR).second, iSystem);
-//        }
+        engrave_not_finished_relobj((*itR).first, (*itR).second, iSystem);
+    }
+
+    //engrave Lyrics that continue in next system
+    list<PendingLyrics>::iterator itAR;
+    for (itAR = m_notFinishedLyrics.begin(); itAR != m_notFinishedLyrics.end(); ++itAR)
+    {
+        engrave_not_finished_lyrics((*itAR).first, (*itAR).second, iSystem);
     }
 
     //delete engraved staffobjs
@@ -720,6 +719,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
     ImoInstrument* pInstr = pPAO->m_pInstr;
     int idxStaff = pPAO->m_idxStaff;
 
+    //RelObjs
     if (pAR->is_relobj() && !pAR->is_chord())
     {
         ImoRelObj* pRO = static_cast<ImoRelObj*>(pAR);
@@ -752,7 +752,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                      iInstr, iStaff, iSystem, iCol,
                                                      iLine, pInstr, idxStaff,
                                                      m_pVProfile);
-            m_notFinished.push_back(make_pair(pRO, pPAO));
+            m_notFinishedRelObj.push_back(make_pair(pRO, pPAO));
         }
         else if (pSO == pRO->get_end_object())
         {
@@ -769,11 +769,11 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 
             //remove from pending RelObjs
             list<PendingRelObj>::iterator itR;
-            for (itR = m_notFinished.begin(); itR != m_notFinished.end(); ++itR)
+            for (itR = m_notFinishedRelObj.begin(); itR != m_notFinishedRelObj.end(); ++itR)
             {
                 if ((*itR).first == pRO)
                 {
-                    m_notFinished.erase(itR);
+                    m_notFinishedRelObj.erase(itR);
                     break;
                 }
             }
@@ -787,9 +787,12 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
         }
     }
 
+    //AuxObjs && AuxRelObjs
     else
     {
         ImoAuxObj* pAO = static_cast<ImoAuxObj*>(pAR);
+
+        //AuxRelObjs
         if (pAO->is_lyric())
         {
             if (pSO->is_note())
@@ -804,9 +807,12 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 
                 GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>(pMainShape);
                 if (pLyric->is_start_of_relation())
+                {
                     m_pShapesCreator->start_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
                                                 iCol, iLine, pInstr, idxStaff, m_pVProfile);
+                    m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                }
                 else if (pLyric->is_end_of_relation())
                 {
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
@@ -816,15 +822,46 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                 pNoteShape, iInstr, iStaff, iSystem,
                                                 iCol, iLine, prologWidth, pInstr,
                                                 idxStaff, m_pVProfile);
-                    add_relauxobjs_shapes_to_model(tag.str(), GmoShape::k_layer_aux_objs);
+
+                    add_lyrics_shapes_to_model(tag.str(), GmoShape::k_layer_aux_objs,
+                                               true, idxStaff);
+
+                    //remove from pending AuxRelObjs
+                    list<PendingLyrics>::iterator itAR;
+                    for (itAR = m_notFinishedLyrics.begin(); itAR != m_notFinishedLyrics.end(); ++itAR)
+                    {
+                        if ((*itAR).first == tag.str())
+                        {
+                            m_notFinishedLyrics.erase(itAR);
+                            break;
+                        }
+                    }
                 }
                 else
+                {
                     m_pShapesCreator->continue_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
                                                 iCol, iLine, pInstr,
                                                 idxStaff, m_pVProfile);
+
+                    //when the start of the relation was in a previous system, it is
+                    //necessary to add the auxrelobj to the list of pending auxobjs if
+                    //not yet included.
+                    list<PendingLyrics>::iterator it;
+                    for (it = m_notFinishedLyrics.begin(); it != m_notFinishedLyrics.end(); ++it)
+                    {
+                        if ((*it).first == tag.str())
+                            break;
+                    }
+                    if (it == m_notFinishedLyrics.end())
+                    {
+                        m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                    }
+                }
             }
         }
+
+        //AuxObjs
         else
         {
             GmoShape* pAuxShape =
@@ -834,7 +871,6 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 //            pMainShape->accept_link_from(pAuxShape);
             add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
                                    iCol, iInstr, idxStaff);
-//            m_yMax = max(m_yMax, pAuxShape->get_bottom());
         }
     }
 
@@ -844,21 +880,22 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO,
                                                  int UNUSED(iSystem))
 {
-//    SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
-//    LUnits prologWidth( pSysLyt->get_prolog_width() );
-//    ImoStaffObj* pSO = pPAO->m_pSO;
-//    GmoShape* pMainShape = pPAO->m_pMainShape;      //parent staffObj shape
     int iInstr = pPAO->m_iInstr;
-//    int iStaff = pPAO->m_iStaff;
     int iCol = pPAO->m_iCol;
-//    int iLine = pPAO->m_iLine;
-//    ImoInstrument* pInstr = pPAO->m_pInstr;
     int idxStaff = pPAO->m_idxStaff;
 
     GmoShape* pAuxShape = m_pShapesCreator->create_first_or_intermediate_shape(pRO);
     if (pAuxShape)
         add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iCol, iInstr,
                                idxStaff);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::engrave_not_finished_lyrics(const string& tag, PendingAuxObjs* pPAO,
+                                                 int UNUSED(iSystem))
+{
+    int idxStaff = pPAO->m_idxStaff;
+    add_lyrics_shapes_to_model(tag, GmoShape::k_layer_aux_objs, false, idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -958,23 +995,27 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_relauxobjs_shapes_to_model(const string& tag, int layer)
+void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bool fLast,
+                                                int idxStaff)
 {
     AuxRelObjEngraver* pEngrv
         = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
 
-    int numShapes = pEngrv->get_num_shapes();
+    int numShapes = pEngrv->create_shapes();
     for (int i=0; i < numShapes; ++i)
     {
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
             add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr,
-                                   -1);
-   }
+                                   idxStaff);
+    }
 
-    m_engravers.remove_engraver(tag);
-    delete pEngrv;
+    if (fLast)
+    {
+        m_engravers.remove_engraver(tag);
+        delete pEngrv;
+    }
 }
 
 

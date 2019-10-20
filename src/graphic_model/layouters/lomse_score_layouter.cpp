@@ -1402,59 +1402,7 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
     pEngrv->set_end_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
                              xLeft, xRight, yTop, idxStaff, pVProfile);
     pEngrv->set_prolog_width( prologWidth );
-
-    pEngrv->create_shapes(pARO->get_color());
 }
-
-////---------------------------------------------------------------------------------------
-//void ShapesCreator::create_shapes_for_lyrics(ImoStaffObj* pSO, GmoShapeNote* pNoteShape,
-//                                             int iInstr, int iStaff)
-//{
-//    ImoAttachments* pAuxObjs = pSO->get_attachments();
-//    if (!pAuxObjs)
-//        return;
-//
-//    ImoNote* pNote = static_cast<ImoNote*>(pSO);
-//    int size = pAuxObjs->get_num_items();
-//    for (int i=0; i < size; ++i)
-//    {
-//        ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
-//        if (pAO->is_lyric())
-//        {
-//            ImoLyric* pLyric = static_cast<ImoLyric*>(pAO);
-//
-//            //build hash code from instrument, number & voice.
-//            stringstream tag;
-//            tag << iInstr << "-" << pLyric->get_number() << "-" << pNote->get_voice();
-//            string id = tag.str();
-//
-//            //find engraver or create one
-//            LyricEngraver* pEngrv;
-//            if (pLyric->is_start_of_lyrics_line())
-//            {
-//                pEngrv = LOMSE_NEW LyricEngraver(m_libraryScope, m_pScoreMeter);
-//                m_lyricEngravers[id] = pEngrv;
-//            }
-//            else
-//            {
-//                //get engraver for this lyrics line
-//                map<string, LyricEngraver*>::iterator it = m_lyricEngravers.find(id);
-//                if (it == m_lyricEngravers.end())
-//                {
-//                    LOMSE_LOG_ERROR("No engraver!!!!!");
-//                    return;
-//                }
-//                else
-//                    pEngrv = it->second;
-//            }
-//
-//            GmoShape* pAuxShape = pEngrv->create_Lyric_shape(pLyric, pNoteShape);
-////            add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
-////                                      iCol, iInstr);
-//         }
-//
-//    }
-//}
 
 
 //=======================================================================================

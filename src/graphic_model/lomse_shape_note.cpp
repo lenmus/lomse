@@ -286,6 +286,12 @@ bool GmoShapeNote::is_beamed()
     return false;
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::set_color(Color color)
+{
+    m_pNoteheadShape->set_color(color);
+}
+
 
 
 //=======================================================================================

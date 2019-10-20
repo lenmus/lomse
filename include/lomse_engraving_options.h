@@ -115,6 +115,11 @@ namespace lomse
 //articulations
 #define LOMSE_SPACING_STACKED_ARTICULATIONS  2.0f //space between two stacked articulation marks
 
+//lyrics
+#define LOMSE_LYRICS_SPACE_TO_MUSIC     12.0f //space between first lyric line and other music notation
+#define LOMSE_LYRICS_LINES_EXTRA_SPACE   3.0f //additional space between two lyric lines
+
+
 }   //namespace lomse
 
 #endif    // __LOMSE_ENGRAVING_OPTIONS_H__

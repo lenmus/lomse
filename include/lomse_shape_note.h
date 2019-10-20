@@ -125,6 +125,9 @@ public:
     //info from parent ImoNote
     bool is_beamed();
 
+    //used for debug
+    void set_color(Color color);
+
 protected:
     void draw_leger_lines(Drawer* pDrawer);
 

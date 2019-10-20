@@ -50,6 +50,7 @@ class GmoShape;
 class GmoBoxSystem;
 class ImoAuxObj;
 class ImoRelObj;
+class ImoAuxRelObj;
 class ImoInstrument;
 class ImoScore;
 class ImoStaff;
@@ -96,7 +97,9 @@ protected:
     //collected information
     int m_barlinesInfo;     //info about barlines at end of this system
     typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
-    std::list<PendingRelObj> m_notFinished;    //RelObjs that continue in next system
+    std::list<PendingRelObj> m_notFinishedRelObj;    //RelObjs that continue in next system
+    typedef std::pair<std::string, PendingAuxObjs*> PendingLyrics;
+    std::list<PendingLyrics> m_notFinishedLyrics;    //Lyrics that continue in next system
 
     SpacingAlgorithm* m_pSpAlgorithm;
     int m_constrains;
@@ -163,10 +166,11 @@ protected:
 
     void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
     void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO, int iSystem);
+    void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObjs* pPAO, int iSystem);
 
     void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
                                      int iCol, int iInstr, int idxStaff);
-    void add_relauxobjs_shapes_to_model(const string& tag, int layer);
+    void add_lyrics_shapes_to_model(const string& tag, int layer, bool fLast, int idxStaff);
     void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
                                 int idxStaff);
 
