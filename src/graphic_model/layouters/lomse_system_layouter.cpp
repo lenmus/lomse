@@ -183,6 +183,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     //dbg_add_vertical_profile_shape();   //<-- debug. Comment out!
 
     engrave_measure_numbers();
+    move_staves_to_avoid_collisions();
     engrave_instrument_details();
     add_instruments_info();
 
@@ -366,10 +367,33 @@ void SystemLayouter::add_column_to_system(int iCol)
     LUnits size = determine_column_size(iCol);
 
     create_boxes_for_column(iCol, m_pagePos.x, size);
+
+    if (iCol != 0 && is_first_column_in_system())
+        add_prolog_shapes_to_boxes();
+
     add_shapes_for_column(iCol);
 
     m_uFreeSpace -= size;
     m_pagePos.x += size;
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::add_prolog_shapes_to_boxes()
+{
+    //prolog shapes were created for measuring the prolog, and saved in list
+    //m_prologShapes. Now, once the first system slice box has been created, the
+    //prolog shapes are added to the boxes.
+
+    list< tuple<GmoShape*, int, int> >::iterator it;
+    for (it = m_prologShapes.begin(); it != m_prologShapes.end(); ++it)
+    {
+        GmoShape* pShape = get<0>(*it);
+        int iInstr = get<1>(*it);
+        int iStaff = get<2>(*it);
+        GmoBoxSliceInstr* pBox = m_pBoxSystem->get_first_instr_slice(iInstr);
+        pBox->add_shape(pShape, GmoShape::k_layer_notes, iStaff);
+    }
+    m_prologShapes.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -418,6 +442,12 @@ void SystemLayouter::create_boxes_for_column(int iCol, LUnits pos, LUnits UNUSED
 //---------------------------------------------------------------------------------------
 LUnits SystemLayouter::engrave_prolog(int iInstr)
 {
+    //Prolog shapes are created, for measuring the space taken by the prolog. But
+    //prolog shapes cannot be added to the model because first system slice box and
+    //related are not yet created. Therefore, once created, the shapes are saved in list
+    //m_prologShapes so that later, when appropiate, the shapes will be added to
+    //the boxes.
+
     LUnits uPrologWidth = 0.0f;
 
     //AWARE when this method is invoked the paper position is at the left marging,
@@ -427,19 +457,17 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
     //iterate over the collection of staff objects to draw current clef and key signature
     ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
 
-    GmoBoxSystem* pBox = get_box_system();
-
     int numStaves = pInstr->get_num_staves();
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     for (int iStaff=0; iStaff < numStaves; ++iStaff)
     {
         LUnits xPos = xStartPos;
         m_pagePos.y = pInstrEngrv->get_top_line_of_staff(iStaff);
-        int iStaffIndex = m_pScoreMeter->staff_index(iInstr, iStaff);
+        int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
         ColStaffObjsEntry* pClefEntry =
-            m_pSpAlgorithm->get_prolog_clef(m_iFirstCol, iStaffIndex);
+            m_pSpAlgorithm->get_prolog_clef(m_iFirstCol, idxStaff);
         ColStaffObjsEntry* pKeyEntry =
-            m_pSpAlgorithm->get_prolog_key(m_iFirstCol, iStaffIndex);
+            m_pSpAlgorithm->get_prolog_key(m_iFirstCol, idxStaff);
         ImoClef* pClef = pClefEntry ? static_cast<ImoClef*>(pClefEntry->imo_object())
                                     : nullptr;
         int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
@@ -455,7 +483,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                     m_pShapesCreator->create_staffobj_shape(pClef, iInstr, iStaff,
                                                             m_pagePos, clefType);
                 pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
-                pBox->add_shape(pShape, GmoShape::k_layer_notes);
+                m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
                 xPos += pShape->get_width();
             }
         }
@@ -472,7 +500,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                     m_pShapesCreator->create_staffobj_shape(pKey, iInstr, iStaff,
                                                             m_pagePos, clefType);
                 pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
-                pBox->add_shape(pShape, GmoShape::k_layer_notes);
+                m_prologShapes.push_back( make_tuple(pShape, iInstr, iStaff));
                 xPos += pShape->get_width();
             }
         }
@@ -550,6 +578,30 @@ void SystemLayouter::reposition_slices_and_staffobjs()
 }
 
 //---------------------------------------------------------------------------------------
+void SystemLayouter::reposition_staves_in_engravers(const vector<LUnits>& yOrgShifts)
+{
+    m_pPartsEngraver->reposition_staves_in_engravers(yOrgShifts);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::reposition_slice_boxes_and_shapes(const vector<LUnits>& yOrgShifts,
+                                                       vector<LUnits>& heights)
+{
+    int numInstrs = m_pScore->get_num_instruments();
+    vector<LUnits> barlinesHeight(numInstrs);
+
+    for (int iInstr = 0; iInstr < numInstrs; iInstr++)
+    {
+        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+        barlinesHeight[iInstr] = pInstrEngrv->get_barline_bottom()
+                                - pInstrEngrv->get_barline_top();
+    }
+
+    GmoBoxSystem* pSystem = get_box_system();
+    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight);
+}
+
+//---------------------------------------------------------------------------------------
 void SystemLayouter::reposition_full_measure_rests()
 {
     GmoBoxSystem* pBox = get_box_system();
@@ -605,6 +657,41 @@ void SystemLayouter::engrave_instrument_details()
 
     m_pPartsEngraver->engrave_names_and_brackets(fDrawStafflines, m_pBoxSystem,
                                                  m_iSystem);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::move_staves_to_avoid_collisions()
+{
+    int numStaves = m_pScoreMeter->num_staves();
+    vector<LUnits> yOrgShifts(numStaves);
+    vector<LUnits> heights(numStaves);
+
+    //determine shifts to apply
+    for (int i=1; i < numStaves; ++i)
+    {
+        LUnits distance = m_pVProfile->get_staves_distance(i);
+        if (distance < 0.0f)
+        {
+            distance -= m_pScoreMeter->tenths_to_logical(LOMSE_MIN_SPACING_STAVES);
+            heights[i-1] = -distance;
+            for (int j=i; j < numStaves; ++j)
+                yOrgShifts[j] -= distance;
+        }
+    }
+
+    //shift staves
+    //- reposition staves in each instrument and group engraver
+    //- reposition instrSlice boxes and recompute its height
+    //- shift all shapes inside instrSlice boxes
+    //
+    //PROBLEMS DETECTED
+    //- height of barlines change -> fix height as barline is shifted to final pos.?
+
+    reposition_staves_in_engravers(yOrgShifts);
+
+    if (yOrgShifts[numStaves - 1] > 0.0f)
+        reposition_slice_boxes_and_shapes(yOrgShifts, heights);
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -742,7 +829,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 
             GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
             add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
-                                                iCol, iInstr, idxStaff);
+                                        iCol, iInstr, iStaff, idxStaff);
         }
 
         //normal cases: start and end in different objects
@@ -765,7 +852,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                       idxStaff, m_pVProfile);
             GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
             add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
-                                            iCol, iInstr, idxStaff);
+                                        iCol, iInstr, iStaff, idxStaff);
 
             //remove from pending RelObjs
             list<PendingRelObj>::iterator itR;
@@ -824,7 +911,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                 idxStaff, m_pVProfile);
 
                     add_lyrics_shapes_to_model(tag.str(), GmoShape::k_layer_aux_objs,
-                                               true, idxStaff);
+                                               true, iStaff, idxStaff);
 
                     //remove from pending AuxRelObjs
                     list<PendingLyrics>::iterator itAR;
@@ -870,7 +957,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                               pMainShape);
 //            pMainShape->accept_link_from(pAuxShape);
             add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs,
-                                   iCol, iInstr, idxStaff);
+                                   iCol, iInstr, iStaff, idxStaff);
         }
     }
 
@@ -882,20 +969,21 @@ void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs*
 {
     int iInstr = pPAO->m_iInstr;
     int iCol = pPAO->m_iCol;
+    int iStaff = pPAO->m_iStaff;
     int idxStaff = pPAO->m_idxStaff;
 
     GmoShape* pAuxShape = m_pShapesCreator->create_first_or_intermediate_shape(pRO);
     if (pAuxShape)
         add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iCol, iInstr,
-                               idxStaff);
+                               iStaff, idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::engrave_not_finished_lyrics(const string& tag, PendingAuxObjs* pPAO,
                                                  int UNUSED(iSystem))
 {
-    int idxStaff = pPAO->m_idxStaff;
-    add_lyrics_shapes_to_model(tag, GmoShape::k_layer_aux_objs, false, idxStaff);
+    add_lyrics_shapes_to_model(tag, GmoShape::k_layer_aux_objs, false, pPAO->m_iStaff,
+                               pPAO->m_idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -979,9 +1067,9 @@ bool SystemLayouter::measure_number_must_be_displayed(int policy, TypeMeasureInf
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO,
                                                  int layer, int iCol, int iInstr,
-                                                 int idxStaff)
+                                                 int iStaff, int idxStaff)
 {
-    add_aux_shape_to_model(pShape, layer, iCol, iInstr, idxStaff);
+    add_aux_shape_to_model(pShape, layer, iCol, iInstr, iStaff, idxStaff);
 
     RelObjEngraver* pEngrv
         = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
@@ -996,7 +1084,7 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bool fLast,
-                                                int idxStaff)
+                                                int iStaff, int idxStaff)
 {
     AuxRelObjEngraver* pEngrv
         = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
@@ -1008,7 +1096,7 @@ void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bo
         GmoShape* pAuxShape = pInfo->pShape;
         if (pAuxShape)
             add_aux_shape_to_model(pAuxShape, layer, pInfo->iCol, pInfo->iInstr,
-                                   idxStaff);
+                                   iStaff, idxStaff);
     }
 
     if (fLast)
@@ -1020,12 +1108,12 @@ void SystemLayouter::add_lyrics_shapes_to_model(const string& tag, int layer, bo
 
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_aux_shape_to_model(GmoShape* pShape, int layer,
-                                            int iCol, int iInstr, int idxStaff)
+void SystemLayouter::add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol,
+                                            int iInstr, int iStaff, int idxStaff)
 {
     pShape->set_layer(layer);
     GmoBoxSliceInstr* pBox = m_pSpAlgorithm->get_slice_instr(iCol, iInstr);
-    pBox->add_shape(pShape, layer);
+    pBox->add_shape(pShape, layer, iStaff);
     m_yMax = max(m_yMax, pShape->get_bottom());
     if (idxStaff >= 0)
         m_pVProfile->update(pShape, idxStaff);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -106,6 +106,7 @@ public:
     void set_staves_horizontal_position(int iInstr, LUnits x, LUnits width, LUnits indent);
     void set_position_and_width_for_staves(LUnits indent, UPoint org, GmoBoxSystem* pBox);
     void set_staves_width(LUnits width);
+    void reposition_staves_in_engravers(const vector<LUnits>& yShifts);
 
     //info about instruments
     LUnits get_staff_top_position_for(ImoInstrument* pInstr);
@@ -149,16 +150,14 @@ protected:
     URect m_bracketOtherBox;
     URect m_nameBox;
     URect m_abbrevBox;
-
-    //vertical positions are relative to SystemBox origin
-    LUnits m_stavesTop;
-    LUnits m_stavesBottom;
     LUnits m_stavesLeft;
     LUnits m_stavesWidth;
 
+    //vertical positions are relative to SystemBox origin
     std::vector<LUnits> m_staffTop;
     std::vector<LUnits> m_staffBottom;
     std::vector<LUnits> m_lineThickness;
+    std::vector<LUnits> m_yShifts;
 
     //next instrument engraver
     InstrumentEngraver* m_pNextInstrEngr;
@@ -172,6 +171,7 @@ public:
     LUnits set_staves_vertical_position(LUnits y);
     inline void set_slice_instr_origin(UPoint org) { m_org = org; }
     inline void set_staves_width(LUnits width) { m_stavesWidth = width; }
+    void reposition_staff(int iStaff, LUnits yShift);
 
     //indents
     void measure_name_and_bracket();
@@ -186,8 +186,8 @@ public:
     void set_bracket_other_final_pos(URect rect) { m_bracketOtherBox = rect; }
 
     //staves position
-    LUnits get_staff_top_position() { return m_stavesTop; }
-    LUnits get_staff_bottom_position() { return m_stavesBottom; }
+    LUnits get_staff_top_position() { return m_staffTop.front() + m_yShifts.front(); }
+    LUnits get_staff_bottom_position() { return m_staffBottom.back()  + m_yShifts.back(); }
     LUnits get_top_line_of_staff(int iStaff);
     LUnits get_bottom_line_of_staff(int iStaff);
 
@@ -195,7 +195,7 @@ public:
     void add_staff_lines(GmoBoxSystem* pBox);
     void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
     void add_brace_bracket(GmoBoxSystem* pBox, int iSystem);
-    inline LUnits get_staves_bottom() { return m_stavesBottom + m_org.y; }
+    inline LUnits get_staves_bottom() { return get_staff_bottom_position() + m_org.y; }
     LUnits get_staves_top_line();
     LUnits get_staves_bottom_line();
     inline LUnits get_staves_width() { return m_stavesWidth; }
@@ -215,6 +215,7 @@ public:
 protected:
     void measure_name_abbrev();
     void measure_brace_or_bracket();
+    void measure_brace_or_bracket_height();
     bool has_brace_or_bracket();
 
     friend class PartsEngraver;
@@ -272,6 +273,7 @@ public:
 
     //position
     inline void set_slice_instr_origin(UPoint org) { m_org = org; }
+    inline void reposition_staves() { determine_staves_position(); }
 
 protected:
     void determine_staves_position();

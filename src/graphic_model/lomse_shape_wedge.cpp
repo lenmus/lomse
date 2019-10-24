@@ -50,8 +50,7 @@ GmoShapeWedge::GmoShapeWedge(ImoObj* pCreatorImo, ShapeId idx, UPoint points[],
     , m_niente(niente)
     , m_radiusNiente(radius)
 {
-    save_points(points);
-    compute_bounds();
+    save_points_and_compute_bounds(points);
 }
 
 //---------------------------------------------------------------------------------------
@@ -60,35 +59,23 @@ GmoShapeWedge::~GmoShapeWedge()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeWedge::save_points(UPoint* points)
+void GmoShapeWedge::save_points_and_compute_bounds(UPoint* points)
 {
-    for (int i=0; i < 4; i++)
-        m_points[i] = *(points+i);
-}
+    m_origin.x = points[0].x;
+    m_origin.y = min(points[0].y, points[1].y);
+    m_size.width = abs(points[1].x - points[0].x);
+    m_size.height = max( abs(points[2].y - points[0].y),
+                         abs(points[1].y - points[3].y) );
 
-////---------------------------------------------------------------------------------------
-//void GmoShapeWedge::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos,
-//                                           LUnits uBracketDistance, LUnits uJogLength,
-//                                           LUnits uLineThick, LUnits uLeftSpaceToText,
-//                                           LUnits xStaffLeft, LUnits xStaffRight,
-//                                           GmoShapeBarline* pStart,
-//                                           GmoShapeBarline* pEnd)
-//{
-//    //save data
-//    m_pStartBarlineShape = pStart;
-//    m_pStopBarlineShape = pEnd;
-//    m_uBracketDistance = uBracketDistance;
-//	m_uJogLength = uJogLength;
-//    m_uLineThick = uLineThick;
-//    m_uStaffLeft = xStaffLeft;
-//    m_uStaffRight = xStaffRight;
-//
-//	//move text shape to its position
-//    if (m_pShapeText)
-//        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos);
-//
-//    compute_bounds(xStart, xEnd, yPos);
-//}
+    m_xTopStart = points[0].x - m_origin.x;
+    m_yTopStart = points[0].y - m_origin.y;
+    m_xTopEnd = points[1].x - m_origin.x;
+    m_yTopEnd = points[1].y - m_origin.y;
+    m_xBottomStart = points[2].x - m_origin.x;
+    m_yBottomStart = points[2].y - m_origin.y;
+    m_xBottomEnd = points[3].x - m_origin.x;
+    m_yBottomEnd = points[3].y - m_origin.y;
+}
 
 //---------------------------------------------------------------------------------------
 void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
@@ -101,31 +88,21 @@ void GmoShapeWedge::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->stroke_width(m_thickness);
 
     //draw lines
-    pDrawer->move_to(m_points[0].x, m_points[0].y);
-    pDrawer->line_to(m_points[1].x, m_points[1].y);
-    pDrawer->move_to(m_points[2].x, m_points[2].y);
-    pDrawer->line_to(m_points[3].x, m_points[3].y);
+    pDrawer->move_to(m_xTopStart + m_origin.x, m_yTopStart + m_origin.y);
+    pDrawer->line_to(m_xTopEnd + m_origin.x, m_yTopEnd + m_origin.y);
+    pDrawer->move_to(m_xBottomStart + m_origin.x, m_yBottomStart + m_origin.y);
+    pDrawer->line_to(m_xBottomEnd + m_origin.x, m_yBottomEnd + m_origin.y);
 
     //draw niente circle
     if (m_niente == k_niente_at_start)
-        pDrawer->circle(m_points[0].x - m_radiusNiente, m_points[0].y, m_radiusNiente);
+        pDrawer->circle(m_xTopStart + m_origin.x - m_radiusNiente, m_yTopStart + m_origin.y, m_radiusNiente);
     else if (m_niente == k_niente_at_end)
-        pDrawer->circle(m_points[1].x + m_radiusNiente, m_points[1].y, m_radiusNiente);
+        pDrawer->circle(m_xTopEnd + m_origin.x + m_radiusNiente, m_yTopEnd + m_origin.y, m_radiusNiente);
 
     pDrawer->end_path();
     pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShapeWedge::compute_bounds()
-{
-    m_origin.x = m_points[0].x;
-    m_origin.y = min(m_points[0].y, m_points[1].y);
-    m_size.width = abs(m_points[1].x - m_points[0].x);
-    m_size.height = max( abs(m_points[2].y - m_points[0].y),
-                         abs(m_points[1].y - m_points[3].y) );
 }
 
 //---------------------------------------------------------------------------------------

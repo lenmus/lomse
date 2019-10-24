@@ -388,13 +388,14 @@ unsigned MarkerVertexSource::vertex(double* x, double* y)
             m_circle.init(0.0, 0.0, m_radius, m_radius);
             m_circle.rewind(0);
             m_status = circle_point;
-            //continues in next case code
+            [[fallthrough]];    //continues in next case code
 
         // coverity[unterminated_case]
         case circle_point:
             cmd = m_circle.vertex(x, y);
             if(agg::is_stop(cmd)) m_status = stop;
             else return cmd;
+            [[fallthrough]];    //to avoid stupid warning
 
         case points:
             if(m_curr_id < 2)

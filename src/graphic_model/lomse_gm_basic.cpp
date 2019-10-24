@@ -611,7 +611,7 @@ void GmoBox::shift_origin_and_content(const USize& shift)
 //---------------------------------------------------------------------------------------
 void GmoBox::dump_boxes_shapes(ostream& outStream, int level)
 {
-    GmoObj::dump(outStream, level);
+    dump(outStream, level);
 
     dump_shapes(outStream, ++level);
 

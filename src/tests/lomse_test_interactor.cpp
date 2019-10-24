@@ -217,7 +217,8 @@ SUITE(InteractorTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pClef = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pClef = pBSliceStaff->get_shape(0);      //Clef
 
         pIntor->select_object(pClef);
 
@@ -247,7 +248,8 @@ SUITE(InteractorTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pClef = pBSliceInstr->get_shape(0);   //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pClef = pBSliceStaff->get_shape(0);      //Clef
         LUnits x = (pClef->get_left() + pClef->get_right()) / 2.0f;
         LUnits y = (pClef->get_top() + pClef->get_bottom()) / 2.0f;
 
@@ -283,7 +285,8 @@ SUITE(InteractorTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pClef = pBSliceInstr->get_shape(0);   //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pClef = pBSliceStaff->get_shape(0);      //Clef
         LUnits xLeft = pClef->get_left() - 200.0f;
         LUnits xRight = pClef->get_right() + 200.0f;
         LUnits yTop = pClef->get_top() - 200.0f;

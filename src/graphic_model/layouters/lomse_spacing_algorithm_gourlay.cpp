@@ -136,14 +136,18 @@ void SpAlgGourlay::new_column(TimeSlice* pSlice)
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int idxStaff,
-                                  ImoStaffObj* pSO, GmoShape* pShape, bool fInProlog)
+void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iInstr,
+                                  int iStaff, ImoStaffObj* pSO, GmoShape* pShape,
+                                  bool fInProlog)
 {
     StaffObjData* pData = LOMSE_NEW StaffObjData();
     m_data.push_back(pData);
 
+    int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
     pData->m_pShape = pShape;
     pData->m_idxStaff = idxStaff;
+    pData->m_iStaff = iStaff;
+
 
     //determine slice type for the new object to include
 //    dbgLogger << "include_object(). StaffObj type = " << pSO->get_name()
@@ -719,7 +723,7 @@ void SpAlgGourlay::dump_column_data(int iCol, ostream& outStream)
 
 //---------------------------------------------------------------------------------------
 void SpAlgGourlay::add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox,
-                                   int iInstr)
+                                     int iInstr)
 {
     m_columns[iCol]->add_shapes_to_box(pSliceInstrBox, iInstr, m_data);
 }
@@ -1118,7 +1122,8 @@ void TimeSlice::add_shapes_to_box(GmoBoxSliceInstr* pSliceInstrBox, int iInstr,
             GmoShape* pShape = pData->get_shape();
             if (pShape)
 			{
-                pSliceInstrBox->add_shape(pShape, GmoShape::k_layer_notes);
+                pSliceInstrBox->add_shape(pShape, GmoShape::k_layer_notes,
+                                          pData->m_iStaff);
 
                 //collect barlines info for box system (measures table)
 				if (pBoxSystem && pShape->is_shape_barline())

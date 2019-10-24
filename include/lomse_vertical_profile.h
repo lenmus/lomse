@@ -101,13 +101,20 @@ public:
     void initialize(int idxStaff, LUnits yStaffTop, LUnits yStaffBottom);
     void update(GmoShape* pShape, int idxStaff);
 
-    /** Return minimum reached value for staff <i>idxStaff</i>. */
+    /** Return max/min reached value for staff idxStaff. */
     LUnits get_min_limit(int idxStaff) { return m_yMin[idxStaff]; }
-    /** Return maximum reached value for staff <i>idxStaff</i>. */
     LUnits get_max_limit(int idxStaff) { return m_yMax[idxStaff]; }
 
+    /** Return max/min reached value for staff idxStaff in the
+        interval [xStart, xEnd]. */
     LUnits get_max_for(LUnits xStart, LUnits xEnd, int idxStaff);
     LUnits get_min_for(LUnits xStart, LUnits xEnd, int idxStaff);
+
+    /** Return minimun distance between max profile for staff idxStaff-1 and
+        min profile for staff idxStaff. A negative distance means that
+        the profiles overlap. */
+    LUnits get_staves_distance(int idxStaff);
+
 
     //debug
     void dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem);

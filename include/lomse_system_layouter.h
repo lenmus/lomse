@@ -38,6 +38,7 @@
 #include "lomse_spacing_algorithm.h"
 
 #include <list>
+#include <tuple>
 
 namespace lomse
 {
@@ -93,13 +94,18 @@ protected:
     LUnits m_uFreeSpace;    //free space available on current system
     UPoint m_pagePos;
     bool m_fFirstColumnInSystem;
-
-    //collected information
     int m_barlinesInfo;     //info about barlines at end of this system
+
+    //RelObjs that continue in next system
     typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
-    std::list<PendingRelObj> m_notFinishedRelObj;    //RelObjs that continue in next system
+    std::list<PendingRelObj> m_notFinishedRelObj;
+
+    //Lyrics that continue in next system
     typedef std::pair<std::string, PendingAuxObjs*> PendingLyrics;
-    std::list<PendingLyrics> m_notFinishedLyrics;    //Lyrics that continue in next system
+    std::list<PendingLyrics> m_notFinishedLyrics;
+
+    //prolog shapes waiting to be added to slice staff box
+    std::list< std::tuple<GmoShape*, int, int> > m_prologShapes;
 
     SpacingAlgorithm* m_pSpAlgorithm;
     int m_constrains;
@@ -154,7 +160,12 @@ protected:
     void engrave_measure_numbers();
     void engrave_system_details(int iSystem);
     void add_instruments_info();
+    void move_staves_to_avoid_collisions();
+    void reposition_staves_in_engravers(const std::vector<LUnits>& yOrgShifts);
+    void reposition_slice_boxes_and_shapes(const vector<LUnits>& yOrgShifts,
+                                           vector<LUnits>& heights);
 
+    void add_prolog_shapes_to_boxes();
     void add_system_prolog_if_necessary();
     LUnits engrave_prolog(int iInstr);
     LUnits determine_column_start_position(int iCol);
@@ -169,10 +180,11 @@ protected:
     void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObjs* pPAO, int iSystem);
 
     void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
-                                     int iCol, int iInstr, int idxStaff);
-    void add_lyrics_shapes_to_model(const string& tag, int layer, bool fLast, int idxStaff);
+                                     int iCol, int iInstr, int iStaff, int idxStaff);
+    void add_lyrics_shapes_to_model(const std::string& tag, int layer, bool fLast,
+                                    int iStaff, int idxStaff);
     void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
-                                int idxStaff);
+                                int iStaff, int idxStaff);
 
     //helpers
     inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }

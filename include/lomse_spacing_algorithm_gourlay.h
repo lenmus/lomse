@@ -130,9 +130,8 @@ public:
 
     //column creation: collecting content
     void start_column_measurements(int iCol);
-    void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int idxStaff,
-                        ImoStaffObj* pSO, GmoShape* pShape,
-                        bool fInProlog=false);
+    void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iInstr, int iStaff,
+                        ImoStaffObj* pSO, GmoShape* pShape, bool fInProlog=false);
     void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
                                    GmoShape* pNonTimedShape);
     void finish_column_measurements(int iCol);
@@ -245,6 +244,7 @@ class StaffObjData
 public:
     GmoShape*   m_pShape;       //shape for this staff object
     int         m_idxStaff;     //staff index 0..n-1, relative to system
+    int         m_iStaff;       //staff index 0..n-1, relative to instrument
     LUnits      m_xUserShift;
     LUnits      m_yUserShift;
 

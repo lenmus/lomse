@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,9 +42,11 @@ namespace lomse
 class GmoBoxScorePage;
 class TimeGridTable;
 class GmMeasuresTable;
+class GmoBoxSliceStaff;
 
 //---------------------------------------------------------------------------------------
-//GmoBoxSystem represents a line of music in the printed score.
+/** GmoBoxSystem represents a line of music in the printed score.
+*/
 class GmoBoxSystem : public GmoBox
 {
 protected:
@@ -61,9 +63,17 @@ public:
     GmoBoxSystem(ImoScore* pScore);
     ~GmoBoxSystem();
 
+    //helpers for layout
+    /**  Move boxes and shapes to theirs final 'y' positions. */
+    void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
+                                      std::vector<LUnits>& heights,
+                                      vector<LUnits>& barlinesHeight);
+
     //slices
 	inline int get_num_slices() const { return (int)m_childBoxes.size(); }
     inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
+    GmoBoxSliceInstr* get_first_instr_slice(int iInstr);
+    GmoBoxSliceStaff* get_first_slice_staff_for(int iInstr, int iStaff);
 
     //grid table: xPositions/timepos
     inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }

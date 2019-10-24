@@ -369,5 +369,52 @@ string VerticalProfile::dump(list<VProfilePoint>* pPoints)
     return msg.str();
 }
 
+//---------------------------------------------------------------------------------------
+LUnits VerticalProfile::get_staves_distance(int idxStaff)
+{
+    int idxPrev = idxStaff - 1;
+
+    list<VProfilePoint>* pPointsPrev = m_xMax[idxPrev];
+    list<VProfilePoint>* pPointsCur = m_xMin[idxStaff];
+    PointsIterator itPrev = pPointsPrev->begin();
+	LUnits xPrev = (*itPrev).x;
+    LUnits yPrev = ((*itPrev).y == LOMSE_PAPER_LOWER_LIMIT ? m_yStaffBottom[idxPrev]
+                                                           : (*itPrev).y);
+
+    PointsIterator itCur = pPointsCur->begin();
+	LUnits xCur = (*itCur).x;
+    LUnits yCur = ((*itCur).y == LOMSE_PAPER_UPPER_LIMIT ? m_yStaffTop[idxStaff]
+                                                         : (*itCur).y);
+	LUnits distance = yCur - yPrev;
+
+	while (itPrev != pPointsPrev->end() && itCur != pPointsCur->end())
+	{
+	    if (itPrev != pPointsPrev->end() && xPrev <= xCur)
+        {
+            yPrev = ((*itPrev).y == LOMSE_PAPER_LOWER_LIMIT ? m_yStaffBottom[idxPrev]
+                                                            : (*itPrev).y);
+	        ++itPrev;
+	        if (itPrev != pPointsPrev->end())
+                xPrev = (*itPrev).x;
+        }
+        else if (itCur != pPointsCur->end())
+        {
+            yCur = ((*itCur).y == LOMSE_PAPER_UPPER_LIMIT ? m_yStaffTop[idxStaff]
+                                                          : (*itCur).y);
+            ++itCur;
+	        if (itCur != pPointsCur->end())
+                xCur = (*itCur).x;
+        }
+        else
+        {
+            LOMSE_LOG_ERROR("Impossible case!");
+            break;
+        }
+	    distance = min(distance, yCur - yPrev);
+	}
+
+    return distance;
+}
+
 
 }  //namespace lomse

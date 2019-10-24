@@ -2554,8 +2554,10 @@ void ImoInstrument::reserve_space_for_lyrics(int iStaff, LUnits space)
     pInfo->add_space_for_lyrics(space);
 }
 
+
 // ImoSounds interface
 LOMSE_IMPLEMENT_IMOSOUNDS_INTERFACE(ImoInstrument);
+
 
 //---------------------------------------------------------------------------------------
 // Instrument API

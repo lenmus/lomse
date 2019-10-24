@@ -216,7 +216,7 @@ public:
 
     //boxes and shapes
     void add_shapes_to_boxes(int iCol);
-    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
+    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, int idxStaff, LUnits yTop);
     inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
     void set_slice_width(LUnits width);
     void set_slice_final_position(LUnits left, LUnits top);
@@ -325,8 +325,8 @@ public:
     ///prepare for receiving information for a new column
     virtual void start_column_measurements(int iCol) = 0;
     ///save information for staff object in current column
-    virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int idxStaff,
-                                ImoStaffObj* pSO, GmoShape* pShape,
+    virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iInstr,
+                                int  iStaff, ImoStaffObj* pSO, GmoShape* pShape,
                                 bool fInProlog=false) = 0;
     ///save info for a full-measure rest
     virtual void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
@@ -368,7 +368,7 @@ public:
 
     ///create slice instr box for column iCol and access it
     virtual GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr,
-            LUnits yTop);
+                                                 int idxStaff, LUnits yTop);
     ///set width of slice box for column iCol
     virtual void set_slice_width(int iCol, LUnits width);
 
