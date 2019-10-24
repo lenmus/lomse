@@ -73,7 +73,8 @@ void GmoShapeVoltaBracket::add_label(GmoShapeText* pShape)
 void GmoShapeVoltaBracket::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos,
                                            LUnits uBracketDistance, LUnits uJogLength,
                                            LUnits uLineThick, LUnits uLeftSpaceToText,
-                                           LUnits xStaffLeft, LUnits xStaffRight)
+                                           LUnits uTopSpaceToText, LUnits xStaffLeft,
+                                           LUnits xStaffRight)
 {
     //save data
     m_uBracketDistance = uBracketDistance;
@@ -84,7 +85,7 @@ void GmoShapeVoltaBracket::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yP
 
 	//move text shape to its position
     if (m_pShapeText)
-        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos);
+        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos + uTopSpaceToText);
 
     compute_bounds(xStart, xEnd, yPos);
 }

@@ -100,10 +100,11 @@ namespace lomse
 #define LOMSE_TIE_MAX_THICKNESS          4.0f   //tie thickness at center
 
 //volta brackets
-#define LOMSE_VOLTA_JOG_LENGHT         20.0f
-#define LOMSE_VOLTA_BRACKET_DISTANCE   35.0f
-#define LOMSE_VOLTA_BRACKET_THICKNESS   1.0f
-#define LOMSE_VOLTA_LEFT_SPACE_TO_TEXT  6.0f
+#define LOMSE_VOLTA_JOG_LENGHT         20.0f    //volta jog lenght
+#define LOMSE_VOLTA_BRACKET_DISTANCE   35.0f    //top staff line to volta line distance
+#define LOMSE_VOLTA_BRACKET_THICKNESS   1.0f    //volta line thickness
+#define LOMSE_VOLTA_LEFT_SPACE_TO_TEXT  4.0f    //distance between jog line and text
+#define LOMSE_VOLTA_TOP_SPACE_TO_TEXT   3.0f    //distance between volta line and text
 
 //wedges
 #define LOMSE_WEDGE_LINE_THICKNESS      1.5f    //line thickness for wedges/hairpins

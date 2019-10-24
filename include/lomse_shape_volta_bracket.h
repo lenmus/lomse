@@ -73,7 +73,7 @@ public:
 
     void set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos, LUnits uBracketDistance,
                          LUnits uJogLength, LUnits uLineThick, LUnits uLeftSpaceToText,
-                         LUnits xStaffLeft, LUnits xStaffRight);
+                         LUnits uTopSpaceToText, LUnits xStaffLeft, LUnits xStaffRight);
 
     void add_label(GmoShapeText* pShape);
     inline void enable_final_jog(bool value) { m_fStopJog = value; }

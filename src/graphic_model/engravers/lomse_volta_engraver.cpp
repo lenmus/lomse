@@ -205,6 +205,7 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
 {
     LUnits uLineThick = tenths_to_logical(LOMSE_VOLTA_BRACKET_THICKNESS);
     LUnits uLeftSpaceToText = tenths_to_logical(LOMSE_VOLTA_LEFT_SPACE_TO_TEXT);
+    LUnits uTopSpaceToText = tenths_to_logical(LOMSE_VOLTA_TOP_SPACE_TO_TEXT);
     LUnits uJogLength = tenths_to_logical(LOMSE_VOLTA_JOG_LENGHT);
 
     //determine xStart and xEnd
@@ -242,7 +243,7 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
 
     //transfer data to shape
     pShape->set_layout_data(xStart, xEnd, yPos, uDistance, uJogLength, uLineThick,
-                            uLeftSpaceToText, m_uStaffLeft, m_uStaffRight);
+                            uLeftSpaceToText, uTopSpaceToText, m_uStaffLeft, m_uStaffRight);
 }
 
 
