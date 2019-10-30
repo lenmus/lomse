@@ -101,19 +101,39 @@ void VerticalProfile::update(GmoShape* pShape, int idxStaff)
     if (pShape->is_shape_barline())
         return;
 
-    //for notes, only notehead and accidentals
+    //for notes, only notehead, stem and accidentals
     if (pShape->is_shape_note())
     {
         GmoShapeNote* pNote = dynamic_cast<GmoShapeNote*>(pShape);
-        update_shape(pNote->get_notehead_shape(), idxStaff);
+        GmoShape* pNotehead = pNote->get_notehead_shape();
+        update_shape(pNotehead, idxStaff);
         update_shape(pNote->get_accidentals_shape(), idxStaff);
-        if (!pNote->is_beamed())
+
+        //for isolated notes, add stem and flag
+        if (!pNote->is_in_chord() && !pNote->has_beam())
         {
             update_shape(pNote->get_stem_shape(), idxStaff);
             update_shape(pNote->get_flag_shape(), idxStaff);
+            return;
         }
+
+        //for chords accross two staves, only the fixed segment stem must be added.
+        if (pNote->is_in_chord() && pNote->is_shape_chord_base_note())
+        {
+            GmoShapeNote* pFlagNote = static_cast<GmoShapeChordBaseNote*>(pNote)->get_flag_note();
+            update_shape(pFlagNote->get_stem_shape(), idxStaff);
+            update_shape(pFlagNote->get_flag_shape(), idxStaff);
+            return;
+        }
+
+        //if arrives here, it is a beamed note.
+        //for beamed groups, the stem does not contribute to VProfile. So do not add it.
         return;
     }
+
+    //For beams, the beam is not added when cross-staff beam
+    if (!pShape->add_to_vprofile())
+        return;
 
     GmoCompositeShape* pCS = dynamic_cast<GmoCompositeShape*>(pShape);
     if (pCS)

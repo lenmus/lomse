@@ -62,7 +62,7 @@ GmoObj::GmoObj(int objtype, ImoObj* pCreatorImo)
     : m_objtype(objtype)
     , m_origin(0.0f, 0.0f)
     , m_size(0.0f, 0.0f)
-    , m_flags(k_dirty)
+    , m_flags(k_dirty | k_add_to_vprofile)
     , m_pCreatorImo(pCreatorImo)
     , m_pParentBox(nullptr)
 {
@@ -202,6 +202,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_metronome_glyph]   = "metronome-glyph";
         m_typeToName[k_shape_metronome_mark]    = "metronome-mark ";
         m_typeToName[k_shape_note]              = "note           ";
+        m_typeToName[k_shape_chord_base_note]   = "base-note      ";
         m_typeToName[k_shape_notehead]          = "notehead       ";
         m_typeToName[k_shape_octave_shift]      = "octave-shift   ";
         m_typeToName[k_shape_octave_glyph]      = "octave-glyph   ";

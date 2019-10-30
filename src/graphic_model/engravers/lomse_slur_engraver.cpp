@@ -167,7 +167,13 @@ GmoShape* SlurEngraver::create_single_shape()
     compute_default_control_points(&m_points[0]);
     //add_user_displacements(0, &m_points[0]);
 
-    return LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0], m_thickness, m_color);
+    GmoShape* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0],
+                                              m_thickness, m_color);
+
+    if (m_pStartNote->get_staff() != m_pEndNote->get_staff())
+        pShape->set_add_to_vprofile(false);
+
+    return pShape;
 }
 
 //---------------------------------------------------------------------------------------

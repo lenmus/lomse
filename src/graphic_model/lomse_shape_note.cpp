@@ -278,11 +278,20 @@ LUnits GmoShapeNote::get_stem_extra_length() const
 }
 
 //---------------------------------------------------------------------------------------
-bool GmoShapeNote::is_beamed()
+bool GmoShapeNote::has_beam()
 {
     ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
     if (pNote)
-        return pNote->is_beamed();
+        return pNote->has_beam();
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GmoShapeNote::is_in_chord()
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
+    if (pNote)
+        return pNote->is_in_chord();
     return false;
 }
 

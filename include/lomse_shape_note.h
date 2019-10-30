@@ -123,13 +123,37 @@ public:
     inline void set_up_oriented(bool value) { m_fUpOriented = value; }
 
     //info from parent ImoNote
-    bool is_beamed();
+    bool has_beam();
+    bool is_in_chord();
 
     //used for debug
     void set_color(Color color);
 
 protected:
     void draw_leger_lines(Drawer* pDrawer);
+
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeChordBaseNote : public GmoShapeNote
+{
+protected:
+    GmoShapeNote* m_pFlagNote;  //note containing the fixed segment for the stem
+
+public:
+    GmoShapeChordBaseNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
+                          LibraryScope& libraryScope)
+        : GmoShapeNote(pCreatorImo, x, y, color, libraryScope)
+        , m_pFlagNote(nullptr)
+    {
+        m_objtype = GmoObj::k_shape_chord_base_note;
+    }
+
+    inline GmoShapeNote* get_flag_note() { return m_pFlagNote; }
+
+protected:
+    friend class StemFlagEngraver;
+    inline void set_flag_note(GmoShapeNote* pNote) { m_pFlagNote = pNote; }
 
 };
 

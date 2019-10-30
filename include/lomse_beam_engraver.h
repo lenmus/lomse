@@ -110,7 +110,7 @@ protected:
     void make_segments_relative();
 
     bool m_fStemForced;     //at least one stem forced
-    bool m_fStemMixed;      //not all stems in the same direction
+    bool m_fStemsMixed;     //not all stems in the same direction
     bool m_fStemsDown;      //stems direction down
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes

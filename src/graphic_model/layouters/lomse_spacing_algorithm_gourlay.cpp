@@ -1171,28 +1171,13 @@ void TimeSlice::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUni
                                                     yPos + pData->m_yUserShift);
 
             //save info for vertical profile
-            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
+            pVProfile->update(pShape, pData->m_idxStaff);
 
             //update system vertical limits
             *yMax = max(*yMax, pShape->get_bottom());
             *yMin = min(*yMin, pShape->get_top());
         }
     }
-}
-
-//---------------------------------------------------------------------------------------
-void TimeSlice::update_vertical_profile(GmoShape* pShape, int idxStaff,
-                                        VerticalProfile* pVProfile)
-{
-    pVProfile->update(pShape, idxStaff);
-//    if (pShape->is_shape_note())
-//    {
-//        stringstream msg;
-//        msg << "note: shape.xleft=" << pShape->get_left()
-//            << ", xRight=" << pShape->get_right() << ", yTop=" << pShape->get_top()
-//            << ", yBottom=" << pShape->get_bottom();
-//        LOMSE_LOG_INFO(msg.str());
-//    }
 }
 
 
@@ -1288,7 +1273,7 @@ void TimeSliceProlog::move_shapes_to_final_positions(vector<StaffObjData*>& data
                                                     yPos + pData->m_yUserShift);
 
             //save info for vertical profile
-            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
+            pVProfile->update(pShape, pData->m_idxStaff);
 
             //update system vertical limits
             *yMax = max(*yMax, pShape->get_bottom());
@@ -1505,7 +1490,7 @@ void TimeSliceNonTimed::move_shapes_to_final_positions(vector<StaffObjData*>& da
                                                     yPos + pData->m_yUserShift);
 
             //save info for vertical profile
-            update_vertical_profile(pShape, pData->m_idxStaff, pVProfile);
+            pVProfile->update(pShape, pData->m_idxStaff);
 
             positions[iStaff] += pShape->get_width();
             if (!pShape->is_shape_invisible())

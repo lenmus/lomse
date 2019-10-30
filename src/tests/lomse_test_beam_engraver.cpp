@@ -63,7 +63,7 @@ public:
 
     inline void my_decide_on_stems_direction() { decide_on_stems_direction(); }
     inline bool my_stems_forced() { return m_fStemForced; }
-    inline bool my_stems_mixed() { return m_fStemMixed; }
+    inline bool my_stems_mixed() { return m_fStemsMixed; }
     inline bool my_stems_down() { return m_fStemsDown; }
     inline int my_get_num_stems_down() { return m_numStemsDown; }
     inline int my_get_num_notes() { return m_numNotes; }

@@ -1444,6 +1444,38 @@ void ImoBeam::reorganize_after_object_deletion()
     autobeamer.do_autobeam();
 }
 
+//---------------------------------------------------------------------------------------
+int ImoBeam::get_staff()
+{
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = get_related_objects();
+    ImoStaffObj* pSO = notes.front().first;
+    if (pSO->get_instrument()->get_num_staves() == 1)
+        return pSO->get_staff();
+
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    int iStaff = 10000;
+    for (it=notes.begin(); it != notes.end() && iStaff != 0; ++it)
+    {
+        if ((*it).first->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+            if (pNote->is_in_chord())
+            {
+                ImoChord* pChord = pNote->get_chord();
+                list< pair<ImoStaffObj*, ImoRelDataObj*> >& chordNotes = pChord->get_related_objects();
+                list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
+                for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
+                {
+                    iStaff = min(iStaff, ((*itC).first)->get_staff());
+                }
+            }
+            else
+                iStaff = min(iStaff, ((*it).first)->get_staff());
+        }
+    }
+    return iStaff;
+}
+
 
 //=======================================================================================
 // ImoBezierInfo implementation

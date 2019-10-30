@@ -102,10 +102,17 @@ public:
 
     //beam
     ImoBeam* get_beam();
-    inline bool is_beamed() { return find_relation(k_imo_beam) != nullptr; }
     void set_beam_type(int level, int type);
     int get_beam_type(int level);
     bool is_end_of_beam();
+    /** Method ImoNoteRest::is_beamed() informs if the note has an attached beam
+        relation, and not if the note is in a beamed group. Take into account that
+        in beamed chords, the beam relation is only placed on the base note
+        for each chord. Therefore, for notes in chord, method ImoNoteRest::is_beamed()
+        is not reliable.
+        Method ImoNote::has_been() is reliable in all circumstances and cases.
+    */
+    inline bool is_beamed() { return find_relation(k_imo_beam) != nullptr; }
 
     //tuplets
     bool is_in_tuplet();
@@ -280,6 +287,15 @@ public:
     ImoChord* get_chord();
     bool is_start_of_chord();
     bool is_end_of_chord();
+
+    /** Method ImoNoteRest::is_beamed() informs if the note has an attached beam
+        relation, and not if the note is in a beamed group. Take into account that
+        in beamed chords, the beam relation is only placed on the base note
+        for each chord. Therefore, for notes in chord, method ImoNoteRest::is_beamed()
+        is not reliable.
+        Method ImoNote::has_been() is reliable in all circumstances and cases.
+    */
+    bool has_beam();
 
     //pitch. Only valid when m_actual_acc is computed
     FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals

@@ -72,6 +72,7 @@ protected:
     std::list<ChordNoteData*> m_notes;
     ChordNoteData* m_pBaseNoteData;
     bool m_fStemDown;
+    bool m_fCrossStaffChord;
 
     bool m_fHasStem;
     bool m_fHasFlag;
@@ -107,7 +108,7 @@ public:
 
 
 protected:
-    void add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape);
+    void add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape, int idxStaff);
 
     void decide_on_stem_direction();
     void layout_noteheads();

@@ -682,11 +682,7 @@ void SystemLayouter::move_staves_to_avoid_collisions()
     //shift staves
     //- reposition staves in each instrument and group engraver
     //- reposition instrSlice boxes and recompute its height
-    //- shift all shapes inside instrSlice boxes
-    //
-    //PROBLEMS DETECTED
-    //- height of barlines change -> fix height as barline is shifted to final pos.?
-
+    //- shift all shapes inside staffSlice boxes
     reposition_staves_in_engravers(yOrgShifts);
 
     if (yOrgShifts[numStaves - 1] > 0.0f)
@@ -1069,6 +1065,15 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
                                                  int layer, int iCol, int iInstr,
                                                  int iStaff, int idxStaff)
 {
+    //in case of beamed groups across two or more staves, the beam must be placed
+    //on top stave. So, for beams, use beam staff, not RelObj staff.
+    if (pRO->is_beam())
+    {
+        int staff = static_cast<ImoBeam*>(pRO)->get_staff();
+        idxStaff -= (iStaff - staff);
+        iStaff = staff;
+    }
+
     add_aux_shape_to_model(pShape, layer, iCol, iInstr, iStaff, idxStaff);
 
     RelObjEngraver* pEngrv

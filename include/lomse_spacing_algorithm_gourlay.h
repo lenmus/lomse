@@ -381,7 +381,6 @@ public:
                                                 LUnits yPos, LUnits* yMin, LUnits* yMax,
                                                 ScoreMeter* pMeter,
                                                 VerticalProfile* pVProfile);
-    void update_vertical_profile(GmoShape* pShape, int idxStaff, VerticalProfile* pVProfile);
 
     //access to information
     inline LUnits get_width() { return m_width; }

@@ -266,6 +266,19 @@ bool ImoNote::is_end_of_chord()
 }
 
 //---------------------------------------------------------------------------------------
+bool ImoNote::has_beam()
+{
+    ImoChord* pChord = get_chord();
+    if (pChord == nullptr)
+        return is_beamed();
+    else
+    {
+        ImoNote* pNote = static_cast<ImoNote*>(pChord->get_start_object());
+        return pNote->is_beamed();
+    }
+}
+
+//---------------------------------------------------------------------------------------
 FPitch ImoNote::get_fpitch()
 {
     //FPitch. Ignores fractional part of actual accidentals
