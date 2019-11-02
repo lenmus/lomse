@@ -32,6 +32,9 @@
 #include "lomse_internal_model.h"
 #include "lomse_box_slice.h"
 #include "lomse_shape_barline.h"
+#include "lomse_shape_note.h"
+#include "lomse_shape_beam.h"
+#include "lomse_system_layouter.h"
 
 
 namespace lomse
@@ -74,7 +77,8 @@ void GmoBoxSliceInstr::add_shape(GmoShape* pShape, int layer, int iStaff)
 //---------------------------------------------------------------------------------------
 void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
                                                     vector<LUnits>& heights,
-                                                    LUnits barlinesHeight)
+                                                    LUnits barlinesHeight,
+                                                    SystemLayouter* pSysLayouter)
 
 {
     vector<GmoBox*>::iterator it;
@@ -82,7 +86,7 @@ void GmoBoxSliceInstr::reposition_slices_and_shapes(const vector<LUnits>& yOrgSh
     for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
     {
         GmoBoxSliceStaff* pSlice = static_cast<GmoBoxSliceStaff*>(*it);
-        pSlice->reposition_shapes(yOrgShifts, barlinesHeight);
+        pSlice->reposition_shapes(yOrgShifts, barlinesHeight, pSysLayouter);
 
         m_size.height += heights[idxStaff];
     }
@@ -114,18 +118,47 @@ GmoBoxSliceStaff::~GmoBoxSliceStaff()
 
 //---------------------------------------------------------------------------------------
 void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
-                                         LUnits barlinesHeight)
+                                         LUnits barlinesHeight,
+                                         SystemLayouter* pSysLayouter)
 
 {
     LUnits yShift = yShifts[m_idxStaff];
 
-    list<GmoShape*>::iterator it;
-    for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
+    if (yShift == 0.0f)
     {
-        (*it)->shift_shape(0.0f, yShift);
+        //deal only with barlines height
+        list<GmoShape*>::iterator it;
+        for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
+        {
+            if ((*it)->is_shape_barline())
+                (*it)->set_height(barlinesHeight);
+        }
+    }
+    else
+    {
+        //shift shapes and do all other changes
+        list<GmoShape*>::iterator it;
+        for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
+        {
+            if ((*it)->is_shape_beam())
+            {
+                GmoShapeBeam* pShapeBeam = static_cast<GmoShapeBeam*>(*it);
+                if (pShapeBeam->is_cross_staff())
+                {
+                    pSysLayouter->increment_cross_staff_stems(pShapeBeam, yShift / 2.0f);
+                    (*it)->reposition_shape(yShift / 2.0f);
+                }
+                else
+                    (*it)->reposition_shape(yShift);
+            }
+            else
+            {
+                (*it)->reposition_shape(yShift);
 
-        if ((*it)->is_shape_barline())
-            (*it)->set_height(barlinesHeight);
+                if ((*it)->is_shape_barline())
+                    (*it)->set_height(barlinesHeight);
+            }
+        }
     }
 }
 

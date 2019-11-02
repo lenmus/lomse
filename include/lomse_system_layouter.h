@@ -49,6 +49,7 @@ class GmoBoxSlice;
 class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBoxSystem;
+class GmoShapeBeam;
 class ImoAuxObj;
 class ImoRelObj;
 class ImoAuxRelObj;
@@ -174,7 +175,6 @@ protected:
     bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
                                           bool fFirstNumberInSystem);
 
-
     void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
     void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO, int iSystem);
     void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObjs* pPAO, int iSystem);
@@ -191,6 +191,10 @@ protected:
 
     //debug
     void dbg_add_vertical_profile_shape();
+
+    //final layout
+    friend class GmoBoxSliceStaff;
+    void increment_cross_staff_stems(GmoShapeBeam* pShapeBeam, LUnits yIncrement);
 
 };
 

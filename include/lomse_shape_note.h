@@ -114,6 +114,7 @@ public:
     //re-shaping
     void set_stem_down(bool down);
     void set_stem_length(LUnits length);
+    void increment_stem_length(LUnits yIncrement);
 
     //required by beam engraver
     inline int get_pos_on_staff() { return m_nPosOnStaff; }

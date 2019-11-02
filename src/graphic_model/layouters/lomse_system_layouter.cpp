@@ -48,6 +48,8 @@
 #include "lomse_timegrid_table.h"
 #include "lomse_vertical_profile.h"
 #include "lomse_tree.h"
+#include "lomse_shape_beam.h"
+#include "lomse_beam_engraver.h"
 
 #include <sstream>
 #include <algorithm>
@@ -598,7 +600,7 @@ void SystemLayouter::reposition_slice_boxes_and_shapes(const vector<LUnits>& yOr
     }
 
     GmoBoxSystem* pSystem = get_box_system();
-    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight);
+    pSystem->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight, this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -688,6 +690,28 @@ void SystemLayouter::move_staves_to_avoid_collisions()
     if (yOrgShifts[numStaves - 1] > 0.0f)
         reposition_slice_boxes_and_shapes(yOrgShifts, heights);
 
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::increment_cross_staff_stems(GmoShapeBeam* pShapeBeam, LUnits yIncrement)
+
+{
+    ImoBeam* pBeam = static_cast<ImoBeam*>(pShapeBeam->get_creator_imo());
+    if (pBeam)
+    {
+        BeamEngraver* pEngrv
+            = dynamic_cast<BeamEngraver*>(m_engravers.get_engraver(pBeam));
+        if (pEngrv == nullptr)
+        {
+            LOMSE_LOG_ERROR("Engraver not found or is not BeamEngraver");
+            return;
+        }
+
+        pEngrv->increment_cross_staff_stems(yIncrement);
+
+        m_engravers.remove_engraver(pBeam);
+        delete pEngrv;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1065,26 +1089,37 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
                                                  int layer, int iCol, int iInstr,
                                                  int iStaff, int idxStaff)
 {
-    //in case of beamed groups across two or more staves, the beam must be placed
-    //on top stave. So, for beams, use beam staff, not RelObj staff.
+    //in case of cross-staff beams (beams with flag stem segments in two or more staves),
+    //the beam must be placed on bottom staff. In all other cases (beams in a single staff
+    //or beams conecting notes in two staves but with all stems in the same direction)
+    //the stem shape must be placed in top staff
+    bool fDeleteEngraver = true;
     if (pRO->is_beam())
     {
-        int staff = static_cast<ImoBeam*>(pRO)->get_staff();
+        int staff = static_cast<ImoBeam*>(pRO)->get_min_staff();
+        if (static_cast<GmoShapeBeam*>(pShape)->is_cross_staff())
+        {
+            staff = static_cast<ImoBeam*>(pRO)->get_max_staff();
+            fDeleteEngraver = false;
+        }
         idxStaff -= (iStaff - staff);
         iStaff = staff;
     }
 
     add_aux_shape_to_model(pShape, layer, iCol, iInstr, iStaff, idxStaff);
 
-    RelObjEngraver* pEngrv
-        = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
-    if (pEngrv == nullptr)
+    if (fDeleteEngraver)
     {
-        LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
-        return;
+        RelObjEngraver* pEngrv
+            = dynamic_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
+        if (pEngrv == nullptr)
+        {
+            LOMSE_LOG_ERROR("Engraver is not RelObjEngraver");
+            return;
+        }
+        m_engravers.remove_engraver(pRO);
+        delete pEngrv;
     }
-    m_engravers.remove_engraver(pRO);
-    delete pEngrv;
 }
 
 //---------------------------------------------------------------------------------------

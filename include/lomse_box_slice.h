@@ -41,6 +41,7 @@ class GmoBoxSystem;
 class GmoBoxSliceInstr;
 class GmoBoxSliceStaff;
 class ImoInstrument;
+class SystemLayouter;
 
 
 //---------------------------------------------------------------------------------------
@@ -62,7 +63,8 @@ public:
     /**  Move boxes and shapes to theirs final 'y' positions. */
     void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
                                       std::vector<LUnits>& heights,
-                                      vector<LUnits>& barlinesHeight);
+                                      vector<LUnits>& barlinesHeight,
+                                      SystemLayouter* pSysLayouter);
     GmoBoxSliceStaff* get_slice_staff_for(int iInstr, int iStaff);
 
 };

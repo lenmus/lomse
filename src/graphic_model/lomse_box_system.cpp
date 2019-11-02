@@ -101,14 +101,16 @@ GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iInstr, int iStaff)
 //---------------------------------------------------------------------------------------
 void GmoBoxSystem::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
                                                 vector<LUnits>& heights,
-                                                vector<LUnits>& barlinesHeight)
+                                                vector<LUnits>& barlinesHeight,
+                                                SystemLayouter* pSysLayouter)
 
 {
     vector<GmoBox*>::iterator it;
     for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
     {
         GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
-        pSlice->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight);
+        pSlice->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight,
+                                             pSysLayouter);
     }
 
     //shift origin and increase height

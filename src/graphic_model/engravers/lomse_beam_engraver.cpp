@@ -55,9 +55,11 @@ BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     , m_fStemForced(false)
     , m_fStemsMixed(false)
     , m_fStemsDown(false)
+    , m_fCrossStaff(false)
     , m_numStemsDown(0)
     , m_numNotes(0)
     , m_averagePosOnStaff(0)
+    , m_maxStaff(0)
 {
 }
 
@@ -141,7 +143,8 @@ void BeamEngraver::create_shape()
     m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
-    m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed);
+    m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed && !m_fCrossStaff);
+    m_pBeamShape->set_cross_staff(m_fCrossStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -263,7 +266,6 @@ void BeamEngraver::change_stems_direction()
     //change stem directions of notes
     if (!m_fStemForced)
     {
-        dbgLogger << "BeamEngraver::change_stems_direction(). Not forced" << endl;
         std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
         for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
 	    {
@@ -479,8 +481,10 @@ void BeamEngraver::adjust_stems_lengths()
     LUnits xn = 0.0f;       // x position of last stem
 
     int i = 0;                  // index to current element
-    bool fLastStemUp = true;;
+    bool fLastStemUp = true;
+    m_maxStaff = 0;
     m_fStemsMixed = false;
+    m_fCrossStaff = false;
     list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
     for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
     {
@@ -491,8 +495,10 @@ void BeamEngraver::adjust_stems_lengths()
             if (i != 0)
             {
                 m_fStemsMixed |= (fLastStemUp != fStemUp);
+                m_fCrossStaff |= (m_maxStaff != pNR->get_staff());
             }
             fLastStemUp = fStemUp;
+            m_maxStaff = max(m_maxStaff, pNR->get_staff());
 
             GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>((*it).second);
             if (pShapeNote->is_shape_chord_base_note())
@@ -594,27 +600,24 @@ void BeamEngraver::adjust_stems_lengths()
         note[i]->set_stem_length( fabs(yFlag[i] - yNote[i]) );
     }
 }
-//
-////---------------------------------------------------------------------------------------
-//GmoShape* BeamEngraver::find_note_shape_having_flag_stem(ImoNote* pNote)
-//{
-//    ImoChord* pChord = pNote->get_chord();
-//    ImoNote* pNoteFlag = nullptr;
-//    if (m_fStemsDown)
-//        pNoteFlag = pChord->get_lowest_pitch_note();
-//    else
-//        pNoteFlag = pChord->get_highest_pitch_note();
-//
-//    //TODO: Dónde demonios busco la nota y su shape?
-////    list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
-////    for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
-////    {
-////        if ((*it).first == pNoteFlag)
-////            return (*it).second;
-////    }
-////    LOMSE_LOG_ERROR("Impossible case!");
-//    return nullptr;
-//}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::increment_cross_staff_stems(LUnits yIncrement)
+{
+    list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        ImoNoteRest* pNR = (*it).first;
+        if (pNR->is_note())
+        {
+            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>((*it).second);
+            if (pShapeNote->is_shape_chord_base_note())
+                pShapeNote = static_cast<GmoShapeChordBaseNote*>(pShapeNote)->get_flag_note();
+
+            pShapeNote->increment_stem_length(yIncrement);
+        }
+    }
+}
 
 
 }  //namespace lomse

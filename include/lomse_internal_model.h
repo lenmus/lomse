@@ -3930,7 +3930,8 @@ public:
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
 
     void reorganize_after_object_deletion();
-    int get_staff();
+    int get_max_staff();
+    int get_min_staff();
 };
 
 //---------------------------------------------------------------------------------------

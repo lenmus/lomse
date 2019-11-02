@@ -95,6 +95,10 @@ public:
     GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
     GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
+    //During layout, when more space is added between two staves, all shapes are shifted
+    //down to account for the added extra space. If a beam is cross-staff, it is
+    //necessary to increment the lenght of all stems conected to this beam
+    void increment_cross_staff_stems(LUnits yIncrement);
 
 protected:
     void create_shape();
@@ -112,9 +116,11 @@ protected:
     bool m_fStemForced;     //at least one stem forced
     bool m_fStemsMixed;     //not all stems in the same direction
     bool m_fStemsDown;      //stems direction down
+    bool m_fCrossStaff;     //the beamed group is cross-staff (= has notes on several staves)
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes
     int m_averagePosOnStaff;
+    int m_maxStaff;         //for cross-staff beams, the highest staff. For normal beams, just the staff
 };
 
 

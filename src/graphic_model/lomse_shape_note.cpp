@@ -206,6 +206,16 @@ void GmoShapeNote::set_stem_length(LUnits length)
 }
 
 //---------------------------------------------------------------------------------------
+void GmoShapeNote::increment_stem_length(LUnits yIncrement)
+{
+    if (m_pStemShape)
+    {
+        LUnits length = m_pStemShape->get_height() + yIncrement;
+        m_pStemShape->change_length(length);
+    }
+}
+
+//---------------------------------------------------------------------------------------
 LUnits GmoShapeNote::get_notehead_width() const
 {
     return m_pNoteheadShape->get_width();
@@ -304,7 +314,7 @@ void GmoShapeNote::set_color(Color color)
 
 
 //=======================================================================================
-// GmoShapeNote implementation
+// GmoShapeRest implementation
 //=======================================================================================
 GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
                            LUnits UNUSED(x), LUnits UNUSED(y), Color color,

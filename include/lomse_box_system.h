@@ -43,6 +43,7 @@ class GmoBoxScorePage;
 class TimeGridTable;
 class GmMeasuresTable;
 class GmoBoxSliceStaff;
+class SystemLayouter;
 
 //---------------------------------------------------------------------------------------
 /** GmoBoxSystem represents a line of music in the printed score.
@@ -67,7 +68,8 @@ public:
     /**  Move boxes and shapes to theirs final 'y' positions. */
     void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
                                       std::vector<LUnits>& heights,
-                                      vector<LUnits>& barlinesHeight);
+                                      vector<LUnits>& barlinesHeight,
+                                      SystemLayouter* pSysLayouter);
 
     //slices
 	inline int get_num_slices() const { return (int)m_childBoxes.size(); }

@@ -1445,7 +1445,39 @@ void ImoBeam::reorganize_after_object_deletion()
 }
 
 //---------------------------------------------------------------------------------------
-int ImoBeam::get_staff()
+int ImoBeam::get_max_staff()
+{
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = get_related_objects();
+    ImoStaffObj* pSO = notes.front().first;
+    if (pSO->get_instrument()->get_num_staves() == 1)
+        return pSO->get_staff();
+
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    int iStaff = 0;
+    for (it=notes.begin(); it != notes.end(); ++it)
+    {
+        if ((*it).first->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+            if (pNote->is_in_chord())
+            {
+                ImoChord* pChord = pNote->get_chord();
+                list< pair<ImoStaffObj*, ImoRelDataObj*> >& chordNotes = pChord->get_related_objects();
+                list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
+                for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
+                {
+                    iStaff = max(iStaff, ((*itC).first)->get_staff());
+                }
+            }
+            else
+                iStaff = max(iStaff, ((*it).first)->get_staff());
+        }
+    }
+    return iStaff;
+}
+
+//---------------------------------------------------------------------------------------
+int ImoBeam::get_min_staff()
 {
     list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = get_related_objects();
     ImoStaffObj* pSO = notes.front().first;

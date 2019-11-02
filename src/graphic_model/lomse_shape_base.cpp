@@ -125,9 +125,9 @@ void GmoShape::set_origin_and_notify_observers(LUnits xLeft, LUnits yTop)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShape::shift_shape(LUnits xShift, LUnits yShift)
+void GmoShape::reposition_shape(LUnits yShift)
 {
-    shift_origin(xShift, yShift);
+    shift_origin(0.0f, yShift);
 }
 
 //---------------------------------------------------------------------------------------
@@ -258,15 +258,14 @@ void GmoCompositeShape::shift_origin(const USize& shift)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoCompositeShape::shift_shape(LUnits xShift, LUnits yShift)
+void GmoCompositeShape::reposition_shape(LUnits yShift)
 {
-    m_origin.x += xShift;
     m_origin.y += yShift;
 
     //shift components
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
-        (*it)->shift_shape(xShift, yShift);
+        (*it)->reposition_shape(yShift);
 }
 
 //---------------------------------------------------------------------------------------

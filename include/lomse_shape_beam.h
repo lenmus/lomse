@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,6 +50,7 @@ protected:
     std::list<LUnits> m_segments;
 	UPoint m_outerLeftPoint;
     UPoint m_outerRightPoint;
+    unsigned int m_BeamFlags;
 
     friend class BeamEngraver;
     GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness,
@@ -66,10 +67,22 @@ public:
     UPoint get_outer_left_reference_point() { return m_outerLeftPoint; }
     UPoint get_outer_right_reference_point() { return m_outerRightPoint; }
 
+    //layout
+    inline bool is_cross_staff() { return (m_BeamFlags & k_cross_staff) != 0; }
+
+
 protected:
 	void draw_beam_segment(Drawer* pDrawer, LUnits uxStart, LUnits uyStart,
                            LUnits uxEnd, LUnits uyEnd, Color color);
 
+    //flag values
+    enum {
+        k_cross_staff       = 0x0001,   //the beam has stems (flag segment) in at least two staves
+    };
+
+    inline void set_cross_staff(bool value) {
+        value ? m_BeamFlags |= k_cross_staff : m_BeamFlags &= ~k_cross_staff;
+    }
 
 };
 
