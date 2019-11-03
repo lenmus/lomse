@@ -238,7 +238,7 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
     //determine yPos
     LUnits uDistance = tenths_to_logical(LOMSE_VOLTA_BRACKET_DISTANCE);
     LUnits yPos = m_uStaffTop - uDistance;
-    LUnits yMin = m_pVProfile->get_min_for(xStart, xEnd, m_idxStaff) - uDistance;
+    LUnits yMin = m_pVProfile->get_min_for(xStart, xEnd, m_idxStaff).first - uDistance;
     yPos = min(yPos, yMin);
 
     //transfer data to shape

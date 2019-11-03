@@ -159,7 +159,7 @@ SUITE(VerticalProfileTest)
         vp.initialize(0, yTop, yBottom);
         vp.initialize(1, yTop, yBottom);
 
-        CHECK( vp.get_max_for(2000.0f, 3000.0f, 0) == LOMSE_PAPER_LOWER_LIMIT );
+        CHECK( vp.get_max_for(2000.0f, 3000.0f, 0).first == LOMSE_PAPER_LOWER_LIMIT );
     }
 
     TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_020)
@@ -173,7 +173,7 @@ SUITE(VerticalProfileTest)
         vp.initialize(0, yTop, yBottom);
         vp.initialize(1, yTop, yBottom);
 
-        CHECK( vp.get_min_for(2000.0f, 3000.0f, 0) == LOMSE_PAPER_UPPER_LIMIT );
+        CHECK( vp.get_min_for(2000.0f, 3000.0f, 0).first == LOMSE_PAPER_UPPER_LIMIT );
     }
 
     TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_030)
@@ -623,8 +623,8 @@ SUITE(VerticalProfileTest)
         shape.set_width(5000.0f);
         vp.update(&shape, 0);
 
-        CHECK( vp.get_max_for(3800.0f, 6300.0f, 0) == 4000.0f );
-        CHECK( vp.get_max_for(2500.0f, 3100.0f, 0) == LOMSE_PAPER_LOWER_LIMIT );
+        CHECK( vp.get_max_for(3800.0f, 6300.0f, 0).first == 4000.0f );
+        CHECK( vp.get_max_for(2500.0f, 3100.0f, 0).first == LOMSE_PAPER_LOWER_LIMIT );
 //        cout << "get_max_for(3800.0f, 6300.0f) = " << vp.get_max_for(3800.0f, 6300.0f, 0)
 //             << ", get_max_for(2500.0f, 3100.0f) = " << vp.get_max_for(2500.0f, 3100.0f, 0) << endl;
 
@@ -650,7 +650,7 @@ SUITE(VerticalProfileTest)
         shape2.set_width(5000.0f);
         vp.update(&shape2, 0);
 
-        CHECK( vp.get_max_for(3400.0f, 8400.0f, 0) == 6000.0f );
+        CHECK( vp.get_max_for(3400.0f, 8400.0f, 0).first == 6000.0f );
 
     }
 
@@ -674,7 +674,7 @@ SUITE(VerticalProfileTest)
         shape2.set_width(5000.0f);
         vp.update(&shape2, 0);
 
-        CHECK( vp.get_max_for(1500.0f, 8400.0f, 0) == 6000.0f );
+        CHECK( vp.get_max_for(1500.0f, 8400.0f, 0).first == 6000.0f );
 
     }
 
@@ -698,7 +698,7 @@ SUITE(VerticalProfileTest)
         shape2.set_width(7000.0f);
         vp.update(&shape2, 0);
 
-        CHECK( vp.get_min_for(3400.0f, 8400.0f, 0) == 1500.0f );
+        CHECK( vp.get_min_for(3400.0f, 8400.0f, 0).first == 1500.0f );
     }
 
     TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_112)
@@ -721,7 +721,7 @@ SUITE(VerticalProfileTest)
         shape2.set_width(7000.0f);
         vp.update(&shape2, 0);
 
-        CHECK( vp.get_min_for(1500.0f, 8400.0f, 0) == 1500.0f );
+        CHECK( vp.get_min_for(1500.0f, 8400.0f, 0).first == 1500.0f );
     }
 
     TEST_FIXTURE(VerticalProfileTestFixture, vertical_profile_200)

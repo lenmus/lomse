@@ -106,9 +106,9 @@ public:
     LUnits get_max_limit(int idxStaff) { return m_yMax[idxStaff]; }
 
     /** Return max/min reached value for staff idxStaff in the
-        interval [xStart, xEnd]. */
-    LUnits get_max_for(LUnits xStart, LUnits xEnd, int idxStaff);
-    LUnits get_min_for(LUnits xStart, LUnits xEnd, int idxStaff);
+        interval [xStart, xEnd], and the shape responsible for that value. */
+    std::pair<LUnits, GmoShape*> get_max_for(LUnits xStart, LUnits xEnd, int idxStaff);
+    std::pair<LUnits, GmoShape*> get_min_for(LUnits xStart, LUnits xEnd, int idxStaff);
 
     /** Return minimun distance between max profile for staff idxStaff-1 and
         min profile for staff idxStaff. A negative distance means that

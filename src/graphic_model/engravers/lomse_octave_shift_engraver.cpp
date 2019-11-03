@@ -284,14 +284,14 @@ LUnits OctaveShiftEngraver::determine_top_line_of_shape()
     if (octave_shift_at_top())
     {
         yRef -= twoLines;   //2 lines above top staff line
-        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff)
+        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff).first
                       - twoLines;
         yRef = min(yRef, yMin);
     }
     else
     {
         yRef += tenths_to_logical(50.0f);   //1 lines bellow first staff line
-        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff)
+        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff).first
                       + tenths_to_logical(5.0f);
         yRef = max(yRef, yMax);
     }

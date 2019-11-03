@@ -292,33 +292,44 @@ PointsIterator VerticalProfile::locate_insertion_point(list<VProfilePoint>* pPoi
 }
 
 //---------------------------------------------------------------------------------------
-LUnits VerticalProfile::get_max_for(LUnits xStart, LUnits xEnd, int idxStaff)
+std::pair<LUnits, GmoShape*> VerticalProfile::get_max_for(LUnits xStart, LUnits xEnd, int idxStaff)
 {
     list<VProfilePoint>* pPoints = m_xMax[idxStaff];
     PointsIterator it = locate_insertion_point(pPoints, xStart);
     if (it != pPoints->begin())
         --it;
     LUnits yMax = (*it).y;
+    GmoShape* pShape = (*it).shape;
     for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {
-        yMax = max(yMax, (*it).y);
+        if (yMax <= (*it).y)
+        {
+            yMax = (*it).y;
+            pShape = (*it).shape;
+        }
     }
-    return yMax;
+    return make_pair(yMax, pShape);
 }
 
 //---------------------------------------------------------------------------------------
-LUnits VerticalProfile::get_min_for(LUnits xStart, LUnits xEnd, int idxStaff)
+std::pair<LUnits, GmoShape*> VerticalProfile::get_min_for(LUnits xStart, LUnits xEnd,
+                                                          int idxStaff)
 {
     list<VProfilePoint>* pPoints = m_xMin[idxStaff];
     PointsIterator it = locate_insertion_point(pPoints, xStart);
     if (it != pPoints->begin())
         --it;
     LUnits yMin = (*it).y;
+    GmoShape* pShape = (*it).shape;
     for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
     {
-        yMin = min(yMin, (*it).y);
+        if (yMin >= (*it).y)
+        {
+            yMin = (*it).y;
+            pShape = (*it).shape;
+        }
     }
-    return yMin;
+    return make_pair(yMin, pShape);
 }
 
 //---------------------------------------------------------------------------------------

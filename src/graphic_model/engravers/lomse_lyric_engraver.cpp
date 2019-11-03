@@ -206,14 +206,16 @@ void LyricEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoLyric* 
 	if (pLyric->get_placement() == k_placement_above)
     {
         yPos = m_uStaffTop - uDistance;
-        LUnits yMin = m_pVProfile->get_min_for(xLeft, xRight, m_idxStaff) - uDistance;
+        LUnits yMin = m_pVProfile->get_min_for(xLeft, xRight, m_idxStaff).first
+                      - uDistance;
         yPos = min(yPos, yMin);
         yPos -= (m_fontHeight - m_fontBase);
     }
     else
     {
         yPos = m_uStaffTop + tenths_to_logical(40.0f) + uDistance;
-        LUnits yMax = m_pVProfile->get_max_for(xLeft, xRight, m_idxStaff) + uDistance;
+        LUnits yMax = m_pVProfile->get_max_for(xLeft, xRight, m_idxStaff).first
+                      + uDistance;
         yPos = max(yPos, yMax);
         yPos += m_fontBase;
     }

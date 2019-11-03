@@ -100,6 +100,7 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
     //      Instead, it is necessary to measure glyphs
 
     int type = m_pArticulation->get_articulation_type();
+    LUnits spaceNotehead = tenths_to_logical(LOMSE_SPACING_NOTEHEAD_ARTICULATION);
 
     if (type == k_articulation_breath_mark)
     {
@@ -126,15 +127,15 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
         {
             pos.x = m_pParentShape->get_left() - tenths_to_logical(16.0f);
             if (type == k_articulation_plop)
-                pos.y -= tenths_to_logical(15.0f);
+                pos.y -= tenths_to_logical(10.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
             else //scoop
-                pos.y += tenths_to_logical(5.0f);
+                pos.y += spaceNotehead;
         }
         else
         {
             pos.x = m_pParentShape->get_right() + tenths_to_logical(3.0f);
             if (type == k_articulation_doit)
-                pos.y -= tenths_to_logical(15.0f);
+                pos.y -= tenths_to_logical(10.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
         }
     }
 
@@ -142,9 +143,9 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
     {
         m_fEnableShiftWhenCollision = true;
         if (m_fAbove)
-            pos.y -= tenths_to_logical(5.0f);
+            pos.y -= spaceNotehead;
         else
-            pos.y += tenths_to_logical(45.0f);
+            pos.y += tenths_to_logical(40.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
     }
 
     else if (is_accent_articulation() && m_pParentShape->is_shape_note())
@@ -156,16 +157,15 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
 //        //articulation must be centered of next staff space
 //        LUnits shift = pNote->is_on_staff_line() ? tenths_to_logical(15.0f)
 //                                                 : tenths_to_logical(5.0f);
-        LUnits shift = tenths_to_logical(5.0f);
         if (m_fAbove)
         {
             pos.y = pShape->get_top();
-            pos.y -= shift;
+            pos.y -= spaceNotehead;
         }
         else
         {
             pos.y = pShape->get_bottom();
-            pos.y += shift;
+            pos.y += spaceNotehead;
         }
     }
 
@@ -175,12 +175,12 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
         if (m_fAbove)
         {
             pos.y = m_pParentShape->get_top();
-            pos.y -= tenths_to_logical(5.0f);
+            pos.y -= spaceNotehead;
         }
         else
         {
             pos.y = m_pParentShape->get_bottom();
-            pos.y += tenths_to_logical(5.0f);
+            pos.y += spaceNotehead;
         }
     }
 
@@ -214,19 +214,6 @@ void ArticulationEngraver::center_on_parent()
         USize shift(xShift, 0.0f);
         m_pArticulationShape->shift_origin(shift);
     }
-
-//    //ensure that articulation does not collides with parent shape
-//    URect overlap = m_pParentShape->get_bounds();
-//    overlap.intersection( m_pArticulationShape->get_bounds() );
-//    LUnits yShift = overlap.get_height();
-//    if (yShift != 0.0f)
-//    {
-//        yShift += tenths_to_logical(5.0f);
-//        yShift = m_fAbove ? - yShift : yShift;
-//
-//        USize shift(0.0f, yShift);
-//        m_pArticulationShape->shift_origin(shift);
-//    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -254,21 +241,28 @@ void ArticulationEngraver::add_voice()
 void ArticulationEngraver::shift_shape_if_collision()
 {
     LUnits yCurPos = m_pArticulationShape->get_top();
+    LUnits spaceNotehead = tenths_to_logical(LOMSE_SPACING_NOTEHEAD_ARTICULATION);
+    LUnits spaceOther = tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+
     if (m_fAbove)
     {
-        LUnits yMin = m_pVProfile->get_min_for(m_pArticulationShape->get_left(),
-                                               m_pArticulationShape->get_right(),
-                                               m_idxStaff);
+        std::pair<LUnits, GmoShape*> minValue =
+                        m_pVProfile->get_min_for(m_pArticulationShape->get_left(),
+                                                 m_pArticulationShape->get_right(),
+                                                 m_idxStaff);
+        LUnits yMin = minValue.first;
         yMin -= m_pArticulationShape->get_height();
-        yMin -= tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+        yMin -= (minValue.second->is_shape_notehead() ? spaceNotehead : spaceOther);
         m_pArticulationShape->set_top( min(yCurPos, yMin) );
     }
     else
     {
-        LUnits yMax = m_pVProfile->get_max_for(m_pArticulationShape->get_left(),
-                                               m_pArticulationShape->get_right(),
-                                               m_idxStaff);
-        yMax += tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+        std::pair<LUnits, GmoShape*> maxValue =
+                        m_pVProfile->get_max_for(m_pArticulationShape->get_left(),
+                                                 m_pArticulationShape->get_right(),
+                                                 m_idxStaff);
+        LUnits yMax = maxValue.first;
+        yMax += (maxValue.second->is_shape_notehead() ? spaceNotehead : spaceOther);
         m_pArticulationShape->set_top( max(yCurPos, yMax) );
     }
 }

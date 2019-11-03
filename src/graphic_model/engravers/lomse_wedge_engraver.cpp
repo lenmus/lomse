@@ -299,7 +299,7 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
     {
         yRef -= oneLine;   //1 line above top staff line
         yRef -= maxSpread;
-        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff)
+        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff).first
                       - maxSpread - oneLine;
         yRef = min(yRef, yMin);
     }
@@ -307,7 +307,7 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
     {
         yRef += tenths_to_logical(50.0f);   //1 lines bellow first staff line
         yRef += maxSpread;
-        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff)
+        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff).first
                       + maxSpread + oneLine;
         yRef = max(yRef, yMax);
     }
