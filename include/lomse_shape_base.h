@@ -154,8 +154,9 @@ public:
     void lock();
 
     //virtual methods from base class
-    virtual void shift_origin(const USize& shift);
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    virtual void shift_origin(const USize& shift) override;
+    virtual void reposition_shape(LUnits yShift) override;
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //for unit tests
     inline std::list<GmoShape*>& get_components() { return m_components; }

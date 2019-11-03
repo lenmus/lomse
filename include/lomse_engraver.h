@@ -42,6 +42,7 @@ class GmoShape;
 class ImoRelObj;
 class ImoStaffObj;
 class ImoAuxRelObj;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 // base class for all engravers
@@ -94,14 +95,23 @@ struct ShapeBoxInfo
 class RelObjEngraver : public Engraver
 {
 protected:
-    GmoShape* m_pShape;
     Color m_color;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
+
+    enum EShapeType {
+        k_single_shape = 0,
+        k_first_shape,
+        k_intermediate_shape,
+        k_final_shape,
+    };
 
 public:
     RelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
-        , m_pShape(nullptr)
         , m_color( Color(0,0,0) )
+        , m_idxStaff(-1)
+        , m_pVProfile(nullptr)
     {
     }
     virtual ~RelObjEngraver() {}
@@ -109,23 +119,24 @@ public:
     virtual void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol,
-                                    LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
+                                    LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                                    int idxStaff, VerticalProfile* pVProfile) = 0;
     virtual void set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* UNUSED(pSO),
                                      GmoShape* UNUSED(pStaffObjShape),
                                      int UNUSED(iInstr), int UNUSED(iStaff),
                                      int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                     LUnits UNUSED(yTop)) {}
+                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                     LUnits UNUSED(yTop), int UNUSED(idxStaff),
+                                     VerticalProfile* UNUSED(pVProfile)) {}
     virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol,
-                                  LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
-    virtual int create_shapes(Color color=Color(0,0,0)) = 0;
-    virtual int get_num_shapes() = 0;
-    virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
-    virtual void set_prolog_width(LUnits UNUSED(width)) {}
+                                  LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                                  int idxStaff, VerticalProfile* pVProfile) = 0;
 
-    virtual GmoShape* get_shape() { return m_pShape; }
+    virtual void set_prolog_width(LUnits UNUSED(width)) {}
+    virtual GmoShape* create_first_or_intermediate_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
+    virtual GmoShape* create_last_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -135,12 +146,16 @@ class AuxRelObjEngraver : public Engraver
 protected:
     GmoShape* m_pShape;
     Color m_color;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
 
 public:
     AuxRelObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
         , m_pShape(nullptr)
         , m_color( Color(0,0,0) )
+        , m_idxStaff(-1)
+        , m_pVProfile(nullptr)
     {
     }
     virtual ~AuxRelObjEngraver() {}
@@ -148,17 +163,20 @@ public:
     virtual void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol,
-                                    LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
+                                    LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                                    int idxStaff, VerticalProfile* pVProfile) = 0;
     virtual void set_middle_staffobj(ImoAuxRelObj* UNUSED(pARO), ImoStaffObj* UNUSED(pSO),
                                      GmoShape* UNUSED(pStaffObjShape),
                                      int UNUSED(iInstr), int UNUSED(iStaff),
                                      int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                     LUnits UNUSED(yTop)) {}
+                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                     LUnits UNUSED(yStaffTop), int UNUSED(idxStaff),
+                                     VerticalProfile* UNUSED(pVProfile)) {}
     virtual void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol,
-                                  LUnits xRight, LUnits xLeft, LUnits yTop) = 0;
+                                  LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                                  int idxStaff, VerticalProfile* pVProfile) = 0;
     virtual int create_shapes(Color color=Color(0,0,0)) = 0;
     virtual int get_num_shapes() = 0;
     virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;

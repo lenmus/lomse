@@ -125,8 +125,8 @@
         </barline>
       <note default-x="12.00" default-y="-35.00">
         <pitch>
-          <step>F</step>
-          <octave>4</octave>
+          <step>B</step>
+          <octave>5</octave>
           </pitch>
         <duration>4</duration>
         <voice>1</voice>

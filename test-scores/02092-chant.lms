@@ -1,4 +1,4 @@
-(score (vers 2.0)(instrument (musicData 
+(score (vers 2.0)(instrument (name "Chant") (musicData 
     (clef G)
     (key C)
     (n g4 q (slur 100 start)(lyric "Quem" (melisma)))

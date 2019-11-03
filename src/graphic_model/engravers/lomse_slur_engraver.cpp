@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -48,8 +49,7 @@ SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            InstrumentEngraver* pInstrEngrv)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTopStart(0.0f)
-    , m_uStaffTopEnd(0.0f)
+    , m_uStaffTop(0.0f)
     , m_numShapes(0)
     , m_pSlur(nullptr)
     , m_fSlurBelow(false)
@@ -66,88 +66,136 @@ SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 //---------------------------------------------------------------------------------------
 void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int iSystem, int iCol, LUnits UNUSED(xRight),
-                                      LUnits UNUSED(xLeft), LUnits yTop)
+                                      int UNUSED(iSystem), int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                      LUnits UNUSED(xStaffRight), LUnits yTop,
+                                      int idxStaff, VerticalProfile* pVProfile)
 {
+    //data stored in base class
     m_iInstr = iInstr;
     m_iStaff = iStaff;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
+
+    //data specific for this class
     m_pSlur = static_cast<ImoSlur*>(pRO);
 
     m_pStartNote = static_cast<ImoNote*>(pSO);
     m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
-
-    m_uStaffTopStart = yTop - m_pStartNoteShape->get_top();     //relative to note top
+    m_uStaffTop = yTop - m_pStartNoteShape->get_top();     //relative to note top
 }
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                    GmoShape* pStaffObjShape, int iInstr,
-                                    int UNUSED(iStaff), int iSystem, int iCol,
-                                    LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                    LUnits yTop)
+                                    GmoShape* pStaffObjShape, int UNUSED(iInstr),
+                                    int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
+                                    LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                    LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
 {
     m_pEndNote = static_cast<ImoNote*>(pSO);
     m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_shapesInfo[1].iCol = iCol;
-    m_shapesInfo[1].iInstr = iInstr;
-    m_shapesInfo[1].iSystem = iSystem;
+    m_uStaffTop = yTop - m_pEndNoteShape->get_top();     //relative to note top;
 
-    m_uStaffTopEnd = yTop - m_pEndNoteShape->get_top();     //relative to note top;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-int SlurEngraver::create_shapes(Color color)
+void SlurEngraver::decide_placement()
+{
+    //[Read, p.266] placement: at notehead side when all notes in same direction.
+    //When mixed directions, preferred above
+
+    bool fMixed = is_end_point_set() &&
+                  ( (m_pStartNoteShape->is_up() && !m_pEndNoteShape->is_up())
+                     || (!m_pStartNoteShape->is_up() && m_pEndNoteShape->is_up()) );
+
+    if (fMixed)
+        m_fSlurBelow = false;
+    else
+        m_fSlurBelow = m_pStartNoteShape->is_up() ? true : false;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* SlurEngraver::create_first_or_intermediate_shape(Color color)
 {
     m_color = color;
-    decide_placement();
-    decide_if_one_or_two_arches();
-    if (two_arches_needed())
-        create_two_shapes();
+    if (m_numShapes == 0)
+    {
+        decide_placement();
+        return create_first_shape();
+    }
     else
-        create_one_shape();
-    return m_numShapes;
+        return create_intermediate_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::create_one_shape()
+GmoShape* SlurEngraver::create_last_shape(Color color)
 {
-    m_numShapes = 1;
-
-    compute_ref_point(m_pStartNoteShape, &m_points1[ImoBezierInfo::k_start]);
-    compute_ref_point(m_pEndNoteShape, &m_points1[ImoBezierInfo::k_end]);
-    compute_start_point();
-    compute_end_point(&m_points1[ImoBezierInfo::k_end]);
-    compute_default_control_points(&m_points1[0]);
-    //add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape =
-        LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness, m_color);
-
-    m_shapesInfo[1].pShape = nullptr;
+    m_color = color;
+    if (m_numShapes == 0)
+    {
+        decide_placement();
+        return create_single_shape();
+    }
+    return create_final_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::create_two_shapes()
+GmoShape* SlurEngraver::create_first_shape()
 {
-    m_numShapes = 2;
+    //first shape when there are more than one
 
-    //create first shape
     compute_start_point();
     compute_end_of_staff_point();
-    compute_default_control_points(&m_points1[0]);
-    //add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
+    compute_default_control_points(&m_points[0]);
+    //add_user_displacements(0, &m_points[0]);
+    m_numShapes = 1;
+    return LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points[0], m_thickness, m_color);
+}
 
-    //create second shape
-    compute_end_point(&m_points2[ImoBezierInfo::k_end]);
+//---------------------------------------------------------------------------------------
+GmoShape* SlurEngraver::create_single_shape()
+{
+    //the only shape when start and end points are in the same system
+
+    compute_ref_point(m_pStartNoteShape, &m_points[ImoBezierInfo::k_start]);
+    compute_ref_point(m_pEndNoteShape, &m_points[ImoBezierInfo::k_end]);
+    compute_start_point();
+    compute_end_point(&m_points[ImoBezierInfo::k_end]);
+    compute_default_control_points(&m_points[0]);
+    //add_user_displacements(0, &m_points[0]);
+
+    GmoShape* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0],
+                                              m_thickness, m_color);
+
+    if (m_pStartNote->get_staff() != m_pEndNote->get_staff())
+        pShape->set_add_to_vprofile(false);
+
+    return pShape;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* SlurEngraver::create_intermediate_shape()
+{
+    //intermediate shape spanning the whole system
+
+    ++m_numShapes;
+    //TODO
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* SlurEngraver::create_final_shape()
+{
+    //last shape when there are more than one
+
+    compute_end_point(&m_points[ImoBezierInfo::k_end]);
     compute_start_of_staff_point();
-    compute_default_control_points(&m_points2[0]);
-    //add_user_displacements(1, &m_points2[0]);
-    m_shapesInfo[1].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points2[0], m_thickness);
+    compute_default_control_points(&m_points[0]);
+    //add_user_displacements(1, &m_points[0]);
+    return LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0], m_thickness);
 }
 
 //---------------------------------------------------------------------------------------
@@ -177,17 +225,17 @@ void SlurEngraver::compute_start_point()
     }
 
 	//x pos: center on notehead
-	m_points1[ImoBezierInfo::k_start].x = (m_pStartNoteShape->get_notehead_right() +
+	m_points[ImoBezierInfo::k_start].x = (m_pStartNoteShape->get_notehead_right() +
                           m_pStartNoteShape->get_notehead_left()) / 2.0f;
 
     //y pos: 5 tenths appart from notehead of from stem
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
     if (fOverStem)
-        m_points1[ImoBezierInfo::k_start].y = (m_fSlurBelow ?
+        m_points[ImoBezierInfo::k_start].y = (m_fSlurBelow ?
                               m_pStartNoteShape->get_bottom() + space
                               : m_pStartNoteShape->get_top() - space );
     else
-        m_points1[ImoBezierInfo::k_start].y = (m_fSlurBelow ?
+        m_points[ImoBezierInfo::k_start].y = (m_fSlurBelow ?
                               m_pStartNoteShape->get_notehead_bottom() + space
                               : m_pStartNoteShape->get_notehead_top() - space );
 }
@@ -221,50 +269,28 @@ void SlurEngraver::compute_end_point(UPoint* point)
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_start_of_staff_point()
 {
-    m_points2[ImoBezierInfo::k_start].x = m_pInstrEngrv->get_staves_left()
+    m_points[ImoBezierInfo::k_start].x = m_pInstrEngrv->get_staves_left()
                                           + m_uPrologWidth - tenths_to_logical(10.0f);
 
     if (m_fSlurBelow)
-        m_points2[ImoBezierInfo::k_start].y =
-            m_uStaffTopEnd + m_pEndNoteShape->get_top() + tenths_to_logical(60.0f);
+        m_points[ImoBezierInfo::k_start].y =
+            m_uStaffTop + m_pEndNoteShape->get_top() + tenths_to_logical(60.0f);
     else
-        m_points2[ImoBezierInfo::k_start].y =
-            m_uStaffTopEnd + m_pEndNoteShape->get_top() - tenths_to_logical(20.0f);
+        m_points[ImoBezierInfo::k_start].y =
+            m_uStaffTop + m_pEndNoteShape->get_top() - tenths_to_logical(20.0f);
 }
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_end_of_staff_point()
 {
-    m_points1[ImoBezierInfo::k_end].x = m_pInstrEngrv->get_staves_right();
-    LUnits yTop = m_uStaffTopStart + m_pStartNoteShape->get_top();
+    m_points[ImoBezierInfo::k_end].x = m_pInstrEngrv->get_staves_right();
+    LUnits yTop = m_uStaffTop + m_pStartNoteShape->get_top();
 
     if (m_fSlurBelow)
-        m_points1[ImoBezierInfo::k_end].y = yTop + tenths_to_logical(60.0f);
+        m_points[ImoBezierInfo::k_end].y = yTop + tenths_to_logical(60.0f);
     else
-        m_points1[ImoBezierInfo::k_end].y = yTop - tenths_to_logical(20.0f);
+        m_points[ImoBezierInfo::k_end].y = yTop - tenths_to_logical(20.0f);
 }
-
-//---------------------------------------------------------------------------------------
-void SlurEngraver::decide_placement()
-{
-    //[Read, p.266] placement: at notehead side when all notes in same direction.
-    //When mixed directions, preferred above
-
-    bool fMixed = (m_pStartNoteShape->is_up() && !m_pEndNoteShape->is_up())
-                  || (!m_pStartNoteShape->is_up() && m_pEndNoteShape->is_up());
-
-    if (fMixed)
-        m_fSlurBelow = false;
-    else
-        m_fSlurBelow = m_pStartNoteShape->is_up() ? true : false;
-}
-
-//---------------------------------------------------------------------------------------
-void SlurEngraver::decide_if_one_or_two_arches()
-{
-    m_fTwoArches = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
-}
-
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_ref_point(GmoShapeNote* pNoteShape, UPoint* point)
@@ -318,18 +344,6 @@ void SlurEngraver::compute_ref_point(GmoShapeNote* pNoteShape, UPoint* point)
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-int SlurEngraver::get_num_shapes()
-{
-    return m_numShapes;
-}
-
-//---------------------------------------------------------------------------------------
-ShapeBoxInfo* SlurEngraver::get_shape_box_info(int i)
-{
-    return &m_shapesInfo[i];
-}
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::set_prolog_width(LUnits width)

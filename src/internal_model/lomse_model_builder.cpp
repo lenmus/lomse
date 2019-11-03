@@ -122,7 +122,7 @@ void PitchAssigner::assign_pitch(ImoScore* pScore)
     StaffObjsCursor cursor(pScore);
 
     int staves = cursor.get_num_staves();
-    m_context.assign(staves, {0,0,0,0,0,0,0});          //alterations, per staff index
+    m_context.assign(staves, {{0,0,0,0,0,0,0}} );       //alterations, per staff index
 
     int numInstrs = cursor.get_num_instruments();
     vector<ImoKeySignature*> keys;                      //key, per instrument

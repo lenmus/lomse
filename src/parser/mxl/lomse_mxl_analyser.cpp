@@ -5713,6 +5713,7 @@ public:
         check_if_missing_parts();
 
         //m_pAnalyser->score_analysis_end();
+        set_options(pScore);
         return pImoDoc;
     }
 
@@ -5742,7 +5743,6 @@ protected:
         m_pAnchor = pScore;
 
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
-        set_options(pScore);
         pScore->add_required_text_styles();
 
         return pScore;
@@ -5750,8 +5750,16 @@ protected:
 
     void set_options(ImoScore* pScore)
     {
+        //justify last system except for very short scores (less than 5 measures)
         ImoOptionInfo* pOpt = pScore->get_option("Score.JustifyLastSystem");
-        pOpt->set_long_value(k_justify_always);
+        if (m_pAnalyser->get_measures_counter() < 5)
+        {
+            pOpt->set_long_value(k_justify_never);
+            pOpt = pScore->get_option("StaffLines.Truncate");
+            pOpt->set_long_value(k_truncate_always);
+        }
+        else
+            pOpt->set_long_value(k_justify_always);
 
         pOpt = pScore->get_option("Render.SpacingOptions");
         pOpt->set_long_value(k_render_opt_breaker_optimal | k_render_opt_dmin_global);

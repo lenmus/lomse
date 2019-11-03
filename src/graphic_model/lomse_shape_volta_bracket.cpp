@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,8 +46,6 @@ namespace lomse
 //=======================================================================================
 GmoShapeVoltaBracket::GmoShapeVoltaBracket(ImoObj* pCreatorImo, ShapeId idx, Color color)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_volta_bracket, idx, color)
-    , m_pStartBarlineShape(nullptr)
-    , m_pStopBarlineShape(nullptr)
     , m_pShapeText(nullptr)
     , m_fTwoBrackets(false)
     , m_fStopJog(true)
@@ -75,13 +73,10 @@ void GmoShapeVoltaBracket::add_label(GmoShapeText* pShape)
 void GmoShapeVoltaBracket::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos,
                                            LUnits uBracketDistance, LUnits uJogLength,
                                            LUnits uLineThick, LUnits uLeftSpaceToText,
-                                           LUnits xStaffLeft, LUnits xStaffRight,
-                                           GmoShapeBarline* pStart,
-                                           GmoShapeBarline* pEnd)
+                                           LUnits uTopSpaceToText, LUnits xStaffLeft,
+                                           LUnits xStaffRight)
 {
     //save data
-    m_pStartBarlineShape = pStart;
-    m_pStopBarlineShape = pEnd;
     m_uBracketDistance = uBracketDistance;
 	m_uJogLength = uJogLength;
     m_uLineThick = uLineThick;
@@ -90,7 +85,7 @@ void GmoShapeVoltaBracket::set_layout_data(LUnits xStart, LUnits xEnd, LUnits yP
 
 	//move text shape to its position
     if (m_pShapeText)
-        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos);
+        m_pShapeText->set_origin(xStart + uLeftSpaceToText, yPos + uTopSpaceToText);
 
     compute_bounds(xStart, xEnd, yPos);
 }
@@ -100,34 +95,10 @@ void GmoShapeVoltaBracket::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);      //Color(255,0,0);
 
-    //compute horizontal position
-    //AWARE: It is necessary to do this here because when the volta bracket is engraved
-    //the system is not yet justified and, therefore, the barlines will be moved later.
-    LUnits xStart = m_pStartBarlineShape->get_x_right_line();
-    if (m_pStartBarlineShape->get_width() < 40.0f)
-        xStart += 30.0f;
-    LUnits xEnd = m_pStopBarlineShape->get_x_left_line();
-    if (m_pStopBarlineShape->get_width() < 40.0f)
-        xEnd -= 30.0f;
-    LUnits yTop = m_pStopBarlineShape->get_top() - m_uBracketDistance;
-    if (xEnd < xStart)
-        xStart = m_uStaffLeft;
-
-    if (m_fTwoBrackets)
-    {
-        if (get_shape_id() == 0)
-        {
-            yTop = m_pStartBarlineShape->get_top() - m_uBracketDistance;
-            xStart = m_pStartBarlineShape->get_x_right_line();
-            xEnd = m_uStaffRight;
-        }
-        else
-        {
-            xStart = m_uStaffLeft;
-        }
-    }
+    LUnits xStart = m_origin.x;
+    LUnits xEnd = xStart + m_size.width;
+    LUnits yTop = m_origin.y;
     LUnits yBottom = yTop + m_uJogLength;
-
 
     pDrawer->begin_path();
     pDrawer->fill(color);

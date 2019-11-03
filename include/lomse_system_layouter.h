@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,8 +38,7 @@
 #include "lomse_spacing_algorithm.h"
 
 #include <list>
-#include <vector>
-using namespace std;
+#include <tuple>
 
 namespace lomse
 {
@@ -50,7 +49,10 @@ class GmoBoxSlice;
 class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBoxSystem;
+class GmoShapeBeam;
 class ImoAuxObj;
+class ImoRelObj;
+class ImoAuxRelObj;
 class ImoInstrument;
 class ImoScore;
 class ImoStaff;
@@ -64,6 +66,8 @@ class EngraversMap;
 class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
+class VerticalProfile;
+struct PendingAuxObjs;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -75,9 +79,10 @@ protected:
     LibraryScope&   m_libraryScope;
     ScoreMeter*     m_pScoreMeter;
     ImoScore*       m_pScore;
-    EngraversMap&  m_engravers;
+    EngraversMap&   m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
+    VerticalProfile* m_pVProfile;
 
     LUnits m_uPrologWidth;
     GmoBoxSystem* m_pBoxSystem;
@@ -90,9 +95,18 @@ protected:
     LUnits m_uFreeSpace;    //free space available on current system
     UPoint m_pagePos;
     bool m_fFirstColumnInSystem;
-
-    //collected information
     int m_barlinesInfo;     //info about barlines at end of this system
+
+    //RelObjs that continue in next system
+    typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
+    std::list<PendingRelObj> m_notFinishedRelObj;
+
+    //Lyrics that continue in next system
+    typedef std::pair<std::string, PendingAuxObjs*> PendingLyrics;
+    std::list<PendingLyrics> m_notFinishedLyrics;
+
+    //prolog shapes waiting to be added to slice staff box
+    std::list< std::tuple<GmoShape*, int, int> > m_prologShapes;
 
     SpacingAlgorithm* m_pSpAlgorithm;
     int m_constrains;
@@ -130,6 +144,7 @@ public:
 
 protected:
     void set_position_and_width_for_staves(LUnits indent);
+    void create_vertical_profile();
     void fill_current_system_with_columns();
     void collect_last_column_information();
     void justify_current_system();
@@ -146,7 +161,12 @@ protected:
     void engrave_measure_numbers();
     void engrave_system_details(int iSystem);
     void add_instruments_info();
+    void move_staves_to_avoid_collisions();
+    void reposition_staves_in_engravers(const std::vector<LUnits>& yOrgShifts);
+    void reposition_slice_boxes_and_shapes(const vector<LUnits>& yOrgShifts,
+                                           vector<LUnits>& heights);
 
+    void add_prolog_shapes_to_boxes();
     void add_system_prolog_if_necessary();
     LUnits engrave_prolog(int iInstr);
     LUnits determine_column_start_position(int iCol);
@@ -155,18 +175,27 @@ protected:
     bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
                                           bool fFirstNumberInSystem);
 
+    void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
+    void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO, int iSystem);
+    void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObjs* pPAO, int iSystem);
 
-    void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
-                                  int iInstr, int iStaff, int iSystem,
-                                  int iCol, int iLine,
-                                  ImoInstrument* pInstr);
-
-    void add_relobjs_shapes_to_model(ImoObj* pAO, int layer);
-    void add_relauxobjs_shapes_to_model(const string& tag, int layer);
-    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr);
+    void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
+                                     int iCol, int iInstr, int iStaff, int idxStaff);
+    void add_lyrics_shapes_to_model(const std::string& tag, int layer, bool fLast,
+                                    int iStaff, int idxStaff);
+    void add_aux_shape_to_model(GmoShape* pShape, int layer, int iCol, int iInstr,
+                                int iStaff, int idxStaff);
 
     //helpers
     inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }
+
+    //debug
+    void dbg_add_vertical_profile_shape();
+
+    //final layout
+    friend class GmoBoxSliceStaff;
+    void increment_cross_staff_stems(GmoShapeBeam* pShapeBeam, LUnits yIncrement);
+
 };
 
 

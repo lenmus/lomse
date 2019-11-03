@@ -32,6 +32,7 @@
 #include "lomse_drawer.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
+#include "lomse_im_note.h"
 #include "lomse_calligrapher.h"
 
 
@@ -192,6 +193,9 @@ void GmoShapeNote::set_stem_down(bool down)
                        + get_notehead_top();
         m_pStemShape->set_stem_up(xRight, yNote);
     }
+
+    //recompute bounding box
+    recompute_bounds();
 }
 
 //---------------------------------------------------------------------------------------
@@ -199,6 +203,16 @@ void GmoShapeNote::set_stem_length(LUnits length)
 {
     if (m_pStemShape)
         m_pStemShape->change_length(length);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::increment_stem_length(LUnits yIncrement)
+{
+    if (m_pStemShape)
+    {
+        LUnits length = m_pStemShape->get_height() + yIncrement;
+        m_pStemShape->change_length(length);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -273,10 +287,34 @@ LUnits GmoShapeNote::get_stem_extra_length() const
     return (m_pStemShape ? m_pStemShape->get_extra_length() : 0.0f);
 }
 
+//---------------------------------------------------------------------------------------
+bool GmoShapeNote::has_beam()
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
+    if (pNote)
+        return pNote->has_beam();
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GmoShapeNote::is_in_chord()
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
+    if (pNote)
+        return pNote->is_in_chord();
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::set_color(Color color)
+{
+    m_pNoteheadShape->set_color(color);
+}
+
 
 
 //=======================================================================================
-// GmoShapeNote implementation
+// GmoShapeRest implementation
 //=======================================================================================
 GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
                            LUnits UNUSED(x), LUnits UNUSED(y), Color color,

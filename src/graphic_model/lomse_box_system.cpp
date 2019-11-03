@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -96,6 +96,40 @@ GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iInstr, int iStaff)
         return m_staffShapes[iStaff];
     else
         return m_staffShapes[ m_firstStaff[iInstr-1] + iStaff ];
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
+                                                vector<LUnits>& heights,
+                                                vector<LUnits>& barlinesHeight,
+                                                SystemLayouter* pSysLayouter)
+
+{
+    vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(*it);
+        pSlice->reposition_slices_and_shapes(yOrgShifts, heights, barlinesHeight,
+                                             pSysLayouter);
+    }
+
+    //shift origin and increase height
+    m_origin.y += yOrgShifts[0];
+    m_size.height += yOrgShifts.back() + heights[0];
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* GmoBoxSystem::get_first_instr_slice(int iInstr)
+{
+    GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(m_childBoxes[0]);
+    return pSlice->get_instr_slice(iInstr);
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxSliceStaff* GmoBoxSystem::get_first_slice_staff_for(int iInstr, int iStaff)
+{
+    GmoBoxSlice* pSlice = static_cast<GmoBoxSlice*>(m_childBoxes[0]);
+    return pSlice->get_slice_staff_for(iInstr, iStaff);
 }
 
 //---------------------------------------------------------------------------------------

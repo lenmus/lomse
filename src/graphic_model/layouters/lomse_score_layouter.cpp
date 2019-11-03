@@ -75,6 +75,7 @@
 #include "lomse_wedge_engraver.h"
 #include "lomse_spacing_algorithm_gourlay.h"
 #include "lomse_gm_measures_table.h"
+#include "lomse_vertical_profile.h"
 
 namespace lomse
 {
@@ -992,6 +993,11 @@ ShapesCreator::ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
 }
 
 //---------------------------------------------------------------------------------------
+ShapesCreator::~ShapesCreator()
+{
+}
+
+//---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                                UPoint pos, int clefType, int octaveShift,
                                                unsigned flags)
@@ -1085,6 +1091,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
+                                             int idxStaff, VerticalProfile* pVProfile,
                                              GmoShape* pParentShape)
 {
     //factory method to create shapes for auxobjs
@@ -1099,7 +1106,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         case k_imo_articulation_symbol:
         {
             ImoArticulation* pImo = static_cast<ImoArticulation*>(pAO);
-            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff,
+                                       idxStaff, pVProfile);
             Color color = pImo->get_color();
             return engrv.create_shape(pImo, pos, color, pParentShape);
         }
@@ -1195,7 +1203,8 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
                                            GmoShape* pStaffObjShape,
                                            int iInstr, int iStaff, int iSystem,
                                            int iCol, int UNUSED(iLine),
-                                           ImoInstrument* UNUSED(pInstr))
+                                           ImoInstrument* UNUSED(pInstr),
+                                           int idxStaff, VerticalProfile* pVProfile)
 {
     //factory method to create the engraver for relation auxobjs
 
@@ -1220,7 +1229,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 
         case k_imo_tie:
         {
-            pEngrv = LOMSE_NEW TieEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
+            pEngrv = LOMSE_NEW TieEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
@@ -1232,14 +1241,13 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
 
         case k_imo_volta_bracket:
         {
-            pEngrv = LOMSE_NEW VoltaBracketEngraver(m_libraryScope, m_pScoreMeter,
-                                                    xLeft, xRight);
+            pEngrv = LOMSE_NEW VoltaBracketEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
         case k_imo_wedge:
         {
-            pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);   //xLeft, xRight);
+            pEngrv = LOMSE_NEW WedgeEngraver(m_libraryScope, m_pScoreMeter, pInstrEngrv);
             break;
         }
 
@@ -1257,7 +1265,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
     {
         LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
         pEngrv->set_start_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff,
-                                   iSystem, iCol, xLeft, xRight, yTop);
+                                   iSystem, iCol, xLeft, xRight, yTop, idxStaff, pVProfile);
         m_engravers.save_engraver(pEngrv, pRO);
     }
 }
@@ -1268,7 +1276,8 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
                                               GmoShape* pStaffObjShape, int iInstr,
                                               int iStaff, int iSystem, int iCol,
                                               int UNUSED(iLine),
-                                              ImoInstrument* UNUSED(pInstr))
+                                              ImoInstrument* UNUSED(pInstr),
+                                              int idxStaff, VerticalProfile* pVProfile)
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1278,7 +1287,7 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
     RelObjEngraver* pEngrv
         = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
     pEngrv->set_middle_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
-                                xLeft, xRight, yTop);
+                                xLeft, xRight, yTop, idxStaff, pVProfile);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1288,7 +1297,8 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
                                             int iInstr, int iStaff, int iSystem,
                                             int iCol, int UNUSED(iLine),
                                             LUnits prologWidth,
-                                            ImoInstrument* UNUSED(pInstr))
+                                            ImoInstrument* UNUSED(pInstr), int idxStaff,
+                                            VerticalProfile* pVProfile)
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1298,10 +1308,24 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
     RelObjEngraver* pEngrv
         = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
     pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
-                             xLeft, xRight, yTop);
+                             xLeft, xRight, yTop, idxStaff, pVProfile);
     pEngrv->set_prolog_width( prologWidth );
+}
 
-    pEngrv->create_shapes(pRO->get_color());
+//---------------------------------------------------------------------------------------
+GmoShape* ShapesCreator::create_last_shape(ImoRelObj* pRO)
+{
+    RelObjEngraver* pEngrv
+        = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
+    return pEngrv->create_last_shape(pRO->get_color());
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ShapesCreator::create_first_or_intermediate_shape(ImoRelObj* pRO)
+{
+    RelObjEngraver* pEngrv
+        = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
+    return pEngrv->create_first_or_intermediate_shape(pRO->get_color());
 }
 
 //---------------------------------------------------------------------------------------
@@ -1309,7 +1333,8 @@ void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* p
                                               const string& tag, GmoShape* pStaffObjShape,
                                               int iInstr, int iStaff, int iSystem,
                                               int iCol, int UNUSED(iLine),
-                                              ImoInstrument* UNUSED(pInstr))
+                                              ImoInstrument* UNUSED(pInstr),
+                                              int idxStaff, VerticalProfile* pVProfile)
 {
     //factory method to create the engraver for AuxRelObjs
 
@@ -1334,7 +1359,7 @@ void ShapesCreator::start_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* p
         LUnits xLeft = pInstrEngrv->get_staves_left();
         LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
         pEngrv->set_start_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff,
-                                   iSystem, iCol, xLeft, xRight, yTop);
+                                   iSystem, iCol, xLeft, xRight, yTop, idxStaff, pVProfile);
         m_engravers.save_engraver(pEngrv, tag);
     }
 }
@@ -1344,7 +1369,8 @@ void ShapesCreator::continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj
                                               const string& tag, GmoShape* pStaffObjShape,
                                               int iInstr, int iStaff, int iSystem,
                                               int iCol, int UNUSED(iLine),
-                                              ImoInstrument* UNUSED(pInstr))
+                                              ImoInstrument* UNUSED(pInstr),
+                                              int idxStaff, VerticalProfile* pVProfile)
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1354,7 +1380,7 @@ void ShapesCreator::continue_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj
     AuxRelObjEngraver* pEngrv
         = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
     pEngrv->set_middle_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
-                                xLeft, xRight, yTop);
+                                xLeft, xRight, yTop, idxStaff, pVProfile);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1363,7 +1389,8 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
                                                int iInstr, int iStaff, int iSystem,
                                                int iCol, int UNUSED(iLine),
                                                LUnits prologWidth,
-                                               ImoInstrument* UNUSED(pInstr))
+                                               ImoInstrument* UNUSED(pInstr),
+                                               int idxStaff, VerticalProfile* pVProfile)
 {
     InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1373,61 +1400,9 @@ void ShapesCreator::finish_engraving_auxrelobj(ImoAuxRelObj* pARO, ImoStaffObj* 
     AuxRelObjEngraver* pEngrv
         = static_cast<AuxRelObjEngraver*>(m_engravers.get_engraver(tag));
     pEngrv->set_end_staffobj(pARO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol,
-                             xLeft, xRight, yTop);
+                             xLeft, xRight, yTop, idxStaff, pVProfile);
     pEngrv->set_prolog_width( prologWidth );
-
-    pEngrv->create_shapes(pARO->get_color());
 }
-
-////---------------------------------------------------------------------------------------
-//void ShapesCreator::create_shapes_for_lyrics(ImoStaffObj* pSO, GmoShapeNote* pNoteShape,
-//                                             int iInstr, int iStaff)
-//{
-//    ImoAttachments* pAuxObjs = pSO->get_attachments();
-//    if (!pAuxObjs)
-//        return;
-//
-//    ImoNote* pNote = static_cast<ImoNote*>(pSO);
-//    int size = pAuxObjs->get_num_items();
-//    for (int i=0; i < size; ++i)
-//    {
-//        ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
-//        if (pAO->is_lyric())
-//        {
-//            ImoLyric* pLyric = static_cast<ImoLyric*>(pAO);
-//
-//            //build hash code from instrument, number & voice.
-//            stringstream tag;
-//            tag << iInstr << "-" << pLyric->get_number() << "-" << pNote->get_voice();
-//            string id = tag.str();
-//
-//            //find engraver or create one
-//            LyricEngraver* pEngrv;
-//            if (pLyric->is_start_of_lyrics_line())
-//            {
-//                pEngrv = LOMSE_NEW LyricEngraver(m_libraryScope, m_pScoreMeter);
-//                m_lyricEngravers[id] = pEngrv;
-//            }
-//            else
-//            {
-//                //get engraver for this lyrics line
-//                map<string, LyricEngraver*>::iterator it = m_lyricEngravers.find(id);
-//                if (it == m_lyricEngravers.end())
-//                {
-//                    LOMSE_LOG_ERROR("No engraver!!!!!");
-//                    return;
-//                }
-//                else
-//                    pEngrv = it->second;
-//            }
-//
-//            GmoShape* pAuxShape = pEngrv->create_Lyric_shape(pLyric, pNoteShape);
-////            add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
-////                                      iCol, iInstr);
-//         }
-//
-//    }
-//}
 
 
 //=======================================================================================

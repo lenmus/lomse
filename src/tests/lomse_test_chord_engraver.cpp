@@ -167,7 +167,7 @@ public:
         //first note
         m_pChordEngrv = LOMSE_NEW MyChordEngraver(m_libraryScope, m_pMeter, numNotes);
         m_pChordEngrv->set_start_staffobj(m_pChord, m_pNote1, m_pShape1, iInstr, iStaff,
-                                          iSystem, iCol, 0.0f, 0.0f, 0.0f);
+                                          iSystem, iCol, 0.0f, 0.0f, 0.0f, -1, nullptr);
         m_pStorage->save_engraver(m_pChordEngrv, m_pChord);
 
         if (numNotes == 3)
@@ -175,16 +175,16 @@ public:
             //second note
             m_pChordEngrv->set_middle_staffobj(m_pChord, m_pNote2, m_pShape2, iInstr,
                                         iStaff, iSystem, iCol,
-                                        0.0f, 0.0f, 0.0f);
+                                        0.0f, 0.0f, 0.0f, -1, nullptr);
             //last note
             m_pChordEngrv->set_end_staffobj(m_pChord, m_pNote3, m_pShape3, iInstr,
                                      iStaff, iSystem, iCol,
-                                     0.0f, 0.0f, 0.0f);
+                                     0.0f, 0.0f, 0.0f, -1, nullptr);
         }
         else
             m_pChordEngrv->set_end_staffobj(m_pChord, m_pNote2, m_pShape2, iInstr,
                                      iStaff, iSystem, iCol,
-                                     0.0f, 0.0f, 0.0f);
+                                     0.0f, 0.0f, 0.0f, -1, nullptr);
     }
 
 

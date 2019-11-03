@@ -52,6 +52,10 @@ public:
     ~LineEngraver() {}
 
     GmoShapeLine* create_shape(ImoScoreLine* pLine, UPoint pos);
+
+    //dbg
+    GmoShapeLine* dbg_create_shape(UPoint start, UPoint end, Color=Color(255,0,0),
+                                   LUnits lineWidth=5.0f);
 };
 
 

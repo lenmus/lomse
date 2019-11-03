@@ -35,6 +35,7 @@
 #include "lomse_shape_wedge.h"
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -44,11 +45,10 @@ namespace lomse
 // WedgeEngraver implementation
 //---------------------------------------------------------------------------------------
 WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           InstrumentEngraver* pInstrEngrv)
+                             InstrumentEngraver* pInstrEngrv)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTopStart(0.0f)
-    , m_uStaffTopEnd(0.0f)
+    , m_uStaffTop(0.0f)
     , m_numShapes(0)
     , m_pWedge(nullptr)
     , m_fWedgeAbove(false)
@@ -57,15 +57,16 @@ WedgeEngraver::WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_pEndDirection(nullptr)
     , m_pStartDirectionShape(nullptr)
     , m_pEndDirectionShape(nullptr)
-    , m_fTwoWedges(false)
 {
 }
 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int iSystem, int iCol, LUnits UNUSED(xRight),
-                                       LUnits UNUSED(xLeft), LUnits yTop)
+                                       int UNUSED(iSystem), int UNUSED(iCol),
+                                       LUnits UNUSED(xStaffLeft),
+                                       LUnits UNUSED(xStaffRight), LUnits yTop,
+                                       int idxStaff, VerticalProfile* pVProfile)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -74,62 +75,87 @@ void WedgeEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_pStartDirection = static_cast<ImoDirection*>(pSO);
     m_pStartDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
+    m_uStaffTop = yTop;
 
-    m_points1[0].x = m_pStartDirectionShape->get_left();
-    m_points1[0].y = yTop;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 
-    m_uStaffTopStart = yTop;
 }
 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int iInstr,
-                                     int UNUSED(iStaff), int iSystem, int iCol,
-                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                     LUnits yTop)
+                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
+                                     int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
+                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                     LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
 {
     m_pEndDirection = static_cast<ImoDirection*>(pSO);
     m_pEndDirectionShape = static_cast<GmoShapeInvisible*>(pStaffObjShape);
 
-    m_shapesInfo[1].iCol = iCol;
-    m_shapesInfo[1].iInstr = iInstr;
-    m_shapesInfo[1].iSystem = iSystem;
+    m_uStaffTop = yTop;
 
-    m_points1[1].x = m_pEndDirectionShape->get_left();
-    m_points1[1].y = yTop;
-
-    m_uStaffTopEnd = yTop;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-int WedgeEngraver::create_shapes()
+void WedgeEngraver::decide_placement()
 {
-    return create_shapes( m_pWedge->get_color() );
+    //default is bellow
+    m_fWedgeAbove = (m_pStartDirection->get_placement() == k_placement_above);
 }
+
 //---------------------------------------------------------------------------------------
-int WedgeEngraver::create_shapes(Color color)
+GmoShape* WedgeEngraver::create_first_or_intermediate_shape(Color color)
 {
     m_color = color;
-    decide_placement();
-    decide_if_one_or_two_wedges();
-    if (two_wedges_needed())
-        create_two_shapes();
+    if (m_numShapes == 0)
+    {
+        decide_placement();
+        return create_first_shape();
+    }
     else
-        create_one_shape();
-    return m_numShapes;
+        return create_intermediate_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::create_one_shape()
+GmoShape* WedgeEngraver::create_last_shape(Color color)
 {
-    m_numShapes = 1;
+    m_color = color;
+    if (m_numShapes == 0)
+    {
+        decide_placement();
+        return create_first_shape();
+    }
+    return create_final_shape();
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* WedgeEngraver::create_intermediate_shape()
+{
+    //intermediate shape spanning the whole system
+
+    ++m_numShapes;
+
+    LUnits thickness = tenths_to_logical(LOMSE_WEDGE_LINE_THICKNESS);
+    int niente = GmoShapeWedge::k_no_niente;
+    LUnits radius = 0.0f;
+
+    compute_intermediate_shape_position();
+    //add_user_displacements(1, &m_points[0]);
+    return LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points[0], thickness,
+                                   m_pWedge->get_color(), niente, radius);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* WedgeEngraver::create_first_shape()
+{
+    //first shape when there are more than one, or single shape
+
     LUnits thickness = tenths_to_logical(LOMSE_WEDGE_LINE_THICKNESS);
 
     compute_first_shape_position();
-    //add_user_displacements(0, &m_points1[0]);
+    //add_user_displacements(0, &m_points[0]);
 
     //determine if 'niente' circle should be drawn
     int niente = GmoShapeWedge::k_no_niente;
@@ -141,98 +167,31 @@ void WedgeEngraver::create_one_shape()
         radius = tenths_to_logical(LOMSE_WEDGE_NIENTE_RADIUS);
     }
 
-    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points1[0],
-                                                     thickness, m_pWedge->get_color(),
-                                                     niente, radius);
-    m_shapesInfo[1].pShape = nullptr;
-}
-
-//---------------------------------------------------------------------------------------
-void WedgeEngraver::create_two_shapes()
-{
-    m_numShapes = 2;
-    LUnits thickness = tenths_to_logical(LOMSE_WEDGE_LINE_THICKNESS);
-
-    //determine if 'niente' circle should be drawn
-    int niente1 = GmoShapeWedge::k_no_niente;
-    int niente2 = GmoShapeWedge::k_no_niente;
-    LUnits radius = 0.0f;
-    if (m_pWedge->is_niente())
-    {
-        radius = tenths_to_logical(LOMSE_WEDGE_NIENTE_RADIUS);
-        if (m_pWedge->is_crescendo())
-            niente1 = GmoShapeWedge::k_niente_at_start;
-        else
-            niente2 = GmoShapeWedge::k_niente_at_end;
-    }
-
-    //create first shape
-    compute_first_shape_position();
-    //add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points1[0],
-                                                     thickness, m_pWedge->get_color(),
-                                                     niente1, radius);
-    //create second shape
-    compute_second_shape_position();
-    //add_user_displacements(1, &m_points2[0]);
-    m_shapesInfo[1].pShape = LOMSE_NEW GmoShapeWedge(m_pWedge, 0, &m_points2[0],
-                                                     thickness, m_pWedge->get_color(),
-                                                     niente2, radius);
-}
-
-//---------------------------------------------------------------------------------------
-void WedgeEngraver::compute_second_shape_position()
-{
-    m_points2[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
-                     - tenths_to_logical(10.0f);
-    m_points2[2].x = m_points2[0].x;
-    m_points2[1].x = m_pEndDirectionShape->get_left();
-    m_points2[3].x = m_points2[1].x;
-
-    //determine center line of shape box
-    LUnits yRef = m_uStaffTopEnd;
-    if (m_fWedgeAbove)
-        yRef -= tenths_to_logical(50.0f);   //5 lines above top staff line
-    else
-        yRef += tenths_to_logical(90.0f);   //5 lines bellow first staff line
-
-    //determine spread to apply
-    LUnits endSpread = tenths_to_logical(m_pWedge->get_end_spread()) / 2.0f;
-    LUnits startSpread = tenths_to_logical(m_pWedge->get_start_spread()) / 2.0f;
-    if (m_pWedge->is_crescendo())
-        startSpread = endSpread / 2.0f;
-    else
-        startSpread /= 2.0f;
-
-    //compute points
-    m_points2[0].y = yRef - startSpread;
-    m_points2[2].y = yRef + startSpread;
-
-    m_points2[1].y = yRef - endSpread;
-    m_points2[3].y = yRef + endSpread;
+    return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
+                                   m_pWedge->get_color(), niente, radius);
 }
 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::compute_first_shape_position()
 {
     //compute xLeft and xRight positions
-    if (two_wedges_needed())
+    if (m_pEndDirectionShape == nullptr)
     {
-        m_points1[0].x = m_pStartDirectionShape->get_left();    //xLeft at Direction tag
-        m_points1[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
+        m_points[0].x = m_pStartDirectionShape->get_left();    //xLeft at Direction tag
+        m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
     }
     else
     {
-        m_points1[0].x = m_pStartDirectionShape->get_left();
-        m_points1[1].x = m_pEndDirectionShape->get_left();
+        m_points[0].x = m_pStartDirectionShape->get_left();
+        m_points[1].x = m_pEndDirectionShape->get_left();
     }
-    m_points1[2].x = m_points1[0].x;
-    m_points1[3].x = m_points1[1].x;
+    m_points[2].x = m_points[0].x;
+    m_points[3].x = m_points[1].x;
 
-    //determine spread to apply
+    //determine wedge spread
     LUnits startSpread = tenths_to_logical(m_pWedge->get_start_spread()) / 2.0f;
     LUnits endSpread = tenths_to_logical(m_pWedge->get_end_spread()) / 2.0f;
-    if (two_wedges_needed())
+    if (m_pEndDirectionShape == nullptr)
     {
         if (m_pWedge->is_crescendo())
             endSpread /= 2.0f;
@@ -240,32 +199,120 @@ void WedgeEngraver::compute_first_shape_position()
             endSpread = startSpread / 2.0f;
     }
 
-    //determine center line of shape box. yRef is referred to first staff
-    LUnits yRef = m_uStaffTopStart;
-    if (m_fWedgeAbove)
-        yRef -= tenths_to_logical(50.0f);   //5 lines above top staff line
-    else
-        yRef += tenths_to_logical(90.0f);   //5 lines bellow first staff line
+    //determine center line of shape box
+    LUnits yRef = determine_center_line_of_shape(startSpread, endSpread);
 
     //compute points
-    m_points1[0].y = yRef - startSpread;
-    m_points1[2].y = yRef + startSpread;
+    m_points[0].y = yRef - startSpread;
+    m_points[2].y = yRef + startSpread;
 
-    m_points1[1].y = yRef - endSpread;
-    m_points1[3].y = yRef + endSpread;
+    m_points[1].y = yRef - endSpread;
+    m_points[3].y = yRef + endSpread;
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::decide_placement()
+GmoShape* WedgeEngraver::create_final_shape()
 {
-    //default is bellow
-    m_fWedgeAbove = (m_pStartDirection->get_placement() == k_placement_above);
+    //last shape when there are more than one
+
+    LUnits thickness = tenths_to_logical(LOMSE_WEDGE_LINE_THICKNESS);
+
+    //determine if 'niente' circle should be drawn
+    int niente = GmoShapeWedge::k_no_niente;
+    LUnits radius = 0.0f;
+    if (m_pWedge->is_niente())
+    {
+        radius = tenths_to_logical(LOMSE_WEDGE_NIENTE_RADIUS);
+        if (!m_pWedge->is_crescendo())
+            niente = GmoShapeWedge::k_niente_at_end;
+    }
+
+    compute_last_shape_position();
+    //add_user_displacements(1, &m_points[0]);
+    return LOMSE_NEW GmoShapeWedge(m_pWedge, m_numShapes++, &m_points[0], thickness,
+                                   m_pWedge->get_color(), niente, radius);
 }
 
 //---------------------------------------------------------------------------------------
-void WedgeEngraver::decide_if_one_or_two_wedges()
+void WedgeEngraver::compute_last_shape_position()
 {
-    m_fTwoWedges = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
+    m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
+                     - tenths_to_logical(10.0f);
+    m_points[2].x = m_points[0].x;
+    m_points[1].x = m_pEndDirectionShape->get_left();
+    m_points[3].x = m_points[1].x;
+
+    //determine wedge spread
+    LUnits endSpread = tenths_to_logical(m_pWedge->get_end_spread()) / 2.0f;
+    LUnits startSpread = tenths_to_logical(m_pWedge->get_start_spread()) / 2.0f;
+    if (m_pWedge->is_crescendo())
+        startSpread = endSpread / 2.0f;
+    else
+        startSpread /= 2.0f;
+
+    //determine center line of shape box
+    LUnits yRef = determine_center_line_of_shape(startSpread, endSpread);
+
+    //compute points
+    m_points[0].y = yRef - startSpread;
+    m_points[2].y = yRef + startSpread;
+
+    m_points[1].y = yRef - endSpread;
+    m_points[3].y = yRef + endSpread;
+}
+
+//---------------------------------------------------------------------------------------
+void WedgeEngraver::compute_intermediate_shape_position()
+{
+    m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
+                     - tenths_to_logical(10.0f);
+    m_points[2].x = m_points[0].x;
+    m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
+    m_points[3].x = m_points[1].x;
+
+    //determine wedge spread
+    LUnits endSpread = tenths_to_logical(m_pWedge->get_end_spread()) / 2.0f;
+    LUnits startSpread = tenths_to_logical(m_pWedge->get_start_spread()) / 2.0f;
+    if (m_pWedge->is_crescendo())
+        startSpread = endSpread / 2.0f;
+    else
+        startSpread /= 2.0f;
+
+    //determine center line of shape box
+    LUnits yRef = determine_center_line_of_shape(startSpread, endSpread);
+
+    //compute points
+    m_points[0].y = yRef - startSpread;
+    m_points[2].y = yRef + startSpread;
+
+    m_points[1].y = yRef - endSpread;
+    m_points[3].y = yRef + endSpread;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits endSpread)
+{
+    LUnits yRef = m_uStaffTop;
+    LUnits oneLine = tenths_to_logical(10.0f);
+    LUnits maxSpread = max(startSpread, endSpread);
+    if (m_fWedgeAbove)
+    {
+        yRef -= oneLine;   //1 line above top staff line
+        yRef -= maxSpread;
+        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff).first
+                      - maxSpread - oneLine;
+        yRef = min(yRef, yMin);
+    }
+    else
+    {
+        yRef += tenths_to_logical(50.0f);   //1 lines bellow first staff line
+        yRef += maxSpread;
+        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff).first
+                      + maxSpread + oneLine;
+        yRef = max(yRef, yMax);
+    }
+
+    return yRef;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -282,18 +329,6 @@ void WedgeEngraver::decide_if_one_or_two_wedges()
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-int WedgeEngraver::get_num_shapes()
-{
-    return m_numShapes;
-}
-
-//---------------------------------------------------------------------------------------
-ShapeBoxInfo* WedgeEngraver::get_shape_box_info(int i)
-{
-    return &m_shapesInfo[i];
-}
 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::set_prolog_width(LUnits width)

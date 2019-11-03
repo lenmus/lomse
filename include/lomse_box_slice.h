@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -32,9 +32,6 @@
 
 #include "lomse_basic.h"
 #include "lomse_gm_basic.h"
-//#include <sstream>
-//
-//using namespace std;
 
 namespace lomse
 {
@@ -42,58 +39,33 @@ namespace lomse
 //forward declarations
 class GmoBoxSystem;
 class GmoBoxSliceInstr;
+class GmoBoxSliceStaff;
 class ImoInstrument;
+class SystemLayouter;
 
 
 //---------------------------------------------------------------------------------------
-// GmoBoxSlice: a system column
+/**  GmoBoxSlice is a container for all boxes and shapes that compose a system column.
+*/
 class GmoBoxSlice : public GmoBox
 {
 protected:
-//    int             m_nAbsMeasure;		//number of this measure (absolute, 1..n)
-//	int				m_nNumInSystem;		//number of slice for this system (0..n-1)
-//
-//    //start and end positions
-//    LUnits    m_xStart;
-//    LUnits    m_xEnd;
-//
 
 public:
-    GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo);    //, int nNumInSystem,
-			    //LUnits xStart=0, LUnits xEnd=0);
+    GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo);
     ~GmoBoxSlice();
 
-//    inline void UpdateSize(LUnits xStart, LUnits xEnd) {
-//            m_xStart = xStart;
-//            m_xEnd = xEnd;
-//        }
-//
-//	//render
-//	void DrawSelRectangle(lmPaper* pPaper);
-//
-//    //info
-//    inline int GetNumMeasure() const { return m_nAbsMeasure; }
-//
-	//instrument slices
-    GmoBoxSliceInstr* add_box_for_instrument(ImoInstrument* pInstr);
-//	GmoBoxSliceInstr* GetSliceInstr(int i) const { return (GmoBoxSliceInstr*)m_Boxes[i]; }
-//
-//    //implementation of virtual methods from base class
-//	int GetPageNumber() const;
-//
-//	//owners and related
-//	GmoBoxSystem* GetOwnerSystem() { return m_pBoxSystem; }
-//    GmoBoxScore* GetOwnerBoxScore();
-//    GmoBoxPage* GetOwnerBoxPage();
-//
-//    //overrides
-//    void SetBottomSpace(LUnits uyValue);
-
-//    TimeUnits GetGridTimeForPosition(LUnits uxPos);
-//    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
-//                       LUnits uyBottom);
+    GmoBoxSliceInstr* add_box_for_instrument(ImoInstrument* pInstr, int idxStaff);
     GmoBoxSystem* get_system_box();
+    GmoBoxSliceInstr* get_instr_slice(int iInstr);
 
+    //helpers for layout
+    /**  Move boxes and shapes to theirs final 'y' positions. */
+    void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
+                                      std::vector<LUnits>& heights,
+                                      vector<LUnits>& barlinesHeight,
+                                      SystemLayouter* pSysLayouter);
+    GmoBoxSliceStaff* get_slice_staff_for(int iInstr, int iStaff);
 
 };
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -62,7 +62,6 @@ protected:
     ImoStyle* m_pStyle;
     ImoTuplet* m_pTuplet;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
-    ShapeBoxInfo m_shapesInfo[1];
     bool m_fDrawBracket;
     bool m_fDrawNumber;
     bool m_fAbove;
@@ -75,21 +74,23 @@ public:
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
-                             LUnits xRight, LUnits xLeft, LUnits yTop);
+                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                             int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return m_numShapes; }
-    ShapeBoxInfo* get_shape_box_info(int i)
-    {
-        return &m_shapesInfo[i];
-    }
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
+
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits UNUSED(width)) override {}
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 protected:
     void add_text_shape();

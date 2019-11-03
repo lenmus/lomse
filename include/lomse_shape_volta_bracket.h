@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,7 +54,6 @@ class GmoShapeText;
 class GmoShapeVoltaBracket : public GmoCompositeShape
 {
 protected:
-    GmoShapeBarline* m_pStartBarlineShape;
     GmoShapeBarline* m_pStopBarlineShape;
     GmoShapeText* m_pShapeText;
     bool m_fTwoBrackets;
@@ -74,8 +73,7 @@ public:
 
     void set_layout_data(LUnits xStart, LUnits xEnd, LUnits yPos, LUnits uBracketDistance,
                          LUnits uJogLength, LUnits uLineThick, LUnits uLeftSpaceToText,
-                         LUnits xStaffLeft, LUnits xStaffRight,
-                         GmoShapeBarline* pStart, GmoShapeBarline* pEnd);
+                         LUnits uTopSpaceToText, LUnits xStaffLeft, LUnits xStaffRight);
 
     void add_label(GmoShapeText* pShape);
     inline void enable_final_jog(bool value) { m_fStopJog = value; }

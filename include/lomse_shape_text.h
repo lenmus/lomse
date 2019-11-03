@@ -54,13 +54,14 @@ protected:
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
+    LUnits m_space;
 
     friend class TextEngraver;
     friend class LyricEngraver;
     friend class MeasureNumberEngraver;
     GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                  ImoStyle* pStyle, const string& language,
-                 LUnits x, LUnits y, LibraryScope& libraryScope);
+                 LUnits xLeft, LUnits yBaseline, LibraryScope& libraryScope);
 
 public:
 

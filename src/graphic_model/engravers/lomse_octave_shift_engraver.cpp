@@ -38,6 +38,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_glyphs.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -50,16 +51,16 @@ OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter*
                                          InstrumentEngraver* pInstrEngrv)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pInstrEngrv(pInstrEngrv)
-    , m_uStaffTopStart(0.0f)
-    , m_uStaffTopEnd(0.0f)
+    , m_uStaffTop(0.0f)
     , m_numShapes(0)
     , m_pOctaveShift(nullptr)
+    , m_pShapeNumeral(nullptr)
+    , m_pMainShape(nullptr)
     , m_uPrologWidth(0.0f)
     , m_pStartNote(nullptr)
     , m_pEndNote(nullptr)
     , m_pStartNoteShape(nullptr)
     , m_pEndNoteShape(nullptr)
-    , m_fUseTwoShapes(false)
     , m_fPlaceAtTop(true)
 {
 }
@@ -67,8 +68,9 @@ OctaveShiftEngraver::OctaveShiftEngraver(LibraryScope& libraryScope, ScoreMeter*
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int iSystem, int iCol, LUnits UNUSED(xRight),
-                                       LUnits UNUSED(xLeft), LUnits yTop)
+                                       int UNUSED(iSystem), int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                       LUnits UNUSED(xStaffRight), LUnits yTop,
+                                       int idxStaff, VerticalProfile* pVProfile)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -77,80 +79,103 @@ void OctaveShiftEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_pStartNote = static_cast<ImoNote*>(pSO);
     m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
+    m_uStaffTop = yTop;
 
-    m_points[0][0].x = m_pStartNoteShape->get_left();
-    m_points[0][0].y = yTop;
-
-    m_uStaffTopStart = yTop;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
-                                     GmoShape* pStaffObjShape, int iInstr,
-                                     int UNUSED(iStaff), int iSystem, int iCol,
-                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                     LUnits yTop)
+                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
+                                     int UNUSED(iStaff), int UNUSED(iSystem), int UNUSED(iCol),
+                                     LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                     LUnits yTop, int idxStaff, VerticalProfile* pVProfile)
 {
     m_pEndNote = static_cast<ImoNote*>(pSO);
     m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_shapesInfo[1].iCol = iCol;
-    m_shapesInfo[1].iInstr = iInstr;
-    m_shapesInfo[1].iSystem = iSystem;
+    m_uStaffTop = yTop;
 
-    m_points[0][1].x = m_pEndNoteShape->get_left();
-    m_points[0][1].y = yTop;
-
-    m_uStaffTopEnd = yTop;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
-int OctaveShiftEngraver::create_shapes()
-{
-    return create_shapes( m_pOctaveShift->get_color() );
-}
-//---------------------------------------------------------------------------------------
-int OctaveShiftEngraver::create_shapes(Color color)
+GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(Color color)
 {
     m_color = color;
-    decide_placement();
-    decide_if_one_or_two_shapes();
-
-    //create first shape
-    compute_first_shape_position();
-    //add_user_displacements(0, &m_points[0][0]);
-    create_main_container_shape(0);
-    add_shape_numeral(0);
-    add_line_info(0);
-
-    m_shapesInfo[1].pShape = nullptr;
-    if (two_shapes_needed())
+    if (m_numShapes == 0)
     {
-        //create second shape
-        compute_second_shape_position();
-        //add_user_displacements(1, &m_points[1][0]);
-        create_main_container_shape(1);
-        add_shape_numeral(1);
-        add_line_info(1);
+        decide_placement();
+        return create_first_shape();
     }
-
-    return m_numShapes;
+    else
+        return create_intermediate_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::create_main_container_shape(int iShape)
+GmoShape* OctaveShiftEngraver::create_last_shape(Color color)
 {
-    ShapeId idx = iShape;
-    m_pMainShape[iShape] = LOMSE_NEW GmoShapeOctaveShift(m_pOctaveShift, idx,
-                                                    m_pOctaveShift->get_color());
-    m_shapesInfo[iShape].pShape = m_pMainShape[iShape];
+    m_color = color;
+    if (m_numShapes == 0)
+    {
+        decide_placement();
+        return create_first_shape();
+    }
+    return create_final_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::add_shape_numeral(int iShape)
+GmoShape* OctaveShiftEngraver::create_intermediate_shape()
+{
+    //intermediate shape spanning the whole system
+
+    ++m_numShapes;
+    //TODO
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* OctaveShiftEngraver::create_first_shape()
+{
+    //first shape when there are more than one, or single shape
+
+    compute_first_shape_position();
+    //add_user_displacements(0, &m_points[0]);
+    create_main_container_shape();
+    add_shape_numeral();
+    add_line_info();
+
+    m_numShapes++;
+    return m_pMainShape;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* OctaveShiftEngraver::create_final_shape()
+{
+    //last shape when there are more than one
+
+    compute_second_shape_position();
+    //add_user_displacements(1, &m_points[0]);
+    create_main_container_shape();
+    add_shape_numeral();
+    add_line_info();
+
+    m_numShapes++;
+    return m_pMainShape;
+}
+
+//---------------------------------------------------------------------------------------
+void OctaveShiftEngraver::create_main_container_shape()
+{
+    ShapeId idx = m_numShapes;
+    m_pMainShape = LOMSE_NEW GmoShapeOctaveShift(m_pOctaveShift, idx,
+                                                 m_pOctaveShift->get_color());
+}
+
+//---------------------------------------------------------------------------------------
+void OctaveShiftEngraver::add_shape_numeral()
 {
     //determine glyph to use
     int steps = m_pOctaveShift->get_shift_steps();
@@ -158,7 +183,7 @@ void OctaveShiftEngraver::add_shape_numeral(int iShape)
 
     //adjust position
     Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 10.0f;
-    LUnits y = m_points[iShape][0].y
+    LUnits y = m_points[0].y
                + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
 
     //determine font size to use
@@ -166,35 +191,35 @@ void OctaveShiftEngraver::add_shape_numeral(int iShape)
 
    //create the shape
     GmoShape* pShape = LOMSE_NEW GmoShapeOctaveGlyph(m_pOctaveShift, 0, iGlyph,
-                                                     UPoint(m_points[iShape][0].x, y),
+                                                     UPoint(m_points[0].x, y),
                                                      m_color, m_libraryScope, fontSize);
-    m_pShapeNumeral[iShape] = pShape;
+    m_pShapeNumeral = pShape;
 
-    m_pMainShape[iShape]->add(pShape);
+    m_pMainShape->add(pShape);
 }
 
 //---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::add_line_info(int iShape)
+void OctaveShiftEngraver::add_line_info()
 {
     //start point
-    LUnits xStart = m_points[iShape][0].x + m_pShapeNumeral[iShape]->get_width()
+    LUnits xStart = m_points[0].x + m_pShapeNumeral->get_width()
                     + tenths_to_logical(LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE);
 
     LUnits yShift = tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_SHIFT);
-    LUnits yStart = m_points[iShape][0].y - yShift;
+    LUnits yStart = m_points[0].y - yShift;
     if (!octave_shift_at_top())
-        yStart += (m_pShapeNumeral[iShape]->get_height() - yShift);
+        yStart += (m_pShapeNumeral->get_height() - yShift);
 
     //locate last applicable note in this instr/staff
 
     //end point
-    LUnits xEnd = m_points[iShape][1].x;
+    LUnits xEnd = m_points[1].x;
     LUnits yEnd = yStart + (octave_shift_at_top() ? 200.0f : -200.0f);
 
     LUnits thickness = tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_THICKNESS);
-    bool fEndCorner = (iShape==1 || (iShape==0 && !two_shapes_needed()));
+    bool fEndCorner = is_end_point_set();
 
-    m_pMainShape[iShape]->set_layout_data(xStart, xEnd, yStart, yEnd, thickness, fEndCorner);
+    m_pMainShape->set_layout_data(xStart, xEnd, yStart, yEnd, thickness, fEndCorner);
 }
 
 //---------------------------------------------------------------------------------------
@@ -222,56 +247,62 @@ int OctaveShiftEngraver::find_glyph(int shift)
 void OctaveShiftEngraver::compute_first_shape_position()
 {
     //compute xLeft and xRight positions
-    if (two_shapes_needed())
+    if (is_end_point_set())
     {
-        m_points[0][0].x = m_pStartNoteShape->get_left();    //xLeft at Note tag
-        m_points[0][1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
+        m_points[0].x = m_pStartNoteShape->get_left();
+        m_points[1].x = m_pEndNoteShape->get_right();
     }
     else
     {
-        m_points[0][0].x = m_pStartNoteShape->get_left();
-        m_points[0][1].x = m_pEndNoteShape->get_right();
+        m_points[0].x = m_pStartNoteShape->get_left();    //xLeft at Note tag
+        m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
     }
 
-    //determine top line of shape box
-    m_points[0][0].y = m_uStaffTopStart;
-    if (octave_shift_at_top())
-        m_points[0][0].y -= tenths_to_logical(40.0f);   //4 lines above top staff line
-    else
-        m_points[0][0].y += tenths_to_logical(80.0f);   //4 lines bellow first staff line
-
-    m_points[0][1].y = m_points[0][0].y;
+    //determine yTop
+    m_points[0].y = determine_top_line_of_shape();
+    m_points[1].y = m_points[0].y;
 }
 
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::compute_second_shape_position()
 {
     //compute xLeft and xRight positions
-    m_points[1][0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
+    m_points[0].x = m_pInstrEngrv->get_staves_left()+ m_uPrologWidth
                      - tenths_to_logical(10.0f);
-    m_points[1][1].x = m_pEndNoteShape->get_right();
+    m_points[1].x = m_pEndNoteShape->get_right();
 
-    //determine top line of shape box
-    m_points[1][0].y = m_uStaffTopEnd;
+    //determine yTop
+    m_points[0].y = determine_top_line_of_shape();
+    m_points[1].y = m_points[0].y;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits OctaveShiftEngraver::determine_top_line_of_shape()
+{
+    LUnits yRef = m_uStaffTop;
+    LUnits twoLines = tenths_to_logical(20.0f);
     if (octave_shift_at_top())
-        m_points[1][0].y -= tenths_to_logical(40.0f);   //4 lines above top staff line
+    {
+        yRef -= twoLines;   //2 lines above top staff line
+        LUnits yMin = m_pVProfile->get_min_for(m_points[0].x, m_points[1].x, m_idxStaff).first
+                      - twoLines;
+        yRef = min(yRef, yMin);
+    }
     else
-        m_points[1][0].y += tenths_to_logical(80.0f);   //4 lines bellow first staff line
+    {
+        yRef += tenths_to_logical(50.0f);   //1 lines bellow first staff line
+        LUnits yMax = m_pVProfile->get_max_for(m_points[0].x, m_points[1].x, m_idxStaff).first
+                      + tenths_to_logical(5.0f);
+        yRef = max(yRef, yMax);
+    }
 
-    m_points[1][1].y = m_points[1][0].y;
+    return yRef;
 }
 
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::decide_placement()
 {
     m_fPlaceAtTop = m_pOctaveShift->get_shift_steps() < 0;
-}
-
-//---------------------------------------------------------------------------------------
-void OctaveShiftEngraver::decide_if_one_or_two_shapes()
-{
-    m_fUseTwoShapes = (m_shapesInfo[0].iSystem != m_shapesInfo[1].iSystem);
-    m_numShapes = (m_fUseTwoShapes ? 2 : 1);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -288,18 +319,6 @@ void OctaveShiftEngraver::decide_if_one_or_two_shapes()
 //    //    }
 //    //}
 //}
-
-//---------------------------------------------------------------------------------------
-int OctaveShiftEngraver::get_num_shapes()
-{
-    return m_numShapes;
-}
-
-//---------------------------------------------------------------------------------------
-ShapeBoxInfo* OctaveShiftEngraver::get_shape_box_info(int i)
-{
-    return &m_shapesInfo[i];
-}
 
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::set_prolog_width(LUnits width)

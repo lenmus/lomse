@@ -115,16 +115,17 @@ LUnits SpAlgColumn::get_staves_height()
 }
 
 //---------------------------------------------------------------------------------------
-void SpAlgColumn::add_shapes_to_boxes(int iCol)
+void SpAlgColumn::add_shapes_to_boxes(int iCol, VerticalProfile* pVProfile)
 {
+    m_pVProfile = pVProfile;
     m_pColsBuilder->add_shapes_to_boxes(iCol);
 }
 
 //---------------------------------------------------------------------------------------
 GmoBoxSliceInstr* SpAlgColumn::create_slice_instr(int iCol, ImoInstrument* pInstr,
-                                                  LUnits yTop)
+                                                  int idxStaff, LUnits yTop)
 {
-    return m_colsData[iCol]->create_slice_instr(pInstr, yTop);
+    return m_colsData[iCol]->create_slice_instr(pInstr, idxStaff, yTop);
 }
 
 //---------------------------------------------------------------------------------------
@@ -338,10 +339,13 @@ void ColumnsBuilder::collect_content_for_this_column()
         int iInstr = m_pSysCursor->num_instrument();
         int iStaff = m_pSysCursor->staff();
         int iLine = m_pSysCursor->line();
+        int idxStaff = m_pScoreMeter->staff_index(iInstr, iStaff);
         TimeUnits rTime = m_pSysCursor->time();
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
         InstrumentEngraver* pIE = m_pPartsEngraver->get_engraver_for(iInstr);
-        m_pagePos.y = pIE->get_top_line_of_staff(iStaff);
+        UPoint pagePos;           //to track current position
+        pagePos.x = 0.0f;
+        pagePos.y = pIE->get_top_line_of_staff(iStaff);
 
         //if feasible column break, exit loop and finish column
         if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
@@ -362,11 +366,10 @@ void ColumnsBuilder::collect_content_for_this_column()
                 unsigned flags = fInProlog ? 0 : ShapesCreator::k_flag_small_clef;
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType, 0, flags);
+                         pagePos, clefType, 0, flags);
                 pShape->assign_id_as_main_shape();
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
-                                               iLine, iInstr, pSO, -1.0f, iStaff,
-                                               pShape, fInProlog);
+                                               iInstr, iStaff, pSO, pShape, fInProlog);
             }
 
             else if (pSO->is_key_signature() || pSO->is_time_signature())
@@ -376,11 +379,10 @@ void ColumnsBuilder::collect_content_for_this_column()
                 bool fInProlog = determine_if_is_in_prolog(pSO, rTime, iInstr, idx);
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType, 0, flags);
+                         pagePos, clefType, 0, flags);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
-                                               iLine, iInstr, pSO, -1.0f, iStaff,
-                                               pShape, fInProlog);
+                                               iInstr, iStaff, pSO, pShape, fInProlog);
             }
 
             else
@@ -388,10 +390,10 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 int octaveShift = m_pSysCursor->get_applicable_octave_shift();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         m_pagePos, clefType, octaveShift);
-                TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
+                         pagePos, clefType, octaveShift);
+                //TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
-                                               iLine, iInstr, pSO, time, iStaff, pShape);
+                                               iInstr, iStaff, pSO, pShape);
 
                 //save data about full-measure rests
                 if (pSO->is_rest() && static_cast<ImoRest*>(pSO)->is_full_measure())
@@ -402,7 +404,7 @@ void ColumnsBuilder::collect_content_for_this_column()
             }
 
             store_info_about_attached_objects(pSO, pShape, iInstr, iStaff,
-                                              m_iColumn, iLine, pInstr);
+                                              m_iColumn, iLine, pInstr, idxStaff);
 
             //save shapes for non-timed after barline
             if (fSaveNonTimed &&
@@ -487,7 +489,7 @@ void ColumnsBuilder::find_and_save_context_info_for_this_column()
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
         GmoShape* pMainShape, int iInstr, int iStaff,
-        int iCol, int iLine, ImoInstrument* pInstr)
+        int iCol, int iLine, ImoInstrument* pInstr, int idxStaff)
 {
     ImoAttachments* pAuxObjs = pSO->get_attachments();
     ImoRelations* pRelObjs = pSO->get_relations();
@@ -495,7 +497,7 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
         return;
 
     PendingAuxObjs* data = LOMSE_NEW PendingAuxObjs(pSO, pMainShape, iInstr, iStaff,
-                           iCol, iLine, pInstr);
+                           iCol, iLine, pInstr, idxStaff);
     m_pScoreLyt->m_pendingAuxObjs.push_back(data);
 }
 
@@ -548,12 +550,13 @@ void ColumnsBuilder::create_boxes_for_column(int iCol, LUnits xLeft, LUnits yTop
     //create instrument slice boxes
     int numInstrs = m_pScore->get_num_instruments();
 
-    //LUnits yTop = pSlice->get_top();
+    int idxStaff = 0;
     for (int iInstr = 0; iInstr < numInstrs; iInstr++)
     {
         //create slice instr box
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
-        GmoBoxSliceInstr* pCurBSI = m_pSpAlgorithm->create_slice_instr(iCol, pInstr, yTop);
+        GmoBoxSliceInstr* pCurBSI =
+                m_pSpAlgorithm->create_slice_instr(iCol, pInstr, idxStaff, yTop);
 
         //set box height
         LUnits height = m_SliceInstrHeights[iInstr];
@@ -570,6 +573,7 @@ void ColumnsBuilder::create_boxes_for_column(int iCol, LUnits xLeft, LUnits yTop
         }
         yTop += height;
         pCurBSI->set_height(height);
+        idxStaff += pInstr->get_num_staves();
     }
 
     //set slice and system height
@@ -668,9 +672,10 @@ void ColumnData::reserve_space_for_prolog_clefs_keys(int numStaves)
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSliceInstr* ColumnData::create_slice_instr(ImoInstrument* pInstr, LUnits yTop)
+GmoBoxSliceInstr* ColumnData::create_slice_instr(ImoInstrument* pInstr, int idxStaff,
+                                                 LUnits yTop)
 {
-    GmoBoxSliceInstr* pBSI = m_pBoxSlice->add_box_for_instrument(pInstr);
+    GmoBoxSliceInstr* pBSI = m_pBoxSlice->add_box_for_instrument(pInstr, idxStaff);
 	pBSI->set_top(yTop);
 	pBSI->set_left( m_pBoxSlice->get_left() );
 	pBSI->set_width( m_pBoxSlice->get_width() );

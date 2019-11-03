@@ -63,6 +63,7 @@ class StaffObjsCursor;
 class TimeGridTable;
 class TypeMeasureInfo;
 class GmoBoxSystem;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 // Barlines at the end of a column
@@ -90,6 +91,7 @@ protected:
     EngraversMap&  m_engravers;
     ShapesCreator*  m_pShapesCreator;
     PartsEngraver*  m_pPartsEngraver;
+    VerticalProfile* m_pVProfile;
 
 public:
     SpacingAlgorithm(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -145,7 +147,7 @@ public:
                                         LUnits yShift, LUnits* yMin, LUnits* yMax) = 0;
     virtual void reposition_full_measure_rests(int iFirstCol, int iLastCol,
                                                GmoBoxSystem* pBox) = 0;
-    virtual void add_shapes_to_boxes(int iCol) = 0;
+    virtual void add_shapes_to_boxes(int iCol, VerticalProfile* pVProfile) = 0;
     virtual void delete_shapes(int iCol) = 0;
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr) = 0;
     virtual void set_slice_final_position(int iCol, LUnits left, LUnits top) = 0;
@@ -214,7 +216,7 @@ public:
 
     //boxes and shapes
     void add_shapes_to_boxes(int iCol);
-    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
+    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, int idxStaff, LUnits yTop);
     inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
     void set_slice_width(LUnits width);
     void set_slice_final_position(LUnits left, LUnits top);
@@ -273,7 +275,7 @@ public:
     //spacing algorithm
     void do_spacing_algorithm();
     //boxes and shapes
-    virtual void add_shapes_to_boxes(int iCol);
+    virtual void add_shapes_to_boxes(int iCol, VerticalProfile* pVProfile);
     virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr);
     virtual void set_slice_final_position(int iCol, LUnits left, LUnits top);
     virtual void create_boxes_for_column(int iCol, LUnits left, LUnits top);
@@ -323,8 +325,8 @@ public:
     ///prepare for receiving information for a new column
     virtual void start_column_measurements(int iCol) = 0;
     ///save information for staff object in current column
-    virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
-                                TimeUnits rTime, int nStaff, GmoShape* pShape,
+    virtual void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iInstr,
+                                int  iStaff, ImoStaffObj* pSO, GmoShape* pShape,
                                 bool fInProlog=false) = 0;
     ///save info for a full-measure rest
     virtual void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
@@ -366,7 +368,7 @@ public:
 
     ///create slice instr box for column iCol and access it
     virtual GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr,
-            LUnits yTop);
+                                                 int idxStaff, LUnits yTop);
     ///set width of slice box for column iCol
     virtual void set_slice_width(int iCol, LUnits width);
 
@@ -392,7 +394,6 @@ protected:
     ColumnBreaker*  m_pBreaker;
     std::vector<LUnits> m_SliceInstrHeights;
     LUnits m_stavesHeight;      //system height without top and bottom margins
-    UPoint m_pagePos;           //to track current position
 
     int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
     int m_iColStartMeasure;     //to store index at which next measure starts
@@ -449,7 +450,7 @@ protected:
 
     void store_info_about_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
                                            int iInstr, int iStaff, int iCol, int iLine,
-                                           ImoInstrument* pInstr);
+                                           ImoInstrument* pInstr, int idxStaff);
 
     bool determine_if_is_in_prolog(ImoStaffObj* pSO, TimeUnits rTime, int iInstr,
                                    int idx);

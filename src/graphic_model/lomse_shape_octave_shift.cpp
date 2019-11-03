@@ -48,7 +48,6 @@ GmoShapeOctaveShift::GmoShapeOctaveShift(ImoObj* pCreatorImo, ShapeId idx, Color
     , m_fTwoLines(false)
     , m_fEndCorner(true)
     , m_xLineStart(0.0f)
-    , m_xLineEnd(0.0f)
     , m_yLineStart(0.0f)
     , m_yLineEnd(0.0f)
     , m_uLineThick(0.0f)
@@ -65,10 +64,9 @@ void GmoShapeOctaveShift::set_layout_data(LUnits xStart, LUnits xEnd, LUnits ySt
                                           LUnits yEnd, LUnits uLineThick, bool fEndCorner)
 {
     //save data
-    m_xLineStart = xStart;
-    m_xLineEnd = xEnd;
-    m_yLineStart = yStart;
-    m_yLineEnd = yEnd;
+    m_xLineStart = xStart - m_origin.x;
+    m_yLineStart = yStart - m_origin.y;
+    m_yLineEnd = yEnd - m_origin.y;
     m_uLineThick = uLineThick;
     m_fEndCorner = fEndCorner;
 
@@ -84,28 +82,33 @@ void GmoShapeOctaveShift::on_draw(Drawer* pDrawer, RenderOptions& opt)
     LUnits dxLine = 100.0f;
     LUnits dxSpace = 100.0f;
 
+    LUnits xStart = m_xLineStart + m_origin.x;
+    LUnits xEnd = m_origin.x + m_size.width;
+    LUnits yStart = m_yLineStart + m_origin.y;
+    LUnits yEnd = m_yLineEnd + m_origin.y;
+
     pDrawer->begin_path();
     pDrawer->fill_none();
     pDrawer->stroke(color);
     pDrawer->stroke_width(m_uLineThick);
 
     //horizontal line
-    pDrawer->move_to(m_xLineStart, m_yLineStart);
-    LUnits xPos = m_xLineStart + dxLine;
-    while (xPos < m_xLineEnd)
+    pDrawer->move_to(xStart, yStart);
+    LUnits xPos = xStart + dxLine;
+    while (xPos < xEnd)
     {
         pDrawer->hline_to(xPos);
         xPos += dxSpace;
-        pDrawer->move_to(xPos, m_yLineStart);
+        pDrawer->move_to(xPos, yStart);
         xPos += dxLine;
     }
     xPos -= (dxLine + dxSpace);
-    pDrawer->move_to(xPos, m_yLineStart);       //to end of last stroke
-    pDrawer->hline_to(m_xLineEnd);              //continue it to end point
+    pDrawer->move_to(xPos, yStart);       //to end of last stroke
+    pDrawer->hline_to(xEnd);              //continue it to end point
 
     //end corner
     if (m_fEndCorner)
-        pDrawer->vline_to(m_yLineEnd);      //add vertical stroke
+        pDrawer->vline_to(yEnd);      //add vertical stroke
 
     pDrawer->end_path();
     pDrawer->render();

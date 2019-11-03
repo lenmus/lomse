@@ -156,22 +156,24 @@ void DocLayouter::fix_document_size()
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         GmoBox* pBSys = pBSP->get_child_box(0);     //System
 
-        //View height is determined by BoxDocPageContent.
-        //It is only necessary to fix BoxDocPage
-        LUnits height = pBDPC->get_size().height + 2.0f * pBDPC->get_origin().y;
-        pPage->set_height(height);
-
-        //View width is determined by BoxSystem.
-        //It is necessary to fix width in BoxDocPage, BoxDocPageContent and BoxScorePage
-        //BoxSystem do not exist when error: not enough space in page
+        //View height and width are determined by BoxSystem.
+        //To set page width it is necessary to fix width in BoxDocPage, BoxDocPageContent
+        //and BoxScorePage.
+        //To set page height it is only necessary to fix height in BoxDocPage.
+        //BoxSystem does not exist when error "not enough space in page"
         if (pBSys)
         {
-            LUnits width = pBSys->get_size().width+ pBSys->get_origin().x;
+            LUnits width = pBSys->get_size().width + pBSys->get_origin().x;
             pBSys->set_width(width);
             pBSP->set_width(width);
             pBDPC->set_width(width);
             width += pBSP->get_origin().x;
             pPage->set_width(width);
+
+            LUnits height = pBSys->get_size().height + pBSys->get_origin().y;
+            ImoPageInfo* pInfo = m_pDoc->get_page_info();
+            height += pInfo->get_bottom_margin();
+            pPage->set_height(height);
         }
         else
         {
@@ -181,6 +183,10 @@ void DocLayouter::fix_document_size()
             pBDPC->set_width(width);
             width += pBSP->get_origin().x;
             pPage->set_width(width);
+
+            //height determined by BoxDocPageContent
+            LUnits height = pBDPC->get_size().height + 2.0f * pBDPC->get_origin().y;
+            pPage->set_height(height);
         }
     }
 

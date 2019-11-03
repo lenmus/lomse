@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,32 +37,62 @@ namespace lomse
 
 //forward declarations
 class ImoInstrument;
+class GmoBoxSliceStaff;
+class SystemLayouter;
 
 
 //---------------------------------------------------------------------------------------
-// Class GmoBoxSliceInstr represents a part (column, measure) of an instrument.
+/** Class GmoBoxSliceInstr represents a column (measure) of an instrument. It is
+    a container for the GmoBoxSliceStaff objects that contain the shapes for the slice.
+*/
 class GmoBoxSliceInstr : public GmoBox
 {
 private:
+    int m_idxStaff;     //for first staff in this instrument
 
 public:
-    GmoBoxSliceInstr(ImoInstrument* pInstr);
+    GmoBoxSliceInstr(ImoInstrument* pInstr, int idxStaff);
     ~GmoBoxSliceInstr();
 
     GmoBoxSystem* get_system_box();
+
+    void add_shape(GmoShape* pShape, int layer, int iStaff);
+
+    //helpers for layout
+    /**  Move boxes and shapes to theirs final 'y' positions. */
+    void reposition_slices_and_shapes(const std::vector<LUnits>& yOrgShifts,
+                                      std::vector<LUnits>& heights,
+                                      LUnits barlinesHeight,
+                                      SystemLayouter* pSysLayouter);
+    GmoBoxSliceStaff* get_slice_staff_for(int iStaff);
 
 };
 
 
 //---------------------------------------------------------------------------------------
-// Class GmoBoxSliceStaff represents one staff in a SliceInstr
+/** Class GmoBoxSliceStaff represents one staff in a SliceInstr. It is a container
+    for the shapes associated to a staff, to simplify tasks requiring to access the
+    shapes for one staff, such as moving them when thet staff is moved.
+
+    The bounding box is not relevant for any task, so it is not computed.
+*/
 class GmoBoxSliceStaff : public GmoBox
 {
 private:
+    int m_idxStaff;
 
 public:
-    GmoBoxSliceStaff(ImoInstrument* pInstr);
+    GmoBoxSliceStaff(ImoInstrument* pInstr, int idxStaff);
     ~GmoBoxSliceStaff();
+
+    //helpers for layout
+    /**  Move shapes to theirs final 'y' positions and increment barlines height. */
+    void reposition_shapes(const vector<LUnits>& yShifts, LUnits barlinesHeight,
+                           SystemLayouter* pSysLayouter);
+
+protected:
+    void dump(ostream& outStream, int level) override;
+
 };
 
 

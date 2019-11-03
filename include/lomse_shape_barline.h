@@ -69,11 +69,8 @@ public:
 	~GmoShapeBarline();
 
 	//implementation of virtual methods in base class
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-    void shift_origin(const USize& shift);
-
-	//wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+    void shift_origin(const USize& shift) override;
 
 	//access to info
     inline LUnits get_x_right_line() { return m_xRightLine + m_uxLeft; }

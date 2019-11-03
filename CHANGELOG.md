@@ -10,6 +10,28 @@
 
 ##### COMPATIBLE CHANGES
 
+- Improve vertical spacing to avoid collisions between symbols. Until now most notation
+  symbols were engraved without controlling possible vertical collisions with other
+  notations. Now:
+	- A `VerticalProfile` object tracks ocupied space and provides the infrastructure
+	  for avoiding vertical collisions.
+	- The space between systems and staves is no longer fixed. Now, the default spacing
+	  values will be dynamically increased to avoid collisions between notation symbols.
+	- The order for engraving auxiliary notation symbols has been changed. Until now,
+	  once a note was engraved, all its additional attached notation symbols were also
+	  engraved. From now, all aditional notation symbols in a system are engraved by type
+	  for all the system, following a predefined order (defined, in general, by music
+	  engraving rules). For example, first all beams for a system are engraved, then all
+	  the articulations for all the notes in the system, etc.
+	- Engravers now have access to the vertical space occupied by already engraved symbols
+	  and, therefore, can take decisions to avoid collisions between the symbols.
+	- Some engravers have been modified to use the new facilities and engrave the symbols
+	  without collisions.
+
+- The height for single system view is now computed by adding top and bottom paper margins
+  to the real height of the system, once it is layouted. Previously, the height was fixed
+  and was defined by paper height.
+- Full-measure rests are now centered in the measure.
 - Added support to render octave-shift lines. MusicXML importer now also imports them.
 - Added support to render crescendo/diminuendo wedges (hairpins). The MusicXML importer
   now also imports the wedges.
@@ -17,7 +39,6 @@
   first application markings class: `FragmentMark`. This class allows to display on any
   score brackets and vertical lines, spanning one or several staves, to define the start
   and end points of a score section or fragment.
-- Fix. Full-measure rests are now centered in the measure.
 
 
 

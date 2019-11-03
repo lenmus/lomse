@@ -373,7 +373,7 @@ SUITE(DocLayouterTest)
 
             CHECK( pBSlice->get_num_boxes() == 1 );
             GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
-            CHECK( pBSliceInstr->get_num_boxes() == 0 );
+            CHECK( pBSliceInstr->get_num_boxes() == 1 );
             CHECK( pBSliceInstr->get_top_margin() == 0.0f );
             CHECK( pBSliceInstr->get_bottom_margin() == 0.0f );
             CHECK( pBSliceInstr->get_left_margin() == 0.0f );

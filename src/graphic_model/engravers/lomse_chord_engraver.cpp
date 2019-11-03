@@ -55,6 +55,7 @@ ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_pChord(nullptr)
     , m_pBaseNoteData(nullptr)
     , m_fStemDown(false)
+    , m_fCrossStaffChord(false)
     , m_fHasStem(false)
     , m_fHasFlag(false)
     , m_fSomeNoteReversed(false)
@@ -77,38 +78,42 @@ ChordEngraver::~ChordEngraver()
 void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                        int UNUSED(iSystem), int UNUSED(iCol),
-                                       LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                       LUnits UNUSED(yTop))
+                                       LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                       LUnits UNUSED(yTop),
+                                       int idxStaff, VerticalProfile* UNUSED(pVProfile))
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
+    m_idxStaff = idxStaff;
     m_pChord = dynamic_cast<ImoChord*>(pRO);
 
-    add_note(pSO, pStaffObjShape);
+    add_note(pSO, pStaffObjShape, idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
 void ChordEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                         GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                         int UNUSED(iStaff), int UNUSED(iSystem),
-                                        int UNUSED(iCol), LUnits UNUSED(xRight),
-                                        LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                        int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                        LUnits UNUSED(xStaffRight), LUnits UNUSED(yTop),
+                                        int idxStaff, VerticalProfile* UNUSED(pVProfile))
 {
-    add_note(pSO, pStaffObjShape);
+    add_note(pSO, pStaffObjShape, idxStaff);
 }
 
 //---------------------------------------------------------------------------------------
 void ChordEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                      int UNUSED(iStaff), int UNUSED(iSystem),
-                                     int UNUSED(iCol), LUnits UNUSED(xRight),
-                                     LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                     int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                     LUnits UNUSED(xStaffRight), LUnits UNUSED(yTop),
+                                     int idxStaff, VerticalProfile* UNUSED(pVProfile))
 {
-    add_note(pSO, pStaffObjShape);
+    add_note(pSO, pStaffObjShape, idxStaff);
     if (m_numNotesMissing != 0)
     {
-        LOMSE_LOG_ERROR("[ChordEngraver::set_end_staffobj] Num added notes doesn't match exzpected notes in chord");
-        throw runtime_error("[ChordEngraver::set_end_staffobj] Num added notes doesn't match exzpected notes in chord");
+        LOMSE_LOG_ERROR("[ChordEngraver::set_end_staffobj] Num added notes doesn't match expected notes in chord");
+        throw runtime_error("[ChordEngraver::set_end_staffobj] Num added notes doesn't match expected notes in chord");
     }
 }
 
@@ -125,7 +130,7 @@ int ChordEngraver::create_shapes(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
+void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape, int idxStaff)
 {
     m_numNotesMissing--;
     ImoNote* pNote = static_cast<ImoNote*>(pSO);
@@ -152,11 +157,15 @@ void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
                 ChordNoteData* pData =
                     LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	            m_notes.insert(it, 1, pData);
+
+                m_fCrossStaffChord |= (m_idxStaff != idxStaff);
                 return;
             }
         }
         ChordNoteData* pData = LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
+
+	    m_fCrossStaffChord |= (m_idxStaff != idxStaff);
     }
 }
 
@@ -493,30 +502,25 @@ void ChordEngraver::add_stem_and_flag()
     //the stem length must be increased with the distance from min note to max note.
     GmoShapeNote* pMinNoteShape = m_notes.front()->pNoteShape;
     GmoShapeNote* pMaxNoteShape = m_notes.back()->pNoteShape;
-    GmoShapeNotehead* pMinHeadShape = pMinNoteShape->get_notehead_shape();
-    GmoShapeNotehead* pMaxHeadShape = pMaxNoteShape->get_notehead_shape();
-    LUnits uExtraLenght = pMinHeadShape->get_top() - pMaxHeadShape->get_top();
 
-    //stem and the flag will computed for max/min note, depending on stem direction
-    ChordNoteData* pData = (is_stem_down() ? m_notes.front() : m_notes.back());
-    ImoNote* pNote = pData->pNote;
-    GmoShapeNote* pNoteShape = pData->pNoteShape;
-    int instr = pData->iInstr;
-    int staff = pNote->get_staff();
-    int nPosOnStaff = pData->posOnStaff;
+    //stem and the flag is computed for max/min note, depending on stem direction
+    ChordNoteData* pDataFlag = (is_stem_down() ? m_notes.front() : m_notes.back());
+    ImoNote* pNoteFlag = pDataFlag->pNote;  //min note for stem down, max for stem up
+    int instr = pDataFlag->iInstr;
+    int staff = pNoteFlag->get_staff();
+    int nPosOnStaff = pDataFlag->posOnStaff;
 
-    //but the stem is added to base note shape
-    GmoShapeNote* pBaseNoteShape = m_pBaseNoteData->pNoteShape;
+    //create the shape and attach it to notes
     Tenths length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
     if (!is_chord_beamed() && length < 35.0f && m_noteType > k_eighth)
         length = 35.0f;     // 3.5 spaces
     bool fShortFlag = (length < 35.0f);
-    LUnits stemLength = tenths_to_logical(length) + uExtraLenght;
-    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNote, instr, staff);
+    LUnits stemLength = tenths_to_logical(length);
+    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff);
 
-    pNoteShape = (is_stem_down() ? pMaxNoteShape : pMinNoteShape);
-    engrv.add_stem_flag(pNoteShape, pBaseNoteShape, m_noteType, is_stem_down(),
-                        has_flag(), fShortFlag, stemLength, m_color);
+    engrv.add_stem_flag_to_chord(pMinNoteShape, pMaxNoteShape, m_pBaseNoteData->pNoteShape,
+                        m_noteType, is_stem_down(), has_flag(), fShortFlag,
+                        m_fCrossStaffChord, stemLength, m_color);
 }
 
 

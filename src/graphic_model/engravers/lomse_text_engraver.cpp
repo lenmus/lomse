@@ -34,6 +34,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_shape_text.h"
 #include "lomse_score_meter.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -49,6 +50,8 @@ TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_language(language)
+    , m_idxStaff(-1)
+    , m_pVProfile(nullptr)
 {
 }
 
@@ -101,8 +104,20 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
     }
 
     ShapeId idx = 0;
-    return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, m_language,
-                                  pos.x, pos.y, m_libraryScope);
+    GmoShapeText* pShape = LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle,
+                                                  m_language, pos.x, pos.y,
+                                                  m_libraryScope);
+//    stringstream msg;
+//    msg << "idxStaff=" << m_idxStaff;
+//    if (m_idxStaff >=0 && m_pVProfile)
+//    {
+//        LUnits yMin = m_pVProfile->get_min_for(pShape->get_left(), pShape->get_right(),
+//                                               m_idxStaff);
+//        msg << ", yMinProfile=" << yMin << ", shape.y=" << pos.y - pShape->get_height();
+//        //pShape->set_top( min(pos.y - pShape->get_height(), yMin) );
+//    }
+//    LOMSE_LOG_INFO(msg.str());
+    return pShape;
 }
 
 

@@ -145,7 +145,7 @@ public:
                 m_pTupletEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pMeter);
                 m_pTupletEngrv->set_start_staffobj(pTuplet, pNR, m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol,
-                                                 0.0f, 0.0f, 0.0f);
+                                                 0.0f, 0.0f, 0.0f, -1, nullptr);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);
             }
             else if (i == numNotes-1)
@@ -153,14 +153,14 @@ public:
                 //last note
                 m_pTupletEngrv->set_end_staffobj(pTuplet, pNR, m_shapes[i],
                                                iInstr, iStaff, iSystem, iCol,
-                                               0.0f, 0.0f, 0.0f);
+                                               0.0f, 0.0f, 0.0f, -1, nullptr);
             }
             else
             {
                 //intermediate note
                 m_pTupletEngrv->set_middle_staffobj(pTuplet, pNR, m_shapes[i],
                                                   iInstr, iStaff, iSystem, iCol,
-                                                  0.0f, 0.0f, 0.0f);
+                                                  0.0f, 0.0f, 0.0f, -1, nullptr);
             }
         }
     }
@@ -223,8 +223,7 @@ SUITE(TupletEngraverTest)
         ImoTuplet* pTuplet = create_tuplet(&doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         prepare_to_engrave_tuplet(pTuplet);
 
-        m_pTupletEngrv->create_shapes();
-        m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->get_shape() );
+        m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->create_last_shape() );
         CHECK( m_pTupletShape != nullptr );
 
         delete_test_data();

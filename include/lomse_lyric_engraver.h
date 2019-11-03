@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -60,10 +60,18 @@ protected:
     InstrumentEngraver* m_pInstrEngrv;
     list< pair<ImoLyric*, GmoShape*> > m_lyrics;
     vector<ShapeBoxInfo*> m_shapesInfo;
-    vector<LUnits> m_staffTops;     //relative to StaffObj shape
     UPoint m_origin;
     USize m_size;
     bool m_fLyricAbove;
+    int m_numShapes;
+    LUnits m_uStaffTop;             //top line of current staff
+    LUnits m_uStaffLeft;
+    LUnits m_uStaffRight;
+
+    LUnits m_fontAscender;
+    LUnits m_fontDescender;
+    LUnits m_fontHeight;
+    LUnits m_fontBase;      //measured from top border
 
 public:
     LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -74,28 +82,30 @@ public:
     void set_start_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_middle_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
-                             LUnits xRight, LUnits xLeft, LUnits yTop);
+                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                             int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoAuxRelObj* pARO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return int(m_shapesInfo.size()); }
-    ShapeBoxInfo* get_shape_box_info(int i)
-    {
-        return m_shapesInfo[i];
-    }
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
+
+    int create_shapes(Color color=Color(0,0,0)) override;
+    int get_num_shapes() override { return m_numShapes; }
+    ShapeBoxInfo* get_shape_box_info(int i) override { return m_shapesInfo[i]; }
 
 
 protected:
 
     void create_shape(int note, GmoShapeNote* pNoteShape, ImoLyric* pLyric,
-                      GmoShapeNote* pNextNoteShape);
+                      GmoShapeNote* pNextNoteShape, LUnits xLeft, LUnits xRight);
     void decide_placement();
+    void measure_text_height(ImoLyric* pLyric);
 
 };
 

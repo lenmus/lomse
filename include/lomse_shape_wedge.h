@@ -53,7 +53,17 @@ class GmoShapeWedge : public GmoSimpleShape
 {
 protected:
     LUnits  m_thickness;
-    UPoint  m_points[4];
+
+    //wedge points, relative to m_origin
+    LUnits m_xTopStart;
+    LUnits m_yTopStart;
+    LUnits m_xTopEnd;
+    LUnits m_yTopEnd;
+    LUnits m_xBottomStart;
+    LUnits m_yBottomStart;
+    LUnits m_xBottomEnd;
+    LUnits m_yBottomEnd;
+
     int     m_niente;
     LUnits  m_radiusNiente;
 
@@ -78,8 +88,7 @@ public:
     void on_end_of_handler_drag(int iHandler, UPoint newPos);
 
 protected:
-    void save_points(UPoint* points);
-    void compute_bounds();
+    void save_points_and_compute_bounds(UPoint* points);
 
 };
 

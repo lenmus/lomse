@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -32,10 +32,6 @@
 #include "lomse_gm_basic.h"
 #include "lomse_box_system.h"
 #include "lomse_box_slice_instr.h"
-//#include "lomse_internal_model.h"
-//#include <iostream>
-//#include <iomanip>
-//#include "lomse_im_note.h"
 
 
 namespace lomse
@@ -44,10 +40,6 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 GmoBoxSlice::GmoBoxSlice(int UNUSED(nAbsMeasure), ImoObj* pCreatorImo)
     : GmoBox(GmoBox::k_box_slice, pCreatorImo)
-//    , m_nAbsMeasure(nAbsMeasure)
-//	, m_nNumInSystem(nNumInSystem)
-//    , m_xStart(xStart)
-//    , m_xEnd(xEnd)
 {
 }
 
@@ -63,11 +55,46 @@ GmoBoxSystem* GmoBoxSlice::get_system_box()
 }
 
 //--------------------------------------------------------------------------------------
-GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
+GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr,
+                                                      int idxStaff)
 {
-    GmoBoxSliceInstr* pBox = LOMSE_NEW GmoBoxSliceInstr(pInstr);
+    GmoBoxSliceInstr* pBox = LOMSE_NEW GmoBoxSliceInstr(pInstr, idxStaff);
     add_child_box(pBox);
     return pBox;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSlice::reposition_slices_and_shapes(const vector<LUnits>& yOrgShifts,
+                                               vector<LUnits>& heights,
+                                               vector<LUnits>& barlinesHeight,
+                                               SystemLayouter* pSysLayouter)
+
+{
+    vector<GmoBox*>::iterator it;
+    int iInstr = 0;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it, ++iInstr)
+    {
+        GmoBoxSliceInstr* pSlice = static_cast<GmoBoxSliceInstr*>(*it);
+        pSlice->reposition_slices_and_shapes(yOrgShifts, heights,
+                                             barlinesHeight[iInstr], pSysLayouter);
+    }
+
+    //shift origin and increase height
+    m_origin.y += yOrgShifts[0];
+    m_size.height += yOrgShifts.back() + heights[0];
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* GmoBoxSlice::get_instr_slice(int iInstr)
+{
+    return static_cast<GmoBoxSliceInstr*>(m_childBoxes[iInstr]);
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxSliceStaff* GmoBoxSlice::get_slice_staff_for(int iInstr, int iStaff)
+{
+    GmoBoxSliceInstr* pSlice = static_cast<GmoBoxSliceInstr*>(m_childBoxes[iInstr]);
+    return pSlice->get_slice_staff_for(iStaff);
 }
 
 ////--------------------------------------------------------------------------------------

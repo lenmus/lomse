@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,6 +42,7 @@ class ImoArticulation;
 class GmoShape;
 class ScoreMeter;
 class GmoShapeArticulation;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 class ArticulationEngraver : public Engraver
@@ -50,12 +51,15 @@ protected:
     ImoArticulation* m_pArticulation;
     int m_placement;
     bool m_fAbove;
+    bool m_fEnableShiftWhenCollision;
     GmoShape* m_pParentShape;
     GmoShapeArticulation* m_pArticulationShape;
+    int m_idxStaff;
+    VerticalProfile* m_pVProfile;
 
 public:
     ArticulationEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                    int iInstr, int iStaff);
+                    int iInstr, int iStaff, int idxStaff, VerticalProfile* pVProfile);
     ~ArticulationEngraver() {}
 
     GmoShapeArticulation* create_shape(ImoArticulation* pArticulation, UPoint pos,
@@ -69,6 +73,8 @@ protected:
     void add_voice();
     int find_glyph();
     bool must_be_placed_outside_staff();
+    bool is_accent_articulation();
+    void shift_shape_if_collision();
 
 };
 

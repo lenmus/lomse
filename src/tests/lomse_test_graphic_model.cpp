@@ -215,17 +215,13 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
         LUnits x = pShape->get_left() + 1.0f;
         LUnits y = pShape->get_top() + 1.0f;
 
-        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
-        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
-        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
-        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
-        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
-        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << test_name() << endl;
+        //pModel->dump_page(0, cout);
         //cout << "Finding: " << x << ", " << y << endl;
 
         GmoObj* pHit = pPage->find_shape_at(x, y);
@@ -358,17 +354,13 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
         LUnits x = pShape->get_left() + 1.0f;
         LUnits y = pShape->get_top() + 1.0f;
 
-        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
-        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
-        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
-        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
-        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
-        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << test_name() << endl;
+        //pModel->dump_page(0, cout);
         //cout << "Finding: " << x << ", " << y << endl;
 
         GmoObj* pHit = pPage->hit_test(x, y);
@@ -398,17 +390,13 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
         LUnits x = pShape->get_left() + 1.0f;
         LUnits y = pShape->get_top() + 1.0f;
 
-        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
-        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
-        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
-        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
-        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
-        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << test_name() << endl;
+        //pModel->dump_page(0, cout);
         //cout << "Finding: " << x << ", " << y << endl;
 
         GmoObj* pHit = pModel->hit_test(0, x, y);
@@ -470,7 +458,8 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
 
         CHECK ( pPage->is_dirty() == true );
         CHECK ( pBDPC->is_dirty() == true );
@@ -509,7 +498,8 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
 
         pPage->set_dirty(false);
         pBDPC->set_dirty(false);
@@ -576,7 +566,8 @@ SUITE(GraphicModelTest)
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
         GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
         GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        GmoBox* pBSliceStaff = pBSliceInstr->get_child_box(0);   //SliceStaff
+        GmoShape* pShape = pBSliceStaff->get_shape(0);      //Clef
 
         pPage->set_dirty(false);
         pBDPC->set_dirty(false);

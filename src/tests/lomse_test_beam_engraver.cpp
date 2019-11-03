@@ -63,13 +63,11 @@ public:
 
     inline void my_decide_on_stems_direction() { decide_on_stems_direction(); }
     inline bool my_stems_forced() { return m_fStemForced; }
-    inline bool my_stems_mixed() { return m_fStemMixed; }
+    inline bool my_stems_mixed() { return m_fStemsMixed; }
     inline bool my_stems_down() { return m_fStemsDown; }
     inline int my_get_num_stems_down() { return m_numStemsDown; }
     inline int my_get_num_notes() { return m_numNotes; }
     inline int my_get_average_pos_on_staff() { return m_averagePosOnStaff; }
-
-    ShapeBoxInfo* my_get_shape_box_info() { return get_shape_box_info(0); }
 };
 
 
@@ -154,7 +152,7 @@ public:
                 m_pBeamEngrv = LOMSE_NEW MyBeamEngraver(m_libraryScope, m_pMeter);
                 m_pBeamEngrv->set_start_staffobj(pBeam, pNote, m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol,
-                                                 0.0f, 0.0f, 0.0f);
+                                                 0.0f, 0.0f, 0.0f, -1, nullptr);
                 m_pStorage->save_engraver(m_pBeamEngrv, pBeam);
             }
             else if (i == numNotes-1)
@@ -162,14 +160,14 @@ public:
                 //last note
                 m_pBeamEngrv->set_end_staffobj(pBeam, pNote, m_shapes[i],
                                                iInstr, iStaff, iSystem, iCol,
-                                               0.0f, 0.0f, 0.0f);
+                                               0.0f, 0.0f, 0.0f, -1, nullptr);
             }
             else
             {
                 //intermediate note
                 m_pBeamEngrv->set_middle_staffobj(pBeam, pNote, m_shapes[i],
                                                   iInstr, iStaff, iSystem, iCol,
-                                                  0.0f, 0.0f, 0.0f);
+                                                  0.0f, 0.0f, 0.0f, -1, nullptr);
             }
         }
     }
@@ -229,8 +227,7 @@ SUITE(BeamEngraverTest)
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->create_shapes();
-        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->get_shape() );
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape() );
         CHECK( m_pBeamShape != nullptr );
 
         delete_test_data();
@@ -242,8 +239,7 @@ SUITE(BeamEngraverTest)
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->create_shapes();
-        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->get_shape() );
+        m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape() );
 
         //method prepare_to_engrave_beam() store notes shapes in m_shapes
         std::vector<GmoShapeNote*>::iterator it;

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,6 +35,7 @@
 #include "lomse_shapes.h"
 #include "lomse_glyphs.h"
 #include "lomse_shape_note.h"
+#include "lomse_vertical_profile.h"
 
 
 namespace lomse
@@ -45,13 +46,17 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ArticulationEngraver::ArticulationEngraver(LibraryScope& libraryScope,
                                            ScoreMeter* pScoreMeter,
-                                           int UNUSED(iInstr), int UNUSED(iStaff))
+                                           int UNUSED(iInstr), int UNUSED(iStaff),
+                                           int idxStaff, VerticalProfile* pVProfile)
     : Engraver(libraryScope, pScoreMeter)
     , m_pArticulation(nullptr)
     , m_placement(k_placement_default)
     , m_fAbove(true)
+    , m_fEnableShiftWhenCollision(false)
     , m_pParentShape(nullptr)
     , m_pArticulationShape(nullptr)
+    , m_idxStaff(idxStaff)
+    , m_pVProfile(pVProfile)
 {
 }
 
@@ -82,6 +87,9 @@ GmoShapeArticulation* ArticulationEngraver::create_shape(ImoArticulation* pArtic
         center_on_parent();
     }
 
+    if (m_fEnableShiftWhenCollision)
+        shift_shape_if_collision();
+
     return m_pArticulationShape;
 }
 
@@ -92,6 +100,7 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
     //      Instead, it is necessary to measure glyphs
 
     int type = m_pArticulation->get_articulation_type();
+    LUnits spaceNotehead = tenths_to_logical(LOMSE_SPACING_NOTEHEAD_ARTICULATION);
 
     if (type == k_articulation_breath_mark)
     {
@@ -118,37 +127,60 @@ UPoint ArticulationEngraver::compute_location(UPoint pos)
         {
             pos.x = m_pParentShape->get_left() - tenths_to_logical(16.0f);
             if (type == k_articulation_plop)
-                pos.y -= tenths_to_logical(15.0f);
+                pos.y -= tenths_to_logical(10.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
             else //scoop
-                pos.y += tenths_to_logical(5.0f);
+                pos.y += spaceNotehead;
         }
         else
         {
             pos.x = m_pParentShape->get_right() + tenths_to_logical(3.0f);
             if (type == k_articulation_doit)
-                pos.y -= tenths_to_logical(15.0f);
+                pos.y -= tenths_to_logical(10.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
         }
     }
 
     else if ( must_be_placed_outside_staff() )
     {
+        m_fEnableShiftWhenCollision = true;
         if (m_fAbove)
-            pos.y -= tenths_to_logical(5.0f);
+            pos.y -= spaceNotehead;
         else
-            pos.y += tenths_to_logical(45.0f);
+            pos.y += tenths_to_logical(40.0f + LOMSE_SPACING_NOTEHEAD_ARTICULATION);
+    }
+
+    else if (is_accent_articulation() && m_pParentShape->is_shape_note())
+    {
+        m_fEnableShiftWhenCollision = true;
+        GmoShapeNote* pNote = static_cast<GmoShapeNote*>(m_pParentShape);
+        GmoShape* pShape = pNote->get_notehead_shape();
+
+//        //articulation must be centered of next staff space
+//        LUnits shift = pNote->is_on_staff_line() ? tenths_to_logical(15.0f)
+//                                                 : tenths_to_logical(5.0f);
+        if (m_fAbove)
+        {
+            pos.y = pShape->get_top();
+            pos.y -= spaceNotehead;
+        }
+        else
+        {
+            pos.y = pShape->get_bottom();
+            pos.y += spaceNotehead;
+        }
     }
 
     else
     {
+        m_fEnableShiftWhenCollision = true;
         if (m_fAbove)
         {
             pos.y = m_pParentShape->get_top();
-            pos.y -= tenths_to_logical(5.0f);
+            pos.y -= spaceNotehead;
         }
         else
         {
             pos.y = m_pParentShape->get_bottom();
-            pos.y += tenths_to_logical(5.0f);
+            pos.y += spaceNotehead;
         }
     }
 
@@ -182,19 +214,6 @@ void ArticulationEngraver::center_on_parent()
         USize shift(xShift, 0.0f);
         m_pArticulationShape->shift_origin(shift);
     }
-
-    //ensure that articulation does not collides with parent shape
-    URect overlap = m_pParentShape->get_bounds();
-    overlap.intersection( m_pArticulationShape->get_bounds() );
-    LUnits yShift = overlap.get_height();
-    if (yShift != 0.0f)
-    {
-        yShift += tenths_to_logical(5.0f);
-        yShift = m_fAbove ? - yShift : yShift;
-
-        USize shift(0.0f, yShift);
-        m_pArticulationShape->shift_origin(shift);
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -215,6 +234,36 @@ void ArticulationEngraver::add_voice()
         }
         VoiceRelatedShape* pVRS = static_cast<VoiceRelatedShape*>(m_pArticulationShape);
         pVRS->set_voice(pNR->get_voice());
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ArticulationEngraver::shift_shape_if_collision()
+{
+    LUnits yCurPos = m_pArticulationShape->get_top();
+    LUnits spaceNotehead = tenths_to_logical(LOMSE_SPACING_NOTEHEAD_ARTICULATION);
+    LUnits spaceOther = tenths_to_logical(LOMSE_SPACING_STACKED_ARTICULATIONS);
+
+    if (m_fAbove)
+    {
+        std::pair<LUnits, GmoShape*> minValue =
+                        m_pVProfile->get_min_for(m_pArticulationShape->get_left(),
+                                                 m_pArticulationShape->get_right(),
+                                                 m_idxStaff);
+        LUnits yMin = minValue.first;
+        yMin -= m_pArticulationShape->get_height();
+        yMin -= (minValue.second->is_shape_notehead() ? spaceNotehead : spaceOther);
+        m_pArticulationShape->set_top( min(yCurPos, yMin) );
+    }
+    else
+    {
+        std::pair<LUnits, GmoShape*> maxValue =
+                        m_pVProfile->get_max_for(m_pArticulationShape->get_left(),
+                                                 m_pArticulationShape->get_right(),
+                                                 m_idxStaff);
+        LUnits yMax = maxValue.first;
+        yMax += (maxValue.second->is_shape_notehead() ? spaceNotehead : spaceOther);
+        m_pArticulationShape->set_top( max(yCurPos, yMax) );
     }
 }
 
@@ -395,6 +444,33 @@ bool ArticulationEngraver::must_be_placed_outside_staff()
             return true;
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+bool ArticulationEngraver::is_accent_articulation()
+{
+    int type = m_pArticulation->get_articulation_type();
+
+    return type == k_articulation_accent
+           || type == k_articulation_marccato
+           || type == k_articulation_staccato
+           || type == k_articulation_tenuto
+           || type == k_articulation_mezzo_staccato
+           || type == k_articulation_staccatissimo
+           || type == k_articulation_legato_duro
+           || type == k_articulation_marccato_legato
+           || type == k_articulation_marccato_staccato
+           || type == k_articulation_staccato_duro
+           || type == k_articulation_marccato_staccatissimo
+           || type == k_articulation_mezzo_staccatissimo
+           || type == k_articulation_staccatissimo_duro
+        //TODO There are more glyphs for articulations
+           || type == k_glyph_staccatissimo_wedge_above
+           || type == k_glyph_staccatissimo_stroke_above
+           || type == k_glyph_stress_above
+           || type == k_glyph_unstress_above
+           || type == k_glyph_laissez_vibrer_above
+           ;
 }
 
 

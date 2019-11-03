@@ -68,5 +68,15 @@ GmoShapeLine* LineEngraver::create_shape(ImoScoreLine* pLine, UPoint pos)
                                   pLine->get_end_cap() );
 }
 
+//---------------------------------------------------------------------------------------
+GmoShapeLine* LineEngraver::dbg_create_shape(UPoint start, UPoint end, Color color,
+                                             LUnits lineWidth)
+{
+    ShapeId idx = 0;
+    return LOMSE_NEW GmoShapeLine(nullptr, idx, start.x, start.y, end.x, end.y,
+                                  lineWidth, 0.5f, k_line_solid, color,
+                                  k_edge_normal, k_cap_none, k_cap_none);
+}
+
 
 }  //namespace lomse

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -33,6 +33,8 @@
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
+#include "lomse_vertical_profile.h"
+
 #include <list>
 using namespace std;
 
@@ -48,6 +50,7 @@ class ImoNote;
 class GmoShapeNote;
 class ImoNoteRest;
 class GmoShape;
+class VerticalProfile;
 
 
 //---------------------------------------------------------------------------------------
@@ -58,7 +61,6 @@ protected:
     ImoBeam* m_pBeam;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
 
-    ShapeBoxInfo m_shapesInfo[2];
     std::list<LUnits> m_segments;
     UPoint m_origin;
     USize m_size;
@@ -75,23 +77,28 @@ public:
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol,
-                             LUnits xRight, LUnits xLeft, LUnits yTop);
+                             LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                             int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color=Color(0,0,0));
-    int get_num_shapes() { return 1; }
-    ShapeBoxInfo* get_shape_box_info(int UNUSED(i))
-    {
-        //AWARE: Only one shape. Param i MUST be always 0
-        return &m_shapesInfo[0];
-    }
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yStaffTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
 
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits UNUSED(width)) override {}
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
+
+    //During layout, when more space is added between two staves, all shapes are shifted
+    //down to account for the added extra space. If a beam is cross-staff, it is
+    //necessary to increment the lenght of all stems conected to this beam
+    void increment_cross_staff_stems(LUnits yIncrement);
 
 protected:
     void create_shape();
@@ -107,11 +114,13 @@ protected:
     void make_segments_relative();
 
     bool m_fStemForced;     //at least one stem forced
-    bool m_fStemMixed;      //not all stems in the same direction
+    bool m_fStemsMixed;     //not all stems in the same direction
     bool m_fStemsDown;      //stems direction down
+    bool m_fCrossStaff;     //the beamed group is cross-staff (= has notes on several staves)
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes
     int m_averagePosOnStaff;
+    int m_maxStaff;         //for cross-staff beams, the highest staff. For normal beams, just the staff
 };
 
 

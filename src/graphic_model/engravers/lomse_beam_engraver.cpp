@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,11 +53,13 @@ BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     , m_uBeamThickness(0.0f)
     , m_fBeamAbove(false)
     , m_fStemForced(false)
-    , m_fStemMixed(false)
+    , m_fStemsMixed(false)
     , m_fStemsDown(false)
+    , m_fCrossStaff(false)
     , m_numStemsDown(0)
     , m_numNotes(0)
     , m_averagePosOnStaff(0)
+    , m_maxStaff(0)
 {
 }
 
@@ -70,9 +72,10 @@ BeamEngraver::~BeamEngraver()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int iSystem, int iCol,
-                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
-                                      LUnits UNUSED(yTop))
+                                      int UNUSED(iSystem), int UNUSED(iCol),
+                                      LUnits UNUSED(xStaffLeft), LUnits UNUSED(xStaffRight),
+                                      LUnits UNUSED(yStaffTop),
+                                      int idxStaff, VerticalProfile* pVProfile)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -81,17 +84,18 @@ void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 
-    m_shapesInfo[0].iCol = iCol;
-    m_shapesInfo[0].iInstr = iInstr;
-    m_shapesInfo[0].iSystem = iSystem;
+    m_idxStaff = idxStaff;
+    m_pVProfile = pVProfile;
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                        int UNUSED(iStaff), int UNUSED(iSystem),
-                                       int UNUSED(iCol), LUnits UNUSED(xRight),
-                                       LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                       int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                       LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                       int UNUSED(idxStaff),
+                                       VerticalProfile* UNUSED(pVProfile))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
@@ -101,15 +105,25 @@ void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                     int UNUSED(iStaff), int UNUSED(iSystem),
-                                    int UNUSED(iCol), LUnits UNUSED(xRight),
-                                    LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
+                                    int UNUSED(iCol), LUnits UNUSED(xStaffLeft),
+                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                    int UNUSED(idxStaff),
+                                    VerticalProfile* UNUSED(pVProfile))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-int BeamEngraver::create_shapes(Color color)
+GmoShape* BeamEngraver::create_first_or_intermediate_shape(Color color)
+{
+    //TODO: It has been assumed that a beam cannot be split. This has to be revised
+    m_color = color;
+    return nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* BeamEngraver::create_last_shape(Color color)
 {
     m_color = color;
     decide_on_stems_direction();
@@ -120,7 +134,7 @@ int BeamEngraver::create_shapes(Color color)
     compute_beam_segments();
     create_shape();
     add_shape_to_noterests();
-    return 1;
+    return m_pBeamShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -129,8 +143,8 @@ void BeamEngraver::create_shape()
     m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
-    m_pShape = m_pBeamShape;
-    m_shapesInfo[0].pShape = m_pBeamShape;
+    m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed && !m_fCrossStaff);
+    m_pBeamShape->set_cross_staff(m_fCrossStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -194,7 +208,6 @@ void BeamEngraver::decide_on_stems_direction()
     //forced (by a tie, probably) forces the beam stems in this direction
 
     m_fStemForced = false;     //assume no stem forced
-    m_fStemMixed = false;      //assume all stems in the same direction
     m_fStemsDown = false;      //set stems up by default
     m_numStemsDown = 0;
     m_numNotes = 0;
@@ -226,14 +239,7 @@ void BeamEngraver::decide_on_stems_direction()
     }
 
     if (!m_fStemForced && m_numNotes > 0)
-    {
         m_fStemsDown = m_averagePosOnStaff / m_numNotes > 6;
-        m_fStemMixed = false;   //TODO: For now no automatic mixed beams
-    }
-    else
-    {
-        m_fStemMixed = (m_numStemsDown !=0 && m_numStemsDown != m_numNotes);
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -314,6 +320,10 @@ void BeamEngraver::compute_beam_segments()
             if (pNR->is_shape_note())
             {
                 GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(pNR);
+                if (pNR->is_shape_chord_base_note())
+                {
+                    pShapeNote = static_cast<GmoShapeChordBaseNote*>(pNR)->get_flag_note();
+                }
 
                 uxCur = pShapeNote->get_stem_left();
                 uyCur = pShapeNote->get_stem_y_flag() + uyShift;
@@ -329,7 +339,7 @@ void BeamEngraver::compute_beam_segments()
                 }
 
                 // now we can deal with current note
-                switch ( pBeamData->get_beam_type(iLevel) ) //pShapeNote->get_beam_type(iLevel) )
+                switch ( pBeamData->get_beam_type(iLevel) )
                 {
                     case ImoBeam::k_begin:
                         //start of segment. Compute initial point
@@ -361,7 +371,7 @@ void BeamEngraver::compute_beam_segments()
                         uyStart = uyPrev + (uxCur-uxPrev-uBeamHookLength)*(uyCur-uyPrev)/(uxCur-uxPrev);
                         fStartPointComputed = true;      //mark 'segment ready to be drawn'
                         fEndPointComputed = true;
-                    break;
+                        break;
 
                     case ImoBeam::k_continue:
                     case ImoBeam::k_none:
@@ -470,14 +480,31 @@ void BeamEngraver::adjust_stems_lengths()
     LUnits x1 = 0.0f;       // x position of first stem
     LUnits xn = 0.0f;       // x position of last stem
 
-    int i = 0;              // index to current element
-    std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    int i = 0;                  // index to current element
+    bool fLastStemUp = true;
+    m_maxStaff = 0;
+    m_fStemsMixed = false;
+    m_fCrossStaff = false;
+    list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
     for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
     {
-        GmoShape* pNR = (*it).second;
-        if (pNR->is_shape_note())
+        ImoNoteRest* pNR = (*it).first;
+        if (pNR->is_note())
         {
-            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(pNR);
+            bool fStemUp = static_cast<ImoNote*>(pNR)->is_stem_up();
+            if (i != 0)
+            {
+                m_fStemsMixed |= (fLastStemUp != fStemUp);
+                m_fCrossStaff |= (m_maxStaff != pNR->get_staff());
+            }
+            fLastStemUp = fStemUp;
+            m_maxStaff = max(m_maxStaff, pNR->get_staff());
+
+            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>((*it).second);
+            if (pShapeNote->is_shape_chord_base_note())
+            {
+                pShapeNote = static_cast<GmoShapeChordBaseNote*>(pShapeNote)->get_flag_note();
+            }
             note[i] = pShapeNote;
             if (i == 0)
                 x1 = pShapeNote->get_stem_left();
@@ -571,6 +598,24 @@ void BeamEngraver::adjust_stems_lengths()
     for(int i=0; i < nNumNotes; i++)
     {
         note[i]->set_stem_length( fabs(yFlag[i] - yNote[i]) );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::increment_cross_staff_stems(LUnits yIncrement)
+{
+    list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        ImoNoteRest* pNR = (*it).first;
+        if (pNR->is_note())
+        {
+            GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>((*it).second);
+            if (pShapeNote->is_shape_chord_base_note())
+                pShapeNote = static_cast<GmoShapeChordBaseNote*>(pShapeNote)->get_flag_note();
+
+            pShapeNote->increment_stem_length(yIncrement);
+        }
     }
 }
 

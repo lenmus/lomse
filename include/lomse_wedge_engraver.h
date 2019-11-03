@@ -45,14 +45,14 @@ class GmoShapeWedge;
 class GmoShapeInvisible;
 class ScoreMeter;
 class InstrumentEngraver;
+class VerticalProfile;
 
 //---------------------------------------------------------------------------------------
 class WedgeEngraver : public RelObjEngraver
 {
 protected:
     InstrumentEngraver* m_pInstrEngrv;
-    LUnits m_uStaffTopStart;    //top line of start system
-    LUnits m_uStaffTopEnd;      //top line of end system
+    LUnits m_uStaffTop;         //top line of current system
 
     int m_numShapes;
     ImoWedge* m_pWedge;
@@ -64,10 +64,7 @@ protected:
     GmoShapeInvisible* m_pStartDirectionShape;
     GmoShapeInvisible* m_pEndDirectionShape;
 
-    bool m_fTwoWedges;
-    UPoint m_points1[4];    //points for first wedge
-    UPoint m_points2[4];    //points for second wedge, when fisrt one is split
-    ShapeBoxInfo m_shapesInfo[2];
+    UPoint m_points[4];    //points for wedge
 
 public:
     WedgeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -77,27 +74,30 @@ public:
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
                             int iSystem, int iCol,
-                            LUnits xRight, LUnits xLeft, LUnits yTop);
+                            LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                            int idxStaff, VerticalProfile* pVProfile) override;
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol,
-                          LUnits xRight, LUnits xLeft, LUnits yTop);
-    int create_shapes(Color color);
-    int create_shapes();
-    int get_num_shapes();
-    ShapeBoxInfo* get_shape_box_info(int i);
+                          LUnits xStaffLeft, LUnits xStaffRight, LUnits yTop,
+                          int idxStaff, VerticalProfile* pVProfile) override;
 
-    void set_prolog_width(LUnits width);
+    //RelObjEngraver mandatory overrides
+    void set_prolog_width(LUnits width) override;
+    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 protected:
     void decide_placement();
-    void decide_if_one_or_two_wedges();
-    inline bool two_wedges_needed() { return m_fTwoWedges; }
-    void create_two_shapes();
-    void create_one_shape();
+    GmoShape* create_first_shape();
+    GmoShape* create_intermediate_shape();
+    GmoShape* create_final_shape();
 
     void compute_first_shape_position();
-    void compute_second_shape_position();
+    void compute_last_shape_position();
+    void compute_intermediate_shape_position();
+
+    LUnits determine_center_line_of_shape(LUnits startSpread, LUnits endSpread);
     //void add_user_displacements(int iWedge, UPoint* points);
 
 };
