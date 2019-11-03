@@ -6,6 +6,6 @@ This sample is a test for displaying and playing back scores using the different
 ## Building for wxWidgets
 
 ```
-g++ -std=c++11 viewtype-wx.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp -o example-4-wx `pkg-config --cflags liblomse` `wx-config --cflags` -I ./wxMidi/ `pkg-config --libs liblomse` `wx-config --libs` -lstdc++ -lportmidi -lporttime
+g++ -std=c++11 viewtypes-wx.cpp ../../tutorials/wxMidi/wxMidi.cpp ../../tutorials/wxMidi/wxMidiDatabase.cpp -o viewtypes `pkg-config --cflags liblomse` `wx-config --cflags` -I ../../tutorials/wxMidi/ `pkg-config --libs liblomse` `wx-config --libs` -lstdc++ -lportmidi -lporttime
 ```
 

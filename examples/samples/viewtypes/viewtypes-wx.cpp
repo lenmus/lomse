@@ -689,11 +689,11 @@ void MyFrame::on_open_file(wxCommandEvent& WXUNUSED(event))
 
     //prepare a filter for the supported files
     wxString sFilter = "All supported files";
-    sFilter += "|*.lms;*.lmb;*.lmd;*.xml;*.mxl;*.mnx|";
+    sFilter += "|*.lms;*.lmb;*.lmd;*.xml;*.musicxml;*.mnx|";
     sFilter += _("LenMus files");
     sFilter += "|*.lms;*.lmb;*.lmd|";
     sFilter += _("MusicXML files");
-    sFilter += "|*.xml;*.mxl|";
+    sFilter += "|*.xml;*.musicxml|";
     sFilter += _("MNX files");
     sFilter += "|*.mnx";
 

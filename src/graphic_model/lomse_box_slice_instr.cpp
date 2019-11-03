@@ -145,8 +145,10 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                 GmoShapeBeam* pShapeBeam = static_cast<GmoShapeBeam*>(*it);
                 if (pShapeBeam->is_cross_staff())
                 {
-                    pSysLayouter->increment_cross_staff_stems(pShapeBeam, yShift / 2.0f);
-                    (*it)->reposition_shape(yShift / 2.0f);
+                    LUnits down = (yShift + yShifts[m_idxStaff-1]) / 2.0f;
+                    LUnits increment = (yShift - yShifts[m_idxStaff-1]) / 2.0f;
+                    pSysLayouter->increment_cross_staff_stems(pShapeBeam, increment);
+                    (*it)->reposition_shape(down);
                 }
                 else
                     (*it)->reposition_shape(yShift);
