@@ -57,7 +57,6 @@ protected:
     bool m_fTwoLines;
     bool m_fEndCorner;
     LUnits m_xLineStart;
-    LUnits m_xLineEnd;
     LUnits m_yLineStart;
     LUnits m_yLineEnd;
     LUnits m_uLineThick;

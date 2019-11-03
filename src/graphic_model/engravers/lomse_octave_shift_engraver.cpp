@@ -217,7 +217,7 @@ void OctaveShiftEngraver::add_line_info()
     LUnits yEnd = yStart + (octave_shift_at_top() ? 200.0f : -200.0f);
 
     LUnits thickness = tenths_to_logical(LOMSE_OCTAVE_SHIFT_LINE_THICKNESS);
-    bool fEndCorner = is_end_point_set();   //iShape==1 || (iShape==0 && !two_shapes_needed()));
+    bool fEndCorner = is_end_point_set();
 
     m_pMainShape->set_layout_data(xStart, xEnd, yStart, yEnd, thickness, fEndCorner);
 }
