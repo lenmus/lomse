@@ -1,0 +1,49 @@
+<mnx>
+    <score>
+        <mnx-common profile="standard">
+            <global>
+                <measure>
+                    <directions>
+                        <time signature="4/4"/>
+                    </directions>
+                </measure>
+                <measure/>
+            </global>
+            <part>
+                <part-name>Music</part-name>
+                <measure>
+                    <sequence>
+                        <directions>
+                            <clef sign="G" line="2"/>
+                        </directions>
+                        <event value="/4">
+                            <note pitch="C5"/>
+                        </event>
+                        <event value="/4">
+                            <note pitch="E5"/>
+                        </event>
+                        <directions>
+                            <octave-shift type="-8" end="2:1/2" />
+                        </directions>
+                        <event value="/2">
+                            <note pitch="C7"/>
+                        </event>
+                    </sequence>
+                </measure>
+                <measure>
+                    <sequence>
+                        <event value="/2">
+                            <note pitch="E7"/>
+                        </event>
+                        <event value="/4">
+                            <note pitch="C7"/>
+                        </event>
+                        <event value="/4">
+                            <note pitch="C6"/>
+                        </event>
+                    </sequence>
+                </measure>
+            </part>
+        </mnx-common>
+    </score>
+</mnx>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mnx>
+    <score>
+        <mnx-common profile="standard">
+            <global>
+                <measure>
+                    <directions>
+                        <time signature="4/4"/>
+                    </directions>
+                </measure>
+            </global>
+            <part>
+                <part-name>Music</part-name>
+                <measure>
+                    <sequence>
+                        <directions>
+                            <clef sign="G" line="2"/>
+                        </directions>
+                        <event value="/2">
+                            <note pitch="C4"/>
+                            <note pitch="E4"/>
+                            <note pitch="G4"/>
+                        </event>
+                        <event value="/2">
+                            <rest/>
+                        </event>
+                    </sequence>
+                </measure>
+            </part>
+        </mnx-common>
+    </score>
+</mnx>

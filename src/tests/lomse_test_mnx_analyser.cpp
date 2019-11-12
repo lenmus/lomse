@@ -592,7 +592,7 @@ SUITE(MnxAnalyserTest)
         Document doc(m_libraryScope);
         XmlParser parser;
         stringstream expected;
-        expected << "Line 0. <mnx>: missing mandatory element <head>." << endl;
+        //expected << "Line 0. <mnx>: missing mandatory element <head>." << endl;
         parser.parse_text("<mnx></mnx>");
         MnxAnalyser a(errormsg, m_libraryScope, &doc, &parser);
 

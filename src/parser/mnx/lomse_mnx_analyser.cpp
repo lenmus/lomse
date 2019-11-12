@@ -2488,7 +2488,15 @@ protected:
 
 //@--------------------------------------------------------------------------------------
 //@ <mnx>
-//@<!ELEMENT mnx (head, (collection | score)) >
+//@Contexts:
+//@    None: this is the top-level element.
+//@Content Model:
+//@    A single, optional head element.
+//@    Either a collection or a score element.
+//@Attributes:
+//@    None.
+//@
+//@<!ELEMENT mnx (head?, (collection | score)) >
 //@ Attributes: None
 class MnxMnxAnalyser : public MnxElementAnalyser
 {
@@ -2514,7 +2522,7 @@ public:
         add_default(pImoDoc);
 
 		// head?
-        analyse_mandatory("head", pImoDoc);
+        analyse_optional("head", pImoDoc);
 
         // (collection | score)
         analyse_optional("score", pImoDoc);
