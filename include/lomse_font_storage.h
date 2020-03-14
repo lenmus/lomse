@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -40,11 +40,15 @@
 #ifndef __LOMSE_FONT_STORAGE_H__
 #define __LOMSE_FONT_STORAGE_H__
 
+//lomse
 #include "lomse_basic.h"
 #include "lomse_vertex_source.h"
 #include "lomse_agg_types.h"
 #include "lomse_injectors.h"
+
+//std
 #include <string>
+#include <map>
 using namespace std;
 
 using namespace agg;
@@ -136,20 +140,22 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-// FontSelector
+/** FontSelector
+*/
 class FontSelector
 {
 protected:
     LibraryScope* m_pLibScope;
+    map<string, string> m_cache;
 
 public:
     FontSelector(LibraryScope* pLibScope) : m_pLibScope(pLibScope) {}
     ~FontSelector() {}
 
     std::string find_font(const std::string& language,
-                           const std::string& fontFile,
-                           const std::string& name,
-                           bool fBold=false, bool fItalic=false);
+                          const std::string& fontFile,
+                          const std::string& name,
+                          bool fBold=false, bool fItalic=false);
 
 };
 

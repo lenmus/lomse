@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -76,6 +76,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_pNullDoorway(nullptr)
     , m_pLdpFactory(nullptr)       //lazzy instantiation. Singleton scope.
     , m_pFontStorage(nullptr)      //lazzy instantiation. Singleton scope.
+    , m_pFontSelector(nullptr)     //lazzy instantiation. Singleton scope.
     , m_pGlobalMetronome(nullptr)
     , m_pDispatcher(nullptr)
     , m_sMusicFontFile("Bravura.otf")
@@ -112,6 +113,7 @@ LibraryScope::~LibraryScope()
 {
     delete m_pLdpFactory;
     delete m_pFontStorage;
+    delete m_pFontSelector;
     delete m_pNullDoorway;
     delete m_pMusicGlyphs;
     if (m_pDispatcher)
@@ -135,6 +137,14 @@ FontStorage* LibraryScope::font_storage()
     if (!m_pFontStorage)
         m_pFontStorage = LOMSE_NEW FontStorage(this);
     return m_pFontStorage;
+}
+
+//---------------------------------------------------------------------------------------
+FontSelector* LibraryScope::get_font_selector()
+{
+    if (!m_pFontSelector)
+        m_pFontSelector = LOMSE_NEW FontSelector(this);
+    return m_pFontSelector;
 }
 
 //---------------------------------------------------------------------------------------
