@@ -64,7 +64,7 @@ public:
                     LUnits tickness, Color color);
     virtual ~GmoShapeSlurTie();
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
     void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; }
@@ -97,10 +97,21 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeSlur : public GmoShapeSlurTie
 {
+protected:
+    std::vector<UPoint> m_dataPoints;
+
 public:
     GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
                  Color color = Color(0,0,0));
     virtual ~GmoShapeSlur() {}
+
+    void add_data_points(const std::vector<UPoint>& data);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+
+protected:
+    void draw_control_points(Drawer* pDrawer);
+    void draw_reference_points(Drawer* pDrawer);
+
 };
 
 

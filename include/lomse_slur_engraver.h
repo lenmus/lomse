@@ -67,6 +67,8 @@ protected:
     UPoint m_points[4];    //bezier points for current shape
     LUnits m_thickness;
 
+    std::vector<UPoint> m_dataPoints;   //intermediate ref. points
+
 public:
     SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  InstrumentEngraver* pInstrEngrv);
@@ -105,8 +107,10 @@ protected:
     void compute_end_point(UPoint* point);
     void compute_start_of_staff_point();
     void compute_end_of_staff_point();
+    void compute_control_points();
     void compute_default_control_points(UPoint* points);
     //void add_user_displacements(int iSlur, UPoint* points);
+    std::vector<UPoint> find_contour_reference_points();
 
 };
 

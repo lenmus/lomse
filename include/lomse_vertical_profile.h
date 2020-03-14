@@ -115,6 +115,10 @@ public:
         the profiles overlap. */
     LUnits get_staves_distance(int idxStaff);
 
+    /**
+    */
+    std::vector<UPoint> get_min_profile_points(LUnits xStart, LUnits xEnd, int idxStaff);
+    std::vector<UPoint> get_max_profile_points(LUnits xStart, LUnits xEnd, int idxStaff);
 
     //debug
     void dbg_add_vertical_profile_shapes(GmoBox* pBoxSystem);

@@ -423,13 +423,13 @@ void ScoreLayouter::decide_line_breaks()
 {
     if (get_num_columns() != 0)
     {
-        bool fUseSimple;
-        if (m_libraryScope.use_debug_values())
-            fUseSimple = (m_libraryScope.get_render_spacing_opts()
-                              & k_render_opt_breaker_simple) != 0;
-        else
-            fUseSimple = (m_pScoreMeter->get_render_spacing_opts()
-                              & k_render_opt_breaker_simple) != 0;
+        bool fUseSimple = false;
+//        if (m_libraryScope.use_debug_values())
+//            fUseSimple = (m_libraryScope.get_render_spacing_opts()
+//                              & k_render_opt_breaker_simple) != 0;
+//        else
+//            fUseSimple = (m_pScoreMeter->get_render_spacing_opts()
+//                              & k_render_opt_breaker_simple) != 0;
 
         if (fUseSimple)
         {

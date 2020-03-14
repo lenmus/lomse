@@ -450,5 +450,41 @@ LUnits VerticalProfile::get_staves_distance(int idxStaff)
     return distance;
 }
 
+//---------------------------------------------------------------------------------------
+vector<UPoint> VerticalProfile::get_min_profile_points(LUnits xStart, LUnits xEnd,
+                                                       int idxStaff)
+{
+    vector<UPoint> dataPoints;
+    list<VProfilePoint>* pPoints = m_xMin[idxStaff];
+    PointsIterator it = locate_insertion_point(pPoints, xStart);
+    if (it != pPoints->begin())
+        --it;
+
+    for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
+    {
+        if ((*it).y != LOMSE_PAPER_UPPER_LIMIT)
+            dataPoints.push_back( UPoint((*it).x, (*it).y) );
+    }
+    return dataPoints;
+}
+
+//---------------------------------------------------------------------------------------
+vector<UPoint> VerticalProfile::get_max_profile_points(LUnits xStart, LUnits xEnd,
+                                                       int idxStaff)
+{
+    vector<UPoint> dataPoints;
+    list<VProfilePoint>* pPoints = m_xMax[idxStaff];
+    PointsIterator it = locate_insertion_point(pPoints, xStart);
+    if (it != pPoints->begin())
+        --it;
+
+    for (; it != pPoints->end() && (*it).x <= xEnd; ++it)
+    {
+        if ((*it).y != LOMSE_PAPER_LOWER_LIMIT)
+            dataPoints.push_back( UPoint((*it).x, (*it).y) );
+    }
+    return dataPoints;
+}
+
 
 }  //namespace lomse

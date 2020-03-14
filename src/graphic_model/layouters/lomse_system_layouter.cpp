@@ -80,6 +80,8 @@ void initialize_engraving_order()
     m_order[i++] = k_imo_articulation_symbol;
 
     m_order[i++] = k_imo_tuplet;
+    m_order[i++] = k_imo_slur;
+    m_order[i++] = k_imo_tie;
 
     m_order[i++] = k_imo_dynamics_mark;
     m_order[i++] = k_imo_fermata;
@@ -96,8 +98,6 @@ void initialize_engraving_order()
     m_order[i++] = k_imo_score_line;
     m_order[i++] = k_imo_text_box;
     m_order[i++] = k_imo_octave_shift;
-    m_order[i++] = k_imo_slur;
-    m_order[i++] = k_imo_tie;
     m_order[i++] = k_imo_volta_bracket;
     m_order[i++] = k_imo_wedge;
 
