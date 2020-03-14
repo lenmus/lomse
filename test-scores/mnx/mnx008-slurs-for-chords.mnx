@@ -1,0 +1,42 @@
+
+<mnx>
+    <score>
+        <mnx-common profile="standard">
+            <global>
+                <measure>
+                    <directions>
+                        <time signature="4/4"/>
+                    </directions>
+                </measure>
+            </global>
+            <part>
+                <part-name>Music</part-name>
+                <measure>
+                    <sequence>
+                        <directions>
+                            <clef sign="G" line="2"/>
+                        </directions>
+                        <event value="/4" id="event1">
+                            <slur side="up" target="event4" />
+                            <note pitch="C5"/>
+                            <note pitch="E5"/>
+                        </event>
+                        <event value="/4" id="event2">
+                            <note pitch="D5"/>
+                            <note pitch="F5"/>
+                        </event>
+                        <event value="/4" id="event3">
+                            <note pitch="E5"/>
+                            <note pitch="G5"/>
+                        </event>
+                        <event value="/4" id="event4">
+                            <note pitch="F5"/>
+                            <note pitch="A5"/>
+                        </event>
+                    </sequence>
+                </measure>
+            </part>
+        </mnx-common>
+    </score>
+</mnx>
+
