@@ -180,19 +180,45 @@ endif()
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LOMSE_ROOT_DIR}/cmake-modules")
 
-#define path were fonts will be installed.
-set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
 
-# define build options and create the include file "lomse_config.h"
+#----------------------------------------------------------------------------
+# Determine installation folders and create the include file "lomse_config.h"
+#
+# values for configuration macros in "lomse_config.h" could depend on 
+# installation folders. Therefore, before configuring it is necessary to set
+# installation folders. By default, CMake uses the following prefix:
+#   - Linux: "/usr/local"
+#   - Windows: "C:\Program Files\lomse\"
+#
+# You can change the install location by running cmake like this:
+#   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
+#----------------------------------------------------------------------------
+
+message(STATUS "CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
+
+set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
+set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
+
+#define path were fonts will be installed
+if (WIN32)
+    #Used only for Bravura font. For all others will use system installed fonts
+    set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
+elseif (UNIX)
+    #In Linux only system installed fonts are used. This variable is not used
+    set( FONTS_PATH   "not used" )
+else()
+    #Only fonts installed here will be used
+    set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
+endif()
+
+# Now we can define build options and configure the include file "lomse_config.h"
 include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 
 
-##########################################################################
-#
+#----------------------------------------------------------------------------
 # Dependencies
 # Check for needed libraries and set all related includes, flags, etc. 
-#
-###############################################################################
+#----------------------------------------------------------------------------
 
 #dependencies for building and for pkg-config file (intitially empty but will be enhanced)
 set(LOMSE_REQUIRES "")
@@ -502,24 +528,10 @@ endif(LOMSE_BUILD_EXAMPLE)
 
 ###############################################################################
 # library installation
-#
-# You can change the install location by running cmake like this:
-#
-#   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
-#
-# By default, CMake uses the following prefix:
-#   - Linux: "/usr/local"
-#   - Windows: "C:\Program Files\lomse\"
-#
 ###############################################################################
 
-message(STATUS "CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
-
 if( UNIX )
-
-    #define base paths
-    set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
-    set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
+#-------------------------------------------------------------
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION ${LOMSE_LIBDIR} )
@@ -575,10 +587,6 @@ if( UNIX )
 elseif( WIN32 )
 #-------------------------------------------------------------
 
-    #define base paths
-    set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
-    set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
-
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
     install( TARGETS ${LOMSE_SHARED} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
@@ -587,7 +595,6 @@ elseif( WIN32 )
     install(DIRECTORY ${INCLUDES_LOMSE}/
             DESTINATION "${LOMSE_INCLUDEDIR}"
             FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE
                            PATTERN "platform" EXCLUDE )
 
     # copy agg includes
@@ -629,7 +636,7 @@ elseif( WIN32 )
 endif()
 
 
-###############################################################################
+#----------------------------------------------------------------------------
 # create and install the pkg-config file: liblomse.pc
 #
 # By default, pkg-config file will be installed in /usr/lib/pkgconfig
@@ -637,7 +644,6 @@ endif()
 #
 #   cmake -DLOMSE_PKG_CONFIG_INSTALL=/new/install/path
 #
-###############################################################################
 
 if(NOT DEFINED LOMSE_PKG_CONFIG_INSTALL)
     set( LOMSE_PKG_CONFIG_INSTALL "/usr/lib/pkgconfig" )
@@ -660,7 +666,7 @@ message(STATUS "pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
 #
 # CPack section: installers generation
 #
-#   Currently it just builds the Debian binary package.
+#   Currently it just builds a Debian binary package.
 # 
 ###############################################################################
 

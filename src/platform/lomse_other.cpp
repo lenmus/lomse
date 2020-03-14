@@ -38,6 +38,16 @@ namespace lomse
 {
 
 //=======================================================================================
+// Logger implementation
+//=======================================================================================
+Logger::Logger(int mode)
+    : m_mode(mode)
+    , m_areas(0xffffffff)       //all areas enabled
+{
+    dbgLogger.open("lomse-log.txt");
+}
+
+//=======================================================================================
 // FontSelector::find_font implementation for other Operating Systems
 //=======================================================================================
 std::string FontSelector::find_font(const std::string& language,

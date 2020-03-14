@@ -33,8 +33,12 @@
 #include "lomse_logger.h"
 
 //other
-#include <fontconfig.h>
+//For FontSelector
+#include <fontconfig.h>     //to use fontconfig
 #include <unistd.h>         //for access() function
+//For Logger
+#include <pwd.h>            //for the passwd structure
+
 
 //std
 #include <sstream>
@@ -44,6 +48,22 @@ using namespace std;
 
 namespace lomse
 {
+
+//=======================================================================================
+// Logger implementation
+//=======================================================================================
+Logger::Logger(int mode)
+    : m_mode(mode)
+    , m_areas(0xffffffff)       //all areas enabled
+{
+    struct passwd* pw = getpwuid(getuid());
+    const char* homedir = pw->pw_dir;
+    string logPath(homedir);
+    logPath += "/lomse-log.txt";
+    dbgLogger.open(logPath);
+    LOMSE_LOG_INFO("lomse log path=%s", logPath.c_str());
+}
+
 
 //=======================================================================================
 // FontSelector::find_font implementation for Linux

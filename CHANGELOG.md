@@ -10,6 +10,10 @@
 
 ##### COMPATIBLE CHANGES
 
+- Lomse now uses system installed fonts in Linux and Windows. For Windows,
+  Bravura music font is still required in the path specified in configuration
+  macro LOMSE_FONTS_PATH.
+- Log file is now created at user home folder.
 - Improve vertical spacing to avoid collisions between symbols. Until now most notation
   symbols were engraved without controlling possible vertical collisions with other
   notations. Now:
