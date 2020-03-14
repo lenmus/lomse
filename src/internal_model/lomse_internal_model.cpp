@@ -2506,8 +2506,8 @@ ImoInstrument::ImoInstrument()
     , m_pLastMeasureInfo(nullptr)
 {
     add_staff();
-//	m_midiChannel = g_pMidi->DefaultVoiceChannel();
-//	m_midiInstr = g_pMidi->DefaultVoiceInstr();
+//	m_midiChannel = g_pMidi->get_default_voice_channel();
+//	m_midiInstr = g_pMidi->get_default_voice_instr();
 }
 
 //---------------------------------------------------------------------------------------
