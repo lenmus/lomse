@@ -122,7 +122,8 @@
 #
 #-------------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+message(STATUS "Using cmake version ${CMAKE_VERSION}")
 
 # project name
 project(lomse)
@@ -291,6 +292,28 @@ if( FREETYPE_FOUND )
 else()
 	message(SEND_ERROR "FreeType package not found.")
 endif(FREETYPE_FOUND)
+
+# Check for fontconfig
+if (UNIX)
+    find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
+    find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
+    if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
+        OR ("${FONTCONFIG_LIBRARIES}" STREQUAL "FONTCONFIG_LIBRARIES-NOTFOUND")
+       )
+        set(FONTCONFIG_FOUND FALSE)
+    else()
+        set(FONTCONFIG_FOUND TRUE)
+    endif()
+
+    if(FONTCONFIG_FOUND )
+        include_directories( ${FONTCONFIG_INCLUDE_DIR}/fontconfig )
+        link_libraries( ${FONTCONFIG_LIBRARIES} )
+        message(STATUS "fontconfig found: libraries= ${FONTCONFIG_LIBRARIES}" )
+        message(STATUS "fontconfig found: include= ${FONTCONFIG_INCLUDE_DIR}/fontconfig" )
+    else()
+        message(FATAL_ERROR "fontconfig package not found.")
+    endif()
+endif()
 
 # Check for libpng
 if( LOMSE_ENABLE_PNG )

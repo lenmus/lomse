@@ -67,14 +67,14 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
-    void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; }
-    unsigned vertex(double* px, double* py);
+    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; }
+    unsigned vertex(double* px, double* py) override;
 
     //support for handlers
-    int get_num_handlers();
-    UPoint get_handler_point(int i);
-    void on_handler_dragged(int iHandler, UPoint newPos);
-    void on_end_of_handler_drag(int iHandler, UPoint newPos);
+    int get_num_handlers() override;
+    UPoint get_handler_point(int i) override;
+    void on_handler_dragged(int iHandler, UPoint newPos) override;
+    void on_end_of_handler_drag(int iHandler, UPoint newPos) override;
 
 protected:
     void save_points(UPoint* points);
