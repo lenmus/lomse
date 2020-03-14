@@ -69,7 +69,7 @@ namespace lomse
 SoundEventsTable::SoundEventsTable(ImoScore* pScore)
     : m_pScore(pScore)
     , m_numMeasures(0)
-    , rAnacrusisMissingTime(0.0)
+    , m_rAnacrusisMissingTime(0.0)
 {
 }
 
@@ -134,7 +134,7 @@ void SoundEventsTable::create_events()
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
-    rAnacrusisMissingTime = cursor.anacrusis_missing_time();
+    m_rAnacrusisMissingTime = cursor.anacrusis_missing_time();
     ImoKeySignature* pKey = nullptr;
     reset_accidentals(pKey);
 

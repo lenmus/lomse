@@ -176,7 +176,7 @@ protected:
     vector<JumpEntry*> m_jumps;
     vector< pair<int, string> > m_targets;          //pair measure, label
     vector<JumpEntry*> m_pendingLabel;              //jumps to be fixed
-    TimeUnits rAnacrusisMissingTime;
+    TimeUnits m_rAnacrusisMissingTime;
     int m_accidentals[7];
 
 public:
@@ -191,7 +191,7 @@ public:
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
-    inline TimeUnits get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
+    inline TimeUnits get_anacrusis_missing_time() { return m_rAnacrusisMissingTime; }
 
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }

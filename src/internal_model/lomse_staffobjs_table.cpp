@@ -377,7 +377,7 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
 
     //determine if anacrusis
     TimeUnits measureDuration = pTS->get_measure_duration();
-    m_pColStaffObjs->set_anacrusis_missing_time(measureDuration - rTime);
+    m_pColStaffObjs->set_anacrusis_missing_time(max(0.0, measureDuration - rTime));
 }
 
 //---------------------------------------------------------------------------------------
