@@ -1,3 +1,4 @@
+
 <mnx>
     <score>
         <mnx-common profile="standard">
@@ -16,39 +17,35 @@
                         <directions>
                             <clef sign="G" line="2"/>
                         </directions>
-                        <directions>
-                        </directions>
-                        <event value="/4">
-                            <note pitch="C5">
-                                <slur side="up" target="note4" />
-                            </note>
+                        <event value="/4" id="event1">
+                            <note pitch="C5"/>
+                            <slur side="up" target="event4" />
                         </event>
-                        <event value="/4">
+                        <event value="/4" id="event2">
                             <note pitch="D5"/>
                         </event>
-                        <event value="/4">
+                        <event value="/4" id="event3">
                             <note pitch="E5"/>
                         </event>
-                        <event value="/4">
-                            <note id="note4" pitch="C5"/>
+                        <event value="/4" id="event4">
+                            <note pitch="C5"/>
                         </event>
                     </sequence>
                 </measure>
                 <measure>
                     <sequence>
-                        <event value="/4">
-                            <note pitch="G4">
-                                <slur side="down" target="note8" />
-                            </note>
+                        <event value="/4" id="event5">
+                            <note pitch="G4"/>
+                            <slur side="down" target="event8" />
                         </event>
-                        <event value="/4">
+                        <event value="/4" id="event6">
                             <note pitch="A4"/>
                         </event>
-                        <event value="/4">
+                        <event value="/4" id="event7">
                             <note pitch="G4"/>
                         </event>
-                        <event value="/4">
-                            <note id="note8" pitch="E4"/>
+                        <event value="/4" id="event8">
+                            <note pitch="E4"/>
                         </event>
                     </sequence>
                 </measure>
@@ -56,3 +53,4 @@
         </mnx-common>
     </score>
 </mnx>
+

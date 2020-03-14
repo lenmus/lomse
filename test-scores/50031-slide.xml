@@ -27,7 +27,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <stem default-y="-4.5">up</stem>
-        <staff>2</staff>
+        <staff>1</staff>
         <notations>
           <slide line-type="wavy" number="1" type="start"/>
         </notations>
@@ -42,7 +42,7 @@
         <voice>2</voice>
         <type>quarter</type>
         <stem>up</stem>
-        <staff>2</staff>
+        <staff>1</staff>
         <notations>
           <slide line-type="wavy" number="2" type="start"/>
         </notations>
