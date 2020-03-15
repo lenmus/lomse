@@ -104,13 +104,22 @@ add_custom_target (build-version ALL
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "setting Lomse version information ...")
 
-# platform
-if(WIN32)
+# identify platform
+if(WIN32 OR CYGWIN)
+    # for Windows operating system or Windows when using the CygWin version of cmake
     set( LOMSE_PLATFORM_WIN32  "1")
     set( LOMSE_PLATFORM_UNIX   "0")
-elseif(UNIX)
+    set( LOMSE_PLATFORM_APPLE  "0")
+elseif(APPLE)
+    # for MacOS X or iOS, watchOS, tvOS (since 3.10.3)
+    set( LOMSE_PLATFORM_WIN32  "0")
+    set( LOMSE_PLATFORM_UNIX   "0")
+    set( LOMSE_PLATFORM_APPLE  "1")
+elseif(UNIX AND NOT APPLE AND NOT CYGWIN)
+    # for Linux, BSD, Solaris, Minix
     set( LOMSE_PLATFORM_WIN32  "0")
     set( LOMSE_PLATFORM_UNIX   "1")
+    set( LOMSE_PLATFORM_APPLE  "0")
 endif()
 
 # compiler

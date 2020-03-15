@@ -350,10 +350,9 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        if (is_valid_font(pEngrouter))
+        if (LOMSE_PLATFORM_APPLE == 0 && is_valid_font(pEngrouter))
         {
             CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
-                //CHECK( pEngrouter && pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
             //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
             //cout << "size = " << pEngrouter->get_width() << endl;
             CHECK( splitter.more_text() == true );
@@ -379,7 +378,7 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        if (is_valid_font(pEngrouter))
+        if (LOMSE_PLATFORM_APPLE == 0 && is_valid_font(pEngrouter))
         {
             CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
             //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;

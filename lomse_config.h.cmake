@@ -48,6 +48,7 @@
 //---------------------------------------------------------------------------------------
 #define LOMSE_PLATFORM_WIN32      @LOMSE_PLATFORM_WIN32@
 #define LOMSE_PLATFORM_UNIX       @LOMSE_PLATFORM_UNIX@
+#define LOMSE_PLATFORM_APPLE      @LOMSE_PLATFORM_APPLE@
 #define LOMSE_COMPILER_MSVC       @LOMSE_COMPILER_MSVC@
 
 
