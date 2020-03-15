@@ -577,6 +577,8 @@ void WordEngrouter::measure()
 
     m_descent = meter.get_descender();
     m_ascent = meter.get_ascender();
+
+    m_fontFile = meter.get_font_file();
 }
 
 //---------------------------------------------------------------------------------------

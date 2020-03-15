@@ -202,6 +202,7 @@ class WordEngrouter : public Engrouter
 protected:
     wstring m_text;
     string m_language;
+    string m_fontFile;
     LUnits m_descent;
     LUnits m_ascent;
     LUnits m_halfLeading;
@@ -213,6 +214,7 @@ public:
 
     //used only for tests
     inline const wstring& get_text() { return m_text; }
+    inline const string& get_font_file() { return m_fontFile; }
 
     void measure();
     GmoObj* create_gm_object(UPoint pos, LineReferences& refs);

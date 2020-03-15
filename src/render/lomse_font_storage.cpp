@@ -113,6 +113,7 @@ bool FontStorage::set_font(const std::string& fontFullName, double height,
     ////m_fontEngine.transform(mtx);
 
     m_fValidFont = true;
+    m_fontFullName = fontFullName;
     return !m_fValidFont;
 }
 

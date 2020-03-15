@@ -298,11 +298,22 @@ public:
         return pPara->add_text_item(data, pStyle);
     }
 
+    bool is_valid_font(WordEngrouter* pEngrouter)
+    {
+        const string& fontpath = pEngrouter->get_font_file();
+        return (fontpath.find("NotoSansCJK") != std::string::npos);
+    }
+
     string to_str(const wstring& wtext)
     {
         string utf8result;
         utf8::utf32to8(wtext.begin(), wtext.end(), back_inserter(utf8result));
         return utf8result;
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
     }
 };
 
@@ -339,11 +350,17 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
-            //CHECK( pEngrouter && pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
-        //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
-        //cout << "size = " << pEngrouter->get_width() << endl;
-        CHECK( splitter.more_text() == true );
+        if (is_valid_font(pEngrouter))
+        {
+            CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
+                //CHECK( pEngrouter && pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
+            //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+            //cout << "size = " << pEngrouter->get_width() << endl;
+            CHECK( splitter.more_text() == true );
+        }
+        else
+            cout << "Test ChineseTextSplitterTest " << test_name()
+                 << " skipped. Needed font not installed." << endl;
 
         delete pEngr;
     }
@@ -362,10 +379,16 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
-        //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
-        //cout << "size = " << pEngrouter->get_width() << endl;
-        CHECK( splitter.more_text() == false );
+        if (is_valid_font(pEngrouter))
+        {
+            CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
+            //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+            //cout << "size = " << pEngrouter->get_width() << endl;
+            CHECK( splitter.more_text() == false );
+        }
+        else
+            cout << "Test ChineseTextSplitterTest " << test_name()
+                 << " skipped. Needed font not installed." << endl;
 
         delete pEngr;
     }

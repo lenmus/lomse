@@ -84,6 +84,7 @@ protected:
     bool    m_fKerning;
     bool    m_fFlip_y;
     EFontCacheType      m_fontCacheType;
+    string m_fontFullName;
 
 public:
     FontStorage(LibraryScope* pLibScope);
@@ -94,6 +95,7 @@ public:
     inline double get_font_height_in_points() { return m_fontHeight; }
     inline double get_ascender() { return m_fontEngine.ascender(); }
     inline double get_descender() { return m_fontEngine.descender(); }
+    inline const string& get_font_file() { return m_fontFullName; }
 
     void set_font_size(double rPoints);
     void set_font_height(double rPoints);

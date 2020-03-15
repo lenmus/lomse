@@ -251,6 +251,12 @@ LUnits TextMeter::get_font_height()
 }
 
 //---------------------------------------------------------------------------------------
+const string& TextMeter::get_font_file()
+{
+    return m_pFonts->get_font_file();
+}
+
+//---------------------------------------------------------------------------------------
 void TextMeter::set_transform()
 {
     agg::trans_affine mtx;
