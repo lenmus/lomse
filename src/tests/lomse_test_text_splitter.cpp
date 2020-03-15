@@ -350,7 +350,7 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        if (LOMSE_PLATFORM_APPLE == 0 && is_valid_font(pEngrouter))
+        if (is_valid_font(pEngrouter))
         {
             CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
             //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
@@ -378,7 +378,7 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != nullptr );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != nullptr );
-        if (LOMSE_PLATFORM_APPLE == 0 && is_valid_font(pEngrouter))
+        if (is_valid_font(pEngrouter))
         {
             CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
             //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
