@@ -293,7 +293,7 @@ public:
     {
         doc.create_empty();
         ImoStyle* pStyle = doc.create_style("chinese");
-        pStyle->font_file("wqy-zenhei.ttc");
+        pStyle->font_name("Noto Sans CJK SC");  //WenQuanYi Zen Hei");
         ImoParagraph* pPara = doc.add_paragraph();
         return pPara->add_text_item(data, pStyle);
     }

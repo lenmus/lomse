@@ -3651,8 +3651,8 @@ ImoStyle* ImoScore::create_default_style()
             string& language = pImoDoc->get_language();
             if (language == "zh_CN")
             {
-                pDefStyle->font_file("wqy-zenhei.ttc");
-                pDefStyle->font_name("");
+                pDefStyle->font_file("");
+                pDefStyle->font_name("WenQuanYi Zen Hei");
             }
         }
     }

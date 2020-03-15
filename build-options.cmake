@@ -12,25 +12,44 @@
 #
 #-------------------------------------------------------------------------------------
 
-# command line build options
-if(DEFINED LOMSE_ENABLE_DEBUG_LOGS)
-  option( LOMSE_ENABLE_DEBUG_LOGS  "Enable debug logs. Doesn't require debug build" ${LOMSE_ENABLE_DEBUG_LOGS})
-else()
-  option( LOMSE_ENABLE_DEBUG_LOGS  "Enable debug logs. Doesn't require debug build" OFF)
-endif()
+# build options
+OPTION(LOMSE_ENABLE_DEBUG_LOGS
+    "Enable debug logs. Doesn't require debug build"
+    OFF)
+OPTION(LOMSE_DEBUG
+    "Debug build, with debug symbols"
+    OFF)
+OPTION(LOMSE_COMPATIBILITY_LDP_1_5
+    "Enable compatibility for LDP v1.5"
+    ON)
+option(LOMSE_BUILD_STATIC_LIB 
+    "Build the static library"
+    ON)
+option(LOMSE_BUILD_SHARED_LIB
+    "Build the shared library" 
+    OFF)
 
-if(DEFINED LOMSE_DEBUG)
-    option( LOMSE_DEBUG  "Debug build, with debug symbols" ${LOMSE_DEBUG})
-else()
-    option( LOMSE_DEBUG  "Debug build, with debug symbols" OFF)
-endif()
+#Build the test units runner program 'testlib'
+option(LOMSE_BUILD_TESTS "Build testlib program" ON)
 
-if(DEFINED LOMSE_COMPATIBILITY_LDP_1_5)
-    option( LOMSE_COMPATIBILITY_LDP_1_5  "Enable compatibility for LDP v1.5" ${LOMSE_COMPATIBILITY_LDP_1_5})
-else()
-    option( LOMSE_COMPATIBILITY_LDP_1_5  "Enable compatibility for LDP v1.5" ON)
-endif()
+#run unit tests after building the library
+option(LOMSE_RUN_TESTS "Run tests after building"
+    ON)
 
+#Build the example-1 program that uses the library
+option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
+
+#optional dependencies
+option(LOMSE_ENABLE_COMPRESSION "Enable compressed formats (requires zlib)" ON)
+option(LOMSE_ENABLE_PNG "Enable png format (requires pnglib and zlib)" ON)
+
+#santity checks
+if (LOMSE_ENABLE_PNG)
+	if (NOT LOMSE_ENABLE_COMPRESSION)
+        message(STATUS "**WARNING**: Enabling PNG requires enabling compression. LOMSE_ENABLE_COMPRESSION set to ON" )
+    	set(LOMSE_ENABLE_COMPRESSION ON)
+	endif()
+endif()      
 
 #libraries to build
 if (WIN32)
@@ -41,36 +60,11 @@ else()
     set(LOMSE_BUILD_SHARED_LIB ON)
 endif()
 
-option(LOMSE_BUILD_STATIC_LIB "Build the static library" ${LOMSE_BUILD_STATIC_LIB})
-option(LOMSE_BUILD_SHARED_LIB "Build the shared library" ${LOMSE_BUILD_SHARED_LIB})
-
 if (WIN32)
     if (LOMSE_BUILD_SHARED_LIB AND MSVC)
         message(FATAL_ERROR "Shared C++ libraries (C++ DLL) are not supported by MSVC")
     endif()
 endif()
-
-#Build the test units runner program 'testlib'
-option(LOMSE_BUILD_TESTS "Build testlib program" ON)
-
-#run unit tests after building the library
-option(LOMSE_RUN_TESTS "Run tests after building" OFF)
-if (LOMSE_RUN_TESTS)
-    set(LOMSE_BUILD_TESTS ON)
-endif()      
-
-#Build the example-1 program that uses the library
-option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
-
-#optional dependencies
-option(LOMSE_ENABLE_COMPRESSION "Enable compressed formats (requires zlib)" ON)
-option(LOMSE_ENABLE_PNG "Enable png format (requires pnglib and zlib)" ON)
-if (LOMSE_ENABLE_PNG)
-	if (NOT LOMSE_ENABLE_COMPRESSION)
-        message(STATUS "**WARNING**: Enabling PNG requires enabling compression. LOMSE_ENABLE_COMPRESSION set to ON" )
-    	set(LOMSE_ENABLE_COMPRESSION ON)
-	endif()
-endif()      
 
 
 message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
