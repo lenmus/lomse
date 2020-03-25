@@ -458,7 +458,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     nMtrEvDeltaTime -= nMissingTime;
     curTime = time_units_to_milliseconds( nMtrEvDeltaTime );
     LOMSE_LOG_DEBUG(Logger::k_score_player,
-                    "At start: nMtrEvDeltaTime=%d, event=%d, event time=%ld, anacrusis missing time=%f, "
+                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacrusis missing time=%f, "
                     "curTime=%ld, nMissingTime=%ld",
                     nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacrusis_missing_time(),
                     curTime, nMissingTime);
@@ -556,7 +556,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     {
         LOMSE_LOG_DEBUG(Logger::k_score_player,
                         "new iteration: i=%d, curTime=%ld, nMtrEvDeltaTime=%ld, "
-                        "events[i]->DeltaTime=%d",
+                        "events[i]->DeltaTime=%ld",
                         i, curTime, nMtrEvDeltaTime, events[i]->DeltaTime);
 
         //Verify if next event is a metronome click on/off
