@@ -77,7 +77,6 @@ std::string FontSelector::find_font(const std::string& language,
     string fontspath = std::getenv("WINDIR");
     string fullpath = fontspath;
     fullpath += "\\Fonts\\";
-    LOMSE_LOG_INFO("Fonts path=%s", fullpath.c_str());
 
     //transform font name to capital letters for comparisons
     const locale& loc = locale();

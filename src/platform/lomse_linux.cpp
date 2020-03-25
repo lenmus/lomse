@@ -174,10 +174,16 @@ std::string FontSelector::find_font(const std::string& language,
     {
         string localfont = m_pLibScope->fonts_path();
         localfont += "Bravura.otf";
+        LOMSE_LOG_INFO("Bravura font not found. Trying path=%s", localfont.c_str());
         if (access(localfont.c_str(), F_OK) == 0)
+        {
             fullpath = localfont;
-        //else:
-        //   do nothing. Program will not crash but music symbols will not be displayed.
+        }
+        else
+        {
+            // do nothing. Program will not crash but music symbols will not be displayed.
+            LOMSE_LOG_ERROR("Bravura font not found. Music symbols cannot be dispayed.");
+        }
     }
 
     LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());

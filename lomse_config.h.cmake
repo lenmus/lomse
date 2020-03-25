@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,11 +36,27 @@
 //==================================================================
 
 //---------------------------------------------------------------------------------------
-// paths, for test scores and for fonts
+// Paths, for fonts and unit tests resources
+//
+//    LOMSE_FONTS_PATH
+//        - For Linux this path is a fallback path in case Bravura.otf font is not 
+//          found in systems fonts.
+//        - For Windows this path is to look for the Bravura.otf font.
+//        - For platforms other than Linux and Windows the absolute path to the fonts
+//          directory to use must be specified here.
+//      Nevertheless, at run time the application using Lomse can set this path by
+//      invoking method LomseDoorway::set_default_fonts_path(const string& fontsPath)
+//
+//    TESTLIB_SCORES_PATH
+//        Absolute path for tests scores used in unit tests.
+//
+//    TESTLIB_FONTS_PATH
+//        Absolute path for fonts used in unit tests.
+//
 //---------------------------------------------------------------------------------------
+#define LOMSE_FONTS_PATH            @LOMSE_FONTS_PATH@
 #define TESTLIB_SCORES_PATH         @TESTLIB_SCORES_PATH@
 #define TESTLIB_FONTS_PATH          @TESTLIB_FONTS_PATH@
-#define LOMSE_FONTS_PATH            @LOMSE_FONTS_PATH@
 
 
 //---------------------------------------------------------------------------------------
