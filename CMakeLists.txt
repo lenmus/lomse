@@ -123,10 +123,36 @@
 #-------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
-message(STATUS "Using cmake version ${CMAKE_VERSION}")
 
 #Travis complains when building with clang. What is this for?
 cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default 
+
+#prevent in-source builds
+#include(cmake-modules/disallow-in-source-builds.cmake)
+  # make sure the user doesn't play dirty with symlinks
+  get_filename_component(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
+  get_filename_component(bindir "${CMAKE_BINARY_DIR}" REALPATH)
+
+  # disallow in-source builds
+  if("${srcdir}" STREQUAL "${bindir}")
+    message("************** ERROR *************************************")
+    message("  Lomse should not be configured & built in the Lomse")
+    message("  source directory. You must run cmake in a build directory.")
+    message("  For example:")
+    message("")
+    message("      mkdir build; cd build; cmake ..")
+    message("")
+    message("  NOTE: Given that you already tried to make an in-source")
+    message("  build CMake have already created several files & directories")
+    message("  in your source tree. Remove them by doing:")
+    message("")
+    message("      rm -rf CMakeCache.txt CMakeFiles")
+    message("")
+    message("**********************************************************")
+    message(FATAL_ERROR "Quitting configuration")
+  endif()
+
+message(STATUS "Using cmake version ${CMAKE_VERSION}")
 
 # project name
 project(lomse)
