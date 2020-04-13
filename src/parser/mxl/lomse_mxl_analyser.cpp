@@ -6796,17 +6796,10 @@ protected:
 
     void set_tuplet_id(const string& snum)
     {
-        if (snum.empty())
-        {
-            error_msg("Invalid tuplet number. Number ignored.");
-            return;
-        }
+        long num = 1L;
+        if (!snum.empty())
+            num = std::stol(snum);
 
-        ////c++11
-        //long num = std::stol(snum);
-        //c++98
-        char* pEnd;
-        long num = std::strtol(snum.c_str(), &pEnd, 10);
         m_pInfo->set_id(num);
         m_pInfo->set_tuplet_number(num);
     }
