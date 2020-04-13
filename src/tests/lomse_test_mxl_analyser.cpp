@@ -4567,6 +4567,161 @@ SUITE(MxlAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_06)
+    {
+        //@06. tuplet: missing number, replaced by 1
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>G</step><alter>-1</alter>"
+                "<octave>5</octave></pitch><duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='start' /></notations>"
+            "</note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><chord/><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='stop' /></notations>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                    CHECK( pTuplet != nullptr );
+                    CHECK( pTuplet && pTuplet->get_actual_number() == 1 );
+                    CHECK( pTuplet && pTuplet->get_normal_number() == 1 );
+                    CHECK( pTuplet && pTuplet->get_show_bracket() == k_yesno_default );
+                    CHECK( pTuplet && pTuplet->get_num_objects() == 3 );
+                    CHECK( pTuplet && pTuplet->get_id() == 1L );
+
+                    ++it;
+                    ++it;
+                    pNote = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote != nullptr );
+                    if (pNote)
+                    {
+                        ImoTuplet* pTuplet2 = pNote->get_first_tuplet();
+                        CHECK( pTuplet2 == pTuplet );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_07)
+    {
+        //@07. tuplet: error invalid number
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Invalid tuplet number. Tuplet ignored." << endl
+                 << "Line 0. Invalid tuplet number. Tuplet ignored." << endl;
+                 //twice because there are two invalid tuplet elements
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<note><pitch><step>G</step><alter>-1</alter>"
+                "<octave>5</octave></pitch><duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='start' number='one' /></notations>"
+            "</note>"
+            "<note><chord/><pitch><step>C</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+            "</note>"
+            "<note><chord/><pitch><step>E</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type>"
+                "<notations><tuplet type='stop' number='one' /></notations>"
+            "</note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                ImoObj::children_iterator it = pMD->begin();
+                CHECK( pMD->get_num_children() == 4 );
+
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    ImoTuplet* pTuplet = pNote->get_first_tuplet();
+                    CHECK( pTuplet == nullptr );
+
+                    ++it;
+                    ++it;
+                    pNote = dynamic_cast<ImoNote*>( *it );
+                    CHECK( pNote != nullptr );
+                    if (pNote)
+                    {
+                        ImoTuplet* pTuplet2 = pNote->get_first_tuplet();
+                        CHECK( pTuplet2 == pTuplet );
+                    }
+                }
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
 
 
     //@ volta bracket -------------------------------------------------------------------
