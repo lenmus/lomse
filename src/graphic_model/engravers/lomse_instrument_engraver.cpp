@@ -808,6 +808,12 @@ LUnits InstrumentEngraver::get_bottom_line_of_staff(int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_unshifted_bottom_line_of_staff(int iStaff)
+{
+    return m_org.y + m_staffBottom[iStaff] + m_lineThickness[iStaff] / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
 LUnits InstrumentEngraver::get_staves_top_line()
 {
     return m_org.y + m_staffTop[0] + m_yShifts[0] + m_lineThickness[0] / 2.0f;;
