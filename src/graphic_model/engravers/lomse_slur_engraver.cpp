@@ -165,7 +165,11 @@ GmoShape* SlurEngraver::create_single_shape()
     compute_start_point();
     compute_end_point(&m_points[ImoBezierInfo::k_end]);
     m_dataPoints = find_contour_reference_points();
-    compute_control_points();
+    #if (0)  //new behaviour
+        compute_control_points();
+    #else
+        compute_default_control_points(&m_points[0]);
+    #endif
     //add_user_displacements(0, &m_points[0]);
 
     GmoShapeSlur* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0],
@@ -302,13 +306,13 @@ void SlurEngraver::compute_control_points()
     m_points[ImoBezierInfo::k_ctrol2].x = x3;
     m_points[ImoBezierInfo::k_ctrol2].y = y3;
 
-    dbgLogger << "Slur " << (m_fSlurBelow ? "below" : "above") << endl
-        << "xm=" << xm << ", ym=" << ym << endl
-        << "p0=(" << x0 << ", " << y0 << ")" << endl
-        << "p1=(" << x1 << ", " << y1 << ")" << endl
-        << "p2=(" << x2 << ", " << y2 << ")" << endl
-        << "p3=(" << x3 << ", " << y3 << ")" << endl
-        << "ax=" << ax << endl << endl;
+//    dbgLogger << "Slur " << (m_fSlurBelow ? "below" : "above") << endl
+//        << "xm=" << xm << ", ym=" << ym << endl
+//        << "p0=(" << x0 << ", " << y0 << ")" << endl
+//        << "p1=(" << x1 << ", " << y1 << ")" << endl
+//        << "p2=(" << x2 << ", " << y2 << ")" << endl
+//        << "p3=(" << x3 << ", " << y3 << ")" << endl
+//        << "ax=" << ax << endl << endl;
 
     //de-normalize ref. points, for drawing them in debug mode
     m_dataPoints.clear();
