@@ -127,9 +127,8 @@ fi
 
 #run unit tests
 echo -e "${enhanced}Running unit tests${reset}"
-cd "${build_path}"
-unit_tests=`./bin/testlib`
-echo "${unit_tests}"
+cd "${build_path}/bin"
+echo "Runing from: ${PWD}"
 
 
 #-------------------------------------------------------------------
