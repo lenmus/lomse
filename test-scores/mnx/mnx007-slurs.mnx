@@ -1,0 +1,56 @@
+
+<mnx>
+    <score>
+        <mnx-common profile="standard">
+            <global>
+                <measure>
+                    <directions>
+                        <time signature="4/4"/>
+                    </directions>
+                </measure>
+                <measure/>
+            </global>
+            <part>
+                <part-name>Music</part-name>
+                <measure>
+                    <sequence>
+                        <directions>
+                            <clef sign="G" line="2"/>
+                        </directions>
+                        <event value="/4" id="event1">
+                            <note pitch="C5"/>
+                            <slur side="up" target="event4" />
+                        </event>
+                        <event value="/4" id="event2">
+                            <note pitch="D5"/>
+                        </event>
+                        <event value="/4" id="event3">
+                            <note pitch="E5"/>
+                        </event>
+                        <event value="/4" id="event4">
+                            <note pitch="C5"/>
+                        </event>
+                    </sequence>
+                </measure>
+                <measure>
+                    <sequence>
+                        <event value="/4" id="event5">
+                            <note pitch="G4"/>
+                            <slur side="down" target="event8" />
+                        </event>
+                        <event value="/4" id="event6">
+                            <note pitch="A4"/>
+                        </event>
+                        <event value="/4" id="event7">
+                            <note pitch="G4"/>
+                        </event>
+                        <event value="/4" id="event8">
+                            <note pitch="E4"/>
+                        </event>
+                    </sequence>
+                </measure>
+            </part>
+        </mnx-common>
+    </score>
+</mnx>
+

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -40,9 +40,11 @@
 #include "lomse_font_storage.h"
 
 #include "lomse_build_options.h"
+#include "lomse_logger.h"
 
 #include <locale>   //to upper conversion
 using namespace agg;
+
 
 namespace lomse
 {
@@ -111,6 +113,7 @@ bool FontStorage::set_font(const std::string& fontFullName, double height,
     ////m_fontEngine.transform(mtx);
 
     m_fValidFont = true;
+    m_fontFullName = fontFullName;
     return !m_fValidFont;
 }
 
@@ -153,8 +156,8 @@ bool FontStorage::select_raster_font(const std::string& language,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs(m_pLibScope);
-    string fullFile = fs.find_font(language, fontFile, fontName, fBold, fItalic);
+    FontSelector* fs = m_pLibScope->get_font_selector();
+    string fullFile = fs->find_font(language, fontFile, fontName, fBold, fItalic);
     return set_font(fullFile, height, k_raster_font_cache);
 }
 
@@ -165,108 +168,10 @@ bool FontStorage::select_vector_font(const std::string& language,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs(m_pLibScope);
-    string fullFile = fs.find_font(language, fontFile, fontName, fBold, fItalic);
+    FontSelector* fs = m_pLibScope->get_font_selector();
+    string fullFile = fs->find_font(language, fontFile, fontName, fBold, fItalic);
     return set_font(fullFile, height, k_vector_font_cache);
 }
-
-
-
-
-//=======================================================================================
-// FontSelector implementation
-//=======================================================================================
-std::string FontSelector::find_font(const std::string& language,
-                                     const std::string& fontFile,
-                                     const std::string& name,
-                                     bool fBold, bool fItalic)
-{
-    //Returns the font filename, including its full path.
-    //Priority is given to font file.
-    //For generic families (i.e.: sans, serif, monospace, ...) priority is given to
-    //language
-
-    string fullpath = m_pLibScope->fonts_path();
-
-    if (!fontFile.empty())
-        return fullpath + fontFile;
-
-    //transform name to capital letters for comparisons
-    const locale& loc = locale();
-    string fontname;
-    for (string::value_type a : name)
-        fontname += std::toupper(a, loc);
-
-    //music font
-    if (fontname == "BRAVURA")
-    {
-        fullpath += "Bravura.otf";
-        return fullpath;
-    }
-
-    //Chinese fonts
-    if (language == "zh_CN")
-    {
-        fullpath += "wqy-zenhei.ttc";
-        return fullpath;
-    }
-
-
-    if (fontname == "LIBERATION SERIF" || fontname == "SERIF"
-             || fontname == "TIMES NEW ROMAN")
-    {
-        if (fBold && fItalic)
-            fullpath += "LiberationSerif-BoldItalic.ttf";
-        else if (fBold)
-            fullpath += "LiberationSerif-Bold.ttf";
-        else if (fItalic)
-            fullpath += "LiberationSerif-Italic.ttf";
-        else
-            fullpath += "LiberationSerif-Regular.ttf";
-        return fullpath;
-    }
-
-    else if (fontname == "LIBERATION SANS" || fontname == "SANS-SERIF" || fontname == "SANS"
-             || fontname == "HELVETICA")
-    {
-        if (fBold && fItalic)
-            fullpath += "LiberationSans-BoldItalic.ttf";
-        else if (fBold)
-            fullpath += "LiberationSans-Bold.ttf";
-        else if (fItalic)
-            fullpath += "LiberationSans-Italic.ttf";
-        else
-            fullpath += "LiberationSans-Regular.ttf";
-        return fullpath;
-    }
-
-#if (0)
-    //else if (fontname == "MONOSPACE" || fontname == "DEJAVU SANS MONO")
-    else if (fontname == "MONOSPACE" || fontname == "COURIER")
-    {
-        if (italic && bold)
-            fullpath += "FreeMonoBoldOblique.ttf";
-        else if (italic)
-            fullpath += "FreeMonoOblique.ttf";
-        else if (bold)
-            fullpath += "FreeMonoBold.ttf";
-        else
-            fullpath += "FreeMono.ttf";
-        return fullpath;
-    }
-
-    else if (fontname == "HANDWRITTEN" || fontname == "CURSIVE")
-    {
-        fullpath += "DejaVuSans-Oblique.ttf";
-        return fullpath;
-    }
-#endif
-
-    else
-        return m_pLibScope->get_font(name, fBold, fItalic);
-
-}
-
 
 
 }   //namespace lomse

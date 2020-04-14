@@ -1,7 +1,7 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.26.0
+[Since last version] 0.27.0
 =============================
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.26.0
@@ -10,13 +10,36 @@
 
 ##### COMPATIBLE CHANGES
 
-- Improve vertical spacing to avoid collisions between symbols. Until now most notation
-  symbols were engraved without controlling possible vertical collisions with other
-  notations. Now:
+- None.
+
+
+
+Version [0.27.0] (14/Apr/2020)
+==============================
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.26.0
+
+None, but behaviour has changed and could impact:
+- Font management and substitutions: Lomse now uses system installed fonts in
+  Linux and Windows. For Windows,
+  Bravura music font is still required in the path specified in configuration
+  macro LOMSE_FONTS_PATH. For other platforms, the old approach (fonts
+  provided by user application) is applied.
+
+
+##### COMPATIBLE CHANGES
+
+More music notation supported:
+    - Added octave-shift lines.
+    - Added crescendo/diminuendo wedges (hairpins). 
+    - The MusicXML importer now also imports these notations.
+
+Improvements in music layout:
+    - Full-measure rests are now centered in the measure.
+    - The space between systems and staves is now dynamically increased to
+      avoid collisions between notation symbols.
 	- A `VerticalProfile` object tracks ocupied space and provides the infrastructure
 	  for avoiding vertical collisions.
-	- The space between systems and staves is no longer fixed. Now, the default spacing
-	  values will be dynamically increased to avoid collisions between notation symbols.
 	- The order for engraving auxiliary notation symbols has been changed. Until now,
 	  once a note was engraved, all its additional attached notation symbols were also
 	  engraved. From now, all aditional notation symbols in a system are engraved by type
@@ -27,19 +50,19 @@
 	  and, therefore, can take decisions to avoid collisions between the symbols.
 	- Some engravers have been modified to use the new facilities and engrave the symbols
 	  without collisions.
+    - Slurs layout has been slightly improved.
 
-- The height for single system view is now computed by adding top and bottom paper margins
-  to the real height of the system, once it is layouted. Previously, the height was fixed
-  and was defined by paper height.
-- Full-measure rests are now centered in the measure.
-- Added support to render octave-shift lines. MusicXML importer now also imports them.
-- Added support to render crescendo/diminuendo wedges (hairpins). The MusicXML importer
-  now also imports the wedges.
-- Added methods in `Interactor` to add/remove visual application markings. Created the
-  first application markings class: `FragmentMark`. This class allows to display on any
-  score brackets and vertical lines, spanning one or several staves, to define the start
-  and end points of a score section or fragment.
-
+Other changes:
+    - The log file is now created at user home folder.
+    - The height for single system view is now computed by adding top and bottom paper margins
+      to the real height of the system, once it is layouted. Previously, the height was fixed
+      and was defined by paper height.
+    - Added methods in `Interactor` to add/remove visual application markings. Created the
+      first application markings class: `FragmentMark`. This class allows to display on any
+      score brackets and vertical lines, spanning one or several staves, to define the start
+      and end points of a score section or fragment.
+    - Fix bug in anacrusis time computation.
+    - Other bug fixes.
 
 
 Version [0.26.0] (29/Dec/2018)
@@ -769,7 +792,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.26.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.27.0...HEAD
+[0.27.0]: https://github.com/lenmus/lomse/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/lenmus/lomse/compare/0.25.0...0.26.0
 [0.25.0]: https://github.com/lenmus/lomse/compare/0.24.0...0.25.0
 [0.24.0]: https://github.com/lenmus/lomse/compare/0.23.0...0.24.0

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -28,31 +28,6 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_analyser.h"
-
-//#include <iostream>
-//#include <sstream>
-////BUG: In my Ubuntu box next line causes problems since approx. 20/march/2011
-//#if (LOMSE_PLATFORM_WIN32 == 1)
-//    #include <locale>
-//#endif
-//#include <vector>
-//#include <algorithm>   // for find
-//#include "lomse_ldp_factory.h"
-//#include "lomse_tree.h"
-//#include "lomse_parser.h"
-//#include "lomse_internal_model.h"
-//#include "lomse_im_note.h"
-//#include "lomse_im_figured_bass.h"
-//#include "lomse_ldp_elements.h"
-//#include "lomse_linker.h"
-//#include "lomse_injectors.h"
-//#include "lomse_events.h"
-//#include "lomse_im_factory.h"
-//#include "lomse_document.h"
-//#include "lomse_image_reader.h"
-//#include "lomse_score_player_ctrl.h"
-//
-//using namespace std;
 
 namespace lomse
 {

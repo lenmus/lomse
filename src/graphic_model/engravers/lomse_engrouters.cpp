@@ -87,17 +87,17 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace, bool fFirst
     if (!is_there_a_pending_engrouter())
     {
         ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *m_itCurContent );
-        LOMSE_LOG_TRACE(Logger::k_layout,
-            "Trying to create the EngroutersCreator for Imo id %d %s",
-            pImo->get_id(), pImo->get_name().c_str() );
+//        LOMSE_LOG_TRACE(Logger::k_layout,
+//            "Trying to create the EngroutersCreator for Imo id %d %s",
+//            pImo->get_id(), pImo->get_name().c_str() );
 
         //composite content objects
         if (pImo->is_text_item())
         {
             ImoTextItem* pText = static_cast<ImoTextItem*>(pImo);
             pEngr = create_next_text_engrouter_for(pText, maxSpace, fFirstOfLine);
-            LOMSE_LOG_TRACE(Logger::k_layout,
-                "Text item [%s]", pText->get_text().c_str() );
+//            LOMSE_LOG_TRACE(Logger::k_layout,
+//                "Text item [%s]", pText->get_text().c_str() );
         }
         else if (pImo->is_box_inline())
         {
@@ -577,6 +577,8 @@ void WordEngrouter::measure()
 
     m_descent = meter.get_descender();
     m_ascent = meter.get_ascender();
+
+    m_fontFile = meter.get_font_file();
 }
 
 //---------------------------------------------------------------------------------------

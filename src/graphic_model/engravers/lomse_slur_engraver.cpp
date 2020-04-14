@@ -164,12 +164,19 @@ GmoShape* SlurEngraver::create_single_shape()
     compute_ref_point(m_pEndNoteShape, &m_points[ImoBezierInfo::k_end]);
     compute_start_point();
     compute_end_point(&m_points[ImoBezierInfo::k_end]);
-    compute_default_control_points(&m_points[0]);
+    m_dataPoints = find_contour_reference_points();
+    #if (0)  //new behaviour
+        compute_control_points();
+    #else
+        compute_default_control_points(&m_points[0]);
+    #endif
     //add_user_displacements(0, &m_points[0]);
 
-    GmoShape* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0],
-                                              m_thickness, m_color);
+    GmoShapeSlur* pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0],
+                                                  m_thickness, m_color);
+    pShape->add_data_points(m_dataPoints);
 
+    //if cross-staff slur do not add it to VProfile
     if (m_pStartNote->get_staff() != m_pEndNote->get_staff())
         pShape->set_add_to_vprofile(false);
 
@@ -199,12 +206,143 @@ GmoShape* SlurEngraver::create_final_shape()
 }
 
 //---------------------------------------------------------------------------------------
+void SlurEngraver::compute_control_points()
+{
+    //start and end points
+    LUnits x0 = m_points[ImoBezierInfo::k_start].x;
+    LUnits y0 = m_points[ImoBezierInfo::k_start].y;
+    LUnits x1 = m_points[ImoBezierInfo::k_end].x;
+    LUnits y1 = m_points[ImoBezierInfo::k_end].y;
+
+    //determine base line angle and length
+    LUnits d = sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+    LUnits cosb = (x1-x0)/d;
+    LUnits sinb = (y1-y0)/d;
+
+    //normalize ref. points, remove useless ones and find the peak point
+    vector<UPoint> refPoint;    //intermediate ref. points, normalized
+    size_t iPeak = 0;        //index on refPoint vector, for peak point
+    LUnits yPeak = 0.0f;
+    vector<UPoint>::iterator it;
+    for (it=m_dataPoints.begin(); it < m_dataPoints.end(); ++it)
+    {
+        //shift point to reference it to origin
+        LUnits x = (*it).x - x0;
+        LUnits y = (*it).y - y0;
+
+        //rotate it to right, as if base line was horizontal
+        //and scale to match the interval [0,1]:
+        LUnits xAux = (x*cosb + y*sinb) / d;
+        LUnits yAux = (y*cosb - x*sinb) / d;
+
+        //save point and save data to determine peak point.
+        //when slur below y is positive
+        if ((m_fSlurBelow && y > 0.0f) || (!m_fSlurBelow && y < 0.0f))
+        {
+            size_t i = refPoint.size();
+            refPoint.push_back(UPoint(xAux, yAux));
+
+            if ((i == 0)
+                || (m_fSlurBelow && yPeak < yAux)
+                || (!m_fSlurBelow && yPeak > yAux) )
+            {
+                iPeak = i;
+                yPeak = yAux;
+            }
+        }
+
+    }
+
+    //determine peak point
+    LUnits minHeight = 0.08f;
+    LUnits xm = 0.5f;
+    LUnits ym = (m_fSlurBelow ? minHeight : -minHeight);
+    if (refPoint.size() > 2 && abs(refPoint[iPeak].y) > minHeight)
+    {
+        xm = refPoint[iPeak].x;
+        ym = refPoint[iPeak].y;
+    }
+
+
+    //lets built the bezier. Move the center of the reference arc to the peak point
+    LUnits ax = (8.0f * xm - 1.0f) / 3.0f;
+    LUnits x2, x3;
+    if (xm < 0.5f)
+    {
+        x2 = 0.0f;
+        x3 = ax;
+    }
+    else
+    {
+        x3 = 1.0f;
+        x2 = ax - 1.0f;
+    }
+    LUnits y2 = 4.0f * ym / 3.0f;
+    LUnits y3 = y2;
+
+    //scale it to match the base line length
+    x2 *= d; y2 *= d;
+    x3 *= d; y3 *= d;
+
+    //rotate the coordinates so that they're on the baseline angle
+    LUnits xAux = x2 * cosb - y2 * sinb;
+    LUnits yAux = x2 * sinb + y2 * cosb;
+    x2 = xAux; y2 = yAux;
+
+    xAux = x3 * cosb - y3 * sinb;
+    yAux = x3 * sinb + y3 * cosb;
+    x3 = xAux; y3 = yAux;
+
+    //translate all the coordinates so that they're in the right spot on the score
+    x2 += x0; y2 += y0;
+    x3 += x0; y3 += y0;
+
+
+    m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
+
+    m_points[ImoBezierInfo::k_ctrol1].x = x2;
+    m_points[ImoBezierInfo::k_ctrol1].y = y2;
+
+    m_points[ImoBezierInfo::k_ctrol2].x = x3;
+    m_points[ImoBezierInfo::k_ctrol2].y = y3;
+
+//    dbgLogger << "Slur " << (m_fSlurBelow ? "below" : "above") << endl
+//        << "xm=" << xm << ", ym=" << ym << endl
+//        << "p0=(" << x0 << ", " << y0 << ")" << endl
+//        << "p1=(" << x1 << ", " << y1 << ")" << endl
+//        << "p2=(" << x2 << ", " << y2 << ")" << endl
+//        << "p3=(" << x3 << ", " << y3 << ")" << endl
+//        << "ax=" << ax << endl << endl;
+
+    //de-normalize ref. points, for drawing them in debug mode
+    m_dataPoints.clear();
+    for (it=refPoint.begin(); it < refPoint.end(); ++it)
+    {
+        LUnits x = (*it).x;
+        LUnits y = (*it).y;
+
+        //rotate it to left, to original position
+        //and scale to match linebase length
+        LUnits xAux = (x*cosb - y*sinb) * d;
+        LUnits yAux = (y*cosb + x*sinb) * d;
+
+        //shift point to reference it to slur start point, and save it
+        m_dataPoints.push_back(UPoint(xAux+x0, yAux+y0));
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void SlurEngraver::compute_default_control_points(UPoint* points)
 {
     LUnits D = (points+ImoBezierInfo::k_end)->x - (points+ImoBezierInfo::k_start)->x;
     LUnits d = D / 5.8f;
+
+    //approx. burda, assuming horizontal base line
+    LUnits minHeight = abs((points+ImoBezierInfo::k_start)->y - (points+ImoBezierInfo::k_end)->y );
+    LUnits height = minHeight + tenths_to_logical(12.0);
+
     m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
-    LUnits hc = m_thickness * 4.5f; //3.88f;
+    LUnits hc = height; //m_thickness * 4.5f;
     (points+ImoBezierInfo::k_ctrol1)->x = (points+ImoBezierInfo::k_start)->x + d;
     (points+ImoBezierInfo::k_ctrol1)->y = (points+ImoBezierInfo::k_start)->y + (m_fSlurBelow ? hc : -hc);
 
@@ -328,6 +466,79 @@ void SlurEngraver::compute_ref_point(GmoShapeNote* pNoteShape, UPoint* point)
                         pNoteShape->get_top() - space
                         : pNoteShape->get_bottom() + space );
     }
+}
+
+//---------------------------------------------------------------------------------------
+vector<UPoint> SlurEngraver::find_contour_reference_points()
+{
+    vector<UPoint> data = (m_fSlurBelow ?
+                    m_pVProfile->get_max_profile_points(m_points[ImoBezierInfo::k_start].x,
+                                                    m_points[ImoBezierInfo::k_end].x,
+                                                    m_idxStaff)
+                    : m_pVProfile->get_min_profile_points(m_points[ImoBezierInfo::k_start].x,
+                                                    m_points[ImoBezierInfo::k_end].x,
+                                                    m_idxStaff) );
+
+    //remove intermediate no-peak points
+    size_t iMax = data.size() + 1;
+    while (data.size() > 2 && data.size() < iMax)
+    {
+        size_t iPrev = 0;
+        size_t iCur = 1;
+        iMax = data.size();
+        for (size_t i=2; i < iMax; ++i)
+        {
+            if (m_fSlurBelow)
+            {
+                if (data[iCur].y < data[iPrev].y && data[iCur].y < data[i].y)
+                {
+                    //remove itCur
+                    data.erase(data.begin() + iCur);
+                    i = iCur;
+                }
+                else
+                {
+                    iPrev = iCur;
+                    iCur = i;
+                }
+            }
+            else
+            {
+                if (data[iCur].y > data[iPrev].y && data[iCur].y > data[i].y)
+                {
+                    //remove itCur
+                    data.erase(data.begin() + iCur);
+                    i = iCur;
+                }
+                else
+                {
+                    iPrev = iCur;
+                    iCur = i;
+                }
+            }
+        }
+    }
+
+    //add space between reference points and slur points and shift points to center
+    //(approximately) on noteheads
+    if (data.size() > 0)
+    {
+        LUnits space = tenths_to_logical(5.0f);
+        LUnits shift = m_points[ImoBezierInfo::k_start].x - data.front().x;
+        vector<UPoint>::iterator it;
+        for (it=data.begin(); it < data.end(); ++it)
+        {
+            (*it).x += shift;
+            (*it).y += (m_fSlurBelow ? space : -space);
+        }
+
+        //replace start and end points
+        data.front().y = m_points[ImoBezierInfo::k_start].y;
+        data.back().x = m_points[ImoBezierInfo::k_end].x;
+        data.back().y = m_points[ImoBezierInfo::k_end].y;
+    }
+
+    return data;
 }
 
 ////---------------------------------------------------------------------------------------

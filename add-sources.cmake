@@ -221,11 +221,27 @@ if( LOMSE_ENABLE_COMPRESSION )
     )
 endif()
 
+# platform dependent implementation files
+if(UNIX)
+    set(PLATFORM_FILES
+        ${LOMSE_SRC_DIR}/platform/lomse_linux.cpp
+    )
+elseif(WIN32)
+    set(PLATFORM_FILES
+        ${LOMSE_SRC_DIR}/platform/lomse_windows.cpp
+    )
+else()
+    set(PLATFORM_FILES
+        ${LOMSE_SRC_DIR}/platform/lomse_other.cpp
+    )
+endif()
+
+
 set(ALL_LOMSE_SOURCES 
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
     ${GRAPHIC_MODEL_FILES} ${GUI_CONTROLS_FILES} ${INTERNAL_MODEL_FILES} 
     ${MODULE_FILES} ${MVC_FILES}
-    ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
+    ${PARSER_FILES} ${PLATFORM_FILES} ${RENDER_FILES} ${SCORE_FILES} 
     ${SOUND_FILES} ${LOMSE_PACKAGES_FILES}
 )
 

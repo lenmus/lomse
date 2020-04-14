@@ -6746,7 +6746,12 @@ public:
 
         // attrib: number %number-level; #IMPLIED
         string snum = get_optional_string_attribute("number", "");
-        set_tuplet_id(snum);
+        if (set_tuplet_id(snum))
+        {
+            error_msg("Invalid tuplet number. Tuplet ignored.");
+            delete m_pInfo;
+            return nullptr;
+        }
 
         // attrib: bracket %yes-no; #IMPLIED
         string value = get_optional_string_attribute("bracket", "");
@@ -6794,21 +6799,22 @@ protected:
         pInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
     }
 
-    void set_tuplet_id(const string& snum)
+    bool set_tuplet_id(const string& snum)
     {
-        if (snum.empty())
+        //returns TRUE if error
+
+        long num = 1L;
+        if (!snum.empty())
         {
-            error_msg("Invalid tuplet number. Number ignored.");
-            return;
+            char* pEnd;
+            num = std::strtol(snum.c_str(), &pEnd, 10);
+            if (errno == ERANGE || num == 0L)
+                return true;    //error
         }
 
-        ////c++11
-        //long num = std::stol(snum);
-        //c++98
-        char* pEnd;
-        long num = std::strtol(snum.c_str(), &pEnd, 10);
         m_pInfo->set_id(num);
         m_pInfo->set_tuplet_number(num);
+        return false;   //no error
     }
 
     bool set_tuplet_type(const string& value)

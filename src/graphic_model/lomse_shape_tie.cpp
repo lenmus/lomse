@@ -224,5 +224,99 @@ GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint* points,
 {
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeSlur::add_data_points(const std::vector<UPoint>& data)
+{
+    m_dataPoints = data;
+    for (unsigned i=0; i < m_dataPoints.size(); ++i)
+    {
+        m_dataPoints[i].x -= m_origin.x;
+        m_dataPoints[i].y -= m_origin.y;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+//    draw_control_points(pDrawer);
+//    draw_reference_points(pDrawer);
+    pDrawer->render();
+
+    GmoShapeSlurTie::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSlur::draw_control_points(Drawer* pDrawer)
+{
+    Color color(255,0,0);
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    for (unsigned i=0; i < 4; ++i)
+    {
+        pDrawer->circle(m_points[i].x + m_origin.x,
+                        m_points[i].y + m_origin.y, 60.0f);
+    }
+
+//    //determine cross point for tangent lines
+//    LUnits m1 = (m_points[2].y - m_points[0].y) / (m_points[2].x - m_points[0].x);
+//    LUnits m2 = (m_points[3].y - m_points[1].y) / (m_points[3].x - m_points[1].x);
+//    LUnits xa = (m1 * m_points[0].x - m2 * m_points[1].x + m_points[1].y - m_points[0].y) / (m1 - m2);
+//    LUnits ya = m1 * (xa - m_points[0].x) + m_points[0].y;
+//    xa += m_origin.x;
+//    ya += m_origin.y;
+//    pDrawer->circle(xa, ya, 60.0f);
+//
+//    pDrawer->line(m_points[0].x + m_origin.x, m_points[0].y + m_origin.y, xa, ya, 25.0f);
+//    pDrawer->line(m_points[1].x + m_origin.x, m_points[1].y + m_origin.y, xa, ya, 25.0f);
+
+    //compute center point
+    LUnits xc = (m_points[0].x + m_points[1].x + 3.0f * (m_points[2].x + m_points[3].x)) / 8.0f;
+    LUnits yc = (m_points[0].y + m_points[1].y + 3.0f * (m_points[2].y + m_points[3].y)) / 8.0f;
+    xc += m_origin.x;
+    yc += m_origin.y;
+    pDrawer->circle(xc, yc, 60.0f);
+
+    //draw lines to control points
+    pDrawer->line(m_points[0].x + m_origin.x, m_points[0].y + m_origin.y,
+                  m_points[2].x + m_origin.x, m_points[2].y + m_origin.y,
+                  25.0f);
+    pDrawer->line(m_points[1].x + m_origin.x, m_points[1].y + m_origin.y,
+                  m_points[3].x + m_origin.x, m_points[3].y + m_origin.y,
+                  25.0f);
+    pDrawer->end_path();
+
+    //draw baseline
+    pDrawer->begin_path();
+    pDrawer->fill(Color(0,255,0));
+    pDrawer->line(m_points[0].x + m_origin.x, m_points[0].y + m_origin.y,
+                  m_points[1].x + m_origin.x, m_points[1].y + m_origin.y,
+                  25.0f);
+
+//    //draw middle line
+//    pDrawer->line(m_points[2].x + m_origin.x, m_points[2].y + m_origin.y,
+//                  m_points[3].x + m_origin.x, m_points[3].y + m_origin.y,
+//                  25.0f);
+
+    pDrawer->end_path();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSlur::draw_reference_points(Drawer* pDrawer)
+{
+    pDrawer->begin_path();
+    pDrawer->fill(Color(0,0,255));
+    for (unsigned i=0; i < m_dataPoints.size(); ++i)
+    {
+        pDrawer->circle(m_dataPoints[i].x + m_origin.x,
+                        m_dataPoints[i].y + m_origin.y, 60.0f);
+        if (i > 0)
+            pDrawer->line(m_dataPoints[i-1].x + m_origin.x, m_dataPoints[i-1].y + m_origin.y,
+                          m_dataPoints[i].x + m_origin.x, m_dataPoints[i].y + m_origin.y,
+                          25.0f);
+    }
+
+    pDrawer->end_path();
+}
+
 
 }  //namespace lomse

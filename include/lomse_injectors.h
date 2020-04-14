@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -58,6 +58,7 @@ class ModelBuilder;
 class Document;
 class LdpFactory;
 class FontStorage;
+class FontSelector;
 class MusicGlyphs;
 class View;
 class SimpleView;
@@ -99,6 +100,7 @@ protected:
     LomseDoorway* m_pNullDoorway;
     LdpFactory* m_pLdpFactory;
     FontStorage* m_pFontStorage;
+    FontSelector* m_pFontSelector;
     Metronome* m_pGlobalMetronome;
     EventsDispatcher* m_pDispatcher;
     string m_sMusicFontFile;
@@ -138,6 +140,7 @@ public:
     FontStorage* font_storage();
     inline string& fonts_path() { return m_sFontsPath; }
     EventsDispatcher* get_events_dispatcher();
+    FontSelector* get_font_selector();
 
     //callbacks
     void post_event(SpEventInfo pEvent);

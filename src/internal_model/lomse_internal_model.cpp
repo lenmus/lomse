@@ -2506,8 +2506,8 @@ ImoInstrument::ImoInstrument()
     , m_pLastMeasureInfo(nullptr)
 {
     add_staff();
-//	m_midiChannel = g_pMidi->DefaultVoiceChannel();
-//	m_midiInstr = g_pMidi->DefaultVoiceInstr();
+//	m_midiChannel = g_pMidi->get_default_voice_channel();
+//	m_midiInstr = g_pMidi->get_default_voice_instr();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3651,8 +3651,8 @@ ImoStyle* ImoScore::create_default_style()
             string& language = pImoDoc->get_language();
             if (language == "zh_CN")
             {
-                pDefStyle->font_file("wqy-zenhei.ttc");
-                pDefStyle->font_name("");
+                pDefStyle->font_file("");
+                pDefStyle->font_name("WenQuanYi Zen Hei");
             }
         }
     }

@@ -64,17 +64,17 @@ public:
                     LUnits tickness, Color color);
     virtual ~GmoShapeSlurTie();
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
-    void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; }
-    unsigned vertex(double* px, double* py);
+    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; }
+    unsigned vertex(double* px, double* py) override;
 
     //support for handlers
-    int get_num_handlers();
-    UPoint get_handler_point(int i);
-    void on_handler_dragged(int iHandler, UPoint newPos);
-    void on_end_of_handler_drag(int iHandler, UPoint newPos);
+    int get_num_handlers() override;
+    UPoint get_handler_point(int i) override;
+    void on_handler_dragged(int iHandler, UPoint newPos) override;
+    void on_end_of_handler_drag(int iHandler, UPoint newPos) override;
 
 protected:
     void save_points(UPoint* points);
@@ -97,10 +97,21 @@ public:
 //---------------------------------------------------------------------------------------
 class GmoShapeSlur : public GmoShapeSlurTie
 {
+protected:
+    std::vector<UPoint> m_dataPoints;
+
 public:
     GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
                  Color color = Color(0,0,0));
     virtual ~GmoShapeSlur() {}
+
+    void add_data_points(const std::vector<UPoint>& data);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+
+protected:
+    void draw_control_points(Drawer* pDrawer);
+    void draw_reference_points(Drawer* pDrawer);
+
 };
 
 

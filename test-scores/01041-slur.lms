@@ -1,0 +1,6 @@
+(score (vers 2.0) (instrument (musicData
+    (clef G)
+    (n a3 q (stem up)(slur 1 start))
+	(n c7 q (stem down)(slur 1 stop))
+    (barline end)
+)))

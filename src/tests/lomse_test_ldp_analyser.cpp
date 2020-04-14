@@ -8726,7 +8726,6 @@ SUITE(LdpAnalyserTest)
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("(defineStyle \"Composer\" "
-            "(font-file \"wqy-zenhei.ttc\")"
             "(font-name \"Arial\")(font-size 14pt)"
             "(font-style italic)(font-weight bold) )" );
         LdpTree* tree = parser.get_ldp_tree();
@@ -8740,7 +8739,6 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = static_cast<ImoStyle*>( pRoot );
         CHECK( pStyle != nullptr );
         CHECK( pStyle && pStyle->get_name() == "Composer" );
-        CHECK( pStyle && pStyle->font_file() == "wqy-zenhei.ttc" );
         CHECK( pStyle && pStyle->font_name() == "Arial" );
         CHECK( pStyle && pStyle->font_size() == 14 );
         CHECK( pStyle && pStyle->font_style() == ImoStyle::k_font_style_italic );

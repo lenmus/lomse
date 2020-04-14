@@ -91,6 +91,8 @@ int GmoBoxScorePage::nearest_system_to_point(LUnits y)
 //---------------------------------------------------------------------------------------
 TimeUnits GmoBoxScorePage::end_time()
 {
+//    if (m_childBoxes.empty())
+//        return 0.0;
     GmoBoxSystem* pLastSystem = static_cast<GmoBoxSystem*>(m_childBoxes.back());
     return pLastSystem->end_time();
 }
@@ -98,6 +100,8 @@ TimeUnits GmoBoxScorePage::end_time()
 //---------------------------------------------------------------------------------------
 TimeUnits GmoBoxScorePage::start_time()
 {
+//    if (m_childBoxes.empty())
+//        return 0.0;
     GmoBoxSystem* pFirstSystem = static_cast<GmoBoxSystem*>(m_childBoxes.front());
     return pFirstSystem->start_time();
 }

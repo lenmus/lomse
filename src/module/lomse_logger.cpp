@@ -41,14 +41,12 @@ ofstream dbgLogger;
 Logger logger;
 
 //=======================================================================================
-// Logger implementation
+// Logger implementation.
 //=======================================================================================
-Logger::Logger(int mode)
-    : m_mode(mode)
-    , m_areas(0xffffffff)       //all areas enabled
-{
-    dbgLogger.open("lomse-log.txt");
-}
+
+// Logger constructor is platform dependent.
+// The code is in file platform/lomse_<platform>.cpp
+// platform/lomse_<platform>.cpp
 
 //---------------------------------------------------------------------------------------
 Logger::~Logger()

@@ -96,6 +96,7 @@ public:
     LUnits get_ascender();
     LUnits get_descender();
     LUnits get_font_height();
+    const string& get_font_file();
     URect bounding_rectangle(unsigned int ch);
     void measure_glyphs(wstring* glyphs, std::vector<LUnits>& glyphWidths);
 

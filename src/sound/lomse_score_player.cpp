@@ -315,6 +315,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         return;
     }
 
+    LOMSE_LOG_DEBUG(Logger::k_score_player, m_pTable->dump_midi_events());
+
     //TODO All issues related to sol-fa voice playback
 
     std::vector<SoundEvent*>& events = m_pTable->get_events();
@@ -382,10 +384,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     m_nPrevNumPulses = m_nCurNumPulses;
 
     m_conversionFactor = float(m_nCurMtrIntval) / float(m_nMtrPulseDuration);
-//    LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                    "initial settings: nCurMeasureDuration=%ld, nCurMtrIntval=%ld"
-//                    "conversionFactor=%f",
-//                    m_nCurMeasureDuration, m_nCurMtrIntval, m_conversionFactor);
+    LOMSE_LOG_DEBUG(Logger::k_score_player,
+                    "initial settings: nCurMeasureDuration=%ld, nCurMtrIntval=%ld, "
+                    "conversionFactor=%f, m_nMtrPulseDuration=%ld",
+                    m_nCurMeasureDuration, m_nCurMtrIntval, m_conversionFactor, m_nMtrPulseDuration);
 
     //Execute control events that take place before the segment to play, so that
     //instruments and tempo are properly programmed. Continue in the loop while
@@ -420,9 +422,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration (interval to click off), in TU
             nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click, in TU
 
-//            LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                            "new TS: nCurMeasureDuration=%ld, nCurMtrIntval=%ld, nMtrIntvalOff=%ld",
-//                            m_nCurMeasureDuration, m_nCurMtrIntval, nMtrIntvalOff);
+            LOMSE_LOG_DEBUG(Logger::k_score_player,
+                            "new TS: nCurMeasureDuration=%ld, nCurMtrIntval=%ld, nMtrIntvalOff=%ld",
+                            m_nCurMeasureDuration, m_nCurMtrIntval, nMtrIntvalOff);
         }
         else
         {
@@ -455,9 +457,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     nMtrEvDeltaTime -= nMissingTime;
     curTime = time_units_to_milliseconds( nMtrEvDeltaTime );
-//    LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                    "At start: nMtrEvDeltaTime=%d, event=%d, event time=%ld, anacrusis missing time=%f",
-//                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacrusis_missing_time());
+    LOMSE_LOG_DEBUG(Logger::k_score_player,
+                    "At start: nMtrEvDeltaTime=%ld, event=%d, event time=%ld, anacrusis missing time=%f, "
+                    "curTime=%ld, nMissingTime=%ld",
+                    nMtrEvDeltaTime, i, events[i]->DeltaTime, m_pTable->get_anacrusis_missing_time(),
+                    curTime, nMissingTime);
 
     //prepare weak_ptr to interactor
     WpInteractor wpInteractor;
@@ -543,24 +547,24 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         nMtrEvDeltaTime += nMtrIntvalOff;
         fFirstBeatInMeasure = false;
         fCountOffPulseActive = true;
-//        LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                        "end of count-off: nMtrEvDeltaTime=%ld", nMtrEvDeltaTime);
+        LOMSE_LOG_DEBUG(Logger::k_score_player,
+                        "end of count-off: nMtrEvDeltaTime=%ld", nMtrEvDeltaTime);
     }
 
     //loop to process events
     do
     {
-//        LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                        "new iteration: i=%d, curTime=%ld, nMtrEvDeltaTime=%ld, "
-//                        "events[i]->DeltaTime=%d",
-//                        i, curTime, nMtrEvDeltaTime, events[i]->DeltaTime);
+        LOMSE_LOG_DEBUG(Logger::k_score_player,
+                        "new iteration: i=%d, curTime=%ld, nMtrEvDeltaTime=%ld, "
+                        "events[i]->DeltaTime=%ld",
+                        i, curTime, nMtrEvDeltaTime, events[i]->DeltaTime);
 
         //Verify if next event is a metronome click on/off
         if (nMtrEvDeltaTime <= events[i]->DeltaTime)
         {
             //Next event should be a metronome click or the click off event for the previous metronome click
             nEvTime = time_units_to_milliseconds(nMtrEvDeltaTime);
-//            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (MtrDeltaTime) = %ld", nEvTime);
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (MtrDeltaTime) = %ld", nEvTime);
             if (curTime < nEvTime)
             {
                 //flush pending events
@@ -587,8 +591,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     std::this_thread::sleep_for(waitTime);
                 }
                 curTime = nEvTime;
-//                LOMSE_LOG_DEBUG(Logger::k_score_player, "flush pending events: waitT=%ld, new curTime=%ld",
-//                                waitT, curTime);
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "flush pending events: waitT=%ld, new curTime=%ld",
+                                waitT, curTime);
             }
 
             if (fSendMtrOff)
@@ -605,8 +609,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 }
                 fSendMtrOff = false;
                 nMtrEvDeltaTime += nMtrIntvalNextClick;
-//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr Off: new nMtrEvDeltaTime=%ld",
-//                                nMtrEvDeltaTime);
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr Off: new nMtrEvDeltaTime=%ld",
+                                nMtrEvDeltaTime);
             }
             else
             {
@@ -630,26 +634,26 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
 
                 fSendMtrOff = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;
-//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On: new nMtrEvDeltaTime=%ld",
-//                                nMtrEvDeltaTime);
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On: new nMtrEvDeltaTime=%ld",
+                                nMtrEvDeltaTime);
             }
             curTime = nEvTime;
-//            LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On/Off: new curTime=%ld, new nMtrEvDeltaTime=%ld",
-//                            curTime, nMtrEvDeltaTime);
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "Mtr On/Off: new curTime=%ld, new nMtrEvDeltaTime=%ld",
+                            curTime, nMtrEvDeltaTime);
         }
         else
         {
             //next even comes from the table. Usually it will be a note on/off
             nEvTime = time_units_to_milliseconds( events[i]->DeltaTime );
-//            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (event i) = %ld", nEvTime);
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "nEvTime updated (event i) = %ld", nEvTime);
             if (nEvTime > curTime)
             {
                 //flush accumulated events for curTime
                 long elapsed = 0L;
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
-//                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//                                    "Flush pending events");
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                                    "Flush pending events");
                     clock_t t1=clock();
                     if (m_fPostEvents)
                         m_libScope.post_event(pEvent);
@@ -727,10 +731,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
-//                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//                                    "implicit k_highlight_on generated for %d", id);
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                                    "implicit k_highlight_on generated for %d", id);
                 }
-//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note On");
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note On");
             }
             else if (events[i]->EventType == SoundEvent::k_note_off)
             {
@@ -755,11 +759,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking && events[i]->pSO->is_visible())
                 {
                     pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
-//                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//                                    "implicit k_highlight_off generated for %d",
-//                                    events[i]->pSO->get_id());
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                                    "implicit k_highlight_off generated for %d",
+                                    events[i]->pSO->get_id());
                 }
-//                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note Off");
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "Note Off");
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
@@ -768,8 +772,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 {
                     ImoId id = events[i]->pSO->get_id();
                     pEvent->add_item(EventVisualTracking::k_highlight_on, id);
-//                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//                                    "explicit k_highlight_on generated for %d", id);
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                                    "explicit k_highlight_on generated for %d", id);
                 }
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
@@ -778,9 +782,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 if (fVisualTracking)
                 {
                     pEvent->add_item(EventVisualTracking::k_highlight_off, events[i]->pSO->get_id());
-//                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//                                    "explicit k_highlight_off generated for %d",
-//                                    events[i]->pSO->get_id());
+                    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                                    "explicit k_highlight_off generated for %d",
+                                    events[i]->pSO->get_id());
                 }
 
             }
@@ -796,9 +800,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click duration (interval to click off)
                 nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
 
-//                LOMSE_LOG_DEBUG(Logger::k_score_player,
-//                                "new TS: nCurMeasureDuration=%ld, nCurMtrIntval=%ld",
-//                                m_nCurMeasureDuration, m_nCurMtrIntval);
+                LOMSE_LOG_DEBUG(Logger::k_score_player,
+                                "new TS: nCurMeasureDuration=%ld, nCurMtrIntval=%ld",
+                                m_nCurMeasureDuration, m_nCurMtrIntval);
             }
             else if (events[i]->EventType == SoundEvent::k_prog_instr)
             {
@@ -828,7 +832,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             curTime = max(curTime, nEvTime);    //to avoid going backwards when no metronome
                                                 //before start and progInstr events
             i++;
-//            LOMSE_LOG_DEBUG(Logger::k_score_player, "Increment i: curTime=%ld", curTime);
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "Increment i: curTime=%ld", curTime);
         }
 
         //check if the thread should be paused or stopped
@@ -877,8 +881,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         SpEventVisualTracking pEvent(
             LOMSE_NEW EventVisualTracking(wpInteractor, m_pScore->get_id()) );
         pEvent->add_item(EventVisualTracking::k_end_of_visual_tracking, k_no_imoid);
-        //LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-        //                "Flush pending events");
+        LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+                        "Flush pending events");
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)

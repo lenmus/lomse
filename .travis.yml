@@ -19,6 +19,7 @@ matrix:
             - libpng++-dev
             - zlib1g-dev
             - libunittest++-dev
+            - libfontconfig1-dev
 
     - os: linux
       env:
@@ -35,6 +36,7 @@ matrix:
             - libpng++-dev
             - zlib1g-dev
             - libunittest++-dev
+            - libfontconfig1-dev
 
     - os: linux
       env:
@@ -50,6 +52,7 @@ matrix:
             - libpng++-dev
             - zlib1g-dev
             - libunittest++-dev
+            - libfontconfig1-dev
 
     - os: linux
       env:
@@ -66,6 +69,7 @@ matrix:
             - libpng++-dev
             - zlib1g-dev
             - libunittest++-dev
+            - libfontconfig1-dev
 
     - os: osx
       env:

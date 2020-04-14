@@ -179,32 +179,6 @@ protected:
                           m_style->font_size(),
                           m_style->is_bold(),
                           m_style->is_italic() );
-//        string language = "";
-//        string fontFile = m_style->font_file();
-//        string fontName = m_style->font_name();
-//
-//        //get document language
-//        ImoDocument* pImoDoc = m_pDoc->get_im_root();
-//        if (pImoDoc)    //AWARE: in untit tests there could be no ImoDoc
-//            language = pImoDoc->get_language();
-//
-//        //BUG_BYPASS: Default style should use the right font file / font name for the current
-//        // document language. This block is a fix just for Chinese.language
-//        {
-//            if (language == "zh_CN")
-//            {
-//                fontFile = "wqy-zenhei.ttc";
-//                fontName = "";
-//            }
-//        }
-//
-//        TextMeter meter(m_libraryScope);
-//        meter.select_font(language,
-//                          fontFile,
-//                          fontName,
-//                          m_style->font_size(),
-//                          m_style->is_bold(),
-//                          m_style->is_italic() );
     }
 
 };
