@@ -125,16 +125,11 @@ if [ ${fOnlyTests} -eq 0 ]; then
     echo "Build time: $(($secs / 60))m:$(($secs % 60))s"
 fi
 
-#run unit tests
-echo -e "${enhanced}Running unit tests${reset}"
-cd "${build_path}/bin"
-echo "Runing from: ${PWD}"
-
 
 #-------------------------------------------------------------------
 # build an html page with the unit tests results
 #-------------------------------------------------------------------
-echo -e "${enhanced}Building html page with test results${reset}"
+echo -e "\nBuilding html page with test results..."
 
 
 #set output page filename

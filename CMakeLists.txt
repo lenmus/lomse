@@ -67,6 +67,12 @@
 # Build options
 # --------------------------------------------
 #
+# LOMSE_BUILD_MONOLITHIC (Default: OFF)
+#   To avoid dependencies, instead of linking with the required libraries,
+#   these libraries will be combined into lomse library so that the binaries
+#   will not have dependencies on any of these libraries. 
+#   	cmake -DLOMSE_BUILD_MONOLITHIC=ON [...]
+#
 # LOMSE_BUILD_STATIC_LIB (Default: ON)
 #   Build the static library
 #
@@ -384,6 +390,10 @@ include( ${LOMSE_ROOT_DIR}/add-group-folders.cmake )
 
 message(STATUS "LOMSE_BUILD_DEPS= ${LOMSE_BUILD_DEPS}")
 
+#remove dependencies for monolithic builds
+if (LOMSE_BUILD_MONOLITHIC)
+    set(LOMSE_DEBIAN_DEPS "")
+endif()
 
 
 ###############################################################################
@@ -397,6 +407,12 @@ if(LOMSE_BUILD_STATIC_LIB)
 
     add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
 
+    #dependencies
+    if (LOMSE_BUILD_MONOLITHIC)
+        target_link_libraries(${LOMSE_STATIC} STATIC PUBLIC ${LOMSE_BUILD_DEPS})
+    else()
+        target_link_libraries(${LOMSE_STATIC} STATIC ${LOMSE_BUILD_DEPS})
+    endif()
 
     #properties
     set_target_properties(${LOMSE_STATIC} PROPERTIES
@@ -427,6 +443,13 @@ if(LOMSE_BUILD_SHARED_LIB)
     set(LOMSE_SHARED  lomse-shared)
 
     add_library( ${LOMSE_SHARED} SHARED ${ALL_LOMSE_SOURCES} )
+
+    #dependencies
+    if (LOMSE_BUILD_MONOLITHIC)
+        target_link_libraries(${LOMSE_SHARED} PUBLIC ${LOMSE_BUILD_DEPS})
+    else()
+        target_link_libraries(${LOMSE_SHARED} ${LOMSE_BUILD_DEPS})
+    endif()
 
     #properties
     set_target_properties(${LOMSE_SHARED} 
