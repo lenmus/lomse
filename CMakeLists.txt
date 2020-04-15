@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
-# Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+# Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -33,21 +33,26 @@
 # This is a CMake configuration file for building makefiles and installfiles for
 # the Lomse library
 #
-# To use it you need CMake which can be downloaded from http://www.cmake.org/
 #
-# Usage
-#   cmake [<options>] <source-tree>
-#   make
-#   make package
-#   sudo dpkg -i <created-liblomse.package>.deb
+# ---------------------------------------------------------------------------
+# Dependencies from external libraries
+# ---------------------------------------------------------------------------
 #
-# example:
-#   cmake ../lomse
+# lomse has these external dependencies:
 #
-# The default target (in Linux) is "Unix Makefiles". If you would like to generate
-# a diferent makefile use option -G<desired-target>. For instance:
+#   a) for all platforms:
+#       freetype        git clone git://git.sv.nongnu.org/freetype/freetype2.git
+#       libpng          https://github.com/glennrp/libpng
+#       zlib            https://github.com/madler/zlib
+#       UnitTest++      https://github.com/unittest-cpp/unittest-cpp
 #
-#   cmake -G "CodeBlocks - Unix Makefiles"  ...
+#   b) additional, for Linux & macOS platforms (but not for Android):
+#       fontconfig      https://gitlab.freedesktop.org/fontconfig/fontconfig
+#
+# It also uses (included as part of the surce tree):
+#   utfcpp
+#   agg
+#   pugixml
 #
 #
 #---------------------------------------------------------------------------
@@ -59,7 +64,17 @@
 # i.e.:    cmake -DLOMSE_DEBUG=ON  ....
 #
 #
-# a) Installation options
+# Build options
+# --------------------------------------------
+#
+# LOMSE_BUILD_STATIC_LIB (Default: ON)
+#   Build the static library
+#
+# LOMSE_BUILD_SHARED_LIB (Default: OFF)
+#   Build the shared library
+#
+#
+# Installation options
 # --------------------------------------------
 #
 # MAKE_INSTALL_PREFIX  (Default: "/usr/local")
@@ -67,17 +82,17 @@
 #	(binaries) will be installed at "/usr/local/lib" and include files at
 # 	"/usr/local/include/lomse". You can change the default location 
 # 	by specifying option CMAKE_INSTALL_PREFIX. For instance:
-#   	cmake -DCMAKE_INSTALL_PREFIX=/usr  ....
+#   	cmake -DCMAKE_INSTALL_PREFIX=/usr [...]
 #
 # LOMSE_PKG_CONFIG_INSTALL  (Default "/usr/lib/pkgconfig")
 # 	As part of the Lomse instalation process, a pkg-config file, named
 #	liblomse.pc, is installed. The default location is "/usr/lib/pkgconfig".
 #	You can change this default location by using the option
 #	-DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path. For instance:
-#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ....
+#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig [...]
 #
 #
-# b) Debug options (ON / OFF values):
+# Debug options (ON / OFF values):
 # --------------------------------------------
 #
 # LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
@@ -87,7 +102,7 @@
 #	Force to create a debug build, with debug symbols.
 #
 #
-# c) Options to reduce dependencies from other libraries (ON / OFF values):
+# Options to reduce dependencies from other libraries (ON / OFF values):
 # --------------------------------------------------------------------------
 #
 # If your application will not deal with compressed files or with scores
@@ -100,7 +115,7 @@
 #	By setting this to OFF Lomse will ignore any png image embedded in the
 #	documents. But Lomse will not fail in those cases, just will log error
 #	messages. For instance:
-#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_PNG=OFF ....
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_PNG=OFF [...]
 #
 # LOMSE_ENABLE_COMPRESSION   (Default value: ON)
 #	Build with support for compressed files. This requires zlib library.
@@ -108,14 +123,14 @@
 #	such as MusicXML files in compressed format, or with png images embedded in
 #	the documents. But Lomse will not fail in those cases, just will log error
 #	messages. For instance:
-#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF ....
+#		cmake -G "Unix Makefiles" -DLOMSE_ENABLE_COMPRESSION=OFF [...]
 #
 #	**Important**: trying to disable compression without also disabling png
 #   has no effect because libpng depends on zlib. Therefore, when png is
 #   active (LOMSE_ENABLE_PNG=ON) then compression is automatically enabled.
 #
 #
-# d) Other options (ON / OFF values):
+# Other options (ON / OFF values):
 # --------------------------------------------
 # LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
 #       Enables backwards compatibility for accepting scores in LDP v1.5 syntax
@@ -128,7 +143,6 @@ cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default 
 
 #prevent in-source builds
-#include(cmake-modules/disallow-in-source-builds.cmake)
   # make sure the user doesn't play dirty with symlinks
   get_filename_component(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
   get_filename_component(bindir "${CMAKE_BINARY_DIR}" REALPATH)
@@ -152,7 +166,6 @@ cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
     message(FATAL_ERROR "Quitting configuration")
   endif()
 
-message(STATUS "Using cmake version ${CMAKE_VERSION}")
 
 # project name
 project(lomse)
@@ -169,6 +182,7 @@ set( LOMSE_PKG_DIR  ${LOMSE_ROOT_DIR}/packages )
 set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
+message(STATUS "Using cmake version ${CMAKE_VERSION}")
 message(STATUS "** LOMSE_ROOT_DIR: ${LOMSE_ROOT_DIR}")
 message(STATUS "** CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "** LOMSE_SRC_DIR: ${LOMSE_SRC_DIR}")
@@ -250,9 +264,10 @@ include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 # Check for needed libraries and set all related includes, flags, etc. 
 #----------------------------------------------------------------------------
 
-#dependencies for building and for pkg-config file (intitially empty but will be enhanced)
+#dependencies for building and for pkg-config file (intitially empty)
 set(LOMSE_REQUIRES "")
-set(LOMSE_DEPENDENCIES "")
+set(LOMSE_DEBIAN_DEPS "")   #Build deps: Debian "Build-Depends:" string
+set(LOMSE_BUILD_DEPS "")    #Build deps: Libraries to link
 
 # include directories to be installed
 set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
@@ -266,64 +281,61 @@ include_directories(
     ${LOMSE_ROOT_DIR}/src/agg/font_freetype
     ${INCLUDES_UTFCPP}
     ${INCLUDES_PUGIXML}
+    ${INCLUDES_MINIZIP}
 )
 
 
 # Check for UnitTest++. Required for unit test
 if (LOMSE_BUILD_TESTS)
-	#if(WIN32)
-	#	#for Windows use the pre-installed packages
-	#	set(UNITTEST++_INCLUDE_DIR "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/include/UnitTest++")
-	#	set(UNITTEST++_LIBRARY "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/lib/UnitTest++.lib")
-	#	set(UNITTEST++_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/UnitTest++/lib")        
-	#	include_directories(${UNITTEST++_INCLUDE_DIR})
-	#	link_libraries( ${UNITTEST++_LIBRARY} )
-	#	link_directories( ${UNITTEST++_LINK_DIR} )        
-	#	message(STATUS "UnitTest++ pre-packaged: libraries= ${UNITTEST++_LIBRARY}" )
-	#	message(STATUS "UnitTest++ pre-packaged: include= ${UNITTEST++_INCLUDE_DIR}" )
-	#	message(STATUS "UnitTest++ pre-packaged: libdir= ${UNITTEST++_LINK_DIR}" )
-	#else()
-		find_package(UnitTest++)
-		if(UNITTEST++_FOUND)
-			get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
-			include_directories(${UNITTEST++_INCLUDE_DIR})
-			link_libraries( ${UNITTEST++_LIBRARY} )
-			link_directories( ${UNITTEST++_LINK_DIR} )        
-			message(STATUS "UnitTest++ found: libraries= ${UNITTEST++_LIBRARY}" )
-			message(STATUS "UnitTest++ found: include= ${UNITTEST++_INCLUDE_DIR}" )
-			message(STATUS "UnitTest++ found: libdir= ${UNITTEST++_LINK_DIR}" )
-		else()
-			message(STATUS "UnitTest++ package not found. Test program will not be built" )
-			set (LOMSE_BUILD_TESTS OFF)
-		endif()
-	#endif(WIN32)
+	find_package(UnitTest++)
+	if(UNITTEST++_FOUND)
+		get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
+		include_directories(${UNITTEST++_INCLUDE_DIR})
+		#link_libraries( ${UNITTEST++_LIBRARY} )
+		#link_directories( ${UNITTEST++_LINK_DIR} )        
+		message("      include= ${UNITTEST++_INCLUDE_DIR}" )
+		#message("      libdir=  ${UNITTEST++_LINK_DIR}" )
+	else()
+		message(STATUS "Not found UnitTest++. Test program will not be built" )
+		set (LOMSE_BUILD_TESTS OFF)
+	endif()
 endif(LOMSE_BUILD_TESTS)
 
+if( LOMSE_ENABLE_COMPRESSION )
+    # Check for zlib
+    # libpng and freetype require zlib. So deal with zlib first.
+    find_package(ZLIB REQUIRED)
+    include_directories( ${ZLIB_INCLUDE_DIR} )
+    #link_libraries( ${ZLIB_LIBRARIES} )
+    message("      include= ${ZLIB_INCLUDE_DIR}" )
+    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
+    set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${ZLIB_LIBRARIES})
+    set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, zlib1g (>= ${ZLIB_VERSION_STRING})")
+endif(LOMSE_ENABLE_COMPRESSION)
+
 # Check for FreeType
-#if(WIN32)
-#	#for Windows use the pre-installed packages
-#	set(FREETYPE_FOUND 1)
-#	set(FREETYPE_INCLUDE_DIRS "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/include/freetype")
-#	set(FREETYPE_LIBRARY "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64/freetype.lib")
-#	set(FREETYPE_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/freetype-2.9.1/win64")        
-#else()
-	find_package(Freetype REQUIRED)                 
-#endif(WIN32)
-if( FREETYPE_FOUND )
-	include_directories( ${FREETYPE_INCLUDE_DIRS} )
-	link_libraries( ${FREETYPE_LIBRARY} )
-	link_directories( ${FREETYPE_LINK_DIR} )        
-	message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARY}" )
-	message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
-	message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
-	set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
-	set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, libfreetype6")
-else()
-	message(SEND_ERROR "FreeType package not found.")
-endif(FREETYPE_FOUND)
+find_package(Freetype REQUIRED)                 
+include_directories( ${FREETYPE_INCLUDE_DIRS} )
+#link_libraries( ${FREETYPE_LIBRARY} )
+message("          include= ${FREETYPE_INCLUDE_DIRS}" )
+set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
+set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, libfreetype6")
+set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FREETYPE_LIBRARY})
+
+# Check for libpng
+if( LOMSE_ENABLE_PNG )
+    find_package(PNG REQUIRED)  
+    include_directories( ${PNG_INCLUDE_DIRS} )
+    #link_libraries( ${PNG_LIBRARIES} )
+    message("     include= ${PNG_INCLUDE_DIRS}" )
+    set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
+    set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${PNG_LIBRARIES})
+    set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, 
+		libpng12-0 (>=1.2.42) | libpng16-16" )
+endif(LOMSE_ENABLE_PNG)
 
 # Check for fontconfig
-if (UNIX)
+if (UNIX)  #Linux, macOS & Android
     find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
     find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
     if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
@@ -336,74 +348,20 @@ if (UNIX)
 
     if(FONTCONFIG_FOUND )
         include_directories( ${FONTCONFIG_INCLUDE_DIR}/fontconfig )
-        link_libraries( ${FONTCONFIG_LIBRARIES} )
-        message(STATUS "fontconfig found: libraries= ${FONTCONFIG_LIBRARIES}" )
-        message(STATUS "fontconfig found: include= ${FONTCONFIG_INCLUDE_DIR}/fontconfig" )
+        #link_libraries( ${FONTCONFIG_LIBRARIES} )
+        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, fontconfig")
+        set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FONTCONFIG_LIBRARIES})
+        set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, fontconfig")
+        message(STATUS "Found FontConfig: libraries= ${FONTCONFIG_LIBRARIES}" )
+        message("        include= ${FONTCONFIG_INCLUDE_DIR}/fontconfig" )
     else()
         message(FATAL_ERROR "fontconfig package not found.")
     endif()
 endif()
 
-# Check for libpng
-if( LOMSE_ENABLE_PNG )
-	if(0)
-		#for Windows use the pre-installed packages
-		set(PNG_FOUND 1)
-		set(PNG_INCLUDE_DIRS "${LOMSE_ROOT_DIR}/../../win_packages/zlib/include")
-		set(PNG_LIBRARIES "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib/zlib.lib")
-		set(PNG_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib")
-		set(PNG_VERSION_STRING "1.2.11")
-	else()
-	    find_package(PNG REQUIRED)  
-	endif(0)
-    if( PNG_FOUND )
-        include_directories( ${PNG_INCLUDE_DIRS} )
-        link_libraries( ${PNG_LIBRARIES} )
-        link_directories( ${PNG_LINK_DIR} )        
-        message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
-        message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
-        message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
-        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
-        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, 
-			libpng12-0 (>=1.2.42) | libpng16-16" )
-    else()
-        message(SEND_ERROR "libpng package not found.")
-    endif()
-endif(LOMSE_ENABLE_PNG)
-
-if( LOMSE_ENABLE_COMPRESSION )
-    # Check for zlib
-	if(WIN32)
-		#for Windows use the pre-installed packages
-		set(ZLIB_FOUND 1)
-		set(ZLIB_INCLUDE_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/include")
-		set(ZLIB_LIBRARIES "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib/zlib.lib")
-		set(ZLIB_LINK_DIR "${LOMSE_ROOT_DIR}/../../win_packages/zlib/lib")
-		set(ZLIB_VERSION_STRING "1.2.11")
-	else()
-		find_package(ZLIB REQUIRED)
-	endif(WIN32)
-    if( ZLIB_FOUND )
-        include_directories( ${ZLIB_INCLUDE_DIR} )
-        link_libraries( ${ZLIB_LIBRARIES} )
-        link_directories( ${ZLIB_LINK_DIR} )        
-        message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
-        message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIR}" )
-        message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
-        message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
-        set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
-        set(LOMSE_DEPENDENCIES "${LOMSE_DEPENDENCIES}, zlib1g (>= ${ZLIB_VERSION_STRING})")
-        include_directories( ${INCLUDES_MINIZIP} )
-    else()
-        message(SEND_ERROR "zlib package not found.")
-    endif()
-endif(LOMSE_ENABLE_COMPRESSION)
-
-# strip leading commas from LOMSE_REQUIRES and LOMSE_DEPENDENCIES
+# strip leading commas from LOMSE_REQUIRES and LOMSE_DEBIAN_DEPS
 string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
-string( REGEX REPLACE "^, " "" LOMSE_DEPENDENCIES ${LOMSE_DEPENDENCIES})
-
-link_directories( ${LIBRARY_OUTPUT_PATH} )
+string( REGEX REPLACE "^, " "" LOMSE_DEBIAN_DEPS ${LOMSE_DEBIAN_DEPS})
 
 
 # Define possible builds
@@ -424,6 +382,8 @@ include( ${LOMSE_ROOT_DIR}/add-sources.cmake )
 set (LOMSE_GROUP_FOLDER "lomse/" )
 include( ${LOMSE_ROOT_DIR}/add-group-folders.cmake )
 
+message(STATUS "LOMSE_BUILD_DEPS= ${LOMSE_BUILD_DEPS}")
+
 
 
 ###############################################################################
@@ -435,7 +395,10 @@ if(LOMSE_BUILD_STATIC_LIB)
 
     set(LOMSE_STATIC  lomse-static)
 
-    add_library( ${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES} )
+    add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
+
+
+    #properties
     set_target_properties(${LOMSE_STATIC} PROPERTIES
             VERSION ${LOMSE_PACKAGE_VERSION}
             SOVERSION ${LOMSE_PACKAGE_VERSION}
@@ -464,11 +427,14 @@ if(LOMSE_BUILD_SHARED_LIB)
     set(LOMSE_SHARED  lomse-shared)
 
     add_library( ${LOMSE_SHARED} SHARED ${ALL_LOMSE_SOURCES} )
+
+    #properties
     set_target_properties(${LOMSE_SHARED} 
-                          PROPERTIES VERSION ${LOMSE_PACKAGE_VERSION}
-                                     SOVERSION ${LOMSE_PACKAGE_VERSION}
-                                     OUTPUT_NAME "lomse"
-                                     RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin )
+          PROPERTIES VERSION ${LOMSE_PACKAGE_VERSION}
+                     SOVERSION ${LOMSE_PACKAGE_VERSION}
+                     OUTPUT_NAME "lomse"
+                     RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin
+    )
 
 endif(LOMSE_BUILD_SHARED_LIB)
 
@@ -490,10 +456,14 @@ if(LOMSE_BUILD_TESTS)
     
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
-        target_link_libraries ( ${TESTLIB} lomse-shared ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
+        target_link_libraries ( ${TESTLIB} lomse-shared 
+                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+        )
         add_dependencies(testlib lomse-shared)
     else()      
-        target_link_libraries ( ${TESTLIB} lomse ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
+        target_link_libraries (${TESTLIB} lomse
+                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+        )
         add_dependencies(testlib lomse-static)
     endif()
 
@@ -751,7 +721,7 @@ if(UNIX)
     set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEPENDENCIES})
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEBIAN_DEPS})
     message(STATUS "Package dependencies: ${CPACK_DEBIAN_PACKAGE_DEPENDS}" )
 
 #elseif( WIN32 )

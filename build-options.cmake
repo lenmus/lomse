@@ -28,6 +28,9 @@ option(LOMSE_BUILD_STATIC_LIB
 option(LOMSE_BUILD_SHARED_LIB
     "Build the shared library" 
     OFF)
+option(LOMSE_BUILD_MONOLITHIC
+    "Build a monolithic library with no dependencies" 
+    OFF)
 
 #Build the test units runner program 'testlib'
 option(LOMSE_BUILD_TESTS "Build testlib program" ON)
@@ -67,6 +70,7 @@ if (WIN32)
 endif()
 
 
+message(STATUS "Build monolithic library = ${LOMSE_BUILD_MONOLITHIC}")
 message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
 message(STATUS "Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
 message(STATUS "Build testlib program = ${LOMSE_BUILD_TESTS}")
