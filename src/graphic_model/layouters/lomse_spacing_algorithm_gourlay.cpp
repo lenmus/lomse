@@ -1408,7 +1408,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     }
 
 
-    //General rule: transfer space to previous slice
+    //General rule: transfer space to previous slice if it is note rest
     //Gourlay's spacing algorithm is only for determining the position for timed
     //objects. As non-timed objects are not part of the model, its space will be
     //added *after* the space assigned to the previous note. Therefore, as non-timed
@@ -1755,13 +1755,20 @@ void TimeSliceNoterest::assign_spacing_values(vector<StaffObjData*>& data,
         }
         else if (pPrevPrev)
         {
-            //slice before non-timed is barline or prolog. Transfer lyrics to it
-            if (xLyrics > 0.0f)
+            //Space can never be transferred to barlines because if justification places
+            //a system break after the barline, it will not be right justified.
+            //[NR4d] test 31d. CHECK: first system is justified
+            if (pPrevPrev->get_type() != TimeSlice::k_barline)
             {
-                LUnits prevRi = pPrevPrev->get_right_rod();
-                LUnits discount = (prevRi == 0.0f ? pPrevPrev->get_left_rod() : 0.0f);
-                xLyrics = max(0.0f, xLyrics-discount);
-                pPrevPrev->increment_xRi(xLyrics + k_min_space);
+                //Space for lyrics can be transferred when it is prolog
+                //[NR4e] test ???? //TODO
+                if (xLyrics > 0.0f)
+                {
+                    LUnits prevRi = pPrevPrev->get_right_rod();
+                    LUnits discount = (prevRi == 0.0f ? pPrevPrev->get_left_rod() : 0.0f);
+                    xLyrics = max(0.0f, xLyrics-discount);
+                    pPrevPrev->increment_xRi(xLyrics + k_min_space);
+                }
             }
             //account accidentals as fixed space in this noterest
             m_xLeft -= xPrev;   //AWARE: xPrev is always negative
@@ -1775,22 +1782,28 @@ void TimeSliceNoterest::assign_spacing_values(vector<StaffObjData*>& data,
     }
     else if (m_prev)
     {
-        //prev is barline or prolog. Lyrics space can always be transferred to them
-        //but accidentals cannot.
+        //prev is barline or prolog. Accidentals space can never be transferred.
+        //Lyrics space can be transferred if not barline
 
-        //transfer lyrics:
-        //[] test 13b-KeySignatures-ChurchModes
-        if (xLyrics > 0.0f)
+        //Lyrics can never be transferred to barlines because if justification places a
+        //system break after the barline, it will not be right justified.
+        //[NR5a] test 00051. CHECK: first system is justified
+        if (m_prev->get_type() != TimeSlice::k_barline)
         {
-            LUnits prevRi = m_prev->get_right_rod();
-            LUnits discount = (prevRi == 0.0f ? m_prev->get_left_rod() : 0.0f);
-            xLyrics = max(0.0f, xLyrics-discount);
-            m_prev->increment_xRi(xLyrics + k_min_space);
+            //transfer lyrics:
+            //[] test 13b-KeySignatures-ChurchModes
+            if (xLyrics > 0.0f)
+            {
+                LUnits prevRi = m_prev->get_right_rod();
+                LUnits discount = (prevRi == 0.0f ? m_prev->get_left_rod() : 0.0f);
+                xLyrics = max(0.0f, xLyrics-discount);
+                m_prev->increment_xRi(xLyrics + k_min_space);
+            }
         }
 
         //do not transfer accidentals:
         //[NR5a] test 00610. CHECK: enough space between barline and next note accidentals
-        //      test 00611. CHECK: enough space for accidental after barline in last measure
+        //       test 00611. CHECK: enough space for accidental after barline in last measure
         //[NR5b] test 00606. CHECK: equal space between prolog and noteheads in all staves.
         //                  Accidentals do not alter noteheads alignment.
         m_xLeft -= xPrev;   //AWARE: xPrev is always negative
