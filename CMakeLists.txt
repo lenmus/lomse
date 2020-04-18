@@ -512,36 +512,23 @@ endif(LOMSE_BUILD_TESTS)
 
 if (LOMSE_BUILD_EXAMPLE)
 
-    set (EXAMPLE1 example_1)
-    set( EXAMPLE1_SRC  ${LOMSE_ROOT_DIR}/examples )
+    set (EXAMPLE1 tutorial_1)
 
-    if( WIN32 )
-    #-------------------------------------------------------------
+    if(WIN32)
+        set( EXAMPLE1_SRC  ${LOMSE_ROOT_DIR}/examples/tutorials/tutorial-1-win )
+
         include_directories(
             ${LOMSE_SRC_DIR}/agg/include/platform/win32/agg_win32_bmp.h
         )
 
         add_executable( ${EXAMPLE1} WIN32
-            ${EXAMPLE1_SRC}/example_1_win32.cpp
-            ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
-            ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
-            ${EXAMPLE1_SRC}/win32/example_1/stdafx.cpp
-            ${EXAMPLE1_SRC}/win32/example_1/resource.h
-            ${EXAMPLE1_SRC}/win32/example_1/stdafx.h
-            ${EXAMPLE1_SRC}/win32/example_1/small.ico
+            ${EXAMPLE1_SRC}/tutorial-1-win.cpp
             ${LOMSE_SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
         )
-
-        target_link_libraries( ${EXAMPLE1}
-            lomse.lib
-            ${FREETYPE_LIBRARY}
-            ${PNG_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-        )
-
         
-    elseif( UNIX )
-    #-------------------------------------------------------------
+    elseif(UNIX)
+        set( EXAMPLE1_SRC  ${LOMSE_ROOT_DIR}/examples/tutorials/tutorial-1-x11 )
+
         find_package(X11)
         if(X11_FOUND)  
             include_directories(${X11_INCLUDE_DIRS})
@@ -549,20 +536,22 @@ if (LOMSE_BUILD_EXAMPLE)
         endif(X11_FOUND)
 
         add_executable( ${EXAMPLE1} ""
-            ${EXAMPLE1_SRC}/example_1_x11.cpp
+            ${EXAMPLE1_SRC}/tutorial-1-x11.cpp
         )
-
-        target_link_libraries ( ${EXAMPLE1} 
-            liblomse.so
-            ${FREETYPE_LIBRARY}
-            ${PNG_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-        )
-            
     endif()
 
-    # dependencies
-    add_dependencies(example_1 lomse-shared)
+    # libraries to link
+    if (LOMSE_BUILD_SHARED_LIB)
+        target_link_libraries ( ${EXAMPLE1} lomse-shared 
+                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+        )
+        add_dependencies(${EXAMPLE1} lomse-shared)
+    else()      
+        target_link_libraries (${EXAMPLE1} lomse
+                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+        )
+        add_dependencies(${EXAMPLE1} lomse-static)
+    endif()
 
 endif(LOMSE_BUILD_EXAMPLE)
 
