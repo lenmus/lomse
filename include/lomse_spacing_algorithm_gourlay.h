@@ -485,6 +485,10 @@ public:
     //overrides
     void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
                                TextMeter& textMeter) override;
+    void move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                        LUnits yPos, LUnits* yMin, LUnits* yMax,
+                                        ScoreMeter* pMeter,
+                                        VerticalProfile* pVProfile) override;
 
 };
 

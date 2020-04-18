@@ -796,8 +796,9 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     {
         if (fTrace)
         {
-            dbgLogger << "Determine penalty: minimum width is greater than "
-                      << "required width. Penalty= 1000" << endl;
+            dbgLogger << "Determine penalty: minimum width " << minWidth
+                      << " is greater than required width " << lineWidth
+                      << ". Penalty= 1000" << endl;
         }
         return 1000.0f;
     }
@@ -805,16 +806,17 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //determine force to apply to get desired extent
     float F = (lineWidth - fixed) * c;
 
+    //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
+    float R = fabs(F - m_Fopt);
+
     if (fTrace)
     {
-        dbgLogger << "Determine penalty: lineWidth= " << lineWidth
-                  << ", Force= " << F << ", sum= " << sum << ", c= " << c
-                  << ", iSystem" << iSystem
+        dbgLogger << "Determine penalty: lineWidth=" << lineWidth
+                  << ", Force="  << F << ", sum=" << sum << ", c=" << c
+                  << ", R=" << R << ", iSystem=" << iSystem
                   << endl;
     }
 
-    //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
-    float R = fabs(F - m_Fopt);
 
     //do not accept shrinking, if required
 	if (m_pScoreMeter->get_render_spacing_opts() & k_render_opt_breaker_no_shrink)
@@ -965,6 +967,8 @@ void TimeSlice::compute_spring_constant(LUnits uSmin, float alpha, float log2dmi
             space_ds = dsFixed;
         m_ci = float(m_di/m_ds) * ( 1.0f / space_ds );
     }
+    else if (m_type == TimeSlice::k_barline)
+        m_ci = 0.05f;       //aprox. ten times the hardness of the minimum spaced note
     else
         m_ci = 0.0f;
 }
@@ -972,7 +976,7 @@ void TimeSlice::compute_spring_constant(LUnits uSmin, float alpha, float log2dmi
 //---------------------------------------------------------------------------------------
 void TimeSlice::compute_pre_stretching_force()
 {
-    if (m_type == TimeSlice::k_noterest)
+    if (m_type == TimeSlice::k_noterest || m_type == TimeSlice::k_barline)
         m_fi = m_ci * get_xi();
     else
         m_fi = LOMSE_MAX_FORCE;
@@ -1408,7 +1412,7 @@ void TimeSliceNonTimed::assign_spacing_values(vector<StaffObjData*>& data,
     }
 
 
-    //General rule: transfer space to previous slice
+    //General rule: transfer space to previous slice if it is note rest
     //Gourlay's spacing algorithm is only for determining the position for timed
     //objects. As non-timed objects are not part of the model, its space will be
     //added *after* the space assigned to the previous note. Therefore, as non-timed
@@ -1587,6 +1591,34 @@ void TimeSliceBarline::assign_spacing_values(vector<StaffObjData*>& data,
 
 }
 
+//---------------------------------------------------------------------------------------
+void TimeSliceBarline::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                               LUnits yPos, LUnits* yMin, LUnits* yMax,
+                                               ScoreMeter* UNUSED(pMeter),
+                                               VerticalProfile* pVProfile)
+{
+    int iMax = m_iFirstData + m_numEntries;
+    for (int i=m_iFirstData; i < iMax; ++i)
+    {
+        StaffObjData* pData = data[i];
+        GmoShape* pShape = pData->get_shape();
+        if (pShape)
+        {
+            //move shape
+            LUnits xLeft = xPos + m_width - pShape->get_width();
+            pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
+                                                    yPos + pData->m_yUserShift);
+
+            //save info for vertical profile
+            pVProfile->update(pShape, pData->m_idxStaff);
+
+            //update system vertical limits
+            *yMax = max(*yMax, pShape->get_bottom());
+            *yMin = min(*yMin, pShape->get_top());
+        }
+    }
+}
+
 
 //=====================================================================================
 //TimeSliceNoterest implementation
@@ -1755,13 +1787,20 @@ void TimeSliceNoterest::assign_spacing_values(vector<StaffObjData*>& data,
         }
         else if (pPrevPrev)
         {
-            //slice before non-timed is barline or prolog. Transfer lyrics to it
-            if (xLyrics > 0.0f)
+            //Space can never be transferred to barlines because if justification places
+            //a system break after the barline, it will not be right justified.
+            //[NR4d] test 31d. CHECK: first system is justified
+            if (pPrevPrev->get_type() != TimeSlice::k_barline)
             {
-                LUnits prevRi = pPrevPrev->get_right_rod();
-                LUnits discount = (prevRi == 0.0f ? pPrevPrev->get_left_rod() : 0.0f);
-                xLyrics = max(0.0f, xLyrics-discount);
-                pPrevPrev->increment_xRi(xLyrics + k_min_space);
+                //Space for lyrics can be transferred when it is prolog
+                //[NR4e] test ???? //TODO
+                if (xLyrics > 0.0f)
+                {
+                    LUnits prevRi = pPrevPrev->get_right_rod();
+                    LUnits discount = (prevRi == 0.0f ? pPrevPrev->get_left_rod() : 0.0f);
+                    xLyrics = max(0.0f, xLyrics-discount);
+                    pPrevPrev->increment_xRi(xLyrics + k_min_space);
+                }
             }
             //account accidentals as fixed space in this noterest
             m_xLeft -= xPrev;   //AWARE: xPrev is always negative
@@ -1775,22 +1814,28 @@ void TimeSliceNoterest::assign_spacing_values(vector<StaffObjData*>& data,
     }
     else if (m_prev)
     {
-        //prev is barline or prolog. Lyrics space can always be transferred to them
-        //but accidentals cannot.
+        //prev is barline or prolog. Accidentals space can never be transferred.
+        //Lyrics space can be transferred if not barline
 
-        //transfer lyrics:
-        //[] test 13b-KeySignatures-ChurchModes
-        if (xLyrics > 0.0f)
+        //Lyrics can never be transferred to barlines because if justification places a
+        //system break after the barline, it will not be right justified.
+        //[NR5a] test 00051. CHECK: first system is justified
+        if (m_prev->get_type() != TimeSlice::k_barline)
         {
-            LUnits prevRi = m_prev->get_right_rod();
-            LUnits discount = (prevRi == 0.0f ? m_prev->get_left_rod() : 0.0f);
-            xLyrics = max(0.0f, xLyrics-discount);
-            m_prev->increment_xRi(xLyrics + k_min_space);
+            //transfer lyrics:
+            //[] test 13b-KeySignatures-ChurchModes
+            if (xLyrics > 0.0f)
+            {
+                LUnits prevRi = m_prev->get_right_rod();
+                LUnits discount = (prevRi == 0.0f ? m_prev->get_left_rod() : 0.0f);
+                xLyrics = max(0.0f, xLyrics-discount);
+                m_prev->increment_xRi(xLyrics + k_min_space);
+            }
         }
 
         //do not transfer accidentals:
         //[NR5a] test 00610. CHECK: enough space between barline and next note accidentals
-        //      test 00611. CHECK: enough space for accidental after barline in last measure
+        //       test 00611. CHECK: enough space for accidental after barline in last measure
         //[NR5b] test 00606. CHECK: equal space between prolog and noteheads in all staves.
         //                  Accidentals do not alter noteheads alignment.
         m_xLeft -= xPrev;   //AWARE: xPrev is always negative

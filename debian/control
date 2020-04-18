@@ -3,11 +3,16 @@ Section: libs
 Priority: optional
 Maintainer: Cecilio Salmeron <s.cecilio@gmail.com>
 Standards-Version: 3.9.3
-Build-Depends: debhelper (>= 8.0.0), cdbs, cmake (>= 2.8.0),
-    pkg-config,
-    libfreetype6-dev, zlib1g (>= 1:1.1.4), libpng-dev, 
-    libboost-date-time-dev, libboost-thread-dev
-Homepage: http://www.lenmus.org/en/lomse/intro
+Homepage: https://github.com/lenmus/lomse
+Build-Depends:
+ cdbs,
+ cmake (>= 2.8.10),
+ debhelper (>= 8.0.0),
+ libfontconfig1-dev,
+ libfreetype6-dev,
+ libpng++-dev,
+ pkg-config,
+ zlib1g (>= 1:1.2.1),
 
 Package: liblomse
 Architecture: any
@@ -26,7 +31,4 @@ Description: music scores rendering/edition library
  .
  Lomse stands for "Lenmus Open Music Score Edition" 
  library. 
- .
- You can find more information at 
- http://www.lenmus.org/en/lomse/intro
-
+ 

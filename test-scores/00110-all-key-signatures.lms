@@ -1,5 +1,6 @@
 (score
-   (vers 1.6)
+   (vers 2.0)
+   (opt Score.JustifyLastSystem 3)
    (instrument
       (musicData
          (clef G)
@@ -62,6 +63,7 @@
          (key g)
          (barline double)
          (key d)
+         (barline end)
       )
    )
 )
