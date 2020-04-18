@@ -796,8 +796,9 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     {
         if (fTrace)
         {
-            dbgLogger << "Determine penalty: minimum width is greater than "
-                      << "required width. Penalty= 1000" << endl;
+            dbgLogger << "Determine penalty: minimum width " << minWidth
+                      << " is greater than required width " << lineWidth
+                      << ". Penalty= 1000" << endl;
         }
         return 1000.0f;
     }
@@ -805,16 +806,17 @@ float SpAlgGourlay::determine_penalty_for_line(int iSystem, int iFirstCol, int i
     //determine force to apply to get desired extent
     float F = (lineWidth - fixed) * c;
 
+    //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
+    float R = fabs(F - m_Fopt);
+
     if (fTrace)
     {
-        dbgLogger << "Determine penalty: lineWidth= " << lineWidth
-                  << ", Force= " << F << ", sum= " << sum << ", c= " << c
-                  << ", iSystem" << iSystem
+        dbgLogger << "Determine penalty: lineWidth=" << lineWidth
+                  << ", Force="  << F << ", sum=" << sum << ", c=" << c
+                  << ", R=" << R << ", iSystem=" << iSystem
                   << endl;
     }
 
-    //compute penalty:  R(ci, cj) = | sff[cicj](line_width) - fopt |
-    float R = fabs(F - m_Fopt);
 
     //do not accept shrinking, if required
 	if (m_pScoreMeter->get_render_spacing_opts() & k_render_opt_breaker_no_shrink)
@@ -965,6 +967,8 @@ void TimeSlice::compute_spring_constant(LUnits uSmin, float alpha, float log2dmi
             space_ds = dsFixed;
         m_ci = float(m_di/m_ds) * ( 1.0f / space_ds );
     }
+    else if (m_type == TimeSlice::k_barline)
+        m_ci = 0.05f;       //aprox. ten times the hardness of the minimum spaced note
     else
         m_ci = 0.0f;
 }
@@ -972,7 +976,7 @@ void TimeSlice::compute_spring_constant(LUnits uSmin, float alpha, float log2dmi
 //---------------------------------------------------------------------------------------
 void TimeSlice::compute_pre_stretching_force()
 {
-    if (m_type == TimeSlice::k_noterest)
+    if (m_type == TimeSlice::k_noterest || m_type == TimeSlice::k_barline)
         m_fi = m_ci * get_xi();
     else
         m_fi = LOMSE_MAX_FORCE;
@@ -1585,6 +1589,34 @@ void TimeSliceBarline::assign_spacing_values(vector<StaffObjData*>& data,
         }
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+void TimeSliceBarline::move_shapes_to_final_positions(vector<StaffObjData*>& data, LUnits xPos,
+                                               LUnits yPos, LUnits* yMin, LUnits* yMax,
+                                               ScoreMeter* UNUSED(pMeter),
+                                               VerticalProfile* pVProfile)
+{
+    int iMax = m_iFirstData + m_numEntries;
+    for (int i=m_iFirstData; i < iMax; ++i)
+    {
+        StaffObjData* pData = data[i];
+        GmoShape* pShape = pData->get_shape();
+        if (pShape)
+        {
+            //move shape
+            LUnits xLeft = xPos + m_width - pShape->get_width();
+            pShape->set_origin_and_notify_observers(xLeft + pData->m_xUserShift,
+                                                    yPos + pData->m_yUserShift);
+
+            //save info for vertical profile
+            pVProfile->update(pShape, pData->m_idxStaff);
+
+            //update system vertical limits
+            *yMax = max(*yMax, pShape->get_bottom());
+            *yMin = min(*yMin, pShape->get_top());
+        }
+    }
 }
 
 

@@ -1547,9 +1547,10 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
 
                 if (fTrace)
                 {
-                    dbgLogger << "Penalty for (" << i << ", " << j << ")= "
-                              << (prevPenalty + newPenalty) << ". Current= "
-                              << m_entries[j].penalty << endl;
+                    dbgLogger << "prevPenalty for (" << i << ", " << j << ")= "
+                              << prevPenalty << ", New= " << newPenalty << ". Next= "
+                              << m_entries[j].penalty << ", prev+new= "
+                              << (prevPenalty + newPenalty) << endl;
                 }
 
                 if (fSystemBreak || m_pSpAlgorithm->is_better_option(prevPenalty, newPenalty,
@@ -1557,7 +1558,8 @@ void LinesBreakerOptimal::compute_optimal_break_sequence()
                 {
                     if (fTrace)
                     {
-                        dbgLogger << (prevPenalty + newPenalty) << " is better option than "
+                        dbgLogger << "    " << (prevPenalty + newPenalty)
+                                  << " is better option than "
                                   << m_entries[j].penalty << " for entry " << j << endl;
                     }
 
