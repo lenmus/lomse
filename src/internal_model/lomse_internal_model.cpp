@@ -2318,6 +2318,7 @@ void ImoAnonymousBlock::accept_visitor(BaseVisitor& v)
 //=======================================================================================
 ImoDocument::ImoDocument(const std::string& version)
     : ImoBlocksContainer(k_imo_document)
+    , m_scale(1.0f)
     , m_version(version)
     , m_language("en")
     , m_pageInfo()

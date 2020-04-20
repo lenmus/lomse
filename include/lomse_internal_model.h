@@ -4382,6 +4382,7 @@ class ImoDocument : public ImoBlocksContainer
 {
 protected:
     friend class Document;
+    float m_scale;     //page content scaling factor
     string m_version;
     string m_language;
     ImoPageInfo m_pageInfo;
@@ -4399,6 +4400,8 @@ public:
     inline Document* get_owner() { return m_pDoc; }
     inline std::string& get_language() { return m_language; }
     inline void set_language(const string& language) { m_language = language; }
+    inline float get_page_content_scale() { return m_scale; }
+    inline void set_page_content_scale(float scale) { m_scale = scale; }
 
     //document intended paper size
     void add_page_info(ImoPageInfo* pPI);

@@ -128,7 +128,7 @@ void InlinesContainerLayouter::layout_in_box()
     if (m_fAddShapesToModel && !fMoreText)
         m_pItemMainBox->add_shapes_to_tables();
 
-    set_layout_is_finished( !fMoreText );
+    set_layout_result(fMoreText ? k_layout_not_finished : k_layout_success);
 }
 
 //---------------------------------------------------------------------------------------

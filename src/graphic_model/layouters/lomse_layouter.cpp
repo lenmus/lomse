@@ -46,7 +46,7 @@ namespace lomse
 Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
                    LibraryScope& libraryScope, ImoStyles* pStyles,
                    bool fAddShapesToModel)
-    : m_fIsLayouted(false)
+    : m_result(k_layout_not_finished)
     , m_pGModel(pGModel)
     , m_pParentLayouter(pParent)
     , m_libraryScope(libraryScope)
@@ -64,7 +64,7 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
 //---------------------------------------------------------------------------------------
 // constructor for DocumentLayouter
 Layouter::Layouter(LibraryScope& libraryScope)
-    : m_fIsLayouted(false)
+    : m_result(k_layout_not_finished)
     , m_pGModel(nullptr)
     , m_pParentLayouter(nullptr)
     , m_libraryScope(libraryScope)
@@ -96,7 +96,7 @@ GmoBox* Layouter::start_new_page()
 }
 
 //---------------------------------------------------------------------------------------
-void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains)
+int Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains)
 {
     LOMSE_LOG_DEBUG(Logger::k_layout,
         "Laying out id %d %s", pItem->get_id(), pItem->get_name().c_str());
@@ -117,18 +117,24 @@ void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constra
             pParentBox = start_new_page();
         }
     }
-    m_pCurLayouter->add_end_margins();
 
-    //update cursor and available space
-    GmoBox* pChildBox = m_pCurLayouter->get_item_main_box();
-    if (pChildBox)  //AWARE: NullLayouter does not create a box
+    int result = m_pCurLayouter->get_layout_result();
+    if (result != k_layout_failed_auto_scale)
     {
-        m_pageCursor.y = pChildBox->get_bottom();
-        m_availableHeight -= pChildBox->get_height();
-    }
+        m_pCurLayouter->add_end_margins();
 
-    if (!pItem->is_score())
-        delete m_pCurLayouter;
+        //update cursor and available space
+        GmoBox* pChildBox = m_pCurLayouter->get_item_main_box();
+        if (pChildBox)  //AWARE: NullLayouter does not create a box
+        {
+            m_pageCursor.y = pChildBox->get_bottom();
+            m_availableHeight -= pChildBox->get_height();
+        }
+
+        if (!pItem->is_score())
+            delete m_pCurLayouter;
+    }
+    return result;
 }
 
 //---------------------------------------------------------------------------------------

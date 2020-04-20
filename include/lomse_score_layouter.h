@@ -238,6 +238,7 @@ protected:
 
     void delete_system_layouters();
     void get_score_renderization_options();
+    void auto_scale();
 
     bool m_fFirstSystemInPage;
     inline void is_first_system_in_page(bool value) { m_fFirstSystemInPage = value; }
