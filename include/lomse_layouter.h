@@ -51,7 +51,7 @@ class ImoStyles;
 class Layouter
 {
 protected:
-    bool m_fIsLayouted;
+    int m_result;               //value from ELayoutResult
     GraphicModel* m_pGModel;
     Layouter* m_pParentLayouter;
     LibraryScope& m_libraryScope;
@@ -77,10 +77,18 @@ protected:
 public:
     virtual ~Layouter() {}
 
+    enum ELayoutResult
+    {
+        k_layout_not_finished = 0,
+        k_layout_success,
+        k_layout_failed_auto_scale,        //auto-scaling applied. Need to re-layout
+    };
+
     virtual void layout_in_box() = 0;
-    virtual void prepare_to_start_layout() { m_fIsLayouted = false; }
-    virtual bool is_item_layouted() { return m_fIsLayouted; }
-    virtual void set_layout_is_finished(bool value) { m_fIsLayouted = value; }
+    virtual void prepare_to_start_layout() { m_result = k_layout_not_finished; }
+    virtual bool is_item_layouted() { return m_result != k_layout_not_finished; }
+    virtual void set_layout_result(int value) { m_result = value; }
+    virtual int get_layout_result() { return m_result; }
     virtual void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
                                  LUnits height) = 0;
     virtual void save_score_layouter(Layouter* pLayouter) {
@@ -102,7 +110,7 @@ protected:
     virtual GmoBox* start_new_page();
 
     Layouter* create_layouter(ImoContentObj* pItem, int constrains=0);
-    void layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains);
+    int layout_item(ImoContentObj* pItem, GmoBox* pParentBox, int constrains);
 
     void set_cursor_and_available_space();
 
@@ -140,10 +148,10 @@ public:
     }
     ~NullLayouter() {}
 
-    void layout_in_box() {}
-    bool is_item_layouted() { return true; }
+    void layout_in_box() override {}
+    bool is_item_layouted() override { return true; }
     void create_main_box(GmoBox* UNUSED(pParentBox), UPoint UNUSED(pos),
-                         LUnits UNUSED(width), LUnits UNUSED(height)) {}
+                         LUnits UNUSED(width), LUnits UNUSED(height)) override {}
 };
 
 

@@ -284,6 +284,13 @@ public:
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
 
+    /** Return the scaling factor to apply to the content when rendered divided into
+        pages of the size defined by the paper size. Normally this factor is 1.0.
+    */
+    inline float get_page_content_scale() {
+        return (m_pImoDoc != nullptr ? m_pImoDoc->get_page_content_scale() : 1.0f);
+    }
+
     //@}    //Access to the internal model
 
 
@@ -294,6 +301,14 @@ public:
     drawn from ISO 639, optionally extended with a country code drawn from ISO 3166, as
     'en-US'. It represents the default language for all texts in the document. */
     inline void set_language(const string& language) { m_pImoDoc->m_language = language; }
+
+    /** Set the scaling factor to apply to the content when rendered divided into
+        pages of the size defined by the paper size. By default this factor is 1.0.
+    */
+    inline void set_page_content_scale(float scale) {
+        if (m_pImoDoc)
+            m_pImoDoc->set_page_content_scale(scale);
+    }
 
     /** When you modify the content of a %Document it is necessary to update some
         structures associated to music scores, such as the staffobjs collection.

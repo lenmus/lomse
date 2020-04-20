@@ -118,7 +118,7 @@ void TableLayouter::layout_in_box()
         if (!is_body_row_ready())
         {
             //problem or empty body. Terminate table laying out
-            set_layout_is_finished(true);
+            set_layout_result(k_layout_success);
             return;
         }
 
@@ -131,7 +131,7 @@ void TableLayouter::layout_in_box()
     }
 
     bool fMoreRows = (m_bodyLayouter && m_bodyLayouter->is_row_ready());
-    set_layout_is_finished( !fMoreRows );
+    set_layout_result(fMoreRows ? k_layout_not_finished : k_layout_success);
 }
 
 //---------------------------------------------------------------------------------------
@@ -572,7 +572,7 @@ void TableRowLayouter::layout_in_box()
     m_pageCursor.y = yPos;
     m_availableHeight -= height;
 
-    set_layout_is_finished(true);
+    set_layout_result(k_layout_success);
 }
 
 //---------------------------------------------------------------------------------------

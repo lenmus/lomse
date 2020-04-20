@@ -62,11 +62,14 @@ void ContentLayouter::layout_in_box()
     set_cursor_and_available_space();
 
     TreeNode<ImoObj>::children_iterator it;
+    int result = k_layout_success;
     for (it = m_pContent->begin(); it != m_pContent->end(); ++it)
     {
-        layout_item(static_cast<ImoContentObj*>( *it ), m_pItemMainBox, m_constrains);
+        result = layout_item(static_cast<ImoContentObj*>( *it ), m_pItemMainBox, m_constrains);
+        if (result == k_layout_failed_auto_scale)
+            break;
     }
-    set_layout_is_finished(true);
+    set_layout_result(result);
 }
 
 //---------------------------------------------------------------------------------------
@@ -135,6 +138,7 @@ void MultiColumnLayouter::layout_in_box()
     //loop to layout columns while at least one column layout not finished
     int numCols = m_pMultiColumn->get_num_columns();
     bool fLayoutFinished = false;
+    int layoutResult = k_layout_not_finished;
     while(!fLayoutFinished)
     {
         fLayoutFinished = true;        //assume no pagebreaks needed
@@ -147,6 +151,7 @@ void MultiColumnLayouter::layout_in_box()
                 layout_column(pCurLayouter, m_pItemMainBox, m_colWidth[iCol],
                               m_colPosition[iCol]);
                 fLayoutFinished &= pCurLayouter->is_item_layouted();
+                layoutResult = pCurLayouter->get_layout_result();
             }
         }
 
@@ -160,23 +165,25 @@ void MultiColumnLayouter::layout_in_box()
     }
 
     //loop to finish columns
-    LUnits bottom = 0.0f;
-    LUnits height = 0.0f;
-    for (iCol=0; iCol < numCols; ++iCol)
+    if (layoutResult != k_layout_failed_auto_scale)
     {
-        Layouter* pCurLayouter = m_colLayouters[iCol];
-        pCurLayouter->add_end_margins();
+        LUnits bottom = 0.0f;
+        LUnits height = 0.0f;
+        for (iCol=0; iCol < numCols; ++iCol)
+        {
+            Layouter* pCurLayouter = m_colLayouters[iCol];
+            pCurLayouter->add_end_margins();
 
-        GmoBox* pChildBox = pCurLayouter->get_item_main_box();
-        bottom = max(bottom, pChildBox->get_bottom());
-        height = max(height, pChildBox->get_height());
+            GmoBox* pChildBox = pCurLayouter->get_item_main_box();
+            bottom = max(bottom, pChildBox->get_bottom());
+            height = max(height, pChildBox->get_height());
+        }
+
+        //update cursor and available space
+        m_pageCursor.y = bottom;
+        m_availableHeight -= height;
     }
-
-    //update cursor and available space
-    m_pageCursor.y = bottom;
-    m_availableHeight -= height;
-
-    set_layout_is_finished(true);
+    set_layout_result(layoutResult);
 }
 
 //---------------------------------------------------------------------------------------
@@ -257,7 +264,7 @@ void BlocksContainerLayouter::layout_in_box()
             LOMSE_LOG_ERROR("Invalid IMO tree. Child of ImoBlocksContainer "
                             "is not ImoContentObj");
     }
-    set_layout_is_finished(true);
+    set_layout_result(k_layout_success);
 }
 
 //---------------------------------------------------------------------------------------

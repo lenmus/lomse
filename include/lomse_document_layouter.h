@@ -56,8 +56,6 @@ class DocLayouter : public Layouter
 {
 protected:
     ImoDocument* m_pDoc;
-    LUnits m_pageWidth;
-    LUnits m_pageHeight;
 
     //for unit tests: need to access ScoreLayouter.
     Layouter* m_pScoreLayouter;
@@ -80,8 +78,9 @@ public:
     void save_score_layouter(Layouter* pLayouter);
 
 protected:
-    void layout_content();
+    int layout_content();
     void fix_document_size();
+    void delete_last_trial();
 
     GmoBoxDocPage* create_document_page();
     void assign_paper_size_to(GmoBox* pBox);
