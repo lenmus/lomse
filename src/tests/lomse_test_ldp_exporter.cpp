@@ -419,7 +419,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "" );
+        CHECK( source == "(dir unknown)" );
     }
 
 

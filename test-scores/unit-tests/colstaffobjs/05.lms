@@ -1,0 +1,25 @@
+(score (vers 2.0)
+    (opt Render.SpacingOptions 514)
+    (opt StaffLines.Truncate 3)
+    (instrument
+        (musicData
+            (clef G)
+            (r q)
+            (barline)
+            (dir (dyn "p"))
+            (n a4 q)
+            (barline)
+        )
+    )
+    (instrument
+        (musicData
+            (clef G)
+            (r q)
+            (barline)
+            (dir (dyn "p"))
+            (n e4 q)
+            (barline)
+        )
+    )
+)
+

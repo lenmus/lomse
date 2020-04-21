@@ -1,0 +1,16 @@
+(score (vers 2.0)
+	(instrument
+		(musicData
+			(clef G)
+			(dir (metronome e 40))
+			(n e5 q)
+		)
+	)
+	(instrument
+		(musicData
+			(clef F4)
+			(r q)
+		)
+	)
+)
+

@@ -162,54 +162,54 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     //auxiliary, for sort: by time, object type (barlines before objects in other lines),
     //line and staff.
     //AWARE:
-    //   Current order is first pA, then pB
-    //   return TRUE to move pB before pA, FALSE to keep in current order
+    //   Current order is first pA (existing object), then pB (new object to insert)
+    //   return TRUE to insert pB before pA, FALSE to keep in current order
+    //this is:
+    //  TRUE: Continue searching for the insertion point. pA = pA->prev
+    //  FALSE: Insert B after object A
 
 
-    //swap if B has lower time than A
-    if ( is_lower_time(b->time(), a->time()) )
-        return true;
-
-    //both have equal time
-    else if ( is_equal_time(b->time(), a->time()) )
+    //R1. All staffobjs must be ordered by timepos
     {
-        ImoStaffObj* pB = b->imo_object();
-        ImoStaffObj* pA = a->imo_object();
+        //R1.1 swap if B has lower time than A
+        if ( is_lower_time(b->time(), a->time()) )
+            return true;    //B cannot go after A, Try with A-1
 
-        //barline must go before all other objects at same measure
-        if (pB->is_barline() && !pA->is_barline() && b->measure() != a->measure())
-            return true;
-        if (pA->is_barline() && !pB->is_barline() && b->measure() != a->measure())
-            return false;
-
-        //note/rest can not go before non-timed at same timepos
-        if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-            return true;
-
-        //<direction> and <sound> can not go between clefs/key/time ==>
-        //clef/key/time can not go after direction in other instruments/staves
-        if ((pA->is_direction() || pA->is_sound_change())
-            && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
-        {
-            return true;    //(a->line() != b->line());    //move clef/key/time before 'A' object
-        }
-
-////        //clef in other staff can not go after key or time signature
-////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
-////                 && b->staff() != a->staff())
-////            return true;
-////        else if (pA->is_clef() && (pB->is_key_signature() || pB->is_time_signature()))
-////            return false;
-//
-//        //else order by staff and line
-//        return (b->line() < a->line() || (b->line() == a->line()
-//                                          && b->staff() < a->staff()) );
-        //else, preserve definition order
-        return false;
+        //R1.2 time(pB) > time(pA). They are correctly ordered
+        if ( is_greater_time(b->time(), a->time()) )
+            return false;   //insert B after A
     }
 
-    //time(pB) > time(pA). They are correctly ordered
-    return false;
+    //Here A & B have the same timepos
+    ImoStaffObj* pB = b->imo_object();
+    ImoStaffObj* pA = a->imo_object();
+
+    //R4. barlines must go before all other objects  at same timepos having
+    //    high measure number
+    if (pB->is_barline() && (b->measure() < a->measure()) )
+        return true;    //B (barline) cannot go after A, Try with A-1
+
+    //R5. Non-timed must go before barlines at the same timepos with equal measure
+    //    number. But if non-timed is also a barline preserve insertion order
+    if (pB->is_barline() && pA->is_barline())
+        return false;   //insert B after A (preserve order of barlines)
+    if (pA->is_barline() && pB->get_duration() == 0.0f && (b->measure() == a->measure()) )
+        return true;    //B (non-timed) cannot go after A (barline), Try with A-1
+
+    //R2. note/rest can not go before non-timed at same timepos
+    if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+        return true;    //B cannot go after A, Try with A-1
+
+    //R3. <direction> and <sound> can not go between clefs/key/time ==>
+    //    clef/key/time can not go after direction. Missing: in other instruments/staves
+    if ((pA->is_direction() || pA->is_sound_change())
+        && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
+    {
+        return true;    //move clef/key/time before 'A' object
+    }
+
+    //R999. Both have equal time. If no other rule triggers preserve definition order
+    return false;   //insert B after A
 }
 
 //---------------------------------------------------------------------------------------

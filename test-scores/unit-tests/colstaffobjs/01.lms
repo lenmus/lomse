@@ -1,0 +1,9 @@
+(score (vers 2.0)
+    (instrument
+        (musicData 
+            (clef G)
+            (n c4 q)
+            (n e4 q)
+            (barline)
+)))
+

@@ -872,7 +872,7 @@ public:
         else if (m_pObj->get_width() > 0.0f)
             start_element("spacer", m_pObj->get_id());
         else
-            return string("");
+            return string("(dir unknown)");
 
         add_space_width();
         add_spanners();
