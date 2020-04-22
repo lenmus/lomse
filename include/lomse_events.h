@@ -1388,16 +1388,24 @@ public:
 
 //---------------------------------------------------------------------------------------
 // RequestFont
-/** When a Documnet uses a font that is not available in the Lomse package, Lomse
-    sends this request to the user application, asking for the file path for the font
-    to use.
-    The user application has to answer this request by invoking method
+/** When a Document uses a font that Lomse can not find it sends this request to the
+    user application, asking for the file path for the font to use. The user application
+    has to answer this request by invoking method
     RequestFont::set_font_fullname() passing as argument the path to the font to use.
 
-    Currently, Lomse only uses the fonts distributed
-    with liblomse package and this causes different problems
-    (see <a href="https://github.com/lenmus/lomse/issues/102">issue #102</a>).
-    The RequestFont request is just a bypass for this problem.
+    Lomse manages fonts in different ways depending on the platform:
+      - For Linux (and macOS) Lomse uses system installed fonts and makes substitutions
+        when requested font is not available. The RequestFont callback is only used
+        when Lomse cannot find the "Bravura.otf" music font needed for rendering musical
+        symbols, when it is not installed in the system (e.g. missing dependency in
+        installation page, local installation from sources, etc.).
+      - For Windows, Lomse also uses system installed fonts and makes substitutions
+        when requested font is not available, but the substitutions table is small and
+        thus, the RequestFont callback is used when Lomse cannot find the the requested
+        font or an appropriate substitution.
+      - For other platforms Lomse only uses the fonts distributed with Lomse package
+        and the RequestFont callback is used when requesting any other font not present
+        in Lomse package.
 
     <b>Example:</b>
 

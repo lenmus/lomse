@@ -8,7 +8,7 @@
 
 Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.
 
-The Lomse print API consists in four methods, invoked in sequence:
+The Lomse print API is four methods, invoked in sequence:
 
 -# First, determine how many pages to print. To know how many pages the document has, just call Interactor::get_num_pages().
 
@@ -35,6 +35,13 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
     {
         pDC->SetBackground(*WHITE_BRUSH);
         pDC->Clear();
+
+        //adjust size to take into account content scaling factor
+        Document* pDoc = m_pPresenter->get_document_raw_ptr();
+        float scale = pDoc->get_page_content_scale();
+        pDC->SetUserScale(scale, scale);
+        paperWidthPixels = int(float(paperWidthPixels) / scale);
+        paperHeightPixels = int(float(paperHeightPixels) / scale);
 
         //inform Lomse about printer resolution
         int dpi = pDC->GetPPI();
@@ -98,6 +105,13 @@ void DocumentWindow::print_page(PrinterDC* pDC, int page, int paperWidthPixels,
     {
         pDC->SetBackground(*WHITE_BRUSH);
         pDC->Clear();
+
+        //adjust size to take into account content scaling factor
+        Document* pDoc = m_pPresenter->get_document_raw_ptr();
+        float scale = pDoc->get_page_content_scale();
+        pDC->SetUserScale(scale, scale);
+        paperWidthPixels = int(float(paperWidthPixels) / scale);
+        paperHeightPixels = int(float(paperHeightPixels) / scale);
 
         //inform Lomse about printer resolution
         int dpi = pDC->GetPPI();
