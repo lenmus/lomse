@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.26.0</span>
+   &#160;<span id="projectnumber">0.27.0</span>
    </div>
   </td>
  </tr>
@@ -152,9 +152,13 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab4fc5cfffa65acc483d737d5f03af5b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e6c184b6275c49696b644750ec29e6b"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a0e6c184b6275c49696b644750ec29e6b">get_language</a> ()</td></tr>
 <tr class="separator:a0e6c184b6275c49696b644750ec29e6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a893ad884a467d900496bdd30686cc0a0"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a893ad884a467d900496bdd30686cc0a0">get_page_content_scale</a> ()</td></tr>
+<tr class="separator:a893ad884a467d900496bdd30686cc0a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Low level edition API: ImoDocument global settings</div></td></tr>
 <tr class="memitem:a7c34c93b34eacb936effd1063b44ba50"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a7c34c93b34eacb936effd1063b44ba50">set_language</a> (const string &amp;language)</td></tr>
 <tr class="separator:a7c34c93b34eacb936effd1063b44ba50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a749d0a64f2baece960ed728dc78d816a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a749d0a64f2baece960ed728dc78d816a">set_page_content_scale</a> (float scale)</td></tr>
+<tr class="separator:a749d0a64f2baece960ed728dc78d816a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab54f9738b907ee39df924853813d10bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#ab54f9738b907ee39df924853813d10bc">end_of_changes</a> ()</td></tr>
 <tr class="separator:ab54f9738b907ee39df924853813d10bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a320c343a0a0925f4a2d24c21265ec552"><td class="memItemLeft" align="right" valign="top">ImoPageInfo *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocument.html#a320c343a0a0925f4a2d24c21265ec552">get_page_info</a> ()</td></tr>
@@ -1269,6 +1273,32 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 
 </div>
 </div>
+<a id="a893ad884a467d900496bdd30686cc0a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a893ad884a467d900496bdd30686cc0a0">&#9670;&nbsp;</a></span>get_page_content_scale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Document::get_page_content_scale </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Return the scaling factor to apply to the content when rendered divided into pages of the size defined by the paper size. Normally this factor is 1.0. </p>
+
+</div>
+</div>
 <a id="a320c343a0a0925f4a2d24c21265ec552"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a320c343a0a0925f4a2d24c21265ec552">&#9670;&nbsp;</a></span>get_page_info()</h2>
 
@@ -1645,6 +1675,33 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 
 </div>
 </div>
+<a id="a749d0a64f2baece960ed728dc78d816a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a749d0a64f2baece960ed728dc78d816a">&#9670;&nbsp;</a></span>set_page_content_scale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Document::set_page_content_scale </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set the scaling factor to apply to the content when rendered divided into pages of the size defined by the paper size. By default this factor is 1.0. </p>
+
+</div>
+</div>
 <a id="ac958a0c23abacc24e6a49d3090b4bd3f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac958a0c23abacc24e6a49d3090b4bd3f">&#9670;&nbsp;</a></span>tie_notes()</h2>
 
@@ -1696,7 +1753,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>LenmusdocLmdAnalyser
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocument.html">Document</a></li>
-    <li class="footer">Generated on Thu Sep 19 2019 18:12:40 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Apr 22 2020 10:26:02 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

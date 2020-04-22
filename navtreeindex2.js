@@ -1,5 +1,8 @@
 var NAVTREEINDEX2 =
 {
+"page-sound-generation.html#playback-summary":[0,4,1],
+"page-sound-generation.html#sound-generation-external-player":[0,4,6],
+"page-tasks.html":[0,5],
 "page-tasks.html#gui-interaction":[0,5,0],
 "page-tasks.html#task-data-entry":[0,5,1,6],
 "page-tasks.html#task-drag-view":[0,5,1,0],

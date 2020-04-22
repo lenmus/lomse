@@ -56,6 +56,7 @@ var searchData=
   ['get_5fobservable_5fchild',['get_observable_child',['../classObservable.html#a993a493e3b27bf8113dd2e40a534f7d9',1,'Observable']]],
   ['get_5fobservable_5ftype',['get_observable_type',['../classObserver.html#a23510498d7e95a66c7ebf4a1317ecb99',1,'Observer']]],
   ['get_5foperating_5fmode',['get_operating_mode',['../classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead',1,'Interactor']]],
+  ['get_5fpage_5fcontent_5fscale',['get_page_content_scale',['../classDocument.html#a893ad884a467d900496bdd30686cc0a0',1,'Document']]],
   ['get_5fpage_5finfo',['get_page_info',['../classDocument.html#a320c343a0a0925f4a2d24c21265ec552',1,'Document']]],
   ['get_5fpaper_5fheight',['get_paper_height',['../classDocument.html#ad3b5d111875bcc95cb2a79b8949c3fc4',1,'Document']]],
   ['get_5fpaper_5fwidth',['get_paper_width',['../classDocument.html#a97ecb5212223586d0febccb98fadd6ab',1,'Document']]],

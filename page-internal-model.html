@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.26.0</span>
+   &#160;<span id="projectnumber">0.27.0</span>
    </div>
   </td>
  </tr>
@@ -131,30 +131,30 @@ The structure of a document</h1>
 <p>The main blocks for building the <em>Internal Model</em> are the objects shown in the following diagram:</p>
 <pre class="fragment">ImoObj                              Base class for all tree nodes
   |
-  +-- ImoSimpleObj                  Non-renderizable. Just contains other objects or properties
+  ├── ImoSimpleObj                  Non-renderizable. Just contains other objects or properties
   |                                 (e.g. option, style) 
   |           
-  +---ImoContentObj                 Renderizable objects representing document content
+  └──-ImoContentObj                 Renderizable objects representing document content
         |
-        +-- ImoBlockLevelObj        Block-level objects (e.g. document, table, list, score, ...):
+        ├── ImoBlockLevelObj        Block-level objects (e.g. document, table, list, score, ...):
         |     |
-        |     +-- ImoBlocksContainer    * Block-level containers for block-level objects.
+        |     ├── ImoBlocksContainer    * Block-level containers for block-level objects.
         |     |                           (e.g. document, table, list)
         |     |
-        |     +-- ImoInlinesContainer   * Block-level containers for inline-level objs.
+        |     ├── ImoInlinesContainer   * Block-level containers for inline-level objs.
         |     |                           (e.g. paragraph, heading, anonymous-block)
         |     |
-        |     +-- ImoScore              * A block-level object representing a music score
+        |     └── ImoScore              * A block-level object representing a music score
         |
-        +-- ImoInlineLevelObj       Inline-level objects (e.g. wrapper[span], link, button, text, image)
+        ├── ImoInlineLevelObj       Inline-level objects (e.g. wrapper[span], link, button, text, image)
         |
-        +-- ImoScoreObj             Content specific for music scores:
+        └── ImoScoreObj             Content specific for music scores:
               |
-              +-- ImoStaffObj       * Main music content (e.g. note, clef, key signature, barline)
+              ├── ImoStaffObj       * Main music content (e.g. note, clef, key signature, barline)
               |
-              +-- ImoAuxObj         * Modifiers. Attached to other score objects (e.g. fermata, notation)
+              ├── ImoAuxObj         * Modifiers. Attached to other score objects (e.g. fermata, notation)
               |                     
-              +-- ImoRelObj         * Relations. Relates two or more StaffObjs (e.g. slur, tie, beam)
+              └── ImoRelObj         * Relations. Relates two or more StaffObjs (e.g. slur, tie, beam)
                   
 .
 </pre><p>As you can see, the main building blocks (ImoContentObj objects) are of three types:</p><ol type="1">
@@ -173,7 +173,7 @@ Image: Rendering of previous LMD document.</div></div>
                                   |
                              ImoContent
                                   |
-         +----------------+----------------+------------------+
+         ┌────────────────┬───────┴────────┬──────────────────┐
          |                |                |                  |
      ImoHeading     ImoParagraph       ImoScore         ImoParagraph
          |                |                |                  |
@@ -181,7 +181,7 @@ Image: Rendering of previous LMD document.</div></div>
                                            |
                                       ImoMusicData
                                            |
-                      +-------------+-------------+---------+
+                      ┌─────────────┬──────┴──────┬─────────┐
                       |             |             |         |
                    ImoClef   ImoKeySignature   ImoNote   ImoNote
 
@@ -212,24 +212,24 @@ Internal model objects hierarchy</h1>
 <p>The following diagram shows current hierarchy of objects. Those marked with '(A)' are abstract classes. In some cases the equivalence to HTML tags is marked:</p>
 <pre class="fragment">    ImoObj (A) (type, id)
       |
-      +-- ImoDto (A) () Data Transfer Objects (Dto suffix).  Temporay use 
+      ├── ImoDto (A) () Data Transfer Objects (Dto suffix).  Temporay use 
       |     |           during model building, but never part of the final
       |     |           tree (the internal model)
       |     |
-      |     +-- ImoFontStyleDto  
-      |     +-- ImoColorDto
-      |     +-- ImoBeamDto 
-      |     +-- ImoSlurDto
-      |     +-- ImoTieDto
-      |     +-- ImoTupletDto
-      |     +-- ImoGlissandoDto
-      |     +-- ImoVoltaBracketDto
-      |     +-- ImoBorderDto - not used!!!!
-      |     +-- ImoPointDto - not used!!!!
-      |     +-- ImoSizeDto - not used!!!!
+      |     ├── ImoFontStyleDto  
+      |     ├── ImoColorDto
+      |     ├── ImoBeamDto 
+      |     ├── ImoSlurDto
+      |     ├── ImoTieDto
+      |     ├── ImoTupletDto
+      |     ├── ImoGlissandoDto
+      |     ├── ImoVoltaBracketDto
+      |     ├── ImoBorderDto - not used!!!!
+      |     ├── ImoPointDto - not used!!!!
+      |     └── ImoSizeDto - not used!!!!
       |
       |
-      +-- ImoSimpleObj (A) () No renderizable
+      ├── ImoSimpleObj (A) () No renderizable
       |     |                 They just contains other objects or properties
       |     |
       |     |  ___________________________________________________________
@@ -238,154 +238,154 @@ Internal model objects hierarchy</h1>
       |     |     as member variables in other objects. Nevertheless,.
       |     |     all defined as tree nodes for uniform treatment.
       |     |
-      |     +-- ImoBezierInfo -- data (*) in SlurData, TieData, TieDto, SlurDto
-      |     +-- (ImoFiguredBassInfo)
-      |     +-- (ImoFigBassIntervalInfo)
-      |     +-- ImoInstrGroup -- data in ImoInstrument(*)
-      |     +-- ImoLineStyle -- data in ImoTextBox, ImoLine(*)
-      |     +-- ImoPageInfo -- data in ImoDocument, ImoScore
-      |     +-- ImoStaffInfo -- data in ImoInstrument(list)
-      |     +-- ImoStyle - data in ImoStyles (std::map)
-      |     +-- ImoSystemInfo -- data in ImoScore
-      |     +-- ImoTextInfo (string, style) -- data in ImoScoreText, ImoLyricsTextInfo
+      |     ├── ImoBezierInfo -- data (*) in SlurData, TieData, TieDto, SlurDto
+      |     ├── (ImoFiguredBassInfo)
+      |     ├── (ImoFigBassIntervalInfo)
+      |     ├── ImoInstrGroup -- data in ImoInstrument(*)
+      |     ├── ImoLineStyle -- data in ImoTextBox, ImoLine(*)
+      |     ├── ImoPageInfo -- data in ImoDocument, ImoScore
+      |     ├── ImoStaffInfo -- data in ImoInstrument(list)
+      |     ├── ImoStyle - data in ImoStyles (std::map)
+      |     ├── ImoSystemInfo -- data in ImoScore
+      |     ├── ImoTextInfo (string, style) -- data in ImoScoreText, ImoLyricsTextInfo
       |     |
       |     |       // Nodes in tree
       |     |
-      |     +-- ImoMidiInfo -- child of ImoSounds, ImoSoundChange
-      |     +-- ImoOptionInfo - child of ImoOptions
-      |     +-- ImoLyricsTextInfo (text, syllableType, elision) -- child of ImoLyricsData
-      |     +-- ImoParamInfo - child of ImoDynamics
-      |     +-- ImoSoundInfo -- child of ImoSounds
+      |     ├── ImoMidiInfo -- child of ImoSounds, ImoSoundChange
+      |     ├── ImoOptionInfo - child of ImoOptions
+      |     ├── ImoLyricsTextInfo (text, syllableType, elision) -- child of ImoLyricsData
+      |     ├── ImoParamInfo - child of ImoDynamics
+      |     ├── ImoSoundInfo -- child of ImoSounds
       |     |
       |     |  ___________________________________________________________
       |     |  === Value objects to contain relation data for a node =====
       |     |
-      |     +-- ImoRelDataObj (A)
-      |     |     +-- ImoBeamData
-      |     |     +-- ImoSlurData
-      |     |     +-- ImoTieData
-      |     |     +-- ImoGlissandoData
-      |     |     +-- ImoLyricsData
+      |     ├── ImoRelDataObj (A)
+      |     |     ├── ImoBeamData
+      |     |     ├── ImoSlurData
+      |     |     ├── ImoTieData
+      |     |     ├── ImoGlissandoData
+      |     |     └── ImoLyricsData
       |     |  
       |     |  ___________________________________________________________
       |     |  === Container objects; no additional properties ===========
       |     |
-      |     +-- ImoCollection (A) () A node. Branches are the stored objs
+      |     ├── ImoCollection (A) () A node. Branches are the stored objs
       |     |     |
-      |     |     +-- ImoAttachments  &lt;auxobj&gt;
-      |     |     +-- ImoInstruments  &lt;instrument&gt;
-      |     |     +-- ImoInstrGroups  &lt;instrgroup&gt;
-      |     |     +-- ImoMusicData    &lt;staffobj&gt;
-      |     |     +-- ImoOptions      &lt;option&gt;
-      |     |     +-- ImoTableSection(A)
-      |     |           +-- ImoTableHead [thead]    &lt;tableRow&gt;
-      |     |           +-- ImoTableBody [tbody]    &lt;tableRow&gt;
+      |     |     ├── ImoAttachments  &lt;auxobj&gt;
+      |     |     ├── ImoInstruments  &lt;instrument&gt;
+      |     |     ├── ImoInstrGroups  &lt;instrgroup&gt;
+      |     |     ├── ImoMusicData    &lt;staffobj&gt;
+      |     |     ├── ImoOptions      &lt;option&gt;
+      |     |     └── ImoTableSection(A)
+      |     |           ├── ImoTableHead [thead]    &lt;tableRow&gt;
+      |     |           └── ImoTableBody [tbody]    &lt;tableRow&gt;
       |     |  
-      |     +-- ImoStyles     &lt;style&gt;  [a map to store style objects]
-      |     +-- ImoRelations  &lt;relobj&gt; [a list to store relobjs]
+      |     ├── ImoStyles     &lt;style&gt;  [a map to store style objects]
+      |     ├── ImoRelations  &lt;relobj&gt; [a list to store relobjs]
       |     |
-      |     +-- ImoContainerObj (A) ()
+      |     └── ImoContainerObj (A) ()
       |           |
-      |           +-- ImoInstrument (... , [musicData])
+      |           └── ImoInstrument (... , [musicData])
       |     
       |
-      +---ImoContentObj (A) (style, location, visible, [attachments])
+      └── ImoContentObj (A) (style, location, visible, [attachments])
             |
-            +-- ImoBlockLevelObj (A)
+            ├── ImoBlockLevelObj (A)
             |     |       Abstract class for all block-level objects
             |     |
-            |     +-- ImoScore
+            |     ├── ImoScore
             |     |
-            |     +-- ImoBlocksContainer (A)
+            |     ├── ImoBlocksContainer (A)
             |     |     |       A block-level container for block-level objects. All 
             |     |     |       ImoBlocksContainer objects (except ImoContent and
             |     |     |       ImoDynamic) have a ImoContent object as container.
             |     |     |
-            |     |     +-- ImoDocument [html/body]
-            |     |     +-- ImoContent [div] - a generic block-level container
-            |     |     |     +-- ImoDynamic [object] 
+            |     |     ├── ImoDocument [html/body]
+            |     |     ├── ImoContent [div] - a generic block-level container
+            |     |     |     └── ImoDynamic [object] 
             |     |     |
-            |     |     +-- ImoMultiColumn - a container subdivided in columns
-            |     |     +-- ImoTable [table] - a container for table related objects
-            |     |     +-- ImoList [ol, ul]
-            |     |     +-- ImoTableRow [tr] - a container for a row of cells
-            |     |     +-- ImoListItem [li]
-            |     |     +-- ImoTableCell [td, th]
+            |     |     ├── ImoMultiColumn - a container subdivided in columns
+            |     |     ├── ImoTable [table] - a container for table related objects
+            |     |     ├── ImoList [ol, ul]
+            |     |     ├── ImoTableRow [tr] - a container for a row of cells
+            |     |     ├── ImoListItem [li]
+            |     |     └── ImoTableCell [td, th]
             |     |
-            |     +-- ImoInlinesContainer (A)
+            |     └── ImoInlinesContainer (A)
             |           |        A block-level container for inline-level objs.
             |           |
-            |           +-- ImoAnonymousBlock []
-            |           +-- ImoParagraph [p]
-            |           +-- ImoHeading [h1, h2, h3, h4, h5]
+            |           ├── ImoAnonymousBlock []
+            |           ├── ImoParagraph [p]
+            |           └── ImoHeading [h1, h2, h3, h4, h5]
             |
             |
-            +-- ImoInlineLevelObj (A)
+            ├── ImoInlineLevelObj (A)
             |     |       Inline-level objects
             |     |
             |     |
-            |     +-- ImoBoxInline (A) (size, content) - an abstract 
+            |     ├── ImoBoxInline (A) (size, content) - an abstract 
             |     |     |        inline-level box container.
             |     |     |
-            |     |     +-- ImoInlineWrapper [span] - A generic inline-box container
-            |     |     +-- ImoLink [a] - Anchor 
+            |     |     ├── ImoInlineWrapper [span] - A generic inline-box container
+            |     |     └── ImoLink [a] - Anchor 
             |     |
-            |     +-- ImoButton [button] - a button
-            |     +-- ImoControl (control) - A user defined GUI obj.
-            |     |     +-- ImoScorePlayer - A control for managing score playback
+            |     ├── ImoButton [button] - a button
+            |     ├── ImoControl (control) - A user defined GUI obj.
+            |     |     └── ImoScorePlayer - A control for managing score playback
             |     |
-            |     +-- ImoTextItem [] - a piece of text with the same style
-            |     +-- ImoImage [img] - Inline image                        
+            |     ├── ImoTextItem [] - a piece of text with the same style
+            |     └── ImoImage [img] - Inline image                        
             |               
             |
-            +-- ImoScoreObj (A) (color) content for scores
+            └── ImoScoreObj (A) (color) content for scores
                   |
-                  +-- ImoStaffObj (A) (timePos, numStaff)
+                  ├── ImoStaffObj (A) (timePos, numStaff)
                   |     |
-                  |     +-- ImoBarline
-                  |     +-- ImoClef
-                  |     +-- ImoDirection
-                  |     +-- ImoKeySignature
-                  |     +-- ImoMetronomeMark
-                  |     +-- ImoNoteRest (A) (noteType, dots, voice)
-                  |     |     +-- ImoNote
-                  |     |     +-- ImoRest
-                  |     +-- ImoTimeSignature
-                  |     +-- ImoGoBackFwd
-                  |     +-- ImoSoundChange
-                  |     +-- ImoSpacer
-                  |     +-- ImoSystemBreak
+                  |     ├── ImoBarline
+                  |     ├── ImoClef
+                  |     ├── ImoDirection
+                  |     ├── ImoKeySignature
+                  |     ├── ImoMetronomeMark
+                  |     ├── ImoNoteRest (A) (noteType, dots, voice)
+                  |     |     ├── ImoNote
+                  |     |     └── ImoRest
+                  |     ├── ImoTimeSignature
+                  |     ├── ImoGoBackFwd
+                  |     ├── ImoSoundChange
+                  |     ├── ImoSpacer
+                  |     └── ImoSystemBreak
                   |
-                  +-- ImoAuxObj (A) () Can go attached to any score object
+                  ├── ImoAuxObj (A) () Can go attached to any score object
                   |     |
-                  |     +-- ImoArticulation (A)
-                  |     |     +-- ImoArticulationSymbol
-                  |     |     +-- ImoArticulationLine
+                  |     ├── ImoArticulation (A)
+                  |     |     ├── ImoArticulationSymbol
+                  |     |     └── ImoArticulationLine
                   |     |
-                  |     +-- ImoFermata
-                  |     +-- ImoDynamicsMark
-                  |     +-- ImoOrnament
-                  |     +-- ImoTechnical
-                  |     +-- ImoSymbolRepetitionMark
+                  |     ├── ImoFermata
+                  |     ├── ImoDynamicsMark
+                  |     ├── ImoOrnament
+                  |     ├── ImoTechnical
+                  |     ├── ImoSymbolRepetitionMark
                   |     |
-                  |     +-- ImoBlock (A)
-                  |     |     +-- ImoTextBox (anchor line, paragraphs)
+                  |     ├── ImoBlock (A)
+                  |     |     └── ImoTextBox (anchor line, paragraphs)
                   |     |
-                  |     +-- ImoScoreLine
-                  |     +-- ImoScoreText (wrapper for ImoTextInfo)
-                  |           +-- ImoScoreTitle (h-align) 
-                  |           +-- ImoTextRepetitionMark (repeat-type)
-                  |         ( +-- ImoInstrNameAbbrev )
+                  |     ├── ImoScoreLine
+                  |     └── ImoScoreText (wrapper for ImoTextInfo)
+                  |           ├── ImoScoreTitle (h-align) 
+                  |           ├── ImoTextRepetitionMark (repeat-type)
+                  |         ( └── ImoInstrNameAbbrev )
                   | 
-                  +-- ImoRelObj (A)  Relates two or more StaffObjs
-                        +-- ImoTie
-                        +-- ImoBeam
-                        +-- ImoChord
-                        +-- ImoSlur
-                        +-- ImoTuplet
-                        +-- ImoGlissando
-                        +-- ImoLyrics
-                        +-- ImoVoltaBracket
+                  └── ImoRelObj (A)  Relates two or more StaffObjs
+                        ├── ImoTie
+                        ├── ImoBeam
+                        ├── ImoChord
+                        ├── ImoSlur
+                        ├── ImoTuplet
+                        ├── ImoGlissando
+                        ├── ImoLyrics
+                        └── ImoVoltaBracket
 
 
     [*] Double inheritance: also from ImoAuxObj class.
@@ -413,7 +413,7 @@ The structure of a music score</h1>
                      |
                 ImoMusicData
                      |
-        +------------+------------+
+        ┌────────────┼────────────┐
         |            |            |
      ImoClef      ImoNote      ImoNote
 
@@ -436,7 +436,7 @@ Image: Modeling a fermata (simple auxiliary object).</div></div>
                             |
                        ImoMusicData
                             |
-        +------------+------+-----+------------+
+        ┌────────────┬──────┴─────┬────────────┐
         |            |            |            |
      ImoClef      ImoNote      ImoNote    ImoBarline
                                   |
@@ -460,7 +460,7 @@ Image: A tie relationship can not be modeled as a child node.</div></div>
                     |
                 Instrument
                     |
-    +---------+-----+-------+---------+
+    ┌─────────┬─────┴───────┬─────────┐
     |         |             |         |
   Clef      Note          Note     Barline
                \           /         
@@ -476,34 +476,34 @@ Image: A tie relationship can not be modeled as a child node.</div></div>
                            |
                       ImoMusicData
                            |
-       +-------------+-----+-------+---------+
+       ┌─────────────┬─────┴───────┬─────────┐
        |             |             |         |
     ImoClef       ImoNote       ImoNote  ImoBarline
                      |             |
                 ImoRelations  ImoRelations 
                      |             |
-                  ImoTie        ImoTie  &lt;--- These objects derive from 
+                  ImoTie        ImoTie  &lt;─── These objects derive from 
                      \            /          ImoRelObj and represent the
-                    +-------------+          existence of a relationship.
+                    ┌─────────────┐          existence of a relationship.
                     |  \       /  |  
-                    | ImoTieData  |&lt;--- This object is not part of the tree.
+                    | ImoTieData  |&lt;─── This object is not part of the tree.
                     |             |     The two ImoTie nodes store a pointer
-                    +-------------+     to this shared object. It contains
+                    └─────────────┘     to this shared object. It contains
                                         the common data for the relationship.
 .
 </pre><p>So, simple auxiliary objects (ImoAuxObj) are inserted as children in a ImoAttachments child node, and relation auxiliary objects (ImoRelObj) objects are stored as internal data in a ImoRelations child node::</p>
 <pre class="fragment">                                 |
-                     +-----------+-----------+
+                     ┌───────────┴───────────┐
                      |                       |
                   ImoNote                 ImoNote
                      |                       |
-           +---------+---------+       ImoRelations
+           ┌─────────┴─────────┐       ImoRelations
            |                   |             |
     ImoAttachments       ImoRelations        |
            |                   |             |
       ImoFermata             ImoTie        ImoTie
                                \            /
-                          - --- --- --- --- --- ---- ---
+                          ------------------------- 
                                  \       /    Not part of the tree 
                                   TieData         
 .
@@ -522,23 +522,23 @@ Image: A tie relationship can not be modeled as a child node.</div></div>
     data (i.e. its role):      | ImoRelDataObj      | ImoRelDataObj
                                |     ^              |     ^
                                |     |              |     | 
-                       +- -- --|-- --|-- -- -- -- --|-- --|-- -- -- ...
+                       ┌-------|-----|--------------|-----|-------- ...
     List of            |  first|     |second   first|     |second
-    participants -----------&gt; std::pair ---------&gt; std::pair -------&gt; ...
+    participants ───────────&gt; std::pair ─────────&gt; std::pair ─────&gt; ...
                        |       
                        |       
-                       +- -- -- -- -- -- -- -- -- -- -- -- -- -- -- ...   
+                       └------------------------------------------- ...   
                        ImoRelObj
 .
 </pre><p>In some relations, there is no specific data to store in the ImoRelDataObj objects. In these cases no ImoRelDataObj is created, and the internal pointers in ImoRelObj contains nullptr.</p>
 <p>For instance, here are the objects involved in modeling some relationships:</p>
 <pre class="fragment">    ImoRelObj                  ImoRelDataObj
       |                           |
-      +-- ImoBeam                 +-- ImoBeamData
-      +-- ImoChord                |      no chord data needed
-      +-- ImoSlur                 +-- ImoSlurData
-      +-- ImoTie                  +-- ImoTieData
-      +-- ImoTuplet               +-- ImoTupletData
+      ├── ImoBeam                 ├── ImoBeamData
+      ├── ImoChord                |      no chord data needed
+      ├── ImoSlur                 ├── ImoSlurData
+      ├── ImoTie                  ├── ImoTieData
+      └── ImoTuplet               └── ImoTupletData
 .
 </pre><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Finish this by describing the ImoAuxRelObjs (e.g. Lyrics)</dd></dl>
 <h2><a class="anchor" id="internal-model-scores-measures-intro"></a>
@@ -566,7 +566,7 @@ Tables related to measures</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Thu Sep 19 2019 18:12:40 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Apr 22 2020 10:26:01 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

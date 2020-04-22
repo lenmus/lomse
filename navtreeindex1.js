@@ -1,5 +1,8 @@
 var NAVTREEINDEX1 =
 {
+"group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa380201efaf4657c1772782c1e402a70a":[2,1,15,14],
+"group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3b29ceb2d41cd6a0bfd05e8595f83a93":[2,1,15,1],
+"group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3c2b358067e3a2d23c440ea39ffa5d74":[2,1,15,3],
 "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa3f6d0b56aca470a3b9dbe896d7c0c7af":[2,1,15,13],
 "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa70b8aa9c339fb77d08a8c0a1b929eee2":[2,1,15,4],
 "group__enumerations.html#ggaa89f79f04de6649710664ae10a64490aa7692d6c0c5502fea5644ddf6fc1036f5":[2,1,15,10],
@@ -246,8 +249,5 @@ var NAVTREEINDEX1 =
 "page-sound-generation.html#handling-visual-tracking-events":[0,4,4],
 "page-sound-generation.html#how-to-play-score":[0,4,3],
 "page-sound-generation.html#implementing-player-gui":[0,4,5],
-"page-sound-generation.html#page-sound-generation-overview":[0,4,0],
-"page-sound-generation.html#playback-summary":[0,4,1],
-"page-sound-generation.html#sound-generation-external-player":[0,4,6],
-"page-tasks.html":[0,5]
+"page-sound-generation.html#page-sound-generation-overview":[0,4,0]
 };

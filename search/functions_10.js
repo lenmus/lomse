@@ -14,6 +14,7 @@ var searchData=
   ['set_5fnotify_5fcallback',['set_notify_callback',['../classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15',1,'LomseDoorway']]],
   ['set_5fobject',['set_object',['../classRequestDynamic.html#ab65a2fe9ac893cd7b97aad013205f63a',1,'RequestDynamic']]],
   ['set_5foperating_5fmode',['set_operating_mode',['../classInteractor.html#acb5d21578acde66c5da165f1fa808fb6',1,'Interactor']]],
+  ['set_5fpage_5fcontent_5fscale',['set_page_content_scale',['../classDocument.html#a749d0a64f2baece960ed728dc78d816a',1,'Document']]],
   ['set_5fprint_5fbuffer',['set_print_buffer',['../classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb',1,'Interactor']]],
   ['set_5fprint_5fppi',['set_print_ppi',['../classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d',1,'Interactor']]],
   ['set_5frendering_5fbuffer',['set_rendering_buffer',['../classInteractor.html#a2494425c26d19946921e4b4e97f189f3',1,'Interactor']]],
