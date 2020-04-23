@@ -45,6 +45,7 @@
 #include "lomse_injectors.h"
 #include "lomse_image.h"
 #include "lomse_logger.h"
+#include "lomse_engraving_options.h"
 typedef int TIntAttribute;
 
 using namespace std;
@@ -6368,10 +6369,10 @@ protected:
 
     friend class ImFactory;
     friend class ImoInstrument;
-    //Default values for staff. Line spacing: 1.8 mm (staff height = 7.2 mm),
-    //line thickness: 0.15 millimeters, top margin: 10 millimeters
     ImoStaffInfo(int numStaff=0, int lines=5, int type=k_staff_regular,
-                 LUnits spacing=180.0f, LUnits thickness=15.0f, LUnits margin=1000.0f)
+                 LUnits spacing=LOMSE_STAFF_LINE_SPACING,
+                 LUnits thickness=LOMSE_STAFF_LINE_THICKNESS,
+                 LUnits margin=LOMSE_STAFF_TOP_MARGIN)
         : ImoSimpleObj(k_imo_staff_info)
         , m_numStaff(numStaff)
         , m_nNumLines(lines)

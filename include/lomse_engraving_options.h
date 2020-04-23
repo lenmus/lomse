@@ -37,6 +37,13 @@ namespace lomse
 //Engraving options (all measures in Tenths, unless otherwise stated)
 //---------------------------------------------------------------------------------------
 
+//Staff
+//Default values for instantiating scores when defaults are used.
+//**DO NOT** use these constants for other purposes. For engravers, take values from ImoScore.
+#define LOMSE_STAFF_LINE_THICKNESS      15.0f   // line thickness. LUnits: 0.15 millimeters
+#define LOMSE_STAFF_LINE_SPACING       180.0f   // LUnits: 1.8 mm (staff height = 7.2 mm)
+#define LOMSE_STAFF_TOP_MARGIN        1000.0f   // LUnits: 10 millimeters
+
 //Barlines
 #define LOMSE_THIN_LINE_WIDTH            1.5f   // thin line width
 #define LOMSE_THICK_LINE_WIDTH           6.0f   // thick line width
@@ -44,9 +51,8 @@ namespace lomse
 #define LOMSE_BARLINE_RADIUS             2.0f   // dots radius: 2 tenths
 
 //Beams
-//  according to http://www2.coloradocollege.edu/dept/mu/Musicpress/engraving.html
-//  distance between primary and secondary beams should be 1/4 space (2.5 tenths)
-//  I'm using 3 tenths (2.5 up rounding).
+// Rule B1 (GOULD, p.17)(STONE, p.9) Beam thickness is 1/2 space
+// Rule B2 (GOULD, p.17)(STONE, p.9) Distance between beams is 1/4 space
 #define LOMSE_BEAM_THICKNESS             5.0f   //"Beam/Thickness of beam line/"
 #define LOMSE_BEAM_SPACING               3.0f   //"Beam/Space between beam lines/"
 #define LOMSE_BEAM_HOOK_LENGTH          11.0f

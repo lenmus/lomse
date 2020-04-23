@@ -4458,21 +4458,21 @@ public:
         if (get_optional(k_staffSpacing))
         {
             m_childToAnalyse = m_childToAnalyse.first_child();
-            pInfo->set_line_spacing( get_float_value(180.0f));
+            pInfo->set_line_spacing( get_float_value(LOMSE_STAFF_LINE_SPACING));
         }
 
         //[<staffDistance>]
         if (get_optional(k_staffDistance))
         {
             m_childToAnalyse = m_childToAnalyse.first_child();
-            pInfo->set_staff_margin( get_float_value(1000.0f));
+            pInfo->set_staff_margin( get_float_value(LOMSE_STAFF_TOP_MARGIN));
         }
 
         //[<lineThickness>]
         if (get_optional(k_lineThickness))
         {
             m_childToAnalyse = m_childToAnalyse.first_child();
-            pInfo->set_line_thickness( get_float_value(15.0f));
+            pInfo->set_line_thickness( get_float_value(LOMSE_STAFF_LINE_THICKNESS));
         }
 
         error_if_more_elements();

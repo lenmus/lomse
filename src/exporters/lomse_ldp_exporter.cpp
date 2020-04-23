@@ -1187,9 +1187,9 @@ protected:
     {
         return pStaff->get_staff_type() == ImoStaffInfo::k_staff_regular
             && pStaff->get_num_lines() == 5
-            && pStaff->get_line_spacing() == 180.0f
-            && pStaff->get_line_thickness() == 15.0f
-            && pStaff->get_staff_margin() == 1000.0f
+            && pStaff->get_line_spacing() == LOMSE_STAFF_LINE_SPACING
+            && pStaff->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS
+            && pStaff->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN
             ;
     }
 
