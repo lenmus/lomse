@@ -126,7 +126,7 @@ public:
         else
             m_pNote3 = nullptr;
 
-        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         m_pStorage = LOMSE_NEW EngraversMap();
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =

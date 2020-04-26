@@ -107,7 +107,7 @@ public:
         dto3.set_tuplet_type(ImoTupletDto::k_stop);
         m_pNote3->include_in_relation(&doc, m_pTuplet, nullptr);
 
-        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         m_pStorage = LOMSE_NEW EngraversMap();
         m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
@@ -154,7 +154,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -177,7 +177,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_quarter);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -202,7 +202,7 @@ SUITE(NoteEngraverTest)
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -230,7 +230,7 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_whole);
         pNote->set_dots(1);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -256,7 +256,7 @@ SUITE(NoteEngraverTest)
         pNote->set_note_type(k_eighth);
         pNote->set_dots(2);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =

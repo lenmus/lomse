@@ -108,7 +108,7 @@ public:
         int numNotes = int( notes.size() );
 
         m_shapes.reserve(numNotes);
-        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, LOMSE_STAFF_LINE_SPACING);
         m_pStorage = LOMSE_NEW EngraversMap();
 
         //engrave notes/rests
