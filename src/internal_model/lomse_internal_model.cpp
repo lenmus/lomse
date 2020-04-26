@@ -2607,6 +2607,12 @@ LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+LUnits ImoInstrument::get_line_thickness_for_staff(int iStaff)
+{
+    return get_staff(iStaff)->get_line_thickness();
+}
+
+//---------------------------------------------------------------------------------------
 LUnits ImoInstrument::tenths_to_logical(Tenths value, int iStaff)
 {
 	return (value * get_line_spacing_for_staff(iStaff)) / 10.0f;

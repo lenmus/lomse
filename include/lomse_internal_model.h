@@ -5166,6 +5166,7 @@ public:
     ImoMusicData* get_musicdata();
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
+    LUnits get_line_thickness_for_staff(int iStaff);
     inline const string& get_instr_id() const { return m_partId; }
     inline ImMeasuresTable* get_measures_table() const { return m_pMeasures; }
     inline TypeMeasureInfo* get_last_measure_info() { return m_pLastMeasureInfo; }
