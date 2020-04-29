@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -34,6 +34,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_calligrapher.h"
+#include "lomse_time.h"
 
 
 namespace lomse
@@ -309,6 +310,24 @@ bool GmoShapeNote::is_in_chord()
 void GmoShapeNote::set_color(Color color)
 {
     m_pNoteheadShape->set_color(color);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::dump(ostream& outStream, int level)
+{
+    std::ios_base::fmtflags f( outStream.flags() );  //save formating options
+
+    outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
+              << "(" << get_pos_on_staff() << ")"
+              << get_name(m_objtype)
+              << "[" << m_idx << "]"
+              << fixed << setprecision(2) << setfill(' ')
+              << setw(10) << round_half_up(m_origin.x) << ", "
+              << setw(10) << round_half_up(m_origin.y) << ", "
+              << setw(10) << round_half_up(m_size.width) << ", "
+              << setw(10) << round_half_up(m_size.height) << endl;
+
+    outStream.flags( f );  //restore formating options
 }
 
 
