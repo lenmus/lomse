@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,6 +45,10 @@
 #include "lomse_engravers_map.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_im_factory.h"
+#include "lomse_document_layouter.h"
+#include "lomse_staffobjs_table.h"
+#include "lomse_graphical_model.h"
+#include "lomse_instrument_engraver.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -61,13 +65,23 @@ public:
     {
     }
 
-    inline void my_decide_on_stems_direction() { decide_on_stems_direction(); }
+    inline void my_collect_information() { collect_information(); }
     inline bool my_stems_forced() { return m_fStemForced; }
     inline bool my_stems_mixed() { return m_fStemsMixed; }
     inline bool my_stems_down() { return m_fStemsDown; }
+    inline bool my_stems_default() { return m_fDefaultSteams; }
+    inline bool my_stems_up() { return m_fStemsUp; }
+    inline bool my_is_cross_staff() { return m_fCrossStaff; }
     inline int my_get_num_stems_down() { return m_numStemsDown; }
     inline int my_get_num_notes() { return m_numNotes; }
     inline int my_get_average_pos_on_staff() { return m_averagePosOnStaff; }
+    inline bool my_has_repeated_pattern_of_pitches() {
+        return has_repeated_pattern_of_pitches();
+    }
+    inline bool my_check_all_notes_outside_first_ledger_line() {
+        return check_all_notes_outside_first_ledger_line();
+    }
+
 };
 
 
@@ -78,10 +92,13 @@ public:
     LibraryScope    m_libraryScope;
     ImoScore*       m_pScore;
     ScoreMeter*     m_pMeter;
-    EngraversMap*  m_pStorage;
+    EngraversMap*   m_pStorage;
     NoteEngraver*   m_pNoteEngrv;
     MyBeamEngraver* m_pBeamEngrv;
     GmoShapeBeam*   m_pBeamShape;
+    Document*       m_pDoc;
+    DocLayouter*    m_pDocLayouter;
+    GraphicModel*   m_pGModel;
     std::vector<GmoShapeNote*> m_shapes;
 
     BeamEngraverTestFixture()     //SetUp fixture
@@ -92,6 +109,9 @@ public:
         , m_pNoteEngrv(nullptr)
         , m_pBeamEngrv(nullptr)
         , m_pBeamShape(nullptr)
+        , m_pDoc(nullptr)
+        , m_pDocLayouter(nullptr)
+        , m_pGModel(nullptr)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -114,6 +134,22 @@ public:
         return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
     }
 
+    ImoBeam* create_beam_two_staves(Document& doc, const string& src)
+    {
+        string ldp = "(score (vers 2.0)(instrument (staves 2)"
+                     "(musicData (clef G p1)(clef F4 p2)";
+        ldp += src;
+        ldp += ")))";
+
+        doc.from_string(ldp);
+        m_pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        //child 0 = clef G, child 1= clef F4
+        ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(2) );
+        return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
+    }
+
     void prepare_to_engrave_beam(ImoBeam* pBeam)
     {
         int iInstr = 0;
@@ -125,7 +161,7 @@ public:
         int numNotes = int( notes.size() );
 
         m_shapes.reserve(numNotes);
-        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, 180.0f);
+        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, LOMSE_STAFF_LINE_SPACING);
         m_pStorage = LOMSE_NEW EngraversMap();
 
         //engrave notes
@@ -172,6 +208,28 @@ public:
         }
     }
 
+    ColStaffObjs* do_layout(const string& options, const string& ldpNotes)
+    {
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string(
+            "(score (vers 2.0)"
+            + options
+            + "(instrument (musicData (clef G)"
+            + ldpNotes +
+            ")))"
+        );
+
+        m_pDocLayouter = LOMSE_NEW DocLayouter(m_pDoc, m_libraryScope);
+        m_pDocLayouter->layout_document();
+        m_pGModel = m_pDocLayouter->get_graphic_model();
+
+        ImoDocument* pRoot = m_pDoc->get_im_root();
+        m_pScore = static_cast<ImoScore*>(pRoot->get_first_content_item());
+        m_pMeter = LOMSE_NEW ScoreMeter(m_pScore, 1, 1, LOMSE_STAFF_LINE_SPACING);
+
+        return m_pScore->get_staffobjs_table();
+    }
+
     void delete_test_data()
     {
         delete m_pMeter;
@@ -190,17 +248,163 @@ public:
         m_pNoteEngrv = nullptr;
         m_pBeamEngrv = nullptr;
         m_pBeamShape = nullptr;
+
+        delete m_pDocLayouter;
+        delete m_pDoc;
+        m_pDocLayouter = nullptr;
+        m_pDoc = nullptr;
+    }
+
+    inline const char* test_name()
+    {
+        return UnitTest::CurrentTest::Details()->testName;
     }
 
 
+    void check_stem_is_equal(int iLine, int iNote, ColStaffObjsIterator* pIt, float expected)
+    {
+        //pIt points to first note
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>((**pIt)->imo_object());
+        GmoShapeNote* pShapeNote =
+                    static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+        //LUnits halfStaffLine = m_pMeter->line_thickness_for_instr_staff(0,0) / 2.0f;
+        LUnits result = pShapeNote->get_stem_height();
+        LUnits target = expected * m_pMeter->tenths_to_logical(10.0f);// + halfStaffLine;
+        bool fBadStem = is_equal_float(target, result);
+        CHECK( fBadStem );
+        if (!fBadStem)
+        {
+            cout << "    " << test_name() << " (line " << iLine << "): note "
+                << iNote << ", target=" << target << ", result=" << result << endl;
+        }
+    }
+
+
+    void check_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
+                               int numStemsInChord = 2)
+    {
+            do_check_slant_and_stems(iLine, expectedSlant, pIt, 1, numStemsInChord);
+    }
+
+    void check_chord_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
+                                     int numNotesPerStem, int numStemsInChord=2)
+    {
+            do_check_slant_and_stems(iLine, expectedSlant, pIt, numNotesPerStem, numStemsInChord);
+    }
+
+    void do_check_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
+                                  int numNotesPerStem, int numStemsInChord)
+    {
+        //pIt points to first note
+
+        LUnits oneSpace = m_pMeter->tenths_to_logical(10.0f);
+        LUnits minStem = 2.5f * oneSpace;
+
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>((**pIt)->imo_object());
+        GmoShapeNote* pShapeNote1 =
+                    static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+        LUnits top1 = pShapeNote1->get_stem_y_flag();
+        if (numNotesPerStem > 1)
+        {
+            for (int i=0; i < numNotesPerStem-1; ++i, ++(*pIt));
+            pNR = static_cast<ImoNoteRest*>((**pIt)->imo_object());
+            GmoShapeNote* pShapeNote =
+                        static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+            LUnits incrStem = abs(pShapeNote1->get_pos_on_staff() - pShapeNote->get_pos_on_staff());
+            minStem = (2.5f + incrStem * 0.5f) * oneSpace;
+        }
+        LUnits stem = pShapeNote1->get_stem_height();
+        bool fBadStem = (stem >= minStem);
+        CHECK( fBadStem );
+        if (!fBadStem)
+        {
+            cout << "    " << test_name() << " (line " << iLine << "): stem="
+                 << stem/oneSpace << ", should be=" << minStem/oneSpace << endl;
+        }
+
+        //advance to last base note
+        if (numStemsInChord > 2)
+        {
+            int numNotes = numNotesPerStem * (numStemsInChord - 2);
+            for (int i=0; i < numNotes; ++i, ++(*pIt));
+        }
+
+        ++(*pIt);
+        pNR = static_cast<ImoNoteRest*>((**pIt)->imo_object());
+        GmoShapeNote* pShapeNote2 = static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+        LUnits top2 = pShapeNote2->get_stem_y_flag();
+        LUnits Ay = top2 - top1;
+        float angle = Ay / oneSpace;
+        bool fBadSlant = is_equal_float(angle, expectedSlant);
+        CHECK( fBadSlant );
+        if (!fBadSlant)
+        {
+            cout << "    " << test_name() << " (line " << iLine << "): expected slant="
+                 << expectedSlant << ", real slant= " << angle
+                 << ", top2=" << top2 << ", top1=" << top1
+                 << ", oneSpace=" << oneSpace << endl;
+        }
+        if (numNotesPerStem > 1)
+        {
+            for (int i=0; i < numNotesPerStem-1; ++i, ++(*pIt));
+            pNR = static_cast<ImoNoteRest*>((**pIt)->imo_object());
+            GmoShapeNote* pShapeNote =
+                        static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+            LUnits incrStem = abs(pShapeNote2->get_pos_on_staff() - pShapeNote->get_pos_on_staff());
+            minStem = (2.5f + incrStem * 0.5f) * oneSpace;
+        }
+        stem = pShapeNote2->get_stem_height();
+        fBadStem = (stem >= minStem);
+        CHECK( fBadStem );
+        if (!fBadStem)
+        {
+            cout << "    " << test_name() << " (line " << iLine << "): stem="
+                 << stem/oneSpace << ", should be=" << minStem/oneSpace << endl;
+        }
+    }
+
+    void check_repeated_pattern_of_pitches(int iLine, ImoBeam* pBeam, bool fExpected)
+    {
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_collect_information();
+        bool fResult = m_pBeamEngrv->my_has_repeated_pattern_of_pitches();
+        bool fSuccess = (fResult == fExpected);
+        CHECK( fSuccess );
+        if (!fSuccess)
+        {
+            cout << "    " << test_name() << " (line " << iLine << ") " << endl;
+            cout << "m_shapes.size()=" << m_shapes.size() << ", fResult=" << fResult
+                 << ", fExpected=" << fExpected << endl;
+        }
+        delete_test_data();
+    }
+
+    void check_all_notes_outside_first_ledger_line(int iLine, ImoBeam* pBeam, bool fExpected)
+    {
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_collect_information();
+        bool fResult = m_pBeamEngrv->my_check_all_notes_outside_first_ledger_line();
+        bool fSuccess = (fResult == fExpected);
+        CHECK( fSuccess );
+        if (!fSuccess)
+        {
+            cout << "    " << test_name() << " (line " << iLine << ") " << endl;
+            cout << "m_shapes.size()=" << m_shapes.size() << ", fResult=" << fResult
+                 << ", fExpected=" << fExpected << endl;
+        }
+        delete_test_data();
+    }
 
 };
 
 SUITE(BeamEngraverTest)
 {
 
+    // auxiliary test to check that test helper methods work ----------------------------
+
     TEST_FIXTURE(BeamEngraverTestFixture, CreateBeam)
     {
+        //aux. Check that create_beam() creates the ImoBeam object.
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         CHECK( pBeam != nullptr );
@@ -208,6 +412,7 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, FeedEngraver)
     {
+        //aux. Check that prepare_to_engrave_beam() creates BeamEngraver object.
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         CHECK( pBeam != nullptr );
@@ -221,8 +426,9 @@ SUITE(BeamEngraverTest)
         delete_test_data();
     }
 
-    TEST_FIXTURE(BeamEngraverTestFixture, CreateBeamShape)
+    TEST_FIXTURE(BeamEngraverTestFixture, BeamShapeCreated)
     {
+        //aux. Check that beam engraver creates the beam shape
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
@@ -235,13 +441,13 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, BeamShapeAddedToNoteShape)
     {
+        //@aux. Check that prepare_to_engrave_beam() store the notes shapes in m_shapes
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
         m_pBeamShape = dynamic_cast<GmoShapeBeam*>( m_pBeamEngrv->create_last_shape() );
 
-        //method prepare_to_engrave_beam() store notes shapes in m_shapes
         std::vector<GmoShapeNote*>::iterator it;
         for (it = m_shapes.begin(); it != m_shapes.end(); ++it)
             CHECK( (*it)->find_related_shape(GmoObj::k_shape_beam) == m_pBeamShape );
@@ -250,49 +456,60 @@ SUITE(BeamEngraverTest)
     }
 
 
-    // decide_on_stems_direction --------------------------------------------------------
+    // collect_information --------------------------------------------------------------
 
-    TEST_FIXTURE(BeamEngraverTestFixture, DecideStemsDirection)
+    TEST_FIXTURE(BeamEngraverTestFixture, CollectInformation)
     {
+        //@01. collect_information(). Stems default, beam above
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_decide_on_stems_direction();
+        m_pBeamEngrv->my_collect_information();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
         CHECK( m_pBeamEngrv->my_stems_mixed() == false );
         CHECK( m_pBeamEngrv->my_stems_down() == false );
+        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_stems_up() == true );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsForced)
     {
+        //@02. collect_information(). Stems forced, beam above
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+ (stem up))(n f4 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_decide_on_stems_direction();
+        m_pBeamEngrv->my_collect_information();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
         CHECK( m_pBeamEngrv->my_stems_mixed() == false );
         CHECK( m_pBeamEngrv->my_stems_down() == false );
+        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_stems_up() == true );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsMixedButNotAllowed)
     {
+        //@03. collect_information(). Stems forced
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c5 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_decide_on_stems_direction();
+        m_pBeamEngrv->my_collect_information();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
         CHECK( m_pBeamEngrv->my_stems_mixed() == false );   //for now forced to false
         CHECK( m_pBeamEngrv->my_stems_down() == false );
+        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
 //        cout << "num stems down = " << m_pBeamEngrv->my_get_num_stems_down() << endl;
 //        cout << "num notes = " << m_pBeamEngrv->my_get_num_notes() << endl;
 //        cout << "average pos = " << m_pBeamEngrv->my_get_average_pos_on_staff() << endl;
@@ -302,15 +519,587 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsMixed)
     {
+        //@04. collect_information(). Stems mixed
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+ (stem down))(n f4 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_decide_on_stems_direction();
+        m_pBeamEngrv->my_collect_information();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );   //always false when stems forced
-        CHECK( m_pBeamEngrv->my_stems_down() == false );    //stem forced by last forced stem
+        CHECK( m_pBeamEngrv->my_stems_mixed() == true );
+        CHECK( m_pBeamEngrv->my_stems_down() == false );    //value forced by last forced stem
+        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_05)
+    {
+        //@05. collect_information(). Cross-staff
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n a3 e p2 (beam 1 +))"
+            "(n e4 e p1 (beam 1 =))"
+            "(n a3 e p2 (beam 1 =))"
+            "(n e4 e p1 (beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+
+        m_pBeamEngrv->my_collect_information();
+
+        CHECK( m_pBeamEngrv->my_stems_forced() == false );
+        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == true );
+        CHECK( m_pBeamEngrv->my_stems_default() == true );
+
+        delete_test_data();
+    }
+
+
+    // engraving rules
+    // 0xx. Tests for stem length -------------------------------------------------------
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_001)
+    {
+        //@001. A1. Beams on the staff. If note is on a line, the stem is 3.25 spaces
+        ColStaffObjs* pTable = do_layout("",
+            "(n c4 e g+)(n c4 e g-)"
+            "(n a5 e g+)(n a5 e g-)"
+            "(n d5 e g+)(n d5 e g-)"
+            "(n e4 e g+)(n e4 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note
+        check_stem_is_equal(__LINE__, 1, &it, 3.25f);
+        ++it;   //2nd note
+        check_stem_is_equal(__LINE__, 2, &it, 3.25f);
+        ++it;   //3rd note
+        check_stem_is_equal(__LINE__, 3, &it, 3.25f);
+        ++it;   //4th note
+        check_stem_is_equal(__LINE__, 4, &it, 3.25f);
+        ++it;   //5th note
+        check_stem_is_equal(__LINE__, 5, &it, 3.25f);
+        ++it;   //6th note
+        check_stem_is_equal(__LINE__, 6, &it, 3.25f);
+        ++it;   //7th note
+        check_stem_is_equal(__LINE__, 7, &it, 3.25f);
+        ++it;   //8th note
+        check_stem_is_equal(__LINE__, 8, &it, 3.25f);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_002)
+    {
+        //@002. A1. Beams on the staff. For notes on space stem must be 3.0 or 3.5
+        //      depending on the space
+        ColStaffObjs* pTable = do_layout("",
+            "(n d4 e g+)(n d4 e g-)"
+            "(n a4 e g+)(n a4 e g-)"
+            "(n e5 e g+)(n e5 e g-)"
+            "(n c5 e g+)(n c5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note
+        check_stem_is_equal(__LINE__, 1, &it, 3.5f);
+        ++it;   //2nd note
+        check_stem_is_equal(__LINE__, 2, &it, 3.5f);
+        ++it;   //3rd note
+        check_stem_is_equal(__LINE__, 3, &it, 3.0f);
+        ++it;   //4th note
+        check_stem_is_equal(__LINE__, 4, &it, 3.0f);
+        ++it;   //5th note
+        check_stem_is_equal(__LINE__, 5, &it, 3.5f);
+        ++it;   //6th note
+        check_stem_is_equal(__LINE__, 6, &it, 3.5f);
+        ++it;   //7th note
+        check_stem_is_equal(__LINE__, 7, &it, 3.0f);
+        ++it;   //8th note
+        check_stem_is_equal(__LINE__, 8, &it, 3.0f);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_003)
+    {
+        //@003. A4. Minimum space between notehead and beam is 1.5 spaces. This implies
+        //          a minimum stem lenght of 2.5 for one beam and 3 spaces for two beams
+        ColStaffObjs* pTable = do_layout("",
+            "(n e5 e g+ (stem up))(n e5 e g- (stem up))"
+            "(n c4 e g+ (stem down))(n c4 e g- (stem down))"
+            "(n e5 s g+ (stem up))(n e5 s g- (stem up))"
+            "(n c4 s g+ (stem down))(n c4 s g- (stem down))"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note
+        check_stem_is_equal(__LINE__, 1, &it, 2.5f);
+        ++it;   //2nd note
+        check_stem_is_equal(__LINE__, 2, &it, 2.5f);
+        ++it;   //3rd note
+        check_stem_is_equal(__LINE__, 3, &it, 2.5f);
+        ++it;   //4th note
+        check_stem_is_equal(__LINE__, 4, &it, 2.5f);
+        ++it;   //5th note
+        check_stem_is_equal(__LINE__, 5, &it, 3.0f);
+        ++it;   //6th note
+        check_stem_is_equal(__LINE__, 6, &it, 3.0f);
+        ++it;   //7th note
+        check_stem_is_equal(__LINE__, 7, &it, 3.0f);
+        ++it;   //8th note
+        check_stem_is_equal(__LINE__, 8, &it, 3.0f);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_004)
+    {
+        //@004. A4. For each additional beam over two, the stem must be extended one space
+        ColStaffObjs* pTable = do_layout("",
+            "(n c4 f g+)(n c4 f g-)(n b5 f g+)(n b5 f g-)");
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note
+        check_stem_is_equal(__LINE__, 1, &it, 7.25f);
+        ++it;   //2nd note
+        check_stem_is_equal(__LINE__, 2, &it, 7.25f);
+        ++it;   //3rd note
+        check_stem_is_equal(__LINE__, 3, &it, 7.5f);
+        ++it;   //4th note
+        check_stem_is_equal(__LINE__, 4, &it, 7.5f);
+
+        delete_test_data();
+    }
+
+
+    // 1xx. Tests for horizontal beams --------------------------------------------------
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_100)
+    {
+        //@100. R1c. The beam is horizontal when an inner note is closer to the beam than
+        //           either of the outer notes
+        ColStaffObjs* pTable = do_layout("",
+            "(n c5 s g+ (stem up))(n b4 s (stem up))"
+            "(n +g5 s (stem up))(n f5 s g- (stem up))"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>((*it)->imo_object());
+        GmoShapeNote* pShapeNote =
+                    static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+        LUnits top1 = pShapeNote->get_stem_y_flag();
+        LUnits result = pShapeNote->get_stem_height();
+        LUnits target = 4.5f * m_pMeter->tenths_to_logical(10.0f);
+        CHECK( is_equal_float(target, result) );
+        //cout << test_name() << ", note 1. target=" << target << ", result=" << result << endl;
+
+        ++it;   //2nd
+        ++it;   //3rd
+        ++it;   //4th
+        pNR = static_cast<ImoNoteRest*>((*it)->imo_object());
+        pShapeNote = static_cast<GmoShapeNote*>(m_pGModel->get_shape_for_noterest(pNR));
+        LUnits top4 = pShapeNote->get_stem_y_flag();
+        CHECK( is_equal_float(top1, top4) );
+        //cout << test_name() << ", top1=" << top1 << ", top4=" << top4 << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_110)
+    {
+        //@110. check_all_notes_outside_first_ledger_line(). All notes inside.
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n e4 e g+)(n c5 e g-)");
+
+        check_all_notes_outside_first_ledger_line(__LINE__, pBeam, false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_111)
+    {
+        //@111. check_all_notes_outside_first_ledger_line(). All notes outside, above.
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n b5 e g+)(n d6 e)(n e6 e)(n g6 e g-)");
+
+        check_all_notes_outside_first_ledger_line(__LINE__, pBeam, true);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_112)
+    {
+        //@112. check_all_notes_outside...(). One note on first ledger, above
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n a5 e g+)(n d6 e)(n e6 e)(n g6 e g-)");
+
+        check_all_notes_outside_first_ledger_line(__LINE__, pBeam, false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_113)
+    {
+        //@113. check_all_notes_outside...(). One note on first ledger, below
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n b3 e)(n g3 e)(n a3 e g-)");
+
+        check_all_notes_outside_first_ledger_line(__LINE__, pBeam, false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_114)
+    {
+        //@114. check_all_notes_outside_first_ledger_line(). All notes outside, below
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n b3 e g+)(n f3 e)(n g3 e)(n a3 e g-)");
+
+        check_all_notes_outside_first_ledger_line(__LINE__, pBeam, true);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_120)
+    {
+        //@120. R3b. Repeated pattern of pitches. False for two notes
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n c5 e g+)(n f4 e g-)");
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_121)
+    {
+        //@121. R3b. Repeated pattern of pitches. False for even number of notes
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n c5 e g+)(n a4 e)(n f4 e g-)");
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_122)
+    {
+        //@122. R3b. Repeated pattern of pitches. Four notes with pattern
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n c5 s g+)(n a4 s)(n c5 s)(n a4 s g-)"
+        );
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,true);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_123)
+    {
+        //@123. R3b. Repeated pattern of pitches. Four notes no pattern
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n c5 s g+)(n g4 s)(n c5 s)(n a4 s g-)"
+        );
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,false);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_124)
+    {
+        //@124. R3b. Repeated pattern of pitches. Six notes, pattern of three
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n c5 s g+)(n b4 s)(n a4 s)(n c5 s)(n b4 s)(n a4 s g-)"
+        );
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,true);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_125)
+    {
+        //@125. R3b. Repeated pattern of pitches. 24 notes, pattern of 6
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n c5 s g+)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s)"
+            "(n c5 s)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s)"
+            "(n c5 s)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s)"
+            "(n c5 s)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s g-)"
+        );
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,true);
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_126)
+    {
+        //@126. R3b. Repeated pattern of pitches. 24 notes, pattern of 12
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc,
+            "(n c5 s g+)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s)"
+            "(n d4 s)(n c4 s)(n b3 s)(n a3 s)(n g3 s)(n f3 s)"
+            "(n c5 s)(n b4 s)(n a4 s)(n g4 s)(n f4 s)(n e4 s)"
+            "(n d4 s)(n c4 s)(n b3 s)(n a3 s)(n g3 s)(n f3 s g-)"
+        );
+
+        check_repeated_pattern_of_pitches(__LINE__, pBeam,true);
+    }
+
+
+    // 2xx. Tests for beam slant --------------------------------------------------------
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_200)
+    {
+        //@200. R3. Beam slant. Case 1: distance 3 spaces gives slant 1/4
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 30)",
+            //
+            "(n d5 e g+)(n b3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+            "(n d6 e g+ (stem up))(n d5 e g- (stem up))"
+            "(n d5 e g+ (stem down))(n b3 e g- (stem down))"
+            "(n b3 e g+)(n d5 e g-)"
+            "(n d5 e g+)(n d6 e g-)"
+            "(n d5 e g+ (stem up))(n d6 e g- (stem up))"
+            "(n b3 e g+ (stem down))(n d5 e g- (stem down))"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //5th note. group 3
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //7th note. group 4
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //9th note. group 5
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //11th note. group 6
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //13th note. group 7
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //15th note. group 8
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_201)
+    {
+        //@201. R3. Beam slant. Case 2: distance 5 spaces gives slant 1/2 space
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 40)", //40 -> 58.5
+            //
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_202)
+    {
+        //@202. R3. Beam slant. Case 3: distance 6.5 spaces gives slant 1 space
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 50)", //50 --> 72.5
+            //
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 1.0f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 1.0f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_203)
+    {
+        //@203. R3. Beam slant. Case 4: distance 10 spaces gives slant 1.25 spaces
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 70)", //70 --> 100.5
+            //
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 1.25f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 1.25f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_204)
+    {
+        //@204. R3. Beam slant. Case 5: distance 15 spaces gives slant 1.5 spaces
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 100)", // 100 -> 142.5
+            //
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 1.5f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 1.5f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_205)
+    {
+        //@205. R3. Beam slant. Case 6: distance 21 spaces gives slant 2 spaces
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)"
+            "(opt Render.SpacingValue 150)"  //150 -> 212.5
+            ,
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 2.0f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 2.0f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_206)
+    {
+        //@206. R3. Beam slant: slant in the same direction than note pitches
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)"
+            "(opt Render.SpacingValue 40)"
+            ,
+            "(n e4 e g+)(n e3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+            "(n e3 e g+)(n e4 e g-)"
+            "(n d5 e g+)(n d6 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+        ++it;   //5th note. group 3
+        check_slant_and_stems(__LINE__, -0.5f, &it);
+        ++it;   //7th note. group 4
+        check_slant_and_stems(__LINE__, -0.5f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_207)
+    {
+        //@207. R3. Beam slant: error in slant direction
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)"
+            "(opt Render.SpacingValue 40)"
+            ,
+            "(n d5 e g+)(n e5 e g-)"
+            "(n e5 e g+)(n d5 e g-)"
+            "(n g4 e g+)(n f4 e g-)"
+            "(n f4 e g+)(n g4 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, -0.5f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+        ++it;   //5th note. group 3
+        check_slant_and_stems(__LINE__, 0.5f, &it);
+        ++it;   //7th note. group 4
+        check_slant_and_stems(__LINE__, -0.5f, &it);
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_208)
+    {
+        //@208. R3. Beam slant: error in stem increment
+        ColStaffObjs* pTable = do_layout(
+        "(opt Render.SpacingMethod 1)"
+        "(opt Render.SpacingValue 210)"
+        ,
+        "(n e4 e. g+)(n d4 s g-)"
+        "(n d4 e. g+)(n e4 s g-)"
+        "(n f5 e. g+)(n g5 s g-)"
+        "(n g5 e. g+)(n f5 s g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 2.0f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, -2.0f, &it);
+        ++it;   //5th note. group 3
+        check_slant_and_stems(__LINE__, -2.0f, &it);
+        ++it;   //7th note. group 4
+        check_slant_and_stems(__LINE__, 2.0f, &it);
+
+        delete_test_data();
+    }
+
+//    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_209)
+//    {
+//        //@209. R3. Beam slant: error in chords
+//        ColStaffObjs* pTable = do_layout(
+//        "(opt Render.SpacingMethod 1)"
+//        "(opt Render.SpacingValue 50)"
+//        ,
+//        "(chord (n c5 e (beam 1 +))(n f5 e)(n a5 e))"
+//        "(chord (n d5 e (beam 1 -))(n g5 e)(n b5 e))"
+//        "(chord (n c4 e (beam 2 +))(n f4 e)(n a4 e))"
+//        "(chord (n d4 e (beam 2 -))(n g4 e)(n b4 e))"
+//        "(chord (n c5 s (beam 3 ++))(n f5 s)(n a5 s))"
+//        "(chord (n g4 s (beam 3 --))(n e5 s)(n g5 s))"
+//        "(chord (n c4 s (beam 4 ++))(n f4 s)(n a4 s))"
+//        "(chord (n g3 s (beam 4 --))(n e4 s)(n g4 s))"
+//        );
+//        ColStaffObjsIterator it = pTable->begin();  //clef
+//
+//        ++it;   //group 1 (6 notes)
+//        check_chord_slant_and_stems(__LINE__, -1.0f, &it, 3);
+//        ++it;   //group 2 (6 notes)
+//        check_chord_slant_and_stems(__LINE__, -1.0f, &it, 3);
+//        ++it;   //group 3 (6 notes)
+//        check_chord_slant_and_stems(__LINE__, 1.0f, &it, 3);
+//        ++it;   //group 4 (6 notes)
+//        check_chord_slant_and_stems(__LINE__, 1.0f, &it, 3);
+//
+//        delete_test_data();
+//    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_210)
+    {
+        //@210. R4. Beam slant: all notes on ledger lines
+        ColStaffObjs* pTable = do_layout(
+        "(opt Render.SpacingMethod 1)"
+        "(opt Render.SpacingValue 200)"
+        ,
+        "(n f3 e g+)(n g3 e g-)"
+        "(n b5 e g+)(n d6 e)(n e6 e)(n g6 e g-)"
+        "(n c7 e g+)(n c6 e g-)"
+        "(n d6 e g+)(n d6 e)(n b5 e)(n b5 e g-)"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //group 1
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //group 2
+        check_slant_and_stems(__LINE__, -0.50f, &it, 4);
+        ++it;   //group 3
+        check_slant_and_stems(__LINE__, 0.50f, &it);
+        ++it;   //group 4
+        check_slant_and_stems(__LINE__, 0.50f, &it, 4);
 
         delete_test_data();
     }

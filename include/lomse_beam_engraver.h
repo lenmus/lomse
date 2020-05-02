@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,14 +42,14 @@ namespace lomse
 {
 
 //forward declarations
-class ImoObj;
+class GmoShape;
 class GmoShapeBeam;
-class ScoreMeter;
+class GmoShapeNote;
 class ImoBeam;
 class ImoNote;
-class GmoShapeNote;
 class ImoNoteRest;
-class GmoShape;
+class ImoObj;
+class ScoreMeter;
 class VerticalProfile;
 
 
@@ -104,23 +104,37 @@ protected:
     void create_shape();
     void add_shape_to_noterests();
     void reposition_rests();
+    void collect_information();
     void decide_on_stems_direction();
     void decide_beam_position();
     void change_stems_direction();
-    void adjust_stems_lengths();
+    void beam_angle_and_stems_for_simple_beams();
+    void beam_angle_and_stems_for_cross_staff_and_double_steamed_beams();
     void compute_beam_segments();
 	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
     void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
     void make_segments_relative();
+    void determine_number_of_beam_levels();
 
+    bool has_repeated_pattern_of_pitches();
+    bool check_all_notes_outside_first_ledger_line();
+    float get_staff_length_for_beam(int iNote);
+
+    bool m_fHasChords;      //the beam has chords
     bool m_fStemForced;     //at least one stem forced
-    bool m_fStemsMixed;     //not all stems in the same direction
+    bool m_fStemsMixed;     //when stems forced: not all stems in the same direction
     bool m_fStemsDown;      //stems direction down
     bool m_fCrossStaff;     //the beamed group is cross-staff (= has notes on several staves)
+    bool m_fDefaultSteams;  //at least one stem with default position
+    bool m_fStemsUp;        //only meaningfull if m_fStemsMixed==false. True if all stems
+                            //forced up or default position
+
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes
     int m_averagePosOnStaff;
     int m_maxStaff;         //for cross-staff beams, the highest staff. For normal beams, just the staff
+    int m_numLevels;        //number of beam levels for this beam;
+    std::vector<GmoShapeNote*> m_note;      //shapes for notes. Rests removed.
 };
 
 

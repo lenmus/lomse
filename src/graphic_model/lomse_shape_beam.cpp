@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,7 +68,7 @@ void GmoShapeBeam::set_layout_data(std::list<LUnits>& segments, UPoint origin,
 //---------------------------------------------------------------------------------------
 void GmoShapeBeam::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    Color color = determine_color_to_use(opt);
+    Color color = determine_color_to_use(opt);  //Color(255,0,0,127);   //
 
     std::list<LUnits>::iterator it = m_segments.begin();
     while (it != m_segments.end())

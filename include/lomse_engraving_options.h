@@ -52,9 +52,7 @@ namespace lomse
 
 //Beams
 // Rule B1 (GOULD, p.17)(STONE, p.9) Beam thickness is 1/2 space
-// Rule B2 (GOULD, p.17)(STONE, p.9) Distance between beams is 1/4 space
 #define LOMSE_BEAM_THICKNESS             5.0f   //"Beam/Thickness of beam line/"
-#define LOMSE_BEAM_SPACING               3.0f   //"Beam/Space between beam lines/"
 #define LOMSE_BEAM_HOOK_LENGTH          11.0f
 
 //Instruments
