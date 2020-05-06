@@ -269,7 +269,7 @@ std::string FontSelector::find_font(const std::string& language,
         fullpath = fontspath;
         fullpath += "arial.ttf";
         if (access(fullpath.c_str(), 0) != 0) 
-            LOMSE_LOG_ERROR("Arial font not found. The program will prrobably crash!");
+            LOMSE_LOG_ERROR("Arial font not found. The program will probably crash!");
     }
 
     LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());

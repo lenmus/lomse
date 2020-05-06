@@ -500,7 +500,11 @@ Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 void NoteEngraver::add_leger_lines_if_necessary()
 {
     LUnits lineOutgoing = tenths_to_logical(LOMSE_LEGER_LINE_OUTGOING);
-    LUnits lineThickness = tenths_to_logical(LOMSE_STEM_THICKNESS);
+
+    //Ledger lines thicknes is twice the staff line thickness (E.Gould, p.26)
+    LUnits uStaffLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff);
+    LUnits lineThickness = 2.0f * uStaffLine;
+
     LUnits lineSpacing = tenths_to_logical(10.0f);
 
     //leger lines at top
@@ -747,6 +751,7 @@ void StemFlagEngraver::determine_stem_y_pos()
     GmoShape* pTopNotehead = (m_fStemDown ? m_pRefNoteShape : m_pFlagNoteShape)->get_notehead_shape();
     GmoShape* pBottomNotehead = (m_fStemDown ? m_pFlagNoteShape : m_pRefNoteShape)->get_notehead_shape();
     LUnits halfNotehead = pTopNotehead->get_height() / 2.0f;
+    //LUnits oneLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff);
 
     //top of fixed/extensible when up/down, respectively
     m_yStemTop = pTopNotehead->get_top() + halfNotehead;
@@ -758,12 +763,12 @@ void StemFlagEngraver::determine_stem_y_pos()
     if (m_fStemDown)
     {
         m_yStemFlag = m_yStemBottom;
-        m_yStemBottom += m_uStemLength;
+        m_yStemBottom += m_uStemLength; // - oneLine/2.0f;
     }
     else
     {
         m_yStemFlag = m_yStemTop;
-        m_yStemTop -= m_uStemLength;
+        m_yStemTop -= m_uStemLength;    //(m_uStemLength + oneLine/2.0f);
     }
 }
 

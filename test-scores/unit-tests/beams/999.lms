@@ -1,0 +1,17 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 50)
+    (opt Staff.DrawLeftBarline false)
+    (instrument 
+        (musicData
+            (clef G (visible no))
+            (chord (n c5 e (beam 1 +))(n f5 e)(n a5 e))
+            (chord (n d5 e (beam 1 -))(n g5 e)(n b5 e))
+            (chord (n c4 e (beam 2 +))(n f4 e)(n a4 e))
+            (chord (n d4 e (beam 2 -))(n g4 e)(n b4 e))
+            (chord (n c5 s (beam 3 ++))(n f5 s)(n a5 s))
+            (chord (n g4 s (beam 3 --))(n e5 s)(n g5 s))
+            (chord (n c4 s (beam 4 ++))(n f4 s)(n a4 s))
+            (chord (n g3 s (beam 4 --))(n e4 s)(n g4 s))
+    ))
+)

@@ -103,7 +103,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -123,7 +123,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
@@ -159,7 +159,7 @@ SUITE(GmoShapeTest)
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_flat);
         pNote->set_note_type(k_whole);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =

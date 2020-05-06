@@ -90,6 +90,7 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
         {
             m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
             m_lineSpace.push_back(lineSpacing);
+            m_lineThickness.push_back(LOMSE_STAFF_LINE_THICKNESS);
         }
     }
     m_numStaves = numStaves * numInstruments;
@@ -169,6 +170,8 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
             LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
             m_lineSpace.push_back(lineSpacing);
             m_maxLineSpace = max(m_maxLineSpace, lineSpacing);
+
+            m_lineThickness.push_back( pInstr->get_line_thickness_for_staff(iStaff) );
         }
     }
     m_numStaves = staves;
@@ -199,6 +202,13 @@ LUnits ScoreMeter::line_spacing_for_instr_staff(int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;
 	return m_lineSpace[idx];
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreMeter::line_thickness_for_instr_staff(int iInstr, int iStaff)
+{
+    int idx = m_staffIndex[iInstr] + iStaff;
+	return m_lineThickness[idx];
 }
 
 

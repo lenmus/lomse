@@ -1,0 +1,17 @@
+(score (vers 2.1)
+    (instrument (staves 2) (musicData
+        (clef G p1)
+        (clef F4 p2)
+        (spacer 40)
+        (n a3 e p2 (beam 1 +))
+        (n e4 e p1 (beam 1 =))
+        (n a3 e p2 (beam 1 =))
+        (n e4 e p1 (beam 1 -))
+        (spacer 40)
+        (n c5 e p1 (beam 2 +))
+        (n e4 e p1 (beam 2 =))
+        (n a3 e p2 (beam 2 =))
+        (n b4 e p2 (beam 2 -))
+    ))
+)
+

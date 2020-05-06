@@ -188,16 +188,16 @@ SUITE(InternalModelTest)
         ImoStaffInfo* pStaff = pInstr->get_staff(0);
         CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
-        CHECK( pStaff->get_staff_margin() == 1000.0f );
-        CHECK( pStaff->get_line_spacing() == 180.0f );
-        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pStaff->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
+        CHECK( pStaff->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pStaff->get_height() == 735.0f );
         pStaff = pInstr->get_staff(2);
         CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
-        CHECK( pStaff->get_staff_margin() == 1000.0f );
-        CHECK( pStaff->get_line_spacing() == 180.0f );
-        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pStaff->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
+        CHECK( pStaff->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pStaff->get_height() == 735.0f );
         delete pInstr;
     }
@@ -236,16 +236,16 @@ SUITE(InternalModelTest)
         ImoStaffInfo* pStaff = pInstr->get_staff(2);
         CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
-        CHECK( pStaff->get_staff_margin() == 1000.0f );
+        CHECK( pStaff->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
         CHECK( pStaff->get_line_spacing() == 400.0f );
-        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pStaff->get_height() == 1615.0f );
         pStaff = pInstr->get_staff(1);
         CHECK( pStaff != nullptr );
         CHECK( pStaff->get_num_lines() == 5 );
-        CHECK( pStaff->get_staff_margin() == 1000.0f );
-        CHECK( pStaff->get_line_spacing() == 180.0f );
-        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pStaff->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
+        CHECK( pStaff->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pStaff->get_height() == 735.0f );
         delete pInstr;
     }

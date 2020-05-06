@@ -1,0 +1,38 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (opt Score.JustifyLastSystem 3) //always
+    (instrument (musicData
+        (clef G (visible no))
+        (n b3 e g+)(n b3 e g-)
+        (n b3 s g+)(n b3 s g-)
+        (n b3 t g+)(n b3 t g-)
+        (n b3 i g+)(n b3 i g-)
+        (n b3 o g+)(n b3 o g-)
+        (n b3 f g+)(n b3 f g-)
+
+        (n b5 e g+)(n b5 e g-)
+        (n b5 s g+)(n b5 s g-)
+        (n b5 t g+)(n b5 t g-)
+        (n b5 i g+)(n b5 i g-)
+        (n b5 o g+)(n b5 o g-)
+        (n b5 f g+)(n b5 f g-)
+        (barline double)
+
+        (n c4 e g+)(n c4 e g-)
+        (n c4 s g+)(n c4 s g-)
+        (n c4 t g+)(n c4 t g-)
+        (n c4 i g+)(n c4 i g-)
+        (n c4 o g+)(n c4 o g-)
+        (n c4 f g+)(n c4 f g-)
+
+        (n a5 e g+)(n a5 e g-)
+        (n a5 s g+)(n a5 s g-)
+        (n a5 t g+)(n a5 t g-)
+        (n a5 i g+)(n a5 i g-)
+        (n a5 o g+)(n a5 o g-)
+        (n a5 f g+)(n a5 f g-)
+        (barline double)
+    ))
+)

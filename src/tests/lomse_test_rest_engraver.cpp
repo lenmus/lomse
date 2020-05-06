@@ -76,7 +76,7 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(0);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =
@@ -100,7 +100,7 @@ SUITE(RestEngraverTest)
         pRest->set_note_type(k_whole);
         pRest->set_dots(1);
 
-        ScoreMeter meter(nullptr, 1, 1, 180.0f);
+        ScoreMeter meter(nullptr, 1, 1, LOMSE_STAFF_LINE_SPACING);
         EngraversMap storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeRest* pShape =

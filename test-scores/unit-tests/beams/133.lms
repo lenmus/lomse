@@ -1,0 +1,18 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (musicData
+        (clef G (visible no))
+            //group 1
+        (n a3 w (color #ffffff00))
+        (n c5 s g+ (stem down))(n a4 s (stem down))
+        (n g5 s (stem down))(n f5 s g- (stem down))
+        (n a3 w (color #ffffff00))
+            //group 2
+        (n c6 w (color #ffffff00))
+        (n d4 s (beam 1 ++))(n a4 s (beam 1 ==))(n c5 s (beam 1 =-))
+        (n d4 s (beam 1 =+))(n a4 s (beam 1 ==))(n c5 s (beam 1 --))
+        (n c6 w (color #ffffff00))
+    ))
+)

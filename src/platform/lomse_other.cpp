@@ -32,7 +32,10 @@
 #include "lomse_build_options.h"
 #include "lomse_logger.h"
 
-#include <locale>   //to upper conversion
+//std
+#include <locale>           //to upper conversion
+using namespace std;
+
 
 namespace lomse
 {
@@ -59,12 +62,21 @@ std::string FontSelector::find_font(const std::string& language,
     //For generic families (i.e.: sans, serif, monospace, ...) priority is given to
     //language
 
-    LOMSE_LOG_INFO("lang=%s, name=%s", language.c_str(), name.c_str());
+    //search in cache
+    string key=language + name + (fBold ? "1" : "0") + (fItalic ? "1" : "0");
+    map<string, string>::iterator it = m_cache.find(key);
+    if (it != m_cache.end())
+        return it->second;
 
     string fullpath = m_pLibScope->fonts_path();
 
     if (!fontFile.empty())
-        return fullpath + fontFile;
+    {
+        fullpath += fontFile;
+        LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());
+        m_cache.insert(make_pair(key, fullpath));
+        return fullpath;
+    }
 
     //transform name to capital letters for comparisons
     const locale& loc = locale();
@@ -76,18 +88,16 @@ std::string FontSelector::find_font(const std::string& language,
     if (fontname == "BRAVURA")
     {
         fullpath += "Bravura.otf";
-        return fullpath;
     }
 
     //Chinese fonts
-    if (language == "zh_CN")
+    else if (language == "zh_CN")
     {
         fullpath += "wqy-zenhei.ttc";
-        return fullpath;
     }
 
-
-    if (fontname == "LIBERATION SERIF" || fontname == "SERIF"
+    // Liberation Serif, serif or Times New Roman  -->  Liberation Serif
+    else if (fontname == "LIBERATION SERIF" || fontname == "SERIF"
              || fontname == "TIMES NEW ROMAN")
     {
         if (fBold && fItalic)
@@ -98,10 +108,9 @@ std::string FontSelector::find_font(const std::string& language,
             fullpath += "LiberationSerif-Italic.ttf";
         else
             fullpath += "LiberationSerif-Regular.ttf";
-        LOMSE_LOG_INFO("--- Path=%s", fullpath.c_str());
-        return fullpath;
     }
 
+    // Liberation Sans, sans-serif or Helvetica  -->  Liberation Sans
     else if (fontname == "LIBERATION SANS" || fontname == "SANS-SERIF" || fontname == "SANS"
              || fontname == "HELVETICA")
     {
@@ -113,12 +122,16 @@ std::string FontSelector::find_font(const std::string& language,
             fullpath += "LiberationSans-Italic.ttf";
         else
             fullpath += "LiberationSans-Regular.ttf";
-        LOMSE_LOG_INFO("--- Path=%s", fullpath.c_str());
-        return fullpath;
     }
 
+    //Other fonts: ask user program
     else
-        return m_pLibScope->get_font(name, fBold, fItalic);
+        fullpath = m_pLibScope->get_font(name, fBold, fItalic);
+
+    
+    LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());
+    m_cache.insert(make_pair(key, fullpath));
+    return fullpath;
 }
 
 

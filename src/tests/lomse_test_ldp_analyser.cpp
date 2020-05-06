@@ -9575,10 +9575,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->get_staff_number() == 1 );
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
-        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pInfo && pInfo->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
         CHECK( pInfo && pInfo->get_height() == 735.0f );
-        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
@@ -9606,10 +9606,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->get_staff_number() == 1 );
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pInfo && pInfo->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
         CHECK( pInfo && pInfo->get_height() == 735.0f );
-        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
@@ -9638,10 +9638,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->get_staff_number() == 1 );
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
-        CHECK( pInfo && pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo && pInfo->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
+        CHECK( pInfo && pInfo->get_line_spacing() == LOMSE_STAFF_LINE_SPACING );
         CHECK( pInfo && pInfo->get_height() == 735.0f );
-        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();
@@ -9670,10 +9670,10 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->get_staff_number() == 1 );
         CHECK( pInfo && pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
-        CHECK( pInfo && pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo && pInfo->get_staff_margin() == LOMSE_STAFF_TOP_MARGIN );
         CHECK( pInfo && pInfo->get_line_spacing() == 200.0f );
         CHECK( pInfo && pInfo->get_height() == 815.0f );
-        CHECK( pInfo && pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo && pInfo->get_line_thickness() == LOMSE_STAFF_LINE_THICKNESS );
         CHECK( pInfo && pInfo->get_num_lines() == 5 );
 
         delete tree->get_root();

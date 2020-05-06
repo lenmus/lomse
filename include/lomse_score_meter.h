@@ -71,7 +71,8 @@ protected:
     long m_nJustifyLastSystem;
     long m_nTruncateStaffLines;
 
-	std::vector<LUnits> m_lineSpace;    //spacing for each staff
+	std::vector<LUnits> m_lineSpace;        //spacing for each staff
+	std::vector<LUnits> m_lineThickness;    //line thickness for each staff
     std::vector<int> m_staffIndex;
     LUnits m_maxLineSpace;              //spacing for greatest staff
 
@@ -114,6 +115,7 @@ public:
     LUnits tenths_to_logical(Tenths value, int iInstr=0, int iStaff=0);
     Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
+    LUnits line_thickness_for_instr_staff(int iInstr, int iStaff);
     inline LUnits tenths_to_logical_max(Tenths value)     //using biggest staff
     {
         return (value * m_maxLineSpace) / 10.0f;
