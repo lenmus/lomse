@@ -137,7 +137,7 @@ GmoShape* BeamEngraver::create_last_shape(Color color)
     if (m_fCrossStaff || m_fStemsMixed || m_fHasChords)
         beam_angle_and_stems_for_cross_staff_and_double_steamed_beams();
     else
-        beam_angle_and_stems_for_simple_beams();
+        compute_beam_and_stems_for_simple_beams();
 
     reposition_rests();
     compute_beam_segments();
@@ -226,14 +226,15 @@ void BeamEngraver::collect_information()
     m_fStemsMixed = false;      //assume no mixed stems
     m_fCrossStaff = false;      //assume no cross staff beam
     m_fDefaultSteams = true;    //assume at least one stem with default position
-    m_fStemsUp = true;          //assume all stems forced up or default.
-                                //      Only valid if m_fStemsMixed==false
+    m_fStemsUp = true;          //Only valid if m_fStemsMixed==false
+
     m_numStemsDown = 0;
     m_numNotes = 0;
     m_averagePosOnStaff = 0;    //to determine majoritary stem direction
     m_maxStaff = 0;
 
-    m_fStemsDown = false;       //set stems up by default
+    m_fStemsDown = false;       //set stems up by default (old code. to be removed)
+    m_uBeamThickness = m_pMeter->tenths_to_logical(LOMSE_BEAM_THICKNESS, m_iInstr, m_iStaff);
 
     bool fLastForcedStemUp = false;
     int prevStaff = 0;
@@ -322,7 +323,49 @@ void BeamEngraver::decide_beam_position()
     else
     {
         //Normal single staff beams.
-        m_fBeamAbove = !m_fStemsDown;
+
+        if (m_fStemForced)
+        {
+            //all stems in the same direction, as it is not mixed stems.
+            //D3. When there is only one stem direction forced the beam placement is
+            //    forced by it.
+            //D4. When there are more than one stem forced and all forced in the
+            //    same direction this direction forces beam placement.
+            m_fBeamAbove = m_fStemsUp;
+        }
+        else
+        {
+            //all stems are default direction. Therefore, rules D1 & D2 apply.
+
+            //determine max distance above/below middle line
+            int maxAboveDistance = -1;       //-1 means no note above middle line
+            int maxBelowDistance = -1;       //-1 means no note below middle line
+            for (int i=0; i < m_numNotes; ++i)
+            {
+                int pos = m_note[i]->get_pos_on_staff() - 6;    // 6 is middle line
+                if (pos > 0)
+                    maxAboveDistance = max (maxAboveDistance, pos);
+                else
+                    maxBelowDistance = max(maxBelowDistance, -pos);
+            }
+
+            //D1. (Stone, p.50) The farthest note (extreme note) from the middle line of
+            //    the staff determines the direction of all stems in the beamed group.
+            if ((maxBelowDistance == -1) || (maxAboveDistance > maxBelowDistance))
+            {
+                m_fBeamAbove = false;
+            }
+            else if ((maxAboveDistance == -1) || (maxBelowDistance > maxAboveDistance))
+            {
+                m_fBeamAbove = true;
+            }
+            else
+            {
+                //D2. (Stone, p.50) If there are two extreme notes in opposite directions and
+                //    at the same distance from middle line, then group will be stemmed down.
+                m_fBeamAbove = false;
+            }
+        }
     }
 }
 
@@ -366,10 +409,6 @@ void BeamEngraver::change_stems_direction()
         //}
 
         //Change the stems direction of notes unless they are forced.
-        //Recompute m_fStemsMixed as it could change if it is possible to change stems
-        bool fPrevWasUp = false;
-        bool fFirstNote = true;
-        m_fStemsMixed = false;
         std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
         for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
         {
@@ -379,20 +418,8 @@ void BeamEngraver::change_stems_direction()
                 GmoShapeNote* pShape = static_cast<GmoShapeNote*>(it->second);
                 if (pNote->is_stem_default())
                 {
-                    pShape->set_stem_down(m_fStemsDown);
-                    int posOnStaff = pShape->get_pos_on_staff();
-                    Tenths stem = NoteEngraver::get_standard_stem_length(posOnStaff, m_fStemsDown);
-                    pShape->set_stem_length(
-                            m_pMeter->tenths_to_logical(stem, m_iInstr, pNote->get_staff()));
+                    pShape->set_stem_down(!m_fBeamAbove);    //m_fStemsDown);
                 }
-                bool fStemUp = pShape->is_up();
-                if (fFirstNote)
-                {
-                    fPrevWasUp = fStemUp;
-                    fFirstNote = false;
-                }
-                m_fStemsMixed |= (fPrevWasUp != fStemUp);
-                fPrevWasUp = fStemUp;
             }
         }
     }
@@ -615,190 +642,21 @@ void BeamEngraver::make_segments_relative()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::beam_angle_and_stems_for_simple_beams()
+void BeamEngraver::compute_beam_and_stems_for_simple_beams()
 {
-    // At this point all stems have the standard size and the stem start and end points
-    // are computed (start point = nearest to notehead)
+    int pos0 = m_note[0]->get_pos_on_staff();
+    int posN = m_note[m_numNotes-1]->get_pos_on_staff();
 
-    std::vector<LUnits> yNote(m_numNotes);
-    std::vector<LUnits> yFlag(m_numNotes);
-
-    //retrieve the start and end 'y' coordinates for each stem, and we store them in
-    //the auxiliary arrays yNote and yFlag, respectively.
-    for(int i=0; i < m_numNotes; ++i)
+    if (beam_must_be_horizontal(pos0, posN))
     {
-        yNote[i] = m_note[i]->get_stem_y_note();
-        yFlag[i] = m_note[i]->get_stem_y_flag();
+        create_horizontal_beam_and_set_stems(pos0, posN);
     }
-	int n = m_numNotes - 1;	// index to last element
-	bool fAdjustIntermediateFlags = m_numNotes > 2;
-
-
-    LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
-    //LUnits halfLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff) / 2.0f;
-    m_uBeamThickness = m_pMeter->tenths_to_logical(LOMSE_BEAM_THICKNESS, m_iInstr, m_iStaff);
-
-
-    //A1. Position of beam in relation to staff lines (K.Stone rules)
-    //cout << "Before A1. Note 0 stem length=" << m_note[0]->get_stem_height();
-    //cout << ", yNote0=" << yNote[0] << ", yFlag0=" << yFlag[0] << endl;
-    m_note[0]->set_stem_length( get_staff_length_for_beam(0) * staffSpace );
-    yFlag[0] = m_note[0]->get_stem_y_flag();
-    //cout << "After A1. Note 0 stem length=" << m_note[0]->get_stem_height();
-    //cout << ", yNote0=" << yNote[0] << ", yFlag0=" << yFlag[0] << endl;
-    //cout << "Before A1. Note N stem length=" << m_note[n]->get_stem_height();
-    //cout << ", yNoteN=" << yNote[n] << ", yFlagN=" << yFlag[n] << endl;
-    m_note[n]->set_stem_length( get_staff_length_for_beam(n) * staffSpace );
-    yFlag[n] = m_note[n]->get_stem_y_flag();
-    //cout << "After A1. Note N stem length=" << m_note[n]->get_stem_height();
-    //cout << ", yNoteN=" << yNote[n] << ", yFlagN=" << yFlag[n] << endl;
-
-
-	//determine current beam angle (in staff spaces) formed by flags positions.
-	//negative angle means that first note is lower pitch than last note.
-    LUnits Ay = yFlag[n] - yFlag[0];
-    float angle = Ay / staffSpace;
-
-
-    //R2a. The beam is horizontal when the group begins and ends with the same note
-    //  AWARE: 'angle==0' does not imply that the beam is horizontal as that angle is
-    //         measured using trimmed flag positions.
-    bool fHorizontal = is_equal_pos(yNote[0], yNote[n]);
-
-    //R3b. The beam is horizontal when there is a repeated pattern of pitches
-    if (!fHorizontal && m_numNotes > 2)
-        fHorizontal = has_repeated_pattern_of_pitches();
-
-
-    //R2c. The beam is horizontal when an inner note is closer to the beam than
-    //     either of the outer notes
-    if (!fHorizontal && m_numNotes > 2)
+    else
     {
-        //check if any intermediate note is placed higher than both outer notes
-        if (m_fBeamAbove)
-        {
-            LUnits refPos = min(yNote[0], yNote[n]);
-            for(int i=1; i < n; i++)
-                fHorizontal |= (yNote[i] < refPos);
-        }
-        else
-        {
-            LUnits refPos = max(yNote[0], yNote[n]);
-            for(int i=1; i < n; i++)
-                fHorizontal |= (yNote[i] > refPos);
-        }
-    }
-
-
-    //if need to change to horizontal beam, increase all short stems
-    if (fHorizontal)
-    {
-        //determine max/min position for the beam
-        LUnits flagPos = yFlag[0];  //min flag y pos for beam above, max y pos for beam bellow
-        if (m_fBeamAbove)
-        {
-            for(int i=0; i < m_numNotes; i++)
-                flagPos = min(flagPos, yFlag[i]);
-        }
-        else
-        {
-            for(int i=0; i < m_numNotes; i++)
-                flagPos = max(flagPos, yFlag[i]);
-        }
-        //increment stems, if necessary
-        for(int i=0; i < m_numNotes; i++)
-        {
-            m_note[i]->set_stem_length( fabs(flagPos - yNote[i]) );
-            yFlag[i] = m_note[i]->get_stem_y_flag();
-        }
-        Ay = 0.0f;
-        angle = 0.0f;
-        fAdjustIntermediateFlags = false;
-    }
-
-    //Rules for determining the slant
-    if (!fHorizontal)
-    {
-        float slant = 0.25f;    //minimun slant: 1/4 space
-        if (check_all_notes_outside_first_ledger_line())
-        {
-            //R4. When all the notes fall outside first ledger line, the beam takes only
-            //    a slight slope. Intervals of a second take a slope of 0.25sp; all wider
-            //    intervals take a slope of 0.5sp.
-            if (abs(m_note[0]->get_pos_on_staff() - m_note[n]->get_pos_on_staff()) > 1)
-                slant = 0.5f;
-        }
-        else
-        {
-            //R3: Limit slant depending on distance (in spaces) between outer notes.
-            LUnits distance = m_note[n]->get_stem_left() - m_note[0]->get_stem_left();
-            distance /= staffSpace;
-            if (distance > 20.0f)
-                slant = 2.0f;
-            else if (distance > 13.75f)
-                slant = 1.5f;
-            else if (distance > 7.5f)
-                slant = 1.25f;
-            else if (distance > 6.0f)
-                slant = 1.0f;
-            else if (distance > 4.5f)
-                slant = 0.5f;
-        }
-
-        if (yNote[n] - yNote[0] < 0.0f)     //beam going up ==> negative slant
-            slant = -slant;
-
-        //decide the note whose stem will be changed.
-        int i = (slant > angle ? (m_fBeamAbove ? 0 : n) : (m_fBeamAbove ? n : 0));
-
-        //cout << "fBeamGoingUp=" << (yNote[n] - yNote[0] < 0.0f);
-        //cout << ", m_fBeamAbove=" << m_fBeamAbove << ", angle=" << angle;
-        //cout << ", slant=" << slant << ", i=" << i << endl;
-
-        LUnits stemIncr = abs(angle - slant) * staffSpace;
-        //cout << "stemIncr (sp)=" << stemIncr/staffSpace << endl;
-
-        LUnits stem = m_note[i]->get_stem_height();
-        //cout << "Before. Stem length=" << stem << ", yFlag0=" << yFlag[0];
-        //cout << ", yFlagN=" << yFlag[n] << endl;
-        m_note[i]->set_stem_length(stem + stemIncr);
-        yFlag[i] = m_note[i]->get_stem_y_flag();
-        //cout << "After. Stem length=" << m_note[i]->get_stem_height();
-        ////cout << ", yFlag=" << yFlag[0] << ", yFlagN=" << yFlag[n] << endl << endl;
-
-        Ay = yFlag[n] - yFlag[0];
-    }
-
-
-    //End of rules. Following code is for adjusting the stems for the remaing notes
-    if (fAdjustIntermediateFlags)
-    {
-        // In following loop we compute each stem and update its final position.
-        // Beam line position is established by the first and last notes' stems. Now
-        // let's adjust the intermediate notes' stem lengths to end up in the beam line.
-        // This is just a proportional share based on line slope:
-        // If (x0,y0) and (xn,yn) are, respectively, the position of first and last notes of
-        // the group, the y position of any intermediate note i can be computed as:
-        //     Ay = yn-y0
-        //     Ax = xn-x0
-        //                Ay
-        //     yi = y0 + ---- (xi-x0)
-        //                Ax
-        //
-        // The loop is also used to look for the shortest stem
-        LUnits x0 = m_note[0]->get_stem_left();
-        LUnits xn = m_note[n]->get_stem_left();
-        LUnits Ax = xn - x0;
-        for(int i=0; i < m_numNotes; i++)
-        {
-            yFlag[i] = yFlag[0] + (Ay * (m_note[i]->get_stem_left() - x0)) / Ax;
-
-            //compute stem length. For chords we have to substract the stem segment
-            //joining all chord notes. This extra length is zero for notes not in chord
-            LUnits uStemLength = fabs(yNote[i] - yFlag[i]) + m_note[i]->get_stem_extra_length();
-            m_note[i]->set_stem_length(uStemLength);
-            //extraLenght is always 0 !!!
-        }
+        float slant = assign_slant_to_beam(pos0, posN);
+        assing_stem_length_to_outer_notes(slant, pos0, posN);
+        if (m_numNotes > 2)
+            assing_stem_length_to_inner_notes();
     }
 }
 
@@ -978,6 +836,97 @@ void BeamEngraver::increment_cross_staff_stems(LUnits yIncrement)
 }
 
 //---------------------------------------------------------------------------------------
+float BeamEngraver::assign_slant_to_beam(int pos0, int posN)
+{
+    //Rules for assigning the slant when the beam is not horizontal
+
+    float slant = 0.25f;    //minimun slant: 1/4 space
+    int intval = abs(pos0 - posN);
+    if (check_all_notes_outside_first_ledger_line())
+    {
+        //R5. When all the notes fall outside first ledger line, the beam takes only
+        //    a slight slope. Intervals of a second take a slope of 0.25sp; all wider
+        //    intervals take a slope of 0.5sp.
+        if (intval > 1)
+            slant = 0.5f;
+    }
+    else
+    {
+        //R3: Limit slant depending on distance (in spaces) between outer notes.
+        LUnits distance = m_note[m_numNotes-1]->get_stem_left() - m_note[0]->get_stem_left();
+        LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+        distance /= staffSpace;
+        if (distance > 20.0f)
+            slant = 2.0f;
+        else if (distance > 13.75f)
+            slant = 1.50f;
+        else if (distance > 7.5f)
+            slant = 1.25f;
+        else if (distance > 6.0f)
+            slant = 1.0f;
+        else if (distance > 4.5f)
+            slant = 0.5f;
+
+        //R4. Limit slant for small intervals
+        if (intval == 1 && slant > 0.5f)   //2nd
+            slant = 0.50f;
+        else if (intval == 2 && slant > 1.0f)    //3rd
+            slant = 1.0f;
+        else if (intval == 3 && slant > 1.5f)    //4th
+            slant = 1.5f;
+        else if (intval == 4 && slant > 2.0f)    //5th
+            slant = 2.0f;
+
+        //R6. Slant when three or more beams should be 1.0
+        if (m_numLevels >= 3)
+            slant = 1.0f;
+    }
+
+
+    //beam going down ==> negative slant
+    if (pos0 > posN)
+        slant = -slant;
+
+    return slant;
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamEngraver::beam_must_be_horizontal(int pos0, int posN)
+{
+    //Returns true if the beam should be horizontal, according to traditional
+    //engraving rules
+
+    //R2a. The beam is horizontal when the group begins and ends with the same note
+    bool fHorizontal = (pos0 == posN);
+
+    //R3b. The beam is horizontal when there is a repeated pattern of pitches
+    if (!fHorizontal && m_numNotes > 2)
+        fHorizontal = has_repeated_pattern_of_pitches();
+
+
+    //R2c. The beam is horizontal when an inner note is closer to the beam than
+    //     either of the outer notes
+    if (!fHorizontal && m_numNotes > 2)
+    {
+        //check if any intermediate note is placed nearer than both outer notes
+        if (m_fBeamAbove)
+        {
+            int refPos = max(pos0, posN);
+            for(int i=1; i < m_numNotes-1; i++)
+                fHorizontal |= (m_note[i]->get_pos_on_staff() > refPos);
+        }
+        else
+        {
+            int refPos = min(pos0, posN);
+            for(int i=1; i < m_numNotes-1; i++)
+                fHorizontal |= (m_note[i]->get_pos_on_staff() < refPos);
+        }
+    }
+
+    return fHorizontal;
+}
+
+//---------------------------------------------------------------------------------------
 float BeamEngraver::get_staff_length_for_beam(int iNote)
 {
     //Returns the lenght of the stem, in staff spaces
@@ -985,62 +934,293 @@ float BeamEngraver::get_staff_length_for_beam(int iNote)
     int posOnStaff = m_note[iNote]->get_pos_on_staff();
     LUnits stemLength = 3.5f;   //default stem lengh: one octave
 
-    //A1. Beams on the staff. Notes with stem up between the previous space to
-    //    first upper  ledger line (b5 in G clef) and middle line or notes with
-    //    stem down between the previous space to first lower ledger line (b3 in
-    //    G clef) and middle line: they have the normal length of one octave (3.5
-    //    spaces), but adjusted as above described, that is, notes on a line have
-    //    a stem of 3.25 spaces and notes on a space have 3.5 spaces except for
-    //    notes with stem up on 2nd space or with stem down on 3rd space, that
-    //    has a stem length of 3.0 spaces (K.Stone rules).
-    if ((m_fBeamAbove && posOnStaff > -1 && posOnStaff <= 6) ||
-        (!m_fBeamAbove && posOnStaff >= 6 && posOnStaff <= 13) )
+    if (m_numLevels < 3)
     {
-        if (abs(posOnStaff) % 2 == 1)    //note on space
+        //A1. Beams on the staff. Notes with stem up between the previous space to
+        //    first upper  ledger line (b5 in G clef) and middle line or notes with
+        //    stem down between the previous space to first lower ledger line (b3 in
+        //    G clef) and middle line: they have the normal length of one octave (3.5
+        //    spaces), but adjusted as above described, that is, notes on a line have
+        //    a stem of 3.25 spaces and notes on a space have 3.5 spaces except for
+        //    notes with stem up on 2nd space or with stem down on 3rd space, that
+        //    has a stem length of 3.0 spaces (K.Stone rules).
+        if ((m_fBeamAbove && posOnStaff > -1 && posOnStaff <= 6) ||
+            (!m_fBeamAbove && posOnStaff >= 6 && posOnStaff <= 13) )
         {
-            if ((m_fBeamAbove && posOnStaff == 5) || (!m_fBeamAbove && posOnStaff == 7))
-                stemLength = 3.0;
+            if (abs(posOnStaff) % 2 == 1)    //note on space
+            {
+                if ((m_fBeamAbove && posOnStaff == 5) || (!m_fBeamAbove && posOnStaff == 7))
+                    stemLength = 3.0;
+                else
+                    stemLength = 3.5;
+            }
             else
-                stemLength = 3.5;
+            {
+                stemLength = 3.25;
+            }
         }
+
+
+        //A3. Beams out the staff. Notes with stems upwards from 3rd space inclusive
+        //    (c5 in G) or with stems downwards from 2nd line inclusive (g4 in G)
+        //    have a length of 2.5 spaces, except a4 & c5 that have 2.75 (test 208).
+        else if ((m_fBeamAbove && posOnStaff > 6) || (!m_fBeamAbove && posOnStaff < 6))
+        {
+            if (posOnStaff == 5 || posOnStaff == 7)
+                stemLength = 2.75;
+            else
+                stemLength = 2.5;
+        }
+
+
+        //A2. Far notes with beams in middle line. Notes with stem up on or below the
+        //    second lower ledger line (a3 in G) or notes with stem down on or above
+        //    the second upper ledger line: the end of stem have to touch the middle
+        //    staff line. But as they are beamed and the beam straddles the middle
+        //    line, it is necessary to increment stem by 0.25 spaces
         else
         {
-            stemLength = 3.25;
+            stemLength = abs(float(0.5 * (6 - posOnStaff)));     // touch middle line
+            stemLength += 0.25;
         }
+
+        //A4. Minimum space between notehead and beam is 1.5 spaces. This implies a
+        //    minimum stem lenght of 2.5 spaces for one beam and 3.0 spaces for two
+        //    beams. For each additional beam, the stem must be extended one space.
+        if (m_numLevels > 1 && stemLength < 3.0f)
+            stemLength = 3.0f;
+        if (m_numLevels > 2)
+            stemLength += (m_numLevels - 2);
     }
 
-
-    //A3. Beams out the staff. Notes with stems upwards from 3rd space inclusive
-    //    (c5 in G) or with stems downwards from 2nd line inclusive (g4 in G)
-    //    have a length of 2.5 spaces.
-    else if ((m_fBeamAbove && posOnStaff > 6) || (!m_fBeamAbove && posOnStaff < 6))
+    else    //three or more beams
     {
-        stemLength = 2.5;
+        //A5. (Replaces A1, A2 & A3 when three or more beams). The first beam always
+        //    sits/hangs. Therefore, if note on line assign it 3.0 spaces, else 2.5 sp.
+        stemLength = (abs(posOnStaff % 2) == 0 ? 3.0f : 2.5f);
+
+        //A4. Minimum space between notehead and beam is 1.5 spaces. This implies a
+        //    minimum stem lenght of 2.5 spaces for one beam and 3.0 spaces for two
+        //    beams. For each additional beam, the stem must be extended one space.
+        //
+        //    For notes on spaces we can not use 3.0 as that will place the beam in
+        //    an invalid place. Therefore we must chosee betwen 2.5 or 3.5. So for more
+        //    than 2 beams I will deal only with the second part of A4 rule.
+        if (m_numLevels > 2)
+            stemLength += (m_numLevels - 2);
     }
 
 
-    //A2. Far notes with beams in middle line. Notes with stem up on or below the
-    //    second lower ledger line (a3 in G) or notes with stem down on or above
-    //    the second upper ledger line: the end of stem have to touch the middle
-    //    staff line. But as they are beamed and the beam straddles the middle
-    //    line, it is necessary to increment stem by 0.25 spaces.
-    else
-    {
-        stemLength = abs(float(0.5 * (6 - posOnStaff)));     // touch middle line
-        stemLength += 0.25;
-    }
-
-
-    //A4. Minimum space between notehead and beam is 1.5 spaces. This implies a
-    //    minimum stem lenght of 2.5 spaces for one beam and 3.0 spaces for two
-    //    beams. For each additional beam, the stem must be extended one space.
-    if (m_numLevels > 1 && stemLength < 3.0f)
-        stemLength = 3.0f;
-    if (m_numLevels > 2)
-        stemLength += (m_numLevels - 2);
 
 
     return stemLength;  //in spaces
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::create_horizontal_beam_and_set_stems(int pos0, int posN)
+{
+    //determine nearest note to the beam
+    int n = m_numNotes - 1;	        // index to last note
+    int iNote = 0;
+    if (m_fBeamAbove)
+    {
+        int maxPos = max(pos0, posN);
+        iNote = (pos0 > posN ? 0 : n);
+        for(int i=1; i < n; i++)
+        {
+            int pos = m_note[i]->get_pos_on_staff();
+            if (pos > maxPos)
+            {
+                maxPos = pos;
+                iNote = i;
+            }
+        }
+    }
+    else
+    {
+        int minPos = min(pos0, posN);
+        iNote = (pos0 < posN ? 0 : n);
+        for(int i=1; i < n; i++)
+        {
+            int pos = m_note[i]->get_pos_on_staff();
+            if (pos < minPos)
+            {
+                minPos = pos;
+                iNote = i;
+            }
+        }
+    }
+
+    //assign stem length to the nearest note
+    LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+    m_note[iNote]->set_stem_length( get_staff_length_for_beam(iNote) * staffSpace );
+    LUnits yFlag = m_note[iNote]->get_stem_y_flag();
+
+    //assign stem length to the other stems
+    for(int i=0; i < m_numNotes; i++)
+    {
+        if (i != iNote)
+            m_note[i]->set_stem_length( fabs(yFlag - m_note[i]->get_stem_y_note()) );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::assing_stem_length_to_outer_notes(float slant, int pos0, int posN)
+{
+    //slant is the desired slant (0.25 | 0.5 | 1.0 | 1.25 | 1.50 | 2.0) in spaces.
+    //slant is negative when beam going down
+
+    //make slant always positive for comparisons
+    slant = abs(slant);
+
+    //identify the outer note having the shortest stem
+    int posS = 0;   //posOnStaff for outer note with shortest stem
+    int iS = 0;     //index for outer note with shortest stem
+    int posL = 0;   //posOnStaff for outer note with longest stem
+    int iL = 0;     //index for outer note with longest stem
+    if ((pos0 < posN && m_fBeamAbove) || (pos0 > posN && !m_fBeamAbove))
+    {
+        posS = posN;
+        iS = m_numNotes - 1;
+        posL = pos0;
+        iL = 0;
+    }
+    else
+    {
+        posS = pos0;
+        iS = 0;
+        posL = posN;
+        iL = m_numNotes - 1;
+    }
+
+    float stemS = 0.0f;     //shortest stem length (in spaces)
+    float stemL = 0.0f;     //longest stem length (in spaces)
+
+
+    if (m_numLevels < 3)
+    {
+        //C1. Both ends of a slanted beam should be attached to a stave-line according the
+        //    following procedure:
+        //
+        //  1. Assign length to shortest stem note:
+        //     If note on line assign it 3.0 spaces, else assign 2.5 spaces.
+        //
+        //  2. Assign length to longest stem note:
+        //     - for slant < 1.0 stem must be on the same line than shorter stem note. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50
+        //     - for 1.0 <= slant < 2.0 there must be one line of difference. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50 - 1.0
+        //     - for slant = 2 there must be two lines of difference. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50 - 2.0
+        //
+        //  3. Increment shortest stem: For slant 2.0 increment it by 0.25.
+        //
+        //  4. Increment longest stem:
+        //     - for slant 0.25 increment 0.25
+        //     - for slant 0.50 increment 0.50
+        //     - for slant 1.00 increment 0
+        //     - for slant 1.25 increment 0.25
+        //     - for slant 1.50 increment 0.50
+        //     - for slant 2.00 increment 0.25
+
+        //1. Assign length to shortest stem note:
+        //   If note on line assign it 3.0 spaces, else assign 2.5 spaces.
+        stemS = (abs(posS % 2) == 0 ? 3.0f : 2.5f);
+
+        //  2. Assign length to longest stem note:
+        //     - for slant < 1.0 stem must be on the same line than shorter stem note. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50
+        //     - for 1.0 <= slant < 2.0 there must be one line of difference. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50 - 1.0
+        //     - for slant = 2 there must be two lines of difference. Therefore:
+        //              stem2 = stem1 + abs(pos2-pos1)*0.50 - 2.0
+        //
+        stemL = stemS + abs(posL-posS) * 0.50f;
+        if (slant == 2.0f)
+            stemL -= 2.0f;
+        else if (slant >= 1.0f)
+            stemL -= 1.0f;
+
+        //3. Increment longest stem: For slant 1.0 or 2.0 increment it by 0.25.
+        if (slant == 1.0f || slant == 2.0f)
+            stemL += 0.25f;
+
+        //4. Increment shortest stem:
+        //   - for slant 0.25 increment 0.25
+        //   - for slant 0.50 increment 0.50
+        //   - for slant 1.00 increment 0.25
+        //   - for slant 1.25 increment 0.25
+        //   - for slant 1.50 increment 0.50
+        //   - for slant 2.00 increment 0.25
+        if (slant == 0.50f || slant == 1.50f)
+            stemS += 0.50f;
+        else
+            stemS += 0.25f;
+    }
+
+    else    //three or more beams
+    {
+        //C2  (Replaces C1 when three or more beams). The first beam always
+        //    sits/hangs. Therefore:
+        //
+        //    1. Assign length to shortest stem note:
+        //       If note on line assign it 3.0 spaces, else assign 2.50 spaces.
+        //
+        //    2. Assign length to longest stem note. as slant is 1.0 there must be one line of difference. Therefore:
+        //            stem2 = stem1 + abs(pos2-pos1)*0.50 -1.0;
+        stemS = (abs(posS % 2) == 0 ? 3.0f : 2.5f);
+        stemL = stemS + abs(posL-posS) * 0.50f - 1.0f;
+
+        //A4. Minimum space between notehead and beam is 1.5 spaces. This implies a
+        //    minimum stem lenght of 2.5 spaces for one beam and 3.0 spaces for two
+        //    beams. For each additional beam, the stem must be extended one space.
+        //
+        //At this point, stemS is at least 2.5 and was never decremented. Therefore we
+        //only have to deal with more than two beams
+        LUnits incr = (m_numLevels - 2);
+        stemS += incr;
+        stemL += incr;
+    }
+
+    //transfer stems to notes
+    LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+    m_note[iS]->set_stem_length(stemS * staffSpace);
+    m_note[iL]->set_stem_length(stemL * staffSpace);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::assing_stem_length_to_inner_notes()
+{
+    //the outer notes have the stem length correctly set
+
+    // In following loop we compute each stem and assign it to the inner notes.
+    // Beam line position is established by the outer notes' stems. Now
+    // let's adjust the intermediate notes' stem lengths to end up in the beam line.
+    // This is just a proportional share based on line slope:
+    // If (x0,y0) and (xn,yn) are, respectively, the position of first and last notes of
+    // the group, the y position of any intermediate note i can be computed as:
+    //     Ay = yn-y0
+    //     Ax = xn-x0
+    //                Ay
+    //     yi = y0 + ---- (xi-x0)
+    //                Ax
+    //
+    int n = m_numNotes - 1;
+
+    LUnits x0 = m_note[0]->get_stem_left();
+    LUnits Ax = m_note[n]->get_stem_left() - x0;
+
+    LUnits yFlag0 = m_note[0]->get_stem_y_flag();
+    LUnits Ay = m_note[n]->get_stem_y_flag() - yFlag0;
+
+    for(int i=1; i < n; i++)
+    {
+        LUnits yFlag = yFlag0 + (Ay * (m_note[i]->get_stem_left() - x0)) / Ax;
+        LUnits yNote = m_note[i]->get_stem_y_note();
+        LUnits stem = fabs(yNote - yFlag) + m_note[i]->get_stem_extra_length();
+        m_note[i]->set_stem_length(stem);
+        //extraLenght is always 0 !!!
+    }
 }
 
 

@@ -1,0 +1,23 @@
+(score (vers 2.1)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (musicData
+        (clef G (visible no))
+
+        //the group begins and end with the same note
+        (n c5 e g+)(n g5 e)(n e5 e)(n +c5 e g-)
+
+        (n e4 e g+)(n g4 e)(n c5 e)(n e5 e)(n e4 e g-)
+
+        //there is a repeated pattern of notes
+        (n d4 s (beam 1 ++))(n a4 s (beam 1 ==))(n c5 s (beam 1 =-))
+        (n d4 s (beam 1 =+))(n a4 s (beam 1 ==))(n c5 s (beam 1 --))
+
+        (n b4 e g+)(n f5 e)(n b4 e)(n f5 e g-)
+
+        //an inner note is closer to the beam than either of the outer notes
+        (n c5 e g+ (stem up))(n e5 e)(n g4 e)(n e4 e g- (stem up))
+
+        (n f5 t (stem down)(beam 2 +++))(n e5 t (beam 2 ===))(n d5 t (beam 2 ===))(n c5 t (beam 2 =--))
+        (n b4 t (beam 2 =++))(n a4 t (beam 2 ===))(n g4 t (beam 2 ===))(n a4 t (stem down)(beam 2 ---))
+    ))
+)

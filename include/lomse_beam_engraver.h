@@ -108,7 +108,7 @@ protected:
     void decide_on_stems_direction();
     void decide_beam_position();
     void change_stems_direction();
-    void beam_angle_and_stems_for_simple_beams();
+    void compute_beam_and_stems_for_simple_beams();
     void beam_angle_and_stems_for_cross_staff_and_double_steamed_beams();
     void compute_beam_segments();
 	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
@@ -119,6 +119,11 @@ protected:
     bool has_repeated_pattern_of_pitches();
     bool check_all_notes_outside_first_ledger_line();
     float get_staff_length_for_beam(int iNote);
+    float assign_slant_to_beam(int pos0, int posN);
+    bool beam_must_be_horizontal(int pos0, int posN);
+    void create_horizontal_beam_and_set_stems(int pos0, int posN);
+    void assing_stem_length_to_outer_notes(float slant, int pos0, int posN);
+    void assing_stem_length_to_inner_notes();
 
     bool m_fHasChords;      //the beam has chords
     bool m_fStemForced;     //at least one stem forced

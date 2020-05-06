@@ -1,0 +1,20 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (opt Score.JustifyLastSystem 3) //always
+    (instrument (musicData
+        (clef G (visible no))
+        (n c5 e g+)(n c5 e g-)
+        (n b4 e g+ (stem down))(n b4 e g- (stem down))
+        (n a4 e g+ (stem down))(n a4 e g- (stem down))
+        (n g4 e g+ (stem down))(n g4 e g- (stem down))
+        (n f4 e g+ (stem down))(n f4 e g- (stem down))
+
+        (n a4 e g+)(n a4 e g-)
+        (n b4 e g+ (stem up))(n b4 e g- (stem up))
+        (n c5 e g+ (stem up))(n c5 e g- (stem up))
+        (n d5 e g+ (stem up))(n d5 e g- (stem up))
+        (n e5 e g+ (stem up))(n e5 e g- (stem up))
+    ))
+)

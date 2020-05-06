@@ -1,0 +1,7 @@
+(score (vers 2.1)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (musicData
+        (clef F4 noVisible)
+        (n f3 e g+)(n g3 e g-)
+    ))
+)

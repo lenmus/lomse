@@ -1,0 +1,10 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (musicData
+        (clef G (visible no))
+        (n g4 t g+)(n f4 t)(n d4 t)(n b3 t g-)
+        (n c5 t g+)(n e5 t)(n g5 t)(n b5 t g-)
+    ))
+)
