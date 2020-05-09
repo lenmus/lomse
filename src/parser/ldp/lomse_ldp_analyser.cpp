@@ -3962,6 +3962,8 @@ protected:
             pNote->set_stem_direction(k_stem_up);
         else if (value == "down")
             pNote->set_stem_direction(k_stem_down);
+        else if (value == "none")
+            pNote->set_stem_direction(k_stem_none);
         else
         {
             pNote->set_stem_direction(k_stem_default);

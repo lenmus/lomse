@@ -281,6 +281,7 @@ public:
     inline bool is_stem_up() { return m_stemDirection == k_stem_up; }
     inline bool is_stem_down() { return m_stemDirection == k_stem_down; }
     inline bool is_stem_default() { return m_stemDirection == k_stem_default; }
+    inline bool is_stem_none() { return m_stemDirection == k_stem_none; }
 
     //in chord
     bool is_in_chord();

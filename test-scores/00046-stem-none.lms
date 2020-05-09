@@ -1,0 +1,16 @@
+(score (vers 2.1)
+    (opt Staff.DrawLeftBarline no)
+    (opt Render.SpacingMethod 1)
+    (opt Render.SpacingValue 70)
+    (instrument (musicData
+        (clef G (visible no))
+        (n e4 h (stem none))
+        (n f4 q (stem none))
+        (n g4 e (stem none))
+        (n b4 h (stem none))
+        (n c5 q (stem none))
+        (n d5 e (stem none))
+        (barline end (visible no))
+    ))
+)
+

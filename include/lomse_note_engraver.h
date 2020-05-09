@@ -98,8 +98,8 @@ protected:
     inline bool is_last_note_of_chord() { return m_pNote && m_pNote->is_end_of_chord(); }
 
     //helper
-    inline bool has_stem() { return m_noteType >= k_half; }
-    inline bool has_flag() { return m_noteType >= k_eighth; }
+    inline bool has_stem() { return m_noteType >= k_half && !m_pNote->is_stem_none(); }
+    inline bool has_flag() { return m_noteType >= k_eighth && !m_pNote->is_stem_none(); }
     inline bool is_beamed() { return m_pNote && m_pNote->is_beamed(); }
     Tenths get_glyph_offset(int iGlyph);
 
