@@ -32,12 +32,16 @@ option(LOMSE_BUILD_MONOLITHIC
     "Build a monolithic library with no dependencies" 
     OFF)
 
+# Bravura.otf font
+OPTION(LOMSE_DOWNLOAD_BRAVURA_FONT
+    "Download Bravura.otf font if not present in source tree"
+	ON)
+OPTION(LOMSE_INSTALL_BRAVURA_FONT
+    "Include Bravura music font in the package"
+	ON)
+
 #Build the test units runner program 'testlib'
 option(LOMSE_BUILD_TESTS "Build testlib program" ON)
-
-#run unit tests after building the library
-option(LOMSE_RUN_TESTS "Run tests after building"
-    ON)
 
 #Build the example-1 program that uses the library
 option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
@@ -58,9 +62,11 @@ endif()
 if (WIN32)
     set(LOMSE_BUILD_STATIC_LIB ON)
     set(LOMSE_BUILD_SHARED_LIB OFF)
+    message(STATUS "In Windows force to build the static library")
 else()
     set(LOMSE_BUILD_STATIC_LIB OFF)
     set(LOMSE_BUILD_SHARED_LIB ON)
+    message(STATUS "In Unix force to build the dynamic library")
 endif()
 
 if (WIN32)
@@ -74,12 +80,13 @@ message(STATUS "Build monolithic library = ${LOMSE_BUILD_MONOLITHIC}")
 message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
 message(STATUS "Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
 message(STATUS "Build testlib program = ${LOMSE_BUILD_TESTS}")
-message(STATUS "Run tests after building = ${LOMSE_RUN_TESTS}")
 message(STATUS "Create Debug build = ${LOMSE_DEBUG}")
 message(STATUS "Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
 message(STATUS "Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 message(STATUS "Enable compressed formats = ${LOMSE_ENABLE_COMPRESSION}")
 message(STATUS "Enable png format = ${LOMSE_ENABLE_PNG}")
+message(STATUS "Download Bravura font if not in source tree = ${LOMSE_DOWNLOAD_BRAVURA_FONT}")
+message(STATUS "Install Bravura font = ${LOMSE_INSTALL_BRAVURA_FONT}")
 
 
 
@@ -87,7 +94,7 @@ message(STATUS "Enable png format = ${LOMSE_ENABLE_PNG}")
 #------------------------------------------------------
 
 # build type (this variables affects lomse_config.h and are used
-# in lomse_build_options.h. But there is are two problems:
+# in lomse_build_options.h. But there are two problems:
 # 1. Both builds (static and shared) can be built in the same cmake command.
 #    And in this case there is (currently) a single lomse_config.h file
 #    common to both build.
@@ -159,12 +166,5 @@ elseif( UNIX )
     set( CMAKE_SHARED_LIBRARY_SUFFIX ".so" )
     set( CMAKE_EXECUTABLE_SUFFIX "" )
 endif()
-
-
-#define a header file to pass CMake settings to source code
-configure_file(
-    "${LOMSE_ROOT_DIR}/lomse_config.h.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
-)
 
 

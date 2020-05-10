@@ -32,6 +32,105 @@
 #-------------------------------------------------------------------------------------
 # This is a CMake configuration file for building makefiles and installfiles for
 # the Lomse library
+#-------------------------------------------------------------------------------------
+#
+# To use it you need CMake which can be downloaded from http://www.cmake.org/
+#
+# Usage
+#   cmake [<options>] <source-tree>
+#
+# The default target (in Linux) is "Unix Makefiles". If you would like to generate
+# a diferent makefile use option -G<desired-target>. For instance:
+#   cmake -G "Ninja" [...]
+#
+#
+# Default configuration
+# ~~~~~~~~~~~~~~~~~~~~~~~
+# - Build type is 'Release'
+#
+# - The Bravura.otf music font *IS INCLUDED* in the package.
+#   See "Bravura music font required to render scores" section.
+#
+#
+# ---------------------------------------------------------------------------
+# Build options
+# ---------------------------------------------------------------------------
+#
+# Please note that default values can be changed directly in the CMake GUI or
+# through the command line by prefixing the option's name with '-D':
+# i.e.:    cmake -DLOMSE_DEBUG=ON  ....
+#
+#
+# LOMSE_BUILD_MONOLITHIC (Default: OFF) [In development. Not yet implemented]
+#   To avoid dependencies, instead of linking with the required libraries,
+#   these libraries will be combined into lomse library so that the binaries
+#   will not have dependencies on any of these libraries. 
+#   	cmake -DLOMSE_BUILD_MONOLITHIC=ON [...]
+#
+# LOMSE_BUILD_STATIC_LIB (Default: ON)
+#   Build the static library
+#
+# LOMSE_BUILD_SHARED_LIB (Default: OFF)
+#   Build the shared library
+#
+#
+# Unit Tests
+# ~~~~~~~~~~~~
+# By default unit tests are also build. You can reduce executable size by
+# disabling this option:
+#   cmake -DLOMSE_ENABLE_UNIT_TESTS:BOOL=OFF [...]
+#
+#
+# Bravura music font required to render scores
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# By default, this font must not be included in Linux packages and the required
+# font package must be set as an install dependency.
+# As it is necessary to install it in Windows, and as in some Linux distros
+# there is no package to install this font, this cmake scripts includes this
+# font in the installer. To prevent this, you can use the option:
+#   cmake -DLOMSE_INSTALL_BRAVURA_FONT:BOOL=OFF ...
+#
+# When it is requested that Bravura font be included in the package, this
+# cmake script will download the Bravura.otf font in case it is not found in
+# the system. You can use the option:
+#   cmake -DLOMSE_DOWNLOAD_BRAVURA_FONT:BOOL=OFF ...
+# to force not to download it if not found in the system. But if the font is
+# not found, it will not be installed in any case.
+#
+#
+# Installation folders
+# ~~~~~~~~~~~~~~~~~~~~~
+#
+# CMAKE_INSTALL_PREFIX 
+#   The default installation prefix is "/usr/local" for Linux and
+#   "C:/Program Files (x86)" or "C:/Program Files" for Windows. 
+#   You can change the install location by running cmake like this:
+#       cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix ...
+#
+# LOMSE_PKG_CONFIG_INSTALL  (Default "/usr/lib/pkgconfig")
+# 	As part of the Lomse instalation process, a pkg-config file, named
+#	liblomse.pc, is installed. The default location is "/usr/lib/pkgconfig".
+#	You can change this default location by using the option
+#	-DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path. For instance:
+#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig [...]
+#
+# MAN_INSTALL_DIR (Linux only. Default "/usr/share/man")
+#   The default folder (in Linux) for installing man pages is
+#       /usr/share/man
+#   You can specify other location by using option MAN_INSTALL_DIR:
+#       cmake -DMAN_INSTALL_DIR=/new/install/location/for/manpages [...]
+#
+#
+# Debug options (ON / OFF values):
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
+#	Enable debug logs (performance loss). Doesn't require a debug build.
+#
+# LOMSE_DEBUG   (Default value: OFF)      
+#	Force to create a debug build, with debug symbols.
+#
+#
 #
 #
 # ---------------------------------------------------------------------------
@@ -53,59 +152,6 @@
 #   utfcpp
 #   agg
 #   pugixml
-#
-#
-#---------------------------------------------------------------------------
-# Build options
-#---------------------------------------------------------------------------
-#
-# Please note that default values can be changed directly in the CMake GUI or
-# through the command line by prefixing the option's name with '-D':
-# i.e.:    cmake -DLOMSE_DEBUG=ON  ....
-#
-#
-# Build options
-# --------------------------------------------
-#
-# LOMSE_BUILD_MONOLITHIC (Default: OFF)
-#   To avoid dependencies, instead of linking with the required libraries,
-#   these libraries will be combined into lomse library so that the binaries
-#   will not have dependencies on any of these libraries. 
-#   	cmake -DLOMSE_BUILD_MONOLITHIC=ON [...]
-#
-# LOMSE_BUILD_STATIC_LIB (Default: ON)
-#   Build the static library
-#
-# LOMSE_BUILD_SHARED_LIB (Default: OFF)
-#   Build the shared library
-#
-#
-# Installation options
-# --------------------------------------------
-#
-# MAKE_INSTALL_PREFIX  (Default: "/usr/local")
-# 	The default installation prefix is "/usr/local". Therefore, libraries
-#	(binaries) will be installed at "/usr/local/lib" and include files at
-# 	"/usr/local/include/lomse". You can change the default location 
-# 	by specifying option CMAKE_INSTALL_PREFIX. For instance:
-#   	cmake -DCMAKE_INSTALL_PREFIX=/usr [...]
-#
-# LOMSE_PKG_CONFIG_INSTALL  (Default "/usr/lib/pkgconfig")
-# 	As part of the Lomse instalation process, a pkg-config file, named
-#	liblomse.pc, is installed. The default location is "/usr/lib/pkgconfig".
-#	You can change this default location by using the option
-#	-DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path. For instance:
-#   	cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig [...]
-#
-#
-# Debug options (ON / OFF values):
-# --------------------------------------------
-#
-# LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
-#	Enable debug logs (performance loss). Doesn't require a debug build.
-#
-# LOMSE_DEBUG   (Default value: OFF)      
-#	Force to create a debug build, with debug symbols.
 #
 #
 # Options to reduce dependencies from other libraries (ON / OFF values):
@@ -146,7 +192,10 @@
 cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
 #Travis complains when building with clang. What is this for?
-cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default 
+cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
+
+#Windows 10 camplains 
+cmake_policy(SET CMP0054 NEW)   # quoted arguments will not be further dereferenced
 
 #prevent in-source builds
   # make sure the user doesn't play dirty with symlinks
@@ -176,16 +225,11 @@ cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
 # project name
 project(lomse)
 
-#======================================================================
-# AWARE:
-# Options are defined in module 'lomse/trunk/build-options.cmake'
-#======================================================================
-
 # main directories 
 set( LOMSE_ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
 set( LOMSE_SRC_DIR  ${LOMSE_ROOT_DIR}/src )
 set( LOMSE_PKG_DIR  ${LOMSE_ROOT_DIR}/packages )
-set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
+set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR})
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
 message(STATUS "Using cmake version ${CMAKE_VERSION}")
@@ -196,6 +240,8 @@ message(STATUS "** EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
 message(STATUS "** LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
 message(STATUS "** OUTDIR: ${OUTDIR}")
 
+# define build options
+include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
@@ -212,23 +258,37 @@ else ()
 endif ()
 
 #check that the compiler supports c++11 and std::regex
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     # require at least gcc 4.9
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
         message(FATAL_ERROR "GCC version must be at least 4.9!")
     endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     # require at least clang 3.4
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
         message(FATAL_ERROR "Clang version must be at least 3.4!")
     endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # require at least msvc 15 (Visual Studio 2008 version 9.0)
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15)
+        message(FATAL_ERROR "MSVC version must be at least 15!")
+    endif()
 else()
     message(WARNING "** Warning **: You are using an untested compiler! Lomse has only been tested with GCC and Clang.")
 endif()
+message(STATUS "** Compiler to use: ${CMAKE_CXX_COMPILER_ID} v.${CMAKE_CXX_COMPILER_VERSION}")
 
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LOMSE_ROOT_DIR}/cmake-modules")
+
+# determine system arquitecture
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(SYSTEM_ARCHITECTURE "x64")
+else()
+    set(SYSTEM_ARCHITECTURE "x86")
+endif()
+message(STATUS "SYSTEM_ARCHITECTURE = ${SYSTEM_ARCHITECTURE}" )
 
 
 #----------------------------------------------------------------------------
@@ -246,23 +306,27 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${LOMSE_ROOT_DIR}/cmake-modules")
 
 message(STATUS "CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
 
+#set install folder 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT
+    OR (${CMAKE_INSTALL_PREFIX} STREQUAL "C:/Program Files/${CMAKE_PROJECT_NAME}")
+    OR (${CMAKE_INSTALL_PREFIX} STREQUAL "C:/Program Files (x86)/${CMAKE_PROJECT_NAME}")
+  )
+    message(STATUS "    CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT = ${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT}")
+    #Fix CMAKE_INSTALL_PREFIX for Windows.
+    #Sometimes it points to 'Program Files (x86)' for x64 builds
+    if(WIN32)
+        message(STATUS "    Win32. SYSTEM_ARCHITECTURE = ${SYSTEM_ARCHITECTURE}")
+        if(${SYSTEM_ARCHITECTURE} STREQUAL "x64")
+            set(CMAKE_INSTALL_PREFIX "C:/Program Files/${CMAKE_PROJECT_NAME}")
+        else()
+            set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/${CMAKE_PROJECT_NAME}")
+        endif()
+    endif()
+endif()
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
 set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
 set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
 
-#define path were fonts will be installed
-if (WIN32)
-    #Used only for Bravura font. For all others will use system installed fonts
-    set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
-elseif (UNIX)
-    #In Linux only system installed fonts are used. This variable is not used
-    set( FONTS_PATH   "not used" )
-else()
-    #Only fonts installed here will be used
-    set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
-endif()
-
-# Now we can define build options and configure the include file "lomse_config.h"
-include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 
 
 #----------------------------------------------------------------------------
@@ -290,6 +354,54 @@ include_directories(
     ${INCLUDES_MINIZIP}
 )
 
+
+# Check for Bravura music font required to render scores
+set (INSTALL_BRAVURA_FONT ${LOMSE_INSTALL_BRAVURA_FONT})
+find_path(BRAVURA_FONT_PATH
+          NAMES Bravura.otf
+          PATHS
+              /usr/share/fonts/truetype/          # Red Hat & fonts-lenmus-bravura.deb
+              ${LOMSE_ROOT_DIR}/z_fonts           # local builds
+              ${LOMSE_ROOT_DIR}/fonts             # local builds
+              ${LOMSE_ROOT_DIR}/bravura/src       # builds for PPA at Launchpad.net
+         )
+if("${BRAVURA_FONT_PATH}" STREQUAL "BRAVURA_FONT_PATH-NOTFOUND")
+    if (LOMSE_DOWNLOAD_BRAVURA_FONT)
+        message(STATUS "Bravura font not found. Downloading it ...")
+        file(DOWNLOAD 
+            "https://github.com/steinbergmedia/bravura/raw/master/redist/otf/Bravura.otf"
+            "${LOMSE_ROOT_DIR}/fonts/Bravura.otf"
+            SHOW_PROGRESS
+#            EXPECTED_HASH MD5=863c90e6f99c264a1747856130ebdc3c
+            STATUS status
+            LOG log
+        )
+
+        list(GET status 0 status_code)
+        list(GET status 1 status_string)
+        
+        if(NOT status_code EQUAL 0)
+            message(FATAL_ERROR "Error downloading Bravura font. Status_code: ${status_code}
+                status_string: ${status_string}
+                log: ${log}
+                ")
+        endif()
+        message(STATUS "Bravura font downloaded.")
+        set(BRAVURA_FONT_PATH "${LOMSE_ROOT_DIR}/fonts/")
+        set(INSTALL_BRAVURA_FONT ON)
+
+    else(LOMSE_DOWNLOAD_BRAVURA_FONT)
+        if (WIN32)
+            message(FATAL_ERROR "Bravura font not found. Aborting...")
+        else()
+            message(STATUS "Bravura font not found. It will not be installed.")
+        endif()
+        set(INSTALL_BRAVURA_FONT OFF)
+    endif(LOMSE_DOWNLOAD_BRAVURA_FONT)
+
+else()
+    message(STATUS "Bravura font found in ${BRAVURA_FONT_PATH}")
+endif()
 
 # Check for UnitTest++. Required for unit test
 if (LOMSE_BUILD_TESTS)
@@ -392,6 +504,18 @@ if (LOMSE_BUILD_MONOLITHIC)
 endif()
 
 
+
+#define a header file to pass CMake settings to source code
+configure_file(
+    "${LOMSE_ROOT_DIR}/lomse_config.h.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
+)
+
+
+
+#======= End of dependencies checking ========================================
+
+    
 ###############################################################################
 #
 # Target: Lomse static library
@@ -399,32 +523,34 @@ endif()
 ###############################################################################
 if(LOMSE_BUILD_STATIC_LIB)
 
-    set(LOMSE_STATIC  lomse-static)
+    set(LOMSE_STATIC lomse)
 
     add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
 
     #dependencies
     if (LOMSE_BUILD_MONOLITHIC)
-        target_link_libraries(${LOMSE_STATIC} STATIC PUBLIC ${LOMSE_BUILD_DEPS})
+        target_link_libraries(${LOMSE_STATIC} PUBLIC ${LOMSE_BUILD_DEPS})
     else()
-        target_link_libraries(${LOMSE_STATIC} STATIC ${LOMSE_BUILD_DEPS})
+        target_link_libraries(${LOMSE_STATIC} PUBLIC ${LOMSE_BUILD_DEPS})
     endif()
 
     #properties
-    set_target_properties(${LOMSE_STATIC} PROPERTIES
-            VERSION ${LOMSE_PACKAGE_VERSION}
-            SOVERSION ${LOMSE_PACKAGE_VERSION}
-            OUTPUT_NAME "lomse"
-            RUNTIME_OUTPUT_DIRECTORY ${LOMSE_ROOT_DIR}/bin
-    )
+    #if(UNIX)
+        set_target_properties(${LOMSE_STATIC} PROPERTIES
+                VERSION ${LOMSE_PACKAGE_VERSION}
+                SOVERSION ${LOMSE_PACKAGE_VERSION}
+                OUTPUT_NAME "lomse"
+                RUNTIME_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH}
+        )
+    #endif()
 
     # Force not to link with standard MSVC libraries: /NODEFAULTLIB
     if(MSVC)
-        set_target_properties(${LOMSE_STATIC} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB")
+        set_target_properties(${LOMSE_STATIC} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
     endif()
 
-    #get_target_property(VAR ${LOMSE_STATIC} LINK_FLAGS)
-    #message("library target properties=" ${VAR})
+    get_target_property(VAR ${LOMSE_STATIC} LINK_FLAGS)
+    message("library target properties=" ${VAR})
 
 endif(LOMSE_BUILD_STATIC_LIB)
 
@@ -452,7 +578,7 @@ if(LOMSE_BUILD_SHARED_LIB)
           PROPERTIES VERSION ${LOMSE_PACKAGE_VERSION}
                      SOVERSION ${LOMSE_PACKAGE_VERSION}
                      OUTPUT_NAME "lomse"
-                     RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin
+                     RUNTIME_OUTPUT_DIRECTORY  ${LIBRARY_OUTPUT_PATH}
     )
 
 endif(LOMSE_BUILD_SHARED_LIB)
@@ -471,35 +597,40 @@ if(LOMSE_BUILD_TESTS)
     add_executable(${TESTLIB} ${TESTLIB_SRC})
 
     # Check for pthreads
-    find_package (Threads)
+    #find_package (Threads)
     
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
-        target_link_libraries ( ${TESTLIB} lomse-shared 
-                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+        target_link_libraries ( ${TESTLIB} lomse-shared
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} #${CMAKE_THREAD_LIBS_INIT} 
         )
         add_dependencies(testlib lomse-shared)
-    else()      
-        target_link_libraries (${TESTLIB} lomse
-                ${UNITTEST++_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${LOMSE_BUILD_DEPS}
+    else()
+        target_link_libraries (${TESTLIB} ${LOMSE_STATIC} -DEBUG
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} #${CMAKE_THREAD_LIBS_INIT} 
+        add_dependencies(${TESTLIB} ${LOMSE_STATIC})
         )
-        add_dependencies(testlib lomse-static)
+    endif()
+    
+    if(MSVC)
+        set_target_properties(${LOMSE_STATIC} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
     endif()
 
-    # once generated, run tests
-    if (LOMSE_RUN_TESTS)
-        if(WIN32)
-            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
-        else()
-            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
-        endif()
+    get_target_property(VAR ${LOMSE_STATIC} LINK_FLAGS)
+    message("testlib target properties=" ${VAR})
 
-        add_custom_command(
-            TARGET ${TESTLIB} POST_BUILD
-            COMMAND ${TESTLIB_EXECUTABLE}
-            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-        )
-    endif(LOMSE_RUN_TESTS)
+    # once generated, run tests
+    if(WIN32)
+        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
+    else()
+        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
+    endif()
+
+    add_custom_command(
+        TARGET ${TESTLIB} POST_BUILD
+        COMMAND ${TESTLIB_EXECUTABLE}
+        WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+    )
 
 endif(LOMSE_BUILD_TESTS)
 
@@ -560,9 +691,8 @@ endif(LOMSE_BUILD_EXAMPLE)
 # library installation
 ###############################################################################
 
-if( UNIX )
-#-------------------------------------------------------------
 
+if( UNIX )
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION ${LOMSE_LIBDIR} )
     install( TARGETS ${LOMSE_SHARED} LIBRARY DESTINATION ${LOMSE_LIBDIR} )
@@ -573,97 +703,53 @@ if( UNIX )
                                         ${CMAKE_INSTALL_PREFIX}/lib/liblomse.so )" 
     )
 
-    # copy lomse includes
-    install(DIRECTORY ${INCLUDES_LOMSE}/
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN "*.hpp"
-                           PATTERN "*.txt"
-                           PATTERN ".svn" EXCLUDE
-                           PATTERN "platform" EXCLUDE )
-
-    # copy agg includes
-    install(DIRECTORY "${INCLUDES_AGG}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-
-    if( LOMSE_ENABLE_COMPRESSION )
-        # copy minizip includes
-        install(DIRECTORY "${INCLUDES_MINIZIP}/"
-                DESTINATION "${LOMSE_INCLUDEDIR}"
-                FILES_MATCHING PATTERN "*.h"
-                            PATTERN ".svn" EXCLUDE )
-    endif()
-
-    # copy utfcpp includes
-    install(DIRECTORY "${INCLUDES_UTFCPP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-
-    # copy also lomse_config.h
-    install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
-            DESTINATION "${LOMSE_INCLUDEDIR}" )
-
-    #copy fonts
-    install(DIRECTORY  "${LOMSE_ROOT_DIR}/fonts/"
-            DESTINATION ${FONTS_PATH}
-            FILES_MATCHING PATTERN "*.ttf" 
-                           PATTERN "*.ttc"
-                           PATTERN "Bravura.otf" 
-                           PATTERN ".svn" EXCLUDE )
-
 elseif( WIN32 )
-#-------------------------------------------------------------
+    #For Windows force to install Bravura font
+    set(INSTALL_BRAVURA_FONT 1)
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
     install( TARGETS ${LOMSE_SHARED} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
 
-    # copy lomse includes
-    install(DIRECTORY ${INCLUDES_LOMSE}/
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN "platform" EXCLUDE )
-
-    # copy agg includes
-    install(DIRECTORY "${INCLUDES_AGG}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-
-    if( LOMSE_ENABLE_COMPRESSION )
-        # copy minizip includes
-        install(DIRECTORY "${INCLUDES_MINIZIP}/"
-                DESTINATION "${LOMSE_INCLUDEDIR}"
-                FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-    endif()
-
-    # copy utfcpp includes
-    install(DIRECTORY "${INCLUDES_UTFCPP}/"
-            DESTINATION "${LOMSE_INCLUDEDIR}"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-    install(DIRECTORY "${INCLUDES_UTFCPP}/utf8"
-            DESTINATION "${LOMSE_INCLUDEDIR}/utf8"
-            FILES_MATCHING PATTERN "*.h"
-                           PATTERN ".svn" EXCLUDE )
-
-    # copy also lomse_config.h
-    install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
-            DESTINATION "${LOMSE_INCLUDEDIR}" )
-
-    #copy fonts
-    install(DIRECTORY  "${LOMSE_ROOT_DIR}/fonts/"
-            DESTINATION ${FONTS_PATH}
-            FILES_MATCHING PATTERN "*.ttf" 
-                           PATTERN "*.ttc"
-                           PATTERN "Bravura.otf" 
-                           PATTERN ".svn" EXCLUDE )
-
 endif()
+
+
+# copy bravura font
+if(INSTALL_BRAVURA_FONT)
+        message(STATUS "BRAVURA_FONT_PATH=${BRAVURA_FONT_PATH}")
+        file(COPY ${BRAVURA_FONT_PATH}/Bravura.otf
+             DESTINATION ${LOMSE_ROOT_DIR}/fonts/)
+endif()
+
+# copy lomse includes
+install(DIRECTORY ${INCLUDES_LOMSE}/
+        DESTINATION "${LOMSE_INCLUDEDIR}"
+        FILES_MATCHING PATTERN "*.h"
+                       PATTERN "platform" EXCLUDE )
+
+# copy agg includes
+install(DIRECTORY "${INCLUDES_AGG}/"
+        DESTINATION "${LOMSE_INCLUDEDIR}"
+        FILES_MATCHING PATTERN "*.h" )
+
+# copy minizip includes
+if( LOMSE_ENABLE_COMPRESSION )
+    install(DIRECTORY "${INCLUDES_MINIZIP}/"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h" )
+endif()
+
+# copy utfcpp includes
+install(DIRECTORY "${INCLUDES_UTFCPP}/"
+        DESTINATION "${LOMSE_INCLUDEDIR}"
+        FILES_MATCHING PATTERN "*.h" )
+install(DIRECTORY "${INCLUDES_UTFCPP}/utf8"
+        DESTINATION "${LOMSE_INCLUDEDIR}/utf8"
+        FILES_MATCHING PATTERN "*.h" )
+
+# copy also lomse_config.h
+install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
+        DESTINATION "${LOMSE_INCLUDEDIR}" )
 
 
 #----------------------------------------------------------------------------
@@ -731,20 +817,6 @@ if(UNIX)
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEBIAN_DEPS})
     message(STATUS "Package dependencies: ${CPACK_DEBIAN_PACKAGE_DEPENDS}" )
-
-#elseif( WIN32 )
-#    # MS Windows package
-#    set(CPACK_GENERATOR "NSIS")
-
-#    # There is a bug in NSI that does not handle full unix paths properly. Make
-#    # sure there is at least one set of four (4) backlasshes.
-#    SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-#    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
-#    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} My Famous Project")
-#    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.my-project-home-page.org")
-#    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.my-personal-home-page.com")
-#    SET(CPACK_NSIS_CONTACT "me@my-personal-home-page.com")
-#    SET(CPACK_NSIS_MODIFY_PATH ON)
 
 endif()
 
