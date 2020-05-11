@@ -368,7 +368,6 @@ add_custom_target (build-version ALL
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "setting Lomse version information ...")
 
-
 # identify platform and compiler
 if(WIN32 OR CYGWIN)
     # for Windows operating system or Windows when using the CygWin version of cmake
@@ -704,6 +703,7 @@ if(LOMSE_BUILD_STATIC_LIB)
 
     set(LOMSE_STATIC lomse)
     add_library(${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES})
+    add_dependencies(${LOMSE_STATIC} build-version)
 
     #dependencies
     if (LOMSE_BUILD_MONOLITHIC)
@@ -742,6 +742,7 @@ if(LOMSE_BUILD_SHARED_LIB)
 
     set(LOMSE_SHARED  lomse-shared)
     add_library( ${LOMSE_SHARED} SHARED ${ALL_LOMSE_SOURCES} )
+    add_dependencies(${LOMSE_SHARED} build-version)
 
     #dependencies
     if (LOMSE_BUILD_MONOLITHIC)
