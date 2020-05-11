@@ -592,10 +592,7 @@ if (LOMSE_BUILD_TESTS)
 	if(UNITTEST++_FOUND)
 		get_filename_component(UNITTEST++_LINK_DIR ${UNITTEST++_LIBRARY} DIRECTORY)
 		include_directories(${UNITTEST++_INCLUDE_DIR})
-		#link_libraries( ${UNITTEST++_LIBRARY} )
-		#link_directories( ${UNITTEST++_LINK_DIR} )        
 		message("      include= ${UNITTEST++_INCLUDE_DIR}" )
-		#message("      libdir=  ${UNITTEST++_LINK_DIR}" )
 	else()
 		message(STATUS "Not found UnitTest++. Test program will not be built" )
 		set (LOMSE_BUILD_TESTS OFF)
@@ -607,6 +604,7 @@ if( LOMSE_ENABLE_COMPRESSION )
     # libpng and freetype require zlib. So deal with zlib first.
     find_package(ZLIB REQUIRED)
     include_directories( ${ZLIB_INCLUDE_DIR} )
+    message(STATUS "Found ZLib: ${ZLIB_LIBRARIES}" )
     message("      include= ${ZLIB_INCLUDE_DIR}" )
     set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, zlib")
     set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${ZLIB_LIBRARIES})
@@ -616,7 +614,8 @@ endif(LOMSE_ENABLE_COMPRESSION)
 # Check for FreeType
 find_package(Freetype REQUIRED)                 
 include_directories( ${FREETYPE_INCLUDE_DIRS} )
-message("          include= ${FREETYPE_INCLUDE_DIRS}" )
+message(STATUS "Found Freetype: ${FREETYPE_LIBRARY}" )
+message("      include= ${FREETYPE_INCLUDE_DIRS}" )
 set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, freetype2")
 set(LOMSE_DEBIAN_DEPS "${LOMSE_DEBIAN_DEPS}, libfreetype6")
 set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FREETYPE_LIBRARY})
@@ -625,6 +624,7 @@ set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${FREETYPE_LIBRARY})
 if( LOMSE_ENABLE_PNG )
     find_package(PNG REQUIRED)  
     include_directories( ${PNG_INCLUDE_DIRS} )
+    message(STATUS "Found PNG: ${PNG_LIBRARIES}" )
     message("     include= ${PNG_INCLUDE_DIRS}" )
     set(LOMSE_REQUIRES "${LOMSE_REQUIRES}, libpng")
     set(LOMSE_BUILD_DEPS ${LOMSE_BUILD_DEPS} ${PNG_LIBRARIES})
@@ -660,12 +660,8 @@ endif()
 string( REGEX REPLACE "^, " "" LOMSE_REQUIRES ${LOMSE_REQUIRES})
 string( REGEX REPLACE "^, " "" LOMSE_DEBIAN_DEPS ${LOMSE_DEBIAN_DEPS})
 
-
-# Define possible builds
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
-
-# "Print all warnings", macros for GCC & __UNIX__
 if(UNIX)
+    # macros for "Print all warnings", GCC & __UNIX__
     add_definitions( -Wall -DGCC -D__UNIX__ )
 endif(UNIX)
 
@@ -780,8 +776,8 @@ if(LOMSE_BUILD_TESTS)
     
     # libraries to link
     if (LOMSE_BUILD_SHARED_LIB)
-        target_link_libraries ( ${TESTLIB} ${LOMSE_SHARED}
-                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} #${CMAKE_THREAD_LIBS_INIT} 
+        target_link_libraries (${TESTLIB} ${LOMSE_SHARED}
+                ${UNITTEST++_LIBRARY} ${LOMSE_BUILD_DEPS} 
         )
         add_dependencies(${TESTLIB} ${LOMSE_SHARED})
     else()
@@ -803,7 +799,7 @@ if(LOMSE_BUILD_TESTS)
 
     # once generated, run tests
     if(WIN32)
-        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
+        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB}.exe )
     else()
         set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
     endif()
