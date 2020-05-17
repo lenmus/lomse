@@ -31,12 +31,6 @@
 #define __LOMSE_AUTOBEAMER_H__
 
 #include <vector>
-//#include "lomse_ldp_elements.h"
-//#include "lomse_relation_builder.h"
-//#include "lomse_internal_model.h"       //required to define BeamsBuilder, SlursBuilder
-//#include "lomse_im_note.h"              //required for enum EAccidentals
-//#include "lomse_analyser.h"              //required for enum EAccidentals
-
 using namespace std;
 
 namespace lomse

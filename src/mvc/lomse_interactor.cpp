@@ -31,7 +31,7 @@
 #include "lomse_interactor.h"
 
 #include "lomse_ldp_compiler.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_basic.h"
 #include "lomse_tasks.h"

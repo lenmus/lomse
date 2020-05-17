@@ -35,7 +35,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_image_reader.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 //#include "lomse_ldp_compiler.h"
 //#include "lomse_user_command.h"
 //#include "lomse_view.h"

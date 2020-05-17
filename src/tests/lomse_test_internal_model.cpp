@@ -37,7 +37,7 @@
 #include "lomse_im_figured_bass.h"
 #include "lomse_im_note.h"
 #include "lomse_time.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;

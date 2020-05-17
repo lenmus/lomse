@@ -38,7 +38,7 @@
 #include "lomse_note_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_tuplet_engraver.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_gm_basic.h"
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"

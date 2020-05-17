@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -33,7 +33,7 @@
 #include <list>
 #include <iostream>
 
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 
 using namespace std;
 
@@ -154,6 +154,11 @@ public:
 
     /** Returns the raw pointer to the Document associated to this %Presenter.    */
     inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
+
+    /** Returns an IDocument object for interacting with the internal model.  */
+    inline IDocument get_document() {
+        return m_spDoc.get()->get_document_api();
+    }
 
 
     //to save user data

@@ -42,7 +42,7 @@
 #include "lomse_mnx_analyser.h"
 #include "lomse_mnx_compiler.h"
 #include "lomse_model_builder.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_font_storage.h"
 #include "lomse_graphic_view.h"
 #include "lomse_interactor.h"

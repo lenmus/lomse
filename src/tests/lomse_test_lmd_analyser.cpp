@@ -34,7 +34,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_xml_parser.h"
 #include "lomse_lmd_analyser.h"
 #include "lomse_internal_model.h"

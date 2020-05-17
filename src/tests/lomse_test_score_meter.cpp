@@ -35,7 +35,7 @@
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
 #include "lomse_score_meter.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 
 using namespace UnitTest;
 using namespace std;

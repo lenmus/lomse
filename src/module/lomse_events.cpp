@@ -32,7 +32,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_events_dispatcher.h"
 #include "lomse_control.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_logger.h"
 
 namespace lomse

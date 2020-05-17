@@ -35,7 +35,7 @@
 #include "lomse_right_aligner.h"
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;

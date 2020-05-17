@@ -31,7 +31,7 @@
 #define __LOMSE_CONTROL_H__
 
 #include "lomse_basic.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_injectors.h"
 #include "lomse_events.h"               // EventHandler
 #include "lomse_gm_basic.h"

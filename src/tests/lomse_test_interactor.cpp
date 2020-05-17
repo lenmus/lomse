@@ -35,7 +35,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_interactor.h"
 #include "lomse_graphic_view.h"
 #include "lomse_tasks.h"

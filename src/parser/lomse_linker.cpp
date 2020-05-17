@@ -33,7 +33,7 @@
 #include "lomse_ldp_elements.h"        //for node type
 #include "lomse_im_note.h"
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 
 

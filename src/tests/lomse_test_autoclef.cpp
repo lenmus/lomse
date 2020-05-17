@@ -32,7 +32,7 @@
 #include "lomse_build_options.h"
 
 //classes related to these tests
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_autoclef.h"

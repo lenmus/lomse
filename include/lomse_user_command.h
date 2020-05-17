@@ -34,7 +34,7 @@
 #include <list>
 #include "lomse_ldp_elements.h"
 #include "lomse_stack.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 
 using namespace std;
 

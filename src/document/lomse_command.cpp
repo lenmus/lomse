@@ -31,7 +31,7 @@
 #include "lomse_command.h"
 #include "lomse_build_options.h"
 
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_im_factory.h"
 #include "lomse_logger.h"

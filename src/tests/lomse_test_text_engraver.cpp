@@ -36,7 +36,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_calligrapher.h"
 #include "lomse_text_engraver.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_score_meter.h"
 
 using namespace UnitTest;

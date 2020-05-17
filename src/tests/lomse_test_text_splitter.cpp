@@ -34,7 +34,7 @@
 //classes related to these tests
 #include "lomse_text_splitter.h"
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_factory.h"
 #include "lomse_engrouters.h"

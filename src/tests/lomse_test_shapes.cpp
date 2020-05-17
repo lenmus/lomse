@@ -43,7 +43,7 @@
 #include "lomse_note_engraver.h"
 #include "lomse_score_meter.h"
 #include "lomse_engravers_map.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;

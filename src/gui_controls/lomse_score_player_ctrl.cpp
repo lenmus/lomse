@@ -32,7 +32,7 @@
 #include "lomse_score_player.h"
 #include "lomse_internal_model.h"
 #include "lomse_shapes.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_gm_basic.h"
 #include "lomse_shape_text.h"
 #include "lomse_drawer.h"

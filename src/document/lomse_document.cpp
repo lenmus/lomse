@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#include "private/lomse_document_p.h"
 #include "lomse_document.h"
 #include "lomse_build_options.h"
 
@@ -40,7 +41,6 @@
 #include "lomse_mnx_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
-#include "lomse_internal_model.h"
 #include "lomse_ldp_exporter.h"
 #include "lomse_lmd_exporter.h"
 #include "lomse_model_builder.h"
@@ -727,6 +727,220 @@ string Document::dump_tree() const
 
     return data.str();
 }
+
+//---------------------------------------------------------------------------------------
+IDocument Document::get_document_api()
+{
+    return IDocument(this);
+}
+
+
+//=======================================================================================
+// Implementation of API class IDocument
+IDocument::IDocument(Document* impl)
+    : m_pImpl(impl)
+{
+}
+
+//facade methods for ImoDocument
+
+//---------------------------------------------------------------------------------------
+string& IDocument::get_version()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+    return pRoot->get_version();
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_left_margin(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_left_margin(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_right_margin(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_right_margin(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_top_margin(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_top_margin(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_bottom_margin(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_bottom_margin(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_binding_margin(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_binding_margin(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_size(USize uPageSize)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    pageInfo->set_page_size(uPageSize);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_width(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->set_page_width(value);
+}
+
+//---------------------------------------------------------------------------------------
+void  IDocument::set_page_height(LUnits value)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->set_page_height(value);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_left_margin()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_left_margin();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_right_margin()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_right_margin();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_top_margin()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_top_margin();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_bottom_margin()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_bottom_margin();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_binding_margin()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_binding_margin();
+}
+
+//---------------------------------------------------------------------------------------
+USize IDocument::get_page_size()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_page_size();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_width()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_page_width();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits IDocument::get_page_height()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+	ImoPageInfo* pageInfo = pRoot->get_page_info();
+    return pageInfo->get_page_height();
+}
+
+//---------------------------------------------------------------------------------------
+float IDocument::get_page_content_scale()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+    return pRoot->get_page_content_scale();
+}
+
+//---------------------------------------------------------------------------------------
+void IDocument::set_page_content_scale(float scale)
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+    pRoot->set_page_content_scale(scale);
+}
+
+//---------------------------------------------------------------------------------------
+IScore IDocument::get_first_score()
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+    ImoContent* pContent = pRoot->get_content();
+    ImoObj::children_iterator it;
+    for (it= pContent->begin(); it != pContent->end(); ++it)
+    {
+        if ((*it)->is_score())
+            return IScore(static_cast<ImoScore*>(*it), pimpl(), pimpl()->get_model_ref());
+    }
+    return IScore();
+}
+
+
+//methods for Document
+
+
+//---------------------------------------------------------------------------------------
+void IDocument::end_of_changes()
+{
+    pimpl()->end_of_changes();
+}
+
+//---------------------------------------------------------------------------------------
+void IDocument::define_beat(int beatType, TimeUnits duration)
+{
+    pimpl()->define_beat(beatType, duration);
+}
+
+//---------------------------------------------------------------------------------------
+int IDocument::get_beat_type()
+{
+    return pimpl()->get_beat_type();
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits IDocument::get_beat_duration()
+{
+    return pimpl()->get_beat_duration();
+}
+
+//---------------------------------------------------------------------------------------
+Document* IDocument::get_internal_object()
+{
+    return pimpl();
+}
+
 
 
 

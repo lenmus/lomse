@@ -36,7 +36,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_selections.h"
 #include "lomse_shapes.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 
 using namespace UnitTest;
 using namespace std;

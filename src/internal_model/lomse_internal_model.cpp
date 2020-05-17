@@ -112,6 +112,39 @@ static string m_unknown = "unknown";
 #define k_default_max_width     0.0f
 #define k_default_width         0.0f
 
+//=======================================================================================
+// helper macro to simplify the implementation of internal model API objects
+
+#define LOMSE_IMPLEMENT_IM_API_CLASS(IXxxx, ImoXxxx)  \
+    IXxxx::IXxxx(ImoXxxx* impl, Document* doc, long imVers)        \
+        : m_pImpl(impl)                                            \
+        , m_pDoc(doc)                                              \
+        , m_id(impl->get_id())                                     \
+        , m_imVersion(imVers)                                      \
+    {                                                              \
+    }                                                              \
+    IXxxx::IXxxx()                      \
+        : m_pImpl(nullptr)              \
+        , m_pDoc(nullptr)               \
+        , m_id(-1L)                     \
+        , m_imVersion(-1L)              \
+    {                                   \
+    }                                   \
+    void IXxxx::ensure_validity()                                                  \
+    {                                                                              \
+        if (!m_pDoc->is_valid_model(m_imVersion))                                  \
+        {                                                                          \
+            m_imVersion = m_pDoc->get_model_ref();                                 \
+            m_pImpl = static_cast<ImoXxxx*>(m_pDoc->get_pointer_to_imo(m_id));     \
+        }                                                                          \
+    }                                                                              \
+    bool IXxxx::is_valid()                \
+    {                                     \
+        if (m_pImpl == nullptr)           \
+            return false;                 \
+        ensure_validity();                \
+        return m_pImpl != nullptr;        \
+    }
 
 //=======================================================================================
 // ImoAttr implementation
@@ -3828,6 +3861,21 @@ void ImoScore::end_of_changes()
 {
     ModelBuilder builder;
     builder.structurize(this);
+}
+
+//=======================================================================================
+LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore)
+
+ImoId IScore::get_score_id()
+{
+    ensure_validity();
+    return pimpl()->get_id();
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore* IScore::get_internal_object()
+{
+    return pimpl();
 }
 
 
