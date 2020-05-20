@@ -318,7 +318,7 @@ endif()
 #endif()
 
 #if (WIN32)
-#    if (LOMSE_BUILD_SHARED_LIB AND MSVC)
+#    if (LOMSE_BUILD_SHARED_LIB AND (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
 #        message(FATAL_ERROR "Shared C++ libraries (C++ DLL) are not supported by MSVC")
 #    endif()
 #endif()
@@ -387,7 +387,7 @@ elseif(UNIX AND NOT APPLE AND NOT CYGWIN)
 endif()
 
 # compiler
-if(MSVC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set( LOMSE_COMPILER_MSVC  "1")
 else()
     set( LOMSE_COMPILER_MSVC  "0")
@@ -450,7 +450,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         message(FATAL_ERROR "MSVC version must be at least 15!")
     endif()
 else()
-    message(WARNING "** Warning **: You are using an untested compiler! Lomse has only been tested with GCC and Clang.")
+    message(WARNING "** Warning **: You are using an untested compiler! Lomse has not been tested with ${CMAKE_CXX_COMPILER_ID}.")
 endif()
 message(STATUS "** Compiler to use: ${CMAKE_CXX_COMPILER_ID} v.${CMAKE_CXX_COMPILER_VERSION}")
 
@@ -723,7 +723,7 @@ if(LOMSE_BUILD_STATIC_LIB)
     #endif()
 
     # Force not to link with standard MSVC libraries: /NODEFAULTLIB
-    if(MSVC)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set_target_properties(${LOMSE_STATIC} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
     endif()
 
@@ -791,7 +791,7 @@ if(LOMSE_BUILD_TESTS)
         add_dependencies(${TESTLIB} ${LOMSE_STATIC})
     endif()
     
-    if(MSVC)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         set_target_properties(${TESTLIB} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
     endif()
 
