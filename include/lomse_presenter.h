@@ -156,7 +156,7 @@ public:
     inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
 
     /** Returns an IDocument object for interacting with the internal model.  */
-    inline IDocument get_document() {
+    inline unique_ptr<IDocument> get_document() {
         return m_spDoc.get()->get_document_api();
     }
 

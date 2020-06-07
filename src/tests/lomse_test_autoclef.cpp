@@ -271,7 +271,7 @@ SUITE(AutoClefTest)
         ac.do_autoclef();
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score "
-              "(vers 2.0)(instrument (staves 1)(musicData (clef G p1)(n c4 q v1 p1))))))" );
+              "(vers 2.0)(instrument P1 (staves 1)(musicData (clef G p1)(n c4 q v1 p1))))))" );
 //        cout << test_name() << endl;
 //        cout << doc.to_string() << endl;
 
@@ -296,7 +296,7 @@ SUITE(AutoClefTest)
         ac.do_autoclef();
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
+              "(instrument P1 (staves 2)(musicData (clef G p1)(clef F4 p2)"
               "(key C)(time 2 4)(n e4 e v1 p1 (beam 107 +))(n c3 e v2 p2 (beam 114 +))"
               "(n g4 e v1 p1 (beam 107 -))(n e3 e v2 p2 (beam 114 -))(n g3 e v2 p2 "
               "(beam 121 +))(n c4 e v2 p2 (beam 121 -))(barline simple)(n a3 q v2 p2)"

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,6 +55,7 @@
 #include <sstream>
 using namespace std;
 
+///@cond INTERNALS
 namespace lomse
 {
 
@@ -152,6 +153,7 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_modified(0)
     , m_beatType(k_beat_implied)
     , m_beatDuration( TimeUnits(k_duration_quarter) )
+    , m_imRef(0L)
 {
 }
 
@@ -329,6 +331,7 @@ void Document::end_of_changes()
 {
     ModelBuilder builder;
     builder.build_model(m_pImoDoc);
+    ++m_imRef;
 }
 
 //---------------------------------------------------------------------------------------
@@ -729,29 +732,66 @@ string Document::dump_tree() const
 }
 
 //---------------------------------------------------------------------------------------
-IDocument Document::get_document_api()
+unique_ptr<IDocument> Document::get_document_api()
 {
-    return IDocument(this);
+    return unique_ptr<IDocument>(new IDocument(this));
 }
 
+//---------------------------------------------------------------------------------------
+bool Document::is_valid_model(long imRef)
+{
+    return m_imRef == imRef;
+}
+
+//---------------------------------------------------------------------------------------
+long Document::get_model_ref()
+{
+    return m_imRef;
+}
+
+///@endcond
 
 //=======================================================================================
-// Implementation of API class IDocument
+/** @class IDocument
+    The %IDocument class is the API root object that contains, basically, the @IM,
+    a model similar to the DOM in HTML.
+    It represents the whole document and allows to access and modify the content
+    of the document. By accessing and modifying this internal model you
+    have full control over the document content and its properties.
+
+    The %IDocument class also encapsulates all the internals, providing the basic API
+    for creating, modifying and using a document.
+*/
+
+///@cond INTERNALS
+
 IDocument::IDocument(Document* impl)
     : m_pImpl(impl)
 {
 }
 
-//facade methods for ImoDocument
+///@endcond
 
 //---------------------------------------------------------------------------------------
-string& IDocument::get_version()
+/** @memberof IDocument
+    For documents created from sources in LMD format this method will return
+    the LMD version used in the source. For other document creation methods and
+    formats it will return version "0.0".
+*/
+string& IDocument::get_lmd_version() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_version();
 }
 
+
+/// @name Page size and margins
+//@{
+
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_left_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -760,6 +800,9 @@ void  IDocument::set_page_left_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_right_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -768,6 +811,9 @@ void  IDocument::set_page_right_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_top_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -776,6 +822,9 @@ void  IDocument::set_page_top_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_bottom_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -784,6 +833,9 @@ void  IDocument::set_page_bottom_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_binding_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -792,6 +844,9 @@ void  IDocument::set_page_binding_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_size(USize uPageSize)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -800,6 +855,9 @@ void  IDocument::set_page_size(USize uPageSize)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_width(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -808,6 +866,9 @@ void  IDocument::set_page_width(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+
+*/
 void  IDocument::set_page_height(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -816,7 +877,10 @@ void  IDocument::set_page_height(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_left_margin()
+/** @memberof IDocument
+
+*/
+LUnits IDocument::get_page_left_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -824,7 +888,10 @@ LUnits IDocument::get_page_left_margin()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_right_margin()
+/** @memberof IDocument
+
+*/
+LUnits IDocument::get_page_right_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -832,7 +899,10 @@ LUnits IDocument::get_page_right_margin()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_top_margin()
+/** @memberof IDocument
+
+*/
+LUnits IDocument::get_page_top_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -840,7 +910,10 @@ LUnits IDocument::get_page_top_margin()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_bottom_margin()
+/** @memberof IDocument
+
+*/
+LUnits IDocument::get_page_bottom_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -848,7 +921,10 @@ LUnits IDocument::get_page_bottom_margin()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_binding_margin()
+/** @memberof IDocument
+
+*/
+LUnits IDocument::get_page_binding_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -856,7 +932,10 @@ LUnits IDocument::get_page_binding_margin()
 }
 
 //---------------------------------------------------------------------------------------
-USize IDocument::get_page_size()
+/** @memberof IDocument
+
+*/
+USize IDocument::get_page_size() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -864,7 +943,11 @@ USize IDocument::get_page_size()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_width()
+/** @memberof IDocument
+    Returns the paper width intended for rendering this document. The returned value
+    is in logical units (cents of a millimeter).
+*/
+LUnits IDocument::get_page_width() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -872,29 +955,136 @@ LUnits IDocument::get_page_width()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_height()
+/** @memberof IDocument
+    Returns the paper height intended for rendering this document. The returned value
+    is in logical units (cents of a millimeter).
+*/
+LUnits IDocument::get_page_height() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
     return pageInfo->get_page_height();
 }
 
+//@}    //Page size and margins
+
+
+/// @name Page content scale
+//@{
+
 //---------------------------------------------------------------------------------------
-float IDocument::get_page_content_scale()
+/** @memberof IDocument
+    Return the scaling factor to apply to the content when rendered divided into
+    pages of the size defined by the paper size. Normally this factor is 1.0.
+*/
+float IDocument::get_page_content_scale() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_page_content_scale();
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Set the scaling factor to apply to the content when rendered divided into
+    pages of the size defined by the paper size. By default this factor is 1.0.
+*/
 void IDocument::set_page_content_scale(float scale)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     pRoot->set_page_content_scale(scale);
 }
 
+//@}    //Page content scale
+
+
+/// @name Content traversal
+//@{
+
 //---------------------------------------------------------------------------------------
-IScore IDocument::get_first_score()
+/** @memberof IDocument
+    Returns the number of objects contained, at first level, in this document.
+*/
+int IDocument::get_num_children() const
+{
+    return const_cast<Document*>(pimpl())->get_num_content_items();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns
+*/
+unique_ptr<IElement> IDocument::get_child_at(int iItem) const
+{
+//    return const_cast<ImoInstrument*>(pimpl())->get_num_content_items();
+//    return text.get_text();
+    return unique_ptr<IElement>();    //TODO
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns
+*/
+unique_ptr<IElement> IDocument::get_first_child() const
+{
+    Document* pDoc = const_cast<Document*>(pimpl());
+    ImoDocument* pRoot = pDoc->get_im_root();
+    ImoContent* pContent = pRoot->get_content();
+    ImoContentObj* pImo = pContent->get_item(0);
+    if (pImo->is_block_level_obj())
+    {
+        // return Private::downcast_content_obj(pImo);
+        if (pImo->is_score())
+        {
+            ImoScore* pBlock = static_cast<ImoScore*>(pImo);
+            return unique_ptr<IScore>(new IScore(pBlock, pDoc, pDoc->get_model_ref()) );
+        }
+        else
+        {
+            ImoContentObj* pBlock = static_cast<ImoContentObj*>(pImo);
+            return unique_ptr<IElement>(
+                        new IElement(pBlock, pDoc, pDoc->get_model_ref()) );
+        }
+//            |     |     ├── ImoContent [div] - a generic block-level container
+//            |     |     |     └── ImoDynamic [object]
+//            |     |     ├── ImoMultiColumn - a container subdivided in columns
+//            |     |     ├── ImoTable [table] - a container for table related objects
+//            |     |     ├── ImoList [ol, ul]
+//            |     |     ├── ImoTableRow [tr] - a container for a row of cells
+//            |     |     ├── ImoListItem [li]
+//            |     |     └── ImoTableCell [td, th]
+//            |           ├── ImoAnonymousBlock []
+//            |           ├── ImoParagraph [p]
+//            |           └── ImoHeading [h1, h2, h3, h4, h5]
+//
+    }
+    else
+    {
+        stringstream s;
+        s << "[IDocument::get_first_child] First child is not ImoBlockLevelObj but "
+          << pImo->get_name() << ". Aborting.";
+        string msg = s.str();
+        s << endl << pDoc->to_string() << endl;
+        LOMSE_LOG_ERROR(s.str());
+        throw runtime_error(msg);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns
+*/
+unique_ptr<IElement> IDocument::get_last_child() const
+{
+//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
+//    return text.get_text();
+    return unique_ptr<IElement>();    //TODO
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    convenience method for documents containing only a music score
+*/
+unique_ptr<IScore> IDocument::get_first_score() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     ImoContent* pContent = pRoot->get_content();
@@ -902,40 +1092,83 @@ IScore IDocument::get_first_score()
     for (it= pContent->begin(); it != pContent->end(); ++it)
     {
         if ((*it)->is_score())
-            return IScore(static_cast<ImoScore*>(*it), pimpl(), pimpl()->get_model_ref());
+        {
+            ImoScore* pScore = static_cast<ImoScore*>(*it);
+            Document* pDoc = const_cast<Document*>(pimpl());
+            return unique_ptr<IScore>( new IScore(pScore, pDoc, pDoc->get_model_ref()) );
+        }
     }
-    return IScore();
+    return unique_ptr<IScore>();
 }
+
+//@}    //Content traversal
 
 
 //methods for Document
 
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    When you modify the content of a document it is necessary to update some
+    structures associated to music scores.
+    For this it is mandatory to invoke this method. Alternatively, you can
+    invoke IScore::end_of_changes(), on the modified scores.
+*/
 void IDocument::end_of_changes()
 {
     pimpl()->end_of_changes();
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Defines the duration for one beat, for metronome and for methods that use
+    measure/beat parameters to define a location. This value is shared by all
+    scores contained in the document and can be changed at any time.
+    Changes while the score is being played back are ignored until playback finishes.
+    @param beatType A value from enum #EBeatDuration.
+    @param duration The duration (in Lomse Time Units) for one beat. You can use
+        a value from enum ENoteDuration casted to TimeUnits. This parameter is
+        required only when value for parameter `beatType` is `k_beat_specified`.
+        For all other values, if a non-zero value is specified, the value
+        will be used for the beat duration in scores without time signature.
+*/
 void IDocument::define_beat(int beatType, TimeUnits duration)
 {
     pimpl()->define_beat(beatType, duration);
 }
 
 //---------------------------------------------------------------------------------------
-int IDocument::get_beat_type()
+/** @memberof IDocument
+    Returns the beat type to use for scores in this document.
+
+    See define_beat()
+*/
+int IDocument::get_beat_type() const
 {
-    return pimpl()->get_beat_type();
+    return const_cast<Document*>(pimpl())->get_beat_type();
 }
 
 //---------------------------------------------------------------------------------------
-TimeUnits IDocument::get_beat_duration()
+/** @memberof IDocument
+    Returns the duration for beats to use in scores without time signature and when
+    beat type is `k_beat_specified`.
+
+    See define_beat()
+*/
+TimeUnits IDocument::get_beat_duration() const
 {
-    return pimpl()->get_beat_duration();
+    return const_cast<Document*>(pimpl())->get_beat_duration();
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Transitional, to facilitate migration to the new public API.
+    Notice that this method will be removed in future so, please, if you need to
+    use this method, open an issue at https://github.com/lenmus/lomse/issues
+    explaining the need, so that the public API
+    could be fixed and your app. would not be affected in future when this method
+    is removed.
+*/
 Document* IDocument::get_internal_object()
 {
     return pimpl();

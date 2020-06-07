@@ -331,8 +331,7 @@ SUITE(InternalModelTest)
 
         ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, &doc));
-        pGroup->add_instrument(pInstr1);
-        pGroup->add_instrument(pInstr2);
+        pGroup->set_range(0, 1);
         pScore->add_instruments_group(pGroup);
 
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();

@@ -2689,7 +2689,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup->get_symbol() == k_group_symbol_none );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -2735,7 +2735,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+        CHECK( pGroup->get_symbol() == k_group_symbol_bracket );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }

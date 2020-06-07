@@ -45,6 +45,7 @@ namespace lomse
 class ImoBarline;
 class ImoDocument;
 class ImoInstrument;
+class ImoInstrGroup;
 class ImoKeySignature;
 class ImoNote;
 class ImoObj;
@@ -113,6 +114,39 @@ protected:
     void collect_sounds_info(ImoScore* pScore);
     void assign_score_instr_id();
     void assign_port_and_channel();
+};
+
+//---------------------------------------------------------------------------------------
+// PartIdAssigner. Implements the algorithm to traverse the score instruments and assign
+// a unique partID to any instrument not having partID
+class PartIdAssigner
+{
+protected:
+
+public:
+    PartIdAssigner();
+    virtual ~PartIdAssigner();
+
+	void assign_parts_id(ImoScore* pScore);
+
+protected:
+};
+
+//---------------------------------------------------------------------------------------
+// GroupBarlinesFixer. Implements the algorithm to traverse the score instruments and assign
+// a unique partID to any instrument not having partID
+class GroupBarlinesFixer
+{
+protected:
+
+public:
+    GroupBarlinesFixer();
+    virtual ~GroupBarlinesFixer();
+
+	void set_barline_layout_in_instruments(ImoScore* pScore);
+
+protected:
+    void set_barlines_layout_for(ImoInstrGroup* pGrp);
 };
 
 

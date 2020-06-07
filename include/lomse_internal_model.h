@@ -32,76 +32,303 @@
 
 #include "lomse_basic.h"
 #include "lomse_build_options.h"
+#include "lomse_api_definitions.h"
 #include "private/lomse_internal_model_p.h"
 
+//std
 #include <string>
-using namespace std;
-
+#include <list>
 
 namespace lomse
 {
 
-//forward declaration of the implementation classes and API classes
+//forward declaration of the API classes and the implementation classes
+class ImoBlockLevelObj;
+class ImoContentObj;
 class ImoDocument;
-class IDocument;
+class ImoInstrument;
+class ImoInstrGroup;
+class ImoMidiInfo;
 class ImoScore;
+class ImoSoundInfo;
+
+class IBlockLevelObj;
+class IDocument;
+class IElement;
+class IInstrument;
+class IInstrGroup;
+class IMidiInfo;
 class IScore;
+class ISoundInfo;
+
+//---------------------------------------------------------------------------------------
+// INode: Abstract base class for all objects composing the document
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT INode
+{
+    LOMSE_DECLARE_IM_API_ROOT_CLASS(INode, ImoObj)
+
+    //properties
+    ImoId get_object_id() const;
+};
+
+//---------------------------------------------------------------------------------------
+// IElement: Abstract base class for all elements composing the document
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IElement : public INode
+{
+    LOMSE_DECLARE_IM_API_CLASS(IElement, ImoContentObj)
+    friend class IDocument;
+
+    //Content traversal
+    int get_num_children() const;
+    std::unique_ptr<IElement> get_child_at(int iItem) const;
+    std::unique_ptr<IElement> get_first_child() const;
+    std::unique_ptr<IElement> get_last_child() const;
+    std::unique_ptr<IElement> get_previous_sibling() const;
+    std::unique_ptr<IElement> get_next_sibling() const;
+
+    std::unique_ptr<IScore> get_first_score() const;
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoContentObj* get_internal_object() const;
+};
 
 
 //---------------------------------------------------------------------------------------
-// macro to simplify the declaration of internal model API objects
-// to be moved to another place?
+// IInstrument represents an instrument in the score.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IInstrument : public INode
+{
+    LOMSE_DECLARE_IM_API_CLASS(IInstrument, ImoInstrument)
+    friend class IScore;
+    friend class IInstrGroup;
 
-class Document;
+    // name and abbreviation
+    std::string& get_name_string() const;
+    std::string& get_abbreviation_string() const;
+    void set_name_string(const std::string& name);
+    void set_abbreviation_string(const std::string& abbrev);
 
-#define LOMSE_DECLARE_IM_API_CLASS(IXxxx, ImoXxxx) \
-    private: \
-        friend class ImoXxxx; \
-        friend class Document; \
-        ImoXxxx* m_pImpl; \
-        Document* m_pDoc; \
-        ImoId m_id; \
-        long m_imVersion; \
-        IXxxx(ImoXxxx* impl, Document* doc, long imVers); \
-        IXxxx(); \
-        inline const ImoXxxx* pimpl() const { return m_pImpl; } \
-        inline ImoXxxx* pimpl() { return m_pImpl; } \
-        void ensure_validity(); \
-    public: \
-        IXxxx(IXxxx &&) noexcept = default;             \
-        IXxxx& operator=(IXxxx &&) noexcept = default;  \
-        IXxxx(const IXxxx& other) = default;            \
-        IXxxx& operator=(const IXxxx& other) = default; \
-        bool is_valid();
+    // sound information
+    int get_num_sounds() const;
+    std::unique_ptr<ISoundInfo> get_sound_info_at(int iSound) const;
 
-
-
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoInstrument* get_internal_object() const;
+};
 
 
 //---------------------------------------------------------------------------------------
-/** %IScore is the API object for interacting with the internal model for a music score.
-*/
-class LOMSE_EXPORT IScore
+// IInstrGroup provides access to the information for an instruments group.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IInstrGroup : public INode
+{
+    LOMSE_DECLARE_IM_API_CLASS(IInstrGroup, ImoInstrGroup)
+    friend class IScore;
+
+    //access to group properties
+    EJoinBarlines get_barlines_mode() const;
+    EGroupSymbol get_symbol() const;
+    const std::string& get_name_string() const;
+    const std::string& get_abbreviation_string() const;
+
+    //group properties modification
+    void set_name_string(const std::string& text);
+    void set_abbreviation_string(const std::string& text);
+    void set_symbol(EGroupSymbol symbol);
+    void set_barlines_mode(EJoinBarlines value);
+
+    //instruments in the group
+    int get_num_instruments() const;
+    std::unique_ptr<IInstrument> get_instrument_at(int iInstr) const;  //iInstr = 0..num-instrs-in-group - 1
+    std::unique_ptr<IInstrument> get_first_instrument() const;
+    std::unique_ptr<IInstrument> get_last_instrument() const;
+    int get_index_to_first_instrument() const;
+    int get_index_to_last_instrument() const;
+    bool set_range(int iFirstInstr, int iLastInstr);
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoInstrGroup* get_internal_object() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// IMidiInfo provides access to the MIDI information associated to a ISoundInfo object
+// for an instrument. MIDI info always exists in the ISoundInfo object.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IMidiInfo : public INode
+{
+    LOMSE_DECLARE_IM_API_CLASS(IMidiInfo, ImoMidiInfo)
+    friend class ISoundInfo;
+
+    //getters
+    int get_port() const;
+    std::string& get_device_name() const;
+    std::string& get_program_name() const;
+    int get_bank() const;
+    int get_channel() const;
+    int get_program() const;
+    int get_unpitched() const;
+    float get_volume() const;
+    int get_pan() const;
+    int get_elevation() const;
+
+    //setters
+    void set_port(int value);
+    void set_device_name(const std::string& value);
+    void set_program_name(const std::string& value);
+    void set_bank(int value);
+    void set_channel(int value);
+    void set_program(int value);
+    void set_unpitched(int value);
+    void set_volume(float value);
+    void set_pan(int value);
+    void set_elevation(int value);
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoMidiInfo* get_internal_object() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// IScore is the API object for interacting with the internal model for a music score.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IScore : public IElement
 {
     LOMSE_DECLARE_IM_API_CLASS(IScore, ImoScore)
     friend class IDocument;
+    struct Private;
 
-    /** Returns an internal unique identifier for this score. It could be required
-        by some methods in the libray, such as some %Interactor methods.
-    */
-    ImoId get_score_id();
+    //instruments: create/delete/move instruments and get information
+    std::unique_ptr<IInstrument> append_new_instrument();
+    void delete_instrument(ImoId instrId);
+    void delete_instrument(IInstrument& instr);
+    void move_up_instrument(ImoId instrId);
+    void move_up_instrument(IInstrument& instr);
+    void move_down_instrument(ImoId instrId);
+    void move_down_instrument(IInstrument& instr);
+    std::unique_ptr<IInstrument> get_instrument_at(int iInstr) const;   //0..n-1
+    int get_num_instruments() const;
 
-    /** Transitional, to facilitate migration to the new public API.
-        Notice that this method will be removed in future so, please, if you need to
-        use this method open an issue at https://github.com/lenmus/lomse/issues
-        explaining the need, so that the public API
-        could be fixed and your app. would not be affected in future when this method
-        is removed.
-    */
-    ImoScore* get_internal_object();
+    //instrument groups
+    int get_num_instruments_groups() const;
+    std::unique_ptr<IInstrGroup> get_instruments_group_at(int iGroup) const;   //0..n-1
+    std::unique_ptr<IInstrGroup> create_instruments_group(int iFirstInstr, int iLastInstr);
+    bool delete_instruments_group_at(int iGroup);   //0..n-1
+    bool delete_instruments_group(const IInstrGroup& group);
+    void delete_all_instruments_groups();
 
+    //inform that you have finished modifying this score
+    void end_of_changes();
+
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoScore* get_internal_object() const;
 
 };
+
+
+//---------------------------------------------------------------------------------------
+// ISoundInfo class contains and manages the information for one sound, such as its
+// MIDI values. It always contains a IMidiInfo object.
+// An IInstrument always have at least one sound but can have more. For each sound there
+// is a ISoundInfo object and its associated IMidiInfo object.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT ISoundInfo : public INode
+{
+    LOMSE_DECLARE_IM_API_CLASS(ISoundInfo, ImoSoundInfo)
+    friend class IInstrument;
+
+//    //getters
+//    std::string& get_score_instr_name();
+//    std::string& get_score_instr_abbrev();
+//    std::string& get_score_instr_sound();
+//    bool get_score_instr_solo();
+//    bool get_score_instr_ensemble();
+//    int get_score_instr_ensemble_size();
+//    std::string& get_score_instr_virtual_library();
+//    std::string& get_score_instr_virtual_name();
+//
+//    //setters
+//    void set_score_instr_name(const std::string& value);
+//    void set_score_instr_abbrev(const std::string& value);
+//    void set_score_instr_sound(const std::string& value);
+//    void set_score_instr_solo(bool value);
+//    void set_score_instr_ensemble(bool value);
+//    void set_score_instr_ensemble_size(int value);
+//    void set_score_instr_virtual_library(const std::string& value);
+//    void set_score_instr_virtual_name(const std::string& value),
+
+    //access to MIDI info
+    std::unique_ptr<IMidiInfo> get_midi_info() const;
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoSoundInfo* get_internal_object() const;
+};
+
+
+
+
+////---------------------------------------------------------------------------------------
+//// IXxxxx is the API object for interacting with
+//// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+//// for all class members.
+////
+//class LOMSE_EXPORT IXxxxx : public IElement
+//{
+//    LOMSE_DECLARE_IM_API_CLASS(IXxxxx, ImoXxxxx)
+//    friend class IInstrument;
+//
+//    // put here the member methods ---------------------
+//            //void do_something();
+//    // end of member methods ---------------------------
+//
+//    // Transitional, to facilitate migration to this new public API.
+//    // Notice that this method will be removed in future so, please, if you need to
+//    // use this method open an issue at https://github.com/lenmus/lomse/issues
+//    // explaining the need, so that the public API could be fixed and your app.
+//    // would not be affected in future when this method is removed.
+//    ImoXxxxx* get_internal_object() const;
+//};
 
 
 }   //namespace lomse

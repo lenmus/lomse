@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -26,6 +26,8 @@
 // For any comment, suggestion or feature request, please contact the manager of
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
+
+///@cond INTERNALS
 
 #include "lomse_internal_model.h"
 
@@ -111,40 +113,6 @@ static string m_unknown = "unknown";
 #define k_default_min_width     0.0f
 #define k_default_max_width     0.0f
 #define k_default_width         0.0f
-
-//=======================================================================================
-// helper macro to simplify the implementation of internal model API objects
-
-#define LOMSE_IMPLEMENT_IM_API_CLASS(IXxxx, ImoXxxx)  \
-    IXxxx::IXxxx(ImoXxxx* impl, Document* doc, long imVers)        \
-        : m_pImpl(impl)                                            \
-        , m_pDoc(doc)                                              \
-        , m_id(impl->get_id())                                     \
-        , m_imVersion(imVers)                                      \
-    {                                                              \
-    }                                                              \
-    IXxxx::IXxxx()                      \
-        : m_pImpl(nullptr)              \
-        , m_pDoc(nullptr)               \
-        , m_id(-1L)                     \
-        , m_imVersion(-1L)              \
-    {                                   \
-    }                                   \
-    void IXxxx::ensure_validity()                                                  \
-    {                                                                              \
-        if (!m_pDoc->is_valid_model(m_imVersion))                                  \
-        {                                                                          \
-            m_imVersion = m_pDoc->get_model_ref();                                 \
-            m_pImpl = static_cast<ImoXxxx*>(m_pDoc->get_pointer_to_imo(m_id));     \
-        }                                                                          \
-    }                                                                              \
-    bool IXxxx::is_valid()                \
-    {                                     \
-        if (m_pImpl == nullptr)           \
-            return false;                 \
-        ensure_validity();                \
-        return m_pImpl != nullptr;        \
-    }
 
 //=======================================================================================
 // ImoAttr implementation
@@ -2879,21 +2847,18 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
     , m_pScore(nullptr)
-    , m_joinBarlines(k_standard)
-    , m_symbol(k_none)
+    , m_joinBarlines(EJoinBarlines::k_joined_barlines)
+    , m_symbol(k_group_symbol_none)
     , m_name()
     , m_abbrev()
+    , m_numInstrs(0)
+    , m_iFirstInstr(-1)
 {
 }
 
 //---------------------------------------------------------------------------------------
 ImoInstrGroup::~ImoInstrGroup()
 {
-    //AWARE: instruments MUST NOT be deleted. They are nodes in the tree and
-    //will be deleted when deleting the tree. Here, in the ImoGroup, we just
-    //keep pointers to locate them
-
-    m_instruments.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -2911,28 +2876,102 @@ void ImoInstrGroup::set_abbrev(ImoScoreText* pText)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrGroup::set_name(const string& value)
+{
+    if (!m_name.get_document())
+    {
+        Document* pDoc = get_the_document();
+        m_name.set_owner_document(pDoc);
+    }
+
+    m_name.set_text(value);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrGroup::set_abbrev(const string& value)
+{
+    if (!m_abbrev.get_document())
+    {
+        Document* pDoc = get_the_document();
+        m_abbrev.set_owner_document(pDoc);
+    }
+
+    m_abbrev.set_text(value);
+}
+
+//---------------------------------------------------------------------------------------
 ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 {
-    std::list<ImoInstrument*>::iterator it;
-    int i = 0;
-    for (it = m_instruments.begin(); it != m_instruments.end() && i < iInstr; ++it, ++i);
-    if (i == iInstr && it != m_instruments.end())
-        return *it;
+    if (iInstr < m_numInstrs && m_iFirstInstr >= 0)
+        return m_pScore->get_instrument(iInstr + m_iFirstInstr);
     else
         return nullptr;
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrGroup::add_instrument(ImoInstrument* pInstr)
+ImoInstrument* ImoInstrGroup::get_first_instrument()
 {
-    m_instruments.push_back(pInstr);
+    return m_pScore->get_instrument(m_iFirstInstr);
 }
 
 //---------------------------------------------------------------------------------------
-int ImoInstrGroup::get_num_instruments()
+ImoInstrument* ImoInstrGroup::get_last_instrument()
 {
-    return static_cast<int>( m_instruments.size() );
+    return m_pScore->get_instrument(m_iFirstInstr + m_numInstrs - 1);
 }
+
+//---------------------------------------------------------------------------------------
+bool ImoInstrGroup::contains_instrument(ImoInstrument* pInstr)
+{
+    int index = m_pScore->get_instr_number_for(pInstr);
+    return (index >= m_iFirstInstr) && (index < m_iFirstInstr + m_numInstrs);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrGroup::set_range(int iFirstInstr, int iLastInstr)
+{
+    m_iFirstInstr = iFirstInstr;
+    m_numInstrs = iLastInstr - iFirstInstr + 1;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrGroup::add_instrument(int iInstr)
+{
+    if (m_iFirstInstr == -1)
+    {
+        m_iFirstInstr = iInstr;
+        m_numInstrs = 1;
+    }
+    else
+        ++m_numInstrs;
+}
+
+////---------------------------------------------------------------------------------------
+//bool ImoInstrGroup::remove_instrument(ImoInstrument* pInstr)
+//{
+//    //returns true if instrument found and removed from the list. The instrument is
+//    //not deleted; that is, after the operation, the Instrument pointed by pInstr
+//    //is not destroyed and is still valid.
+//
+//    list<ImoInstrument*>::iterator it = m_instruments.begin();
+//    while (it != m_instruments.end())
+//    {
+//        if (*it == pInstr)
+//        {
+//            m_instruments.erase(it);
+//            return true;
+//        }
+//        ++it;
+//    }
+//    return false;
+//}
+
+////---------------------------------------------------------------------------------------
+//int ImoInstrGroup::get_num_instruments()
+//{
+//    return static_cast<int>( m_instruments.size() );
+//}
+
 
 //=======================================================================================
 // ImoKeySignature implementation
@@ -3610,6 +3649,24 @@ ImoInstrGroups* ImoScore::get_instrument_groups()
 }
 
 //---------------------------------------------------------------------------------------
+list<ImoInstrGroup*> ImoScore::find_groups_containing_instrument(ImoInstrument* pInstr)
+{
+    list<ImoInstrGroup*> groups;
+    ImoInstrGroups* pGroups = get_instrument_groups();
+    if (pGroups)
+    {
+        ImoObj::children_iterator itG;
+        for (itG= pGroups->begin(); itG != pGroups->end(); ++itG)
+        {
+            ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(*itG);
+            if (pGroup->contains_instrument(pInstr))
+                groups.push_back(pGroup);
+        }
+    }
+    return groups;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoScore::add_instruments_group(ImoInstrGroup* pGroup)
 {
     ImoInstrGroups* pGroups = get_instrument_groups();
@@ -3862,22 +3919,6 @@ void ImoScore::end_of_changes()
     ModelBuilder builder;
     builder.structurize(this);
 }
-
-//=======================================================================================
-LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore)
-
-ImoId IScore::get_score_id()
-{
-    ensure_validity();
-    return pimpl()->get_id();
-}
-
-//---------------------------------------------------------------------------------------
-ImoScore* IScore::get_internal_object()
-{
-    return pimpl();
-}
-
 
 
 //=======================================================================================
@@ -5702,6 +5743,6 @@ TimeUnits to_duration(int nNoteType, int nDots)
 
     return rDuration;
 }
-
+///@endcond
 
 }  //namespace lomse

@@ -2314,48 +2314,18 @@ public:
     virtual ~ImoContentObj();
 
     //getters
-    inline Tenths get_user_location_x()
-    {
-        return m_txUserLocation;
-    }
-    inline Tenths get_user_location_y()
-    {
-        return m_tyUserLocation;
-    }
-    inline Tenths get_user_ref_point_x()
-    {
-        return m_txUserRefPoint;
-    }
-    inline Tenths get_user_ref_point_y()
-    {
-        return m_tyUserRefPoint;
-    }
-    inline bool is_visible()
-    {
-        return m_fVisible;
-    }
+    inline Tenths get_user_location_x() { return m_txUserLocation; }
+    inline Tenths get_user_location_y() { return m_tyUserLocation; }
+    inline Tenths get_user_ref_point_x() { return m_txUserRefPoint; }
+    inline Tenths get_user_ref_point_y() { return m_tyUserRefPoint; }
+    inline bool is_visible() { return m_fVisible; }
 
     //setters
-    inline void set_user_location_x(Tenths tx)
-    {
-        m_txUserLocation = tx;
-    }
-    inline void set_user_location_y(Tenths ty)
-    {
-        m_tyUserLocation = ty;
-    }
-    inline void set_user_ref_point_x(Tenths tx)
-    {
-        m_txUserRefPoint = tx;
-    }
-    inline void set_user_ref_point_y(Tenths ty)
-    {
-        m_tyUserRefPoint = ty;
-    }
-    inline void set_visible(bool visible)
-    {
-        m_fVisible = visible;
-    }
+    inline void set_user_location_x(Tenths tx) { m_txUserLocation = tx; }
+    inline void set_user_location_y(Tenths ty) { m_tyUserLocation = ty; }
+    inline void set_user_ref_point_x(Tenths tx) { m_txUserRefPoint = tx; }
+    inline void set_user_ref_point_y(Tenths ty) { m_tyUserRefPoint = ty; }
+    inline void set_visible(bool visible) { m_fVisible = visible; }
 
     //attachments (first child)
     ImoAttachments* get_attachments();
@@ -3378,13 +3348,13 @@ protected:
     //mixer information
     float m_volume;		//channel volume: 0.0 (muted) to 1.0
     int m_pan;			//degrees: -180 to 180.
-    // 0 = in front of the listener, centered
-    //-90 = hard left, 90 is hard right
-    //-180 and 180 = behind the listener, centered
+                        // 0 = in front of the listener, centered
+                        //-90 = hard left, 90 is hard right
+                        //-180 and 180 = behind the listener, centered
     int m_elevation;	//degrees: -90 to 90.
-    // 0 = listener level
-    // 90 = directly above
-    //-90 = directly below.
+                        // 0 = listener level
+                        // 90 = directly above
+                        //-90 = directly below.
 
     friend class ImFactory;
     friend class ImoInstrument;
@@ -3407,96 +3377,30 @@ public:
     virtual ~ImoMidiInfo() {}
 
     //getters
-    inline string& get_score_instr_id()
-    {
-        return 	m_soundId;
-    }
-    inline int get_midi_port()
-    {
-        return m_port;
-    }
-    inline string& get_midi_device_name()
-    {
-        return m_midiDeviceName;
-    }
-    inline string& get_midi_name()
-    {
-        return m_midiName;
-    }
-    inline int get_midi_bank()
-    {
-        return m_bank;
-    }
-    inline int get_midi_channel()
-    {
-        return m_channel;
-    }
-    inline int get_midi_program()
-    {
-        return m_program;
-    }
-    inline int get_midi_unpitched()
-    {
-        return m_unpitched;
-    }
-    inline float get_midi_volume()
-    {
-        return m_volume;
-    }
-    inline int get_midi_pan()
-    {
-        return m_pan;
-    }
-    inline int get_midi_elevation()
-    {
-        return m_elevation;
-    }
+    inline string& get_score_instr_id() { return 	m_soundId; }
+    inline int get_midi_port() { return m_port; }
+    inline string& get_midi_device_name() { return m_midiDeviceName; }
+    inline string& get_midi_name() { return m_midiName; }
+    inline int get_midi_bank() { return m_bank; }
+    inline int get_midi_channel() { return m_channel; }
+    inline int get_midi_program() { return m_program; }
+    inline int get_midi_unpitched() { return m_unpitched; }
+    inline float get_midi_volume() { return m_volume; }
+    inline int get_midi_pan() { return m_pan; }
+    inline int get_midi_elevation() { return m_elevation; }
 
     //setters
-    inline void set_score_instr_id(const string& value)
-    {
-        m_soundId = value;
-    }
-    inline void set_midi_port(int value)
-    {
-        m_port = value;
-    }
-    inline void set_midi_device_name(const string& value)
-    {
-        m_midiDeviceName = value;
-    }
-    inline void set_midi_name(const string& value)
-    {
-        m_midiName = value;
-    }
-    inline void set_midi_bank(int value)
-    {
-        m_bank = value;
-    }
-    inline void set_midi_channel(int value)
-    {
-        m_channel = value;
-    }
-    inline void set_midi_program(int value)
-    {
-        m_program = value;
-    }
-    inline void set_midi_unpitched(int value)
-    {
-        m_unpitched = value;
-    }
-    inline void set_midi_volume(float value)
-    {
-        m_volume = value;
-    }
-    inline void set_midi_pan(int value)
-    {
-        m_pan = value;
-    }
-    inline void set_midi_elevation(int value)
-    {
-        m_elevation = value;
-    }
+    inline void set_score_instr_id(const string& value) { m_soundId = value; }
+    inline void set_midi_port(int value) { m_port = value; }
+    inline void set_midi_device_name(const string& value) { m_midiDeviceName = value; }
+    inline void set_midi_name(const string& value) { m_midiName = value; }
+    inline void set_midi_bank(int value) { m_bank = value; }
+    inline void set_midi_channel(int value) { m_channel = value; }
+    inline void set_midi_program(int value) { m_program = value; }
+    inline void set_midi_unpitched(int value) { m_unpitched = value; }
+    inline void set_midi_volume(float value) { m_volume = value; }
+    inline void set_midi_pan(int value) { m_pan = value; }
+    inline void set_midi_elevation(int value) { m_elevation = value; }
 
 };
 
@@ -3624,77 +3528,26 @@ public:
     virtual ~ImoSoundInfo() {}
 
     //getters
-    inline string& get_score_instr_id()
-    {
-        return m_soundId;
-    }
-    inline string& get_score_instr_name()
-    {
-        return m_instrName;
-    }
-    inline string& get_score_instr_abbrev()
-    {
-        return m_instrAbbrev;
-    }
-    inline string& get_score_instr_sound()
-    {
-        return m_instrSound;
-    }
-    inline bool	get_score_instr_solo()
-    {
-        return m_fSolo;
-    }
-    inline bool	get_score_instr_ensemble()
-    {
-        return m_fEnsemble;
-    }
-    inline int get_score_instr_ensemble_size()
-    {
-        return m_ensembleSize;
-    }
-    inline string& get_score_instr_virtual_library()
-    {
-        return m_virtualLibrary;
-    }
-    inline string& get_score_instr_virtual_name()
-    {
-        return m_virtualName;
-    }
+    inline string& get_score_instr_id() { return m_soundId; }
+    inline string& get_score_instr_name() { return m_instrName; }
+    inline string& get_score_instr_abbrev() { return m_instrAbbrev; }
+    inline string& get_score_instr_sound() { return m_instrSound; }
+    inline bool	get_score_instr_solo() { return m_fSolo; }
+    inline bool	get_score_instr_ensemble() { return m_fEnsemble; }
+    inline int get_score_instr_ensemble_size() { return m_ensembleSize; }
+    inline string& get_score_instr_virtual_library() { return m_virtualLibrary; }
+    inline string& get_score_instr_virtual_name() { return m_virtualName; }
 
     //setters
     void set_score_instr_id(const string& value);
-    inline void set_score_instr_name(const string& value)
-    {
-        m_instrName = value;
-    }
-    inline void set_score_instr_abbrev(const string& value)
-    {
-        m_instrAbbrev = value;
-    }
-    inline void set_score_instr_sound(const string& value)
-    {
-        m_instrSound = value;
-    }
-    inline void set_score_instr_solo(bool value)
-    {
-        m_fSolo = value;
-    }
-    inline void set_score_instr_ensemble(bool value)
-    {
-        m_fEnsemble = value;
-    }
-    inline void set_score_instr_ensemble_size(int value)
-    {
-        m_ensembleSize = value;
-    }
-    inline void set_score_instr_virtual_library(const string& value)
-    {
-        m_virtualLibrary = value;
-    }
-    inline void set_score_instr_virtual_name(const string& value)
-    {
-        m_virtualName = value;
-    }
+    inline void set_score_instr_name(const string& value) { m_instrName = value; }
+    inline void set_score_instr_abbrev(const string& value) { m_instrAbbrev = value; }
+    inline void set_score_instr_sound(const string& value) { m_instrSound = value; }
+    inline void set_score_instr_solo(bool value) { m_fSolo = value; }
+    inline void set_score_instr_ensemble(bool value) { m_fEnsemble = value; }
+    inline void set_score_instr_ensemble_size(int value) { m_ensembleSize = value; }
+    inline void set_score_instr_virtual_library(const string& value) { m_virtualLibrary = value; }
+    inline void set_score_instr_virtual_name(const string& value) { m_virtualName = value; }
 
     //access to ImoMidiInfo child
     ImoMidiInfo* get_midi_info();
@@ -3777,80 +3630,26 @@ public:
     virtual ~ImoPageInfo() {}
 
     //getters
-    inline LUnits get_left_margin()
-    {
-        return m_uLeftMargin;
-    }
-    inline LUnits get_right_margin()
-    {
-        return m_uRightMargin;
-    }
-    inline LUnits get_top_margin()
-    {
-        return m_uTopMargin;
-    }
-    inline LUnits get_bottom_margin()
-    {
-        return m_uBottomMargin;
-    }
-    inline LUnits get_binding_margin()
-    {
-        return m_uBindingMargin;
-    }
-    inline bool is_portrait()
-    {
-        return m_fPortrait;
-    }
-    inline USize get_page_size()
-    {
-        return m_uPageSize;
-    }
-    inline LUnits get_page_width()
-    {
-        return m_uPageSize.width;
-    }
-    inline LUnits get_page_height()
-    {
-        return m_uPageSize.height;
-    }
+    inline LUnits get_left_margin() { return m_uLeftMargin; }
+    inline LUnits get_right_margin() { return m_uRightMargin; }
+    inline LUnits get_top_margin() { return m_uTopMargin; }
+    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
+    inline LUnits get_binding_margin() { return m_uBindingMargin; }
+    inline bool is_portrait() { return m_fPortrait; }
+    inline USize get_page_size() { return m_uPageSize; }
+    inline LUnits get_page_width() { return m_uPageSize.width; }
+    inline LUnits get_page_height() { return m_uPageSize.height; }
 
     //setters
-    inline void set_left_margin(LUnits value)
-    {
-        m_uLeftMargin = value;
-    }
-    inline void set_right_margin(LUnits value)
-    {
-        m_uRightMargin = value;
-    }
-    inline void set_top_margin(LUnits value)
-    {
-        m_uTopMargin = value;
-    }
-    inline void set_bottom_margin(LUnits value)
-    {
-        m_uBottomMargin = value;
-    }
-    inline void set_binding_margin(LUnits value)
-    {
-        m_uBindingMargin = value;
-    }
-    inline void set_portrait(bool value)
-    {
-        m_fPortrait = value;
-    }
-    inline void set_page_size(USize uPageSize)
-    {
-        m_uPageSize = uPageSize;
-    }
-    inline void set_page_width(LUnits value)
-    {
-        m_uPageSize.width = value;
-    }
-    inline void set_page_height(LUnits value)
-    {
-        m_uPageSize.height = value;
-    }
+    inline void set_left_margin(LUnits value) { m_uLeftMargin = value; }
+    inline void set_right_margin(LUnits value) { m_uRightMargin = value; }
+    inline void set_top_margin(LUnits value) { m_uTopMargin = value; }
+    inline void set_bottom_margin(LUnits value) { m_uBottomMargin = value; }
+    inline void set_binding_margin(LUnits value) { m_uBindingMargin = value; }
+    inline void set_portrait(bool value) { m_fPortrait = value; }
+    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
+    inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
+    inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
 };
 
 
@@ -5047,96 +4846,57 @@ class ImoInstrGroup : public ImoSimpleObj
 {
 protected:
     ImoScore* m_pScore;
-    int m_joinBarlines;     // enum k_no, k_standard, k_mensurstrich
-    int m_symbol;           // enum k_none, k_default, k_brace, k_bracket, ...
+    int m_joinBarlines;     // enum EJoinBarlines
+    int m_symbol;           // enum EGroupSymbol
     ImoScoreText m_name;
     ImoScoreText m_abbrev;
-    std::list<ImoInstrument*> m_instruments;
+    int m_numInstrs;        //number of instruments in the group
+    int m_iFirstInstr;      //index to first instrument
 
     friend class ImFactory;
     ImoInstrGroup();
 
-    friend class ImoScore;
-    inline void set_owner_score(ImoScore* pScore)
-    {
-        m_pScore = pScore;
-    }
-
 public:
     virtual ~ImoInstrGroup();
 
-    enum { k_none=0, k_brace, k_bracket, k_line, };
-    enum { k_no=0, k_standard, k_mensurstrich, };
-
     //getters
-    inline int join_barlines()
-    {
-        return m_joinBarlines;
-    }
-    inline int get_symbol()
-    {
-        return m_symbol;
-    }
-    inline const std::string& get_name_string()
-    {
-        return m_name.get_text();
-    }
-    inline const std::string& get_abbrev_string()
-    {
-        return m_abbrev.get_text();
-    }
-    inline ImoScoreText& get_name()
-    {
-        return m_name;
-    }
-    inline ImoScoreText& get_abbrev()
-    {
-        return m_abbrev;
-    }
+    inline int join_barlines() { return m_joinBarlines; }
+    inline int get_symbol() { return m_symbol; }
+    inline const std::string& get_name_string() { return m_name.get_text(); }
+    inline const std::string& get_abbrev_string() { return m_abbrev.get_text(); }
+    inline ImoScoreText& get_name() { return m_name; }
+    inline ImoScoreText& get_abbrev() { return m_abbrev; }
 
     //setters
     void set_name(ImoScoreText* pText);
     void set_abbrev(ImoScoreText* pText);
-    inline void set_symbol(int symbol)
-    {
-        m_symbol = symbol;
-    }
-    inline void set_join_barlines(int value)
-    {
-        m_joinBarlines = value;
-    }
+    void set_name(const string& value);
+    void set_abbrev(const string& value);
+    inline void set_symbol(int symbol) { m_symbol = symbol; }
+    inline void set_join_barlines(int value) { m_joinBarlines = value; }
+    inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
     //instruments
-    inline list<ImoInstrument*>& get_instruments()
-    {
-        return m_instruments;
-    }
-    void add_instrument(ImoInstrument* pInstr);
+    ImoInstrument* get_first_instrument();
+    ImoInstrument* get_last_instrument();
+    inline int get_index_to_first_instrument() { return m_iFirstInstr; }
+    inline int get_index_to_last_instrument() { return m_iFirstInstr + m_numInstrs - 1; }
+    void set_range(int iFirstInstr, int iLastInstr);
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
-    int get_num_instruments();
-    ImoInstrument* get_first_instrument()
-    {
-        return m_instruments.front();
-    }
-    ImoInstrument* get_last_instrument()
-    {
-        return m_instruments.back();
-    }
+    inline int get_num_instruments() { return m_numInstrs; }
+    bool contains_instrument(ImoInstrument* pInstr);
 
     //info
-    inline ImoScore* get_score()
-    {
-        return m_pScore;
-    }
-    inline bool has_name()
-    {
-        return m_name.get_text() != "";
-    }
-    inline bool has_abbrev()
-    {
-        return m_abbrev.get_text() != "";
-    }
+    inline ImoScore* get_score() { return m_pScore; }
+    inline bool has_name() { return m_name.get_text() != ""; }
+    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
 
+protected:
+
+    friend class PartGroups;
+    friend class MnxPartGroups;
+    friend class Linker;
+    void add_instrument(int iInstr);
 };
 
 //---------------------------------------------------------------------------------------
@@ -6080,26 +5840,11 @@ public:
 
     //getters and setters
     string get_version_string();
-    inline int get_version_major()
-    {
-        return m_version/100;
-    }
-    inline int get_version_minor()
-    {
-        return m_version % 100;
-    }
-    inline int get_version_number()
-    {
-        return m_version;
-    }
-    inline void set_version(int version)
-    {
-        m_version = version;
-    }
-    inline ColStaffObjs* get_staffobjs_table()
-    {
-        return m_pColStaffObjs;
-    }
+    inline int get_version_major() { return m_version/100; }
+    inline int get_version_minor() { return m_version % 100; }
+    inline int get_version_number() { return m_version; }
+    inline void set_version(int version) { m_version = version; }
+    inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
 
@@ -6117,6 +5862,7 @@ public:
     //instrument groups
     void add_instruments_group(ImoInstrGroup* pGroup);
     ImoInstrGroups* get_instrument_groups();
+    std::list<ImoInstrGroup*> find_groups_containing_instrument(ImoInstrument* pInstr);
 
     //options
     ImoOptions* get_options();

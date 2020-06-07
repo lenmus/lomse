@@ -143,6 +143,7 @@ protected:
     int             m_modified;
     int             m_beatType;
     TimeUnits       m_beatDuration;
+    long            m_imRef;            //to validate the model
 
 public:
     /// Constructor
@@ -246,7 +247,7 @@ public:
     inline ImoDocument* get_im_root() const { return m_pImoDoc; }
 
     /** Returns an IDocument object for interacting with the internal model.  */
-    IDocument get_document_api();
+    std::unique_ptr<IDocument> get_document_api();
 
 
     /** For %Document objects created from sources in LMD format this method will return
@@ -631,8 +632,8 @@ public:
 //methods excluded from documented public API. Only for internal use.
 
     //support for IM API methods
-    inline bool is_valid_model(long UNUSED(imRef)) { return true; }     //TODO
-    inline long get_model_ref() { return 0L; }  //TODO
+    bool is_valid_model(long imRef);
+    long get_model_ref();
 
     //excluded from low level edition API
     ImoObj* create_object_from_ldp(const string& source, ostream& reporter);
@@ -695,6 +696,7 @@ protected:
     void fix_malformed_musicxml();
 
     friend class ImFactory;
+    friend class InstrumentAnalyser;
     void assign_id(ImoObj* pImo);
     ImoId reserve_id(ImoId id);
 

@@ -6,7 +6,7 @@
 
 @section edit-overview How to modify a document
 
-When a source document (in LDP or MusicXML format) is loaded, it is not stored as text or as an XML Document Object Model (<i>DOM</i>). Instead, the document is parsed and an @IM is built. The @IM is, mainly, a tree structure in memory. The root element of the @IM tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc. For an overview of the @IM see @ref page-internal-model.
+When a source document (in LDP or MusicXML format) is loaded, it is not stored as text or as an XML Document Object Model (<i>DOM</i>). Instead, the document is parsed and an @IM is built. The @IM is, mainly, a tree structure in memory. The root element of the @IM tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc. For an overview of the @IM see @ref page-api-internal-model.
 
 Once the @IM is created, for modifying the document your application has two options, either
 -# use the edition commands API; or
@@ -18,7 +18,7 @@ Once the @IM is created, for modifying the document your application has two opt
 
 Of course, both APIs are compatible and can be used by your application for offering different services.
 
-The rest of this page describes the high level API using edition commands. For a description of the low level API see @ref page-im-modification.
+The rest of this page describes the high level API using edition commands. For a description of the low level API see @ref page-api-internal-model.
 
 
 @section edit-high-level The high-level API: edition commands

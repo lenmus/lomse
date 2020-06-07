@@ -7790,6 +7790,7 @@ SUITE(LdpAnalyserTest)
 
         CHECK( pRoot->is_score() == true );
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        pScore->end_of_changes();
         CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7799,7 +7800,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup->get_symbol() == k_group_symbol_none );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -7830,6 +7831,7 @@ SUITE(LdpAnalyserTest)
 
         CHECK( pRoot->is_score() == true );
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        pScore->end_of_changes();
         CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7839,7 +7841,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+        CHECK( pGroup->get_symbol() == k_group_symbol_bracket );
 
         delete tree->get_root();
         // coverity[check_after_deref]
@@ -7871,6 +7873,7 @@ SUITE(LdpAnalyserTest)
 
         CHECK( pRoot->is_score() == true );
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        pScore->end_of_changes();
         CHECK( pScore && pScore->get_num_instruments() == 2 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7878,8 +7881,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
+        CHECK( pGroup->get_symbol() == k_group_symbol_bracket );
+        CHECK( pGroup->join_barlines() == EJoinBarlines::k_mensurstrich_barlines );
         ImoInstrument* pInstr = pGroup->get_instrument(0);
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_barline_layout() == ImoInstrument::k_mensurstrich );
@@ -7918,6 +7921,7 @@ SUITE(LdpAnalyserTest)
 
         CHECK( pRoot->is_score() == true );
         ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        pScore->end_of_changes();
         CHECK( pScore && pScore->get_num_instruments() == 3 );
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != nullptr );
@@ -7925,8 +7929,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pGroup != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_standard );
+        CHECK( pGroup->get_symbol() == k_group_symbol_bracket );
+        CHECK( pGroup->join_barlines() == EJoinBarlines::k_joined_barlines );
         //barlines layout transferred to instruments
         ImoInstrument* pInstr = pGroup->get_instrument(0);
         CHECK( pInstr != nullptr );
@@ -7943,281 +7947,318 @@ SUITE(LdpAnalyserTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, parts_10)
+    {
+        //@10. parts, instruments with ids
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2)(group P1 P2 (symbol bracket)))"
+            "(instrument#300 P1 (musicData))"
+            "(instrument#400 P2 (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 2 );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            CHECK( pInstr && pInstr->get_id() == 300L );
+            pInstr = pScore->get_instrument(1);
+            CHECK( pInstr && pInstr->get_id() == 400L );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
     // group ----------------------------------------------------------------------------
 
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_All)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "" << endl;
-//        parser.parse_text("(group (name \"Group\")(abbrev \"G.\")"
-//                "(symbol bracket)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        CHECK( pRoot->is_instr_group() == true );
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "Group" );
-//        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
-//        CHECK( pGrp->get_num_instruments() == 3 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete pGrp->get_instrument(2);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoName)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "" << endl;
-//        parser.parse_text("(group (abbrev \"G.\")"
-//                "(symbol bracket)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "" );
-//        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
-//        CHECK( pGrp->get_num_instruments() == 3 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete pGrp->get_instrument(2);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoAbbrev)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "" << endl;
-//        parser.parse_text("(group (name \"Group\")"
-//                "(symbol bracket)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "Group" );
-//        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
-//        CHECK( pGrp->get_num_instruments() == 3 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete pGrp->get_instrument(2);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoNameAbbrev)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "" << endl;
-//        parser.parse_text("(group (symbol bracket)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "" );
-//        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
-//        CHECK( pGrp->get_num_instruments() == 3 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete pGrp->get_instrument(2);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorSymbol)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        expected << "Line 0. Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group ignored." << endl;
-//        parser.parse_text("(group (symbol good)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        CHECK( pRoot == nullptr );
-//
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorJoin)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        expected << "Line 0. Invalid value for joinBarlines. Must be "
-//                    "'yes', 'no' or 'mensurstrich'. 'yes' assumed." << endl;
-//        parser.parse_text("(group (symbol brace)(joinBarlines perhaps)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "" );
-//        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_standard );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
-//        CHECK( pGrp->get_num_instruments() == 3 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete pGrp->get_instrument(2);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorMissingInstruments)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        expected << "Line 0. Missing instruments in group!. Group ignored." << endl;
-//        parser.parse_text("(group (symbol brace)(joinBarlines yes))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//        CHECK( pRoot == nullptr );
-//
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
-//
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorInInstrument)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        expected << "Line 0. Element 'n' unknown or not possible here. Ignored." << endl;
-//        parser.parse_text("(group (symbol brace)(joinBarlines no)"
-//                "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
-//                "(n c4 q)"
-//                "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        ImoObj* pRoot = a.analyse_tree(tree, "string:");
-//
-//        //cout << "[" << errormsg.str() << "]" << endl;
-//        //cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>( pRoot );
-//        CHECK( pGrp != nullptr );
-//        CHECK( pGrp->get_name_string() == "" );
-//        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
-//        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
-//        CHECK( pGrp->get_num_instruments() == 2 );
-//
-//        //AWARE: Group doesn't get ownership of instruments. Therefore, as
-//        //group is not included in a score, we must delete instruments.
-//        delete pGrp->get_instrument(0);
-//        delete pGrp->get_instrument(1);
-//        delete tree->get_root();
-//        // coverity[check_after_deref]
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
-//    }
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_All)
+    {
+        //group has name & abbrev
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3)"
+                "(group P1 P3 (name \"Group\")(abbrev \"G.\")(symbol bracket)(joinBarlines no)))"
+            "(instrument P1 (name \"Soprano\")(abbrev \"S\")(musicData))"
+            "(instrument P2 (name \"Tenor\")(abbrev \"T\")(musicData))"
+            "(instrument P3 (name \"Bass\")(abbrev \"B\")(musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 3 );
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                        pScore->get_instrument_groups()->get_item(0) );
+            CHECK( pGrp != nullptr );
+            CHECK( pGrp->get_name_string() == "Group" );
+            CHECK( pGrp->get_abbrev_string() == "G." );
+            CHECK( pGrp->join_barlines() == EJoinBarlines::k_non_joined_barlines );
+            CHECK( pGrp->get_symbol() == k_group_symbol_bracket );
+            CHECK( pGrp->get_num_instruments() == 3 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoName)
+    {
+        //group. no name. barlines joined (default)
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3)"
+                "(group P1 P2 (abbrev \"G.\")(symbol bracket)))"
+            "(instrument P1 (name \"Soprano\")(abbrev \"S\")(musicData))"
+            "(instrument P2 (name \"Tenor\")(abbrev \"T\")(musicData))"
+            "(instrument P3 (name \"Bass\")(abbrev \"B\")(musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 3 );
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                        pScore->get_instrument_groups()->get_item(0) );
+            CHECK( pGrp != nullptr );
+            CHECK( pGrp->get_name_string() == "" );
+            CHECK( pGrp->get_abbrev_string() == "G." );
+            CHECK( pGrp->join_barlines() == EJoinBarlines::k_joined_barlines );
+            CHECK( pGrp->get_symbol() == k_group_symbol_bracket );
+            CHECK( pGrp->get_num_instruments() == 2 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_NoAbbrev)
+    {
+        //group. no abbrev. barlines joined (default)
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P2 P3 (name \"Grp\")(symbol bracket)))"
+            "(instrument P1 (musicData))"
+            "(instrument P2 (musicData))"
+            "(instrument P3 (musicData))"
+            "(instrument P4 (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 4 );
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                        pScore->get_instrument_groups()->get_item(0) );
+            CHECK( pGrp != nullptr );
+            CHECK( pGrp->get_name_string() == "Grp" );
+            CHECK( pGrp->get_abbrev_string() == "" );
+            CHECK( pGrp->join_barlines() == EJoinBarlines::k_joined_barlines );
+            CHECK( pGrp->get_symbol() == k_group_symbol_bracket );
+            CHECK( pGrp->get_num_instruments() == 2 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorSymbol)
+    {
+        //group. error in symbol
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid value for group symbol. Must be 'none', "
+                    "'brace', 'bracket' or 'line'. 'none' assumed." << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3)"
+                "(group P1 P2 (symbol good)))"
+            "(instrument P1 (musicData))"
+            "(instrument P2 (musicData))"
+            "(instrument P3 (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 3 );
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                        pScore->get_instrument_groups()->get_item(0) );
+            CHECK( pGrp != nullptr );
+            CHECK( pGrp->get_name_string() == "" );
+            CHECK( pGrp->get_abbrev_string() == "" );
+            CHECK( pGrp->join_barlines() == EJoinBarlines::k_joined_barlines );
+            CHECK( pGrp->get_symbol() == k_group_symbol_none );
+            CHECK( pGrp->get_num_instruments() == 2 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorJoin)
+    {
+        //group. error in joinBarlines
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid value for joinBarlines. Must be "
+                    "'yes', 'no' or 'mensurstrich'. 'yes' assumed." << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3)"
+                "(group P1 P2 (symbol brace)(joinBarlines perhaps)))"
+            "(instrument P1 (musicData))"
+            "(instrument P2 (musicData))"
+            "(instrument P3 (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 3 );
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                        pScore->get_instrument_groups()->get_item(0) );
+            CHECK( pGrp != nullptr );
+            CHECK( pGrp->get_name_string() == "" );
+            CHECK( pGrp->get_abbrev_string() == "" );
+            CHECK( pGrp->join_barlines() == EJoinBarlines::k_joined_barlines );
+            CHECK( pGrp->get_symbol() == k_group_symbol_brace );
+            CHECK( pGrp->get_num_instruments() == 2 );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_ErrorMissingInstruments)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. group: missing mandatory element 'label'." << endl;
+        parser.parse_text("(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3)"
+                "(group (symbol brace)))"
+            "(instrument P1 (musicData))"
+            "(instrument P2 (musicData))"
+            "(instrument P3 (musicData))"
+            ")" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        ImoObj* pRoot = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pRoot->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>( pRoot );
+        CHECK( pScore );
+        if (pScore)
+        {
+            pScore->end_of_changes();
+            CHECK( pScore->get_num_instruments() == 3 );
+            ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+            CHECK( pGroups == nullptr );
+        }
+
+        delete tree->get_root();
+        // coverity[check_after_deref]
+        if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
 
     // chord ----------------------------------------------------------------------------
 
