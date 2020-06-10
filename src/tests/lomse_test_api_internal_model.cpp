@@ -497,13 +497,22 @@ SUITE(InternalModelApiTest)
             ")"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
+        CHECK(doc != nullptr);
+        cout << test_name() << ". To execute: doc->get_first_score()" << endl;
         unique_ptr<IScore> score = doc->get_first_score();
+        CHECK(score != nullptr);
+        cout << test_name() << ". To execute: score->get_instrument_at(0)" << endl;
         unique_ptr<IInstrument> instr = score->get_instrument_at(0);
 
+        CHECK(instr != nullptr);
+        cout << test_name() << ". To execute: instr->get_object_id()" << endl;
         score->delete_instrument(instr->get_object_id());
 
+        cout << test_name() << ". To execute: score->get_num_instruments()" << endl;
         CHECK( score->get_num_instruments() == 1 );
+        cout << test_name() << ". To execute: score->get_num_instruments_groups()" << endl;
         CHECK( score->get_num_instruments_groups() == 0 );
+        cout << test_name() << ". Test finished. Were is the crash?" << endl;
 
 //        Document* pDoc = doc->get_internal_object();
 //        pDoc->end_of_changes();
