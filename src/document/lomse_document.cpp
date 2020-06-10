@@ -772,6 +772,17 @@ IDocument::IDocument(Document* impl)
 
 ///@endcond
 
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the internal unique identifier (ID) for this document.
+*/
+ImoId IDocument::get_object_id() const
+{
+    ImoDocument* pRoot = pimpl()->get_im_root();
+    return pRoot->get_id();
+}
+
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
     For documents created from sources in LMD format this method will return

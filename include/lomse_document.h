@@ -50,6 +50,7 @@ private:
     struct Private;
 
     friend class Document;
+    friend class IObject;
     IDocument(Document* impl);
 
     inline const Document* pimpl() const { return m_pImpl; }
@@ -64,6 +65,7 @@ public:
 public:
 
     // Properties
+    ImoId get_object_id() const;
     std::string& get_lmd_version() const;
 
     //Access to content

@@ -127,48 +127,37 @@ enum EBeatDuration
 };
 
 //-----------------------------------------------------------------------------
-/** @ingroup enumerations
-    This enum describes valid types for internal model API objects.
-*/
-enum EINodeType
+// This enum describes valid types for internal model API objects.
+enum EIObjectType
 {
-    // simple nodes
-    k_node_simpleobj=0,
 
-    k_node_instr_group,
-    k_node_midi_info,
-    k_node_sound_info,
-    k_node_music_data,
-    k_node_instrument,
+    k_obj_anonymous_block,
+    k_obj_button,          ///< Button control
+    k_obj_content,
+    k_obj_control,
+    k_obj_dynamic,
+    k_obj_heading,         ///< Text header
+    k_obj_image,           ///< Image
+    k_obj_inline_wrapper,
+    k_obj_instrument,
+    k_obj_instr_group,
+    k_obj_link,            ///< Link
+    k_obj_list,            ///< Text list
+    k_obj_listitem,
+    k_obj_midi_info,
+    k_obj_multicolumn,
+    k_obj_music_data,
+    k_obj_paragraph,       ///< Paragraph
+    k_obj_score,	       ///< Music score
+    k_obj_score_player,    ///< Score player control
+    k_obj_sound_info,
+    k_obj_table,           ///< Table
+    k_obj_table_cell,
+    k_obj_table_row,
+    k_obj_text_item,       ///< Text item
 
-    k_node_simpleobj_last,
-
-
-   // IElements
-    k_node_element,
-
-    k_node_anonymous_block,
-    k_node_button,          ///< Button control
-    k_node_content,
-    k_node_control,
-    k_node_dynamic,
-    k_node_heading,         ///< Text header
-    k_node_image,           ///< Image
-    k_node_inline_wrapper,
-    k_node_link,            ///< Link
-    k_node_list,            ///< Text list
-    k_node_listitem,
-    k_node_multicolumn,
-    k_node_para,            ///< Paragraph
-    k_node_score,		    ///< Music score
-    k_node_score_player,    ///< Score player control
-    k_node_table,           ///< Table
-    k_node_table_cell,
-    k_node_table_row,
-    k_node_text_item,       ///< Text item
-
-    k_node_element_last,
-    k_node_last,
+    k_obj_element_last,
+    k_obj_last,
 
 };
 

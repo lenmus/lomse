@@ -2507,21 +2507,14 @@ public:
     virtual ~ImoInlinesContainer() {}
 
     //contents
-    inline int get_num_items()
-    {
-        return get_num_children();
-    }
-    inline void remove_item(ImoContentObj* pItem)
-    {
-        remove_child_imo(pItem);
-    }
-    inline void add_item(ImoContentObj* pItem)
-    {
-        append_child_imo(pItem);
-    }
-    inline ImoContentObj* get_first_item()
-    {
+    inline int get_num_items() { return get_num_children(); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
+    inline void add_item(ImoContentObj* pItem) { append_child_imo(pItem); }
+    inline ImoContentObj* get_first_item() {
         return dynamic_cast<ImoContentObj*>( get_first_child() );
+    }
+    inline ImoContentObj* get_last_item() {
+        return dynamic_cast<ImoContentObj*>( get_last_child() );
     }
 
 };

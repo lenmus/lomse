@@ -338,6 +338,111 @@ SUITE(InternalModelApiTest)
     }
 
 
+    //@ IParagraph ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0100)
+    {
+        //@0100. IObject properties and casting. OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(para#301 (txt \"Hello world\"))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> obj = doc->get_first_child();
+
+        CHECK( obj != nullptr );
+        CHECK( obj->get_object_id() == 301 );
+        CHECK( obj->get_object_name() == "paragraph" );
+        unique_ptr<IDocument> doc1 = obj->get_owner_document();
+        CHECK( doc->get_object_id() == doc1->get_object_id() );
+
+        //can be downcasted
+        CHECK( obj->is_paragraph() );
+        unique_ptr<IParagraph> para = obj->downcast_to_paragraph();
+        CHECK( para != nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0200)
+    {
+        //@0200. get siblings
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"Hello world\"))"
+            "(para (txt \"Another paragraph\"))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para1 = child->downcast_to_paragraph();
+
+        unique_ptr<IObject> obj = para1->get_previous_sibling();
+        CHECK( obj == nullptr );
+
+        obj = para1->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_paragraph() );
+        unique_ptr<IParagraph> para2 = obj->downcast_to_paragraph();
+
+        obj = para2->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_score() );
+
+        obj = para2->get_previous_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_paragraph() );
+        CHECK( obj->get_object_id() == para1->get_object_id() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0201)
+    {
+        //@0201. get children
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "This is a paragraph "
+                    "<txt>with three items.</txt>"     //<txt style='bold'>
+                    " And the third one."
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+
+        CHECK( para->get_num_children() == 3 );
+
+        unique_ptr<IObject> obj = para->get_first_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
+//        CHECK( txt != nullptr );
+//        CHECK( txt->get_text() == "This is a paragraph " );
+
+        obj = para->get_last_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        txt = obj->downcast_to_text_item();
+//        CHECK( txt != nullptr );
+//        CHECK( txt->get_text() == " And the third one." );
+
+        obj = para->get_child_at(1);
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        txt = obj->downcast_to_text_item();
+//        CHECK( txt != nullptr );
+//        CHECK( txt->get_text() == "with three items." );
+    }
+
+
     //@ IScore --------------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0100)
@@ -497,15 +602,16 @@ SUITE(InternalModelApiTest)
             ")"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
-        CHECK(doc != nullptr);
-        cout << test_name() << ". To execute: doc->get_first_score()" << endl;
         unique_ptr<IScore> score = doc->get_first_score();
-        CHECK(score != nullptr);
-        cout << test_name() << ". To execute: score->get_instrument_at(0)" << endl;
         unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+
+        Document* pDoc = doc->get_internal_object();
+        cout << test_name() << endl << pDoc->to_string(true) << endl;
 
         CHECK(instr != nullptr);
         cout << test_name() << ". To execute: instr->get_object_id()" << endl;
+        cout << test_name() << ". instr->get_object_id() = " << instr->get_object_id() << endl;
+        cout << test_name() << ". To execute: delete_instrument()" << endl;
         score->delete_instrument(instr->get_object_id());
 
         cout << test_name() << ". To execute: score->get_num_instruments()" << endl;

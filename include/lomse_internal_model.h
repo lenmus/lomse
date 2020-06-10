@@ -77,10 +77,12 @@ protected:
 public:
     //properties
     ImoId get_object_id() const;
+    const std::string& get_object_name() const;
+    std::unique_ptr<IDocument> get_owner_document() const;
 
     //downcast objects
+    std::unique_ptr<IParagraph> downcast_to_paragraph() const;
     std::unique_ptr<IScore> downcast_to_score() const;
-
 
     //check object type
     bool is_anonymous_block() const;

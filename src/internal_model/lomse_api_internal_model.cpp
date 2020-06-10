@@ -144,7 +144,7 @@ namespace lomse
     @#include <lomse_api_definitions.h>
 */
 //-----------------------------------------------------------------------------
-/** @enum EINodeType
+/** @enum EIObjectType
     @ingroup enumerations
 
     This enum describes valid types for internal model API objects.
@@ -314,6 +314,10 @@ struct IObject::Private
 
 ///@endcond
 
+
+/// @name Object properties
+//@{
+
 //---------------------------------------------------------------------------------------
 /** @memberof IObject
     Returns the internal unique identifier (ID) for this object. It could be required
@@ -322,16 +326,51 @@ struct IObject::Private
 ImoId IObject::get_object_id() const
 {
     ensure_validity();
-    return const_cast<ImoObj*>(pimpl())->get_id();
+    return m_pImpl->get_id();
 }
 
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns the name of this object class. It is an string.
+*/
+const std::string& IObject::get_object_name() const
+{
+    ensure_validity();
+    return m_pImpl->get_name();
+}
 
-//downcast objects
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns the IDocument owning this object.
+*/
+std::unique_ptr<IDocument> IObject::get_owner_document() const
+{
+    return unique_ptr<IDocument>(new IDocument(m_pDoc));
+}
+
+//@}    //Access to group properties
+
+
+/// @name Object properties
+//@{
 
 //---------------------------------------------------------------------------------------
 std::unique_ptr<IObject> IObject::downcast_to_content_obj()
 {
     return Private::downcast_content_obj(m_pImpl, m_pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<IParagraph> IObject::downcast_to_paragraph() const
+{
+    ensure_validity();
+    if (m_pImpl->is_paragraph())
+    {
+        ImoParagraph* pObj = static_cast<ImoParagraph*>(m_pImpl);
+        return unique_ptr<IParagraph>(new IParagraph(pObj, m_pDoc, m_imVersion) );
+    }
+    else
+        return unique_ptr<IParagraph>();
 }
 
 //---------------------------------------------------------------------------------------
@@ -347,8 +386,11 @@ std::unique_ptr<IScore> IObject::downcast_to_score() const
         return unique_ptr<IScore>();
 }
 
+//@}    //Downcast objects
 
-//check downcasted object type
+
+/// @name Check downcasted object type
+//@{
 
 //---------------------------------------------------------------------------------------
 bool IObject::is_anonymous_block() const
@@ -525,6 +567,9 @@ bool IObject::is_text_item() const
     return const_cast<ImoObj*>(pimpl())->is_text_item();
 }
 
+//@}    //Downcast objects
+
+
 //---------------------------------------------------------------------------------------
 /** @memberof IObject
     Transitional, to facilitate migration to the new public API.
@@ -612,6 +657,23 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IChildren, ImoObj, IObject)
 int IChildren::get_num_children() const
 {
     ensure_validity();
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        //return pBlock->get_num_content_items();
+        return 0;   //TODO
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        return pBlock->get_num_items();
+    }
+//    else if (m_pImpl->is_box_inline())
+//    {
+//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
     return 0;   //TODO
 }
 
@@ -621,7 +683,29 @@ int IChildren::get_num_children() const
 std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
 {
     ensure_validity();
-    //return IObject::Private::get_child_at(m_pImpl, m_pDoc);
+//    if (m_pImpl->is_blocks_container())
+//    {
+//        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+//        ImoContentObj* pImo = pBlock->get_content_item(iItem);
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
+    if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        if (iItem < pBlock->get_num_children())
+        {
+            ImoObj* pImo = pBlock->get_child(iItem);
+            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        }
+        else
+            return unique_ptr<IObject>();
+    }
+//    else if (m_pImpl->is_box_inline())
+//    {
+//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
     return unique_ptr<IObject>();   //TODO
 }
 
@@ -631,18 +715,18 @@ std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
 std::unique_ptr<IObject> IChildren::get_first_child() const
 {
     ensure_validity();
-//    if (m_pImpl->is_blocks_container())
-//    {
-//        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
-//        ImoContentObj* pImo = pBlock->get_first_content_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
-//    else if (m_pImpl->is_inlines_container())
-//    {
-//        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
-//        ImoContentObj* pImo = pBlock->get_first_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_first_content_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_first_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
 //    else if (m_pImpl->is_box_inline())
 //    {
 //        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
@@ -658,8 +742,25 @@ std::unique_ptr<IObject> IChildren::get_first_child() const
 std::unique_ptr<IObject> IChildren::get_last_child() const
 {
     ensure_validity();
-    //return IObject::Private::get_last_child(m_pImpl, m_pDoc);
-    return unique_ptr<IObject>();   //TODO
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_last_content_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_last_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+//    else if (m_pImpl->is_box_inline())
+//    {
+//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//        ImoInlineLevelObj* pImo = pBlock->get_last_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
+    return unique_ptr<IObject>();
 }
 
 //@}    //Document content traversal
@@ -1915,33 +2016,34 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 // /* * @class IAnonymousBlock
 //    %IAnonymousBlock represents an structural block-level container that is not explicitly
 //    present in the source document, but that was created by lomse to satisfy an internal
-//    model constrain. For instance, if a block level container, such as a paragraph, has
+//    model constrain. For instance, if a block level container, such as a list item, has
 //    some inline-level content inside it, such as some text, it is necessary to enclose
-//    the inline content in an inline container to satisfy the constrain that block
-//    containers only contain blocks. The %IAnonymousBlock object represents a container
-//    for the above mentioned cases.
+//    the inline content in an inlines container to satisfy the constrain that block
+//    containers only contain other containers. The %IAnonymousBlock object represents
+//    a container to be used in these cases.
 //
 //    This model would apply in the following example for this LMD content:
 //
 //    @code
-//        <para>
-//            This is anonymous text.
-//            <txt style='emphasis'>This text is in italics.</txt>
-//        </para>
+//        <listitem>This is some text.</listitem>
 //    @endcode
 //
-//    The <para> element contains a chunk text not enclosed in a container, followed by a
-//    <txt> element (a block-level element) containing more text. The resulting model is an
-//    IParagraph container, enclosing two boxes, an %IAnonymousBlock with the initial text,
-//    and an ITextItem with the text in the <txt> element:
+//    The <listitem> element contains a chunk text and will originate an IListItem object,
+//    a type of blocks container object.
+//    And the text string will originate an ITextItem object containing the string. But
+//    ITextItem is an inline object and, thus, can not be included in a blocks container.
+//    The solution for situations like this one is to generate a blocks container without
+//    name, an anonymous container, to wrap the inlines content. The resulting model for
+//    the previous example is an IListItem container, enclosing an %IAnonymousBlock with
+//    the ITextItem object:
 //
 //    @verbatim
-//                                       IParagraph
-//                                            |
-//                           +----------------+----------------+
-//                           |                                 |
-//                     IText (normal)                    IText (emphasis)
-//               "This is anonymous text."           "This text is in italics."
+//                    IListItem (blocks container object)
+//                        |
+//                 IAnonymousBlock (inlines container object)
+//                        |
+//                      IText (inline content object)
+//                "This is some text."
 //    @endverbatim
 //
 //*/
@@ -2059,7 +2161,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 
 ////=======================================================================================
 // /* * @class ITextItem
-//    %ITextItem represents a piece of text with the same style.
+//    %ITextItem is an inline-level object containing a chunk of text with the same style.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITextItem, ImoTextItem)
 
