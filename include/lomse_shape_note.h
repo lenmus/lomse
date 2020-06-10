@@ -80,8 +80,8 @@ public:
 
 
 	//overrides
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-    LUnits get_anchor_offset() { return m_uAnchorOffset; }
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+    LUnits get_anchor_offset() override { return m_uAnchorOffset; }
 
 	//specific methods
 	void add_stem(GmoShapeStem* pShape);
