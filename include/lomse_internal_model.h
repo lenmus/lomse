@@ -49,57 +49,105 @@ class ImoDocument;
 class ImoInstrument;
 class ImoInstrGroup;
 class ImoMidiInfo;
+class ImoParagraph;
 class ImoScore;
 class ImoSoundInfo;
 
 class IBlockLevelObj;
 class IDocument;
-class IElement;
+class IObject;
 class IInstrument;
 class IInstrGroup;
 class IMidiInfo;
+class IParagraph;
 class IScore;
 class ISoundInfo;
 
 //---------------------------------------------------------------------------------------
-// INode: Abstract base class for all objects composing the document
+// IObject: Abstract base class for all objects composing the document
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT INode
+class LOMSE_EXPORT IObject
 {
-    LOMSE_DECLARE_IM_API_ROOT_CLASS(INode, ImoObj)
+protected:
+    std::unique_ptr<IObject> downcast_to_content_obj();
+    LOMSE_DECLARE_IM_API_ROOT_CLASS(IObject, ImoObj)
 
+public:
     //properties
     ImoId get_object_id() const;
-};
 
-//---------------------------------------------------------------------------------------
-// IElement: Abstract base class for all elements composing the document
-// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
-// for all class members.
-//
-class LOMSE_EXPORT IElement : public INode
-{
-    LOMSE_DECLARE_IM_API_CLASS(IElement, ImoContentObj)
-    friend class IDocument;
+    //downcast objects
+    std::unique_ptr<IScore> downcast_to_score() const;
 
-    //Content traversal
-    int get_num_children() const;
-    std::unique_ptr<IElement> get_child_at(int iItem) const;
-    std::unique_ptr<IElement> get_first_child() const;
-    std::unique_ptr<IElement> get_last_child() const;
-    std::unique_ptr<IElement> get_previous_sibling() const;
-    std::unique_ptr<IElement> get_next_sibling() const;
 
-    std::unique_ptr<IScore> get_first_score() const;
+    //check object type
+    bool is_anonymous_block() const;
+    bool is_button() const;
+    bool is_content() const;
+    bool is_control() const;
+    bool is_dynamic() const;
+    bool is_heading() const;
+    bool is_image() const;
+    bool is_inline_wrapper() const;
+    bool is_instrument() const;
+    bool is_instr_group() const;
+    bool is_link() const;
+    bool is_list() const;
+    bool is_listitem() const;
+    bool is_midi_info() const;
+    bool is_multicolumn() const;
+    bool is_music_data() const;
+    bool is_paragraph() const;
+    bool is_score() const;
+    bool is_sound_info() const;
+    bool is_table() const;
+    bool is_table_cell() const;
+    bool is_table_body() const;
+    bool is_table_head() const;
+    bool is_table_row() const;
+    bool is_text_item() const;
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
     // use this method open an issue at https://github.com/lenmus/lomse/issues
     // explaining the need, so that the public API could be fixed and your app.
     // would not be affected in future when this method is removed.
-    ImoContentObj* get_internal_object() const;
+    ImoObj* get_internal_object() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// ISiblings class provides sibling traversal method for objects supporting them
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT ISiblings : public virtual IObject
+{
+    LOMSE_DECLARE_IM_API_CLASS(ISiblings, ImoObj)
+
+    //Document content traversal
+    std::unique_ptr<IObject> get_previous_sibling() const;
+    std::unique_ptr<IObject> get_next_sibling() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// IChildren class provides child traversal method for objects supporting them
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IChildren : public virtual IObject
+{
+    LOMSE_DECLARE_IM_API_CLASS(IChildren, ImoObj)
+
+    //Document content traversal
+    int get_num_children() const;
+    std::unique_ptr<IObject> get_child_at(int iItem) const;
+    std::unique_ptr<IObject> get_first_child() const;
+    std::unique_ptr<IObject> get_last_child() const;
+
 };
 
 
@@ -108,7 +156,7 @@ class LOMSE_EXPORT IElement : public INode
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IInstrument : public INode
+class LOMSE_EXPORT IInstrument : public virtual IObject
 {
     LOMSE_DECLARE_IM_API_CLASS(IInstrument, ImoInstrument)
     friend class IScore;
@@ -138,7 +186,7 @@ class LOMSE_EXPORT IInstrument : public INode
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IInstrGroup : public INode
+class LOMSE_EXPORT IInstrGroup : public virtual IObject
 {
     LOMSE_DECLARE_IM_API_CLASS(IInstrGroup, ImoInstrGroup)
     friend class IScore;
@@ -179,7 +227,7 @@ class LOMSE_EXPORT IInstrGroup : public INode
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IMidiInfo : public INode
+class LOMSE_EXPORT IMidiInfo : public virtual IObject
 {
     LOMSE_DECLARE_IM_API_CLASS(IMidiInfo, ImoMidiInfo)
     friend class ISoundInfo;
@@ -217,16 +265,37 @@ class LOMSE_EXPORT IMidiInfo : public INode
 };
 
 
+
+//---------------------------------------------------------------------------------------
+// IParagraph represents a paragraph. It is a block-level container, similar to the
+// HTML <p> element.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IParagraph : public virtual IObject, public ISiblings, public IChildren
+{
+    LOMSE_DECLARE_IM_API_CLASS(IParagraph, ImoParagraph)
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoScore* get_internal_object() const;
+
+};
+
+
+
 //---------------------------------------------------------------------------------------
 // IScore is the API object for interacting with the internal model for a music score.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IScore : public IElement
+class LOMSE_EXPORT IScore : public virtual IObject, public ISiblings
 {
     LOMSE_DECLARE_IM_API_CLASS(IScore, ImoScore)
     friend class IDocument;
-    struct Private;
 
     //instruments: create/delete/move instruments and get information
     std::unique_ptr<IInstrument> append_new_instrument();
@@ -250,7 +319,6 @@ class LOMSE_EXPORT IScore : public IElement
     //inform that you have finished modifying this score
     void end_of_changes();
 
-
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
     // use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -269,7 +337,7 @@ class LOMSE_EXPORT IScore : public IElement
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT ISoundInfo : public INode
+class LOMSE_EXPORT ISoundInfo : public virtual IObject
 {
     LOMSE_DECLARE_IM_API_CLASS(ISoundInfo, ImoSoundInfo)
     friend class IInstrument;
@@ -313,7 +381,7 @@ class LOMSE_EXPORT ISoundInfo : public INode
 //// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 //// for all class members.
 ////
-//class LOMSE_EXPORT IXxxxx : public IElement
+//class LOMSE_EXPORT IXxxxx : public virtual IObject
 //{
 //    LOMSE_DECLARE_IM_API_CLASS(IXxxxx, ImoXxxxx)
 //    friend class IInstrument;

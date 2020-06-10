@@ -80,8 +80,16 @@ namespace lomse
 
 
 
+//=======================================================================================
+// Documentation for API enums
+
+/** @file lomse_api_definitions.h
+*/
 //---------------------------------------------------------------------------------------
 /** @enum EJoinBarlines
+    @ingroup enumerations
+
+    Options to join barlines in instrument groups.
 
     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -102,14 +110,12 @@ namespace lomse
 */
 //---------------------------------------------------------------------------------------
 /** @enum EGroupSymbol
+    @ingroup enumerations
 
     When several instruments form a group this enum indicates if a symbol for
     the group should be displayed in the score and what symbol to use.
 
     @#include <lomse_api_definitions.h>
-*/
-
-/** @file lomse_api_definitions.h
 */
 //---------------------------------------------------------------------------------------
 //This does not work, but there are neither warnings nor errors !
@@ -128,114 +134,399 @@ namespace lomse
     @var EGroupSymbol::k_group_symbol_brace
     @brief Lorem ipsum dolor sit amet,
 */
+//---------------------------------------------------------------------------------------
+/** @enum EBeatDuration
+    @ingroup enumerations
+
+    This enum defines the duration of one beat, for metronome and for methods that use
+    measure/beat to define a location.
+
+    @#include <lomse_api_definitions.h>
+*/
+//-----------------------------------------------------------------------------
+/** @enum EINodeType
+    @ingroup enumerations
+
+    This enum describes valid types for internal model API objects.
+
+    @#include <lomse_api_definitions.h>
+*/
 
 
 
 //=======================================================================================
-/** @class INode
+// API objects implementation
+//=======================================================================================
+
+
+//=======================================================================================
+/** @class IObject
     Abstract base class for all objects composing the document
 */
-LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(INode, ImoObj)
+LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IObject, ImoObj)
+
+
+///@cond INTERNALS
+
+struct IObject::Private
+{
+    //-----------------------------------------------------------------------------------
+    static unique_ptr<IObject> downcast_content_obj(ImoObj* pImo, Document* pDoc)
+    {
+        if (pImo == nullptr)
+            return unique_ptr<IObject>();
+
+        if (pImo->is_score())
+        {
+            ImoScore* pObj = static_cast<ImoScore*>(pImo);
+            return unique_ptr<IScore>(new IScore(pObj, pDoc, pDoc->get_model_ref()) );
+        }
+//        else if (pImo->is_content())
+//        {
+//            ImoContent* pObj = static_cast<ImoContent*>(pImo);
+//            return unique_ptr<IContent>(new IContent(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_dynamic())
+//        {
+//            ImoDynamic* pObj = static_cast<ImoDynamic*>(pImo);
+//            return unique_ptr<IDynamic>(new IDynamic(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_multi_column())
+//        {
+//            ImoMultiColumn* pObj = static_cast<ImoMultiColumn*>(pImo);
+//            return unique_ptr<IMultiColumn>(new IMultiColumn(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_table())
+//        {
+//            ImoTable* pObj = static_cast<ImoTable*>(pImo);
+//            return unique_ptr<ITable>(new ITable(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_list())
+//        {
+//            ImoList* pObj = static_cast<ImoList*>(pImo);
+//            return unique_ptr<IList>(new IList(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_table_row())
+//        {
+//            ImoTableRow* pObj = static_cast<ImoTableRow*>(pImo);
+//            return unique_ptr<ITableRow>(new ITableRow(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_list_item())
+//        {
+//            ImoListItem* pObj = static_cast<ImoListItem*>(pImo);
+//            return unique_ptr<IListItem>(new IListItem(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_table_cell())
+//        {
+//            ImoTableCell* pObj = static_cast<ImoTableCell*>(pImo);
+//            return unique_ptr<ITableCell>(new ITableCell(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_anonimous_block())
+//        {
+//            ImoAnonymousBlock* pObj = static_cast<ImoAnonymousBlock*>(pImo);
+//            return unique_ptr<IAnonymousBlock>(new IAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_paragraph())
+//        {
+//            ImoParagraph* pObj = static_cast<ImoParagraph*>(pImo);
+//            return unique_ptr<IParagraph>(new IParagraph(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+//        else if (pImo->is_heading())
+//        {
+//            ImoHeading* pObj = static_cast<ImoHeading*>(pImo);
+//            return unique_ptr<IHeading>(new IHeading(pObj, pDoc, pDoc->get_model_ref()) );
+//        }
+        else
+        {
+            return unique_ptr<IObject>(
+                        new IObject(pImo, pDoc, pDoc->get_model_ref()) );
+        }
+    }
+
+
+    //Document content traversal
+
+    //-----------------------------------------------------------------------------------
+    static unique_ptr<IObject> get_previous_sibling(ImoObj* pImo, Document* pDoc)
+    {
+        if (pImo == nullptr)
+            return unique_ptr<IObject>();
+
+        if (pImo->is_block_level_obj()) //score
+        {
+            ImoObj* pSibling = pImo->get_prev_sibling();
+            return downcast_content_obj(pSibling, pDoc);
+        }
+//        if (m_pImpl->is_blocks_container())
+//        {
+//            ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+//            ImoContentObj* pImo = pBlock->get_first_content_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+//        else if (m_pImpl->is_inlines_container())
+//        {
+//            ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+//            ImoContentObj* pImo = pBlock->get_first_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+//        else if (m_pImpl->is_box_inline())
+//        {
+//            ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//            ImoInlineLevelObj* pImo = pBlock->get_first_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+        return unique_ptr<IObject>();
+    }
+
+    //-----------------------------------------------------------------------------------
+    static unique_ptr<IObject> get_next_sibling(ImoObj* pImo, Document* pDoc)
+    {
+        if (pImo == nullptr)
+            return unique_ptr<IObject>();
+
+        if (pImo->is_block_level_obj()) //score
+        {
+            ImoObj* pSibling = pImo->get_next_sibling();
+            return downcast_content_obj(pSibling, pDoc);
+        }
+//        if (m_pImpl->is_blocks_container())
+//        {
+//            ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+//            ImoContentObj* pImo = pBlock->get_first_content_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+//        else if (m_pImpl->is_inlines_container())
+//        {
+//            ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+//            ImoContentObj* pImo = pBlock->get_first_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+//        else if (m_pImpl->is_box_inline())
+//        {
+//            ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//            ImoInlineLevelObj* pImo = pBlock->get_first_item();
+//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//        }
+        return unique_ptr<IObject>();
+    }
+
+};
+
+///@endcond
 
 //---------------------------------------------------------------------------------------
-/** @memberof INode
+/** @memberof IObject
     Returns the internal unique identifier (ID) for this object. It could be required
     by some methods in the libray.
 */
-ImoId INode::get_object_id() const
+ImoId IObject::get_object_id() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->get_id();
 }
 
 
-
-//=======================================================================================
-/** @class IElement
-    @extends INode
-    Abstract base class for all elements composing the document
-*/
-LOMSE_IMPLEMENT_IM_API_CLASS(IElement, ImoContentObj, INode)
-
-/// @name Content traversal
-//@{
+//downcast objects
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-int IElement::get_num_children() const
+std::unique_ptr<IObject> IObject::downcast_to_content_obj()
 {
-    ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return 0;    //TODO
+    return Private::downcast_content_obj(m_pImpl, m_pDoc);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-std::unique_ptr<IElement> IElement::get_child_at(int iItem) const
+std::unique_ptr<IScore> IObject::downcast_to_score() const
 {
     ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();    //TODO
+    if (m_pImpl->is_score())
+    {
+        ImoScore* pObj = static_cast<ImoScore*>(m_pImpl);
+        return unique_ptr<IScore>(new IScore(pObj, m_pDoc, m_imVersion) );
+    }
+    else
+        return unique_ptr<IScore>();
+}
+
+
+//check downcasted object type
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_anonymous_block() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_anonymous_block();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-std::unique_ptr<IElement> IElement::get_first_child() const
+bool IObject::is_button() const
 {
     ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();    //TODO
+    return const_cast<ImoObj*>(pimpl())->is_button();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-std::unique_ptr<IElement> IElement::get_last_child() const
+bool IObject::is_content() const
 {
     ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();    //TODO
+    return const_cast<ImoObj*>(pimpl())->is_content();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-std::unique_ptr<IElement> IElement::get_previous_sibling() const
+bool IObject::is_control() const
 {
     ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();
+    return const_cast<ImoObj*>(pimpl())->is_control();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
-    Returns
-*/
-std::unique_ptr<IElement> IElement::get_next_sibling() const
+bool IObject::is_dynamic() const
 {
     ensure_validity();
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();
+    return const_cast<ImoObj*>(pimpl())->is_dynamic();
 }
 
-//@}    //Content traversal
+//---------------------------------------------------------------------------------------
+bool IObject::is_heading() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_heading();
+}
 
 //---------------------------------------------------------------------------------------
-/** @memberof IElement
+bool IObject::is_image() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_image();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_inline_wrapper() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_inline_wrapper();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_instrument() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_instrument();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_instr_group() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_instr_group();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_link() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_link();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_list() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_list();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_listitem() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_listitem();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_midi_info() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_midi_info();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_multicolumn() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_multicolumn();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_music_data() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_music_data();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_paragraph() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_paragraph();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_score() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_score();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_sound_info() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_sound_info();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_table() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_table();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_table_cell() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_table_cell();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_table_body() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_table_body();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_table_head() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_table_head();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_table_row() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_table_row();
+}
+
+//---------------------------------------------------------------------------------------
+bool IObject::is_text_item() const
+{
+    ensure_validity();
+    return const_cast<ImoObj*>(pimpl())->is_text_item();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -243,16 +534,141 @@ std::unique_ptr<IElement> IElement::get_next_sibling() const
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoContentObj* IElement::get_internal_object() const
+ImoObj* IObject::get_internal_object() const
 {
-    return const_cast<ImoContentObj*>(pimpl());
+    return const_cast<ImoObj*>(pimpl());
 }
 
 
 
 //=======================================================================================
+/** @class ISiblings
+    @extends IObject
+    ISiblings class provides sibling traversal methods for objects supporting them
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(ISiblings, ImoObj, IObject)
+
+
+/// @name Document content traversal
+//@{
+
+//---------------------------------------------------------------------------------------
+/** @memberof ISiblings
+*/
+std::unique_ptr<IObject> ISiblings::get_previous_sibling() const
+{
+    ensure_validity();
+    return IObject::Private::get_previous_sibling(m_pImpl, m_pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof ISiblings
+*/
+std::unique_ptr<IObject> ISiblings::get_next_sibling() const
+{
+    ensure_validity();
+    return IObject::Private::get_next_sibling(m_pImpl, m_pDoc);
+}
+
+//@}    //Document content traversal
+
+
+
+//=======================================================================================
+/** @class IChildren
+    @extends IObject
+    Some API clases present a virtual structure similar to a tree. For
+    instance, IParagraph class can be seen as a container for text with different styles.
+    Thus, the following LDP source code:
+    @code
+        (para (txt (style bold) "Hello") (txt " world! ")(txt "It is a nice day!"))
+    @endcode
+
+    will produce the following structure of API classes:
+
+    @verbatim
+                                   IParagraph
+                                        |
+                       +----------------+----------------+
+                       |                |                |
+                 IText (bold)     IText (normal)   IText (normal)
+                   "Hello"          " world! "    "It is a nice day!"
+    @endverbatim
+
+    For objects, such as IParagraph, that organizes its content in a tree, class
+    %IChildren provides the methods for child content traversal. %IChildren is just an
+    interface class and thus, you will never directly manage IChildren objects but
+    objects derived from this class.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(IChildren, ImoObj, IObject)
+
+
+/// @name Document content traversal
+//@{
+
+//---------------------------------------------------------------------------------------
+/** @memberof IChildren
+*/
+int IChildren::get_num_children() const
+{
+    ensure_validity();
+    return 0;   //TODO
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IChildren
+*/
+std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
+{
+    ensure_validity();
+    //return IObject::Private::get_child_at(m_pImpl, m_pDoc);
+    return unique_ptr<IObject>();   //TODO
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IChildren
+*/
+std::unique_ptr<IObject> IChildren::get_first_child() const
+{
+    ensure_validity();
+//    if (m_pImpl->is_blocks_container())
+//    {
+//        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+//        ImoContentObj* pImo = pBlock->get_first_content_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
+//    else if (m_pImpl->is_inlines_container())
+//    {
+//        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+//        ImoContentObj* pImo = pBlock->get_first_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
+//    else if (m_pImpl->is_box_inline())
+//    {
+//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
+//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+//    }
+    return unique_ptr<IObject>();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IChildren
+*/
+std::unique_ptr<IObject> IChildren::get_last_child() const
+{
+    ensure_validity();
+    //return IObject::Private::get_last_child(m_pImpl, m_pDoc);
+    return unique_ptr<IObject>();   //TODO
+}
+
+//@}    //Document content traversal
+
+
+
+//=======================================================================================
 /** @class IInstrument
-    @extends INode
+    @extends IObject
     %IInstrument represents an instrument on the score. For lomse, an instrument refers
     to a physical musical instrument, such as a violin, a flute, or a piano. It is
     represented by one or more staves and is modeled as the collection of all aspects
@@ -275,7 +691,7 @@ ImoContentObj* IElement::get_internal_object() const
     objects (ISoundInfo objects) each of them containing the sound information for each
     real physical instrument that is sharing the staff.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IInstrument, ImoInstrument, INode)
+LOMSE_IMPLEMENT_IM_API_CLASS(IInstrument, ImoInstrument, IObject)
 
 
 /// @name Name and abbreviation
@@ -404,10 +820,10 @@ ImoInstrument* IInstrument::get_internal_object() const
 
 //=======================================================================================
 /** @class IInstrGroup
-    @extends INode
+    @extends IObject
     %IInstrGroup is the API object for interacting with the internal model Bla,bla bla...
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, INode)
+LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, IObject)
 
 //---------------------------------------------------------------------------------------
 /** @memberof IInstrGroup
@@ -640,7 +1056,7 @@ bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
 
 //=======================================================================================
 /** @class IMidiInfo
-    @extends INode
+    @extends IObject
     %IMidiInfo provides access to the MIDI information associated to a ISoundInfo object
     for an instrument. MIDI info always exists in the ISoundInfo object.
     By default, when no MIDI information is provided in the source file or when
@@ -670,7 +1086,7 @@ bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
     events that only uses the MIDI channel, program and volume information. All other
     MIDI information, such as bank, port or elevation is currently ignored.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IMidiInfo, ImoMidiInfo, INode)
+LOMSE_IMPLEMENT_IM_API_CLASS(IMidiInfo, ImoMidiInfo, IObject)
 
 //---------------------------------------------------------------------------------------
 /** @memberof IMidiInfo
@@ -941,8 +1357,26 @@ void IMidiInfo::set_elevation(int value)
 
 
 //=======================================================================================
+/** @class IParagraph
+    @extends IObject
+    @extends IChildren
+    @extends ISiblings
+
+    %IParagraph represents a paragraph. It is a block-level container, similar to the
+    HTML <p> element. Paragraphs are usually blocks of text separated from adjacent
+    blocks by blank lines and/or first-line indentation, but appart from text, a
+    paragraph can also contain other elements, e.g. images (IImage), links (ILink),
+    buttons (IButton), etc.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(IParagraph, ImoParagraph, IObject)
+
+
+
+//=======================================================================================
 /** @class IScore
-    @extends IElement
+    @extends IObject
+    @extends ISiblings
+
     %IScore represents a full music score, that is, an object comprising all of the
     music for all of the players and their instruments, typically laid out in a specific
     order. In lomse, an score is, basically, a collection instruments (IInstrument
@@ -953,7 +1387,7 @@ void IMidiInfo::set_elevation(int value)
     group of instruments is represented by an IInstrGroup object, and the IScore object
     is also responsible for managing the collection of all defined instrument groups.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IElement)
+LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IObject)
 
 //---------------------------------------------------------------------------------------
 /** @memberof IScore
@@ -1248,9 +1682,6 @@ void IScore::move_down_instrument(IInstrument& instr)
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
-
-*/
 int IScore::get_num_instruments_groups() const
 {
     ensure_validity();
@@ -1262,10 +1693,6 @@ int IScore::get_num_instruments_groups() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
-
-;   //0..n-1
-*/
 std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
 {
     ensure_validity();
@@ -1401,7 +1828,6 @@ void IScore::delete_all_instruments_groups()
 
 //@}    //Groups management. Create/remove groups
 
-
 //---------------------------------------------------------------------------------------
 /** @memberof IScore
     When you finish modifying the content of an score it is necessary to inform
@@ -1419,7 +1845,7 @@ void IScore::end_of_changes()
 
 //=======================================================================================
 /** @class ISoundInfo
-    @extends INode
+    @extends IObject
     %ISoundInfo class contains and manages the information for one sound, such as its
     MIDI values. It always contains a IMidiInfo object.
     An IInstrument always have at least one sound but can have more. For each sound there
@@ -1432,7 +1858,7 @@ void IScore::end_of_changes()
     object when the score is imported from MusicXML files. But this information is not
     yet used in lomse sound API.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, INode)
+LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, IObject)
 
 //---------------------------------------------------------------------------------------
 /** @memberof ISoundInfo
@@ -1486,46 +1912,165 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 
 
 ////=======================================================================================
-// /* * @class IXxxxx
-//    @extends INode
-//    %IXxxxx is the API object for interacting with the internal model...
+// /* * @class IAnonymousBlock
+//    %IAnonymousBlock represents an structural block-level container that is not explicitly
+//    present in the source document, but that was created by lomse to satisfy an internal
+//    model constrain. For instance, if a block level container, such as a paragraph, has
+//    some inline-level content inside it, such as some text, it is necessary to enclose
+//    the inline content in an inline container to satisfy the constrain that block
+//    containers only contain blocks. The %IAnonymousBlock object represents a container
+//    for the above mentioned cases.
+//
+//    This model would apply in the following example for this LMD content:
+//
+//    @code
+//        <para>
+//            This is anonymous text.
+//            <txt style='emphasis'>This text is in italics.</txt>
+//        </para>
+//    @endcode
+//
+//    The <para> element contains a chunk text not enclosed in a container, followed by a
+//    <txt> element (a block-level element) containing more text. The resulting model is an
+//    IParagraph container, enclosing two boxes, an %IAnonymousBlock with the initial text,
+//    and an ITextItem with the text in the <txt> element:
+//
+//    @verbatim
+//                                       IParagraph
+//                                            |
+//                           +----------------+----------------+
+//                           |                                 |
+//                     IText (normal)                    IText (emphasis)
+//               "This is anonymous text."           "This text is in italics."
+//    @endverbatim
+//
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IXxxxx, ImoXxxxx, IElement)
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IAnonymousBlock, ImoAnonymousBlock)
 //
-////---------------------------------------------------------------------------------------
-// /* * @memberof IXxxxx
-//    Transitional, to facilitate migration to the new public API.
-//    Notice that this method will be removed in future so, please, if you need to
-//    use this method open an issue at https://github.com/lenmus/lomse/issues
-//    explaining the need, so that the public API
-//    could be fixed and your app. would not be affected in future when this method
-//    is removed.
+////=======================================================================================
+// /* * @class IContent
+//    %IContent is a generic block-level container, similar to the HTML <div> element. It
+//    is used for grouping content but has no effect on the content or its layout.
 //*/
-//ImoXxxxx* IXxxxx::get_internal_object() const
-//{
-//    return pimpl();
-//}
-//
-////exclude from API documentation all private members
-/////@cond INTERNALS
-//
-////struct IXxxxx::Private
-////{
-////    static void delete_instrument(ImoScore* pScore, ImoInstrument* pInstr)
-////    {
-////    }
-////};
-//
-/////@endcond
-//
-////---------------------------------------------------------------------------------------
-// /* * @memberof IXxxxx
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IContent, ImoContent)
+
+////=======================================================================================
+// /* * @class IDynamic
+//    %IDynamic represents external content that is injected dynamically into the document
+//    by the user application. It is equivalent to the HTML <object> element.
 //*/
-//int IXxxxx::get_num_instruments() const
-//{
-//    ensure_validity();
-//    return pimpl()->get_num_instruments();
-//}
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IDynamic, ImoDynamic)
+
+////=======================================================================================
+// /* * @class IMultiColumn
+//    %IMultiColumn is a blocks container subdivided in columns. It is an structural
+//    container to display its content in conlumns instead of in a single block. There is
+//    no equivalent in HTML, but you can consider it as a table with a single row and as
+//    many columns as you need.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IMultiColumn, ImoMultiColumn)
+
+////=======================================================================================
+// /* * @class ITable
+//    %ITable represents tabular data, that is, information presented in a two-dimensional
+//    table comprised of rows and columns of cells containing data. It is equivalent to
+//    the HTML <table> and can be considered as a container for the ITableRow,
+//    ITableCell, ITableHead and ITableBoby objects.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITable, ImoTable)
+
+////=======================================================================================
+// /* * @class IList
+//    %IList represents a list of items and it is a container for IListItem objects.
+//    It is equivalent to the HTML <ol> and <ul> elements. The type of list, ordered
+//    or unordered, is an attribute of the IList object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IList, ImoList)
+
+////=======================================================================================
+// /* * @class ITableRow
+//    %ITableRow defines a row of cells in a table. It is equivalent to the HTML <tr>
+//    element. It is a container for the ITableCell objects that define the row's cells.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableRow, ImoTableRow)
+
+////=======================================================================================
+// /* * @class IListItem
+//    %IListItem represents an item in a list. It is similar to the HTML <li> element.
+//    %IListItem objects ar always contained in an IList parent object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IListItem, ImoListItem)
+
+////=======================================================================================
+// /* * @class ITableCell
+//    %ITableCell defines a cell of a table that contains data. It is similar to the
+//    HTML <td> and <th> elements. %ITableCell objects are always contained in an
+//    ITableRow object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableCell, ImoTableCell)
+
+////=======================================================================================
+// /* * @class IHeading
+//    %IHeading represents a section heading, similar to the HTML <h1> - <h6> elements.
+//    The level of the heading is an attribute of the %IHeading object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IHeading, ImoHeading)
+
+////=======================================================================================
+// /* * @class IInlineWrapper
+//    %IInlineWrapper is a generic inline-box container similar to the HTML <span>
+//    element. It does not inherently represent anything. It can be used to group
+//    elements for styling purposes or because they share attribute values, such as
+//    language. %IInlineWrapper is very much like the IContent object, but IContent is
+//    a block-level object whereas the %IInlineWrapper is an inline object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IInlineWrapper, ImoInlineWrapper)
+
+////=======================================================================================
+// /* * @class ILink
+//    %ILink is a container for inline objects, and reprensents a clickable 'link'
+//    object that creates hyperlinks. It is similar to the HTML <a> element.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ILink, ImoLink)
+
+////=======================================================================================
+// /* * @class IButton
+//    %IButton represents a clickable button, used to generate an action in the
+//    application. It is similar to the HTML button element.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IButton, ImoButton)
+
+////=======================================================================================
+// /* * @class IControl
+//    %IControl represents a user defined GUI control object, that is, an object that
+//    can be clicked to produce an action on the user application. It is similar to
+//    ILink, IButton or IScorePlayer, but ILink, IButton and IScorePlayer have a
+//    pre-defined apearance and behaviour, whereas IControl content can be much more
+//    complex, containing other controls, such as buttons and links, and its
+//    appearance and behaviour is defined by the user application.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IControl, ImoControl)
+
+////=======================================================================================
+// /* * @class IScorePlayer
+//    %IScorePlayer is a control for managing the playback of the associated IScore object.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IScorePlayer, ImoScorePlayer)
+
+////=======================================================================================
+// /* * @class ITextItem
+//    %ITextItem represents a piece of text with the same style.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITextItem, ImoTextItem)
+
+////=======================================================================================
+// /* * @class IImage
+//    %IImage is an inline object that represents a two-dimensional image. It is
+//    equivalent to the HTML <img> element, that embeds an image into the document.
+//*/
+//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IImage, ImoImage)
+//
+//
 
 
 }  //namespace lomse

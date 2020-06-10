@@ -101,7 +101,7 @@ SUITE(InternalModelApiTest)
         PresenterBuilder builder(m_libraryScope);
         Presenter* pPresenter = builder.new_document(k_view_simple,
             "(lenmusdoc (vers 0.0)(content "
-            "(text \"hello world\")"
+            "(para (txt \"Hello world\"))"
             "(score#505 (vers 2.0)"
             "(instrument (musicData (clef G)"
             "(n g4 q)"
@@ -154,7 +154,7 @@ SUITE(InternalModelApiTest)
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
-            "(text \"hello world\")"
+            "(para (txt \"Hello world\"))"
             "(score (vers 2.0)"
             "(instrument (musicData (clef G)"
             "(n g4 q)"
@@ -174,10 +174,8 @@ SUITE(InternalModelApiTest)
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
-                "(text \"hello world\")"
-                "(score (vers 2.0)"
-                    "(instrument (musicData (clef G)(n g4 q)))"
-                ")"
+                "(para (txt \"Hello world\"))"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
@@ -203,27 +201,140 @@ SUITE(InternalModelApiTest)
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
-                "(score (vers 2.0)"
-                    "(instrument (musicData (clef G)(n g4 q)) )"
-                ")"
-                "(text \"hello world\")"
-                "(score (vers 2.0)"
-                    "(instrument (musicData (clef G)(n g4 q)) )"
-                ")"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+                "(para (txt \"Hello world\"))"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
 
         //child found
         CHECK( doc->get_num_children() == 3 );
-        unique_ptr<IElement> content = doc->get_first_child();
+        unique_ptr<IObject> content = doc->get_first_child();
         CHECK( content != nullptr );
 
-        //and can be downcasted
+        //and can be downcasted, either directly (C++ cast)
         IScore* score = dynamic_cast<IScore*>(content.get());
         CHECK( score != nullptr );
         ImoScore* pScore = score->get_internal_object();
         CHECK( pScore->is_score() == true );
+
+        //or using API methods
+        CHECK( content->is_score() == true );
+        unique_ptr<IScore> score2 = content->downcast_to_score();
+        CHECK( score2 != nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0207)
+    {
+        //@0207. get_first_child(). Empty document.
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        //child found
+        CHECK( doc->get_num_children() == 0 );
+        unique_ptr<IObject> content = doc->get_first_child();
+        CHECK( content == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0208)
+    {
+        //@0208. get_last_child(). OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+                "(heading 1 (txt \"Hello world\"))"
+                "(para (txt \"This is a score\"))"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        //child found
+        CHECK( doc->get_num_children() == 3 );
+        unique_ptr<IObject> content = doc->get_last_child();
+        CHECK( content != nullptr );
+
+        //and can be downcasted, either directly (C++ cast)
+        IScore* score = dynamic_cast<IScore*>(content.get());
+        CHECK( score != nullptr );
+        ImoScore* pScore = score->get_internal_object();
+        CHECK( pScore->is_score() == true );
+
+        //or using API methods
+        CHECK( content->is_score() == true );
+        unique_ptr<IScore> score2 = content->downcast_to_score();
+        CHECK( score2 != nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0209)
+    {
+        //@0209. get_last_child(). Empty document.
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        //child found
+        CHECK( doc->get_num_children() == 0 );
+        unique_ptr<IObject> content = doc->get_last_child();
+        CHECK( content == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0210)
+    {
+        //@0210. get_child_at(). OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+                "(heading 1 (txt \"Hello world\"))"
+                "(para (txt \"This is a score\"))"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        //child found
+        CHECK( doc->get_num_children() == 3 );
+        unique_ptr<IObject> content = doc->get_child_at(1);
+        CHECK( content != nullptr );
+        CHECK( content->is_paragraph() == true );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0211)
+    {
+        //@0211. get_child_at(). Invalid parameter
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+                "(heading 1 (txt \"Hello world\"))"
+                "(para (txt \"This is a score\"))"
+                "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        unique_ptr<IObject> content = doc->get_child_at(4);
+
+        CHECK( content == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idocument_0212)
+    {
+        //@0212. get_child_at(). Empty document
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+
+        unique_ptr<IObject> content = doc->get_child_at(0);
+
+        CHECK( content == nullptr );
     }
 
 
@@ -250,10 +361,7 @@ SUITE(InternalModelApiTest)
         //@0201. get_num_instruments()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
-            "(score (vers 2.0)"
-            "(instrument (musicData (clef G)"
-            "(n g4 q)"
-            ")))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
         unique_ptr<IScore> score = doc->get_first_score();
@@ -266,10 +374,7 @@ SUITE(InternalModelApiTest)
         //@0202. get_instrument_at()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
-            "(score (vers 2.0)"
-            "(instrument#402 (musicData (clef G)"
-            "(n g4 q)"
-            ")))"
+            "(score (vers 2.0)(instrument#402 (musicData (clef G)(n g4 q))))"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
         unique_ptr<IScore> score = doc->get_first_score();
@@ -284,10 +389,7 @@ SUITE(InternalModelApiTest)
         //@0203. delete_instrument(). Not in group
         Document theDoc(m_libraryScope);
         theDoc.from_string(
-            "(score (vers 2.0)"
-            "(instrument#402 (musicData (clef G)"
-            "(n g4 q)"
-            ")))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
         unique_ptr<IScore> score = doc->get_first_score();
@@ -765,6 +867,80 @@ SUITE(InternalModelApiTest)
 //        Document* pDoc = doc->get_internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0400)
+    {
+        //@0400. get_previous_sibling(). OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"Hello world\"))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        unique_ptr<IObject> obj = score->get_previous_sibling();
+
+        CHECK( obj != nullptr );
+        CHECK( obj->is_paragraph() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0401)
+    {
+        //@0401. get_previous_sibling(). No previous sibling
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "(para (txt \"Hello world\"))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        unique_ptr<IObject> obj = score->get_previous_sibling();
+
+        CHECK( obj == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0402)
+    {
+        //@0402. get_next_sibling(). OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "(para (txt \"Hello world\"))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        unique_ptr<IObject> obj = score->get_next_sibling();
+
+        CHECK( obj != nullptr );
+        CHECK( obj->is_paragraph() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0403)
+    {
+        //@0403. get_next_sibling(). No more siblings
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(lenmusdoc (vers 0.0)(content "
+            "(heading 1 (txt \"Hello world\"))"
+            "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
+            "))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        unique_ptr<IObject> obj = score->get_next_sibling();
+
+        CHECK( obj == nullptr );
     }
 
 

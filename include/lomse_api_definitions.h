@@ -46,6 +46,7 @@ class Document;
     protected: \
         friend class ImoXxxx; \
         friend class Document; \
+        friend class IDocument; \
         mutable ImoXxxx* m_pImpl; \
         Document* m_pDoc; \
         ImoId m_id; \
@@ -55,6 +56,7 @@ class Document;
         inline const ImoXxxx* pimpl() const { return m_pImpl; } \
         inline ImoXxxx* pimpl() { return m_pImpl; } \
         virtual void ensure_validity() const; \
+        struct Private; \
     public: \
         IXxxx(IXxxx &&) noexcept = default;             \
         IXxxx& operator=(IXxxx &&) noexcept = default;  \
@@ -67,10 +69,12 @@ class Document;
     protected: \
         friend class ImoXxxx; \
         friend class Document; \
+        friend class IObject; \
         IXxxx(ImoXxxx* impl, Document* doc, long imVers); \
         IXxxx(); \
         inline const ImoXxxx* pimpl() const { return static_cast<ImoXxxx*>(m_pImpl); } \
         inline ImoXxxx* pimpl() { return static_cast<ImoXxxx*>(m_pImpl); } \
+        struct Private; \
     public: \
         IXxxx(IXxxx &&) noexcept = default;             \
         IXxxx& operator=(IXxxx &&) noexcept = default;  \
@@ -80,9 +84,7 @@ class Document;
 
 
 //---------------------------------------------------------------------------------------
-/** @ingroup enumerations
-    Options to join barlines in instrument groups
-*/
+// Options to join barlines in instrument groups
 enum EJoinBarlines
 {
     k_non_joined_barlines = 0,      ///< Do not join the barlines of all instruments in the group.
@@ -91,9 +93,7 @@ enum EJoinBarlines
 };
 
 //---------------------------------------------------------------------------------------
-/** @ingroup enumerations
-    Symbol to use for joining all instruments in an instruments group.
-*/
+// Symbols to use for joining all instruments in an instruments group.
 enum EGroupSymbol
 {
     k_group_symbol_none = 0,    ///< Do not display a symbol.
@@ -103,11 +103,8 @@ enum EGroupSymbol
 };
 
 //---------------------------------------------------------------------------------------
-/** @ingroup enumerations
-
-    This enum defines the duration of one beat, for metronome and for methods that use
-    measure/beat to define a location.
-*/
+// This enum defines the duration of one beat, for metronome and for methods that use
+// measure/beat to define a location.
 enum EBeatDuration
 {
     k_beat_implied = 0,     ///< Implied by the time signature; e.g. 4/4 = four
@@ -127,6 +124,52 @@ enum EBeatDuration
                             ///< time signature top number, e.g. 3 beats for 3/8.
 
     k_beat_specified,       ///< Use specified note value for beat duration.
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+    This enum describes valid types for internal model API objects.
+*/
+enum EINodeType
+{
+    // simple nodes
+    k_node_simpleobj=0,
+
+    k_node_instr_group,
+    k_node_midi_info,
+    k_node_sound_info,
+    k_node_music_data,
+    k_node_instrument,
+
+    k_node_simpleobj_last,
+
+
+   // IElements
+    k_node_element,
+
+    k_node_anonymous_block,
+    k_node_button,          ///< Button control
+    k_node_content,
+    k_node_control,
+    k_node_dynamic,
+    k_node_heading,         ///< Text header
+    k_node_image,           ///< Image
+    k_node_inline_wrapper,
+    k_node_link,            ///< Link
+    k_node_list,            ///< Text list
+    k_node_listitem,
+    k_node_multicolumn,
+    k_node_para,            ///< Paragraph
+    k_node_score,		    ///< Music score
+    k_node_score_player,    ///< Score player control
+    k_node_table,           ///< Table
+    k_node_table_cell,
+    k_node_table_row,
+    k_node_text_item,       ///< Text item
+
+    k_node_element_last,
+    k_node_last,
+
 };
 
 

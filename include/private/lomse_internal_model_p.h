@@ -1588,32 +1588,13 @@ public:
     Color& set_from_rgba_string(const std::string& rgba);
     Color& set_from_argb_string(const std::string& argb);
     Color& set_from_string(const std::string& hex);
-    inline bool is_ok()
-    {
-        return m_ok;
-    }
+    inline bool is_ok() { return m_ok; }
 
-    inline Int8u red()
-    {
-        return m_color.r;
-    }
-    inline Int8u blue()
-    {
-        return m_color.b;
-    }
-    inline Int8u green()
-    {
-        return m_color.g;
-    }
-    inline Int8u alpha()
-    {
-        return m_color.a;
-    }
-    inline Color& get_color()
-    {
-        return m_color;
-    }
-
+    inline Int8u red() { return m_color.r; }
+    inline Int8u blue() { return m_color.b; }
+    inline Int8u green() { return m_color.g; }
+    inline Int8u alpha() { return m_color.a; }
+    inline Color& get_color() { return m_color; }
 
 protected:
     Int8u convert_from_hex(const std::string& hex);
@@ -2709,16 +2690,10 @@ public:
     virtual ~ImoScoreObj() {}
 
     //getters
-    inline Color& get_color()
-    {
-        return m_color;
-    }
+    inline Color& get_color() { return m_color; }
 
     //setters
-    inline void set_color(Color color)
-    {
-        m_color = color;
-    }
+    inline void set_color(Color color) { m_color = color; }
 
     //IM attributes interface
     void set_int_attribute(TIntAttribute attrib, int value);
@@ -2761,36 +2736,15 @@ public:
     ImoRelObj* find_relation(int type);
 
     //getters
-    inline TimeUnits get_time()
-    {
-        return m_time;
-    }
-    virtual TimeUnits get_duration()
-    {
-        return 0.0;
-    }
-    inline int get_staff()
-    {
-        return m_staff;
-    }
-    inline int get_measure()
-    {
-        return m_measure;
-    }
+    inline TimeUnits get_time() { return m_time; }
+    virtual TimeUnits get_duration() { return 0.0; }
+    inline int get_staff() { return m_staff; }
+    inline int get_measure() { return m_measure; }
 
     //setters
-    virtual void set_staff(int staff)
-    {
-        m_staff = staff;
-    }
-    inline void set_time(TimeUnits rTime)
-    {
-        m_time = rTime;
-    }
-    inline void set_measure(int measure)
-    {
-        m_measure = measure;
-    }
+    virtual void set_staff(int staff) { m_staff = staff; }
+    inline void set_time(TimeUnits rTime) { m_time = rTime; }
+    inline void set_measure(int measure) { m_measure = measure; }
 
     //other
     ImoInstrument* get_instrument();

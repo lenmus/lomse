@@ -47,6 +47,7 @@ class LOMSE_EXPORT IDocument
 {
 private:
     Document* m_pImpl;
+    struct Private;
 
     friend class Document;
     IDocument(Document* impl);
@@ -67,9 +68,9 @@ public:
 
     //Access to content
     int get_num_children() const;
-    std::unique_ptr<IElement> get_child_at(int iItem) const;
-    std::unique_ptr<IElement> get_first_child() const;
-    std::unique_ptr<IElement> get_last_child() const;
+    std::unique_ptr<IObject> get_child_at(int iItem) const;
+    std::unique_ptr<IObject> get_first_child() const;
+    std::unique_ptr<IObject> get_last_child() const;
     std::unique_ptr<IScore> get_first_score() const;
 
     //Page content scale

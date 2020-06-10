@@ -778,7 +778,7 @@ IDocument::IDocument(Document* impl)
     the LMD version used in the source. For other document creation methods and
     formats it will return version "0.0".
 */
-string& IDocument::get_lmd_version() const
+std::string& IDocument::get_lmd_version() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_version();
@@ -789,10 +789,7 @@ string& IDocument::get_lmd_version() const
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_left_margin(LUnits value)
+void IDocument::set_page_left_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -800,10 +797,7 @@ void  IDocument::set_page_left_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_right_margin(LUnits value)
+void IDocument::set_page_right_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -811,10 +805,7 @@ void  IDocument::set_page_right_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_top_margin(LUnits value)
+void IDocument::set_page_top_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -822,10 +813,7 @@ void  IDocument::set_page_top_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_bottom_margin(LUnits value)
+void IDocument::set_page_bottom_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -833,10 +821,7 @@ void  IDocument::set_page_bottom_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_binding_margin(LUnits value)
+void IDocument::set_page_binding_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -844,10 +829,7 @@ void  IDocument::set_page_binding_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_size(USize uPageSize)
+void IDocument::set_page_size(USize uPageSize)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -855,10 +837,7 @@ void  IDocument::set_page_size(USize uPageSize)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_width(LUnits value)
+void IDocument::set_page_width(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -866,10 +845,7 @@ void  IDocument::set_page_width(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
-void  IDocument::set_page_height(LUnits value)
+void IDocument::set_page_height(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -877,9 +853,6 @@ void  IDocument::set_page_height(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 LUnits IDocument::get_page_left_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -888,9 +861,6 @@ LUnits IDocument::get_page_left_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 LUnits IDocument::get_page_right_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -899,9 +869,6 @@ LUnits IDocument::get_page_right_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 LUnits IDocument::get_page_top_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -910,9 +877,6 @@ LUnits IDocument::get_page_top_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 LUnits IDocument::get_page_bottom_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -921,9 +885,6 @@ LUnits IDocument::get_page_bottom_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 LUnits IDocument::get_page_binding_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -932,9 +893,6 @@ LUnits IDocument::get_page_binding_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-
-*/
 USize IDocument::get_page_size() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -1010,81 +968,43 @@ int IDocument::get_num_children() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Returns
-*/
-unique_ptr<IElement> IDocument::get_child_at(int iItem) const
-{
-//    return const_cast<ImoInstrument*>(pimpl())->get_num_content_items();
-//    return text.get_text();
-    return unique_ptr<IElement>();    //TODO
-}
-
-//---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Returns
-*/
-unique_ptr<IElement> IDocument::get_first_child() const
+std::unique_ptr<IObject> IDocument::get_child_at(int iItem) const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
     ImoDocument* pRoot = pDoc->get_im_root();
-    ImoContent* pContent = pRoot->get_content();
-    ImoContentObj* pImo = pContent->get_item(0);
-    if (pImo->is_block_level_obj())
-    {
-        // return Private::downcast_content_obj(pImo);
-        if (pImo->is_score())
-        {
-            ImoScore* pBlock = static_cast<ImoScore*>(pImo);
-            return unique_ptr<IScore>(new IScore(pBlock, pDoc, pDoc->get_model_ref()) );
-        }
-        else
-        {
-            ImoContentObj* pBlock = static_cast<ImoContentObj*>(pImo);
-            return unique_ptr<IElement>(
-                        new IElement(pBlock, pDoc, pDoc->get_model_ref()) );
-        }
-//            |     |     ├── ImoContent [div] - a generic block-level container
-//            |     |     |     └── ImoDynamic [object]
-//            |     |     ├── ImoMultiColumn - a container subdivided in columns
-//            |     |     ├── ImoTable [table] - a container for table related objects
-//            |     |     ├── ImoList [ol, ul]
-//            |     |     ├── ImoTableRow [tr] - a container for a row of cells
-//            |     |     ├── ImoListItem [li]
-//            |     |     └── ImoTableCell [td, th]
-//            |           ├── ImoAnonymousBlock []
-//            |           ├── ImoParagraph [p]
-//            |           └── ImoHeading [h1, h2, h3, h4, h5]
-//
-    }
+    ImoObj* pImo = pRoot->get_content_item(iItem);
+    if (pImo)
+        return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
     else
-    {
-        stringstream s;
-        s << "[IDocument::get_first_child] First child is not ImoBlockLevelObj but "
-          << pImo->get_name() << ". Aborting.";
-        string msg = s.str();
-        s << endl << pDoc->to_string() << endl;
-        LOMSE_LOG_ERROR(s.str());
-        throw runtime_error(msg);
-    }
+        return unique_ptr<IObject>();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Returns
-*/
-unique_ptr<IElement> IDocument::get_last_child() const
+std::unique_ptr<IObject> IDocument::get_first_child() const
 {
-//    ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
-//    return text.get_text();
-    return unique_ptr<IElement>();    //TODO
+    Document* pDoc = const_cast<Document*>(pimpl());
+    ImoDocument* pRoot = pDoc->get_im_root();
+    ImoObj* pImo = pRoot->get_first_content_item();
+    if (pImo)
+        return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
+    else
+        return unique_ptr<IObject>();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    convenience method for documents containing only a music score
-*/
-unique_ptr<IScore> IDocument::get_first_score() const
+std::unique_ptr<IObject> IDocument::get_last_child() const
+{
+    Document* pDoc = const_cast<Document*>(pimpl());
+    ImoDocument* pRoot = pDoc->get_im_root();
+    ImoObj* pImo = pRoot->get_last_content_item();
+    if (pImo)
+        return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
+    else
+        return unique_ptr<IObject>();
+}
+
+//---------------------------------------------------------------------------------------
+std::unique_ptr<IScore> IDocument::get_first_score() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     ImoContent* pContent = pRoot->get_content();
