@@ -681,56 +681,6 @@ SUITE(ScoreAlgorithmsTest)
         CHECK( is_equal_time(timepos, 448.0) );
     }
 
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_207)
-    {
-        //@207. timepos computed correctly for k_beat_bottom_ts
-
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument (musicData "
-            "(clef G)(time 6 8)(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)"
-            ")))"
-        );
-        ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        doc.define_beat(k_beat_bottom_ts);
-
-        //measure 2, beat 3: 192+32+32 = 256
-        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 1, 2, 0);
-
-//        cout << test_name() << endl;
-//        cout << "timepos=" << timepos << endl;
-        CHECK( is_equal_time(timepos, 256.0) );
-    }
-
-    TEST_FIXTURE(ScoreAlgorithmsTestFixture, get_timepos_for_208)
-    {
-        //@208. timepos computed correctly for k_beat_specified
-
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 2.0) (instrument (musicData "
-            "(clef G)(time 6 8)(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
-            "(n c4 e)(n e4 e)(n g4 e)"
-            ")))"
-        );
-        ImoScore* pScore =
-            static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
-        doc.define_beat(k_beat_specified, 73.0);
-
-        //measure 2, beat 3: 192+73+73 = 338
-        TimeUnits timepos = ScoreAlgorithms::get_timepos_for(pScore, 1, 2, 0);
-
-//        cout << test_name() << endl;
-//        cout << "timepos=" << timepos << endl;
-        CHECK( is_equal_time(timepos, 338.0) );
-    }
-
 
     // get timepos for measure locator --------------------------------------------------
 

@@ -156,9 +156,6 @@ protected:
     static ColStaffObjsIterator find_barline_with_time_lower_or_equal(ImoScore* pScore,
                                              int instr, TimeUnits maxTime);
 
-    static TimeUnits get_beat_duration_for(ImoScore* pScore,
-                                           ImMeasuresTableEntry* measure);
-
 };
 
 

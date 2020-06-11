@@ -580,8 +580,8 @@ public:
     */
     bool is_editable();
 
-    /** Define the duration for one beat, for metronome and for methods that use
-        measure/beat parameters to define a location. This value is shared by all
+    /** Define the duration for one beat, for metronome and score player related
+        methods. This value is shared by all
         scores contained in the document and can be changed at any time.
         Changes while the score is being played back are ignored until playback finishes.
         @param beatType A value from enum #EBeatDuration.
@@ -593,13 +593,15 @@ public:
     */
     void define_beat(int beatType, TimeUnits duration=0.0);
 
-    /** Return the beat type to use for scores in this document.
+    /** Return the beat type to use for scores in this document, for metronome and
+        score player related methods.
 
         See define_beat()
     */
     inline int get_beat_type() { return m_beatType; }
 
-    /** Return the duration for beats to use in scores without time signature and when
+    /** Return the duration for beats, for metronome and score player related
+        methods, to use in scores without time signature and when
         beat type is `k_beat__specified`.
 
         See define_beat()
