@@ -76,6 +76,17 @@ public:
     }
 
     //setting beat type
+
+    /** Define the duration for one beat, for metronome and score player related
+        methods. Changes while an score is being played back are ignored until
+        playback finishes.
+        @param type A value from enum #EBeatDuration.
+        @param duration The duration (in Lomse Time Units) for one beat. You can use
+            a value from enum ENoteDuration casted to double. This parameter is
+            required only when value for parameter `beatType` is `k_beat_specified`.
+            For all other values, if a non-zero value is specified, the value
+            will be used for the beat duration in scores without time signature.
+    */
     inline void set_beat_type(int type, TimeUnits duration=0.0)
     {
         m_beatType = type;
@@ -88,7 +99,20 @@ public:
     inline long get_interval() { return m_nInterval; }
     inline bool is_muted() { return m_fMuted; }
     inline bool is_running() { return m_fRunning; }
+
+    /** Return the beat type to use for scores in this document, for metronome and
+        score player related methods.
+
+        See set_beat_type()
+    */
     inline int get_beat_type() { return m_beatType; }
+
+    /** Return the duration for beats, for metronome and score player related
+        methods, to use in scores without time signature and when
+        beat type is `k_beat__specified`.
+
+        See set_beat_type()
+    */
     inline TimeUnits get_beat_duration() { return m_beatDuration; }
 
     // commands

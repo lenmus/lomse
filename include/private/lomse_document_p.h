@@ -141,8 +141,6 @@ protected:
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
     int             m_modified;
-    int             m_beatType;
-    TimeUnits       m_beatDuration;
     long            m_imRef;            //to validate the model
 
 public:
@@ -579,34 +577,6 @@ public:
         returns @true.
     */
     bool is_editable();
-
-    /** Define the duration for one beat, for metronome and score player related
-        methods. This value is shared by all
-        scores contained in the document and can be changed at any time.
-        Changes while the score is being played back are ignored until playback finishes.
-        @param beatType A value from enum #EBeatDuration.
-        @param duration The duration (in Lomse Time Units) for one beat. You can use
-            a value from enum ENoteDuration casted to TimeUnits. This parameter is
-            required only when value for parameter `beatType` is `k_beat_specified`.
-            For all other values, if a non-zero value is specified, the value
-            will be used for the beat duration in scores without time signature.
-    */
-    void define_beat(int beatType, TimeUnits duration=0.0);
-
-    /** Return the beat type to use for scores in this document, for metronome and
-        score player related methods.
-
-        See define_beat()
-    */
-    inline int get_beat_type() { return m_beatType; }
-
-    /** Return the duration for beats, for metronome and score player related
-        methods, to use in scores without time signature and when
-        beat type is `k_beat__specified`.
-
-        See define_beat()
-    */
-    inline TimeUnits get_beat_duration() { return m_beatDuration; }
 
     /** Return @true if the document has been modified (if it is dirty).
         This flag is automatically cleared when the graphic model for the

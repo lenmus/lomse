@@ -365,9 +365,16 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     m_nPrevMtrIntval = m_nCurMtrIntval;
 
     //get current definition for 'beat'
-    Document* pDoc = m_pScore->get_the_document();
-    m_beatDuration = pDoc->get_beat_duration();
-    m_beatType = pDoc->get_beat_type();
+    if (m_pMtr)
+    {
+        m_beatDuration = m_pMtr->get_beat_duration();
+        m_beatType = m_pMtr->get_beat_type();
+    }
+    else
+    {
+        m_beatDuration = k_duration_quarter;
+        m_beatType = k_beat_implied;
+    }
     LOMSE_LOG_DEBUG(Logger::k_score_player,
                     "beat: m_beatType=%d, m_beatDuration=%f",
                     m_beatType, m_beatDuration);
@@ -451,7 +458,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     //lower pulse time
     long nMissingTime = long( m_pTable->get_anacrusis_missing_time() );
     while (nMissingTime >= m_nMtrPulseDuration)
-        nMissingTime -= m_nMtrPulseDuration;
+       nMissingTime -= m_nMtrPulseDuration;
     if (nMissingTime > 0)
         nMissingTime -= m_nMtrPulseDuration;
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;

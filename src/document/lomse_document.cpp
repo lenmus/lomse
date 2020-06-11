@@ -151,8 +151,6 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_pImoDoc(nullptr)
     , m_flags(k_dirty)
     , m_modified(0)
-    , m_beatType(k_beat_implied)
-    , m_beatDuration( TimeUnits(k_duration_quarter) )
     , m_imRef(0L)
 {
 }
@@ -411,31 +409,6 @@ bool Document::is_editable()
     //TODO: How to mark a document as 'not editable'?
     //For now, all documents are editable
     return true;
-}
-
-//---------------------------------------------------------------------------------------
-void Document::define_beat(int beatType, TimeUnits duration)
-{
-    switch (beatType)
-    {
-        case k_beat_implied:
-        case k_beat_bottom_ts:
-            m_beatType = beatType;
-            if (is_greater_time(duration, 0.0))
-                m_beatDuration = duration;
-            break;
-
-        case k_beat_specified:
-            if (is_greater_time(duration, 0.0))
-            {
-                m_beatType = beatType;
-                m_beatDuration = duration;
-            }
-            break;
-
-        default:
-            LOMSE_LOG_ERROR("Invalid beat type %d. Ignored.", beatType);;
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -761,6 +734,10 @@ long Document::get_model_ref()
 
     The %IDocument class also encapsulates all the internals, providing the basic API
     for creating, modifying and using a document.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 
 ///@cond INTERNALS
@@ -1035,9 +1012,6 @@ std::unique_ptr<IScore> IDocument::get_first_score() const
 //@}    //Content traversal
 
 
-//methods for Document
-
-
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
     When you modify the content of a document it is necessary to update some
@@ -1050,46 +1024,6 @@ void IDocument::end_of_changes()
     pimpl()->end_of_changes();
 }
 
-//---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Defines the duration for one beat, for metronome and for methods that use
-    measure/beat parameters to define a location. This value is shared by all
-    scores contained in the document and can be changed at any time.
-    Changes while the score is being played back are ignored until playback finishes.
-    @param beatType A value from enum #EBeatDuration.
-    @param duration The duration (in Lomse Time Units) for one beat. You can use
-        a value from enum ENoteDuration casted to TimeUnits. This parameter is
-        required only when value for parameter `beatType` is `k_beat_specified`.
-        For all other values, if a non-zero value is specified, the value
-        will be used for the beat duration in scores without time signature.
-*/
-void IDocument::define_beat(int beatType, TimeUnits duration)
-{
-    pimpl()->define_beat(beatType, duration);
-}
-
-//---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Returns the beat type to use for scores in this document.
-
-    See define_beat()
-*/
-int IDocument::get_beat_type() const
-{
-    return const_cast<Document*>(pimpl())->get_beat_type();
-}
-
-//---------------------------------------------------------------------------------------
-/** @memberof IDocument
-    Returns the duration for beats to use in scores without time signature and when
-    beat type is `k_beat_specified`.
-
-    See define_beat()
-*/
-TimeUnits IDocument::get_beat_duration() const
-{
-    return const_cast<Document*>(pimpl())->get_beat_duration();
-}
 
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
