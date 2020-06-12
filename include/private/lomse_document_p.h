@@ -248,17 +248,13 @@ public:
     std::unique_ptr<IDocument> get_document_api();
 
 
-    /** For %Document objects created from sources in LMD format this method will return
-        the LMD version used in the source. For %Document objects created from
-        sources in other formats it will return version "0.0". */
+    //LMD version used in the source or "0.0" in other cases
     inline std::string& get_version() { return m_pImoDoc->m_version; }
 
-    /** Returns a pointer to the internal model object with the given ID or
-        nullptr if no object found with the given ID. */
+    // ptr to ImoDocument or nullptr if no object found with the given ID.
     ImoObj* get_pointer_to_imo(ImoId id) const;
 
-    /** Returns a pointer to the ImoControl object with the given ID or
-        value `k_no_imoid` (-1) if no ImoControl object found with the given ID. */
+    //ptr. to ImoControl or value `k_no_imoid` (-1) if no ImoControl with the given ID
     Control* get_pointer_to_control(ImoId id) const;
 
     /** Returns the default language for all texts in the document. The returned value
@@ -275,9 +271,6 @@ public:
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_language() : "en");
     }
 
-    /** Return the scaling factor to apply to the content when rendered divided into
-        pages of the size defined by the paper size. Normally this factor is 1.0.
-    */
     inline float get_page_content_scale() {
         return (m_pImoDoc != nullptr ? m_pImoDoc->get_page_content_scale() : 1.0f);
     }
@@ -293,18 +286,11 @@ public:
     'en-US'. It represents the default language for all texts in the document. */
     inline void set_language(const string& language) { m_pImoDoc->m_language = language; }
 
-    /** Set the scaling factor to apply to the content when rendered divided into
-        pages of the size defined by the paper size. By default this factor is 1.0.
-    */
     inline void set_page_content_scale(float scale) {
         if (m_pImoDoc)
             m_pImoDoc->set_page_content_scale(scale);
     }
 
-    /** When you modify the content of a %Document it is necessary to update some
-        structures associated to music scores, such as the staffobjs collection.
-        For this it is mandatory to invoke this method. Alternatively, you can
-        invoke ImoScore::end_of_changes(), on the modified scores. */
     void end_of_changes();
 
     /** Return the ImoPageInfo node for this %Document. ImoPageInfo contains the
@@ -319,12 +305,7 @@ public:
     */
     inline ImoPageInfo* get_page_info() { return &(m_pImoDoc->m_pageInfo); }
 
-    /** Return the paper width intended for rendering this %Document. The returned value
-        is in logical units (cents of a millimeter). */
     inline LUnits get_paper_width() { return m_pImoDoc->m_pageInfo.get_page_width(); }
-
-    /** Return the paper height intended for rendering this %Document. The returned value
-        is in logical units (cents of a millimeter). */
     inline LUnits get_paper_height() { return m_pImoDoc->m_pageInfo.get_page_height(); }
 
     /** Append a ImoPageInfo node with default values.
@@ -486,37 +467,21 @@ public:
 
 
 
-    /// @name Low level edition API: traversing the document
-    //@{
-
-
-    /** Return the ImoContent object associated to this %Document. */
+    // traversing the document
     ImoContent* get_content() { return m_pImoDoc->get_content(); }
-
-    /** Return the number of ImoBlockLevelObj objects contained in this %Document. */
     int get_num_content_items() { return m_pImoDoc->get_num_content_items(); }
-
-    /** Return the specified ImoBlockLevelObj object.
-        @param iItem    Is the index to the requested ImoBlockLevelObj
-            object (0 ... num_content_objects - 1)
-    */
     ImoBlockLevelObj* get_content_item(int iItem) {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_content_item(iItem) ); }
-
-    /** Return the first ImoBlockLevelObj object.  */
+        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_content_item(iItem) );
+    }
     ImoBlockLevelObj* get_first_content_item() {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_first_content_item() ); }
-
-    /** Return the last ImoBlockLevelObj object.  */
+        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_first_content_item() );
+    }
     ImoBlockLevelObj* get_last_content_item() {
-        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_last_content_item() ); }
+        return dynamic_cast<ImoBlockLevelObj*>( m_pImoDoc->get_last_content_item() );
+    }
 
-    //@}    //Low level edition API: traversing the document
 
-
-    /// @name Low level edition API: styles
-    //@{
-
+    //styles
 
     /** Return the default style defined in this %Document. Must always exist. */
     ImoStyle* get_default_style();
@@ -551,8 +516,6 @@ public:
 
     /** Add the style passed as parameter to the sets of styles. */
     void add_style(ImoStyle* pStyle) { m_pImoDoc->add_style(pStyle); }
-
-    //@}    //Low level edition API: styles
 
 
 

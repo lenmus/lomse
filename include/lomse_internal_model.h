@@ -318,6 +318,11 @@ class LOMSE_EXPORT IScore : public virtual IObject, public ISiblings
     bool delete_instruments_group(const IInstrGroup& group);
     void delete_all_instruments_groups();
 
+    //Algorithms
+    MeasureLocator get_locator_for(TimeUnits timepos, int iInstr=0);
+    TimeUnits get_timepos_for(int iMeasure, int iBeat, int iInstr=0);
+    TimeUnits get_timepos_for(const MeasureLocator& ml);
+
     //inform that you have finished modifying this score
     void end_of_changes();
 

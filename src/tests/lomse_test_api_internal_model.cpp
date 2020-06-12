@@ -605,20 +605,20 @@ SUITE(InternalModelApiTest)
         unique_ptr<IScore> score = doc->get_first_score();
         unique_ptr<IInstrument> instr = score->get_instrument_at(0);
 
-        Document* pDoc = doc->get_internal_object();
-        cout << test_name() << endl << pDoc->to_string(true) << endl;
+        //Document* pDoc = doc->get_internal_object();
+        //cout << test_name() << endl << pDoc->to_string(true) << endl;
 
         CHECK(instr != nullptr);
-        cout << test_name() << ". To execute: instr->get_object_id()" << endl;
-        cout << test_name() << ". instr->get_object_id() = " << instr->get_object_id() << endl;
-        cout << test_name() << ". To execute: delete_instrument()" << endl;
+//        cout << test_name() << ". To execute: instr->get_object_id()" << endl;
+//        cout << test_name() << ". instr->get_object_id() = " << instr->get_object_id() << endl;
+//        cout << test_name() << ". To execute: delete_instrument()" << endl;
         score->delete_instrument(instr->get_object_id());
 
-        cout << test_name() << ". To execute: score->get_num_instruments()" << endl;
+//        cout << test_name() << ". To execute: score->get_num_instruments()" << endl;
         CHECK( score->get_num_instruments() == 1 );
-        cout << test_name() << ". To execute: score->get_num_instruments_groups()" << endl;
+//        cout << test_name() << ". To execute: score->get_num_instruments_groups()" << endl;
         CHECK( score->get_num_instruments_groups() == 0 );
-        cout << test_name() << ". Test finished. Were is the crash?" << endl;
+//        cout << test_name() << ". Test finished. Were is the crash?" << endl;
 
 //        Document* pDoc = doc->get_internal_object();
 //        pDoc->end_of_changes();
@@ -1056,6 +1056,103 @@ SUITE(InternalModelApiTest)
         unique_ptr<IObject> obj = score->get_next_sibling();
 
         CHECK( obj == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0500)
+    {
+        //@500. algorithms. get_timepos_for(locator)
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        //measure 2, location 64 ==> 128+64 = 192
+        MeasureLocator ml(0, 1, 64);
+        TimeUnits timepos = score->get_timepos_for(ml);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 192.0) );
+
+        //measure 1, location 0 ==> 0
+        MeasureLocator ml2(0, 0, 0);
+        timepos = score->get_timepos_for(ml2);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 0.0) );
+
+        //measure 8, location 0 ==> 896
+        MeasureLocator ml3(0, 7, 0);
+        timepos = score->get_timepos_for(ml3);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 896.0) );
+
+        //measure 4, location 64 ==> 384+64 = 448
+        MeasureLocator ml4(0, 3, 64);
+        timepos = score->get_timepos_for(ml4);
+//        cout << test_name() << endl;
+//        cout << "timepos=" << timepos << endl;
+        CHECK( is_equal_time(timepos, 448.0) );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0501)
+    {
+        //@0501. algorithms. get timepos for(measure/beat)
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 6 8)(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
+            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
+            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
+            "(n c4 e)(n e4 e)(n g4 e)(n c4 e)(n e4 e)(n g4 e)(barline)"
+            "(n c4 e)(n e4 e)(n g4 e)"
+            ")))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        //6/8 : measure duration = 32x6 = 192
+
+        //6/8 = two beats, 3 eight notes per beat ==> beat duration = 3x32=96
+        //measure 2, beat 3 ==> 1 measure (192) + two beats (2x96=192) = 384
+        TimeUnits timepos = score->get_timepos_for(1, 2, 0);
+        CHECK( is_equal_time(timepos, 384.0) );
+        //cout << test_name() << ". timepos=" << timepos << endl;
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0502)
+    {
+        //@0502. algorithms. get_locator_for()
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(n e4 q)(n g4 q)(barline)"
+            "(n c5 q)(n e5 q)(barline)"
+            "(n c4 e)"
+            ")))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+
+        MeasureLocator ml = score->get_locator_for(160.0);
+
+//        cout << test_name() << endl;
+//        cout << "instr=" << ml.iInstr << ", meas=" << ml.iMeasure << ", loc=" << ml.location << endl;
+        CHECK( ml.iInstr == 0 );
+        CHECK( ml.iMeasure == 1 );      //measure 1 starts at 128
+        CHECK( ml.location == 32.0 );   //160 - 128 = 32
     }
 
 

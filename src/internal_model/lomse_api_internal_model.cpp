@@ -33,6 +33,7 @@
 #include "lomse_document.h"
 #include "lomse_model_builder.h"
 #include "lomse_im_factory.h"
+#include "lomse_score_algorithms.h"
 
 
 using namespace std;
@@ -162,6 +163,10 @@ namespace lomse
 //=======================================================================================
 /** @class IObject
     Abstract base class for all objects composing the document
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IObject, ImoObj)
 
@@ -351,16 +356,27 @@ std::unique_ptr<IDocument> IObject::get_owner_document() const
 //@}    //Access to group properties
 
 
-/// @name Object properties
+/** @name Downcast objects
+    All API classes derive from base class %IObject. These downcasting methods
+    convert the %IObject to the derived class referenced by it.
+*/
 //@{
 
+///@cond INTERNALS
+//protected class, for IDocument
 //---------------------------------------------------------------------------------------
 std::unique_ptr<IObject> IObject::downcast_to_content_obj()
 {
     return Private::downcast_content_obj(m_pImpl, m_pDoc);
 }
+///@endcond
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an IParagraph. That is, if this %IObject references an
+    IParagraph object, this method returns the referenced IParagraph object. Otherwise,
+    it returns an invalid (nullptr) IParagraph.
+*/
 std::unique_ptr<IParagraph> IObject::downcast_to_paragraph() const
 {
     ensure_validity();
@@ -374,6 +390,11 @@ std::unique_ptr<IParagraph> IObject::downcast_to_paragraph() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an IScore. That is, if this %IObject references an
+    IScore object, this method returns the referenced IScore object. Otherwise,
+    it returns an invalid (nullptr) IScore.
+*/
 std::unique_ptr<IScore> IObject::downcast_to_score() const
 {
     ensure_validity();
@@ -389,10 +410,17 @@ std::unique_ptr<IScore> IObject::downcast_to_score() const
 //@}    //Downcast objects
 
 
-/// @name Check downcasted object type
+/** @name Check referenced object type
+    All API classes derive from base class %IObject. These testing methods
+    allow to check the type of derived object referenced by this %IObject.
+*/
 //@{
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an anonymous block
+    (IAnonymousBlock class)
+*/
 bool IObject::is_anonymous_block() const
 {
     ensure_validity();
@@ -400,6 +428,10 @@ bool IObject::is_anonymous_block() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an button control
+    (IButton class)
+*/
 bool IObject::is_button() const
 {
     ensure_validity();
@@ -407,6 +439,10 @@ bool IObject::is_button() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an content block
+    (a \<div\> block), represented by the IContent class.
+*/
 bool IObject::is_content() const
 {
     ensure_validity();
@@ -414,6 +450,10 @@ bool IObject::is_content() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an control object
+    (IControl class)
+*/
 bool IObject::is_control() const
 {
     ensure_validity();
@@ -421,6 +461,10 @@ bool IObject::is_control() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a dynamically generated
+    content block (IDynamic class)
+*/
 bool IObject::is_dynamic() const
 {
     ensure_validity();
@@ -428,6 +472,10 @@ bool IObject::is_dynamic() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a heading
+    (IHeading class)
+*/
 bool IObject::is_heading() const
 {
     ensure_validity();
@@ -435,6 +483,10 @@ bool IObject::is_heading() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an image
+    (IImage class)
+*/
 bool IObject::is_image() const
 {
     ensure_validity();
@@ -442,6 +494,11 @@ bool IObject::is_image() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an generic inline-box
+    container (similar to the \<spam\> html element) represented by the
+    IInlineWrapper class.
+*/
 bool IObject::is_inline_wrapper() const
 {
     ensure_validity();
@@ -449,6 +506,10 @@ bool IObject::is_inline_wrapper() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an score instrument
+    (IInstrument class)
+*/
 bool IObject::is_instrument() const
 {
     ensure_validity();
@@ -456,6 +517,10 @@ bool IObject::is_instrument() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an score instruments group
+    (IInstrGroup class)
+*/
 bool IObject::is_instr_group() const
 {
     ensure_validity();
@@ -463,6 +528,10 @@ bool IObject::is_instr_group() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is an hyperlink
+    (ILink class)
+*/
 bool IObject::is_link() const
 {
     ensure_validity();
@@ -470,6 +539,10 @@ bool IObject::is_link() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a list
+    (IList class)
+*/
 bool IObject::is_list() const
 {
     ensure_validity();
@@ -477,6 +550,10 @@ bool IObject::is_list() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a list item
+    (IListItem class)
+*/
 bool IObject::is_listitem() const
 {
     ensure_validity();
@@ -484,6 +561,10 @@ bool IObject::is_listitem() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a MIDI properties object
+    (IMidiInfo class)
+*/
 bool IObject::is_midi_info() const
 {
     ensure_validity();
@@ -491,6 +572,10 @@ bool IObject::is_midi_info() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a multi-column container
+    object (IMultiColumn class)
+*/
 bool IObject::is_multicolumn() const
 {
     ensure_validity();
@@ -498,6 +583,11 @@ bool IObject::is_multicolumn() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a container describing the
+    musical content for an instrument
+    (IMusicData class)
+*/
 bool IObject::is_music_data() const
 {
     ensure_validity();
@@ -505,6 +595,10 @@ bool IObject::is_music_data() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a paragraph
+    (IParagraph class)
+*/
 bool IObject::is_paragraph() const
 {
     ensure_validity();
@@ -512,6 +606,10 @@ bool IObject::is_paragraph() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a music score
+    (IScore class)
+*/
 bool IObject::is_score() const
 {
     ensure_validity();
@@ -519,6 +617,10 @@ bool IObject::is_score() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a sound properties object
+    (ISoundInfo class)
+*/
 bool IObject::is_sound_info() const
 {
     ensure_validity();
@@ -526,6 +628,10 @@ bool IObject::is_sound_info() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a table
+    (ITable class)
+*/
 bool IObject::is_table() const
 {
     ensure_validity();
@@ -533,6 +639,10 @@ bool IObject::is_table() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a cell for a table
+    (ITableCell class)
+*/
 bool IObject::is_table_cell() const
 {
     ensure_validity();
@@ -540,6 +650,10 @@ bool IObject::is_table_cell() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is the body for a table
+    (ITableBody class)
+*/
 bool IObject::is_table_body() const
 {
     ensure_validity();
@@ -547,6 +661,10 @@ bool IObject::is_table_body() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is the head for a table
+    (ITableHead class)
+*/
 bool IObject::is_table_head() const
 {
     ensure_validity();
@@ -554,6 +672,10 @@ bool IObject::is_table_head() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a row for a table
+    (ITableRow class)
+*/
 bool IObject::is_table_row() const
 {
     ensure_validity();
@@ -561,13 +683,17 @@ bool IObject::is_table_row() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Returns @TRUE if the object referenced by this %IObject is a chunk of text
+    (ITextItem class)
+*/
 bool IObject::is_text_item() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_text_item();
 }
 
-//@}    //Downcast objects
+//@}    //Check referenced object type
 
 
 //---------------------------------------------------------------------------------------
@@ -791,6 +917,10 @@ std::unique_ptr<IObject> IChildren::get_last_child() const
     represent several real instruments and, thus, could have several sound information
     objects (ISoundInfo objects) each of them containing the sound information for each
     real physical instrument that is sharing the staff.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(IInstrument, ImoInstrument, IObject)
 
@@ -923,6 +1053,10 @@ ImoInstrument* IInstrument::get_internal_object() const
 /** @class IInstrGroup
     @extends IObject
     %IInstrGroup is the API object for interacting with the internal model Bla,bla bla...
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, IObject)
 
@@ -1468,6 +1602,10 @@ void IMidiInfo::set_elevation(int value)
     blocks by blank lines and/or first-line indentation, but appart from text, a
     paragraph can also contain other elements, e.g. images (IImage), links (ILink),
     buttons (IButton), etc.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(IParagraph, ImoParagraph, IObject)
 
@@ -1487,6 +1625,10 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IParagraph, ImoParagraph, IObject)
     having some visual clues, such as a brace or bracket, and a group name. In lomse, a
     group of instruments is represented by an IInstrGroup object, and the IScore object
     is also responsible for managing the collection of all defined instrument groups.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IObject)
 
@@ -1694,7 +1836,7 @@ void IScore::delete_instrument(IInstrument& instr)
     five will always join the instruments occupying those positions, whatever they
     are there after a move operation.
 
-    @sa: move_down_instrument()
+    @see move_down_instrument()
 */
 void IScore::move_up_instrument(ImoId instrId)
 {
@@ -1718,7 +1860,7 @@ void IScore::move_up_instrument(ImoId instrId)
     five will always join the instruments occupying those positions, whatever they
     are there after a move operation.
 
-    @sa: move_down_instrument()
+    @see move_down_instrument()
 */
 void IScore::move_up_instrument(IInstrument& instr)
 {
@@ -1742,7 +1884,7 @@ void IScore::move_up_instrument(IInstrument& instr)
     five will always join the instruments occupying those positions, whatever they
     are there after a move operation.
 
-    @sa: move_up_instrument()
+    @see move_up_instrument()
 */
 void IScore::move_down_instrument(ImoId instrId)
 {
@@ -1766,7 +1908,7 @@ void IScore::move_down_instrument(ImoId instrId)
     five will always join the instruments occupying those positions, whatever they
     are there after a move operation.
 
-    @sa: move_up_instrument()
+    @see move_up_instrument()
 */
 void IScore::move_down_instrument(IInstrument& instr)
 {
@@ -1783,6 +1925,9 @@ void IScore::move_down_instrument(IInstrument& instr)
 //@{
 
 //---------------------------------------------------------------------------------------
+/** @memberof IScore
+    Returns the number of instrument groups that this score contains.
+*/
 int IScore::get_num_instruments_groups() const
 {
     ensure_validity();
@@ -1794,6 +1939,11 @@ int IScore::get_num_instruments_groups() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IScore
+    Returns the requested instruments group.
+    @param iGroup   Is the index to the requested instruments
+                    group (0 ... num.groups - 1).
+*/
 std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
 {
     ensure_validity();
@@ -1819,7 +1969,6 @@ std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
 
 /// @name Groups management. Create/remove groups
 //@{
-
 
 //---------------------------------------------------------------------------------------
 /** @memberof IScore
@@ -1929,6 +2078,63 @@ void IScore::delete_all_instruments_groups()
 
 //@}    //Groups management. Create/remove groups
 
+
+/// @name Algorithms
+//@{
+
+//---------------------------------------------------------------------------------------
+/** @memberof IScore
+    Returns a measure locator for the specified instrument and timepos.
+    @param timepos
+    @param iInstr Number of the instrument (0..m) to which the measures refer to.
+        Take into account that for polymetric music (music in which not all
+        instruments have the same time signature), the measure number is not an
+        absolute value, common to all the score instruments, but it
+        is relative to an instrument. For normal scores, just providing measure
+        number and location will do the job.
+*/
+MeasureLocator IScore::get_locator_for(TimeUnits timepos, int iInstr)
+{
+    ensure_validity();
+    return ScoreAlgorithms::get_locator_for(pimpl(), timepos, iInstr);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IScore
+    Returns the time position for the specified measure and beat.
+    @param iMeasure Measure number (0..n) in instrument iInstr.
+    @param iBeat Beat number (0..m) relative to the measure.
+    @param iInstr Number of the instrument (0..m) to which the measures refer to.
+        Take into account that for polymetric music (music in which not all
+        instruments have the same time signature), the measure number is not an
+        absolute value, common to all the score instruments, but it
+        is relative to an instrument. For normal scores, just providing measure
+        number and location will do the job.
+
+    @warning For scores without time signature this method is useless as there are no
+        measures, and beats are not defined. Therefore, if this method is invoked in an
+        score without time signature, this method will always return time position 0.
+*/
+TimeUnits IScore::get_timepos_for(int iMeasure, int iBeat, int iInstr)
+{
+    ensure_validity();
+    return ScoreAlgorithms::get_timepos_for(pimpl(), iMeasure, iBeat, iInstr);
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IScore
+    Returns the time position for the specified measure locator.
+    @param ml The measure locator to convert.
+*/
+TimeUnits IScore::get_timepos_for(const MeasureLocator& ml)
+{
+    ensure_validity();
+    return ScoreAlgorithms::get_timepos_for(pimpl(), ml);
+}
+
+//@}    //Algorithms
+
+
 //---------------------------------------------------------------------------------------
 /** @memberof IScore
     When you finish modifying the content of an score it is necessary to inform
@@ -1958,6 +2164,10 @@ void IScore::end_of_changes()
     played in the associated instrument. This information is stored in the ISoundInfo
     object when the score is imported from MusicXML files. But this information is not
     yet used in lomse sound API.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, IObject)
 
@@ -2028,8 +2238,8 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //        <listitem>This is some text.</listitem>
 //    @endcode
 //
-//    The <listitem> element contains a chunk text and will originate an IListItem object,
-//    a type of blocks container object.
+//    The \<listitem\> element contains a chunk text and will originate an IListItem
+//    object, a type of blocks container object.
 //    And the text string will originate an ITextItem object containing the string. But
 //    ITextItem is an inline object and, thus, can not be included in a blocks container.
 //    The solution for situations like this one is to generate a blocks container without
@@ -2051,7 +2261,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //
 ////=======================================================================================
 // /* * @class IContent
-//    %IContent is a generic block-level container, similar to the HTML <div> element. It
+//    %IContent is a generic block-level container, similar to the HTML \<div\> element. It
 //    is used for grouping content but has no effect on the content or its layout.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IContent, ImoContent)
@@ -2059,7 +2269,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 ////=======================================================================================
 // /* * @class IDynamic
 //    %IDynamic represents external content that is injected dynamically into the document
-//    by the user application. It is equivalent to the HTML <object> element.
+//    by the user application. It is equivalent to the HTML \<object\> element.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IDynamic, ImoDynamic)
 
@@ -2076,7 +2286,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 // /* * @class ITable
 //    %ITable represents tabular data, that is, information presented in a two-dimensional
 //    table comprised of rows and columns of cells containing data. It is equivalent to
-//    the HTML <table> and can be considered as a container for the ITableRow,
+//    the HTML \<table\> and can be considered as a container for the ITableRow,
 //    ITableCell, ITableHead and ITableBoby objects.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITable, ImoTable)
@@ -2084,21 +2294,21 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 ////=======================================================================================
 // /* * @class IList
 //    %IList represents a list of items and it is a container for IListItem objects.
-//    It is equivalent to the HTML <ol> and <ul> elements. The type of list, ordered
+//    It is equivalent to the HTML \<ol\> and \<ul\> elements. The type of list, ordered
 //    or unordered, is an attribute of the IList object.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IList, ImoList)
 
 ////=======================================================================================
 // /* * @class ITableRow
-//    %ITableRow defines a row of cells in a table. It is equivalent to the HTML <tr>
+//    %ITableRow defines a row of cells in a table. It is equivalent to the HTML \<tr\>
 //    element. It is a container for the ITableCell objects that define the row's cells.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableRow, ImoTableRow)
 
 ////=======================================================================================
 // /* * @class IListItem
-//    %IListItem represents an item in a list. It is similar to the HTML <li> element.
+//    %IListItem represents an item in a list. It is similar to the HTML \<li\> element.
 //    %IListItem objects ar always contained in an IList parent object.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IListItem, ImoListItem)
@@ -2106,21 +2316,21 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 ////=======================================================================================
 // /* * @class ITableCell
 //    %ITableCell defines a cell of a table that contains data. It is similar to the
-//    HTML <td> and <th> elements. %ITableCell objects are always contained in an
+//    HTML \<td\> and \<th\> elements. %ITableCell objects are always contained in an
 //    ITableRow object.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableCell, ImoTableCell)
 
 ////=======================================================================================
 // /* * @class IHeading
-//    %IHeading represents a section heading, similar to the HTML <h1> - <h6> elements.
+//    %IHeading represents a section heading, similar to the HTML \<h1\> - \<h6\> elements.
 //    The level of the heading is an attribute of the %IHeading object.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IHeading, ImoHeading)
 
 ////=======================================================================================
 // /* * @class IInlineWrapper
-//    %IInlineWrapper is a generic inline-box container similar to the HTML <span>
+//    %IInlineWrapper is a generic inline-box container similar to the HTML \<span\>
 //    element. It does not inherently represent anything. It can be used to group
 //    elements for styling purposes or because they share attribute values, such as
 //    language. %IInlineWrapper is very much like the IContent object, but IContent is
@@ -2131,7 +2341,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 ////=======================================================================================
 // /* * @class ILink
 //    %ILink is a container for inline objects, and reprensents a clickable 'link'
-//    object that creates hyperlinks. It is similar to the HTML <a> element.
+//    object that creates hyperlinks. It is similar to the HTML \<a\> element.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ILink, ImoLink)
 
@@ -2168,7 +2378,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 ////=======================================================================================
 // /* * @class IImage
 //    %IImage is an inline object that represents a two-dimensional image. It is
-//    equivalent to the HTML <img> element, that embeds an image into the document.
+//    equivalent to the HTML \<img\> element, that embeds an image into the document.
 //*/
 //LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IImage, ImoImage)
 //

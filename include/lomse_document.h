@@ -84,7 +84,6 @@ public:
     LUnits get_page_right_margin() const;
     LUnits get_page_top_margin() const;
     LUnits get_page_bottom_margin() const;
-    LUnits get_page_binding_margin() const;
     USize get_page_size() const;
     LUnits get_page_width() const;
     LUnits get_page_height() const;
@@ -92,7 +91,6 @@ public:
     void set_page_right_margin(LUnits value);
     void set_page_top_margin(LUnits value);
     void set_page_bottom_margin(LUnits value);
-    void set_page_binding_margin(LUnits value);
     void set_page_size(USize uPageSize);
     void set_page_width(LUnits value);
     void set_page_height(LUnits value);
@@ -100,10 +98,10 @@ public:
 
     void end_of_changes();
 
-    //For scores
-    void define_beat(int beatType, TimeUnits duration=0.0);
-    int get_beat_type() const;
-    TimeUnits get_beat_duration() const;
+    //metronome settings, for scores
+    void define_metronome_beat(int beatType, TimeUnits duration=0.0);
+    int get_metronome_beat_type() const;
+    TimeUnits get_metronome_beat_duration() const;
 
     // Transitional, to facilitate migration to the new public API.
     // Notice that this method will be removed in future so, please, if you need to

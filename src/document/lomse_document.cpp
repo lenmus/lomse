@@ -735,6 +735,22 @@ long Document::get_model_ref()
     The %IDocument class also encapsulates all the internals, providing the basic API
     for creating, modifying and using a document.
 
+    A lomse document is similar to an HTML document but including also music scores.
+
+    The lomse document supports the most common tags for textual content, such as
+    headings, paragraphs, lists, tables and images, plus specific tags for music scores.
+
+    The document is organized in a way similar to that of an HTML page but with
+    embedded music scores. The document elements support styles (but not CSS).
+
+    You can consider the lomse document as a generic rich text document that also can
+    contain full-fledged music scores. It is mainly oriented to display music scores
+    and to have them inserted in an interactive text document, such as a music theory
+    book with chapters, texts, music scores and interactive music exercises.
+
+    Of course, the document can contain just one full-score, and this will be the case
+    when importing music scores in other formats, such as a MusicXML score file.
+
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
@@ -773,10 +789,22 @@ std::string& IDocument::get_lmd_version() const
 }
 
 
-/// @name Page size and margins
+/** @name Page size and margins
+
+    Margings, in lomse, documents, are strips of white space around the edge of the
+    paper. The wider the left and right margins, the narrower the page content. The
+    wider the top and bottom margins, the shorter the page content.
+
+    In most cases, it is not necessary to change the default page margins. However,
+    you can change the margins with these methods.
+*/
 //@{
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the left margin of the page. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
 void IDocument::set_page_left_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -785,6 +813,10 @@ void IDocument::set_page_left_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the right margin of the page. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
 void IDocument::set_page_right_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -793,6 +825,10 @@ void IDocument::set_page_right_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the top margin of the page. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
 void IDocument::set_page_top_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -801,6 +837,10 @@ void IDocument::set_page_top_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the bottom margin of the page. The new margin value is specified in logical
+    units (cents of a millimeter).
+*/
 void IDocument::set_page_bottom_margin(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -809,14 +849,10 @@ void IDocument::set_page_bottom_margin(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
-void IDocument::set_page_binding_margin(LUnits value)
-{
-    ImoDocument* pRoot = pimpl()->get_im_root();
-	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    pageInfo->set_binding_margin(value);
-}
-
-//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the paper size intended for rendering this document. The size values
+    are in logical units (cents of a millimeter).
+*/
 void IDocument::set_page_size(USize uPageSize)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -825,6 +861,10 @@ void IDocument::set_page_size(USize uPageSize)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the paper width intended for rendering this document. The width value
+    is in logical units (cents of a millimeter).
+*/
 void IDocument::set_page_width(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -833,6 +873,10 @@ void IDocument::set_page_width(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Sets the paper height intended for rendering this document. The height value
+    is in logical units (cents of a millimeter).
+*/
 void IDocument::set_page_height(LUnits value)
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -841,6 +885,10 @@ void IDocument::set_page_height(LUnits value)
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the left margin of the page. The returned value is in logical
+    units (cents of a millimeter).
+*/
 LUnits IDocument::get_page_left_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -849,6 +897,10 @@ LUnits IDocument::get_page_left_margin() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the right margin of the page. The returned value is in logical
+    units (cents of a millimeter).
+*/
 LUnits IDocument::get_page_right_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -857,6 +909,10 @@ LUnits IDocument::get_page_right_margin() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the top margin of the page. The returned value is in logical
+    units (cents of a millimeter).
+*/
 LUnits IDocument::get_page_top_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -865,6 +921,10 @@ LUnits IDocument::get_page_top_margin() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the bottom margin of the page. The returned value is in logical
+    units (cents of a millimeter).
+*/
 LUnits IDocument::get_page_bottom_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -873,14 +933,10 @@ LUnits IDocument::get_page_bottom_margin() const
 }
 
 //---------------------------------------------------------------------------------------
-LUnits IDocument::get_page_binding_margin() const
-{
-    ImoDocument* pRoot = pimpl()->get_im_root();
-	ImoPageInfo* pageInfo = pRoot->get_page_info();
-    return pageInfo->get_binding_margin();
-}
-
-//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the paper size intended for rendering this document. The returned value
+    is in logical units (cents of a millimeter).
+*/
 USize IDocument::get_page_size() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
@@ -956,6 +1012,10 @@ int IDocument::get_num_children() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the specified child object.
+    @param iItem    Is the index to the requested child (0 ... num.children - 1)
+*/
 std::unique_ptr<IObject> IDocument::get_child_at(int iItem) const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
@@ -968,6 +1028,9 @@ std::unique_ptr<IObject> IDocument::get_child_at(int iItem) const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the first child object.
+*/
 std::unique_ptr<IObject> IDocument::get_first_child() const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
@@ -980,6 +1043,9 @@ std::unique_ptr<IObject> IDocument::get_first_child() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the last child object.
+*/
 std::unique_ptr<IObject> IDocument::get_last_child() const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
@@ -992,6 +1058,9 @@ std::unique_ptr<IObject> IDocument::get_last_child() const
 }
 
 //---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Returns the first child object of type 'music score'.
+*/
 std::unique_ptr<IScore> IDocument::get_first_score() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
