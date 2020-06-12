@@ -43,26 +43,159 @@ a.el:hover {
 	border-bottom: 1px dotted #ff0000;
 }
 
-/* background of member prototypes *//*
-.memproto, dl.reflist dt
+/*----------------------------------------------------------------------*/
+
+.memtitle                       /* el título con el nombre de la función */
 {
-    background-image: none;
-    background-repeat: no-repeat;
-    background-color: #f0f0f0;
-    border-top: 1px solid #d0d0d0;
-    border-left: 1px solid #d0d0d0;
-    border-right: 1px solid #d0d0d0;
+	padding: 0px;
+	padding-top: 15px;
+	border-top: 1px solid #B4B4B4;
+	border-left: 0px;
+	border-right: 0px;
+	border-top-right-radius: 0px;
+	border-top-left-radius: 0px;
+	margin-bottom: 0px;
+	background-image: none;
+	background-repeat: repeat-x;
+	background-color: #ffffff;
+	line-height: 1.0;
+	font-weight: 600;
+	float:left;
+    color: #7f8adc;
+    font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    line-height: 1.15em;
+    font-size: 2.25em;
+	/*font-style: italic;*/
 }
 
-.memdoc, dl.reflist dd {
-    border-top: 1px solid #d0d0d0;
-    border-left: 1px solid #d0d0d0;
-    border-right: 1px solid #d0d0d0;
-    background-image: none;
-    background-repeat: no-repeat;
-    background-color: #ffffff;
+.permalink                      /* el rombo delante del título */
+{
+    font-size: 65%;
+    display: inline-block;
+    vertical-align: middle;
+    padding-right: 10px;
 }
+.permalink a                    /* el rombo delante del título */
+{
+    color: #ff8020;
+}
+
+.memproto, dl.reflist dt        /* el bloque del prototipo de la función*/
+{
+    margin: 20px;
+	border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    padding: 0px 0px 6px 20px;      /* top, right, bottom, left */
+    color: #2B2B2B;
+    font-weight: bold;
+    text-shadow: none;
+    background-color: #ffffff;
+    /* opera specific markup */
+    box-shadow: none;
+    border-top-right-radius: 0px;
+    /* firefox specific markup */
+    -moz-box-shadow: none;  
+    -moz-border-radius-topright: 0px;
+    /* webkit specific markup */
+    -webkit-box-shadow: none;
+    -webkit-border-top-right-radius: 0px;
+}
+
+table.memname               /* el recuadro del prototipo */
+{
+	padding: 0.5em;
+    background-color: #f7f7f7;
+}
+
+.memname td                 /* el texto del prototipo */
+{
+    font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
+    line-height: 100%;
+    font-weight: 600;
+    font-size: 110%;
+}
+
+.memitem                /* ??? */
+{
+	padding: 0;
+	margin-right: 5px;
+    display: table !important;
+    width: 100%;
+}
+
+.memdoc, dl.reflist dd      /* el bloque con la descripción completa de la función*/
+{
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 0px;
+        padding: 0px 10px 2px 10px;     /* top, right, bottom, left */
+        background-color: #FCFCFC;
+        border-top-width: 0;
+        background-image: none;
+        background-repeat:repeat-x;
+        background-color: #FFFFFF;
+        /* opera specific markup */
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+        box-shadow: none;
+        /* firefox specific markup */
+        -moz-border-radius-bottomleft: 0px;
+        -moz-border-radius-bottomright: 0px;
+        -moz-box-shadow: none;
+        /* webkit specific markup */
+        -webkit-border-bottom-left-radius: 0px;
+        -webkit-border-bottom-right-radius: 0px;
+        -webkit-box-shadow: none;
+}
+
+.paramname {
+	color: #7f8adc;
+	white-space: nowrap;
+    font-style: italic;
+}
+
+.paramname em {
+	font-style: italic;
+}
+
+td.paramname
+{
+    font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 110%;
+    padding-right: 20px;
+}
+
+dl.warning, dl.attention
+{
+    margin-left:20px;
+    margin-right:20px;
+    padding-bottom:10px;
+    padding-left: 3px;
+    border-left:4px solid #FF0000;
+	background-color: #fff5f5;
+}
+.warning dt, .attention dt, .deprecated dt
+{
+    padding: 0.5em 0px 1em 0.5em;     /* top, right, bottom, left */
+}
+
+.memnav {
+/*
+	background-color: #EEEEEE;
+	border: 1px solid #B0B0B0;
 */
+	text-align: center;
+	margin: 2px;
+	margin-right: 15px;
+	padding: 2px;
+}
+
+/*----------------------------------------------------------------------*/
 
 /* change colors in pages TOC box */
 div.toc

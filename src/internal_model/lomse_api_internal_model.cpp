@@ -206,11 +206,11 @@ struct IObject::Private
 //            ImoTable* pObj = static_cast<ImoTable*>(pImo);
 //            return unique_ptr<ITable>(new ITable(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
-//        else if (pImo->is_list())
-//        {
-//            ImoList* pObj = static_cast<ImoList*>(pImo);
-//            return unique_ptr<IList>(new IList(pObj, pDoc, pDoc->get_model_ref()) );
-//        }
+        else if (pImo->is_list())
+        {
+            ImoList* pObj = static_cast<ImoList*>(pImo);
+            return unique_ptr<IList>(new IList(pObj, pDoc, pDoc->get_model_ref()) );
+        }
 //        else if (pImo->is_table_row())
 //        {
 //            ImoTableRow* pObj = static_cast<ImoTableRow*>(pImo);
@@ -231,11 +231,11 @@ struct IObject::Private
 //            ImoAnonymousBlock* pObj = static_cast<ImoAnonymousBlock*>(pImo);
 //            return unique_ptr<IAnonymousBlock>(new IAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
-//        else if (pImo->is_paragraph())
-//        {
-//            ImoParagraph* pObj = static_cast<ImoParagraph*>(pImo);
-//            return unique_ptr<IParagraph>(new IParagraph(pObj, pDoc, pDoc->get_model_ref()) );
-//        }
+        else if (pImo->is_paragraph())
+        {
+            ImoParagraph* pObj = static_cast<ImoParagraph*>(pImo);
+            return unique_ptr<IParagraph>(new IParagraph(pObj, pDoc, pDoc->get_model_ref()) );
+        }
 //        else if (pImo->is_heading())
 //        {
 //            ImoHeading* pObj = static_cast<ImoHeading*>(pImo);
@@ -257,30 +257,11 @@ struct IObject::Private
         if (pImo == nullptr)
             return unique_ptr<IObject>();
 
-        if (pImo->is_block_level_obj()) //score
-        {
-            ImoObj* pSibling = pImo->get_prev_sibling();
+        ImoObj* pSibling = pImo->get_prev_sibling();
+        if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
-        }
-//        if (m_pImpl->is_blocks_container())
-//        {
-//            ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
-//            ImoContentObj* pImo = pBlock->get_first_content_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-//        else if (m_pImpl->is_inlines_container())
-//        {
-//            ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
-//            ImoContentObj* pImo = pBlock->get_first_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-//        else if (m_pImpl->is_box_inline())
-//        {
-//            ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//            ImoInlineLevelObj* pImo = pBlock->get_first_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-        return unique_ptr<IObject>();
+        else
+            return unique_ptr<IObject>();
     }
 
     //-----------------------------------------------------------------------------------
@@ -289,30 +270,11 @@ struct IObject::Private
         if (pImo == nullptr)
             return unique_ptr<IObject>();
 
-        if (pImo->is_block_level_obj()) //score
-        {
-            ImoObj* pSibling = pImo->get_next_sibling();
+        ImoObj* pSibling = pImo->get_next_sibling();
+        if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
-        }
-//        if (m_pImpl->is_blocks_container())
-//        {
-//            ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
-//            ImoContentObj* pImo = pBlock->get_first_content_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-//        else if (m_pImpl->is_inlines_container())
-//        {
-//            ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
-//            ImoContentObj* pImo = pBlock->get_first_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-//        else if (m_pImpl->is_box_inline())
-//        {
-//            ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//            ImoInlineLevelObj* pImo = pBlock->get_first_item();
-//            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//        }
-        return unique_ptr<IObject>();
+        else
+            return unique_ptr<IObject>();
     }
 
 };
@@ -371,6 +333,43 @@ std::unique_ptr<IObject> IObject::downcast_to_content_obj()
 }
 ///@endcond
 
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an ILink. That is, if this %IObject references an
+    ILink object, this method returns the referenced ILink object. Otherwise,
+    it returns an invalid (nullptr) ILink.
+*/
+std::unique_ptr<ILink> IObject::downcast_to_link() const
+{
+    ensure_validity();
+    if (m_pImpl->is_link())
+    {
+        ImoLink* pObj = static_cast<ImoLink*>(m_pImpl);
+        return unique_ptr<ILink>(new ILink(pObj, m_pDoc, m_imVersion) );
+    }
+    else
+        return unique_ptr<ILink>();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an IList. That is, if this %IObject references an
+    IList object, this method returns the referenced IList object. Otherwise,
+    it returns an invalid (nullptr) IList.
+*/
+std::unique_ptr<IList> IObject::downcast_to_list() const
+{
+    ensure_validity();
+    if (m_pImpl->is_list())
+    {
+        ImoList* pObj = static_cast<ImoList*>(m_pImpl);
+        return unique_ptr<IList>(new IList(pObj, m_pDoc, m_imVersion) );
+    }
+    else
+        return unique_ptr<IList>();
+}
+
 //---------------------------------------------------------------------------------------
 /** @memberof IObject
     Downcasts this %IObject to an IParagraph. That is, if this %IObject references an
@@ -405,6 +404,24 @@ std::unique_ptr<IScore> IObject::downcast_to_score() const
     }
     else
         return unique_ptr<IScore>();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to a ITextItem. That is, if this %IObject references an
+    ITextItem object, this method returns the referenced ITextItem object. Otherwise,
+    it returns an invalid (nullptr) ITextItem.
+*/
+std::unique_ptr<ITextItem> IObject::downcast_to_text_item() const
+{
+    ensure_validity();
+    if (m_pImpl->is_text_item())
+    {
+        ImoTextItem* pObj = static_cast<ImoTextItem*>(m_pImpl);
+        return unique_ptr<ITextItem>(new ITextItem(pObj, m_pDoc, m_imVersion) );
+    }
+    else
+        return unique_ptr<ITextItem>();
 }
 
 //@}    //Downcast objects
@@ -554,7 +571,7 @@ bool IObject::is_list() const
     Returns @TRUE if the object referenced by this %IObject is a list item
     (IListItem class)
 */
-bool IObject::is_listitem() const
+bool IObject::is_list_item() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_listitem();
@@ -786,21 +803,19 @@ int IChildren::get_num_children() const
     if (m_pImpl->is_blocks_container())
     {
         ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
-        //return pBlock->get_num_content_items();
-        return 0;   //TODO
+        return pBlock->get_num_content_items();
     }
     else if (m_pImpl->is_inlines_container())
     {
         ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
         return pBlock->get_num_items();
     }
-//    else if (m_pImpl->is_box_inline())
-//    {
-//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
-    return 0;   //TODO
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        return pBlock->get_num_items();
+    }
+    return 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -809,13 +824,14 @@ int IChildren::get_num_children() const
 std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
 {
     ensure_validity();
-//    if (m_pImpl->is_blocks_container())
-//    {
-//        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
-//        ImoContentObj* pImo = pBlock->get_content_item(iItem);
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
-    if (m_pImpl->is_inlines_container())
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_content_item(iItem);
+        if (pImo)
+            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
     {
         ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
         if (iItem < pBlock->get_num_children())
@@ -823,16 +839,14 @@ std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
             ImoObj* pImo = pBlock->get_child(iItem);
             return IObject::Private::downcast_content_obj(pImo, m_pDoc);
         }
-        else
-            return unique_ptr<IObject>();
     }
-//    else if (m_pImpl->is_box_inline())
-//    {
-//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
-    return unique_ptr<IObject>();   //TODO
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_item(iItem);
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    return unique_ptr<IObject>();
 }
 
 //---------------------------------------------------------------------------------------
@@ -853,12 +867,12 @@ std::unique_ptr<IObject> IChildren::get_first_child() const
         ImoContentObj* pImo = pBlock->get_first_item();
         return IObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-//    else if (m_pImpl->is_box_inline())
-//    {
-//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//        ImoInlineLevelObj* pImo = pBlock->get_first_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_first_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
     return unique_ptr<IObject>();
 }
 
@@ -880,12 +894,12 @@ std::unique_ptr<IObject> IChildren::get_last_child() const
         ImoContentObj* pImo = pBlock->get_last_item();
         return IObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-//    else if (m_pImpl->is_box_inline())
-//    {
-//        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
-//        ImoInlineLevelObj* pImo = pBlock->get_last_item();
-//        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
-//    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_last_item();
+        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
     return unique_ptr<IObject>();
 }
 
@@ -1286,6 +1300,31 @@ bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
 }
 
 //@}    //Instruments in the group
+
+
+
+//=======================================================================================
+/** @class ILink
+    @extends IObject
+    @extends ISiblings
+    @extends IChildren
+    %ILink is a container for inline objects, and reprensents a clickable 'link'
+    object that creates hyperlinks. It is similar to the HTML \<a\> element.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(ILink, ImoLink, IObject)
+
+
+
+//=======================================================================================
+/** @class IList
+    @extends IObject
+    @extends ISiblings
+    @extends IChildren
+    %IList represents a list of items and it is a container for IListItem objects.
+    It is equivalent to the HTML \<ol\> and \<ul\> elements. The type of list, ordered
+    or unordered, is an attribute of the IList object.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(IList, ImoList, IObject)
 
 
 
@@ -2221,6 +2260,15 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 
 
 
+//=======================================================================================
+/** @class ITextItem
+    @extends IObject
+    @extends ISiblings
+
+    %ITextItem is an inline-level object containing a chunk of text with the same style.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(ITextItem, ImoTextItem, IObject)
+
 
 ////=======================================================================================
 // /* * @class IAnonymousBlock
@@ -2257,21 +2305,21 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    @endverbatim
 //
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IAnonymousBlock, ImoAnonymousBlock)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IAnonymousBlock, ImoAnonymousBlock, IObject)
 //
 ////=======================================================================================
 // /* * @class IContent
 //    %IContent is a generic block-level container, similar to the HTML \<div\> element. It
 //    is used for grouping content but has no effect on the content or its layout.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IContent, ImoContent)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IContent, ImoContent, IObject)
 
 ////=======================================================================================
 // /* * @class IDynamic
 //    %IDynamic represents external content that is injected dynamically into the document
 //    by the user application. It is equivalent to the HTML \<object\> element.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IDynamic, ImoDynamic)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IDynamic, ImoDynamic, IObject)
 
 ////=======================================================================================
 // /* * @class IMultiColumn
@@ -2280,7 +2328,7 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    no equivalent in HTML, but you can consider it as a table with a single row and as
 //    many columns as you need.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IMultiColumn, ImoMultiColumn)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IMultiColumn, ImoMultiColumn, IObject)
 
 ////=======================================================================================
 // /* * @class ITable
@@ -2289,29 +2337,21 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    the HTML \<table\> and can be considered as a container for the ITableRow,
 //    ITableCell, ITableHead and ITableBoby objects.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITable, ImoTable)
-
-////=======================================================================================
-// /* * @class IList
-//    %IList represents a list of items and it is a container for IListItem objects.
-//    It is equivalent to the HTML \<ol\> and \<ul\> elements. The type of list, ordered
-//    or unordered, is an attribute of the IList object.
-//*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IList, ImoList)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ITable, ImoTable, IObject)
 
 ////=======================================================================================
 // /* * @class ITableRow
 //    %ITableRow defines a row of cells in a table. It is equivalent to the HTML \<tr\>
 //    element. It is a container for the ITableCell objects that define the row's cells.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableRow, ImoTableRow)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ITableRow, ImoTableRow, IObject)
 
 ////=======================================================================================
 // /* * @class IListItem
 //    %IListItem represents an item in a list. It is similar to the HTML \<li\> element.
 //    %IListItem objects ar always contained in an IList parent object.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IListItem, ImoListItem)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IListItem, ImoListItem, IObject)
 
 ////=======================================================================================
 // /* * @class ITableCell
@@ -2319,14 +2359,14 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    HTML \<td\> and \<th\> elements. %ITableCell objects are always contained in an
 //    ITableRow object.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITableCell, ImoTableCell)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ITableCell, ImoTableCell, IObject)
 
 ////=======================================================================================
 // /* * @class IHeading
 //    %IHeading represents a section heading, similar to the HTML \<h1\> - \<h6\> elements.
 //    The level of the heading is an attribute of the %IHeading object.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IHeading, ImoHeading)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IHeading, ImoHeading, IObject)
 
 ////=======================================================================================
 // /* * @class IInlineWrapper
@@ -2336,21 +2376,14 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    language. %IInlineWrapper is very much like the IContent object, but IContent is
 //    a block-level object whereas the %IInlineWrapper is an inline object.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IInlineWrapper, ImoInlineWrapper)
-
-////=======================================================================================
-// /* * @class ILink
-//    %ILink is a container for inline objects, and reprensents a clickable 'link'
-//    object that creates hyperlinks. It is similar to the HTML \<a\> element.
-//*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ILink, ImoLink)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IInlineWrapper, ImoInlineWrapper, IObject)
 
 ////=======================================================================================
 // /* * @class IButton
 //    %IButton represents a clickable button, used to generate an action in the
 //    application. It is similar to the HTML button element.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IButton, ImoButton)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IButton, ImoButton, IObject)
 
 ////=======================================================================================
 // /* * @class IControl
@@ -2361,26 +2394,20 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
 //    complex, containing other controls, such as buttons and links, and its
 //    appearance and behaviour is defined by the user application.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IControl, ImoControl)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IControl, ImoControl, IObject)
 
 ////=======================================================================================
 // /* * @class IScorePlayer
 //    %IScorePlayer is a control for managing the playback of the associated IScore object.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IScorePlayer, ImoScorePlayer)
-
-////=======================================================================================
-// /* * @class ITextItem
-//    %ITextItem is an inline-level object containing a chunk of text with the same style.
-//*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(ITextItem, ImoTextItem)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IScorePlayer, ImoScorePlayer, IObject)
 
 ////=======================================================================================
 // /* * @class IImage
 //    %IImage is an inline object that represents a two-dimensional image. It is
 //    equivalent to the HTML \<img\> element, that embeds an image into the document.
 //*/
-//LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IImage, ImoImage)
+//LOMSE_IMPLEMENT_IM_API_CLASS(IImage, ImoImage, IObject)
 //
 //
 

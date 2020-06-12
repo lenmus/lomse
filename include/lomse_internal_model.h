@@ -48,20 +48,26 @@ class ImoContentObj;
 class ImoDocument;
 class ImoInstrument;
 class ImoInstrGroup;
+class ImoLink;
+class ImoList;
 class ImoMidiInfo;
 class ImoParagraph;
 class ImoScore;
 class ImoSoundInfo;
+class ImoTextItem;
 
 class IBlockLevelObj;
 class IDocument;
 class IObject;
 class IInstrument;
 class IInstrGroup;
+class ILink;
+class IList;
 class IMidiInfo;
 class IParagraph;
 class IScore;
 class ISoundInfo;
+class ITextItem;
 
 //---------------------------------------------------------------------------------------
 // IObject: Abstract base class for all objects composing the document
@@ -81,8 +87,11 @@ public:
     std::unique_ptr<IDocument> get_owner_document() const;
 
     //downcast objects
+    std::unique_ptr<ILink> downcast_to_link() const;
+    std::unique_ptr<IList> downcast_to_list() const;
     std::unique_ptr<IParagraph> downcast_to_paragraph() const;
     std::unique_ptr<IScore> downcast_to_score() const;
+    std::unique_ptr<ITextItem> downcast_to_text_item() const;
 
     //check object type
     bool is_anonymous_block() const;
@@ -97,7 +106,7 @@ public:
     bool is_instr_group() const;
     bool is_link() const;
     bool is_list() const;
-    bool is_listitem() const;
+    bool is_list_item() const;
     bool is_midi_info() const;
     bool is_multicolumn() const;
     bool is_music_data() const;
@@ -213,6 +222,44 @@ class LOMSE_EXPORT IInstrGroup : public virtual IObject
     int get_index_to_first_instrument() const;
     int get_index_to_last_instrument() const;
     bool set_range(int iFirstInstr, int iLastInstr);
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoInstrGroup* get_internal_object() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// ILink is a container for inline objects, and reprensents a clickable 'link'
+// object that creates hyperlinks. It is similar to the HTML \<a\> element.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT ILink : public virtual IObject, public ISiblings, public IChildren
+{
+    LOMSE_DECLARE_IM_API_CLASS(ILink, ImoLink)
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoInstrGroup* get_internal_object() const;
+};
+
+
+//---------------------------------------------------------------------------------------
+// IList represents a list of items and it is a container for IListItem objects.
+// It is equivalent to the HTML \<ol\> and \<ul\> elements.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT IList : public virtual IObject, public ISiblings, public IChildren
+{
+    LOMSE_DECLARE_IM_API_CLASS(IList, ImoList)
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -381,6 +428,22 @@ class LOMSE_EXPORT ISoundInfo : public virtual IObject
 };
 
 
+//---------------------------------------------------------------------------------------
+// ITextItem is an inline-level object containing a chunk of text with the same style.
+// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
+// for all class members.
+//
+class LOMSE_EXPORT ITextItem : public virtual IObject, public ISiblings
+{
+    LOMSE_DECLARE_IM_API_CLASS(ITextItem, ImoTextItem)
+
+    // Transitional, to facilitate migration to this new public API.
+    // Notice that this method will be removed in future so, please, if you need to
+    // use this method open an issue at https://github.com/lenmus/lomse/issues
+    // explaining the need, so that the public API could be fixed and your app.
+    // would not be affected in future when this method is removed.
+    ImoSoundInfo* get_internal_object() const;
+};
 
 
 ////---------------------------------------------------------------------------------------

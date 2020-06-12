@@ -2580,49 +2580,29 @@ protected:
 public:
     virtual ~ImoBoxInline() {}
 
-    //content
-    inline int get_num_items()
-    {
-        return get_num_children();
-    }
-    inline void add_item(ImoInlineLevelObj* pItem)
-    {
-        append_child_imo(pItem);
-    }
-    inline void remove_item(ImoContentObj* pItem)
-    {
-        remove_child_imo(pItem);
-    }
-    inline ImoInlineLevelObj* get_first_item()
-    {
+    //add/remove content
+    inline void add_item(ImoInlineLevelObj* pItem) { append_child_imo(pItem); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
+
+    //content traversal
+    inline int get_num_items() { return get_num_children(); }
+    inline ImoInlineLevelObj* get_first_item() {
         return dynamic_cast<ImoInlineLevelObj*>( get_first_child() );
+    }
+    inline ImoInlineLevelObj* get_last_item() {
+        return dynamic_cast<ImoInlineLevelObj*>( get_last_child() );
+    }
+    inline ImoInlineLevelObj* get_item(int iItem) {
+        return dynamic_cast<ImoInlineLevelObj*>( get_child(iItem) );
     }
 
     //size
-    inline USize& get_size()
-    {
-        return m_size;
-    }
-    inline LUnits get_width()
-    {
-        return m_size.width;
-    }
-    inline LUnits get_height()
-    {
-        return m_size.height;
-    }
-    inline void set_size(const USize& size)
-    {
-        m_size = size;
-    }
-    inline void set_width(LUnits value)
-    {
-        m_size.width = value;
-    }
-    inline void set_height(LUnits value)
-    {
-        m_size.height = value;
-    }
+    inline USize& get_size() { return m_size; }
+    inline LUnits get_width() { return m_size.width; }
+    inline LUnits get_height() { return m_size.height; }
+    inline void set_size(const USize& size) { m_size = size; }
+    inline void set_width(LUnits value) { m_size.width = value; }
+    inline void set_height(LUnits value) { m_size.height = value; }
 
 };
 

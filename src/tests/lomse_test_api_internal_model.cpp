@@ -338,6 +338,522 @@ SUITE(InternalModelApiTest)
     }
 
 
+    //@ IInstrument ---------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0100)
+    {
+        //@0100. get and set name and abbreviation
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(instrument (name \"Violin\")(abbrev \"V.\")(musicData (clef G)"
+            "(n g4 q)"
+            ")))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        CHECK( instr->get_name_string() == "Violin" );
+        CHECK( instr->get_abbreviation_string() == "V." );
+
+        instr->set_name_string("Flute");
+        instr->set_abbreviation_string("F.");
+
+        CHECK( instr->get_name_string() == "Flute" );
+        CHECK( instr->get_abbreviation_string() == "F." );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0101)
+    {
+        //@0101. get and set MIDI information
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(instrument (name \"Violin\")(abbrev \"V.\")(musicData (clef G)"
+            "(n g4 q)"
+            ")))"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+
+        CHECK( instr->get_num_sounds() == 1 );
+        unique_ptr<ISoundInfo> sound = instr->get_sound_info_at(0);
+        unique_ptr<IMidiInfo> midi = sound->get_midi_info();
+        CHECK( midi->get_channel() == 1 );
+        CHECK( midi->get_program() == 1 );
+        midi->set_channel(7);
+        midi->set_program(2);
+
+        unique_ptr<IScore> score2 = doc->get_first_score();
+        unique_ptr<IInstrument> instr2 = score2->get_instrument_at(0);
+        unique_ptr<ISoundInfo> sound2 = instr2->get_sound_info_at(0);
+        unique_ptr<IMidiInfo> midi2 = sound2->get_midi_info();
+        CHECK( midi2->get_channel() == 7 );
+        CHECK( midi2->get_program() == 2 );
+    }
+
+
+    //@ IInstrGroup ---------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0100)
+    {
+        //@0100. get and set name and abbreviation
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
+        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
+        CHECK( group1->get_name_string() == "Group1" );
+        CHECK( group1->get_abbreviation_string() == "" );
+        CHECK( group2->get_name_string() == "" );
+        CHECK( group2->get_abbreviation_string() == "G2" );
+
+        group1->set_abbreviation_string("G1");
+        group2->set_name_string("Group2");
+
+        CHECK( group1->get_name_string() == "Group1" );
+        CHECK( group1->get_abbreviation_string() == "G1" );
+        CHECK( group2->get_name_string() == "Group2" );
+        CHECK( group2->get_abbreviation_string() == "G2" );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0110)
+    {
+        //@0110. get and set symbol
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
+        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
+
+        CHECK( group1->get_symbol() == EGroupSymbol::k_group_symbol_bracket );
+        CHECK( group2->get_symbol() == EGroupSymbol::k_group_symbol_brace );
+
+        group1->set_symbol(EGroupSymbol::k_group_symbol_none);
+        group2->set_symbol(EGroupSymbol::k_group_symbol_line);
+
+        CHECK( group1->get_symbol() == k_group_symbol_none );
+        CHECK( group2->get_symbol() == k_group_symbol_line );
+
+//        Document* pDoc = doc->get_internal_object();
+//        pDoc->end_of_changes();
+//        cout << test_name() << pDoc->to_string(true) << endl;
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0120)
+    {
+        //@0120. get and set barlines_mode
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
+        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
+
+        CHECK( group1->get_barlines_mode() == EJoinBarlines::k_non_joined_barlines );
+        CHECK( group2->get_barlines_mode() == EJoinBarlines::k_joined_barlines );
+
+        group1->set_barlines_mode(EJoinBarlines::k_mensurstrich_barlines);
+        group2->set_barlines_mode(EJoinBarlines::k_non_joined_barlines);
+
+        CHECK( group1->get_barlines_mode() == k_mensurstrich_barlines );
+        CHECK( group2->get_barlines_mode() == k_non_joined_barlines );
+
+//        Document* pDoc = doc->get_internal_object();
+//        pDoc->end_of_changes();
+//        cout << test_name() << pDoc->to_string(true) << endl;
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0130)
+    {
+        //@0130. set_range()
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+
+        //out of range
+        CHECK( group->set_range(0, 4) == false );
+
+        //out of order
+        CHECK( group->set_range(3, 2) == false );
+
+        //only one instrument
+        CHECK( group->set_range(1, 1) == false );
+
+        //valid range
+        CHECK( group->set_range(1, 3) == true );
+
+        //check group
+        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
+        CHECK( group1->get_num_instruments() == 3 );
+        CHECK( group1->get_first_instrument()->get_object_id() == 400L );
+        CHECK( group1->get_last_instrument()->get_object_id() == 600L );
+
+//        Document* pDoc = doc->get_internal_object();
+//        pDoc->end_of_changes();
+//        cout << test_name() << pDoc->to_string(true) << endl;
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0140)
+    {
+        //@0140. get_instrument_at(). Invalid parameter
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+
+        unique_ptr<IInstrument> instr = group->get_instrument_at(3);
+        CHECK( instr == nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0141)
+    {
+        //@0141. get_instrument_at(). OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+
+        unique_ptr<IInstrument> instr = group->get_instrument_at(2);
+        CHECK( instr != nullptr );
+        CHECK( instr->get_name_string() == "P4" );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0142)
+    {
+        //@0142. get index to_first and last instruments
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "(score (vers 2.0)"
+            "(parts (instrIds P1 P2 P3 P4)"
+                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
+            ")"
+            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
+            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
+            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
+            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
+            ")"
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IScore> score = doc->get_first_score();
+        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+
+        CHECK( group->get_index_to_first_instrument() == 1 );
+        CHECK( group->get_index_to_last_instrument() == 3 );
+    }
+
+
+    //@ ILink ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilink_0100)
+    {
+        //@0100. IObject properties and casting. OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "<link url='This is 1st url'>This is the first link</link>"
+                    "<txt>Some text</txt>"
+                    "<link url='This is 2nd url'>This is the second link</link>"
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+
+        unique_ptr<IObject> obj = para->get_first_child();
+
+        CHECK( obj != nullptr );
+        CHECK( obj->get_object_id() != 0 );
+        CHECK( obj->get_object_name() == "link" );
+        unique_ptr<IDocument> doc1 = obj->get_owner_document();
+        CHECK( doc->get_object_id() == doc1->get_object_id() );
+
+        //can be downcasted
+        CHECK( obj->is_link() );
+        unique_ptr<ILink> link = obj->downcast_to_link();
+        CHECK( link != nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilink_0200)
+    {
+        //@0200. get siblings
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "<link url='This is 1st url'>This is the first link</link>"
+                    "<link url='This is 2nd url'>This is the second link</link>"
+                    "<txt>Some text</txt>"
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        unique_ptr<IObject> obj = para->get_first_child();
+        CHECK( obj->is_link() );
+        unique_ptr<ILink> link1 = obj->downcast_to_link();
+
+        obj = link1->get_previous_sibling();
+        CHECK( obj == nullptr );
+
+        obj = link1->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_link() );
+        unique_ptr<ILink> link2 = obj->downcast_to_link();
+
+        obj = link2->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+
+        obj = link2->get_previous_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_link() );
+        CHECK( obj->get_object_id() == link1->get_object_id() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilink_0201)
+    {
+        //@0201. get children
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "<link url='This is 1st url'>"
+                        "This is the first chunk of text. "
+                        "<txt>Now, the second one. </txt>"
+                        "And let's finish."
+                    "</link>"
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        unique_ptr<IObject> obj = para->get_first_child();
+        CHECK( obj->is_link() );
+        unique_ptr<ILink> link = obj->downcast_to_link();
+
+        CHECK( link->get_num_children() == 3 );
+
+        obj = link->get_first_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        unique_ptr<ILinkItem> li = obj->downcast_to_text_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "This is the first item" );
+
+        obj = link->get_last_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        li = obj->downcast_to_text_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "The second item" );
+
+        obj = link->get_child_at(1);
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+//        li = obj->downcast_to_text_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "The end of the list" );
+    }
+
+
+    //@ IList ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilist_0100)
+    {
+        //@0100. IObject properties and casting. OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<orderedlist>"
+                    "<listitem>This is the first item</listitem>"
+                    "<listitem>The second item</listitem>"
+                    "<listitem>The end of the list</listitem>"
+                "</orderedlist>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> obj = doc->get_first_child();
+
+        CHECK( obj != nullptr );
+        CHECK( obj->get_object_id() != 0 );
+        CHECK( obj->get_object_name() == "list" );
+        unique_ptr<IDocument> doc1 = obj->get_owner_document();
+        CHECK( doc->get_object_id() == doc1->get_object_id() );
+
+        //can be downcasted
+        CHECK( obj->is_list() );
+        unique_ptr<IList> lst = obj->downcast_to_list();
+        CHECK( lst != nullptr );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilist_0200)
+    {
+        //@0200. get siblings
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<itemizedlist>"
+                    "<listitem>This is the first item</listitem>"
+                    "<listitem>The second item</listitem>"
+                    "<listitem>The end of the list</listitem>"
+                "</itemizedlist>"
+                "<orderedlist>"
+                    "<listitem>One</listitem>"
+                    "<listitem>Two</listitem>"
+                "</orderedlist>"
+                "<para>This is a paragraph</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_list() );
+        unique_ptr<IList> lst1 = child->downcast_to_list();
+
+        unique_ptr<IObject> obj = lst1->get_previous_sibling();
+        CHECK( obj == nullptr );
+
+        obj = lst1->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_list() );
+        unique_ptr<IList> lst2 = obj->downcast_to_list();
+
+        obj = lst2->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_paragraph() );
+
+        obj = lst2->get_previous_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_list() );
+        CHECK( obj->get_object_id() == lst1->get_object_id() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilist_0201)
+    {
+        //@0201. get children
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<itemizedlist>"
+                    "<listitem>This is the first item</listitem>"
+                    "<listitem>The second item</listitem>"
+                    "<listitem>The end of the list</listitem>"
+                "</itemizedlist>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_list() );
+        unique_ptr<IList> lst = child->downcast_to_list();
+
+        CHECK( lst->get_num_children() == 3 );
+
+        unique_ptr<IObject> obj = lst->get_first_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_list_item() );
+//        unique_ptr<IListItem> li = obj->downcast_to_list_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "This is the first item" );
+
+        obj = lst->get_last_child();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_list_item() );
+//        li = obj->downcast_to_list_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "The second item" );
+
+        obj = lst->get_child_at(1);
+        CHECK( obj != nullptr );
+        CHECK( obj->is_list_item() );
+//        li = obj->downcast_to_list_item();
+//        CHECK( li != nullptr );
+//        CHECK( li->get_text() == "The end of the list" );
+    }
+
+
     //@ IParagraph ----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0100)
@@ -423,22 +939,22 @@ SUITE(InternalModelApiTest)
         unique_ptr<IObject> obj = para->get_first_child();
         CHECK( obj != nullptr );
         CHECK( obj->is_text_item() );
-//        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
-//        CHECK( txt != nullptr );
+        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
+        CHECK( txt != nullptr );
 //        CHECK( txt->get_text() == "This is a paragraph " );
 
         obj = para->get_last_child();
         CHECK( obj != nullptr );
         CHECK( obj->is_text_item() );
-//        txt = obj->downcast_to_text_item();
-//        CHECK( txt != nullptr );
+        txt = obj->downcast_to_text_item();
+        CHECK( txt != nullptr );
 //        CHECK( txt->get_text() == " And the third one." );
 
         obj = para->get_child_at(1);
         CHECK( obj != nullptr );
         CHECK( obj->is_text_item() );
-//        txt = obj->downcast_to_text_item();
-//        CHECK( txt != nullptr );
+        txt = obj->downcast_to_text_item();
+        CHECK( txt != nullptr );
 //        CHECK( txt->get_text() == "with three items." );
     }
 
@@ -1156,278 +1672,79 @@ SUITE(InternalModelApiTest)
     }
 
 
-    //@ IInstrument ---------------------------------------------------------------------
+    //@ ITextItem ---------------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0100)
+    TEST_FIXTURE(InternalModelApiTestFixture, itextitem_0100)
     {
-        //@0100. get and set name and abbreviation
+        //@0100. IObject properties and casting. OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
-            "(score (vers 2.0)"
-            "(instrument (name \"Violin\")(abbrev \"V.\")(musicData (clef G)"
-            "(n g4 q)"
-            ")))"
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "This is the first chunk of text. "
+                    "<txt>Now, the second one. </txt>"
+                    "And let's finish."
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
-        CHECK( instr->get_name_string() == "Violin" );
-        CHECK( instr->get_abbreviation_string() == "V." );
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
 
-        instr->set_name_string("Flute");
-        instr->set_abbreviation_string("F.");
+        unique_ptr<IObject> obj = para->get_first_child();
 
-        CHECK( instr->get_name_string() == "Flute" );
-        CHECK( instr->get_abbreviation_string() == "F." );
+        CHECK( obj != nullptr );
+        CHECK( obj->get_object_id() != 0 );
+        CHECK( obj->get_object_name() == "text" );
+        unique_ptr<IDocument> doc1 = obj->get_owner_document();
+        CHECK( doc->get_object_id() == doc1->get_object_id() );
+
+        //can be downcasted
+        CHECK( obj->is_text_item() );
+        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
+        CHECK( txt != nullptr );
     }
 
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0101)
+    TEST_FIXTURE(InternalModelApiTestFixture, itextitem_0200)
     {
-        //@0101. get and set MIDI information
+        //@0200. get siblings
         Document theDoc(m_libraryScope);
         theDoc.from_string(
-            "(score (vers 2.0)"
-            "(instrument (name \"Violin\")(abbrev \"V.\")(musicData (clef G)"
-            "(n g4 q)"
-            ")))"
+            "<lenmusdoc vers='0.0'><content>"
+                "<para>"
+                    "This is the first chunk of text. "
+                    "<txt>Now, the second one. </txt>"
+                    "And let's finish."
+                "</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
         );
         unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        unique_ptr<IObject> child = doc->get_first_child();
+        CHECK( child->is_paragraph() );
+        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        unique_ptr<IObject> obj = para->get_first_child();
+        CHECK( obj->is_text_item() );
+        unique_ptr<ITextItem> txt1 = obj->downcast_to_text_item();
 
-        CHECK( instr->get_num_sounds() == 1 );
-        unique_ptr<ISoundInfo> sound = instr->get_sound_info_at(0);
-        unique_ptr<IMidiInfo> midi = sound->get_midi_info();
-        CHECK( midi->get_channel() == 1 );
-        CHECK( midi->get_program() == 1 );
-        midi->set_channel(7);
-        midi->set_program(2);
+        obj = txt1->get_previous_sibling();
+        CHECK( obj == nullptr );
 
-        unique_ptr<IScore> score2 = doc->get_first_score();
-        unique_ptr<IInstrument> instr2 = score2->get_instrument_at(0);
-        unique_ptr<ISoundInfo> sound2 = instr2->get_sound_info_at(0);
-        unique_ptr<IMidiInfo> midi2 = sound2->get_midi_info();
-        CHECK( midi2->get_channel() == 7 );
-        CHECK( midi2->get_program() == 2 );
-    }
+        obj = txt1->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+        unique_ptr<ITextItem> txt2 = obj->downcast_to_text_item();
 
+        obj = txt2->get_next_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
 
-    //@ IInstrGroup ---------------------------------------------------------------------
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0100)
-    {
-        //@0100. get and set name and abbreviation
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
-        CHECK( group1->get_name_string() == "Group1" );
-        CHECK( group1->get_abbreviation_string() == "" );
-        CHECK( group2->get_name_string() == "" );
-        CHECK( group2->get_abbreviation_string() == "G2" );
-
-        group1->set_abbreviation_string("G1");
-        group2->set_name_string("Group2");
-
-        CHECK( group1->get_name_string() == "Group1" );
-        CHECK( group1->get_abbreviation_string() == "G1" );
-        CHECK( group2->get_name_string() == "Group2" );
-        CHECK( group2->get_abbreviation_string() == "G2" );
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0110)
-    {
-        //@0110. get and set symbol
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
-
-        CHECK( group1->get_symbol() == EGroupSymbol::k_group_symbol_bracket );
-        CHECK( group2->get_symbol() == EGroupSymbol::k_group_symbol_brace );
-
-        group1->set_symbol(EGroupSymbol::k_group_symbol_none);
-        group2->set_symbol(EGroupSymbol::k_group_symbol_line);
-
-        CHECK( group1->get_symbol() == k_group_symbol_none );
-        CHECK( group2->get_symbol() == k_group_symbol_line );
-
-//        Document* pDoc = doc->get_internal_object();
-//        pDoc->end_of_changes();
-//        cout << test_name() << pDoc->to_string(true) << endl;
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0120)
-    {
-        //@0120. get and set barlines_mode
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-                "(group P3 P4 (abbrev \"G2\")(symbol brace)(joinBarlines yes))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
-
-        CHECK( group1->get_barlines_mode() == EJoinBarlines::k_non_joined_barlines );
-        CHECK( group2->get_barlines_mode() == EJoinBarlines::k_joined_barlines );
-
-        group1->set_barlines_mode(EJoinBarlines::k_mensurstrich_barlines);
-        group2->set_barlines_mode(EJoinBarlines::k_non_joined_barlines);
-
-        CHECK( group1->get_barlines_mode() == k_mensurstrich_barlines );
-        CHECK( group2->get_barlines_mode() == k_non_joined_barlines );
-
-//        Document* pDoc = doc->get_internal_object();
-//        pDoc->end_of_changes();
-//        cout << test_name() << pDoc->to_string(true) << endl;
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0130)
-    {
-        //@0130. set_range()
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P1 P2 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-
-        //out of range
-        CHECK( group->set_range(0, 4) == false );
-
-        //out of order
-        CHECK( group->set_range(3, 2) == false );
-
-        //only one instrument
-        CHECK( group->set_range(1, 1) == false );
-
-        //valid range
-        CHECK( group->set_range(1, 3) == true );
-
-        //check group
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        CHECK( group1->get_num_instruments() == 3 );
-        CHECK( group1->get_first_instrument()->get_object_id() == 400L );
-        CHECK( group1->get_last_instrument()->get_object_id() == 600L );
-
-//        Document* pDoc = doc->get_internal_object();
-//        pDoc->end_of_changes();
-//        cout << test_name() << pDoc->to_string(true) << endl;
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0140)
-    {
-        //@0140. get_instrument_at(). Invalid parameter
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-
-        unique_ptr<IInstrument> instr = group->get_instrument_at(3);
-        CHECK( instr == nullptr );
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0141)
-    {
-        //@0141. get_instrument_at(). OK
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-
-        unique_ptr<IInstrument> instr = group->get_instrument_at(2);
-        CHECK( instr != nullptr );
-        CHECK( instr->get_name_string() == "P4" );
-    }
-
-    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0142)
-    {
-        //@0142. get index to_first and last instruments
-        Document theDoc(m_libraryScope);
-        theDoc.from_string(
-            "(score (vers 2.0)"
-            "(parts (instrIds P1 P2 P3 P4)"
-                "(group P2 P4 (name \"Group1\")(symbol bracket)(joinBarlines no))"
-            ")"
-            "(instrument#300 P1 (name \"P1\")(musicData (clef G)) )"
-            "(instrument#400 P2 (name \"P2\")(musicData (clef F4)) )"
-            "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
-            "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
-            ")"
-        );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-
-        CHECK( group->get_index_to_first_instrument() == 1 );
-        CHECK( group->get_index_to_last_instrument() == 3 );
+        obj = txt2->get_previous_sibling();
+        CHECK( obj != nullptr );
+        CHECK( obj->is_text_item() );
+        CHECK( obj->get_object_id() == txt1->get_object_id() );
     }
 
 }
