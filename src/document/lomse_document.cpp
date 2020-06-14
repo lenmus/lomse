@@ -705,9 +705,9 @@ string Document::dump_tree() const
 }
 
 //---------------------------------------------------------------------------------------
-unique_ptr<IDocument> Document::get_document_api()
+IDocument Document::get_document_api()
 {
-    return unique_ptr<IDocument>(new IDocument(this));
+    return IDocument(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -723,6 +723,40 @@ long Document::get_model_ref()
 }
 
 ///@endcond
+
+
+EImoObjType object_type_to_imo_type(EIObjectType type)
+{
+    switch(type)
+    {
+        case k_obj_anonymous_block:     return k_imo_anonymous_block;
+        case k_obj_button:              return k_imo_button;
+        case k_obj_content:             return k_imo_content;
+        case k_obj_control:             return k_imo_control;
+        case k_obj_dynamic:             return k_imo_dynamic;
+        case k_obj_heading:             return k_imo_heading;
+        case k_obj_image:               return k_imo_image;
+        case k_obj_inline_wrapper:      return k_imo_inline_wrapper;
+        case k_obj_instrument:          return k_imo_instrument;
+        case k_obj_instr_group:         return k_imo_instr_group;
+        case k_obj_link:                return k_imo_link;
+        case k_obj_list:                return k_imo_list;
+        case k_obj_list_item:           return k_imo_listitem;
+        case k_obj_midi_info:           return k_imo_midi_info;
+        case k_obj_multicolumn:         return k_imo_multicolumn;
+        case k_obj_music_data:          return k_imo_music_data;
+        case k_obj_paragraph:           return k_imo_para;
+        case k_obj_score:               return k_imo_score;
+        case k_obj_score_player:        return k_imo_score_player;
+        case k_obj_sound_info:          return k_imo_sound_info;
+        case k_obj_table:               return k_imo_table;
+        case k_obj_table_cell:          return k_imo_table_cell;
+        case k_obj_table_row:           return k_imo_table_row;
+        case k_obj_text_item:           return k_imo_text_item;
+        default:
+            return k_imo_obj;
+    }
+}
 
 //=======================================================================================
 /** @class IDocument
@@ -768,9 +802,18 @@ IDocument::IDocument(Document* impl)
 
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
+    Returns @TRUE if the object represents a valid document.
+*/
+bool IDocument::is_valid() const
+{
+    return m_pImpl != nullptr;
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
     Returns the internal unique identifier (ID) for this document.
 */
-ImoId IDocument::get_object_id() const
+ImoId IDocument::object_id() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_id();
@@ -782,10 +825,61 @@ ImoId IDocument::get_object_id() const
     the LMD version used in the source. For other document creation methods and
     formats it will return version "0.0".
 */
-std::string& IDocument::get_lmd_version() const
+std::string& IDocument::lmd_version() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_version();
+}
+//---------------------------------------------------------------------------------------
+/** @memberof IDocument
+    Creates a new detached IObject of the type specified by parameter <i>type</i>.
+    @param type     A value from enum EIObjectType that specifies the type of object
+                    to be created.
+
+    The created object is <i>detached</i>. This means that although it is part of the
+    document, this node is not atached as content. It exists in memory and the document
+    knows about it, but is is not part of the visible content. It is 'waiting' to be
+    inserted at some point in the content. To atach a detached object to the document it
+    is necessary to use specific methods, such as IScore::append(IInstrument detached).
+*/
+IObject IDocument::create_object(EIObjectType type)
+{
+    EImoObjType t = object_type_to_imo_type(type);
+    if (t == k_imo_obj)
+        return IObject();   //invalid conversion. Fix object_type_to_imo_type() function
+
+    Document* pDoc = pimpl();
+    ImoObj* pImo = ImFactory::inject(t, pDoc);
+    long mref = pDoc->get_model_ref();
+    switch(type)
+    {
+//        case k_obj_anonymous_block:     return IAnonymousBlock(pImo, pDoc, mref);
+//        case k_obj_button:              return IScore(pImo, pDoc, mref);
+//        case k_obj_content:             return IContent(pImo, pDoc, mref);
+//        case k_obj_control:             return IControl(pImo, pDoc, mref);
+        case k_obj_dynamic:             return IDynamic(pImo, pDoc, mref);
+//        case k_obj_heading:             return IHeading(pImo, pDoc, mref);
+//        case k_obj_image:               return IImage(pImo, pDoc, mref);
+//        case k_obj_inline_wrapper:      return IInlineWrapper(pImo, pDoc, mref);
+        case k_obj_instrument:          return IInstrument(pImo, pDoc, mref);
+        case k_obj_instr_group:         return IInstrGroup(pImo, pDoc, mref);
+        case k_obj_link:                return ILink(pImo, pDoc, mref);
+        case k_obj_list:                return IList(pImo, pDoc, mref);
+//        case k_obj_list_item:           return IListitem(pImo, pDoc, mref);
+        case k_obj_midi_info:           return IMidiInfo(pImo, pDoc, mref);
+//        case k_obj_multicolumn:         return IMulticolumn(pImo, pDoc, mref);
+//        case k_obj_music_data:          return IMusicData(pImo, pDoc, mref);
+        case k_obj_paragraph:           return IParagraph(pImo, pDoc, mref);
+        case k_obj_score:               return IScore(pImo, pDoc, mref);
+//        case k_obj_score_player:        return IScorePlayer(pImo, pDoc, mref);
+        case k_obj_sound_info:          return ISoundInfo(pImo, pDoc, mref);
+//        case k_obj_table:               return ITable(pImo, pDoc, mref);
+//        case k_obj_table_cell:          return ITableCell(pImo, pDoc, mref);
+//        case k_obj_table_row:           return ITableRow(pImo, pDoc, mref);
+        case k_obj_text_item:           return ITextItem(pImo, pDoc, mref);
+        default:
+            return IObject();   //missing case. Fix this switch block
+    }
 }
 
 
@@ -889,7 +983,7 @@ void IDocument::set_page_height(LUnits value)
     Returns the left margin of the page. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits IDocument::get_page_left_margin() const
+LUnits IDocument::page_left_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -901,7 +995,7 @@ LUnits IDocument::get_page_left_margin() const
     Returns the right margin of the page. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits IDocument::get_page_right_margin() const
+LUnits IDocument::page_right_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -913,7 +1007,7 @@ LUnits IDocument::get_page_right_margin() const
     Returns the top margin of the page. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits IDocument::get_page_top_margin() const
+LUnits IDocument::page_top_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -925,7 +1019,7 @@ LUnits IDocument::get_page_top_margin() const
     Returns the bottom margin of the page. The returned value is in logical
     units (cents of a millimeter).
 */
-LUnits IDocument::get_page_bottom_margin() const
+LUnits IDocument::page_bottom_margin() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -937,7 +1031,7 @@ LUnits IDocument::get_page_bottom_margin() const
     Returns the paper size intended for rendering this document. The returned value
     is in logical units (cents of a millimeter).
 */
-USize IDocument::get_page_size() const
+USize IDocument::page_size() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -949,7 +1043,7 @@ USize IDocument::get_page_size() const
     Returns the paper width intended for rendering this document. The returned value
     is in logical units (cents of a millimeter).
 */
-LUnits IDocument::get_page_width() const
+LUnits IDocument::page_width() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -961,7 +1055,7 @@ LUnits IDocument::get_page_width() const
     Returns the paper height intended for rendering this document. The returned value
     is in logical units (cents of a millimeter).
 */
-LUnits IDocument::get_page_height() const
+LUnits IDocument::page_height() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
 	ImoPageInfo* pageInfo = pRoot->get_page_info();
@@ -979,7 +1073,7 @@ LUnits IDocument::get_page_height() const
     Return the scaling factor to apply to the content when rendered divided into
     pages of the size defined by the paper size. Normally this factor is 1.0.
 */
-float IDocument::get_page_content_scale() const
+float IDocument::page_content_scale() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     return pRoot->get_page_content_scale();
@@ -1006,7 +1100,7 @@ void IDocument::set_page_content_scale(float scale)
 /** @memberof IDocument
     Returns the number of objects contained, at first level, in this document.
 */
-int IDocument::get_num_children() const
+int IDocument::num_children() const
 {
     return const_cast<Document*>(pimpl())->get_num_content_items();
 }
@@ -1016,7 +1110,7 @@ int IDocument::get_num_children() const
     Returns the specified child object.
     @param iItem    Is the index to the requested child (0 ... num.children - 1)
 */
-std::unique_ptr<IObject> IDocument::get_child_at(int iItem) const
+IObject IDocument::child_at(int iItem) const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
     ImoDocument* pRoot = pDoc->get_im_root();
@@ -1024,14 +1118,14 @@ std::unique_ptr<IObject> IDocument::get_child_at(int iItem) const
     if (pImo)
         return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
     else
-        return unique_ptr<IObject>();
+        return IObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
     Returns the first child object.
 */
-std::unique_ptr<IObject> IDocument::get_first_child() const
+IObject IDocument::first_child() const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
     ImoDocument* pRoot = pDoc->get_im_root();
@@ -1039,14 +1133,14 @@ std::unique_ptr<IObject> IDocument::get_first_child() const
     if (pImo)
         return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
     else
-        return unique_ptr<IObject>();
+        return IObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
     Returns the last child object.
 */
-std::unique_ptr<IObject> IDocument::get_last_child() const
+IObject IDocument::last_child() const
 {
     Document* pDoc = const_cast<Document*>(pimpl());
     ImoDocument* pRoot = pDoc->get_im_root();
@@ -1054,14 +1148,14 @@ std::unique_ptr<IObject> IDocument::get_last_child() const
     if (pImo)
         return IObject(pImo, pDoc, pDoc->get_model_ref()).downcast_to_content_obj();
     else
-        return unique_ptr<IObject>();
+        return IObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IDocument
     Returns the first child object of type 'music score'.
 */
-std::unique_ptr<IScore> IDocument::get_first_score() const
+IScore IDocument::first_score() const
 {
     ImoDocument* pRoot = pimpl()->get_im_root();
     ImoContent* pContent = pRoot->get_content();
@@ -1072,10 +1166,10 @@ std::unique_ptr<IScore> IDocument::get_first_score() const
         {
             ImoScore* pScore = static_cast<ImoScore*>(*it);
             Document* pDoc = const_cast<Document*>(pimpl());
-            return unique_ptr<IScore>( new IScore(pScore, pDoc, pDoc->get_model_ref()) );
+            return IScore(pScore, pDoc, pDoc->get_model_ref());
         }
     }
-    return unique_ptr<IScore>();
+    return IScore();
 }
 
 //@}    //Content traversal
@@ -1103,7 +1197,7 @@ void IDocument::end_of_changes()
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-Document* IDocument::get_internal_object()
+Document* IDocument::internal_object()
 {
     return pimpl();
 }

@@ -187,8 +187,8 @@ public:
         if (m_requestType == k_dynamic_content_request)
         {
             RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = (pDyn ? pDyn->get_document() : nullptr);
+            IObject dyn = pRq->get_object();
+            m_pDoc = dyn.owner_document().internal_object()->get_im_root();
         }
     }
 

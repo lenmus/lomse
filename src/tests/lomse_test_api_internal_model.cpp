@@ -89,10 +89,10 @@ SUITE(InternalModelApiTest)
         );
         ImoDocument* pImoDoc = theDoc.get_im_root();
 
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        CHECK( doc->get_lmd_version() == pImoDoc->get_version() );
-        CHECK( doc->get_lmd_version() == "0.0" );
+        CHECK( doc.lmd_version() == pImoDoc->get_version() );
+        CHECK( doc.lmd_version() == "0.0" );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0101)
@@ -108,31 +108,31 @@ SUITE(InternalModelApiTest)
             ")))"
             "))", cout, Document::k_format_ldp
         );
-        unique_ptr<IDocument> doc = pPresenter->get_document();
+        IDocument doc = pPresenter->get_document();
 
-        unique_ptr<IScore> score = doc->get_first_score();
-        CHECK( score->get_object_id() == 505 );
+        IScore score = doc.first_score();
+        CHECK( score.object_id() == 505 );
 
         delete pPresenter;
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0201)
     {
-        //@0201. Access to first score-> Not found
+        //@0201. Access to first score. Not found
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content ))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        unique_ptr<IScore> score = doc->get_first_score();
+        IScore score = doc.first_score();
 
-        CHECK( score == nullptr );
+        CHECK( !score.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0202)
     {
-        //@0202. Access to first score-> Success
+        //@0202. Access to first score. Success
 
         Document theDoc(m_libraryScope);
         theDoc.from_string(
@@ -141,16 +141,16 @@ SUITE(InternalModelApiTest)
             "(n g4 q)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        unique_ptr<IScore> score = doc->get_first_score();
+        IScore score = doc.first_score();
 
-        CHECK( score != nullptr );
+        CHECK( score.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0203)
     {
-        //@0203. Access to first score-> More content. Success
+        //@0203. Access to first score. More content. Success
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -161,16 +161,16 @@ SUITE(InternalModelApiTest)
             ")))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        unique_ptr<IScore> score = doc->get_first_score();
+        IScore score = doc.first_score();
 
-        CHECK( score != nullptr );
+        CHECK( score.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0204)
     {
-        //@0204. get_num_children(). OK
+        //@0204. num_children(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -178,26 +178,26 @@ SUITE(InternalModelApiTest)
                 "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        CHECK( doc->get_num_children() == 2 );
+        CHECK( doc.num_children() == 2 );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0205)
     {
-        //@0205. get_num_children(). Empty document
+        //@0205. num_children(). Empty document
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        CHECK( doc->get_num_children() == 0 );
+        CHECK( doc.num_children() == 0 );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0206)
     {
-        //@0206. get_first_child(). OK
+        //@0206. first_child(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -206,43 +206,37 @@ SUITE(InternalModelApiTest)
                 "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
         //child found
-        CHECK( doc->get_num_children() == 3 );
-        unique_ptr<IObject> content = doc->get_first_child();
-        CHECK( content != nullptr );
+        CHECK( doc.num_children() == 3 );
+        IObject content = doc.first_child();
+        CHECK( content.is_valid() );
 
-        //and can be downcasted, either directly (C++ cast)
-        IScore* score = dynamic_cast<IScore*>(content.get());
-        CHECK( score != nullptr );
-        ImoScore* pScore = score->get_internal_object();
-        CHECK( pScore->is_score() == true );
-
-        //or using API methods
-        CHECK( content->is_score() == true );
-        unique_ptr<IScore> score2 = content->downcast_to_score();
-        CHECK( score2 != nullptr );
+        //and can be downcasted
+        CHECK( content.is_score() == true );
+        IScore score2 = content.downcast_to_score();
+        CHECK( score2.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0207)
     {
-        //@0207. get_first_child(). Empty document.
+        //@0207. first_child(). Empty document.
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
         //child found
-        CHECK( doc->get_num_children() == 0 );
-        unique_ptr<IObject> content = doc->get_first_child();
-        CHECK( content == nullptr );
+        CHECK( doc.num_children() == 0 );
+        IObject content = doc.first_child();
+        CHECK( !content.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0208)
     {
-        //@0208. get_last_child(). OK
+        //@0208. last_child(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -251,43 +245,37 @@ SUITE(InternalModelApiTest)
                 "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
         //child found
-        CHECK( doc->get_num_children() == 3 );
-        unique_ptr<IObject> content = doc->get_last_child();
-        CHECK( content != nullptr );
+        CHECK( doc.num_children() == 3 );
+        IObject content = doc.last_child();
+        CHECK( content.is_valid() );
 
-        //and can be downcasted, either directly (C++ cast)
-        IScore* score = dynamic_cast<IScore*>(content.get());
-        CHECK( score != nullptr );
-        ImoScore* pScore = score->get_internal_object();
-        CHECK( pScore->is_score() == true );
-
-        //or using API methods
-        CHECK( content->is_score() == true );
-        unique_ptr<IScore> score2 = content->downcast_to_score();
-        CHECK( score2 != nullptr );
+        //and can be downcasted
+        CHECK( content.is_score() == true );
+        IScore score2 = content.downcast_to_score();
+        CHECK( score2.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0209)
     {
-        //@0209. get_last_child(). Empty document.
+        //@0209. last_child(). Empty document.
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
         //child found
-        CHECK( doc->get_num_children() == 0 );
-        unique_ptr<IObject> content = doc->get_last_child();
-        CHECK( content == nullptr );
+        CHECK( doc.num_children() == 0 );
+        IObject content = doc.last_child();
+        CHECK( !content.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0210)
     {
-        //@0210. get_child_at(). OK
+        //@0210. child_at(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -296,18 +284,18 @@ SUITE(InternalModelApiTest)
                 "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
         //child found
-        CHECK( doc->get_num_children() == 3 );
-        unique_ptr<IObject> content = doc->get_child_at(1);
-        CHECK( content != nullptr );
-        CHECK( content->is_paragraph() == true );
+        CHECK( doc.num_children() == 3 );
+        IObject content = doc.child_at(1);
+        CHECK( content.is_valid() );
+        CHECK( content.is_paragraph() == true );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0211)
     {
-        //@0211. get_child_at(). Invalid parameter
+        //@0211. child_at(). Invalid parameter
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -316,25 +304,111 @@ SUITE(InternalModelApiTest)
                 "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        unique_ptr<IObject> content = doc->get_child_at(4);
+        IObject content = doc.child_at(4);
 
-        CHECK( content == nullptr );
+        CHECK( !content.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, idocument_0212)
     {
-        //@0212. get_child_at(). Empty document
+        //@0212. child_at(). Empty document
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
+        IDocument doc = theDoc.get_document_api();
 
-        unique_ptr<IObject> content = doc->get_child_at(0);
+        IObject content = doc.child_at(0);
 
-        CHECK( content == nullptr );
+        CHECK( !content.is_valid() );
+    }
+
+
+    //@ IDynamic ---------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idynamic_0100)
+    {
+        //@0100. IObject properties and casting. OK
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<dynamic classid=\"test\" />"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        IDocument doc = theDoc.get_document_api();
+        IObject obj = doc.first_child();
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_id() != 0 );
+        CHECK( obj.object_name() == "dynamic" );
+        IDocument doc1 = obj.owner_document();
+        CHECK( doc.object_id() == doc1.object_id() );
+
+        //can be downcasted
+        CHECK( obj.is_dynamic() );
+        IDynamic dyn = obj.downcast_to_dynamic();
+        CHECK( dyn.is_valid() );
+
+        //other properties
+        CHECK( dyn.classid() == "test" );
+        CHECK( dyn.num_children() == 0 );
+        CHECK( !dyn.first_child().is_valid() );
+        CHECK( !dyn.last_child().is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idynamic_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_dynamic);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "dynamic" );
+        CHECK( obj.is_dynamic() );
+        IDynamic dyn = obj.downcast_to_dynamic();
+        CHECK( dyn.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, idynamic_0200)
+    {
+        //@0200. get siblings
+        Document theDoc(m_libraryScope);
+        theDoc.from_string(
+            "<lenmusdoc vers='0.0'><content>"
+                "<dynamic classid=\"Foo\" />"
+                "<dynamic classid=\"Bar\" />"
+                "<para>This is a paragraph</para>"
+            "<content/></lenmusdoc>"
+            , Document::k_format_lmd
+        );
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_dynamic() );
+        IDynamic dyn1 = child.downcast_to_dynamic();
+        CHECK( dyn1.classid() == "Foo" );
+
+        IObject obj = dyn1.previous_sibling();
+        CHECK( !obj.is_valid() );
+
+        obj = dyn1.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_dynamic() );
+        IDynamic dyn2 = obj.downcast_to_dynamic();
+        CHECK( dyn2.classid() == "Bar" );
+
+        obj = dyn2.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
+
+        obj = dyn2.previous_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_dynamic() );
+        CHECK( obj.object_id() == dyn1.object_id() );
     }
 
 
@@ -350,22 +424,37 @@ SUITE(InternalModelApiTest)
             "(n g4 q)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
-        CHECK( instr->get_name_string() == "Violin" );
-        CHECK( instr->get_abbreviation_string() == "V." );
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
+        CHECK( instr.name_string() == "Violin" );
+        CHECK( instr.abbreviation_string() == "V." );
 
-        instr->set_name_string("Flute");
-        instr->set_abbreviation_string("F.");
+        instr.set_name_string("Flute");
+        instr.set_abbreviation_string("F.");
 
-        CHECK( instr->get_name_string() == "Flute" );
-        CHECK( instr->get_abbreviation_string() == "F." );
+        CHECK( instr.name_string() == "Flute" );
+        CHECK( instr.abbreviation_string() == "F." );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0101)
     {
-        //@0101. get and set MIDI information
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_instrument);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "instrument" );
+        CHECK( obj.is_instrument() );
+        IInstrument instr = obj.downcast_to_instrument();
+        CHECK( instr.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrument_0102)
+    {
+        //@0102. get and set MIDI information
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)"
@@ -373,24 +462,24 @@ SUITE(InternalModelApiTest)
             "(n g4 q)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        CHECK( instr->get_num_sounds() == 1 );
-        unique_ptr<ISoundInfo> sound = instr->get_sound_info_at(0);
-        unique_ptr<IMidiInfo> midi = sound->get_midi_info();
-        CHECK( midi->get_channel() == 1 );
-        CHECK( midi->get_program() == 1 );
-        midi->set_channel(7);
-        midi->set_program(2);
+        CHECK( instr.num_sounds() == 1 );
+        ISoundInfo sound = instr.sound_info_at(0);
+        IMidiInfo midi = sound.midi_info();
+        CHECK( midi.channel() == 1 );
+        CHECK( midi.program() == 1 );
+        midi.set_channel(7);
+        midi.set_program(2);
 
-        unique_ptr<IScore> score2 = doc->get_first_score();
-        unique_ptr<IInstrument> instr2 = score2->get_instrument_at(0);
-        unique_ptr<ISoundInfo> sound2 = instr2->get_sound_info_at(0);
-        unique_ptr<IMidiInfo> midi2 = sound2->get_midi_info();
-        CHECK( midi2->get_channel() == 7 );
-        CHECK( midi2->get_program() == 2 );
+        IScore score2 = doc.first_score();
+        IInstrument instr2 = score2.instrument_at(0);
+        ISoundInfo sound2 = instr2.sound_info_at(0);
+        IMidiInfo midi2 = sound2.midi_info();
+        CHECK( midi2.channel() == 7 );
+        CHECK( midi2.program() == 2 );
     }
 
 
@@ -412,22 +501,37 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
-        CHECK( group1->get_name_string() == "Group1" );
-        CHECK( group1->get_abbreviation_string() == "" );
-        CHECK( group2->get_name_string() == "" );
-        CHECK( group2->get_abbreviation_string() == "G2" );
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group1 = score.instruments_group_at(0);
+        IInstrGroup group2 = score.instruments_group_at(1);
+        CHECK( group1.name_string() == "Group1" );
+        CHECK( group1.abbreviation_string() == "" );
+        CHECK( group2.name_string() == "" );
+        CHECK( group2.abbreviation_string() == "G2" );
 
-        group1->set_abbreviation_string("G1");
-        group2->set_name_string("Group2");
+        group1.set_abbreviation_string("G1");
+        group2.set_name_string("Group2");
 
-        CHECK( group1->get_name_string() == "Group1" );
-        CHECK( group1->get_abbreviation_string() == "G1" );
-        CHECK( group2->get_name_string() == "Group2" );
-        CHECK( group2->get_abbreviation_string() == "G2" );
+        CHECK( group1.name_string() == "Group1" );
+        CHECK( group1.abbreviation_string() == "G1" );
+        CHECK( group2.name_string() == "Group2" );
+        CHECK( group2.abbreviation_string() == "G2" );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_instr_group);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "instr-group" );
+        CHECK( obj.is_instr_group() );
+        IInstrGroup group = obj.downcast_to_instr_group();
+        CHECK( group.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0110)
@@ -446,21 +550,21 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group1 = score.instruments_group_at(0);
+        IInstrGroup group2 = score.instruments_group_at(1);
 
-        CHECK( group1->get_symbol() == EGroupSymbol::k_group_symbol_bracket );
-        CHECK( group2->get_symbol() == EGroupSymbol::k_group_symbol_brace );
+        CHECK( group1.symbol() == EGroupSymbol::k_group_symbol_bracket );
+        CHECK( group2.symbol() == EGroupSymbol::k_group_symbol_brace );
 
-        group1->set_symbol(EGroupSymbol::k_group_symbol_none);
-        group2->set_symbol(EGroupSymbol::k_group_symbol_line);
+        group1.set_symbol(EGroupSymbol::k_group_symbol_none);
+        group2.set_symbol(EGroupSymbol::k_group_symbol_line);
 
-        CHECK( group1->get_symbol() == k_group_symbol_none );
-        CHECK( group2->get_symbol() == k_group_symbol_line );
+        CHECK( group1.symbol() == k_group_symbol_none );
+        CHECK( group2.symbol() == k_group_symbol_line );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -481,21 +585,21 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(1);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group1 = score.instruments_group_at(0);
+        IInstrGroup group2 = score.instruments_group_at(1);
 
-        CHECK( group1->get_barlines_mode() == EJoinBarlines::k_non_joined_barlines );
-        CHECK( group2->get_barlines_mode() == EJoinBarlines::k_joined_barlines );
+        CHECK( group1.barlines_mode() == EJoinBarlines::k_non_joined_barlines );
+        CHECK( group2.barlines_mode() == EJoinBarlines::k_joined_barlines );
 
-        group1->set_barlines_mode(EJoinBarlines::k_mensurstrich_barlines);
-        group2->set_barlines_mode(EJoinBarlines::k_non_joined_barlines);
+        group1.set_barlines_mode(EJoinBarlines::k_mensurstrich_barlines);
+        group2.set_barlines_mode(EJoinBarlines::k_non_joined_barlines);
 
-        CHECK( group1->get_barlines_mode() == k_mensurstrich_barlines );
-        CHECK( group2->get_barlines_mode() == k_non_joined_barlines );
+        CHECK( group1.barlines_mode() == k_mensurstrich_barlines );
+        CHECK( group2.barlines_mode() == k_non_joined_barlines );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -515,36 +619,36 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group = score.instruments_group_at(0);
 
         //out of range
-        CHECK( group->set_range(0, 4) == false );
+        CHECK( group.set_range(0, 4) == false );
 
         //out of order
-        CHECK( group->set_range(3, 2) == false );
+        CHECK( group.set_range(3, 2) == false );
 
         //only one instrument
-        CHECK( group->set_range(1, 1) == false );
+        CHECK( group.set_range(1, 1) == false );
 
         //valid range
-        CHECK( group->set_range(1, 3) == true );
+        CHECK( group.set_range(1, 3) == true );
 
         //check group
-        unique_ptr<IInstrGroup> group1 = score->get_instruments_group_at(0);
-        CHECK( group1->get_num_instruments() == 3 );
-        CHECK( group1->get_first_instrument()->get_object_id() == 400L );
-        CHECK( group1->get_last_instrument()->get_object_id() == 600L );
+        IInstrGroup group1 = score.instruments_group_at(0);
+        CHECK( group1.num_instruments() == 3 );
+        CHECK( group1.first_instrument().object_id() == 400L );
+        CHECK( group1.last_instrument().object_id() == 600L );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0140)
     {
-        //@0140. get_instrument_at(). Invalid parameter
+        //@0140. instrument_at(). Invalid parameter
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)"
@@ -557,17 +661,17 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group = score.instruments_group_at(0);
 
-        unique_ptr<IInstrument> instr = group->get_instrument_at(3);
-        CHECK( instr == nullptr );
+        IInstrument instr = group.instrument_at(3);
+        CHECK( !instr.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0141)
     {
-        //@0141. get_instrument_at(). OK
+        //@0141. instrument_at(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)"
@@ -580,13 +684,13 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group = score.instruments_group_at(0);
 
-        unique_ptr<IInstrument> instr = group->get_instrument_at(2);
-        CHECK( instr != nullptr );
-        CHECK( instr->get_name_string() == "P4" );
+        IInstrument instr = group.instrument_at(2);
+        CHECK( instr.is_valid() );
+        CHECK( instr.name_string() == "P4" );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iinstrgroup_0142)
@@ -604,12 +708,12 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group = score.instruments_group_at(0);
 
-        CHECK( group->get_index_to_first_instrument() == 1 );
-        CHECK( group->get_index_to_last_instrument() == 3 );
+        CHECK( group.index_to_first_instrument() == 1 );
+        CHECK( group.index_to_last_instrument() == 3 );
     }
 
 
@@ -629,23 +733,38 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
 
-        unique_ptr<IObject> obj = para->get_first_child();
+        IObject obj = para.first_child();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->get_object_id() != 0 );
-        CHECK( obj->get_object_name() == "link" );
-        unique_ptr<IDocument> doc1 = obj->get_owner_document();
-        CHECK( doc->get_object_id() == doc1->get_object_id() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_id() != 0 );
+        CHECK( obj.object_name() == "link" );
+        IDocument doc1 = obj.owner_document();
+        CHECK( doc.object_id() == doc1.object_id() );
 
         //can be downcasted
-        CHECK( obj->is_link() );
-        unique_ptr<ILink> link = obj->downcast_to_link();
-        CHECK( link != nullptr );
+        CHECK( obj.is_link() );
+        ILink link = obj.downcast_to_link();
+        CHECK( link.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilink_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_link);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "link" );
+        CHECK( obj.is_link() );
+        ILink link = obj.downcast_to_link();
+        CHECK( link.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ilink_0200)
@@ -662,30 +781,30 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
-        unique_ptr<IObject> obj = para->get_first_child();
-        CHECK( obj->is_link() );
-        unique_ptr<ILink> link1 = obj->downcast_to_link();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
+        IObject obj = para.first_child();
+        CHECK( obj.is_link() );
+        ILink link1 = obj.downcast_to_link();
 
-        obj = link1->get_previous_sibling();
-        CHECK( obj == nullptr );
+        obj = link1.previous_sibling();
+        CHECK( !obj.is_valid() );
 
-        obj = link1->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_link() );
-        unique_ptr<ILink> link2 = obj->downcast_to_link();
+        obj = link1.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_link() );
+        ILink link2 = obj.downcast_to_link();
 
-        obj = link2->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
+        obj = link2.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
 
-        obj = link2->get_previous_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_link() );
-        CHECK( obj->get_object_id() == link1->get_object_id() );
+        obj = link2.previous_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_link() );
+        CHECK( obj.object_id() == link1.object_id() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ilink_0201)
@@ -704,36 +823,36 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
-        unique_ptr<IObject> obj = para->get_first_child();
-        CHECK( obj->is_link() );
-        unique_ptr<ILink> link = obj->downcast_to_link();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
+        IObject obj = para.first_child();
+        CHECK( obj.is_link() );
+        ILink link = obj.downcast_to_link();
 
-        CHECK( link->get_num_children() == 3 );
+        CHECK( link.num_children() == 3 );
 
-        obj = link->get_first_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-//        unique_ptr<ILinkItem> li = obj->downcast_to_text_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "This is the first item" );
+        obj = link.first_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+//        unique_ptr<ILinkItem> li = obj.downcast_to_text_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "This is the first item" );
 
-        obj = link->get_last_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-//        li = obj->downcast_to_text_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "The second item" );
+        obj = link.last_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+//        li = obj.downcast_to_text_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "The second item" );
 
-        obj = link->get_child_at(1);
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-//        li = obj->downcast_to_text_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "The end of the list" );
+        obj = link.child_at(1);
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+//        li = obj.downcast_to_text_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "The end of the list" );
     }
 
 
@@ -753,19 +872,34 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> obj = doc->get_first_child();
+        IDocument doc = theDoc.get_document_api();
+        IObject obj = doc.first_child();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->get_object_id() != 0 );
-        CHECK( obj->get_object_name() == "list" );
-        unique_ptr<IDocument> doc1 = obj->get_owner_document();
-        CHECK( doc->get_object_id() == doc1->get_object_id() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_id() != 0 );
+        CHECK( obj.object_name() == "list" );
+        IDocument doc1 = obj.owner_document();
+        CHECK( doc.object_id() == doc1.object_id() );
 
         //can be downcasted
-        CHECK( obj->is_list() );
-        unique_ptr<IList> lst = obj->downcast_to_list();
-        CHECK( lst != nullptr );
+        CHECK( obj.is_list() );
+        IList lst = obj.downcast_to_list();
+        CHECK( lst.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, ilist_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_list);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "list" );
+        CHECK( obj.is_list() );
+        IList lst = obj.downcast_to_list();
+        CHECK( lst.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ilist_0200)
@@ -787,27 +921,27 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_list() );
-        unique_ptr<IList> lst1 = child->downcast_to_list();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_list() );
+        IList lst1 = child.downcast_to_list();
 
-        unique_ptr<IObject> obj = lst1->get_previous_sibling();
-        CHECK( obj == nullptr );
+        IObject obj = lst1.previous_sibling();
+        CHECK( !obj.is_valid() );
 
-        obj = lst1->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_list() );
-        unique_ptr<IList> lst2 = obj->downcast_to_list();
+        obj = lst1.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_list() );
+        IList lst2 = obj.downcast_to_list();
 
-        obj = lst2->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_paragraph() );
+        obj = lst2.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
 
-        obj = lst2->get_previous_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_list() );
-        CHECK( obj->get_object_id() == lst1->get_object_id() );
+        obj = lst2.previous_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_list() );
+        CHECK( obj.object_id() == lst1.object_id() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ilist_0201)
@@ -824,33 +958,33 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_list() );
-        unique_ptr<IList> lst = child->downcast_to_list();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_list() );
+        IList lst = child.downcast_to_list();
 
-        CHECK( lst->get_num_children() == 3 );
+        CHECK( lst.num_children() == 3 );
 
-        unique_ptr<IObject> obj = lst->get_first_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_list_item() );
-//        unique_ptr<IListItem> li = obj->downcast_to_list_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "This is the first item" );
+        IObject obj = lst.first_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_list_item() );
+//        unique_ptr<IListItem> li = obj.downcast_to_list_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "This is the first item" );
 
-        obj = lst->get_last_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_list_item() );
-//        li = obj->downcast_to_list_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "The second item" );
+        obj = lst.last_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_list_item() );
+//        li = obj.downcast_to_list_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "The second item" );
 
-        obj = lst->get_child_at(1);
-        CHECK( obj != nullptr );
-        CHECK( obj->is_list_item() );
-//        li = obj->downcast_to_list_item();
-//        CHECK( li != nullptr );
-//        CHECK( li->get_text() == "The end of the list" );
+        obj = lst.child_at(1);
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_list_item() );
+//        li = obj.downcast_to_list_item();
+//        CHECK( li.is_valid() );
+//        CHECK( li->text() == "The end of the list" );
     }
 
 
@@ -866,19 +1000,34 @@ SUITE(InternalModelApiTest)
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> obj = doc->get_first_child();
+        IDocument doc = theDoc.get_document_api();
+        IObject obj = doc.first_child();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->get_object_id() == 301 );
-        CHECK( obj->get_object_name() == "paragraph" );
-        unique_ptr<IDocument> doc1 = obj->get_owner_document();
-        CHECK( doc->get_object_id() == doc1->get_object_id() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_id() == 301 );
+        CHECK( obj.object_name() == "paragraph" );
+        IDocument doc1 = obj.owner_document();
+        CHECK( doc.object_id() == doc1.object_id() );
 
         //can be downcasted
-        CHECK( obj->is_paragraph() );
-        unique_ptr<IParagraph> para = obj->downcast_to_paragraph();
-        CHECK( para != nullptr );
+        CHECK( obj.is_paragraph() );
+        IParagraph para = obj.downcast_to_paragraph();
+        CHECK( para.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_paragraph);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "paragraph" );
+        CHECK( obj.is_paragraph() );
+        IParagraph para = obj.downcast_to_paragraph();
+        CHECK( para.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0200)
@@ -892,27 +1041,27 @@ SUITE(InternalModelApiTest)
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para1 = child->downcast_to_paragraph();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para1 = child.downcast_to_paragraph();
 
-        unique_ptr<IObject> obj = para1->get_previous_sibling();
-        CHECK( obj == nullptr );
+        IObject obj = para1.previous_sibling();
+        CHECK( !obj.is_valid() );
 
-        obj = para1->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_paragraph() );
-        unique_ptr<IParagraph> para2 = obj->downcast_to_paragraph();
+        obj = para1.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
+        IParagraph para2 = obj.downcast_to_paragraph();
 
-        obj = para2->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_score() );
+        obj = para2.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_score() );
 
-        obj = para2->get_previous_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_paragraph() );
-        CHECK( obj->get_object_id() == para1->get_object_id() );
+        obj = para2.previous_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
+        CHECK( obj.object_id() == para1.object_id() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iparagraph_0201)
@@ -929,33 +1078,33 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
 
-        CHECK( para->get_num_children() == 3 );
+        CHECK( para.num_children() == 3 );
 
-        unique_ptr<IObject> obj = para->get_first_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
-        CHECK( txt != nullptr );
-//        CHECK( txt->get_text() == "This is a paragraph " );
+        IObject obj = para.first_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+        ITextItem txt = obj.downcast_to_text_item();
+        CHECK( txt.is_valid() );
+//        CHECK( txt->text() == "This is a paragraph " );
 
-        obj = para->get_last_child();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-        txt = obj->downcast_to_text_item();
-        CHECK( txt != nullptr );
-//        CHECK( txt->get_text() == " And the third one." );
+        obj = para.last_child();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+        txt = obj.downcast_to_text_item();
+        CHECK( txt.is_valid() );
+//        CHECK( txt->text() == " And the third one." );
 
-        obj = para->get_child_at(1);
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-        txt = obj->downcast_to_text_item();
-        CHECK( txt != nullptr );
-//        CHECK( txt->get_text() == "with three items." );
+        obj = para.child_at(1);
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+        txt = obj.downcast_to_text_item();
+        CHECK( txt.is_valid() );
+//        CHECK( txt->text() == "with three items." );
     }
 
 
@@ -963,7 +1112,7 @@ SUITE(InternalModelApiTest)
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0100)
     {
-        //@0100. get_object_id()
+        //@0100. object_id()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score#301 (vers 2.0)"
@@ -971,38 +1120,53 @@ SUITE(InternalModelApiTest)
             "(n g4 q)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        CHECK( score->get_object_id() == 301 );
+        CHECK( score.object_id() == 301 );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, iscore_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_score);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "score" );
+        CHECK( obj.is_score() );
+        IScore score = obj.downcast_to_score();
+        CHECK( score.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0201)
     {
-        //@0201. get_num_instruments()
+        //@0201. num_instruments()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        CHECK( score->get_num_instruments() == 1 );
+        CHECK( score.num_instruments() == 1 );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0202)
     {
-        //@0202. get_instrument_at()
+        //@0202. instrument_at()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)(instrument#402 (musicData (clef G)(n g4 q))))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IInstrument instr = score.instrument_at(0);
 
-        CHECK( instr->get_object_id() == 402 );
+        CHECK( instr.object_id() == 402 );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0203)
@@ -1012,13 +1176,13 @@ SUITE(InternalModelApiTest)
         theDoc.from_string(
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        score->delete_instrument(instr->get_object_id());
+        score.delete_instrument(instr.object_id());
 
-        CHECK( score->get_num_instruments() == 0 );
+        CHECK( score.num_instruments() == 0 );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0204)
@@ -1034,32 +1198,32 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C2)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        score->delete_instrument(instr->get_object_id());
+        score.delete_instrument(instr.object_id());
 
-        CHECK( score->get_num_instruments() == 3 );
-        CHECK( score->get_num_instruments_groups() == 1 );
+        CHECK( score.num_instruments() == 3 );
+        CHECK( score.num_instruments_groups() == 1 );
 
         //check group integrity
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 3 );
-        unique_ptr<IInstrument> instr1 = group->get_first_instrument();
-        unique_ptr<IInstrument> instr2 = group->get_last_instrument();
-        CHECK( instr1->get_object_id() == 400 );
-        CHECK( instr2->get_object_id() == 600 );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 3 );
+        IInstrument instr1 = group.first_instrument();
+        IInstrument instr2 = group.last_instrument();
+        CHECK( instr1.object_id() == 400 );
+        CHECK( instr2.object_id() == 600 );
 
-//        cout << test_name() << ", num.instrs=" << group->get_num_instruments() << endl;
-//        ImoInstrGroup* pGrp = group->get_internal_object();
-//        int numInstrs = pGrp->get_num_instruments();
+//        cout << test_name() << ", num.instrs=" << group.num_instruments() << endl;
+//        ImoInstrGroup* pGrp = group.internal_object();
+//        int numInstrs = pGrp->num_instruments();
 //        for (int i=0; i < numInstrs; ++i)
 //        {
-//            ImoInstrument* pInstr = pGrp->get_instrument(i);
-//            cout << "        instr: index=" << i << ", id=" << pInstr->get_id() << endl;
+//            ImoInstrument* pInstr = pGrp->instrument(i);
+//            cout << "        instr: index=" << i << ", id=" << pInstr->id() << endl;
 //        }
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
     }
@@ -1076,32 +1240,32 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"P3\")(musicData (clef C2)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        score->delete_instrument(instr->get_object_id());
+        score.delete_instrument(instr.object_id());
 
-        CHECK( score->get_num_instruments() == 2 );
-        CHECK( score->get_num_instruments_groups() == 1 );
+        CHECK( score.num_instruments() == 2 );
+        CHECK( score.num_instruments_groups() == 1 );
 
         //check group integrity
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 2 );
-        unique_ptr<IInstrument> instr1 = group->get_first_instrument();
-        unique_ptr<IInstrument> instr2 = group->get_last_instrument();
-        CHECK( instr1->get_object_id() == 400 );
-        CHECK( instr2->get_object_id() == 500 );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 2 );
+        IInstrument instr1 = group.first_instrument();
+        IInstrument instr2 = group.last_instrument();
+        CHECK( instr1.object_id() == 400 );
+        CHECK( instr2.object_id() == 500 );
 
-//        cout << test_name() << ", num.instrs=" << group->get_num_instruments() << endl;
-//        ImoInstrGroup* pGrp = group->get_internal_object();
-//        int numInstrs = pGrp->get_num_instruments();
+//        cout << test_name() << ", num.instrs=" << group.num_instruments() << endl;
+//        ImoInstrGroup* pGrp = group.internal_object();
+//        int numInstrs = pGrp->num_instruments();
 //        for (int i=0; i < numInstrs; ++i)
 //        {
-//            ImoInstrument* pInstr = pGrp->get_instrument(i);
-//            cout << "        instr: index=" << i << ", id=" << pInstr->get_id() << endl;
+//            ImoInstrument* pInstr = pGrp->instrument(i);
+//            cout << "        instr: index=" << i << ", id=" << pInstr->id() << endl;
 //        }
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
     }
@@ -1117,26 +1281,26 @@ SUITE(InternalModelApiTest)
             "(instrument#400 P2 (name \"Bass\")(musicData (clef F4)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        //Document* pDoc = doc->get_internal_object();
+        //Document* pDoc = doc.internal_object();
         //cout << test_name() << endl << pDoc->to_string(true) << endl;
 
-        CHECK(instr != nullptr);
-//        cout << test_name() << ". To execute: instr->get_object_id()" << endl;
-//        cout << test_name() << ". instr->get_object_id() = " << instr->get_object_id() << endl;
+        CHECK(instr.is_valid());
+//        cout << test_name() << ". To execute: instr.object_id()" << endl;
+//        cout << test_name() << ". instr.object_id() = " << instr.object_id() << endl;
 //        cout << test_name() << ". To execute: delete_instrument()" << endl;
-        score->delete_instrument(instr->get_object_id());
+        score.delete_instrument(instr.object_id());
 
-//        cout << test_name() << ". To execute: score->get_num_instruments()" << endl;
-        CHECK( score->get_num_instruments() == 1 );
-//        cout << test_name() << ". To execute: score->get_num_instruments_groups()" << endl;
-        CHECK( score->get_num_instruments_groups() == 0 );
+//        cout << test_name() << ". To execute: score.num_instruments()" << endl;
+        CHECK( score.num_instruments() == 1 );
+//        cout << test_name() << ". To execute: score.num_instruments_groups()" << endl;
+        CHECK( score.num_instruments_groups() == 0 );
 //        cout << test_name() << ". Test finished. Were is the crash?" << endl;
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -1153,23 +1317,23 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(0);
 
-        score->move_up_instrument(*instr);
+        score.move_up_instrument(instr);
 
-        CHECK( score->get_num_instruments() == 3 );
-        CHECK( score->get_num_instruments_groups() == 1 );
-        CHECK( score->get_instrument_at(0)->get_object_id() == 300L );
-        CHECK( score->get_instrument_at(1)->get_object_id() == 400L );
-        CHECK( score->get_instrument_at(2)->get_object_id() == 500L );
+        CHECK( score.num_instruments() == 3 );
+        CHECK( score.num_instruments_groups() == 1 );
+        CHECK( score.instrument_at(0).object_id() == 300L );
+        CHECK( score.instrument_at(1).object_id() == 400L );
+        CHECK( score.instrument_at(2).object_id() == 500L );
 
         //check group
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 3 );
-        CHECK( group->get_first_instrument()->get_object_id() == 300L );
-        CHECK( group->get_last_instrument()->get_object_id() == 500L );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 3 );
+        CHECK( group.first_instrument().object_id() == 300L );
+        CHECK( group.last_instrument().object_id() == 500L );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0211)
@@ -1185,34 +1349,34 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(1);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(1);
 
-        score->move_up_instrument(*instr);
+        score.move_up_instrument(instr);
 
-        CHECK( score->get_num_instruments() == 4 );
-        CHECK( score->get_num_instruments_groups() == 1 );
-        CHECK( score->get_instrument_at(0)->get_object_id() == 400L );
-        CHECK( score->get_instrument_at(1)->get_object_id() == 300L );
-        CHECK( score->get_instrument_at(2)->get_object_id() == 500L );
-        CHECK( score->get_instrument_at(3)->get_object_id() == 600L );
+        CHECK( score.num_instruments() == 4 );
+        CHECK( score.num_instruments_groups() == 1 );
+        CHECK( score.instrument_at(0).object_id() == 400L );
+        CHECK( score.instrument_at(1).object_id() == 300L );
+        CHECK( score.instrument_at(2).object_id() == 500L );
+        CHECK( score.instrument_at(3).object_id() == 600L );
 
         //check group
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 3 );
-        CHECK( group->get_first_instrument()->get_object_id() == 300L );
-        CHECK( group->get_last_instrument()->get_object_id() == 600L );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 3 );
+        CHECK( group.first_instrument().object_id() == 300L );
+        CHECK( group.last_instrument().object_id() == 600L );
 
-//        cout << test_name() << ", num.instrs=" << group->get_num_instruments() << endl;
-//        ImoInstrGroup* pGrp = group->get_internal_object();
-//        int numInstrs = pGrp->get_num_instruments();
+//        cout << test_name() << ", num.instrs=" << group.num_instruments() << endl;
+//        ImoInstrGroup* pGrp = group.internal_object();
+//        int numInstrs = pGrp->num_instruments();
 //        for (int i=0; i < numInstrs; ++i)
 //        {
-//            ImoInstrument* pInstr = pGrp->get_instrument(i);
-//            cout << "        instr: index=" << i << ", id=" << pInstr->get_id() << endl;
+//            ImoInstrument* pInstr = pGrp->instrument(i);
+//            cout << "        instr: index=" << i << ", id=" << pInstr->id() << endl;
 //        }
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
     }
@@ -1229,23 +1393,23 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(2);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(2);
 
-        score->move_down_instrument(*instr);
+        score.move_down_instrument(instr);
 
-        CHECK( score->get_num_instruments() == 3 );
-        CHECK( score->get_num_instruments_groups() == 1 );
-        CHECK( score->get_instrument_at(0)->get_object_id() == 300L );
-        CHECK( score->get_instrument_at(1)->get_object_id() == 400L );
-        CHECK( score->get_instrument_at(2)->get_object_id() == 500L );
+        CHECK( score.num_instruments() == 3 );
+        CHECK( score.num_instruments_groups() == 1 );
+        CHECK( score.instrument_at(0).object_id() == 300L );
+        CHECK( score.instrument_at(1).object_id() == 400L );
+        CHECK( score.instrument_at(2).object_id() == 500L );
 
         //check group
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 3 );
-        CHECK( group->get_first_instrument()->get_object_id() == 300L );
-        CHECK( group->get_last_instrument()->get_object_id() == 500L );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 3 );
+        CHECK( group.first_instrument().object_id() == 300L );
+        CHECK( group.last_instrument().object_id() == 500L );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0221)
@@ -1261,34 +1425,34 @@ SUITE(InternalModelApiTest)
             "(instrument#600 P4 (name \"P4\")(musicData (clef C1)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrument> instr = score->get_instrument_at(2);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrument instr = score.instrument_at(2);
 
-        score->move_down_instrument(*instr);
+        score.move_down_instrument(instr);
 
-        CHECK( score->get_num_instruments() == 4 );
-        CHECK( score->get_num_instruments_groups() == 1 );
-        CHECK( score->get_instrument_at(0)->get_object_id() == 300L );
-        CHECK( score->get_instrument_at(1)->get_object_id() == 400L );
-        CHECK( score->get_instrument_at(2)->get_object_id() == 600L );
-        CHECK( score->get_instrument_at(3)->get_object_id() == 500L );
+        CHECK( score.num_instruments() == 4 );
+        CHECK( score.num_instruments_groups() == 1 );
+        CHECK( score.instrument_at(0).object_id() == 300L );
+        CHECK( score.instrument_at(1).object_id() == 400L );
+        CHECK( score.instrument_at(2).object_id() == 600L );
+        CHECK( score.instrument_at(3).object_id() == 500L );
 
         //check group
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 3 );
-        CHECK( group->get_first_instrument()->get_object_id() == 400L );
-        CHECK( group->get_last_instrument()->get_object_id() == 500L );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 3 );
+        CHECK( group.first_instrument().object_id() == 400L );
+        CHECK( group.last_instrument().object_id() == 500L );
 
-//        cout << test_name() << ", num.instrs=" << group->get_num_instruments() << endl;
-//        ImoInstrGroup* pGrp = group->get_internal_object();
-//        int numInstrs = pGrp->get_num_instruments();
+//        cout << test_name() << ", num.instrs=" << group.num_instruments() << endl;
+//        ImoInstrGroup* pGrp = group.internal_object();
+//        int numInstrs = pGrp->num_instruments();
 //        for (int i=0; i < numInstrs; ++i)
 //        {
-//            ImoInstrument* pInstr = pGrp->get_instrument(i);
-//            cout << "        instr: index=" << i << ", id=" << pInstr->get_id() << endl;
+//            ImoInstrument* pInstr = pGrp->instrument(i);
+//            cout << "        instr: index=" << i << ", id=" << pInstr->id() << endl;
 //        }
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
     }
@@ -1305,27 +1469,27 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IInstrument> instr = score->append_new_instrument();
+        IInstrument instr = score.append_new_instrument();
 
-        CHECK( score->get_num_instruments() == 4 );
-        CHECK( score->get_num_instruments_groups() == 1 );
-        CHECK( score->get_instrument_at(0)->get_object_id() == 300L );
-        CHECK( score->get_instrument_at(1)->get_object_id() == 400L );
-        CHECK( score->get_instrument_at(2)->get_object_id() == 500L );
-        CHECK( score->get_instrument_at(3)->get_object_id() == instr->get_object_id() );
-        ImoInstrument* pInstr = instr->get_internal_object();
+        CHECK( score.num_instruments() == 4 );
+        CHECK( score.num_instruments_groups() == 1 );
+        CHECK( score.instrument_at(0).object_id() == 300L );
+        CHECK( score.instrument_at(1).object_id() == 400L );
+        CHECK( score.instrument_at(2).object_id() == 500L );
+        CHECK( score.instrument_at(3).object_id() == instr.object_id() );
+        ImoInstrument* pInstr = instr.internal_object();
         CHECK( pInstr->get_instr_id().empty() == false );
 
         //check group
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
-        CHECK( group->get_num_instruments() == 2 );
-        CHECK( group->get_first_instrument()->get_object_id() == 400L );
-        CHECK( group->get_last_instrument()->get_object_id() == 500L );
+        IInstrGroup group = score.instruments_group_at(0);
+        CHECK( group.num_instruments() == 2 );
+        CHECK( group.first_instrument().object_id() == 400L );
+        CHECK( group.last_instrument().object_id() == 500L );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << ". Source= " << pDoc->to_string(true) << endl;
     }
@@ -1341,30 +1505,30 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IInstrGroup> group = score->create_instruments_group(1, 2);
+        IInstrGroup group = score.create_instruments_group(1, 2);
 
-        CHECK( score->get_num_instruments() == 3 );
+        CHECK( score.num_instruments() == 3 );
 
         //check group
-        CHECK( score->get_num_instruments_groups() == 1 );
-        unique_ptr<IInstrGroup> group2 = score->get_instruments_group_at(0);
-        CHECK( group->get_object_id() == group2->get_object_id() );
-        CHECK( group->get_num_instruments() == 2 );
-        CHECK( group->get_first_instrument()->get_object_id() == 400L );
-        CHECK( group->get_last_instrument()->get_object_id() == 500L );
+        CHECK( score.num_instruments_groups() == 1 );
+        IInstrGroup group2 = score.instruments_group_at(0);
+        CHECK( group.object_id() == group2.object_id() );
+        CHECK( group.num_instruments() == 2 );
+        CHECK( group.first_instrument().object_id() == 400L );
+        CHECK( group.last_instrument().object_id() == 500L );
 
-//        cout << test_name() << ", num.instrs=" << group->get_num_instruments() << endl;
-//        ImoInstrGroup* pGrp = group->get_internal_object();
-//        int numInstrs = pGrp->get_num_instruments();
+//        cout << test_name() << ", num.instrs=" << group.num_instruments() << endl;
+//        ImoInstrGroup* pGrp = group.internal_object();
+//        int numInstrs = pGrp->num_instruments();
 //        for (int i=0; i < numInstrs; ++i)
 //        {
-//            ImoInstrument* pInstr = pGrp->get_instrument(i);
-//            cout << "        instr: index=" << i << ", id=" << pInstr->get_id() << endl;
+//            ImoInstrument* pInstr = pGrp->instrument(i);
+//            cout << "        instr: index=" << i << ", id=" << pInstr->id() << endl;
 //        }
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
     }
@@ -1380,25 +1544,25 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"P3\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
         //out of range
-        unique_ptr<IInstrGroup> group = score->create_instruments_group(2, 3);
-        CHECK( group == nullptr );
-        CHECK( score->get_num_instruments_groups() == 0 );
+        IInstrGroup group = score.create_instruments_group(2, 3);
+        CHECK( !group.is_valid() );
+        CHECK( score.num_instruments_groups() == 0 );
 
         //out of order
-        unique_ptr<IInstrGroup> group2 = score->create_instruments_group(1, 0);
-        CHECK( group2 == nullptr );
-        CHECK( score->get_num_instruments_groups() == 0 );
+        IInstrGroup group2 = score.create_instruments_group(1, 0);
+        CHECK( !group2.is_valid() );
+        CHECK( score.num_instruments_groups() == 0 );
 
         //only one instrument
-        unique_ptr<IInstrGroup> group3 = score->create_instruments_group(1, 1);
-        CHECK( group3 == nullptr );
-        CHECK( score->get_num_instruments_groups() == 0 );
+        IInstrGroup group3 = score.create_instruments_group(1, 1);
+        CHECK( !group3.is_valid() );
+        CHECK( score.num_instruments_groups() == 0 );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -1415,14 +1579,14 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        CHECK( score->delete_instruments_group_at(2) == false );
+        CHECK( score.delete_instruments_group_at(2) == false );
 
-        CHECK( score->get_num_instruments_groups() == 1 );
+        CHECK( score.num_instruments_groups() == 1 );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -1439,14 +1603,14 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        score->delete_instruments_group_at(0);
+        score.delete_instruments_group_at(0);
 
-        CHECK( score->get_num_instruments_groups() == 0 );
+        CHECK( score.num_instruments_groups() == 0 );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -1463,15 +1627,15 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
-        unique_ptr<IInstrGroup> group = score->get_instruments_group_at(0);
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
+        IInstrGroup group = score.instruments_group_at(0);
 
-        score->delete_instruments_group(*group);
+        score.delete_instruments_group(group);
 
-        CHECK( score->get_num_instruments_groups() == 0 );
+        CHECK( score.num_instruments_groups() == 0 );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
@@ -1488,21 +1652,21 @@ SUITE(InternalModelApiTest)
             "(instrument#500 P3 (name \"Flute\")(musicData (clef G)) )"
             ")"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        score->delete_all_instruments_groups();
+        score.delete_all_instruments_groups();
 
-        CHECK( score->get_num_instruments_groups() == 0 );
+        CHECK( score.num_instruments_groups() == 0 );
 
-//        Document* pDoc = doc->get_internal_object();
+//        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << test_name() << pDoc->to_string(true) << endl;
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0400)
     {
-        //@0400. get_previous_sibling(). OK
+        //@0400. previous_sibling(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -1510,18 +1674,18 @@ SUITE(InternalModelApiTest)
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IObject> obj = score->get_previous_sibling();
+        IObject obj = score.previous_sibling();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->is_paragraph() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0401)
     {
-        //@0401. get_previous_sibling(). No previous sibling
+        //@0401. previous_sibling(). No previous sibling
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -1529,17 +1693,17 @@ SUITE(InternalModelApiTest)
             "(para (txt \"Hello world\"))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IObject> obj = score->get_previous_sibling();
+        IObject obj = score.previous_sibling();
 
-        CHECK( obj == nullptr );
+        CHECK( !obj.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0402)
     {
-        //@0402. get_next_sibling(). OK
+        //@0402. next_sibling(). OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -1547,18 +1711,18 @@ SUITE(InternalModelApiTest)
             "(para (txt \"Hello world\"))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IObject> obj = score->get_next_sibling();
+        IObject obj = score.next_sibling();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->is_paragraph() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_paragraph() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0403)
     {
-        //@0403. get_next_sibling(). No more siblings
+        //@0403. next_sibling(). No more siblings
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(lenmusdoc (vers 0.0)(content "
@@ -1566,17 +1730,17 @@ SUITE(InternalModelApiTest)
             "(score (vers 2.0)(instrument (musicData (clef G)(n g4 q))))"
             "))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        unique_ptr<IObject> obj = score->get_next_sibling();
+        IObject obj = score.next_sibling();
 
-        CHECK( obj == nullptr );
+        CHECK( !obj.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0500)
     {
-        //@500. algorithms. get_timepos_for(locator)
+        //@500. algorithms. timepos_for(locator)
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0) (instrument (musicData "
@@ -1590,33 +1754,33 @@ SUITE(InternalModelApiTest)
             "(n c4 e)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
         //measure 2, location 64 ==> 128+64 = 192
         MeasureLocator ml(0, 1, 64);
-        TimeUnits timepos = score->get_timepos_for(ml);
+        TimeUnits timepos = score.timepos_for(ml);
 //        cout << test_name() << endl;
 //        cout << "timepos=" << timepos << endl;
         CHECK( is_equal_time(timepos, 192.0) );
 
         //measure 1, location 0 ==> 0
         MeasureLocator ml2(0, 0, 0);
-        timepos = score->get_timepos_for(ml2);
+        timepos = score.timepos_for(ml2);
 //        cout << test_name() << endl;
 //        cout << "timepos=" << timepos << endl;
         CHECK( is_equal_time(timepos, 0.0) );
 
         //measure 8, location 0 ==> 896
         MeasureLocator ml3(0, 7, 0);
-        timepos = score->get_timepos_for(ml3);
+        timepos = score.timepos_for(ml3);
 //        cout << test_name() << endl;
 //        cout << "timepos=" << timepos << endl;
         CHECK( is_equal_time(timepos, 896.0) );
 
         //measure 4, location 64 ==> 384+64 = 448
         MeasureLocator ml4(0, 3, 64);
-        timepos = score->get_timepos_for(ml4);
+        timepos = score.timepos_for(ml4);
 //        cout << test_name() << endl;
 //        cout << "timepos=" << timepos << endl;
         CHECK( is_equal_time(timepos, 448.0) );
@@ -1635,21 +1799,21 @@ SUITE(InternalModelApiTest)
             "(n c4 e)(n e4 e)(n g4 e)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
         //6/8 : measure duration = 32x6 = 192
 
         //6/8 = two beats, 3 eight notes per beat ==> beat duration = 3x32=96
         //measure 2, beat 3 ==> 1 measure (192) + two beats (2x96=192) = 384
-        TimeUnits timepos = score->get_timepos_for(1, 2, 0);
+        TimeUnits timepos = score.timepos_for(1, 2, 0);
         CHECK( is_equal_time(timepos, 384.0) );
         //cout << test_name() << ". timepos=" << timepos << endl;
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, iscore_0502)
     {
-        //@0502. algorithms. get_locator_for()
+        //@0502. algorithms. locator_for()
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "(score (vers 2.0)(instrument (musicData "
@@ -1659,10 +1823,10 @@ SUITE(InternalModelApiTest)
             "(n c4 e)"
             ")))"
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IScore> score = doc->get_first_score();
+        IDocument doc = theDoc.get_document_api();
+        IScore score = doc.first_score();
 
-        MeasureLocator ml = score->get_locator_for(160.0);
+        MeasureLocator ml = score.locator_for(160.0);
 
 //        cout << test_name() << endl;
 //        cout << "instr=" << ml.iInstr << ", meas=" << ml.iMeasure << ", loc=" << ml.location << endl;
@@ -1676,7 +1840,7 @@ SUITE(InternalModelApiTest)
 
     TEST_FIXTURE(InternalModelApiTestFixture, itextitem_0100)
     {
-        //@0100. IObject properties and casting. OK
+        //@0100. IObject properties OK
         Document theDoc(m_libraryScope);
         theDoc.from_string(
             "<lenmusdoc vers='0.0'><content>"
@@ -1688,23 +1852,38 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
 
-        unique_ptr<IObject> obj = para->get_first_child();
+        IObject obj = para.first_child();
 
-        CHECK( obj != nullptr );
-        CHECK( obj->get_object_id() != 0 );
-        CHECK( obj->get_object_name() == "text" );
-        unique_ptr<IDocument> doc1 = obj->get_owner_document();
-        CHECK( doc->get_object_id() == doc1->get_object_id() );
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_id() != 0 );
+        CHECK( obj.object_name() == "text" );
+        IDocument doc1 = obj.owner_document();
+        CHECK( doc.object_id() == doc1.object_id() );
 
         //can be downcasted
-        CHECK( obj->is_text_item() );
-        unique_ptr<ITextItem> txt = obj->downcast_to_text_item();
-        CHECK( txt != nullptr );
+        CHECK( obj.is_text_item() );
+        ITextItem txt = obj.downcast_to_text_item();
+        CHECK( txt.is_valid() );
+    }
+
+    TEST_FIXTURE(InternalModelApiTestFixture, itextitem_0101)
+    {
+        //@0101. Factory, enum and downcast are ok
+        Document theDoc(m_libraryScope);
+        IDocument doc = theDoc.get_document_api();
+
+        IObject obj = doc.create_object(k_obj_text_item);
+
+        CHECK( obj.is_valid() );
+        CHECK( obj.object_name() == "text" );
+        CHECK( obj.is_text_item() );
+        ITextItem txt = obj.downcast_to_text_item();
+        CHECK( txt.is_valid() );
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, itextitem_0200)
@@ -1721,30 +1900,30 @@ SUITE(InternalModelApiTest)
             "<content/></lenmusdoc>"
             , Document::k_format_lmd
         );
-        unique_ptr<IDocument> doc = theDoc.get_document_api();
-        unique_ptr<IObject> child = doc->get_first_child();
-        CHECK( child->is_paragraph() );
-        unique_ptr<IParagraph> para = child->downcast_to_paragraph();
-        unique_ptr<IObject> obj = para->get_first_child();
-        CHECK( obj->is_text_item() );
-        unique_ptr<ITextItem> txt1 = obj->downcast_to_text_item();
+        IDocument doc = theDoc.get_document_api();
+        IObject child = doc.first_child();
+        CHECK( child.is_paragraph() );
+        IParagraph para = child.downcast_to_paragraph();
+        IObject obj = para.first_child();
+        CHECK( obj.is_text_item() );
+        ITextItem txt1 = obj.downcast_to_text_item();
 
-        obj = txt1->get_previous_sibling();
-        CHECK( obj == nullptr );
+        obj = txt1.previous_sibling();
+        CHECK( !obj.is_valid() );
 
-        obj = txt1->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-        unique_ptr<ITextItem> txt2 = obj->downcast_to_text_item();
+        obj = txt1.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+        ITextItem txt2 = obj.downcast_to_text_item();
 
-        obj = txt2->get_next_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
+        obj = txt2.next_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
 
-        obj = txt2->get_previous_sibling();
-        CHECK( obj != nullptr );
-        CHECK( obj->is_text_item() );
-        CHECK( obj->get_object_id() == txt1->get_object_id() );
+        obj = txt2.previous_sibling();
+        CHECK( obj.is_valid() );
+        CHECK( obj.is_text_item() );
+        CHECK( obj.object_id() == txt1.object_id() );
     }
 
 }

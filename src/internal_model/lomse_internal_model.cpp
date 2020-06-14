@@ -1564,7 +1564,7 @@ int ImoBlocksContainer::get_num_content_items()
 ImoContentObj* ImoBlocksContainer::get_content_item(int iItem)
 {
     ImoContent* pContent = get_content();
-    if (iItem < pContent->get_num_children())
+    if (pContent && iItem < pContent->get_num_children())
         return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
     else
         return nullptr;

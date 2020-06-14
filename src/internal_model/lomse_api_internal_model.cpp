@@ -66,11 +66,18 @@ namespace lomse
             m_imVersion = m_pDoc->get_model_ref(); \
             m_pImpl = static_cast<ImoXxxx*>(m_pDoc->get_pointer_to_imo(m_id)); \
         } \
+    } \
+    bool IXxxx::is_valid() const \
+    { \
+        if (m_pImpl == nullptr) \
+            return false; \
+        ensure_validity(); \
+        return m_pImpl != nullptr; \
     }
 
 
 #define LOMSE_IMPLEMENT_IM_API_CLASS(IXxxx, ImoXxxx, IParentClass) \
-    IXxxx::IXxxx(ImoXxxx* impl, Document* doc, long imVers) \
+    IXxxx::IXxxx(ImoObj* impl, Document* doc, long imVers) \
         : IParentClass(impl, doc, imVers) \
     { \
     } \
@@ -176,75 +183,74 @@ LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IObject, ImoObj)
 struct IObject::Private
 {
     //-----------------------------------------------------------------------------------
-    static unique_ptr<IObject> downcast_content_obj(ImoObj* pImo, Document* pDoc)
+    static IObject downcast_content_obj(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return unique_ptr<IObject>();
+            return IObject();
 
         if (pImo->is_score())
         {
             ImoScore* pObj = static_cast<ImoScore*>(pImo);
-            return unique_ptr<IScore>(new IScore(pObj, pDoc, pDoc->get_model_ref()) );
+            return IScore(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_content())
 //        {
 //            ImoContent* pObj = static_cast<ImoContent*>(pImo);
-//            return unique_ptr<IContent>(new IContent(pObj, pDoc, pDoc->get_model_ref()) );
+//            return IContent>(new IContent(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
-//        else if (pImo->is_dynamic())
-//        {
-//            ImoDynamic* pObj = static_cast<ImoDynamic*>(pImo);
-//            return unique_ptr<IDynamic>(new IDynamic(pObj, pDoc, pDoc->get_model_ref()) );
-//        }
+        else if (pImo->is_dynamic())
+        {
+            ImoDynamic* pObj = static_cast<ImoDynamic*>(pImo);
+            return IDynamic(pObj, pDoc, pDoc->get_model_ref());
+        }
 //        else if (pImo->is_multi_column())
 //        {
 //            ImoMultiColumn* pObj = static_cast<ImoMultiColumn*>(pImo);
-//            return unique_ptr<IMultiColumn>(new IMultiColumn(pObj, pDoc, pDoc->get_model_ref()) );
+//            return IMultiColumn>(new IMultiColumn(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_table())
 //        {
 //            ImoTable* pObj = static_cast<ImoTable*>(pImo);
-//            return unique_ptr<ITable>(new ITable(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ITable>(new ITable(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else if (pImo->is_list())
         {
             ImoList* pObj = static_cast<ImoList*>(pImo);
-            return unique_ptr<IList>(new IList(pObj, pDoc, pDoc->get_model_ref()) );
+            return IList(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_table_row())
 //        {
 //            ImoTableRow* pObj = static_cast<ImoTableRow*>(pImo);
-//            return unique_ptr<ITableRow>(new ITableRow(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ITableRow>(new ITableRow(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_list_item())
 //        {
 //            ImoListItem* pObj = static_cast<ImoListItem*>(pImo);
-//            return unique_ptr<IListItem>(new IListItem(pObj, pDoc, pDoc->get_model_ref()) );
+//            return IListItem>(new IListItem(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_table_cell())
 //        {
 //            ImoTableCell* pObj = static_cast<ImoTableCell*>(pImo);
-//            return unique_ptr<ITableCell>(new ITableCell(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ITableCell>(new ITableCell(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_anonimous_block())
 //        {
 //            ImoAnonymousBlock* pObj = static_cast<ImoAnonymousBlock*>(pImo);
-//            return unique_ptr<IAnonymousBlock>(new IAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
+//            return IAnonymousBlock>(new IAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else if (pImo->is_paragraph())
         {
             ImoParagraph* pObj = static_cast<ImoParagraph*>(pImo);
-            return unique_ptr<IParagraph>(new IParagraph(pObj, pDoc, pDoc->get_model_ref()) );
+            return IParagraph(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_heading())
 //        {
 //            ImoHeading* pObj = static_cast<ImoHeading*>(pImo);
-//            return unique_ptr<IHeading>(new IHeading(pObj, pDoc, pDoc->get_model_ref()) );
+//            return IHeading>(new IHeading(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else
         {
-            return unique_ptr<IObject>(
-                        new IObject(pImo, pDoc, pDoc->get_model_ref()) );
+            return IObject(pImo, pDoc, pDoc->get_model_ref());
         }
     }
 
@@ -252,29 +258,29 @@ struct IObject::Private
     //Document content traversal
 
     //-----------------------------------------------------------------------------------
-    static unique_ptr<IObject> get_previous_sibling(ImoObj* pImo, Document* pDoc)
+    static IObject previous_sibling(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return unique_ptr<IObject>();
+            return IObject();
 
         ImoObj* pSibling = pImo->get_prev_sibling();
         if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
         else
-            return unique_ptr<IObject>();
+            return IObject();
     }
 
     //-----------------------------------------------------------------------------------
-    static unique_ptr<IObject> get_next_sibling(ImoObj* pImo, Document* pDoc)
+    static IObject next_sibling(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return unique_ptr<IObject>();
+            return IObject();
 
         ImoObj* pSibling = pImo->get_next_sibling();
         if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
         else
-            return unique_ptr<IObject>();
+            return IObject();
     }
 
 };
@@ -290,7 +296,7 @@ struct IObject::Private
     Returns the internal unique identifier (ID) for this object. It could be required
     by some methods in the libray.
 */
-ImoId IObject::get_object_id() const
+ImoId IObject::object_id() const
 {
     ensure_validity();
     return m_pImpl->get_id();
@@ -300,7 +306,7 @@ ImoId IObject::get_object_id() const
 /** @memberof IObject
     Returns the name of this object class. It is an string.
 */
-const std::string& IObject::get_object_name() const
+const std::string& IObject::object_name() const
 {
     ensure_validity();
     return m_pImpl->get_name();
@@ -310,9 +316,9 @@ const std::string& IObject::get_object_name() const
 /** @memberof IObject
     Returns the IDocument owning this object.
 */
-std::unique_ptr<IDocument> IObject::get_owner_document() const
+IDocument IObject::owner_document() const
 {
-    return unique_ptr<IDocument>(new IDocument(m_pDoc));
+    return IDocument(m_pDoc);
 }
 
 //@}    //Access to group properties
@@ -327,7 +333,7 @@ std::unique_ptr<IDocument> IObject::get_owner_document() const
 ///@cond INTERNALS
 //protected class, for IDocument
 //---------------------------------------------------------------------------------------
-std::unique_ptr<IObject> IObject::downcast_to_content_obj()
+IObject IObject::downcast_to_content_obj()
 {
     return Private::downcast_content_obj(m_pImpl, m_pDoc);
 }
@@ -336,20 +342,74 @@ std::unique_ptr<IObject> IObject::downcast_to_content_obj()
 
 //---------------------------------------------------------------------------------------
 /** @memberof IObject
+    Downcasts this %IObject to an IDynamic. That is, if this %IObject references an
+    IDynamic object, this method returns the referenced IDynamic object. Otherwise,
+    it returns an invalid (nullptr) IDynamic.
+*/
+IDynamic IObject::downcast_to_dynamic() const
+{
+    ensure_validity();
+    if (m_pImpl && m_pImpl->is_dynamic())
+    {
+        ImoDynamic* pObj = static_cast<ImoDynamic*>(m_pImpl);
+        return IDynamic(pObj, m_pDoc, m_imVersion);
+    }
+    else
+        return IDynamic();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an IInstrument. That is, if this %IObject references an
+    IInstrument object, this method returns the referenced IInstrument object. Otherwise,
+    it returns an invalid (nullptr) IInstrument.
+*/
+IInstrument IObject::downcast_to_instrument() const
+{
+    ensure_validity();
+    if (m_pImpl && m_pImpl->is_instrument())
+    {
+        ImoInstrument* pObj = static_cast<ImoInstrument*>(m_pImpl);
+        return IInstrument(pObj, m_pDoc, m_imVersion);
+    }
+    else
+        return IInstrument();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
+    Downcasts this %IObject to an IInstrument. That is, if this %IObject references an
+    IInstrument object, this method returns the referenced IInstrument object. Otherwise,
+    it returns an invalid (nullptr) IInstrument.
+*/
+IInstrGroup IObject::downcast_to_instr_group() const
+{
+    ensure_validity();
+    if (m_pImpl && m_pImpl->is_instr_group())
+    {
+        ImoInstrGroup* pObj = static_cast<ImoInstrGroup*>(m_pImpl);
+        return IInstrGroup(pObj, m_pDoc, m_imVersion);
+    }
+    else
+        return IInstrGroup();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IObject
     Downcasts this %IObject to an ILink. That is, if this %IObject references an
     ILink object, this method returns the referenced ILink object. Otherwise,
     it returns an invalid (nullptr) ILink.
 */
-std::unique_ptr<ILink> IObject::downcast_to_link() const
+ILink IObject::downcast_to_link() const
 {
     ensure_validity();
-    if (m_pImpl->is_link())
+    if (m_pImpl && m_pImpl->is_link())
     {
         ImoLink* pObj = static_cast<ImoLink*>(m_pImpl);
-        return unique_ptr<ILink>(new ILink(pObj, m_pDoc, m_imVersion) );
+        return ILink(pObj, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<ILink>();
+        return ILink();
 }
 
 //---------------------------------------------------------------------------------------
@@ -358,16 +418,16 @@ std::unique_ptr<ILink> IObject::downcast_to_link() const
     IList object, this method returns the referenced IList object. Otherwise,
     it returns an invalid (nullptr) IList.
 */
-std::unique_ptr<IList> IObject::downcast_to_list() const
+IList IObject::downcast_to_list() const
 {
     ensure_validity();
-    if (m_pImpl->is_list())
+    if (m_pImpl && m_pImpl->is_list())
     {
         ImoList* pObj = static_cast<ImoList*>(m_pImpl);
-        return unique_ptr<IList>(new IList(pObj, m_pDoc, m_imVersion) );
+        return IList(pObj, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<IList>();
+        return IList();
 }
 
 //---------------------------------------------------------------------------------------
@@ -376,16 +436,16 @@ std::unique_ptr<IList> IObject::downcast_to_list() const
     IParagraph object, this method returns the referenced IParagraph object. Otherwise,
     it returns an invalid (nullptr) IParagraph.
 */
-std::unique_ptr<IParagraph> IObject::downcast_to_paragraph() const
+IParagraph IObject::downcast_to_paragraph() const
 {
     ensure_validity();
-    if (m_pImpl->is_paragraph())
+    if (m_pImpl && m_pImpl->is_paragraph())
     {
         ImoParagraph* pObj = static_cast<ImoParagraph*>(m_pImpl);
-        return unique_ptr<IParagraph>(new IParagraph(pObj, m_pDoc, m_imVersion) );
+        return IParagraph(pObj, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<IParagraph>();
+        return IParagraph();
 }
 
 //---------------------------------------------------------------------------------------
@@ -394,16 +454,16 @@ std::unique_ptr<IParagraph> IObject::downcast_to_paragraph() const
     IScore object, this method returns the referenced IScore object. Otherwise,
     it returns an invalid (nullptr) IScore.
 */
-std::unique_ptr<IScore> IObject::downcast_to_score() const
+IScore IObject::downcast_to_score() const
 {
     ensure_validity();
-    if (m_pImpl->is_score())
+    if (m_pImpl && m_pImpl->is_score())
     {
         ImoScore* pObj = static_cast<ImoScore*>(m_pImpl);
-        return unique_ptr<IScore>(new IScore(pObj, m_pDoc, m_imVersion) );
+        return IScore(pObj, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<IScore>();
+        return IScore();
 }
 
 //---------------------------------------------------------------------------------------
@@ -412,16 +472,16 @@ std::unique_ptr<IScore> IObject::downcast_to_score() const
     ITextItem object, this method returns the referenced ITextItem object. Otherwise,
     it returns an invalid (nullptr) ITextItem.
 */
-std::unique_ptr<ITextItem> IObject::downcast_to_text_item() const
+ITextItem IObject::downcast_to_text_item() const
 {
     ensure_validity();
-    if (m_pImpl->is_text_item())
+    if (m_pImpl && m_pImpl->is_text_item())
     {
         ImoTextItem* pObj = static_cast<ImoTextItem*>(m_pImpl);
-        return unique_ptr<ITextItem>(new ITextItem(pObj, m_pDoc, m_imVersion) );
+        return ITextItem(pObj, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<ITextItem>();
+        return ITextItem();
 }
 
 //@}    //Downcast objects
@@ -722,7 +782,7 @@ bool IObject::is_text_item() const
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoObj* IObject::get_internal_object() const
+ImoObj* IObject::internal_object() const
 {
     return const_cast<ImoObj*>(pimpl());
 }
@@ -743,19 +803,19 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ISiblings, ImoObj, IObject)
 //---------------------------------------------------------------------------------------
 /** @memberof ISiblings
 */
-std::unique_ptr<IObject> ISiblings::get_previous_sibling() const
+IObject ISiblings::previous_sibling() const
 {
     ensure_validity();
-    return IObject::Private::get_previous_sibling(m_pImpl, m_pDoc);
+    return IObject::Private::previous_sibling(m_pImpl, m_pDoc);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ISiblings
 */
-std::unique_ptr<IObject> ISiblings::get_next_sibling() const
+IObject ISiblings::next_sibling() const
 {
     ensure_validity();
-    return IObject::Private::get_next_sibling(m_pImpl, m_pDoc);
+    return IObject::Private::next_sibling(m_pImpl, m_pDoc);
 }
 
 //@}    //Document content traversal
@@ -797,7 +857,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IChildren, ImoObj, IObject)
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-int IChildren::get_num_children() const
+int IChildren::num_children() const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
@@ -821,7 +881,7 @@ int IChildren::get_num_children() const
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
+IObject IChildren::child_at(int iItem) const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
@@ -846,13 +906,13 @@ std::unique_ptr<IObject> IChildren::get_child_at(int iItem) const
         ImoInlineLevelObj* pImo = pBlock->get_item(iItem);
         return IObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return unique_ptr<IObject>();
+    return IObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-std::unique_ptr<IObject> IChildren::get_first_child() const
+IObject IChildren::first_child() const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
@@ -873,13 +933,13 @@ std::unique_ptr<IObject> IChildren::get_first_child() const
         ImoInlineLevelObj* pImo = pBlock->get_first_item();
         return IObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return unique_ptr<IObject>();
+    return IObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-std::unique_ptr<IObject> IChildren::get_last_child() const
+IObject IChildren::last_child() const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
@@ -900,10 +960,47 @@ std::unique_ptr<IObject> IChildren::get_last_child() const
         ImoInlineLevelObj* pImo = pBlock->get_last_item();
         return IObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return unique_ptr<IObject>();
+    return IObject();
 }
 
 //@}    //Document content traversal
+
+
+
+//=======================================================================================
+/** @class IDynamic
+    @extends IObject
+    @extends ISiblings
+    @extends IChildren
+    %IDynamic represents external content that is injected dynamically into the document
+    by the user application. It is equivalent to the HTML \<object\> element.
+*/
+LOMSE_IMPLEMENT_IM_API_CLASS(IDynamic, ImoDynamic, IObject)
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDynamic
+    Returns the value of the <i>classid</i> attribute. It defines the type of dynamic
+    content that this object represents.
+*/
+std::string& IDynamic::classid()
+{
+    ensure_validity();
+    return const_cast<ImoDynamic*>(pimpl())->get_classid();
+}
+
+//---------------------------------------------------------------------------------------
+/** @memberof IDynamic
+    Transitional, to facilitate migration to the new public API.
+    Notice that this method will be removed in future so, please, if you need to
+    use this method open an issue at https://github.com/lenmus/lomse/issues
+    explaining the need, so that the public API
+    could be fixed and your app. would not be affected in future when this method
+    is removed.
+*/
+ImoDynamic* IDynamic::internal_object() const
+{
+    return const_cast<ImoDynamic*>(pimpl());
+}
 
 
 
@@ -947,7 +1044,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IInstrument, ImoInstrument, IObject)
     Returns the name of the instrument, that is the string that is placed at the start of
     the first system in the score.
 */
-std::string& IInstrument::get_name_string() const
+std::string& IInstrument::name_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
@@ -959,7 +1056,7 @@ std::string& IInstrument::get_name_string() const
     Returns the short, abbreviated name that appears on every system other than
     the first system.
 */
-std::string& IInstrument::get_abbreviation_string() const
+std::string& IInstrument::abbreviation_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_abbrev();
@@ -1012,10 +1109,10 @@ void IInstrument::set_abbreviation_string(const string& abbrev)
     instruments there is aISoundInfo object for each real physical instrument that is
     sharing the staff.
 
-    Method IInstrument::get_num_sounds() informs about the number of ISoundInfo objects
+    Method IInstrument::num_sounds() informs about the number of ISoundInfo objects
     that this instrument contains. Always at least one.
 */
-int IInstrument::get_num_sounds() const
+int IInstrument::num_sounds() const
 {
     ensure_validity();
     return const_cast<ImoInstrument*>(pimpl())->get_num_sounds();
@@ -1030,19 +1127,18 @@ int IInstrument::get_num_sounds() const
     instruments there is a collection of ISoundInfo objects, one for each real physical
     instrument that is sharing the staff.
 
-    IInstrument::get_sound_info_at(0) is always valid and returns the only ISoundInfo
+    IInstrument::sound_info_at(0) is always valid and returns the only ISoundInfo
     object for normal cases and the first ISoundInfo object when several real instruments
     are represented by a single IInstrument object.
 
     @param iSound   The index (0..n-1) to the requested sound info object.
 
 */
-std::unique_ptr<ISoundInfo> IInstrument::get_sound_info_at(int iSound) const
+ISoundInfo IInstrument::sound_info_at(int iSound) const
 {
     ensure_validity();
-    return unique_ptr<ISoundInfo>(
-                new ISoundInfo(const_cast<ImoInstrument*>(pimpl())->get_sound_info(iSound),
-                               m_pDoc, m_imVersion) );
+    return ISoundInfo(const_cast<ImoInstrument*>(pimpl())->get_sound_info(iSound),
+                      m_pDoc, m_imVersion);
 }
 
 //@}    //Sound information
@@ -1057,7 +1153,7 @@ std::unique_ptr<ISoundInfo> IInstrument::get_sound_info_at(int iSound) const
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoInstrument* IInstrument::get_internal_object() const
+ImoInstrument* IInstrument::internal_object() const
 {
     return const_cast<ImoInstrument*>(pimpl());
 }
@@ -1083,7 +1179,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoInstrGroup* IInstrGroup::get_internal_object() const
+ImoInstrGroup* IInstrGroup::internal_object() const
 {
     return const_cast<ImoInstrGroup*>(pimpl());
 }
@@ -1097,7 +1193,7 @@ ImoInstrGroup* IInstrGroup::get_internal_object() const
     Returns a value from enum EJoinBarlines indicating how the barlines for the
     instruments in the group will be displayed.
 */
-EJoinBarlines IInstrGroup::get_barlines_mode() const
+EJoinBarlines IInstrGroup::barlines_mode() const
 {
     ensure_validity();
     return static_cast<EJoinBarlines>(
@@ -1109,7 +1205,7 @@ EJoinBarlines IInstrGroup::get_barlines_mode() const
     Returns a value from enum EGroupSymbol indicating what symbol will be displayed for
     marking the instruments that form the group.
 */
-EGroupSymbol IInstrGroup::get_symbol() const
+EGroupSymbol IInstrGroup::symbol() const
 {
     ensure_validity();
     return static_cast<EGroupSymbol>(
@@ -1121,7 +1217,7 @@ EGroupSymbol IInstrGroup::get_symbol() const
     Returns the name of the group, that is the string for the group that is placed at
     the start of the first system in the score.
 */
-const std::string& IInstrGroup::get_name_string() const
+const std::string& IInstrGroup::name_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_name();
@@ -1133,7 +1229,7 @@ const std::string& IInstrGroup::get_name_string() const
     Returns the short, abbreviated name of the group. This is the string for the group
     that appears on every system other than the first system.
 */
-const std::string& IInstrGroup::get_abbreviation_string() const
+const std::string& IInstrGroup::abbreviation_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_abbrev();
@@ -1200,7 +1296,7 @@ void IInstrGroup::set_abbreviation_string(const std::string& abbrev)
 /** @memberof IInstrGroup
     Returns the number of instruments included in the group.
 */
-int IInstrGroup::get_num_instruments() const
+int IInstrGroup::num_instruments() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_num_instruments();
@@ -1211,39 +1307,36 @@ int IInstrGroup::get_num_instruments() const
     Returns the instrument at position <i>pos</i> in the group. First instrument in the
     group is position 0.
 */
-std::unique_ptr<IInstrument> IInstrGroup::get_instrument_at(int pos) const
+IInstrument IInstrGroup::instrument_at(int pos) const
 {
     ensure_validity();
     ImoInstrGroup* pGrp = const_cast<ImoInstrGroup*>(pimpl());
     if (pos < 0 || pos >= pGrp->get_num_instruments())
-        return unique_ptr<IInstrument>();
+        return IInstrument();
 
-    return unique_ptr<IInstrument>(
-                    new IInstrument(pGrp->get_instrument(pos), m_pDoc, m_imVersion));
+    return IInstrument(pGrp->get_instrument(pos), m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IInstrGroup
     Returns the first instrument included in the group.
 */
-std::unique_ptr<IInstrument> IInstrGroup::get_first_instrument() const
+IInstrument IInstrGroup::first_instrument() const
 {
     ensure_validity();
-    return unique_ptr<IInstrument>(
-                new IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_first_instrument(),
-                                m_pDoc, m_imVersion) );
+    return IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_first_instrument(),
+                       m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IInstrGroup
     Returns the last instrument included in the group.
 */
-std::unique_ptr<IInstrument> IInstrGroup::get_last_instrument() const
+IInstrument IInstrGroup::last_instrument() const
 {
     ensure_validity();
-    return unique_ptr<IInstrument>(
-                new IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_last_instrument(),
-                                m_pDoc, m_imVersion) );
+    return IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_last_instrument(),
+                       m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1252,7 +1345,7 @@ std::unique_ptr<IInstrument> IInstrGroup::get_last_instrument() const
     group. The returned index is the position occupied by this instrument in the score
     (0 based: 0 .. num.instrs - 1)
 */
-int IInstrGroup::get_index_to_first_instrument() const
+int IInstrGroup::index_to_first_instrument() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_index_to_first_instrument();
@@ -1264,7 +1357,7 @@ int IInstrGroup::get_index_to_first_instrument() const
     group. The returned index is the position occupied by this instrument in the score
     (0 based: 0 .. num.instrs - 1)
 */
-int IInstrGroup::get_index_to_last_instrument() const
+int IInstrGroup::index_to_last_instrument() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_index_to_last_instrument();
@@ -1313,6 +1406,20 @@ bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(ILink, ImoLink, IObject)
 
+//---------------------------------------------------------------------------------------
+/** @memberof ILink
+    Transitional, to facilitate migration to the new public API.
+    Notice that this method will be removed in future so, please, if you need to
+    use this method open an issue at https://github.com/lenmus/lomse/issues
+    explaining the need, so that the public API
+    could be fixed and your app. would not be affected in future when this method
+    is removed.
+*/
+ImoLink* ILink::internal_object() const
+{
+    return const_cast<ImoLink*>(pimpl());
+}
+
 
 
 //=======================================================================================
@@ -1325,6 +1432,20 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ILink, ImoLink, IObject)
     or unordered, is an attribute of the IList object.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(IList, ImoList, IObject)
+
+//---------------------------------------------------------------------------------------
+/** @memberof IList
+    Transitional, to facilitate migration to the new public API.
+    Notice that this method will be removed in future so, please, if you need to
+    use this method open an issue at https://github.com/lenmus/lomse/issues
+    explaining the need, so that the public API
+    could be fixed and your app. would not be affected in future when this method
+    is removed.
+*/
+ImoList* IList::internal_object() const
+{
+    return const_cast<ImoList*>(pimpl());
+}
 
 
 
@@ -1371,7 +1492,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IMidiInfo, ImoMidiInfo, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoMidiInfo* IMidiInfo::get_internal_object() const
+ImoMidiInfo* IMidiInfo::internal_object() const
 {
     return const_cast<ImoMidiInfo*>(pimpl());
 }
@@ -1382,7 +1503,7 @@ ImoMidiInfo* IMidiInfo::get_internal_object() const
     It is a number from 1 to 16 that can be used with the unofficial MIDI port
     (or cable) meta event.
 */
-int IMidiInfo::get_port() const
+int IMidiInfo::port() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_port();
@@ -1394,7 +1515,7 @@ int IMidiInfo::get_port() const
     It will be used in the DeviceName meta-event when exporting the score as a
     Standard MIDI File (not yet implemented).
 */
-std::string& IMidiInfo::get_device_name() const
+std::string& IMidiInfo::device_name() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_device_name();
@@ -1406,7 +1527,7 @@ std::string& IMidiInfo::get_device_name() const
     It will be used in the ProgramName meta-events when exporting the score as
     a Standard MIDI File (not yet implemented).
 */
-std::string& IMidiInfo::get_program_name() const
+std::string& IMidiInfo::program_name() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_name();
@@ -1417,7 +1538,7 @@ std::string& IMidiInfo::get_program_name() const
     Returns the MIDI bank assigned to this sound. MIDI 1.0 bank numbers range
     from 1 to 16,384.
 */
-int IMidiInfo::get_bank() const
+int IMidiInfo::bank() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_bank() + 1;
@@ -1428,7 +1549,7 @@ int IMidiInfo::get_bank() const
     Returns the MIDI channel assigned to this sound. MIDI 1.0 channel numbers range
     from 1 to 16.
 */
-int IMidiInfo::get_channel() const
+int IMidiInfo::channel() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_channel() + 1;
@@ -1439,7 +1560,7 @@ int IMidiInfo::get_channel() const
     Returns the MIDI program number assigned to this sound. MIDI 1.0 program numbers
     range from 1 to 128.
 */
-int IMidiInfo::get_program() const
+int IMidiInfo::program() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_program() + 1;
@@ -1451,7 +1572,7 @@ int IMidiInfo::get_program() const
     for unpitched instruments and, for them, it specifies a MIDI 1.0 note number
     ranging from 0 to 127. It is usually used with MIDI banks for percussion.
 */
-int IMidiInfo::get_unpitched() const
+int IMidiInfo::unpitched() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_unpitched();
@@ -1465,7 +1586,7 @@ int IMidiInfo::get_unpitched() const
     This corresponds to a scaling value for the MIDI 1.0
     channel volume controller.
 */
-float IMidiInfo::get_volume() const
+float IMidiInfo::volume() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_volume();
@@ -1481,7 +1602,7 @@ float IMidiInfo::get_volume() const
         -90 is hard left, 90 is hard right, and
        -180 or 180 are directly behind the listener, centered.
 */
-int IMidiInfo::get_pan() const
+int IMidiInfo::pan() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_pan();
@@ -1496,7 +1617,7 @@ int IMidiInfo::get_pan() const
          0 is level with the listener head,
         90 is directly above, and -90 is directly below.
 */
-int IMidiInfo::get_elevation() const
+int IMidiInfo::elevation() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_elevation();
@@ -1680,7 +1801,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoScore* IScore::get_internal_object() const
+ImoScore* IScore::internal_object() const
 {
     return const_cast<ImoScore*>(pimpl());
 }
@@ -1764,18 +1885,18 @@ struct IScore::Private
     Returns the requested instrument.
     @param iInstr    Is the index to the requested instrument (0 ... num_instruments - 1).
 */
-std::unique_ptr<IInstrument> IScore::get_instrument_at(int iInstr) const
+IInstrument IScore::instrument_at(int iInstr) const
 {
     ensure_validity();
     ImoInstrument* pInstr = const_cast<ImoScore*>(pimpl())->get_instrument(iInstr);
-    return unique_ptr<IInstrument>(new IInstrument(pInstr, m_pDoc, m_imVersion));
+    return IInstrument(pInstr, m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IScore
     Returns the number of instruments that this score contains.
 */
-int IScore::get_num_instruments() const
+int IScore::num_instruments() const
 {
     ensure_validity();
     return const_cast<ImoScore*>(pimpl())->get_num_instruments();
@@ -1798,7 +1919,7 @@ int IScore::get_num_instruments() const
 
     Returns the created instrument.
 */
-std::unique_ptr<IInstrument> IScore::append_new_instrument()
+IInstrument IScore::append_new_instrument()
 {
     ensure_validity();
     ImoInstrument* pInstr = pimpl()->add_instrument();
@@ -1806,7 +1927,7 @@ std::unique_ptr<IInstrument> IScore::append_new_instrument()
     PartIdAssigner assigner;
     assigner.assign_parts_id(pimpl());
 
-    return unique_ptr<IInstrument>(new IInstrument(pInstr, m_pDoc, m_imVersion));
+    return IInstrument(pInstr, m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1967,7 +2088,7 @@ void IScore::move_down_instrument(IInstrument& instr)
 /** @memberof IScore
     Returns the number of instrument groups that this score contains.
 */
-int IScore::get_num_instruments_groups() const
+int IScore::num_instruments_groups() const
 {
     ensure_validity();
     ImoInstrGroups* pGroups = const_cast<ImoScore*>(pimpl())->get_instrument_groups();
@@ -1983,12 +2104,12 @@ int IScore::get_num_instruments_groups() const
     @param iGroup   Is the index to the requested instruments
                     group (0 ... num.groups - 1).
 */
-std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
+IInstrGroup IScore::instruments_group_at(int iGroup) const
 {
     ensure_validity();
     ImoInstrGroups* pGroups = const_cast<ImoScore*>(pimpl())->get_instrument_groups();
     if (!pGroups)
-        return unique_ptr<IInstrGroup>();
+        return IInstrGroup();
 
     ImoObj::children_iterator itG;
     int i = 0;
@@ -1996,10 +2117,10 @@ std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
     if (i == iGroup && itG != pGroups->end())
     {
         ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(*itG);
-        return unique_ptr<IInstrGroup>(new IInstrGroup(pGroup, m_pDoc, m_imVersion));
+        return IInstrGroup(pGroup, m_pDoc, m_imVersion);
     }
     else
-        return unique_ptr<IInstrGroup>();
+        return IInstrGroup();
 }
 
 
@@ -2026,7 +2147,7 @@ std::unique_ptr<IInstrGroup> IScore::get_instruments_group_at(int iGroup) const
     group will have neither name nor abbreviation. After the group is created,
     you can change all these default settings.
 */
-std::unique_ptr<IInstrGroup> IScore::create_instruments_group(int iFirstInstr, int iLastInstr)
+IInstrGroup IScore::create_instruments_group(int iFirstInstr, int iLastInstr)
 {
     ensure_validity();
     int maxInstr = pimpl()->get_num_instruments();
@@ -2039,11 +2160,11 @@ std::unique_ptr<IInstrGroup> IScore::create_instruments_group(int iFirstInstr, i
         pGrp->set_owner_score(pimpl());
         pGrp->set_range(iFirstInstr, iLastInstr);
         pimpl()->add_instruments_group(pGrp);
-        return unique_ptr<IInstrGroup>(new IInstrGroup(pGrp, m_pDoc, m_imVersion));
+        return IInstrGroup(pGrp, m_pDoc, m_imVersion);
     }
     else
     {
-        return unique_ptr<IInstrGroup>();
+        return IInstrGroup();
     }
 }
 
@@ -2092,7 +2213,7 @@ bool IScore::delete_instruments_group(const IInstrGroup& group)
     if (!pGroups)
         return false;    //no success: no groups
 
-    ImoInstrGroup* pGrp = group.get_internal_object();
+    ImoInstrGroup* pGrp = group.internal_object();
     pGroups->remove_child_imo(pGrp);
     delete pGrp;
     return true;    //success
@@ -2132,7 +2253,7 @@ void IScore::delete_all_instruments_groups()
         is relative to an instrument. For normal scores, just providing measure
         number and location will do the job.
 */
-MeasureLocator IScore::get_locator_for(TimeUnits timepos, int iInstr)
+MeasureLocator IScore::locator_for(TimeUnits timepos, int iInstr)
 {
     ensure_validity();
     return ScoreAlgorithms::get_locator_for(pimpl(), timepos, iInstr);
@@ -2154,7 +2275,7 @@ MeasureLocator IScore::get_locator_for(TimeUnits timepos, int iInstr)
         measures, and beats are not defined. Therefore, if this method is invoked in an
         score without time signature, this method will always return time position 0.
 */
-TimeUnits IScore::get_timepos_for(int iMeasure, int iBeat, int iInstr)
+TimeUnits IScore::timepos_for(int iMeasure, int iBeat, int iInstr)
 {
     ensure_validity();
     return ScoreAlgorithms::get_timepos_for(pimpl(), iMeasure, iBeat, iInstr);
@@ -2165,7 +2286,7 @@ TimeUnits IScore::get_timepos_for(int iMeasure, int iBeat, int iInstr)
     Returns the time position for the specified measure locator.
     @param ml The measure locator to convert.
 */
-TimeUnits IScore::get_timepos_for(const MeasureLocator& ml)
+TimeUnits IScore::timepos_for(const MeasureLocator& ml)
 {
     ensure_validity();
     return ScoreAlgorithms::get_timepos_for(pimpl(), ml);
@@ -2219,7 +2340,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoSoundInfo* ISoundInfo::get_internal_object() const
+ImoSoundInfo* ISoundInfo::internal_object() const
 {
     return const_cast<ImoSoundInfo*>(pimpl());
 }
@@ -2250,12 +2371,11 @@ ImoSoundInfo* ISoundInfo::get_internal_object() const
     each instrument is assigned a unique combination (port, channel) for all instruments
     with port or channel containig the "not initialized" value.
 */
-std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
+IMidiInfo ISoundInfo::midi_info() const
 {
     ensure_validity();
-    return unique_ptr<IMidiInfo>(
-                new IMidiInfo(const_cast<ImoSoundInfo*>(pimpl())->get_midi_info(),
-                              m_pDoc, m_imVersion) );
+    return IMidiInfo(const_cast<ImoSoundInfo*>(pimpl())->get_midi_info(),
+                     m_pDoc, m_imVersion);
 }
 
 
@@ -2268,6 +2388,21 @@ std::unique_ptr<IMidiInfo> ISoundInfo::get_midi_info() const
     %ITextItem is an inline-level object containing a chunk of text with the same style.
 */
 LOMSE_IMPLEMENT_IM_API_CLASS(ITextItem, ImoTextItem, IObject)
+
+//---------------------------------------------------------------------------------------
+/** @memberof ITextItem
+    Transitional, to facilitate migration to the new public API.
+    Notice that this method will be removed in future so, please, if you need to
+    use this method open an issue at https://github.com/lenmus/lomse/issues
+    explaining the need, so that the public API
+    could be fixed and your app. would not be affected in future when this method
+    is removed.
+*/
+ImoTextItem* ITextItem::internal_object() const
+{
+    return const_cast<ImoTextItem*>(pimpl());
+}
+
 
 
 ////=======================================================================================
@@ -2313,13 +2448,6 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ITextItem, ImoTextItem, IObject)
 //    is used for grouping content but has no effect on the content or its layout.
 //*/
 //LOMSE_IMPLEMENT_IM_API_CLASS(IContent, ImoContent, IObject)
-
-////=======================================================================================
-// /* * @class IDynamic
-//    %IDynamic represents external content that is injected dynamically into the document
-//    by the user application. It is equivalent to the HTML \<object\> element.
-//*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IDynamic, ImoDynamic, IObject)
 
 ////=======================================================================================
 // /* * @class IMultiColumn

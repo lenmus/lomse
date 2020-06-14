@@ -51,12 +51,14 @@ private:
 
     friend class Document;
     friend class IObject;
+    friend class RequestDynamic;
     IDocument(Document* impl);
 
     inline const Document* pimpl() const { return m_pImpl; }
     inline Document* pimpl() { return m_pImpl; }
 
 public:
+    IDocument() { m_pImpl = nullptr; }
     IDocument(IDocument &&) noexcept = default;
     IDocument& operator=(IDocument &&) noexcept = default;
     IDocument(const IDocument& other) = default;
@@ -65,28 +67,32 @@ public:
 public:
 
     // Properties
-    ImoId get_object_id() const;
-    std::string& get_lmd_version() const;
+    ImoId object_id() const;
+    std::string& lmd_version() const;
+    bool is_valid() const;
 
     //Access to content
-    int get_num_children() const;
-    std::unique_ptr<IObject> get_child_at(int iItem) const;
-    std::unique_ptr<IObject> get_first_child() const;
-    std::unique_ptr<IObject> get_last_child() const;
-    std::unique_ptr<IScore> get_first_score() const;
+    int num_children() const;
+    IObject child_at(int iItem) const;
+    IObject first_child() const;
+    IObject last_child() const;
+    IScore first_score() const;
+
+    //Create new detached objects
+    IObject create_object(EIObjectType type);
 
     //Page content scale
-    float get_page_content_scale() const;
+    float page_content_scale() const;
     void set_page_content_scale(float scale);
 
     //Document page size
-    LUnits get_page_left_margin() const;
-    LUnits get_page_right_margin() const;
-    LUnits get_page_top_margin() const;
-    LUnits get_page_bottom_margin() const;
-    USize get_page_size() const;
-    LUnits get_page_width() const;
-    LUnits get_page_height() const;
+    LUnits page_left_margin() const;
+    LUnits page_right_margin() const;
+    LUnits page_top_margin() const;
+    LUnits page_bottom_margin() const;
+    USize page_size() const;
+    LUnits page_width() const;
+    LUnits page_height() const;
     void set_page_left_margin(LUnits value);
     void set_page_right_margin(LUnits value);
     void set_page_top_margin(LUnits value);
@@ -94,21 +100,21 @@ public:
     void set_page_size(USize uPageSize);
     void set_page_width(LUnits value);
     void set_page_height(LUnits value);
-    std::unique_ptr<ImoPageInfo> get_page_info() const;
+    std::unique_ptr<ImoPageInfo> page_info() const;
 
     void end_of_changes();
 
     //metronome settings, for scores
     void define_metronome_beat(int beatType, TimeUnits duration=0.0);
-    int get_metronome_beat_type() const;
-    TimeUnits get_metronome_beat_duration() const;
+    int metronome_beat_type() const;
+    TimeUnits metronome_beat_duration() const;
 
     // Transitional, to facilitate migration to the new public API.
     // Notice that this method will be removed in future so, please, if you need to
     // use this method open an issue at https://github.com/lenmus/lomse/issues
     // explaining the need, so that the public API could be fixed and your app. would
     // not be affected in future when this method is removed.
-    Document* get_internal_object();
+    Document* internal_object();
 
 };
 

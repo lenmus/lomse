@@ -156,7 +156,7 @@ public:
     inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
 
     /** Returns an IDocument object for interacting with the internal model.  */
-    inline unique_ptr<IDocument> get_document() {
+    inline IDocument get_document() {
         return m_spDoc.get()->get_document_api();
     }
 
@@ -176,7 +176,7 @@ public:
 
     /** Returns a pointer to the user data associated with this %Presenter (if any).
         @return
-            A pointer to the user data, or NULL if no data saved.
+            A pointer to the user data, or nullptr if no data saved.
     */
     inline void* get_user_data() { return m_userData; }
 

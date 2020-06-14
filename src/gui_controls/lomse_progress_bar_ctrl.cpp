@@ -49,7 +49,7 @@ ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
     : Control(libScope, pDoc, pParent)
     , m_label("0.0%")
     , m_maxValue(maxValue)
-    , m_pMainBox(NULL)
+    , m_pMainBox(nullptr)
     , m_width(width)
     , m_height(height)
     , m_xCenter(0.0f)
@@ -58,7 +58,7 @@ ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
     , m_percent(0.0f)
     , m_fDisplayPercentage(true)
 {
-    m_style = (pStyle == NULL ? create_default_style() : pStyle);
+    m_style = (pStyle == nullptr ? create_default_style() : pStyle);
 
     m_textColor = m_style->color();
     m_barColor = Color(0,255,0,255);  //green solid

@@ -245,7 +245,7 @@ public:
     inline ImoDocument* get_im_root() const { return m_pImoDoc; }
 
     /** Returns an IDocument object for interacting with the internal model.  */
-    std::unique_ptr<IDocument> get_document_api();
+    IDocument get_document_api();
 
 
     //LMD version used in the source or "0.0" in other cases

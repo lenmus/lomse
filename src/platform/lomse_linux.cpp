@@ -133,7 +133,7 @@ std::string FontSelector::find_font(const std::string& language,
     FcPattern* font = FcFontMatch(config, pattern, &result);
     if (font)
     {
-        FcChar8* file = NULL;
+        FcChar8* file = nullptr;
         if (FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch)
         {
             string fullFileName((char*)file);

@@ -47,35 +47,40 @@ class Document;
         friend class ImoXxxx; \
         friend class Document; \
         friend class IDocument; \
+        friend class IChildren; \
+        friend class ISiblings; \
+        friend class RequestDynamic; \
         mutable ImoXxxx* m_pImpl; \
         Document* m_pDoc; \
         ImoId m_id; \
         mutable long m_imVersion; \
         IXxxx(ImoXxxx* impl, Document* doc, long imVers); \
-        IXxxx(); \
         inline const ImoXxxx* pimpl() const { return m_pImpl; } \
         inline ImoXxxx* pimpl() { return m_pImpl; } \
-        virtual void ensure_validity() const; \
+        void ensure_validity() const; \
         struct Private; \
     public: \
+        IXxxx(); \
         IXxxx(IXxxx &&) noexcept = default;             \
         IXxxx& operator=(IXxxx &&) noexcept = default;  \
         IXxxx(const IXxxx& other) = default;            \
         IXxxx& operator=(const IXxxx& other) = default; \
         virtual ~IXxxx() = default; \
+        bool is_valid() const;
 
 
 #define LOMSE_DECLARE_IM_API_CLASS(IXxxx, ImoXxxx) \
     protected: \
         friend class ImoXxxx; \
         friend class Document; \
+        friend class IDocument; \
         friend class IObject; \
-        IXxxx(ImoXxxx* impl, Document* doc, long imVers); \
-        IXxxx(); \
+        IXxxx(ImoObj* impl, Document* doc, long imVers); \
         inline const ImoXxxx* pimpl() const { return static_cast<ImoXxxx*>(m_pImpl); } \
         inline ImoXxxx* pimpl() { return static_cast<ImoXxxx*>(m_pImpl); } \
         struct Private; \
     public: \
+        IXxxx(); \
         IXxxx(IXxxx &&) noexcept = default;             \
         IXxxx& operator=(IXxxx &&) noexcept = default;  \
         IXxxx(const IXxxx& other) = default;            \
@@ -110,7 +115,7 @@ enum EBeatDuration
     k_beat_implied = 0,     ///< Implied by the time signature; e.g. 4/4 = four
                             ///< beats, 6/8 = two beats, 3/8 = one beat.
                             ///< The number of implied beats for a time signature is
-                            ///< provided by method ImoTimeSignature::get_num_pulses().
+                            ///< provided by method ImoTimeSignature::num_pulses().
                             ///< Basically, for simple time signatures, such as 4/4,
                             ///< 3/4, 2/4, 3/8, and 2/2, the number of beats is given by
                             ///< the time signature top number, with the exception of
@@ -130,7 +135,6 @@ enum EBeatDuration
 // This enum describes valid types for internal model API objects.
 enum EIObjectType
 {
-
     k_obj_anonymous_block,
     k_obj_button,          ///< Button control
     k_obj_content,
@@ -143,7 +147,7 @@ enum EIObjectType
     k_obj_instr_group,
     k_obj_link,            ///< Link
     k_obj_list,            ///< Text list
-    k_obj_listitem,
+    k_obj_list_item,
     k_obj_midi_info,
     k_obj_multicolumn,
     k_obj_music_data,
@@ -155,10 +159,6 @@ enum EIObjectType
     k_obj_table_cell,
     k_obj_table_row,
     k_obj_text_item,       ///< Text item
-
-    k_obj_element_last,
-    k_obj_last,
-
 };
 
 

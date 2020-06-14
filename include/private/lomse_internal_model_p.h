@@ -4075,24 +4075,12 @@ public:
     virtual ~ImoDynamic();
 
     //construction
-    inline void set_classid(const string& value)
-    {
-        m_classid = value;
-    }
-    inline void add_param(ImoParamInfo* pParam)
-    {
-        m_params.push_back(pParam);
-    }
+    inline void set_classid(const string& value) { m_classid = value; }
+    inline void add_param(ImoParamInfo* pParam) { m_params.push_back(pParam); }
 
     //accessors
-    inline string& get_classid()
-    {
-        return m_classid;
-    }
-    inline std::list<ImoParamInfo*>& get_params()
-    {
-        return m_params;
-    }
+    inline string& get_classid() { return m_classid; }
+    inline std::list<ImoParamInfo*>& get_params() { return m_params; }
 
 };
 

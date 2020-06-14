@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -429,6 +429,27 @@ EventControlPointMoved::EventControlPointMoved(EEventType type, WpInteractor wpI
     m_imoId = pImo->get_id();
     m_gmoType = pGmo->get_gmobj_type();
     m_idx = (pGmo->is_shape() ? static_cast<GmoShape*>(pGmo)->get_shape_id() : -1);
+}
+
+
+//=======================================================================================
+// RequestDynamic implementation
+//=======================================================================================
+IObject RequestDynamic::get_object()
+{
+    return IObject(m_pObj, m_pDoc, m_pDoc->get_model_ref());
+}
+
+//---------------------------------------------------------------------------------------
+IDocument RequestDynamic::get_document()
+{
+    return IDocument(m_pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void RequestDynamic::set_object(IObject& obj)
+{
+    m_pObj = obj.internal_object();
 }
 
 

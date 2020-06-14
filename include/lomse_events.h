@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,6 +53,10 @@ class ImoStaffObj;
 class PlayerGui;
 class SelectionSet;
 class GmoObj;
+
+class IDocument;
+class IDynamic;
+class IObject;
 
 class Interactor;
 typedef std::weak_ptr<Interactor>     WpInteractor;
@@ -1374,15 +1378,16 @@ public:
     ~RequestDynamic() {}
 
     /** If the user application has not yet handled this request, this method returns
-        the ImoDynamic object that should be replaced. Otherwise, returns the replacement
-        ImoObj set by the user application.    */
-    inline ImoObj* get_object() { return m_pObj; }
+        the dynamic object that should be replaced. Otherwise, returns the replacement
+        object set by the user application.
+    */
+    IObject get_object();
 
-    /// Returns a pointer to the Document to which this request refers to.    */
-    inline Document* get_document() { return m_pDoc; }
+    /// Returns the document to which this request refers to.    */
+    IDocument get_document();
 
     ///for setting requested data
-    inline void set_object(ImoObj* pObj) { m_pObj = pObj; }
+    void set_object(IObject& obj);
 
 };
 
