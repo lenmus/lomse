@@ -2946,32 +2946,6 @@ void ImoInstrGroup::add_instrument(int iInstr)
         ++m_numInstrs;
 }
 
-////---------------------------------------------------------------------------------------
-//bool ImoInstrGroup::remove_instrument(ImoInstrument* pInstr)
-//{
-//    //returns true if instrument found and removed from the list. The instrument is
-//    //not deleted; that is, after the operation, the Instrument pointed by pInstr
-//    //is not destroyed and is still valid.
-//
-//    list<ImoInstrument*>::iterator it = m_instruments.begin();
-//    while (it != m_instruments.end())
-//    {
-//        if (*it == pInstr)
-//        {
-//            m_instruments.erase(it);
-//            return true;
-//        }
-//        ++it;
-//    }
-//    return false;
-//}
-
-////---------------------------------------------------------------------------------------
-//int ImoInstrGroup::get_num_instruments()
-//{
-//    return static_cast<int>( m_instruments.size() );
-//}
-
 
 //=======================================================================================
 // ImoKeySignature implementation

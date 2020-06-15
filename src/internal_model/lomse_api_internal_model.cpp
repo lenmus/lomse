@@ -1870,7 +1870,7 @@ struct AScore::Private
             {
                 ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(*itG);
                 int iFirst = pGroup->get_index_to_first_instrument();
-                if (iFirst + pGroup->get_num_instruments() > numInstrs)
+                if ((iFirst + pGroup->get_num_instruments()) > numInstrs)
                     pGroup->set_range(iFirst, numInstrs-1);
 
                 if (pGroup->get_num_instruments() < 2)
@@ -1878,6 +1878,13 @@ struct AScore::Private
                     pGroups->remove_child_imo(pGroup);
                     delete pGroup;
                 }
+            }
+
+            //If no groups left, remove ImoInstrGroups child
+            if (pGroups->get_num_items() == 0)
+            {
+                pScore->remove_child_imo(pGroups);
+                delete pGroups;
             }
         }
 
