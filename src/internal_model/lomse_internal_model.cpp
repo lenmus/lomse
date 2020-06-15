@@ -3530,7 +3530,9 @@ ImoInstruments* ImoScore::get_instruments()
 ImoInstrument* ImoScore::get_instrument(int iInstr)    //iInstr = 0..n-1
 {
     ImoInstruments* pColInstr = get_instruments();
-    return dynamic_cast<ImoInstrument*>( pColInstr->get_child(iInstr) );
+    if (iInstr >= 0 && iInstr < pColInstr->get_num_items())
+        return dynamic_cast<ImoInstrument*>( pColInstr->get_child(iInstr) );
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

@@ -30,19 +30,17 @@
 #ifndef __LOMSE_INTERNAL_MODEL_H__        //to avoid nested includes
 #define __LOMSE_INTERNAL_MODEL_H__
 
-#include "lomse_basic.h"
-#include "lomse_build_options.h"
-#include "lomse_api_definitions.h"
-#include "private/lomse_internal_model_p.h"
+#include "lomse_internal_model_defs.h"
 
 //std
 #include <string>
 #include <list>
 
+///@cond INTERNALS
 namespace lomse
 {
 
-//forward declaration of the API classes and the implementation classes
+//forward declaration of the document API classes and the implementation classes
 class ImoBlockLevelObj;
 class ImoContentObj;
 class ImoDocument;
@@ -57,46 +55,117 @@ class ImoScore;
 class ImoSoundInfo;
 class ImoTextItem;
 
-class IBlockLevelObj;
-class IDocument;
-class IDynamic;
-class IObject;
-class IInstrument;
-class IInstrGroup;
-class ILink;
-class IList;
-class IMidiInfo;
-class IParagraph;
-class IScore;
-class ISoundInfo;
-class ITextItem;
+class ADocument;
+class ADynamic;
+class AObject;
+class AInstrument;
+class AInstrGroup;
+class ALink;
+class AList;
+class AMidiInfo;
+class AParagraph;
+class AScore;
+class ASoundInfo;
+class ATextItem;
+
+///@endcond
+
+
+//=======================================================================================
+// Enumerations defined in this module
+//=======================================================================================
 
 //---------------------------------------------------------------------------------------
-// IObject: Abstract base class for all objects composing the document
+/** @ingroup enumerations
+    In a music score, when several instruments form a group, this enum indicates how
+    the barlines for the instruments should be displayed.
+*/
+enum EJoinBarlines
+{
+    k_non_joined_barlines = 0,  ///< Independent barlines for each instrument in the group.
+    k_joined_barlines,	        ///< Barlines joined across all instruments in the group.
+    k_mensurstrich_barlines,    ///< Barlines only in the gaps between instruments in
+                                ///< the group, but not on the staves of each instrument.
+};
+
+//---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+    In a music score, when several instruments form a group, this enum indicates if a
+    symbol for the group should be displayed in the score and what symbol to use.
+*/
+enum EGroupSymbol
+{
+    k_group_symbol_none = 0,    ///< Do not display a symbol.
+    k_group_symbol_brace,       ///< Use a brace.
+    k_group_symbol_bracket,     ///< Use a bracket.
+    k_group_symbol_line,        ///< Use a vertical a line.
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+    This enum describes the API objects that compose a document
+*/
+enum EDocObject
+{
+    k_obj_anonymous_block,  ///< An structural block-level container (AAnonymousBlock)
+    k_obj_button,           ///< A button control (AButton)
+    k_obj_content,          ///< A generic block-level container (AContent)
+    k_obj_control,          ///< A user defined GUI control object (AControl)
+    k_obj_dynamic,          ///< A block of external content injected dynamically (ADynamic)
+    k_obj_heading,          ///< A text header (AHeading)
+    k_obj_image,            ///< An image (AImage)
+    k_obj_inline_wrapper,   ///< A generic inline-box container (AInlineWrapper)
+    k_obj_instrument,       ///< An instrument in an score (AInstrument)
+    k_obj_instr_group,      ///< A grouping of instruments in an score (AInstrGroup)
+    k_obj_link,             ///< A hyperlink (ALink)
+    k_obj_list,             ///< A text list (AList)
+    k_obj_list_item,        ///< An item in a text list (AListItem)
+    k_obj_midi_info,        ///< A set of MIDI properties (AMidiInfo)
+    k_obj_multicolumn,      ///< A blocks container subdivided in columns (AMultiColumn)
+    k_obj_music_data,       ///< The musical content for an instrument (AMusicData)
+    k_obj_paragraph,        ///< A paragraph (AParagraph)
+    k_obj_score,	        ///< A music score (AScore)
+    k_obj_score_player,     ///< A score player control (AScorePlayer)
+    k_obj_sound_info,       ///< Sound information for an instrument (ASoundInfo)
+    k_obj_table,            ///< A table (ATable)
+    k_obj_table_cell,       ///< A cell in a table (ATableCell)
+    k_obj_table_row,        ///< A row in a table (ATableRow)
+    k_obj_text_item,        ///< A chunk of text (ATextItem)
+};
+
+
+//=======================================================================================
+// Classes defined in this module
+//=======================================================================================
+///@cond INTERNALS
+
+
+//---------------------------------------------------------------------------------------
+// AObject: Abstract base class for all objects composing the document
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IObject
+class LOMSE_EXPORT AObject
 {
 protected:
-    IObject downcast_to_content_obj();
-    LOMSE_DECLARE_IM_API_ROOT_CLASS(IObject, ImoObj)
+    AObject downcast_to_content_obj();
+    LOMSE_DECLARE_IM_API_ROOT_CLASS(AObject, ImoObj)
 
 public:
     //properties
     ImoId object_id() const;
     const std::string& object_name() const;
-    IDocument owner_document() const;
+    ADocument owner_document() const;
 
     //downcast objects
-    IDynamic downcast_to_dynamic() const;
-    IInstrument downcast_to_instrument() const;
-    IInstrGroup downcast_to_instr_group() const;
-    ILink downcast_to_link() const;
-    IList downcast_to_list() const;
-    IParagraph downcast_to_paragraph() const;
-    IScore downcast_to_score() const;
-    ITextItem downcast_to_text_item() const;
+    ADynamic downcast_to_dynamic() const;
+    AInstrument downcast_to_instrument() const;
+    AInstrGroup downcast_to_instr_group() const;
+    ALink downcast_to_link() const;
+    AList downcast_to_list() const;
+    AParagraph downcast_to_paragraph() const;
+    AScore downcast_to_score() const;
+    ATextItem downcast_to_text_item() const;
 
     //check object type
     bool is_anonymous_block() const;
@@ -139,13 +208,13 @@ public:
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT ISiblings : public virtual IObject
+class LOMSE_EXPORT ISiblings : public virtual AObject
 {
     LOMSE_DECLARE_IM_API_CLASS(ISiblings, ImoObj)
 
     //Document content traversal
-    IObject previous_sibling() const;
-    IObject next_sibling() const;
+    AObject previous_sibling() const;
+    AObject next_sibling() const;
 };
 
 
@@ -154,28 +223,28 @@ class LOMSE_EXPORT ISiblings : public virtual IObject
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IChildren : public virtual IObject
+class LOMSE_EXPORT IChildren : public virtual AObject
 {
     LOMSE_DECLARE_IM_API_CLASS(IChildren, ImoObj)
 
     //Document content traversal
     int num_children() const;
-    IObject child_at(int iItem) const;
-    IObject first_child() const;
-    IObject last_child() const;
+    AObject child_at(int iItem) const;
+    AObject first_child() const;
+    AObject last_child() const;
 
 };
 
 
 //---------------------------------------------------------------------------------------
-// IDynamic represents external content that is injected dynamically into the document
+// ADynamic represents external content that is injected dynamically into the document
 // by the user application. It is equivalent to the HTML \<object\> element.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IDynamic : public virtual IObject, public ISiblings, public IChildren
+class LOMSE_EXPORT ADynamic : public virtual AObject, public ISiblings, public IChildren
 {
-    LOMSE_DECLARE_IM_API_CLASS(IDynamic, ImoDynamic)
+    LOMSE_DECLARE_IM_API_CLASS(ADynamic, ImoDynamic)
     friend class RequestDynamic;
 
     std::string& classid();
@@ -190,15 +259,15 @@ class LOMSE_EXPORT IDynamic : public virtual IObject, public ISiblings, public I
 
 
 //---------------------------------------------------------------------------------------
-// IInstrument represents an instrument in the score.
+// AInstrument represents an instrument in the score.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IInstrument : public virtual IObject
+class LOMSE_EXPORT AInstrument : public virtual AObject
 {
-    LOMSE_DECLARE_IM_API_CLASS(IInstrument, ImoInstrument)
-    friend class IScore;
-    friend class IInstrGroup;
+    LOMSE_DECLARE_IM_API_CLASS(AInstrument, ImoInstrument)
+    friend class AScore;
+    friend class AInstrGroup;
 
     // name and abbreviation
     std::string& name_string() const;
@@ -208,7 +277,7 @@ class LOMSE_EXPORT IInstrument : public virtual IObject
 
     // sound information
     int num_sounds() const;
-    ISoundInfo sound_info_at(int iSound) const;
+    ASoundInfo sound_info_at(int iSound) const;
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -220,14 +289,14 @@ class LOMSE_EXPORT IInstrument : public virtual IObject
 
 
 //---------------------------------------------------------------------------------------
-// IInstrGroup provides access to the information for an instruments group.
+// AInstrGroup provides access to the information for an instruments group.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IInstrGroup : public virtual IObject
+class LOMSE_EXPORT AInstrGroup : public virtual AObject
 {
-    LOMSE_DECLARE_IM_API_CLASS(IInstrGroup, ImoInstrGroup)
-    friend class IScore;
+    LOMSE_DECLARE_IM_API_CLASS(AInstrGroup, ImoInstrGroup)
+    friend class AScore;
 
     //access to group properties
     EJoinBarlines barlines_mode() const;
@@ -243,9 +312,9 @@ class LOMSE_EXPORT IInstrGroup : public virtual IObject
 
     //instruments in the group
     int num_instruments() const;
-    IInstrument instrument_at(int iInstr) const;  //iInstr = 0..num-instrs-in-group - 1
-    IInstrument first_instrument() const;
-    IInstrument last_instrument() const;
+    AInstrument instrument_at(int iInstr) const;  //iInstr = 0..num-instrs-in-group - 1
+    AInstrument first_instrument() const;
+    AInstrument last_instrument() const;
     int index_to_first_instrument() const;
     int index_to_last_instrument() const;
     bool set_range(int iFirstInstr, int iLastInstr);
@@ -260,14 +329,14 @@ class LOMSE_EXPORT IInstrGroup : public virtual IObject
 
 
 //---------------------------------------------------------------------------------------
-// ILink is a container for inline objects, and reprensents a clickable 'link'
+// ALink is a container for inline objects, and reprensents a clickable 'link'
 // object that creates hyperlinks. It is similar to the HTML \<a\> element.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT ILink : public virtual IObject, public ISiblings, public IChildren
+class LOMSE_EXPORT ALink : public virtual AObject, public ISiblings, public IChildren
 {
-    LOMSE_DECLARE_IM_API_CLASS(ILink, ImoLink)
+    LOMSE_DECLARE_IM_API_CLASS(ALink, ImoLink)
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -279,14 +348,14 @@ class LOMSE_EXPORT ILink : public virtual IObject, public ISiblings, public IChi
 
 
 //---------------------------------------------------------------------------------------
-// IList represents a list of items and it is a container for IListItem objects.
+// AList represents a list of items and it is a container for AListItem objects.
 // It is equivalent to the HTML \<ol\> and \<ul\> elements.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IList : public virtual IObject, public ISiblings, public IChildren
+class LOMSE_EXPORT AList : public virtual AObject, public ISiblings, public IChildren
 {
-    LOMSE_DECLARE_IM_API_CLASS(IList, ImoList)
+    LOMSE_DECLARE_IM_API_CLASS(AList, ImoList)
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -298,15 +367,15 @@ class LOMSE_EXPORT IList : public virtual IObject, public ISiblings, public IChi
 
 
 //---------------------------------------------------------------------------------------
-// IMidiInfo provides access to the MIDI information associated to a ISoundInfo object
-// for an instrument. MIDI info always exists in the ISoundInfo object.
+// AMidiInfo provides access to the MIDI information associated to a ASoundInfo object
+// for an instrument. MIDI info always exists in the ASoundInfo object.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IMidiInfo : public virtual IObject
+class LOMSE_EXPORT AMidiInfo : public virtual AObject
 {
-    LOMSE_DECLARE_IM_API_CLASS(IMidiInfo, ImoMidiInfo)
-    friend class ISoundInfo;
+    LOMSE_DECLARE_IM_API_CLASS(AMidiInfo, ImoMidiInfo)
+    friend class ASoundInfo;
 
     //getters
     int port() const;
@@ -343,14 +412,14 @@ class LOMSE_EXPORT IMidiInfo : public virtual IObject
 
 
 //---------------------------------------------------------------------------------------
-// IParagraph represents a paragraph. It is a block-level container, similar to the
+// AParagraph represents a paragraph. It is a block-level container, similar to the
 // HTML <p> element.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IParagraph : public virtual IObject, public ISiblings, public IChildren
+class LOMSE_EXPORT AParagraph : public virtual AObject, public ISiblings, public IChildren
 {
-    LOMSE_DECLARE_IM_API_CLASS(IParagraph, ImoParagraph)
+    LOMSE_DECLARE_IM_API_CLASS(AParagraph, ImoParagraph)
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -364,31 +433,31 @@ class LOMSE_EXPORT IParagraph : public virtual IObject, public ISiblings, public
 
 
 //---------------------------------------------------------------------------------------
-// IScore is the API object for interacting with the internal model for a music score.
+// AScore is the API object for interacting with the internal model for a music score.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT IScore : public virtual IObject, public ISiblings
+class LOMSE_EXPORT AScore : public virtual AObject, public ISiblings
 {
-    LOMSE_DECLARE_IM_API_CLASS(IScore, ImoScore)
+    LOMSE_DECLARE_IM_API_CLASS(AScore, ImoScore)
 
     //instruments: create/delete/move instruments and get information
-    IInstrument append_new_instrument();
+    AInstrument append_new_instrument();
     void delete_instrument(ImoId instrId);
-    void delete_instrument(IInstrument& instr);
+    void delete_instrument(AInstrument& instr);
     void move_up_instrument(ImoId instrId);
-    void move_up_instrument(IInstrument& instr);
+    void move_up_instrument(AInstrument& instr);
     void move_down_instrument(ImoId instrId);
-    void move_down_instrument(IInstrument& instr);
-    IInstrument instrument_at(int iInstr) const;   //0..n-1
+    void move_down_instrument(AInstrument& instr);
+    AInstrument instrument_at(int iInstr) const;   //0..n-1
     int num_instruments() const;
 
     //instrument groups
     int num_instruments_groups() const;
-    IInstrGroup instruments_group_at(int iGroup) const;   //0..n-1
-    IInstrGroup create_instruments_group(int iFirstInstr, int iLastInstr);
+    AInstrGroup instruments_group_at(int iGroup) const;   //0..n-1
+    AInstrGroup group_instruments(int iFirstInstr, int iLastInstr);
     bool delete_instruments_group_at(int iGroup);   //0..n-1
-    bool delete_instruments_group(const IInstrGroup& group);
+    bool delete_instruments_group(const AInstrGroup& group);
     void delete_all_instruments_groups();
 
     //Algorithms
@@ -410,40 +479,20 @@ class LOMSE_EXPORT IScore : public virtual IObject, public ISiblings
 
 
 //---------------------------------------------------------------------------------------
-// ISoundInfo class contains and manages the information for one sound, such as its
-// MIDI values. It always contains a IMidiInfo object.
-// An IInstrument always have at least one sound but can have more. For each sound there
-// is a ISoundInfo object and its associated IMidiInfo object.
+// ASoundInfo class contains and manages the information for one sound, such as its
+// MIDI values. It always contains a AMidiInfo object.
+// An AInstrument always have at least one sound but can have more. For each sound there
+// is a ASoundInfo object and its associated AMidiInfo object.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT ISoundInfo : public virtual IObject
+class LOMSE_EXPORT ASoundInfo : public virtual AObject
 {
-    LOMSE_DECLARE_IM_API_CLASS(ISoundInfo, ImoSoundInfo)
-    friend class IInstrument;
-
-//    //getters
-//    std::string& score_instr_name();
-//    std::string& score_instr_abbrev();
-//    std::string& score_instr_sound();
-//    bool score_instr_solo();
-//    bool score_instr_ensemble();
-//    int score_instr_ensemble_size();
-//    std::string& score_instr_virtual_library();
-//    std::string& score_instr_virtual_name();
-//
-//    //setters
-//    void set_score_instr_name(const std::string& value);
-//    void set_score_instr_abbrev(const std::string& value);
-//    void set_score_instr_sound(const std::string& value);
-//    void set_score_instr_solo(bool value);
-//    void set_score_instr_ensemble(bool value);
-//    void set_score_instr_ensemble_size(int value);
-//    void set_score_instr_virtual_library(const std::string& value);
-//    void set_score_instr_virtual_name(const std::string& value),
+    LOMSE_DECLARE_IM_API_CLASS(ASoundInfo, ImoSoundInfo)
+    friend class AInstrument;
 
     //access to MIDI info
-    IMidiInfo midi_info() const;
+    AMidiInfo midi_info() const;
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -455,13 +504,13 @@ class LOMSE_EXPORT ISoundInfo : public virtual IObject
 
 
 //---------------------------------------------------------------------------------------
-// ITextItem is an inline-level object containing a chunk of text with the same style.
+// ATextItem is an inline-level object containing a chunk of text with the same style.
 // See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
 // for all class members.
 //
-class LOMSE_EXPORT ITextItem : public virtual IObject, public ISiblings
+class LOMSE_EXPORT ATextItem : public virtual AObject, public ISiblings
 {
-    LOMSE_DECLARE_IM_API_CLASS(ITextItem, ImoTextItem)
+    LOMSE_DECLARE_IM_API_CLASS(ATextItem, ImoTextItem)
 
     // Transitional, to facilitate migration to this new public API.
     // Notice that this method will be removed in future so, please, if you need to
@@ -472,30 +521,8 @@ class LOMSE_EXPORT ITextItem : public virtual IObject, public ISiblings
 };
 
 
-////---------------------------------------------------------------------------------------
-//// IXxxxx is the API object for interacting with
-//// See: https://lenmus.github.io/lomse/classDocument.html  for details and documentation
-//// for all class members.
-////
-//class LOMSE_EXPORT IXxxxx : public virtual IObject
-//{
-//    LOMSE_DECLARE_IM_API_CLASS(IXxxxx, ImoXxxxx)
-//    friend class IInstrument;
-//
-//    // put here the member methods ---------------------
-//            //void do_something();
-//    // end of member methods ---------------------------
-//
-//    // Transitional, to facilitate migration to this new public API.
-//    // Notice that this method will be removed in future so, please, if you need to
-//    // use this method open an issue at https://github.com/lenmus/lomse/issues
-//    // explaining the need, so that the public API could be fixed and your app.
-//    // would not be affected in future when this method is removed.
-//    ImoXxxxx* internal_object() const;
-//};
-
-
 }   //namespace lomse
+///@endcond
 
 #endif    // __LOMSE_INTERNAL_MODEL_H__
 

@@ -435,19 +435,19 @@ EventControlPointMoved::EventControlPointMoved(EEventType type, WpInteractor wpI
 //=======================================================================================
 // RequestDynamic implementation
 //=======================================================================================
-IObject RequestDynamic::get_object()
+AObject RequestDynamic::get_object()
 {
-    return IObject(m_pObj, m_pDoc, m_pDoc->get_model_ref());
+    return AObject(m_pObj, m_pDoc, m_pDoc->get_model_ref());
 }
 
 //---------------------------------------------------------------------------------------
-IDocument RequestDynamic::get_document()
+ADocument RequestDynamic::get_document()
 {
-    return IDocument(m_pDoc);
+    return ADocument(m_pDoc);
 }
 
 //---------------------------------------------------------------------------------------
-void RequestDynamic::set_object(IObject& obj)
+void RequestDynamic::set_object(AObject& obj)
 {
     m_pObj = obj.internal_object();
 }

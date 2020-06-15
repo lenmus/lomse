@@ -38,6 +38,54 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    This enum defines the duration of one beat, for metronome related methods.
+
+    The metronome default behaviour corresponds to value <i>k_beat_implied</i>. In this
+    mode, the note implied a by a metronome beat is is given by the
+    time signature, e.g., 4/4 = four beats and each beat is a quarter note; 6/8 = two
+    beats and each beat is a dotted eight note; 3/8 = one beat and each beat is a dotted
+    eight note, etc.
+
+    But in some cases, you would like to subdivide or to group beats. For instance, to
+    subdivide a 6/8 metric, each beat should be an eight note, that is, the value
+    implied by the time signature bottom number. The value <i>k_beat_bottom_ts</i>
+    means this: to take the beat value from the note implied by the time signature
+    bottom number.
+
+    Notice that <i>k_beat_bottom_ts</i> is not useful to subdivide, for instance, a 4/4
+    metric, as the value implied by the time signature is ... a quarter note! So, for
+    other cases, value <i>k_beat_specified</i> uses as beat duration the note value
+    provided by the user.
+
+    @see Metronome::set_beat_type()
+
+    @#include <lomse_metronome.h>
+*/
+enum EBeatDuration
+{
+    k_beat_implied = 0,     ///< Implied by the time signature; e.g. 4/4 = four
+                            ///< beats, 6/8 = two beats, 3/8 = one beat.
+                            ///< The number of implied beats for a time signature is
+                            ///< provided by method ImoTimeSignature::num_pulses().
+                            ///< Basically, for simple time signatures, such as 4/4,
+                            ///< 3/4, 2/4, 3/8, and 2/2, the number of beats is given by
+                            ///< the time signature top number, with the exception of
+                            ///< 3/8 which is normally conducted in one beat. In compound
+                            ///< time signatures (6/x, 12/x, and 9/x) the number of beats
+                            ///< is given by dividing the top number by three.
+
+    k_beat_bottom_ts,       ///< Use the note duration implied by the time signature
+                            ///< bottom number; e.g. 3/8 = use eighth notes. Notice
+                            ///< that the number of beats will coincide with the
+                            ///< time signature top number, e.g. 3 beats for 3/8.
+
+    k_beat_specified,       ///< Use specified note value for beat duration.
+};
+
+
+//---------------------------------------------------------------------------------------
 /** Abstract class defining the interface for any Metronome
 */
 class Metronome
@@ -77,7 +125,7 @@ public:
 
     //setting beat type
 
-    /** Define the duration for one beat, for metronome and score player related
+    /** Defines the duration for one beat, for metronome and score player related
         methods. Changes while an score is being played back are ignored until
         playback finishes.
         @param type A value from enum #EBeatDuration.

@@ -244,8 +244,8 @@ public:
         %Document provides facade methods for the most common operations. */
     inline ImoDocument* get_im_root() const { return m_pImoDoc; }
 
-    /** Returns an IDocument object for interacting with the internal model.  */
-    IDocument get_document_api();
+    /** Returns an ADocument object for interacting with the internal model.  */
+    ADocument get_document_api();
 
 
     //LMD version used in the source or "0.0" in other cases

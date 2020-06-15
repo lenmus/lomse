@@ -654,7 +654,7 @@ INPUT     = mainpages \
 			../../include/lomse_tempo_line.h \
 			../../include/lomse_view.h \
 			../../include/lomse_visual_effect.h \
-			../../include/lomse_api_definitions.h \
+			../../include/lomse_internal_model.h \
             ../../src/internal_model/lomse_api_internal_model.cpp \
 			../../src/document/lomse_document.cpp \
             groups

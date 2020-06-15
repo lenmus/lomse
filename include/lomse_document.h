@@ -40,29 +40,29 @@ namespace lomse
 class Document;
 
 //---------------------------------------------------------------------------------------
-// The IDocument represents the whole document and allows to access and modify the
+// The ADocument represents the whole document and allows to access and modify the
 // content of the document.
 //
-class LOMSE_EXPORT IDocument
+class LOMSE_EXPORT ADocument
 {
 private:
     Document* m_pImpl;
     struct Private;
 
     friend class Document;
-    friend class IObject;
+    friend class AObject;
     friend class RequestDynamic;
-    IDocument(Document* impl);
+    ADocument(Document* impl);
 
     inline const Document* pimpl() const { return m_pImpl; }
     inline Document* pimpl() { return m_pImpl; }
 
 public:
-    IDocument() { m_pImpl = nullptr; }
-    IDocument(IDocument &&) noexcept = default;
-    IDocument& operator=(IDocument &&) noexcept = default;
-    IDocument(const IDocument& other) = default;
-    IDocument& operator=(const IDocument& other) = default;
+    ADocument() { m_pImpl = nullptr; }
+    ADocument(ADocument &&) noexcept = default;
+    ADocument& operator=(ADocument &&) noexcept = default;
+    ADocument(const ADocument& other) = default;
+    ADocument& operator=(const ADocument& other) = default;
 
 public:
 
@@ -73,13 +73,16 @@ public:
 
     //Access to content
     int num_children() const;
-    IObject child_at(int iItem) const;
-    IObject first_child() const;
-    IObject last_child() const;
-    IScore first_score() const;
+    AObject child_at(int iItem) const;
+    AObject first_child() const;
+    AObject last_child() const;
+    AScore first_score() const;
 
     //Create new detached objects
-    IObject create_object(EIObjectType type);
+    AObject create_object(EDocObject type);
+
+    //attach content
+    bool append_child(const AObject& detachedObj);
 
     //Page content scale
     float page_content_scale() const;
@@ -103,11 +106,6 @@ public:
     std::unique_ptr<ImoPageInfo> page_info() const;
 
     void end_of_changes();
-
-    //metronome settings, for scores
-    void define_metronome_beat(int beatType, TimeUnits duration=0.0);
-    int metronome_beat_type() const;
-    TimeUnits metronome_beat_duration() const;
 
     // Transitional, to facilitate migration to the new public API.
     // Notice that this method will be removed in future so, please, if you need to

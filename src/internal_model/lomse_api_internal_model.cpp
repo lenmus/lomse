@@ -44,45 +44,13 @@ namespace lomse
 //=======================================================================================
 // helper macro to simplify the implementation of internal model API objects
 
-#define LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IXxxx, ImoXxxx) \
-    IXxxx::IXxxx(ImoXxxx* impl, Document* doc, long imVers) \
-        : m_pImpl(impl) \
-        , m_pDoc(doc) \
-        , m_id(impl->get_id()) \
-        , m_imVersion(imVers) \
+#define LOMSE_IMPLEMENT_IM_API_CLASS(AXxxx, ImoXxxx, AParentClass) \
+    AXxxx::AXxxx(ImoObj* impl, Document* doc, long imVers) \
+        : AParentClass(impl, doc, imVers) \
     { \
     } \
-    IXxxx::IXxxx() \
-        : m_pImpl(nullptr) \
-        , m_pDoc(nullptr) \
-        , m_id(-1L) \
-        , m_imVersion(-1L) \
-    { \
-    } \
-    void IXxxx::ensure_validity() const \
-    { \
-        if (!m_pDoc->is_valid_model(m_imVersion)) \
-        { \
-            m_imVersion = m_pDoc->get_model_ref(); \
-            m_pImpl = static_cast<ImoXxxx*>(m_pDoc->get_pointer_to_imo(m_id)); \
-        } \
-    } \
-    bool IXxxx::is_valid() const \
-    { \
-        if (m_pImpl == nullptr) \
-            return false; \
-        ensure_validity(); \
-        return m_pImpl != nullptr; \
-    }
-
-
-#define LOMSE_IMPLEMENT_IM_API_CLASS(IXxxx, ImoXxxx, IParentClass) \
-    IXxxx::IXxxx(ImoObj* impl, Document* doc, long imVers) \
-        : IParentClass(impl, doc, imVers) \
-    { \
-    } \
-    IXxxx::IXxxx() \
-        : IParentClass() \
+    AXxxx::AXxxx() \
+        : AParentClass() \
     { \
     } \
 
@@ -91,75 +59,84 @@ namespace lomse
 //=======================================================================================
 // Documentation for API enums
 
-/** @file lomse_api_definitions.h
-*/
-//---------------------------------------------------------------------------------------
-/** @enum EJoinBarlines
+////---------------------------------------------------------------------------------------
+// /* * @enum EJoinBarlines
+//    @ingroup enumerations
+//
+//    Options to join barlines in instrument groups.
+//    k_non_joined_barlines = 0,      ///< Do not join the barlines of all instruments in the group.
+//    k_joined_barlines = 1,	        ///< join the barlines of all instruments in the group.
+//    k_mensurstrich_barlines = 2,    ///< join the barlines of all instruments in the group.
+////
+////    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+////    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+////    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+////
+////    Option 'k_truncate_barline_final' is the default behavior and it can be useful
+////    for score editors: staff lines will run always to right margin until a barline of
+////    type final is entered.
+////
+//    Option 'k_truncate_always' truncates staff lines after last staff object. It can
+//    be useful for creating score samples (i.e. for ebooks).
+//        k_isolated=0,       Independent barlines for each score part
+//        k_joined,           Barlines joined across all parts
+//        k_mensurstrich,     Barlines only in the gaps between parts, but not on
+//                            the staves of each part
+//
+//    @#include <lomse_internal_model.h>
+//*/
+
+
+////---------------------------------------------------------------------------------------
+// /* * @enum EGroupSymbol
+//    @ingroup enumerations
+//
+//    When several instruments form a group this enum indicates if a symbol for
+//    the group should be displayed in the score and what symbol to use.
+//
+//    @#include <lomse_internal_model.h>
+//*/
+////Doxygen: this does not work, but there are neither warnings nor errors !
+// /* * @enum EGroupSymbol
+//    @var k_group_symbol_brace
+//    @brief Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+//           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+//           quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+//           consequat.
+//*/
+// /* * @enum EGroupSymbol
+//    @var EGroupSymbol::k_group_symbol_brace
+//    @brief Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+//*/
+// /* * @enum EGroupSymbol
+//    @var EGroupSymbol::k_group_symbol_brace
+//    @brief Lorem ipsum dolor sit amet,
+//*/
+
+
+//-----------------------------------------------------------------------------
+/** @enum EDocObject
     @ingroup enumerations
 
-    Options to join barlines in instrument groups.
+    The values from this
+    enum are normally used in factory methods, to define the class of the object to
+    be created. For instance, in ADocument::create_object().
 
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-    Option 'k_truncate_barline_final' is the default behavior and it can be useful
-    for score editors: staff lines will run always to right margin until a barline of
-    type final is entered.
-
-    Option 'k_truncate_always' truncates staff lines after last staff object. It can
-    be useful for creating score samples (i.e. for ebooks).
-        k_isolated=0,       Independent barlines for each score part
-        k_joined,           Barlines joined across all parts
-        k_mensurstrich,     Barlines only in the gaps between parts, but not on
-                            the staves of each part
-
-    @#include <lomse_api_definitions.h>
+    @#include <lomse_internal_model.h>
 */
-//---------------------------------------------------------------------------------------
-/** @enum EGroupSymbol
-    @ingroup enumerations
-
-    When several instruments form a group this enum indicates if a symbol for
-    the group should be displayed in the score and what symbol to use.
-
-    @#include <lomse_api_definitions.h>
-*/
-//---------------------------------------------------------------------------------------
-//This does not work, but there are neither warnings nor errors !
-/* * @enum EGroupSymbol
-    @var k_group_symbol_brace
-    @brief Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-           quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-           consequat.
-*/
-/* * @enum EGroupSymbol
-    @var EGroupSymbol::k_group_symbol_brace
-    @brief Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-*/
-/* * @enum EGroupSymbol
-    @var EGroupSymbol::k_group_symbol_brace
+//Doxygen: this does not work, but there are neither warnings nor errors !
+/** @var EDocObject::k_obj_content
     @brief Lorem ipsum dolor sit amet,
 */
-//---------------------------------------------------------------------------------------
-/** @enum EBeatDuration
-    @ingroup enumerations
-
-    This enum defines the duration of one beat, for metronome and for methods that use
-    measure/beat to define a location.
-
-    @#include <lomse_api_definitions.h>
+/** @enum EDocObject
+    @var EDocObject::k_obj_heading
+    Lorem ipsum dolor sit amet,
 */
-//-----------------------------------------------------------------------------
-/** @enum EIObjectType
-    @ingroup enumerations
+/** @var k_obj_image
+    @brief Foo it with a C
 
-    This enum describes valid types for internal model API objects.
-
-    @#include <lomse_api_definitions.h>
-*/
-
+    When you use C... etc.
+ */
 
 
 //=======================================================================================
@@ -168,40 +145,93 @@ namespace lomse
 
 
 //=======================================================================================
-/** @class IObject
+/** @class AObject
     Abstract base class for all objects composing the document
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_ROOT_CLASS(IObject, ImoObj)
+//---------------------------------------------------------------------------------------
+/** @memberof AObject
+    Default constructor. Creates an empty (invalid) %AObject. Useful for methods that
+    returns an %AObject when a valid object cannot be returned.
+*/
+AObject::AObject()
+    : m_pImpl(nullptr)
+    , m_pDoc(nullptr)
+    , m_id(-1L)
+    , m_imVersion(-1L)
+{
+}
 
+//---------------------------------------------------------------------------------------
+/** @memberof AObject
+    Returns @FALSE when the object is not in a usable state. It is the equivalent to
+    checking if a pointer contains value @nullptr.
+
+    What happens if you tries to use it? The same than if you tries to use a @nullptr
+    pointer: a crash!
+*/
+bool AObject::is_valid() const
+{
+    if (m_pImpl == nullptr)
+        return false;
+    ensure_validity();
+    return m_pImpl != nullptr;
+}
+
+
+////---------------------------------------------------------------------------------------
+// /* * @memberof AObject
+//    Default constructor. Creates an empty (invalid) IObject. Useful for methods that
+//    returns an IObject when a valid object cannot be returned.
+//*/
 
 ///@cond INTERNALS
 
-struct IObject::Private
+//---------------------------------------------------------------------------------------
+AObject::AObject(ImoObj* impl, Document* doc, long imVers)
+    : m_pImpl(impl)
+    , m_pDoc(doc)
+    , m_id(impl->get_id())
+    , m_imVersion(imVers)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void AObject::ensure_validity() const
+{
+    if (!m_pDoc->is_valid_model(m_imVersion))
+    {
+        m_imVersion = m_pDoc->get_model_ref();
+        m_pImpl = static_cast<ImoObj*>(m_pDoc->get_pointer_to_imo(m_id));
+    }
+}
+
+//---------------------------------------------------------------------------------------
+struct AObject::Private
 {
     //-----------------------------------------------------------------------------------
-    static IObject downcast_content_obj(ImoObj* pImo, Document* pDoc)
+    static AObject downcast_content_obj(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return IObject();
+            return AObject();
 
         if (pImo->is_score())
         {
             ImoScore* pObj = static_cast<ImoScore*>(pImo);
-            return IScore(pObj, pDoc, pDoc->get_model_ref());
+            return AScore(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_content())
 //        {
 //            ImoContent* pObj = static_cast<ImoContent*>(pImo);
-//            return IContent>(new IContent(pObj, pDoc, pDoc->get_model_ref()) );
+//            return AContent>(new AContent(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else if (pImo->is_dynamic())
         {
             ImoDynamic* pObj = static_cast<ImoDynamic*>(pImo);
-            return IDynamic(pObj, pDoc, pDoc->get_model_ref());
+            return ADynamic(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_multi_column())
 //        {
@@ -211,46 +241,46 @@ struct IObject::Private
 //        else if (pImo->is_table())
 //        {
 //            ImoTable* pObj = static_cast<ImoTable*>(pImo);
-//            return ITable>(new ITable(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ATable>(new ATable(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else if (pImo->is_list())
         {
             ImoList* pObj = static_cast<ImoList*>(pImo);
-            return IList(pObj, pDoc, pDoc->get_model_ref());
+            return AList(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_table_row())
 //        {
 //            ImoTableRow* pObj = static_cast<ImoTableRow*>(pImo);
-//            return ITableRow>(new ITableRow(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ATableRow>(new ATableRow(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_list_item())
 //        {
 //            ImoListItem* pObj = static_cast<ImoListItem*>(pImo);
-//            return IListItem>(new IListItem(pObj, pDoc, pDoc->get_model_ref()) );
+//            return AListItem>(new AListItem(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_table_cell())
 //        {
 //            ImoTableCell* pObj = static_cast<ImoTableCell*>(pImo);
-//            return ITableCell>(new ITableCell(pObj, pDoc, pDoc->get_model_ref()) );
+//            return ATableCell>(new ATableCell(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_anonimous_block())
 //        {
 //            ImoAnonymousBlock* pObj = static_cast<ImoAnonymousBlock*>(pImo);
-//            return IAnonymousBlock>(new IAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
+//            return AAnonymousBlock>(new AAnonymousBlock(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else if (pImo->is_paragraph())
         {
             ImoParagraph* pObj = static_cast<ImoParagraph*>(pImo);
-            return IParagraph(pObj, pDoc, pDoc->get_model_ref());
+            return AParagraph(pObj, pDoc, pDoc->get_model_ref());
         }
 //        else if (pImo->is_heading())
 //        {
 //            ImoHeading* pObj = static_cast<ImoHeading*>(pImo);
-//            return IHeading>(new IHeading(pObj, pDoc, pDoc->get_model_ref()) );
+//            return AHeading>(new AHeading(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
         else
         {
-            return IObject(pImo, pDoc, pDoc->get_model_ref());
+            return AObject(pImo, pDoc, pDoc->get_model_ref());
         }
     }
 
@@ -258,29 +288,29 @@ struct IObject::Private
     //Document content traversal
 
     //-----------------------------------------------------------------------------------
-    static IObject previous_sibling(ImoObj* pImo, Document* pDoc)
+    static AObject previous_sibling(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return IObject();
+            return AObject();
 
         ImoObj* pSibling = pImo->get_prev_sibling();
         if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
         else
-            return IObject();
+            return AObject();
     }
 
     //-----------------------------------------------------------------------------------
-    static IObject next_sibling(ImoObj* pImo, Document* pDoc)
+    static AObject next_sibling(ImoObj* pImo, Document* pDoc)
     {
         if (pImo == nullptr)
-            return IObject();
+            return AObject();
 
         ImoObj* pSibling = pImo->get_next_sibling();
         if (pSibling)
             return downcast_content_obj(pSibling, pDoc);
         else
-            return IObject();
+            return AObject();
     }
 
 };
@@ -292,48 +322,48 @@ struct IObject::Private
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
+/** @memberof AObject
     Returns the internal unique identifier (ID) for this object. It could be required
     by some methods in the libray.
 */
-ImoId IObject::object_id() const
+ImoId AObject::object_id() const
 {
     ensure_validity();
     return m_pImpl->get_id();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
+/** @memberof AObject
     Returns the name of this object class. It is an string.
 */
-const std::string& IObject::object_name() const
+const std::string& AObject::object_name() const
 {
     ensure_validity();
     return m_pImpl->get_name();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns the IDocument owning this object.
+/** @memberof AObject
+    Returns the ADocument owning this object.
 */
-IDocument IObject::owner_document() const
+ADocument AObject::owner_document() const
 {
-    return IDocument(m_pDoc);
+    return ADocument(m_pDoc);
 }
 
 //@}    //Access to group properties
 
 
 /** @name Downcast objects
-    All API classes derive from base class %IObject. These downcasting methods
-    convert the %IObject to the derived class referenced by it.
+    All API classes derive from base class %AObject. These downcasting methods
+    convert the %AObject to the derived class referenced by it.
 */
 //@{
 
 ///@cond INTERNALS
-//protected class, for IDocument
+//protected class, for ADocument
 //---------------------------------------------------------------------------------------
-IObject IObject::downcast_to_content_obj()
+AObject AObject::downcast_to_content_obj()
 {
     return Private::downcast_content_obj(m_pImpl, m_pDoc);
 }
@@ -341,430 +371,430 @@ IObject IObject::downcast_to_content_obj()
 
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IDynamic. That is, if this %IObject references an
-    IDynamic object, this method returns the referenced IDynamic object. Otherwise,
-    it returns an invalid (nullptr) IDynamic.
+/** @memberof AObject
+    Downcasts this %AObject to an ADynamic. That is, if this %AObject references an
+    ADynamic object, this method returns the referenced ADynamic object. Otherwise,
+    it returns an invalid (nullptr) ADynamic.
 */
-IDynamic IObject::downcast_to_dynamic() const
+ADynamic AObject::downcast_to_dynamic() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_dynamic())
     {
         ImoDynamic* pObj = static_cast<ImoDynamic*>(m_pImpl);
-        return IDynamic(pObj, m_pDoc, m_imVersion);
+        return ADynamic(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IDynamic();
+        return ADynamic();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IInstrument. That is, if this %IObject references an
-    IInstrument object, this method returns the referenced IInstrument object. Otherwise,
-    it returns an invalid (nullptr) IInstrument.
+/** @memberof AObject
+    Downcasts this %AObject to an AInstrument. That is, if this %AObject references an
+    AInstrument object, this method returns the referenced AInstrument object. Otherwise,
+    it returns an invalid (nullptr) AInstrument.
 */
-IInstrument IObject::downcast_to_instrument() const
+AInstrument AObject::downcast_to_instrument() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_instrument())
     {
         ImoInstrument* pObj = static_cast<ImoInstrument*>(m_pImpl);
-        return IInstrument(pObj, m_pDoc, m_imVersion);
+        return AInstrument(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IInstrument();
+        return AInstrument();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IInstrument. That is, if this %IObject references an
-    IInstrument object, this method returns the referenced IInstrument object. Otherwise,
-    it returns an invalid (nullptr) IInstrument.
+/** @memberof AObject
+    Downcasts this %AObject to an AInstrument. That is, if this %AObject references an
+    AInstrument object, this method returns the referenced AInstrument object. Otherwise,
+    it returns an invalid (nullptr) AInstrument.
 */
-IInstrGroup IObject::downcast_to_instr_group() const
+AInstrGroup AObject::downcast_to_instr_group() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_instr_group())
     {
         ImoInstrGroup* pObj = static_cast<ImoInstrGroup*>(m_pImpl);
-        return IInstrGroup(pObj, m_pDoc, m_imVersion);
+        return AInstrGroup(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IInstrGroup();
+        return AInstrGroup();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an ILink. That is, if this %IObject references an
-    ILink object, this method returns the referenced ILink object. Otherwise,
-    it returns an invalid (nullptr) ILink.
+/** @memberof AObject
+    Downcasts this %AObject to an ALink. That is, if this %AObject references an
+    ALink object, this method returns the referenced ALink object. Otherwise,
+    it returns an invalid (nullptr) ALink.
 */
-ILink IObject::downcast_to_link() const
+ALink AObject::downcast_to_link() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_link())
     {
         ImoLink* pObj = static_cast<ImoLink*>(m_pImpl);
-        return ILink(pObj, m_pDoc, m_imVersion);
+        return ALink(pObj, m_pDoc, m_imVersion);
     }
     else
-        return ILink();
+        return ALink();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IList. That is, if this %IObject references an
-    IList object, this method returns the referenced IList object. Otherwise,
-    it returns an invalid (nullptr) IList.
+/** @memberof AObject
+    Downcasts this %AObject to an AList. That is, if this %AObject references an
+    AList object, this method returns the referenced AList object. Otherwise,
+    it returns an invalid (nullptr) AList.
 */
-IList IObject::downcast_to_list() const
+AList AObject::downcast_to_list() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_list())
     {
         ImoList* pObj = static_cast<ImoList*>(m_pImpl);
-        return IList(pObj, m_pDoc, m_imVersion);
+        return AList(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IList();
+        return AList();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IParagraph. That is, if this %IObject references an
-    IParagraph object, this method returns the referenced IParagraph object. Otherwise,
-    it returns an invalid (nullptr) IParagraph.
+/** @memberof AObject
+    Downcasts this %AObject to an AParagraph. That is, if this %AObject references an
+    AParagraph object, this method returns the referenced AParagraph object. Otherwise,
+    it returns an invalid (nullptr) AParagraph.
 */
-IParagraph IObject::downcast_to_paragraph() const
+AParagraph AObject::downcast_to_paragraph() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_paragraph())
     {
         ImoParagraph* pObj = static_cast<ImoParagraph*>(m_pImpl);
-        return IParagraph(pObj, m_pDoc, m_imVersion);
+        return AParagraph(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IParagraph();
+        return AParagraph();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to an IScore. That is, if this %IObject references an
-    IScore object, this method returns the referenced IScore object. Otherwise,
-    it returns an invalid (nullptr) IScore.
+/** @memberof AObject
+    Downcasts this %AObject to an AScore. That is, if this %AObject references an
+    AScore object, this method returns the referenced AScore object. Otherwise,
+    it returns an invalid (nullptr) AScore.
 */
-IScore IObject::downcast_to_score() const
+AScore AObject::downcast_to_score() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_score())
     {
         ImoScore* pObj = static_cast<ImoScore*>(m_pImpl);
-        return IScore(pObj, m_pDoc, m_imVersion);
+        return AScore(pObj, m_pDoc, m_imVersion);
     }
     else
-        return IScore();
+        return AScore();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Downcasts this %IObject to a ITextItem. That is, if this %IObject references an
-    ITextItem object, this method returns the referenced ITextItem object. Otherwise,
-    it returns an invalid (nullptr) ITextItem.
+/** @memberof AObject
+    Downcasts this %AObject to a ATextItem. That is, if this %AObject references an
+    ATextItem object, this method returns the referenced ATextItem object. Otherwise,
+    it returns an invalid (nullptr) ATextItem.
 */
-ITextItem IObject::downcast_to_text_item() const
+ATextItem AObject::downcast_to_text_item() const
 {
     ensure_validity();
     if (m_pImpl && m_pImpl->is_text_item())
     {
         ImoTextItem* pObj = static_cast<ImoTextItem*>(m_pImpl);
-        return ITextItem(pObj, m_pDoc, m_imVersion);
+        return ATextItem(pObj, m_pDoc, m_imVersion);
     }
     else
-        return ITextItem();
+        return ATextItem();
 }
 
 //@}    //Downcast objects
 
 
 /** @name Check referenced object type
-    All API classes derive from base class %IObject. These testing methods
-    allow to check the type of derived object referenced by this %IObject.
+    All API classes derive from base class %AObject. These testing methods
+    allow to check the type of derived object referenced by this %AObject.
 */
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an anonymous block
-    (IAnonymousBlock class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an anonymous block
+    (AAnonymousBlock class)
 */
-bool IObject::is_anonymous_block() const
+bool AObject::is_anonymous_block() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_anonymous_block();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an button control
-    (IButton class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an button control
+    (AButton class)
 */
-bool IObject::is_button() const
+bool AObject::is_button() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_button();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an content block
-    (a \<div\> block), represented by the IContent class.
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an content block
+    (a \<div\> block), represented by the AContent class.
 */
-bool IObject::is_content() const
+bool AObject::is_content() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_content();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an control object
-    (IControl class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an control object
+    (AControl class)
 */
-bool IObject::is_control() const
+bool AObject::is_control() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_control();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a dynamically generated
-    content block (IDynamic class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a dynamically generated
+    content block (ADynamic class)
 */
-bool IObject::is_dynamic() const
+bool AObject::is_dynamic() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_dynamic();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a heading
-    (IHeading class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a heading
+    (AHeading class)
 */
-bool IObject::is_heading() const
+bool AObject::is_heading() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_heading();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an image
-    (IImage class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an image
+    (AImage class)
 */
-bool IObject::is_image() const
+bool AObject::is_image() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_image();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an generic inline-box
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an generic inline-box
     container (similar to the \<spam\> html element) represented by the
-    IInlineWrapper class.
+    AInlineWrapper class.
 */
-bool IObject::is_inline_wrapper() const
+bool AObject::is_inline_wrapper() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_inline_wrapper();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an score instrument
-    (IInstrument class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an score instrument
+    (AInstrument class)
 */
-bool IObject::is_instrument() const
+bool AObject::is_instrument() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_instrument();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an score instruments group
-    (IInstrGroup class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an score instruments group
+    (AInstrGroup class)
 */
-bool IObject::is_instr_group() const
+bool AObject::is_instr_group() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_instr_group();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is an hyperlink
-    (ILink class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is an hyperlink
+    (ALink class)
 */
-bool IObject::is_link() const
+bool AObject::is_link() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_link();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a list
-    (IList class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a list
+    (AList class)
 */
-bool IObject::is_list() const
+bool AObject::is_list() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_list();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a list item
-    (IListItem class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a list item
+    (AListItem class)
 */
-bool IObject::is_list_item() const
+bool AObject::is_list_item() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_listitem();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a MIDI properties object
-    (IMidiInfo class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a MIDI properties object
+    (AMidiInfo class)
 */
-bool IObject::is_midi_info() const
+bool AObject::is_midi_info() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_midi_info();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a multi-column container
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a multi-column container
     object (IMultiColumn class)
 */
-bool IObject::is_multicolumn() const
+bool AObject::is_multicolumn() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_multicolumn();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a container describing the
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a container describing the
     musical content for an instrument
     (IMusicData class)
 */
-bool IObject::is_music_data() const
+bool AObject::is_music_data() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_music_data();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a paragraph
-    (IParagraph class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a paragraph
+    (AParagraph class)
 */
-bool IObject::is_paragraph() const
+bool AObject::is_paragraph() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_paragraph();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a music score
-    (IScore class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a music score
+    (AScore class)
 */
-bool IObject::is_score() const
+bool AObject::is_score() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_score();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a sound properties object
-    (ISoundInfo class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a sound properties object
+    (ASoundInfo class)
 */
-bool IObject::is_sound_info() const
+bool AObject::is_sound_info() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_sound_info();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a table
-    (ITable class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a table
+    (ATable class)
 */
-bool IObject::is_table() const
+bool AObject::is_table() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_table();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a cell for a table
-    (ITableCell class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a cell for a table
+    (ATableCell class)
 */
-bool IObject::is_table_cell() const
+bool AObject::is_table_cell() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_table_cell();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is the body for a table
-    (ITableBody class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is the body for a table
+    (ATableBody class)
 */
-bool IObject::is_table_body() const
+bool AObject::is_table_body() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_table_body();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is the head for a table
-    (ITableHead class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is the head for a table
+    (ATableHead class)
 */
-bool IObject::is_table_head() const
+bool AObject::is_table_head() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_table_head();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a row for a table
-    (ITableRow class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a row for a table
+    (ATableRow class)
 */
-bool IObject::is_table_row() const
+bool AObject::is_table_row() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_table_row();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
-    Returns @TRUE if the object referenced by this %IObject is a chunk of text
-    (ITextItem class)
+/** @memberof AObject
+    Returns @TRUE if the object referenced by this %AObject is a chunk of text
+    (ATextItem class)
 */
-bool IObject::is_text_item() const
+bool AObject::is_text_item() const
 {
     ensure_validity();
     return const_cast<ImoObj*>(pimpl())->is_text_item();
@@ -774,7 +804,7 @@ bool IObject::is_text_item() const
 
 
 //---------------------------------------------------------------------------------------
-/** @memberof IObject
+/** @memberof AObject
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -782,7 +812,7 @@ bool IObject::is_text_item() const
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoObj* IObject::internal_object() const
+ImoObj* AObject::internal_object() const
 {
     return const_cast<ImoObj*>(pimpl());
 }
@@ -791,10 +821,10 @@ ImoObj* IObject::internal_object() const
 
 //=======================================================================================
 /** @class ISiblings
-    @extends IObject
+    @extends AObject
     ISiblings class provides sibling traversal methods for objects supporting them
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(ISiblings, ImoObj, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(ISiblings, ImoObj, AObject)
 
 
 /// @name Document content traversal
@@ -803,19 +833,19 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ISiblings, ImoObj, IObject)
 //---------------------------------------------------------------------------------------
 /** @memberof ISiblings
 */
-IObject ISiblings::previous_sibling() const
+AObject ISiblings::previous_sibling() const
 {
     ensure_validity();
-    return IObject::Private::previous_sibling(m_pImpl, m_pDoc);
+    return AObject::Private::previous_sibling(m_pImpl, m_pDoc);
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof ISiblings
 */
-IObject ISiblings::next_sibling() const
+AObject ISiblings::next_sibling() const
 {
     ensure_validity();
-    return IObject::Private::next_sibling(m_pImpl, m_pDoc);
+    return AObject::Private::next_sibling(m_pImpl, m_pDoc);
 }
 
 //@}    //Document content traversal
@@ -824,9 +854,9 @@ IObject ISiblings::next_sibling() const
 
 //=======================================================================================
 /** @class IChildren
-    @extends IObject
+    @extends AObject
     Some API clases present a virtual structure similar to a tree. For
-    instance, IParagraph class can be seen as a container for text with different styles.
+    instance, AParagraph class can be seen as a container for text with different styles.
     Thus, the following LDP source code:
     @code
         (para (txt (style bold) "Hello") (txt " world! ")(txt "It is a nice day!"))
@@ -835,7 +865,7 @@ IObject ISiblings::next_sibling() const
     will produce the following structure of API classes:
 
     @verbatim
-                                   IParagraph
+                                   AParagraph
                                         |
                        +----------------+----------------+
                        |                |                |
@@ -843,12 +873,12 @@ IObject ISiblings::next_sibling() const
                    "Hello"          " world! "    "It is a nice day!"
     @endverbatim
 
-    For objects, such as IParagraph, that organizes its content in a tree, class
+    For objects, such as AParagraph, that organizes its content in a tree, class
     %IChildren provides the methods for child content traversal. %IChildren is just an
     interface class and thus, you will never directly manage IChildren objects but
     objects derived from this class.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IChildren, ImoObj, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(IChildren, ImoObj, AObject)
 
 
 /// @name Document content traversal
@@ -881,7 +911,7 @@ int IChildren::num_children() const
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-IObject IChildren::child_at(int iItem) const
+AObject IChildren::child_at(int iItem) const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
@@ -889,7 +919,7 @@ IObject IChildren::child_at(int iItem) const
         ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
         ImoContentObj* pImo = pBlock->get_content_item(iItem);
         if (pImo)
-            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+            return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
     else if (m_pImpl->is_inlines_container())
     {
@@ -897,70 +927,70 @@ IObject IChildren::child_at(int iItem) const
         if (iItem < pBlock->get_num_children())
         {
             ImoObj* pImo = pBlock->get_child(iItem);
-            return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+            return AObject::Private::downcast_content_obj(pImo, m_pDoc);
         }
     }
     else if (m_pImpl->is_box_inline())
     {
         ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
         ImoInlineLevelObj* pImo = pBlock->get_item(iItem);
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return IObject();
+    return AObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-IObject IChildren::first_child() const
+AObject IChildren::first_child() const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
     {
         ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
         ImoContentObj* pImo = pBlock->get_first_content_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
     else if (m_pImpl->is_inlines_container())
     {
         ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
         ImoContentObj* pImo = pBlock->get_first_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
     else if (m_pImpl->is_box_inline())
     {
         ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
         ImoInlineLevelObj* pImo = pBlock->get_first_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return IObject();
+    return AObject();
 }
 
 //---------------------------------------------------------------------------------------
 /** @memberof IChildren
 */
-IObject IChildren::last_child() const
+AObject IChildren::last_child() const
 {
     ensure_validity();
     if (m_pImpl->is_blocks_container())
     {
         ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
         ImoContentObj* pImo = pBlock->get_last_content_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
     else if (m_pImpl->is_inlines_container())
     {
         ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
         ImoContentObj* pImo = pBlock->get_last_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
     else if (m_pImpl->is_box_inline())
     {
         ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
         ImoInlineLevelObj* pImo = pBlock->get_last_item();
-        return IObject::Private::downcast_content_obj(pImo, m_pDoc);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
     }
-    return IObject();
+    return AObject();
 }
 
 //@}    //Document content traversal
@@ -968,28 +998,32 @@ IObject IChildren::last_child() const
 
 
 //=======================================================================================
-/** @class IDynamic
-    @extends IObject
+/** @class ADynamic
+    @extends AObject
     @extends ISiblings
     @extends IChildren
-    %IDynamic represents external content that is injected dynamically into the document
+    %ADynamic represents external content that is injected dynamically into the document
     by the user application. It is equivalent to the HTML \<object\> element.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IDynamic, ImoDynamic, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(ADynamic, ImoDynamic, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDynamic
+/** @memberof ADynamic
     Returns the value of the <i>classid</i> attribute. It defines the type of dynamic
     content that this object represents.
 */
-std::string& IDynamic::classid()
+std::string& ADynamic::classid()
 {
     ensure_validity();
     return const_cast<ImoDynamic*>(pimpl())->get_classid();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IDynamic
+/** @memberof ADynamic
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -997,7 +1031,7 @@ std::string& IDynamic::classid()
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoDynamic* IDynamic::internal_object() const
+ImoDynamic* ADynamic::internal_object() const
 {
     return const_cast<ImoDynamic*>(pimpl());
 }
@@ -1005,9 +1039,9 @@ ImoDynamic* IDynamic::internal_object() const
 
 
 //=======================================================================================
-/** @class IInstrument
-    @extends IObject
-    %IInstrument represents an instrument on the score. For lomse, an instrument refers
+/** @class AInstrument
+    @extends AObject
+    %AInstrument represents an instrument on the score. For lomse, an instrument refers
     to a physical musical instrument, such as a violin, a flute, or a piano. It is
     represented by one or more staves and is modeled as the collection of all aspects
     pertaining to the visual display of the staff/staves as they appear on the printed
@@ -1026,25 +1060,25 @@ ImoDynamic* IDynamic::internal_object() const
     other layout. But for compatibility with MusicXML, lomse allows that several
     instruments share the same staves. As a consequence, a lomse instrument could
     represent several real instruments and, thus, could have several sound information
-    objects (ISoundInfo objects) each of them containing the sound information for each
+    objects (ASoundInfo objects) each of them containing the sound information for each
     real physical instrument that is sharing the staff.
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IInstrument, ImoInstrument, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AInstrument, ImoInstrument, AObject)
 
 
 /// @name Name and abbreviation
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
+/** @memberof AInstrument
     Returns the name of the instrument, that is the string that is placed at the start of
     the first system in the score.
 */
-std::string& IInstrument::name_string() const
+std::string& AInstrument::name_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_name();
@@ -1052,11 +1086,11 @@ std::string& IInstrument::name_string() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
+/** @memberof AInstrument
     Returns the short, abbreviated name that appears on every system other than
     the first system.
 */
-std::string& IInstrument::abbreviation_string() const
+std::string& AInstrument::abbreviation_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrument*>(pimpl())->get_abbrev();
@@ -1064,7 +1098,7 @@ std::string& IInstrument::abbreviation_string() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
+/** @memberof AInstrument
     Sets the name of the instrument, that is the string that is placed at the start of
     the first system in the score.
 
@@ -1074,18 +1108,18 @@ std::string& IInstrument::abbreviation_string() const
     second staff for the instrument. Or renaming  “Trumpets in Bb” to “Trumpets in C”
     does not change the transposition information.
 */
-void IInstrument::set_name_string(const string& name)
+void AInstrument::set_name_string(const string& name)
 {
     ensure_validity();
     pimpl()->set_name(name);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
+/** @memberof AInstrument
     Sets the short, abbreviated name that appears on every system other than
     the first system.
 */
-void IInstrument::set_abbreviation_string(const string& abbrev)
+void AInstrument::set_abbreviation_string(const string& abbrev)
 {
     ensure_validity();
     pimpl()->set_abbrev(abbrev);
@@ -1098,10 +1132,10 @@ void IInstrument::set_abbreviation_string(const string& abbrev)
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
-    Returns the number of ISoundInfo elements contained in this instrument, at least one.
+/** @memberof AInstrument
+    Returns the number of ASoundInfo elements contained in this instrument, at least one.
 
-    An %IInstruments always have at least one sound, represented by an ISoundInfo object.
+    An %AInstruments always have at least one sound, represented by an ASoundInfo object.
     But there are cases in which the staves for an instrument contain the music for
     more than one real instrument. For instance the bass and tenor voices in a choral
     can be placed in a single staff, or the different percussion instruments can share
@@ -1109,35 +1143,35 @@ void IInstrument::set_abbreviation_string(const string& abbrev)
     instruments there is aISoundInfo object for each real physical instrument that is
     sharing the staff.
 
-    Method IInstrument::num_sounds() informs about the number of ISoundInfo objects
+    Method AInstrument::num_sounds() informs about the number of ASoundInfo objects
     that this instrument contains. Always at least one.
 */
-int IInstrument::num_sounds() const
+int AInstrument::num_sounds() const
 {
     ensure_validity();
     return const_cast<ImoInstrument*>(pimpl())->get_num_sounds();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
-    Returns the ISoundInfo object at a given position in the collection of sounds
+/** @memberof AInstrument
+    Returns the ASoundInfo object at a given position in the collection of sounds
     for this instrument.
 
     In cases in which a lomse instrument represents several real
-    instruments there is a collection of ISoundInfo objects, one for each real physical
+    instruments there is a collection of ASoundInfo objects, one for each real physical
     instrument that is sharing the staff.
 
-    IInstrument::sound_info_at(0) is always valid and returns the only ISoundInfo
-    object for normal cases and the first ISoundInfo object when several real instruments
-    are represented by a single IInstrument object.
+    AInstrument::sound_info_at(0) is always valid and returns the only ASoundInfo
+    object for normal cases and the first ASoundInfo object when several real instruments
+    are represented by a single AInstrument object.
 
     @param iSound   The index (0..n-1) to the requested sound info object.
 
 */
-ISoundInfo IInstrument::sound_info_at(int iSound) const
+ASoundInfo AInstrument::sound_info_at(int iSound) const
 {
     ensure_validity();
-    return ISoundInfo(const_cast<ImoInstrument*>(pimpl())->get_sound_info(iSound),
+    return ASoundInfo(const_cast<ImoInstrument*>(pimpl())->get_sound_info(iSound),
                       m_pDoc, m_imVersion);
 }
 
@@ -1145,7 +1179,7 @@ ISoundInfo IInstrument::sound_info_at(int iSound) const
 
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrument
+/** @memberof AInstrument
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1153,25 +1187,25 @@ ISoundInfo IInstrument::sound_info_at(int iSound) const
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoInstrument* IInstrument::internal_object() const
+ImoInstrument* AInstrument::internal_object() const
 {
     return const_cast<ImoInstrument*>(pimpl());
 }
 
 
 //=======================================================================================
-/** @class IInstrGroup
-    @extends IObject
-    %IInstrGroup is the API object for interacting with the internal model Bla,bla bla...
+/** @class AInstrGroup
+    @extends AObject
+    %AInstrGroup is the API object for interacting with the internal model Bla,bla bla...
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AInstrGroup, ImoInstrGroup, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1179,7 +1213,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IInstrGroup, ImoInstrGroup, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoInstrGroup* IInstrGroup::internal_object() const
+ImoInstrGroup* AInstrGroup::internal_object() const
 {
     return const_cast<ImoInstrGroup*>(pimpl());
 }
@@ -1189,11 +1223,11 @@ ImoInstrGroup* IInstrGroup::internal_object() const
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns a value from enum EJoinBarlines indicating how the barlines for the
     instruments in the group will be displayed.
 */
-EJoinBarlines IInstrGroup::barlines_mode() const
+EJoinBarlines AInstrGroup::barlines_mode() const
 {
     ensure_validity();
     return static_cast<EJoinBarlines>(
@@ -1201,11 +1235,11 @@ EJoinBarlines IInstrGroup::barlines_mode() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns a value from enum EGroupSymbol indicating what symbol will be displayed for
     marking the instruments that form the group.
 */
-EGroupSymbol IInstrGroup::symbol() const
+EGroupSymbol AInstrGroup::symbol() const
 {
     ensure_validity();
     return static_cast<EGroupSymbol>(
@@ -1213,11 +1247,11 @@ EGroupSymbol IInstrGroup::symbol() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the name of the group, that is the string for the group that is placed at
     the start of the first system in the score.
 */
-const std::string& IInstrGroup::name_string() const
+const std::string& AInstrGroup::name_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_name();
@@ -1225,11 +1259,11 @@ const std::string& IInstrGroup::name_string() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the short, abbreviated name of the group. This is the string for the group
     that appears on every system other than the first system.
 */
-const std::string& IInstrGroup::abbreviation_string() const
+const std::string& AInstrGroup::abbreviation_string() const
 {
     ensure_validity();
     ImoScoreText& text = const_cast<ImoInstrGroup*>(pimpl())->get_abbrev();
@@ -1243,44 +1277,44 @@ const std::string& IInstrGroup::abbreviation_string() const
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Sets the symbol that will be displayed for marking the instruments that form the
     group. Must be a value from enum EGroupSymbol.
 */
-void IInstrGroup::set_symbol(EGroupSymbol symbol)
+void AInstrGroup::set_symbol(EGroupSymbol symbol)
 {
     ensure_validity();
     pimpl()->set_symbol(symbol);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Defines how the barlines for the instruments in the group will be displayed.
     Parameter must be a value from enum EJoinBarlines.
 */
-void IInstrGroup::set_barlines_mode(EJoinBarlines value)
+void AInstrGroup::set_barlines_mode(EJoinBarlines value)
 {
     ensure_validity();
     pimpl()->set_join_barlines(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Sets the name of the group, that is the string for the group that is placed at the
     start of the first system in the score.
 */
-void IInstrGroup::set_name_string(const std::string& name)
+void AInstrGroup::set_name_string(const std::string& name)
 {
     ensure_validity();
     pimpl()->set_name(name);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Sets the short, abbreviated name for the group that appears on every system other
     than the first one.
 */
-void IInstrGroup::set_abbreviation_string(const std::string& abbrev)
+void AInstrGroup::set_abbreviation_string(const std::string& abbrev)
 {
     ensure_validity();
     pimpl()->set_abbrev(abbrev);
@@ -1293,78 +1327,78 @@ void IInstrGroup::set_abbreviation_string(const std::string& abbrev)
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the number of instruments included in the group.
 */
-int IInstrGroup::num_instruments() const
+int AInstrGroup::num_instruments() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_num_instruments();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the instrument at position <i>pos</i> in the group. First instrument in the
     group is position 0.
 */
-IInstrument IInstrGroup::instrument_at(int pos) const
+AInstrument AInstrGroup::instrument_at(int pos) const
 {
     ensure_validity();
     ImoInstrGroup* pGrp = const_cast<ImoInstrGroup*>(pimpl());
     if (pos < 0 || pos >= pGrp->get_num_instruments())
-        return IInstrument();
+        return AInstrument();
 
-    return IInstrument(pGrp->get_instrument(pos), m_pDoc, m_imVersion);
+    return AInstrument(pGrp->get_instrument(pos), m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the first instrument included in the group.
 */
-IInstrument IInstrGroup::first_instrument() const
+AInstrument AInstrGroup::first_instrument() const
 {
     ensure_validity();
-    return IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_first_instrument(),
+    return AInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_first_instrument(),
                        m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the last instrument included in the group.
 */
-IInstrument IInstrGroup::last_instrument() const
+AInstrument AInstrGroup::last_instrument() const
 {
     ensure_validity();
-    return IInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_last_instrument(),
+    return AInstrument(const_cast<ImoInstrGroup*>(pimpl())->get_last_instrument(),
                        m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the index, referred to the score, of the first instrument included in the
     group. The returned index is the position occupied by this instrument in the score
     (0 based: 0 .. num.instrs - 1)
 */
-int IInstrGroup::index_to_first_instrument() const
+int AInstrGroup::index_to_first_instrument() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_index_to_first_instrument();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Returns the index, referred to the score, of the last instrument included in the
     group. The returned index is the position occupied by this instrument in the score
     (0 based: 0 .. num.instrs - 1)
 */
-int IInstrGroup::index_to_last_instrument() const
+int AInstrGroup::index_to_last_instrument() const
 {
     ensure_validity();
     return const_cast<ImoInstrGroup*>(pimpl())->get_index_to_last_instrument();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IInstrGroup
+/** @memberof AInstrGroup
     Defines the instruments that will be included in the group. Returns @FALSE if
     any error.
     @param iFirstInstr  Position in the score of the first instrument to be included in
@@ -1375,7 +1409,7 @@ int IInstrGroup::index_to_last_instrument() const
     Notice that <i>iFirstInstr</i> must be lower than <i>iLastInstr</i>. Otherwise
     this method will do nothing.
 */
-bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
+bool AInstrGroup::set_range(int iFirstInstr, int iLastInstr)
 {
     ensure_validity();
     ImoScore* pScore = pimpl()->get_score();
@@ -1397,17 +1431,21 @@ bool IInstrGroup::set_range(int iFirstInstr, int iLastInstr)
 
 
 //=======================================================================================
-/** @class ILink
-    @extends IObject
+/** @class ALink
+    @extends AObject
     @extends ISiblings
     @extends IChildren
-    %ILink is a container for inline objects, and reprensents a clickable 'link'
+    %ALink is a container for inline objects, and reprensents a clickable 'link'
     object that creates hyperlinks. It is similar to the HTML \<a\> element.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(ILink, ImoLink, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(ALink, ImoLink, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof ILink
+/** @memberof ALink
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1415,7 +1453,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ILink, ImoLink, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoLink* ILink::internal_object() const
+ImoLink* ALink::internal_object() const
 {
     return const_cast<ImoLink*>(pimpl());
 }
@@ -1423,18 +1461,22 @@ ImoLink* ILink::internal_object() const
 
 
 //=======================================================================================
-/** @class IList
-    @extends IObject
+/** @class AList
+    @extends AObject
     @extends ISiblings
     @extends IChildren
-    %IList represents a list of items and it is a container for IListItem objects.
+    %AList represents a list of items and it is a container for AListItem objects.
     It is equivalent to the HTML \<ol\> and \<ul\> elements. The type of list, ordered
-    or unordered, is an attribute of the IList object.
+    or unordered, is an attribute of the AList object.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IList, ImoList, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AList, ImoList, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof IList
+/** @memberof AList
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1442,7 +1484,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IList, ImoList, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoList* IList::internal_object() const
+ImoList* AList::internal_object() const
 {
     return const_cast<ImoList*>(pimpl());
 }
@@ -1450,10 +1492,10 @@ ImoList* IList::internal_object() const
 
 
 //=======================================================================================
-/** @class IMidiInfo
-    @extends IObject
-    %IMidiInfo provides access to the MIDI information associated to a ISoundInfo object
-    for an instrument. MIDI info always exists in the ISoundInfo object.
+/** @class AMidiInfo
+    @extends AObject
+    %AMidiInfo provides access to the MIDI information associated to a ASoundInfo object
+    for an instrument. MIDI info always exists in the ASoundInfo object.
     By default, when no MIDI information is provided in the source file or when
     programatically building a score, MIDI information is initialized as follows:
 
@@ -1472,7 +1514,7 @@ ImoList* IList::internal_object() const
     'port', 'channel' or both could have not been specified and, thus, any of them can
     still in "not initialized". In these cases, port and channel are automatically
     assigned right values when the score is finished, that is, when invoking
-    IScore::end_of_changes() method. The algorithm, in method
+    AScore::end_of_changes() method. The algorithm, in method
     MidiAssigner::assign_port_and_channel(), ensures that
     each instrument is assigned a unique combination (port, channel) for all instruments
     with port or channel containig the "not initialized" value.
@@ -1481,10 +1523,10 @@ ImoList* IList::internal_object() const
     events that only uses the MIDI channel, program and volume information. All other
     MIDI information, such as bank, port or elevation is currently ignored.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IMidiInfo, ImoMidiInfo, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AMidiInfo, ImoMidiInfo, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1492,108 +1534,108 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IMidiInfo, ImoMidiInfo, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoMidiInfo* IMidiInfo::internal_object() const
+ImoMidiInfo* AMidiInfo::internal_object() const
 {
     return const_cast<ImoMidiInfo*>(pimpl());
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI port assigned to this sound.
     It is a number from 1 to 16 that can be used with the unofficial MIDI port
     (or cable) meta event.
 */
-int IMidiInfo::port() const
+int AMidiInfo::port() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_port();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI device name assigned to this sound.
     It will be used in the DeviceName meta-event when exporting the score as a
     Standard MIDI File (not yet implemented).
 */
-std::string& IMidiInfo::device_name() const
+std::string& AMidiInfo::device_name() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_device_name();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI program name assigned to this sound.
     It will be used in the ProgramName meta-events when exporting the score as
     a Standard MIDI File (not yet implemented).
 */
-std::string& IMidiInfo::program_name() const
+std::string& AMidiInfo::program_name() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_name();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI bank assigned to this sound. MIDI 1.0 bank numbers range
     from 1 to 16,384.
 */
-int IMidiInfo::bank() const
+int AMidiInfo::bank() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_bank() + 1;
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI channel assigned to this sound. MIDI 1.0 channel numbers range
     from 1 to 16.
 */
-int IMidiInfo::channel() const
+int AMidiInfo::channel() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_channel() + 1;
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI program number assigned to this sound. MIDI 1.0 program numbers
     range from 1 to 128.
 */
-int IMidiInfo::program() const
+int AMidiInfo::program() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_program() + 1;
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the unpitched note number assigned to this sound. It is only meaningfull
     for unpitched instruments and, for them, it specifies a MIDI 1.0 note number
     ranging from 0 to 127. It is usually used with MIDI banks for percussion.
 */
-int IMidiInfo::unpitched() const
+int AMidiInfo::unpitched() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_unpitched();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI volume assigned to this sound.
     The volume value is a percentage of the maximum, ranging from 0.0 to 1.0, with
     decimal values allowed.
     This corresponds to a scaling value for the MIDI 1.0
     channel volume controller.
 */
-float IMidiInfo::volume() const
+float AMidiInfo::volume() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_volume();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI pan value assigned to this sound.
     Pan and elevation allow placing of sound in a 3-D space relative to the listener.
     Pan refers to the horizontal position around the listener, expressed
@@ -1602,14 +1644,14 @@ float IMidiInfo::volume() const
         -90 is hard left, 90 is hard right, and
        -180 or 180 are directly behind the listener, centered.
 */
-int IMidiInfo::pan() const
+int AMidiInfo::pan() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_pan();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Returns the MIDI elevation value assigned to this sound.
     Pan and elevation allow placing of sound in a 3-D space relative to the listener.
     Elevation refers to the vertical position around the listener, expressed
@@ -1617,109 +1659,109 @@ int IMidiInfo::pan() const
          0 is level with the listener head,
         90 is directly above, and -90 is directly below.
 */
-int IMidiInfo::elevation() const
+int AMidiInfo::elevation() const
 {
     ensure_validity();
     return const_cast<ImoMidiInfo*>(pimpl())->get_midi_elevation();
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI port to use for this sound.
     It is a number from 1 to 16 that can be used with the unofficial MIDI port
     (or cable) meta event.
 */
-void IMidiInfo::set_port(int value)
+void AMidiInfo::set_port(int value)
 {
     ensure_validity();
     pimpl()->set_midi_port(value - 1);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI device name to use for this sound.
     It will be used in the DeviceName meta-event when exporting the score as a
     Standard MIDI File (not yet implemented).
 */
-void IMidiInfo::set_device_name(const std::string& value)
+void AMidiInfo::set_device_name(const std::string& value)
 {
     ensure_validity();
     pimpl()->set_midi_device_name(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI program name to use for this sound.
     It will be used in the ProgramName meta-events when exporting the score as
     a Standard MIDI File (not yet implemented).
 */
-void IMidiInfo::set_program_name(const std::string& value)
+void AMidiInfo::set_program_name(const std::string& value)
 {
     ensure_validity();
     pimpl()->set_midi_name(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI bank to use for this sound. MIDI 1.0 bank numbers range
     from 1 to 16,384.
 */
-void IMidiInfo::set_bank(int value)
+void AMidiInfo::set_bank(int value)
 {
     ensure_validity();
     pimpl()->set_midi_bank(value - 1);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI channel to use for this sound. MIDI 1.0 channel numbers range
     from 1 to 16.
 */
-void IMidiInfo::set_channel(int value)
+void AMidiInfo::set_channel(int value)
 {
     ensure_validity();
     pimpl()->set_midi_channel(value - 1);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI program number to use for this sound. MIDI 1.0 program numbers
     range from 1 to 128.
 */
-void IMidiInfo::set_program(int value)
+void AMidiInfo::set_program(int value)
 {
     ensure_validity();
     pimpl()->set_midi_program(value - 1);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the unpitched note number to use for this sound. It is only meaningfull
     for unpitched instruments and, for them, it specifies a MIDI 1.0 note number
     ranging from 0 to 127. It is usually used with MIDI banks for percussion.
 */
-void IMidiInfo::set_unpitched(int value)
+void AMidiInfo::set_unpitched(int value)
 {
     ensure_validity();
     pimpl()->set_midi_unpitched(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI volume to use for this sound.
     The volume value is a percentage of the maximum, ranging from 0.0 to 1.0, with
     decimal values allowed.
     This corresponds to a scaling value for the MIDI 1.0
     channel volume controller.
 */
-void IMidiInfo::set_volume(float value)
+void AMidiInfo::set_volume(float value)
 {
     ensure_validity();
     pimpl()->set_midi_volume(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI pan value to use for this sound.
     Pan and elevation allow placing of sound in a 3-D space relative to the listener.
     Pan refers to the horizontal position around the listener, expressed
@@ -1728,14 +1770,14 @@ void IMidiInfo::set_volume(float value)
         -90 is hard left, 90 is hard right, and
        -180 or 180 are directly behind the listener, centered.
 */
-void IMidiInfo::set_pan(int value)
+void AMidiInfo::set_pan(int value)
 {
     ensure_validity();
     pimpl()->set_midi_pan(value);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IMidiInfo
+/** @memberof AMidiInfo
     Sets the MIDI pan value to use for this sound.
     Pan and elevation allow placing of sound in a 3-D space relative to the listener.
     Elevation refers to the vertical position around the listener, expressed
@@ -1743,7 +1785,7 @@ void IMidiInfo::set_pan(int value)
          0 is level with the listener head,
         90 is directly above, and -90 is directly below.
 */
-void IMidiInfo::set_elevation(int value)
+void AMidiInfo::set_elevation(int value)
 {
     ensure_validity();
     pimpl()->set_midi_elevation(value);
@@ -1752,48 +1794,48 @@ void IMidiInfo::set_elevation(int value)
 
 
 //=======================================================================================
-/** @class IParagraph
-    @extends IObject
+/** @class AParagraph
+    @extends AObject
     @extends IChildren
     @extends ISiblings
 
-    %IParagraph represents a paragraph. It is a block-level container, similar to the
+    %AParagraph represents a paragraph. It is a block-level container, similar to the
     HTML <p> element. Paragraphs are usually blocks of text separated from adjacent
     blocks by blank lines and/or first-line indentation, but appart from text, a
-    paragraph can also contain other elements, e.g. images (IImage), links (ILink),
-    buttons (IButton), etc.
+    paragraph can also contain other elements, e.g. images (AImage), links (ALink),
+    buttons (AButton), etc.
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IParagraph, ImoParagraph, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AParagraph, ImoParagraph, AObject)
 
 
 
 //=======================================================================================
-/** @class IScore
-    @extends IObject
+/** @class AScore
+    @extends AObject
     @extends ISiblings
 
-    %IScore represents a full music score, that is, an object comprising all of the
+    %AScore represents a full music score, that is, an object comprising all of the
     music for all of the players and their instruments, typically laid out in a specific
-    order. In lomse, an score is, basically, a collection instruments (IInstrument
+    order. In lomse, an score is, basically, a collection instruments (AInstrument
     objects) and some information common to all them, such as score titles.
 
     In a full score, related instruments are usually grouped by sharing barlines and
     having some visual clues, such as a brace or bracket, and a group name. In lomse, a
-    group of instruments is represented by an IInstrGroup object, and the IScore object
+    group of instruments is represented by an AInstrGroup object, and the AScore object
     is also responsible for managing the collection of all defined instrument groups.
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(AScore, ImoScore, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -1801,7 +1843,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(IScore, ImoScore, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoScore* IScore::internal_object() const
+ImoScore* AScore::internal_object() const
 {
     return const_cast<ImoScore*>(pimpl());
 }
@@ -1809,7 +1851,7 @@ ImoScore* IScore::internal_object() const
 //exclude from API documentation all private members
 ///@cond INTERNALS
 
-struct IScore::Private
+struct AScore::Private
 {
     //-----------------------------------------------------------------------------------
     static void delete_instrument(ImoScore* pScore, ImoInstrument* pInstr)
@@ -1881,22 +1923,22 @@ struct IScore::Private
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the requested instrument.
     @param iInstr    Is the index to the requested instrument (0 ... num_instruments - 1).
 */
-IInstrument IScore::instrument_at(int iInstr) const
+AInstrument AScore::instrument_at(int iInstr) const
 {
     ensure_validity();
     ImoInstrument* pInstr = const_cast<ImoScore*>(pimpl())->get_instrument(iInstr);
-    return IInstrument(pInstr, m_pDoc, m_imVersion);
+    return AInstrument(pInstr, m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the number of instruments that this score contains.
 */
-int IScore::num_instruments() const
+int AScore::num_instruments() const
 {
     ensure_validity();
     return const_cast<ImoScore*>(pimpl())->get_num_instruments();
@@ -1910,16 +1952,16 @@ int IScore::num_instruments() const
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Appends a new empty instrument to the score, instantiated with default values:
     - One empty staff, staff size 7.2 mm (rastral size between 2 (7.4mm) and 3 (7.0mm)).
     - No name, no abbreviation
     - Not included in any existing instruments group.
-    - Has default MIDI info (see IMidiInfo for default values)
+    - Has default MIDI info (see AMidiInfo for default values)
 
     Returns the created instrument.
 */
-IInstrument IScore::append_new_instrument()
+AInstrument AScore::append_new_instrument()
 {
     ensure_validity();
     ImoInstrument* pInstr = pimpl()->add_instrument();
@@ -1927,11 +1969,11 @@ IInstrument IScore::append_new_instrument()
     PartIdAssigner assigner;
     assigner.assign_parts_id(pimpl());
 
-    return IInstrument(pInstr, m_pDoc, m_imVersion);
+    return AInstrument(pInstr, m_pDoc, m_imVersion);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Removes the specified instrument form the score and deletes it.
 
     Instrument groups in the score are not affected, as they are not tied to specific
@@ -1945,15 +1987,15 @@ IInstrument IScore::append_new_instrument()
 
     @param instrId    The ID of the instrument to delete.
 */
-void IScore::delete_instrument(ImoId instrId)
+void AScore::delete_instrument(ImoId instrId)
 {
     ensure_validity();
     ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pDoc->get_pointer_to_imo(instrId));
-    IScore::Private::delete_instrument(pimpl(), pInstr);
+    AScore::Private::delete_instrument(pimpl(), pInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Removes the specified instrument form the score and deletes it.
 
     Instrument groups in the score are not affected, as they are not tied to specific
@@ -1967,11 +2009,11 @@ void IScore::delete_instrument(ImoId instrId)
 
     @param instr    A reference to the instrument to delete.
 */
-void IScore::delete_instrument(IInstrument& instr)
+void AScore::delete_instrument(AInstrument& instr)
 {
     ensure_validity();
     ImoInstrument* pInstr = instr.pimpl();
-    IScore::Private::delete_instrument(pimpl(), pInstr);
+    AScore::Private::delete_instrument(pimpl(), pInstr);
 }
 
 
@@ -1982,7 +2024,7 @@ void IScore::delete_instrument(IInstrument& instr)
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Changes the order of the instruments in the score by moving the referenced
     instrument before the one immediately above it.
 
@@ -1998,15 +2040,15 @@ void IScore::delete_instrument(IInstrument& instr)
 
     @see move_down_instrument()
 */
-void IScore::move_up_instrument(ImoId instrId)
+void AScore::move_up_instrument(ImoId instrId)
 {
     ensure_validity();
     ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pDoc->get_pointer_to_imo(instrId));
-    IScore::Private::move_up_instrument(pimpl(), pInstr);
+    AScore::Private::move_up_instrument(pimpl(), pInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Changes the order of the instruments in the score by moving the referenced
     instrument before the one immediately above it.
 
@@ -2022,15 +2064,15 @@ void IScore::move_up_instrument(ImoId instrId)
 
     @see move_down_instrument()
 */
-void IScore::move_up_instrument(IInstrument& instr)
+void AScore::move_up_instrument(AInstrument& instr)
 {
     ensure_validity();
     ImoInstrument* pInstr = instr.pimpl();
-    IScore::Private::move_up_instrument(pimpl(), pInstr);
+    AScore::Private::move_up_instrument(pimpl(), pInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Changes the order of the instruments in the score by moving the referenced
     instrument after the one immediately below it.
 
@@ -2046,15 +2088,15 @@ void IScore::move_up_instrument(IInstrument& instr)
 
     @see move_up_instrument()
 */
-void IScore::move_down_instrument(ImoId instrId)
+void AScore::move_down_instrument(ImoId instrId)
 {
     ensure_validity();
     ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pDoc->get_pointer_to_imo(instrId));
-    IScore::Private::move_down_instrument(pimpl(), pInstr);
+    AScore::Private::move_down_instrument(pimpl(), pInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Changes the order of the instruments in the score by moving the referenced
     instrument after the one immediately below it.
 
@@ -2070,11 +2112,11 @@ void IScore::move_down_instrument(ImoId instrId)
 
     @see move_up_instrument()
 */
-void IScore::move_down_instrument(IInstrument& instr)
+void AScore::move_down_instrument(AInstrument& instr)
 {
     ensure_validity();
     ImoInstrument* pInstr = instr.pimpl();
-    IScore::Private::move_down_instrument(pimpl(), pInstr);
+    AScore::Private::move_down_instrument(pimpl(), pInstr);
 }
 
 
@@ -2085,10 +2127,10 @@ void IScore::move_down_instrument(IInstrument& instr)
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the number of instrument groups that this score contains.
 */
-int IScore::num_instruments_groups() const
+int AScore::num_instruments_groups() const
 {
     ensure_validity();
     ImoInstrGroups* pGroups = const_cast<ImoScore*>(pimpl())->get_instrument_groups();
@@ -2099,17 +2141,17 @@ int IScore::num_instruments_groups() const
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the requested instruments group.
     @param iGroup   Is the index to the requested instruments
                     group (0 ... num.groups - 1).
 */
-IInstrGroup IScore::instruments_group_at(int iGroup) const
+AInstrGroup AScore::instruments_group_at(int iGroup) const
 {
     ensure_validity();
     ImoInstrGroups* pGroups = const_cast<ImoScore*>(pimpl())->get_instrument_groups();
     if (!pGroups)
-        return IInstrGroup();
+        return AInstrGroup();
 
     ImoObj::children_iterator itG;
     int i = 0;
@@ -2117,10 +2159,10 @@ IInstrGroup IScore::instruments_group_at(int iGroup) const
     if (i == iGroup && itG != pGroups->end())
     {
         ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(*itG);
-        return IInstrGroup(pGroup, m_pDoc, m_imVersion);
+        return AInstrGroup(pGroup, m_pDoc, m_imVersion);
     }
     else
-        return IInstrGroup();
+        return AInstrGroup();
 }
 
 
@@ -2131,7 +2173,7 @@ IInstrGroup IScore::instruments_group_at(int iGroup) const
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Creates a group whose first instrument will be instrument at position
     <i>iFirstInstr</i> and the last in the group will be instrument at position
     <i>iLastInstr</i>.
@@ -2140,14 +2182,14 @@ IInstrGroup IScore::instruments_group_at(int iGroup) const
 
     @param iLastInstr     Position (0..n-1) of last instrument to include in the group.
         Notice that <i>iFirstInstr</i> must be lower than <i>iLastInstr</i>. Otherwise
-        this method will do nothing and will return an invalid IInstrGroup.
+        this method will do nothing and will return an invalid AInstrGroup.
 
     The created group will not have any symbol (k_group_symbol_none),
     the instruments will have their barlines joined (k_joined_barlines), and the
     group will have neither name nor abbreviation. After the group is created,
     you can change all these default settings.
 */
-IInstrGroup IScore::create_instruments_group(int iFirstInstr, int iLastInstr)
+AInstrGroup AScore::group_instruments(int iFirstInstr, int iLastInstr)
 {
     ensure_validity();
     int maxInstr = pimpl()->get_num_instruments();
@@ -2160,23 +2202,23 @@ IInstrGroup IScore::create_instruments_group(int iFirstInstr, int iLastInstr)
         pGrp->set_owner_score(pimpl());
         pGrp->set_range(iFirstInstr, iLastInstr);
         pimpl()->add_instruments_group(pGrp);
-        return IInstrGroup(pGrp, m_pDoc, m_imVersion);
+        return AInstrGroup(pGrp, m_pDoc, m_imVersion);
     }
     else
     {
-        return IInstrGroup();
+        return AInstrGroup();
     }
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Deletes the instruments group at position <i>iGroup</i>.
     Returns @FALSE if error (invalid value for param iGroup).
 
     @param iGroup    Position (0..num.groups-1) of group to delete. Please, notice
         that groups are ordered as they are created: first created one has index 0.
 */
-bool IScore::delete_instruments_group_at(int iGroup)
+bool AScore::delete_instruments_group_at(int iGroup)
 {
     if (iGroup < 0)
         return false;    //no success: invalid index, too low
@@ -2200,20 +2242,20 @@ bool IScore::delete_instruments_group_at(int iGroup)
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Deletes the instruments group <i>group</i>.
     Returns @FALSE if any error.
 
     @param group    The group to delete.
 */
-bool IScore::delete_instruments_group(const IInstrGroup& group)
+bool AScore::delete_instruments_group(const AInstrGroup& group)
 {
     ensure_validity();
     ImoInstrGroups* pGroups = pimpl()->get_instrument_groups();
     if (!pGroups)
         return false;    //no success: no groups
 
-    ImoInstrGroup* pGrp = group.internal_object();
+    ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(group.m_pImpl);
     pGroups->remove_child_imo(pGrp);
     delete pGrp;
     return true;    //success
@@ -2222,10 +2264,10 @@ bool IScore::delete_instruments_group(const IInstrGroup& group)
     void delete_all_instruments_groups();
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Deletes all instruments groups defined in the score, if any.
 */
-void IScore::delete_all_instruments_groups()
+void AScore::delete_all_instruments_groups()
 {
     ensure_validity();
     ImoInstrGroups* pGroups = pimpl()->get_instrument_groups();
@@ -2243,7 +2285,7 @@ void IScore::delete_all_instruments_groups()
 //@{
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns a measure locator for the specified instrument and timepos.
     @param timepos
     @param iInstr Number of the instrument (0..m) to which the measures refer to.
@@ -2253,14 +2295,14 @@ void IScore::delete_all_instruments_groups()
         is relative to an instrument. For normal scores, just providing measure
         number and location will do the job.
 */
-MeasureLocator IScore::locator_for(TimeUnits timepos, int iInstr)
+MeasureLocator AScore::locator_for(TimeUnits timepos, int iInstr)
 {
     ensure_validity();
     return ScoreAlgorithms::get_locator_for(pimpl(), timepos, iInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the time position for the specified measure and beat.
     @param iMeasure Measure number (0..n) in instrument iInstr.
     @param iBeat Beat number (0..m) relative to the measure.
@@ -2275,18 +2317,18 @@ MeasureLocator IScore::locator_for(TimeUnits timepos, int iInstr)
         measures, and beats are not defined. Therefore, if this method is invoked in an
         score without time signature, this method will always return time position 0.
 */
-TimeUnits IScore::timepos_for(int iMeasure, int iBeat, int iInstr)
+TimeUnits AScore::timepos_for(int iMeasure, int iBeat, int iInstr)
 {
     ensure_validity();
     return ScoreAlgorithms::get_timepos_for(pimpl(), iMeasure, iBeat, iInstr);
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     Returns the time position for the specified measure locator.
     @param ml The measure locator to convert.
 */
-TimeUnits IScore::timepos_for(const MeasureLocator& ml)
+TimeUnits AScore::timepos_for(const MeasureLocator& ml)
 {
     ensure_validity();
     return ScoreAlgorithms::get_timepos_for(pimpl(), ml);
@@ -2296,13 +2338,13 @@ TimeUnits IScore::timepos_for(const MeasureLocator& ml)
 
 
 //---------------------------------------------------------------------------------------
-/** @memberof IScore
+/** @memberof AScore
     When you finish modifying the content of an score it is necessary to inform
     lomse for updating all internal structures associated to the score.
     For this it is mandatory to invoke this method. Alternatively, you can invoke
-    IDocument::end_of_changes(), that will invoke this method on all scores.
+    ADocument::end_of_changes(), that will invoke this method on all scores.
 */
-void IScore::end_of_changes()
+void AScore::end_of_changes()
 {
     ensure_validity();
     pimpl()->end_of_changes();
@@ -2311,17 +2353,17 @@ void IScore::end_of_changes()
 
 
 //=======================================================================================
-/** @class ISoundInfo
-    @extends IObject
-    %ISoundInfo class contains and manages the information for one sound, such as its
-    MIDI values. It always contains a IMidiInfo object.
-    An IInstrument always have at least one sound but can have more. For each sound there
-    is a ISoundInfo object and its associated IMidiInfo object.
+/** @class ASoundInfo
+    @extends AObject
+    %ASoundInfo class contains and manages the information for one sound, such as its
+    MIDI values. It always contains a AMidiInfo object.
+    An AInstrument always have at least one sound but can have more. For each sound there
+    is a ASoundInfo object and its associated AMidiInfo object.
 
     MusicXML files and other can contain additional information about the sound for an
     instrument, such as performance data (a solo instrument or an ensemble?), the
     virtual instrument used for the sound, or the play technique to use for all notes
-    played in the associated instrument. This information is stored in the ISoundInfo
+    played in the associated instrument. This information is stored in the ASoundInfo
     object when the score is imported from MusicXML files. But this information is not
     yet used in lomse sound API.
 
@@ -2329,10 +2371,10 @@ void IScore::end_of_changes()
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(ASoundInfo, ImoSoundInfo, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof ISoundInfo
+/** @memberof ASoundInfo
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -2340,13 +2382,13 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ISoundInfo, ImoSoundInfo, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoSoundInfo* ISoundInfo::internal_object() const
+ImoSoundInfo* ASoundInfo::internal_object() const
 {
     return const_cast<ImoSoundInfo*>(pimpl());
 }
 
 //---------------------------------------------------------------------------------------
-/** @memberof ISoundInfo
+/** @memberof ASoundInfo
     Provides access to the MIDI information for this instrument. MIDI info always exists.
     By default, when no MIDI information is provided in the source file or when
     programatically building a score, MIDI information is initialized as follows:
@@ -2366,31 +2408,35 @@ ImoSoundInfo* ISoundInfo::internal_object() const
     'port', 'channel' or both could have not been specified and, thus, any of them can
     still in "not initialized". In these cases, port and channel are automatically
     assigned right values when the score is finished, that is, when invoking
-    IScore::end_of_changes() method. The algorithm, in method
+    AScore::end_of_changes() method. The algorithm, in method
     MidiAssigner::assign_port_and_channel(), ensures that
     each instrument is assigned a unique combination (port, channel) for all instruments
     with port or channel containig the "not initialized" value.
 */
-IMidiInfo ISoundInfo::midi_info() const
+AMidiInfo ASoundInfo::midi_info() const
 {
     ensure_validity();
-    return IMidiInfo(const_cast<ImoSoundInfo*>(pimpl())->get_midi_info(),
+    return AMidiInfo(const_cast<ImoSoundInfo*>(pimpl())->get_midi_info(),
                      m_pDoc, m_imVersion);
 }
 
 
 
 //=======================================================================================
-/** @class ITextItem
-    @extends IObject
+/** @class ATextItem
+    @extends AObject
     @extends ISiblings
 
-    %ITextItem is an inline-level object containing a chunk of text with the same style.
+    %ATextItem is an inline-level object containing a chunk of text with the same style.
+
+    @warning This documentation is incomplete. The user API for the document
+        internal model is currently being defined and, thus, for this class, only some
+        methods have been defined.
 */
-LOMSE_IMPLEMENT_IM_API_CLASS(ITextItem, ImoTextItem, IObject)
+LOMSE_IMPLEMENT_IM_API_CLASS(ATextItem, ImoTextItem, AObject)
 
 //---------------------------------------------------------------------------------------
-/** @memberof ITextItem
+/** @memberof ATextItem
     Transitional, to facilitate migration to the new public API.
     Notice that this method will be removed in future so, please, if you need to
     use this method open an issue at https://github.com/lenmus/lomse/issues
@@ -2398,7 +2444,7 @@ LOMSE_IMPLEMENT_IM_API_CLASS(ITextItem, ImoTextItem, IObject)
     could be fixed and your app. would not be affected in future when this method
     is removed.
 */
-ImoTextItem* ITextItem::internal_object() const
+ImoTextItem* ATextItem::internal_object() const
 {
     return const_cast<ImoTextItem*>(pimpl());
 }
@@ -2406,13 +2452,13 @@ ImoTextItem* ITextItem::internal_object() const
 
 
 ////=======================================================================================
-// /* * @class IAnonymousBlock
-//    %IAnonymousBlock represents an structural block-level container that is not explicitly
+// /* * @class AAnonymousBlock
+//    %AAnonymousBlock represents an structural block-level container that is not explicitly
 //    present in the source document, but that was created by lomse to satisfy an internal
 //    model constrain. For instance, if a block level container, such as a list item, has
 //    some inline-level content inside it, such as some text, it is necessary to enclose
 //    the inline content in an inlines container to satisfy the constrain that block
-//    containers only contain other containers. The %IAnonymousBlock object represents
+//    containers only contain other containers. The %AAnonymousBlock object represents
 //    a container to be used in these cases.
 //
 //    This model would apply in the following example for this LMD content:
@@ -2421,122 +2467,355 @@ ImoTextItem* ITextItem::internal_object() const
 //        <listitem>This is some text.</listitem>
 //    @endcode
 //
-//    The \<listitem\> element contains a chunk text and will originate an IListItem
+//    The \<listitem\> element contains a chunk text and will originate an AListItem
 //    object, a type of blocks container object.
-//    And the text string will originate an ITextItem object containing the string. But
-//    ITextItem is an inline object and, thus, can not be included in a blocks container.
+//    And the text string will originate an ATextItem object containing the string. But
+//    ATextItem is an inline object and, thus, can not be included in a blocks container.
 //    The solution for situations like this one is to generate a blocks container without
 //    name, an anonymous container, to wrap the inlines content. The resulting model for
-//    the previous example is an IListItem container, enclosing an %IAnonymousBlock with
-//    the ITextItem object:
+//    the previous example is an AListItem container, enclosing an %AAnonymousBlock with
+//    the ATextItem object:
 //
 //    @verbatim
-//                    IListItem (blocks container object)
+//                    AListItem (blocks container object)
 //                        |
-//                 IAnonymousBlock (inlines container object)
+//                 AAnonymousBlock (inlines container object)
 //                        |
 //                      IText (inline content object)
 //                "This is some text."
 //    @endverbatim
 //
-//*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IAnonymousBlock, ImoAnonymousBlock, IObject)
 //
-////=======================================================================================
-// /* * @class IContent
-//    %IContent is a generic block-level container, similar to the HTML \<div\> element. It
-//    is used for grouping content but has no effect on the content or its layout.
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IContent, ImoContent, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AAnonymousBlock, ImoAnonymousBlock, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AAnonymousBlock
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoAnonymousBlock* AAnonymousBlock::internal_object() const
+//{
+//    return const_cast<ImoAnonymousBlock*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IMultiColumn
-//    %IMultiColumn is a blocks container subdivided in columns. It is an structural
+// /* * @class AContent
+//    %AContent is a generic block-level container, similar to the HTML \<div\> element. It
+//    is used for grouping content but has no effect on the content or its layout.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
+//*/
+//LOMSE_IMPLEMENT_IM_API_CLASS(AContent, ImoContent, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AContent
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoContent* AContent::internal_object() const
+//{
+//    return const_cast<ImoContent*>(pimpl());
+//}
+
+////=======================================================================================
+// /* * @class AMultiColumn
+//    %AMultiColumn is a blocks container subdivided in columns. It is an structural
 //    container to display its content in conlumns instead of in a single block. There is
 //    no equivalent in HTML, but you can consider it as a table with a single row and as
 //    many columns as you need.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IMultiColumn, ImoMultiColumn, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AMultiColumn, ImoMultiColumn, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AMultiColumn
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoMultiColumn* AMultiColumn::internal_object() const
+//{
+//    return const_cast<ImoMultiColumn*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class ITable
-//    %ITable represents tabular data, that is, information presented in a two-dimensional
+// /* * @class ATable
+//    %ATable represents tabular data, that is, information presented in a two-dimensional
 //    table comprised of rows and columns of cells containing data. It is equivalent to
-//    the HTML \<table\> and can be considered as a container for the ITableRow,
-//    ITableCell, ITableHead and ITableBoby objects.
+//    the HTML \<table\> and can be considered as a container for the ATableRow,
+//    ATableCell, ATableHead and ATableBoby objects.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(ITable, ImoTable, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ATable, ImoTable, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof ATable
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoTable* ATable::internal_object() const
+//{
+//    return const_cast<ImoTable*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class ITableRow
-//    %ITableRow defines a row of cells in a table. It is equivalent to the HTML \<tr\>
-//    element. It is a container for the ITableCell objects that define the row's cells.
+// /* * @class ATableRow
+//    %ATableRow defines a row of cells in a table. It is equivalent to the HTML \<tr\>
+//    element. It is a container for the ATableCell objects that define the row's cells.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(ITableRow, ImoTableRow, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ATableRow, ImoTableRow, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof ATableRow
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoTableRow* ATableRow::internal_object() const
+//{
+//    return const_cast<ImoTableRow*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IListItem
-//    %IListItem represents an item in a list. It is similar to the HTML \<li\> element.
-//    %IListItem objects ar always contained in an IList parent object.
+// /* * @class AListItem
+//    %AListItem represents an item in a list. It is similar to the HTML \<li\> element.
+//    %AListItem objects ar always contained in an AList parent object.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IListItem, ImoListItem, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AListItem, ImoListItem, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AListItem
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoListItem* AListItem::internal_object() const
+//{
+//    return const_cast<ImoListItem*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class ITableCell
-//    %ITableCell defines a cell of a table that contains data. It is similar to the
-//    HTML \<td\> and \<th\> elements. %ITableCell objects are always contained in an
-//    ITableRow object.
+// /* * @class ATableCell
+//    %ATableCell defines a cell of a table that contains data. It is similar to the
+//    HTML \<td\> and \<th\> elements. %ATableCell objects are always contained in an
+//    ATableRow object.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(ITableCell, ImoTableCell, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(ATableCell, ImoTableCell, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof ATableCell
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoTableCell* ATableCell::internal_object() const
+//{
+//    return const_cast<ImoTableCell*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IHeading
-//    %IHeading represents a section heading, similar to the HTML \<h1\> - \<h6\> elements.
-//    The level of the heading is an attribute of the %IHeading object.
+// /* * @class AHeading
+//    %AHeading represents a section heading, similar to the HTML \<h1\> - \<h6\> elements.
+//    The level of the heading is an attribute of the %AHeading object.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IHeading, ImoHeading, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AHeading, ImoHeading, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AHeading
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoHeading* AHeading::internal_object() const
+//{
+//    return const_cast<ImoHeading*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IInlineWrapper
-//    %IInlineWrapper is a generic inline-box container similar to the HTML \<span\>
+// /* * @class AInlineWrapper
+//    %AInlineWrapper is a generic inline-box container similar to the HTML \<span\>
 //    element. It does not inherently represent anything. It can be used to group
 //    elements for styling purposes or because they share attribute values, such as
-//    language. %IInlineWrapper is very much like the IContent object, but IContent is
-//    a block-level object whereas the %IInlineWrapper is an inline object.
+//    language. %AInlineWrapper is very much like the AContent object, but AContent is
+//    a block-level object whereas the %AInlineWrapper is an inline object.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IInlineWrapper, ImoInlineWrapper, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AInlineWrapper, ImoInlineWrapper, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AInlineWrapper
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoInlineWrapper* AInlineWrapper::internal_object() const
+//{
+//    return const_cast<ImoInlineWrapper*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IButton
-//    %IButton represents a clickable button, used to generate an action in the
+// /* * @class AButton
+//    %AButton represents a clickable button, used to generate an action in the
 //    application. It is similar to the HTML button element.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
 //*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IButton, ImoButton, IObject)
+//LOMSE_IMPLEMENT_IM_API_CLASS(AButton, ImoButton, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AButton
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoButton* AButton::internal_object() const
+//{
+//    return const_cast<ImoButton*>(pimpl());
+//}
 
 ////=======================================================================================
-// /* * @class IControl
-//    %IControl represents a user defined GUI control object, that is, an object that
+// /* * @class AControl
+//    %AControl represents a user defined GUI control object, that is, an object that
 //    can be clicked to produce an action on the user application. It is similar to
-//    ILink, IButton or IScorePlayer, but ILink, IButton and IScorePlayer have a
-//    pre-defined apearance and behaviour, whereas IControl content can be much more
+//    ALink, AButton or AScorePlayer, but ALink, AButton and AScorePlayer have a
+//    pre-defined apearance and behaviour, whereas AControl content can be much more
 //    complex, containing other controls, such as buttons and links, and its
 //    appearance and behaviour is defined by the user application.
-//*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IControl, ImoControl, IObject)
-
-////=======================================================================================
-// /* * @class IScorePlayer
-//    %IScorePlayer is a control for managing the playback of the associated IScore object.
-//*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IScorePlayer, ImoScorePlayer, IObject)
-
-////=======================================================================================
-// /* * @class IImage
-//    %IImage is an inline object that represents a two-dimensional image. It is
-//    equivalent to the HTML \<img\> element, that embeds an image into the document.
-//*/
-//LOMSE_IMPLEMENT_IM_API_CLASS(IImage, ImoImage, IObject)
 //
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
+//*/
+//LOMSE_IMPLEMENT_IM_API_CLASS(AControl, ImoControl, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AControl
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoControl* AControl::internal_object() const
+//{
+//    return const_cast<ImoControl*>(pimpl());
+//}
+
+////=======================================================================================
+// /* * @class AScorePlayer
+//    %AScorePlayer is a control for managing the playback of the associated AScore object.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
+//*/
+//LOMSE_IMPLEMENT_IM_API_CLASS(AScorePlayer, ImoScorePlayer, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AScorePlayer
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoScorePlayer* AScorePlayer::internal_object() const
+//{
+//    return const_cast<ImoScorePlayer*>(pimpl());
+//}
+
+////=======================================================================================
+// /* * @class AImage
+//    %AImage is an inline object that represents a two-dimensional image. It is
+//    equivalent to the HTML \<img\> element, that embeds an image into the document.
+//
+//    @warning This documentation is incomplete. The user API for the document
+//        internal model is currently being defined and, thus, for this class, only some
+//        methods have been defined.
+//*/
+//LOMSE_IMPLEMENT_IM_API_CLASS(AImage, ImoImage, AObject)
+//
+////---------------------------------------------------------------------------------------
+// /* * @memberof AImage
+//    Transitional, to facilitate migration to the new public API.
+//    Notice that this method will be removed in future so, please, if you need to
+//    use this method open an issue at https://github.com/lenmus/lomse/issues
+//    explaining the need, so that the public API
+//    could be fixed and your app. would not be affected in future when this method
+//    is removed.
+//*/
+//ImoImage* AImage::internal_object() const
+//{
+//    return const_cast<ImoImage*>(pimpl());
+//}
 //
 
 

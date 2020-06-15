@@ -340,7 +340,12 @@ div.textblock a:hover {
 span.literal {
     text-decoration: none;
     font-weight: bold;
-    font-family: monospace, fixed;
+    font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
+    line-height: 100%;
+    font-weight: 600;
+    font-size: 110%;
+	padding: 0.5em;
+    background-color: #f7f7f7;
 }
 
 /* border around images */

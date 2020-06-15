@@ -54,9 +54,9 @@ class PlayerGui;
 class SelectionSet;
 class GmoObj;
 
-class IDocument;
-class IDynamic;
-class IObject;
+class ADocument;
+class ADynamic;
+class AObject;
 
 class Interactor;
 typedef std::weak_ptr<Interactor>     WpInteractor;
@@ -1381,13 +1381,13 @@ public:
         the dynamic object that should be replaced. Otherwise, returns the replacement
         object set by the user application.
     */
-    IObject get_object();
+    AObject get_object();
 
     /// Returns the document to which this request refers to.    */
-    IDocument get_document();
+    ADocument get_document();
 
     ///for setting requested data
-    void set_object(IObject& obj);
+    void set_object(AObject& obj);
 
 };
 
