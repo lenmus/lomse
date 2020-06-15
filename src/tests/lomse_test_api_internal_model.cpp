@@ -1323,11 +1323,11 @@ SUITE(InternalModelApiTest)
         AScore score = doc.first_score();
         AInstrument instr = score.instrument_at(0);
 
-        Document* pDoc = doc.internal_object();
-        cout << test_name() << endl << pDoc->to_string(true) << endl;
+//        Document* pDoc = doc.internal_object();
+//        cout << test_name() << endl << pDoc->to_string(true) << endl;
 
         CHECK(instr.is_valid());
-        cout << test_name() << ". To execute: instr.object_id()" << endl;
+//        cout << test_name() << ". To execute: instr.object_id()" << endl;
         cout << test_name() << ". instr.object_id() = " << instr.object_id() << endl;
         cout << test_name() << ". To execute: delete_instrument()" << endl;
         score.delete_instrument(instr.object_id());
@@ -1338,7 +1338,7 @@ SUITE(InternalModelApiTest)
         CHECK( score.num_instruments_groups() == 0 );
         cout << test_name() << ". Test finished. Were is the crash?" << endl;
 
-        //Document* pDoc = doc.internal_object();
+        Document* pDoc = doc.internal_object();
         pDoc->end_of_changes();
         cout << test_name() << pDoc->to_string(true) << endl;
     }

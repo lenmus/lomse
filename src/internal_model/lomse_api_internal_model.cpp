@@ -328,8 +328,7 @@ struct AObject::Private
 */
 ImoId AObject::object_id() const
 {
-    ensure_validity();
-    return m_pImpl->get_id();
+    return m_id;
 }
 
 //---------------------------------------------------------------------------------------
