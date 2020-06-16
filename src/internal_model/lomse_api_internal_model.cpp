@@ -1864,6 +1864,7 @@ struct AScore::Private
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         if (pGroups)
         {
+            list<ImoInstrGroup*> toDelete;
             ImoObj::children_iterator itG;
             for (itG= pGroups->begin(); itG != pGroups->end(); ++itG)
             {
@@ -1873,10 +1874,13 @@ struct AScore::Private
                     pGroup->set_range(iFirst, numInstrs-1);
 
                 if (pGroup->get_num_instruments() < 2)
-                {
-                    pGroups->remove_child_imo(pGroup);
-                    delete pGroup;
-                }
+                    toDelete.push_back(pGroup);
+            }
+
+            for (auto group : toDelete)
+            {
+                pGroups->remove_child_imo(group);
+                delete group;
             }
 
             //If no groups left, remove ImoInstrGroups child
