@@ -42,7 +42,7 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 #include "lomse_im_factory.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_image_reader.h"
 #include "lomse_score_player_ctrl.h"
 #include "lomse_ldp_parser.h"
@@ -101,11 +101,13 @@ MnxPartList::~MnxPartList()
 }
 
 //---------------------------------------------------------------------------------------
-void MnxPartList::add_score_part(const string& id, ImoInstrument* pInstrument)
+int MnxPartList::add_score_part(const string& id, ImoInstrument* pInstrument)
 {
+    int iInstr = m_numInstrs;
     m_locators[id] = m_numInstrs++;
     m_instruments.push_back(pInstrument);
     m_partAdded.push_back(false);
+    return iInstr;
 }
 
 //---------------------------------------------------------------------------------------
@@ -182,13 +184,13 @@ MnxPartGroups::~MnxPartGroups()
 }
 
 //---------------------------------------------------------------------------------------
-void MnxPartGroups::add_instrument_to_groups(ImoInstrument* pInstr)
+void MnxPartGroups::add_instrument_to_groups(int iInstr)
 {
     map<int, ImoInstrGroup*>::const_iterator it;
     for (it = m_groups.begin(); it != m_groups.end(); ++it)
     {
         ImoInstrGroup* pGrp = it->second;
-        pGrp->add_instrument(pInstr);
+        pGrp->add_instrument(iInstr);
     }
 }
 
@@ -204,10 +206,6 @@ void MnxPartGroups::terminate_group(int number)
     map<int, ImoInstrGroup*>::iterator it = m_groups.find(number);
 	if (it == m_groups.end())
         return;
-
-    ImoInstrGroup* pGrp = it->second;
-    if (pGrp->join_barlines() != ImoInstrGroup::k_no)
-        set_barline_layout_in_instruments(pGrp);
 
     m_groups.erase(it);
 }
@@ -238,25 +236,6 @@ void MnxPartGroups::check_if_all_groups_are_closed(ostream& reporter)
     {
         reporter << "Error: missing <part-group type='stop'> for <part-group> number='"
                  << it->first << "'." << endl;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void MnxPartGroups::set_barline_layout_in_instruments(ImoInstrGroup* pGrp)
-{
-    int layout = (pGrp->join_barlines() == ImoInstrGroup::k_standard
-                    ? ImoInstrument::k_joined
-                    : ImoInstrument::k_mensurstrich);
-
-    ImoInstrument* pLastInstr = pGrp->get_last_instrument();
-    list<ImoInstrument*>& instrs = pGrp->get_instruments();
-    list<ImoInstrument*>::iterator it;
-    for (it = instrs.begin(); it != instrs.end(); ++it)
-    {
-        if (*it != pLastInstr)
-            (*it)->set_barline_layout(layout);
-        else if (layout == ImoInstrument::k_mensurstrich)
-            (*it)->set_barline_layout(ImoInstrument::k_nothing);
     }
 }
 
@@ -3797,6 +3776,7 @@ ImoInstrGroup* MnxAnalyser::start_part_group(int number)
     Document* pDoc = get_document_being_analysed();
     ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, pDoc));
+    pGrp->set_owner_score(get_score_being_analysed());
 
     m_partGroups.start_group(number, pGrp);
     return pGrp;

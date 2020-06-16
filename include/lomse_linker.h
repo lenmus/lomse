@@ -117,8 +117,6 @@ protected:
     ImoObj* add_inline_level_item(ImoInlineLevelObj* pImo);
     ImoObj* add_block_level_item(ImoBlockLevelObj* pImo);
 
-    void set_barline_layout_in_instruments(ImoInstrGroup* pGrp);
-
 };
 
 

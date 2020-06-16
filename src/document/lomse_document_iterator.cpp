@@ -29,7 +29,7 @@
 
 #include "lomse_document_iterator.h"
 
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
 
 using namespace std;

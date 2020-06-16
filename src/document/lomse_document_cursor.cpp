@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_score_iterator.h"

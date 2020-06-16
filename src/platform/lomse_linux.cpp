@@ -133,7 +133,7 @@ std::string FontSelector::find_font(const std::string& language,
     FcPattern* font = FcFontMatch(config, pattern, &result);
     if (font)
     {
-        FcChar8* file = NULL;
+        FcChar8* file = nullptr;
         if (FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch)
         {
             string fullFileName((char*)file);
@@ -170,6 +170,9 @@ std::string FontSelector::find_font(const std::string& language,
     //if Bravura font is requested but it is not installed in the system (e.g.
     //missing dependency in installation page, local installation from sources, etc)
     //try to use local copy at lenmus/res/fonts
+    //
+    //AWARE: Looking for "ravura.otf" instead of "Bravura.otf" just in case in some
+    //       distro they decide to use lower case for the font name.
     if (name=="Bravura" && fullpath.find("ravura.otf") == std::string::npos)
     {
         string localfont = m_pLibScope->fonts_path();

@@ -29,8 +29,8 @@ If you are new to Lomse, @b please read the @subpage page-introduction and then 
 - @subpage page-edit-overview
 - @subpage page-sound-generation
 - @subpage page-tasks
-- @subpage page-internal-model
-- @subpage page-im-modification
+- @subpage page-api-internal-model
+
 
 ## Other topics
 

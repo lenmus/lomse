@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -32,7 +32,7 @@
 #include "lomse_gm_basic.h"
 #include "lomse_events_dispatcher.h"
 #include "lomse_control.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_logger.h"
 
 namespace lomse
@@ -429,6 +429,27 @@ EventControlPointMoved::EventControlPointMoved(EEventType type, WpInteractor wpI
     m_imoId = pImo->get_id();
     m_gmoType = pGmo->get_gmobj_type();
     m_idx = (pGmo->is_shape() ? static_cast<GmoShape*>(pGmo)->get_shape_id() : -1);
+}
+
+
+//=======================================================================================
+// RequestDynamic implementation
+//=======================================================================================
+AObject RequestDynamic::get_object()
+{
+    return AObject(m_pObj, m_pDoc, m_pDoc->get_model_ref());
+}
+
+//---------------------------------------------------------------------------------------
+ADocument RequestDynamic::get_document()
+{
+    return ADocument(m_pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void RequestDynamic::set_object(AObject& obj)
+{
+    m_pObj = obj.internal_object();
 }
 
 

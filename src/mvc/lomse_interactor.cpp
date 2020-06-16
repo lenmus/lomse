@@ -31,7 +31,7 @@
 #include "lomse_interactor.h"
 
 #include "lomse_ldp_compiler.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_basic.h"
 #include "lomse_tasks.h"
@@ -128,13 +128,6 @@ void Interactor::switch_task(int taskType)
     delete m_pTask;
     m_pTask = Injector::inject_Task(taskType, this);
     m_pTask->init_task();
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::define_beat(int beatType, TimeUnits duration)
-{
-    if (SpDocument spDoc = m_wpDoc.lock())
-        spDoc->define_beat(beatType, duration);
 }
 
 //---------------------------------------------------------------------------------------

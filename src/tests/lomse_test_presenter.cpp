@@ -35,7 +35,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_ldp_compiler.h"
 //#include "lomse_user_command.h"
 #include "lomse_view.h"
@@ -124,18 +124,24 @@ SUITE(PresenterTest)
     //    delete pPresenter;
     //}
 
-    //TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtStart)
-    //{
-    //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(k_view_simple,
-    //              "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
-    //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
-    //    DocCursor& cursor = pView->get_cursor();
-    //    //cout << (*cursor)->to_string() << endl;
-    //    CHECK( *cursor != nullptr );
-    //    //CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (n c4 q) (r q))))" );
-    //    delete pPresenter;
-    //}
+//    TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtStart)
+//    {
+//        PresenterBuilder builder(m_libraryScope);
+//        Presenter* pPresenter = builder.new_document(k_view_simple,
+//                  "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
+//        WpInteractor wpIntor = pPresenter->get_interactor(0);
+//        if (SpInteractor sp = wpIntor.lock())
+//        {
+//            SimpleView* pView = dynamic_cast<SimpleView*>( sp->get_view() );
+//            DocCursor& cursor = pView->get_cursor();
+//            //cout << (*cursor)->to_string() << endl;
+//            CHECK( *cursor != nullptr );
+//            //CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (n c4 q) (r q))))" );
+//        }
+//        else
+//            CHECK( false );
+//        delete pPresenter;
+//    }
 
     //TEST_FIXTURE(PresenterTestFixture, PresenterBuilder_OpenDocument)
     //{

@@ -129,7 +129,9 @@ protected:
     void delete_instrument_engravers();
     void determine_staves_vertical_position();
     void measure_groups_name_and_bracket();
+    void add_groups_name_to_aligner();
     void measure_instruments_name_and_bracket();
+    void add_instruments_name_to_aligner();
     void save_names_and_brackets_positions();
 
 };

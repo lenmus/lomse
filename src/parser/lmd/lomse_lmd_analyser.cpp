@@ -49,7 +49,7 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 #include "lomse_im_factory.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_image_reader.h"
 #include "lomse_score_player_ctrl.h"
 #include "lomse_ldp_parser.h"
@@ -2214,8 +2214,9 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, pDoc));
-        pGrp->add_instrument(pFirstInstr);
-        pGrp->add_instrument(pLastInstr);
+        int iFirstInstr = pScore->get_instr_number_for(pFirstInstr);
+        int iLastInstr = pScore->get_instr_number_for(pLastInstr);
+        pGrp->set_range(iFirstInstr, iLastInstr);
 
         // grpName?
         if (get_optional("grpName"))
@@ -2239,7 +2240,7 @@ public:
 
 //        // joinBarlines?
 //        if (get_optional("joinBarlines"))
-//            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
+//            pGrp->set_join_barlines(EJoinBarlines::k_joined_barlines);
 //
         error_if_more_elements();
 
@@ -2253,15 +2254,15 @@ protected:
     {
         string symbol = m_childToAnalyse.first_child().value();
         if (symbol == "brace")
-            pGrp->set_symbol(ImoInstrGroup::k_brace);
+            pGrp->set_symbol(k_group_symbol_brace);
         else if (symbol == "bracket")
-            pGrp->set_symbol(ImoInstrGroup::k_bracket);
+            pGrp->set_symbol(k_group_symbol_bracket);
         else if (symbol == "line")
-            pGrp->set_symbol(ImoInstrGroup::k_line);
+            pGrp->set_symbol(k_group_symbol_line);
         else if (symbol == "none")
-            pGrp->set_symbol(ImoInstrGroup::k_none);
+            pGrp->set_symbol(k_group_symbol_none);
         else
-            error_msg("Invalid value for <grpSymbol>. Must be 'none', 'brace', "
+            error_msg("Invalid value for group symbol. Must be 'none', 'brace', "
                       "'bracket' or 'line'. 'none' assumed.");
     }
 

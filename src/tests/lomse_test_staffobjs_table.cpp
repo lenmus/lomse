@@ -38,7 +38,7 @@
 #include "lomse_ldp_analyser.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_score_iterator.h"
 #include "lomse_model_builder.h"
 #include "lomse_time.h"

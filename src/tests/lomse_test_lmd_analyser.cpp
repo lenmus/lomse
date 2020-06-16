@@ -34,7 +34,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_xml_parser.h"
 #include "lomse_lmd_analyser.h"
 #include "lomse_internal_model.h"
@@ -98,8 +98,8 @@ public:
         if (m_requestType == k_dynamic_content_request)
         {
             RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = pDyn->get_document();
+            AObject dyn = pRq->get_object();
+            m_pDoc = dyn.owner_document().internal_object()->get_im_root();
         }
     }
 
@@ -2689,7 +2689,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup->get_symbol() == k_group_symbol_none );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
@@ -2735,7 +2735,7 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+        CHECK( pGroup->get_symbol() == k_group_symbol_bracket );
 
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }

@@ -37,7 +37,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_ldp_compiler.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 #include "lomse_staffobjs_table.h"
 
@@ -444,7 +444,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
+        string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(key C)"
             "(n g4 q v1 p1 (dyn \"fff\" below))"
             "(n g4 q v1 p1 (dyn \"ppp\"))"
@@ -475,7 +475,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument (staves 1)(musicData))" );
+        CHECK( source == "(instrument P1 (staves 1)(musicData))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_1)
@@ -494,7 +494,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        string expected = "(instrument (staves 1)(staff 1 (staffType ossia)"
+        string expected = "(instrument P1 (staves 1)(staff 1 (staffType ossia)"
             "(staffLines 5)(staffSpacing 250)(staffDistance 2000)"
             "(lineThickness 15))(musicData))";
         CHECK( source == expected );
@@ -513,7 +513,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument (staves 1)(infoMIDI 9 12)(musicData))" );
+        CHECK( source == "(instrument P1 (staves 1)(infoMIDI 9 12)(musicData))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_3)
@@ -529,7 +529,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(instrument (name \"Guitar\")(abbrev \"G.\")(staves 1)(musicData))" );
+        CHECK( source == "(instrument P1 (name \"Guitar\")(abbrev \"G.\")(staves 1)(musicData))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, instrument_4)
@@ -549,7 +549,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pInstr);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        string expected = "(instrument (name \"Guitar\" (style \"Best1\"))"
+        string expected = "(instrument P1 (name \"Guitar\" (style \"Best1\"))"
             "(abbrev \"G.\" (style \"Best2\"))(staves 1)(musicData))";
         CHECK( source == expected );
     }
@@ -926,7 +926,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
+        string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(n c4 e v1 p1 (tm 2 3)(t 106 + 3 2))(n e4 e v1 p1 (tm 2 3))"
             "(n g4 e v1 p1 (tm 2 3)(t 106 -))"
             ")))";
@@ -971,7 +971,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pScore);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        string expected = "(score (vers 2.0)(instrument (staves 1)(musicData "
+        string expected = "(score (vers 2.0)(instrument P1 (staves 1)(musicData "
             "(clef G p1)(n c4 e v1 p1)(goFwd e v1 p1)(n e4 e v1 p1))))";
 
         CHECK( source == expected );
@@ -997,7 +997,7 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pScore);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
         string expected = "(score (vers 2.0)(style \"Score1\")"
-            "(instrument (staves 1)(musicData (clef G p1))))";
+            "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
         CHECK( source == expected );
     }
@@ -1020,7 +1020,7 @@ SUITE(LdpExporterTest)
         string expected = "(score (vers 2.0)"
             "(defineStyle \"Score1\" (font-name \"Arial\")(font-size 14pt)"
             "(font-style normal)(font-weight bold)(color #00fe0f7f))"
-            "(instrument (staves 1)(musicData (clef G p1))))";
+            "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
         CHECK( source == expected );
     }
@@ -1043,7 +1043,7 @@ SUITE(LdpExporterTest)
         string expected =
             "(score (vers 2.0)"
             "(opt Render.SpacingValue 40)(opt StaffLines.Truncate 0)"
-            "(instrument (staves 1)(musicData (clef G p1))))";
+            "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
         CHECK( source == expected );
     }
@@ -1068,7 +1068,7 @@ SUITE(LdpExporterTest)
             "(score (vers 2.0)"
             "(systemLayout first (systemMargins 0 0 1700 1200))"
             "(systemLayout other (systemMargins 0 0 1800 2000))"
-            "(instrument (staves 1)(musicData (clef G p1))))";
+            "(instrument P1 (staves 1)(musicData (clef G p1))))";
 
         CHECK( source == expected );
     }
@@ -1095,7 +1095,7 @@ SUITE(LdpExporterTest)
             "(systemLayout other (systemMargins 0 0 1500 1000))"
             "(opt Score.FillPageWithEmptyStaves true)"
             "(opt StaffLines.Truncate 0)"
-            "(instrument (staves 1)(musicData)))";
+            "(instrument P1 (staves 1)(musicData)))";
 
         CHECK( source == expected );
     }

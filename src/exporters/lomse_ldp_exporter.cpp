@@ -2912,9 +2912,7 @@ protected:
         for (int i=0; i < numInstr; ++i)
         {
             ImoInstrument* pInstr = m_pObj->get_instrument(i);
-            if (i > 0)
-                m_source << " ";
-            m_source << pInstr->get_instr_id();
+            m_source << " " << pInstr->get_instr_id();
         }
         end_element(k_in_same_line);
     }
@@ -2929,7 +2927,7 @@ protected:
 
             ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(*it);
             ImoInstrument* pInstr = pGrp->get_first_instrument();
-            m_source << pInstr->get_instr_id();
+            m_source << " " << pInstr->get_instr_id();
             pInstr = pGrp->get_last_instrument();
             m_source << " " << pInstr->get_instr_id();
             bool fAddSpace = true;
@@ -2961,7 +2959,7 @@ protected:
                 end_element(k_in_same_line);
             }
 
-            if (pGrp->get_symbol() != ImoInstrGroup::k_none)
+            if (pGrp->get_symbol() != k_group_symbol_none)
             {
                 if (fAddSpace)
                 {
@@ -2971,22 +2969,22 @@ protected:
                 start_element("symbol", k_no_imoid, k_in_same_line);
                 switch (pGrp->get_symbol())
                 {
-                    case ImoInstrGroup::k_bracket:
-                        m_source << "bracket";
+                    case k_group_symbol_bracket:
+                        m_source << " bracket";
                         break;
-                    case ImoInstrGroup::k_brace:
-                        m_source << "brace";
+                    case k_group_symbol_brace:
+                        m_source << " brace";
                         break;
-                    case ImoInstrGroup::k_line:
-                        m_source << "line";
+                    case k_group_symbol_line:
+                        m_source << " line";
                         break;
                     default:
-                        m_source << "none";
+                        m_source << " none";
                 }
                 end_element(k_in_same_line);
             }
 
-            if (pGrp->join_barlines() != ImoInstrGroup::k_no)
+            if (pGrp->join_barlines() != EJoinBarlines::k_non_joined_barlines)
             {
                 if (fAddSpace)
                 {
@@ -2996,10 +2994,10 @@ protected:
                 start_element("joinBarlines", k_no_imoid, k_in_same_line);
                 switch (pGrp->join_barlines())
                 {
-                    case ImoInstrGroup::k_standard:
+                    case EJoinBarlines::k_joined_barlines:
                         m_source << " yes";
                         break;
-                    case ImoInstrGroup::k_mensurstrich:
+                    case EJoinBarlines::k_mensurstrich_barlines:
                         m_source << " mensurstrich";
                         break;
                     default:

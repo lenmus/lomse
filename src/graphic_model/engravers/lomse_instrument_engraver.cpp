@@ -151,8 +151,7 @@ void PartsEngraver::decide_systems_indentation()
     m_pRightAlignerFirst = LOMSE_NEW RightAligner();
     m_pRightAlignerOther = LOMSE_NEW RightAligner();
 
-    //Traverse all groups from inner to outer (backwards, from last defined one to
-    //first one). For each group:
+    //Traverse all groups. For each group:
     // - measure bracket/brace. Bracket/brace coords: x=0, y = determined by first
     //   instrument yTop and last instrument yBottom.
     // - add bracket/brace to the RightAligner
@@ -161,8 +160,14 @@ void PartsEngraver::decide_systems_indentation()
     //Traverse all instruments. For each instrument:
     // - engrave name/abbr at x=0, y= instr.center (middle of instrument yTop and
     //   instrument yBottom).
-    // - add name/abbr to the RightAligner
+    // - add bracket (if exists) to the RightAligner
     measure_instruments_name_and_bracket();
+
+    //Traverse all instruments and add name/abbrev. to the RightAligner
+    add_instruments_name_to_aligner();
+
+    //Traverse all groups and add name/abbrev. to the RightAligner
+    add_groups_name_to_aligner();
 
     //As each box is added to the RightAligner it is repositioned to
     //the correct position. Therefore, at this point, all the boxes for names
@@ -218,8 +223,7 @@ LUnits PartsEngraver::get_staff_bottom_position_for(ImoInstrument* pInstr)
 //---------------------------------------------------------------------------------------
 void PartsEngraver::measure_groups_name_and_bracket()
 {
-    //Traverse all groups from inner to outer (backwards, from last defined one to
-    //first one). For each group:
+    //Traverse all groups. For each group:
     // - measure bracket/brace. Bracket/brace coords: x=0, y = determined by first
     //   instrument yTop and last instrument yBottom.
     // - add bracket/brace to the RightAligner
@@ -230,8 +234,20 @@ void PartsEngraver::measure_groups_name_and_bracket()
     {
         (*it)->measure_name_and_bracket();
         m_iGrpBracketFirst[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_bracket() );
-        m_iGrpName[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_name() );
         m_iGrpBracketOther[i] = m_pRightAlignerOther->add_box( (*it)->get_box_for_bracket() );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::add_groups_name_to_aligner()
+{
+    //Traverse all groups. For each group add name/abbrev to the RightAligner
+
+    int i = 0;
+    std::vector<GroupEngraver*>::iterator it;
+    for (it = m_groupEngravers.begin(); it != m_groupEngravers.end(); ++it, ++i)
+    {
+        m_iGrpName[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_name() );
         m_iGrpAbbrev[i] = m_pRightAlignerOther->add_box( (*it)->get_box_for_abbrev() );
     }
 }
@@ -245,8 +261,19 @@ void PartsEngraver::measure_instruments_name_and_bracket()
     {
         (*it)->measure_name_and_bracket();
         m_iInstrBracketFirst[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_bracket() );
-        m_iInstrName[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_name() );
         m_iInstrBracketOther[i] = m_pRightAlignerOther->add_box( (*it)->get_box_for_bracket() );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::add_instruments_name_to_aligner()
+{
+    int i = 0;
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it, ++i)
+    {
+        (*it)->measure_name_and_bracket();
+        m_iInstrName[i] = m_pRightAlignerFirst->add_box( (*it)->get_box_for_name() );
         m_iInstrAbbrev[i] = m_pRightAlignerOther->add_box( (*it)->get_box_for_abbrev() );
     }
 }
@@ -448,12 +475,12 @@ void GroupEngraver::measure_brace_or_bracket()
         int symbol = m_pGroup->get_symbol();
 
         LUnits uBracketWidth;
-        if (symbol == ImoInstrGroup::k_brace)
+        if (symbol == k_group_symbol_brace)
         {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACE_WIDTH);
             m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
         }
-        else if  (symbol == ImoInstrGroup::k_bracket)
+        else if  (symbol == k_group_symbol_bracket)
         {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACKET_WIDTH);
             m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
@@ -475,7 +502,7 @@ void GroupEngraver::measure_brace_or_bracket()
 bool GroupEngraver::has_brace_or_bracket()
 {
     int symbol = m_pGroup->get_symbol();
-    return (symbol != ImoInstrGroup::k_none);
+    return (symbol != k_group_symbol_none);
 }
 
 //---------------------------------------------------------------------------------------
@@ -542,10 +569,10 @@ void GroupEngraver::add_brace_bracket(GmoBoxSystem* pBox, int iSystem)
         GmoShape* pShape;
         ShapeId idx = 0;
         int symbol = m_pGroup->get_symbol();
-        if (symbol == ImoInstrGroup::k_brace)
+        if (symbol == k_group_symbol_brace)
             pShape = LOMSE_NEW GmoShapeBrace(m_pGroup, idx, xLeft, yTop,
                                              xRight, yBottom, Color(0,0,0));
-        else if (symbol == ImoInstrGroup::k_bracket)
+        else if (symbol == k_group_symbol_bracket)
         {
             LUnits dyHook = tenths_to_logical(LOMSE_GRP_BRACKET_HOOK);
             pShape = LOMSE_NEW GmoShapeBracket(m_pGroup, idx, xLeft, yTop, xRight,

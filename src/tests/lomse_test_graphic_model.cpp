@@ -40,7 +40,7 @@
 #include "lomse_shape_staff.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_interactor.h"
 #include "lomse_graphic_view.h"
 #include "lomse_doorway.h"

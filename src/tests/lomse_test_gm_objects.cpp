@@ -41,7 +41,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_shape_staff.h"
 #include "lomse_im_factory.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 
 using namespace UnitTest;
 using namespace std;

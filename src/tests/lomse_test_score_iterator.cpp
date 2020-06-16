@@ -33,7 +33,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_ldp_factory.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_document_cursor.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_score_iterator.h"

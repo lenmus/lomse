@@ -174,7 +174,7 @@ public:
     ~MnxPartList();
 
     int get_num_items() { return static_cast<int>(m_locators.size()); }
-    void add_score_part(const string& id, ImoInstrument* pInstrument);
+    int add_score_part(const string& id, ImoInstrument* pInstrument);
     ImoInstrument* get_instrument(const string& id);
     bool mark_part_as_added(const string& id);
     void add_all_instruments(ImoScore* pScore);
@@ -211,15 +211,12 @@ public:
 //    void set_symbol(int symbol);
 //    void set_barline(bool value);
 
-    void add_instrument_to_groups(ImoInstrument* pInstr);
+    void add_instrument_to_groups(int iInstr);
     void start_group(int number, ImoInstrGroup* pGrp);
     void terminate_group(int number);
     bool group_exists(int number);
     ImoInstrGroup* get_group(int number);
     void check_if_all_groups_are_closed(ostream& reporter);
-
-protected:
-    void set_barline_layout_in_instruments(ImoInstrGroup* pGrp);
 
 };
 
@@ -308,8 +305,8 @@ public:
     //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
     void add_score_part(const string& id, ImoInstrument* pInstrument) {
-        m_partList.add_score_part(id, pInstrument);
-        m_partGroups.add_instrument_to_groups(pInstrument);
+        int iInstr = m_partList.add_score_part(id, pInstrument);
+        m_partGroups.add_instrument_to_groups(iInstr);
     }
     void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
     bool mark_part_as_added(const string& id) {

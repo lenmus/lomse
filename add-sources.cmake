@@ -133,13 +133,14 @@ set(GUI_CONTROLS_FILES
 )
 
 set(INTERNAL_MODEL_FILES
+    ${LOMSE_SRC_DIR}/internal_model/lomse_api_internal_model.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_attributes.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
+    ${LOMSE_SRC_DIR}/internal_model/lomse_im_measures_table.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_measures_table.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_model_builder.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_algorithms.cpp
     ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp

@@ -33,7 +33,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_command.h"
 #include "lomse_document_cursor.h"
 #include "lomse_im_note.h"
@@ -3135,7 +3135,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->time() == 64 );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 130 +))"
+              "(instrument P1 (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 130 +))"
               "(n c4 e v1 p1 (beam 130 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
@@ -3165,7 +3165,7 @@ SUITE(DocCommandTest)
 //        cout << pSC->dump_cursor() << endl;
 
         CHECK( doc.is_dirty() == true );
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (staves 1)(musicData)))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument P1 (staves 1)(musicData)))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
 //        cout << doc.to_string() << endl;
@@ -3198,7 +3198,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_staff() == true );
 
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-              "(instrument (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 139 +))"
+              "(instrument P1 (staves 1)(musicData (clef G p1)(n e4 e v1 p1 (beam 139 +))"
               "(n c4 e v1 p1 (beam 139 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
@@ -3303,7 +3303,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_empty_score() == true );
         CHECK( doc.is_dirty() == true );
         string expected = "(lenmusdoc (vers 0.0)(content (score (vers 2.0)"
-            "(instrument (staves 1)(musicData)))))";
+            "(instrument P1 (staves 1)(musicData)))))";
         CHECK( doc.to_string() == expected );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );

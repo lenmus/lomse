@@ -31,7 +31,7 @@
 #include "lomse_presenter.h"
 
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_command.h"
 #include "lomse_view.h"
 #include "lomse_interactor.h"

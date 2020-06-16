@@ -812,7 +812,7 @@ public:
             empty will default to "Change attribute".
 
         <b>Remarks</b>
-        - If target object is not valid (e.g. NULL), the command
+        - If target object is not valid (e.g. nullptr), the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -838,7 +838,7 @@ public:
         @param cmdName The displayable name for the command. If not specified or empty will default to "Change attribute".
 
         <b>Remarks</b>
-        - If target object is not valid (e.g. NULL), the command
+        - If target object is not valid (e.g. nullptr), the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -873,7 +873,7 @@ public:
         @param cmdName The displayable name for the command. If not specified or empty will default to "Change attribute".
 
         <b>Remarks</b>
-        - If target object is not valid (e.g. NULL), the command
+        - If target object is not valid (e.g. nullptr), the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -893,7 +893,7 @@ public:
         @param cmdName The displayable name for the command. If not specified or empty will default to "Change attribute".
 
         <b>Remarks</b>
-        - If target object is not valid (e.g. NULL), the command
+        - If target object is not valid (e.g. nullptr), the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -913,7 +913,7 @@ public:
         @param cmdName The displayable name for the command. If not specified or empty will default to "Change attribute".
 
         <b>Remarks</b>
-        - If target object is not valid (e.g. NULL), the command
+        - If target object is not valid (e.g. nullptr), the command
             will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -1338,7 +1338,7 @@ public:
             default to string "Delete " followed by the name of the object to delete.
 
         <b>Remarks</b>
-        - If object pointed by cursor is not valid (e.g. NULL or not block level object),
+        - If object pointed by cursor is not valid (e.g. nullptr or not block level object),
           the command will not be executed and will return a failure code.
         - After executing the command:
             - the selection will not be changed.
@@ -1516,7 +1516,7 @@ public:
             default to string "Delete " followed by the name of the object to delete.
 
         <b>Remarks</b>
-        - If object pointed by cursor is not valid (e.g. NULL or is not an staff object),
+        - If object pointed by cursor is not valid (e.g. nullptr or is not an staff object),
           the command will not be executed and will return a failure code.
         - After executing the command:
             - the selection will be empty.

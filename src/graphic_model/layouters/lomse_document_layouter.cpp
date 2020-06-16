@@ -31,7 +31,7 @@
 
 #include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_layouter.h"
 #include "lomse_score_layouter.h"
 #include "lomse_calligrapher.h"

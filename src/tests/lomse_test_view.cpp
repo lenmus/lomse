@@ -34,7 +34,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_graphic_view.h"
 #include "lomse_doorway.h"
 #include "lomse_screen_drawer.h"

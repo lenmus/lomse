@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -34,6 +34,7 @@
 #include "lomse_time.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_im_measures_table.h"
+#include "lomse_document.h"             //for enum EBeatDuration
 
 //specific for ScoreAlgorithms
 #include "lomse_pitch.h"
@@ -327,7 +328,7 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, int iMeasure, int i
         timepos = measure->get_timepos();
         if (iBeat >= 0)
         {
-            timepos += get_beat_duration_for(pScore, measure) * iBeat;
+            timepos += measure->get_implied_beat_duration() * iBeat;
         }
     }
     return timepos;
@@ -348,24 +349,6 @@ TimeUnits ScoreAlgorithms::get_timepos_for(ImoScore* pScore, const MeasureLocato
         timepos = measure->get_timepos() + ml.location;
     }
     return timepos;
-}
-
-//---------------------------------------------------------------------------------------
-TimeUnits ScoreAlgorithms::get_beat_duration_for(ImoScore* pScore,
-                                                 ImMeasuresTableEntry* measure)
-{
-    //get current definition for 'beat'
-    Document* pDoc = pScore->get_the_document();
-    TimeUnits beatType = pDoc->get_beat_type();
-
-    //use current definition for providing beat duration
-    if (beatType == k_beat_implied)
-        return measure->get_implied_beat_duration();
-
-    if (beatType == k_beat_bottom_ts)
-        return measure->get_bottom_ts_beat_duration();
-
-    return pDoc->get_beat_duration();
 }
 
 

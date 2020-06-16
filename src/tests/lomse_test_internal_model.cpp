@@ -37,7 +37,7 @@
 #include "lomse_im_figured_bass.h"
 #include "lomse_im_note.h"
 #include "lomse_time.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;
@@ -331,8 +331,7 @@ SUITE(InternalModelTest)
 
         ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
                                     ImFactory::inject(k_imo_instr_group, &doc));
-        pGroup->add_instrument(pInstr1);
-        pGroup->add_instrument(pInstr2);
+        pGroup->set_range(0, 1);
         pScore->add_instruments_group(pGroup);
 
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();

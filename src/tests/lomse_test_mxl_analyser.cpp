@@ -34,7 +34,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_xml_parser.h"
 #include "lomse_mxl_analyser.h"
 #include "lomse_internal_model.h"
@@ -187,8 +187,8 @@ public:
         if (m_requestType == k_dynamic_content_request)
         {
             RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = (pDyn ? pDyn->get_document() : nullptr);
+            AObject dyn = pRq->get_object();
+            m_pDoc = dyn.owner_document().internal_object()->get_im_root();
         }
     }
 
@@ -612,7 +612,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
         CHECK( pGroup && pGroup->get_abbrev_string() == "" );
         CHECK( pGroup && pGroup->get_name_string() == "" );
-        CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_none );
 
         a.do_not_delete_instruments_in_destructor();
         if (pRoot && !pRoot->is_document()) delete pRoot;
@@ -903,7 +903,7 @@ SUITE(MxlAnalyserTest)
                     CHECK( pGroup->get_instrument(1) != nullptr );
                     CHECK( pGroup->get_abbrev_string() == "" );
                     CHECK( pGroup->get_name_string() == "" );
-                    CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+                    CHECK( pGroup->get_symbol() == k_group_symbol_none );
                 }
             }
         }
@@ -964,7 +964,7 @@ SUITE(MxlAnalyserTest)
                     CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
                     CHECK( pGroup && pGroup->get_abbrev_string() == "Grp" );
                     CHECK( pGroup && pGroup->get_name_string() == "Group" );
-                    CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
+                    CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_none );
                 }
             }
         }
@@ -1024,7 +1024,7 @@ SUITE(MxlAnalyserTest)
                 CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
                 CHECK( pGroup && pGroup->get_abbrev_string() == "" );
                 CHECK( pGroup && pGroup->get_name_string() == "Group" );
-                CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_brace );
+                CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_brace );
             }
         }
 
@@ -1084,8 +1084,8 @@ SUITE(MxlAnalyserTest)
                 CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
                 CHECK( pGroup && pGroup->get_abbrev_string() == "" );
                 CHECK( pGroup && pGroup->get_name_string() == "Group" );
-                CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_none );
-                CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_standard );
+                CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_none );
+                CHECK( pGroup && pGroup->join_barlines() == EJoinBarlines::k_joined_barlines );
             }
         }
 
@@ -1133,6 +1133,7 @@ SUITE(MxlAnalyserTest)
             CHECK( pScore != nullptr );
             if (pScore)
             {
+                pScore->end_of_changes();
                 CHECK( pScore->get_num_instruments() == 2 );
                 ImoInstrument* pInstr = pScore->get_instrument(0);
                 CHECK( pInstr != nullptr );
@@ -1147,8 +1148,8 @@ SUITE(MxlAnalyserTest)
                     CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
                     CHECK( pGroup && pGroup->get_abbrev_string() == "" );
                     CHECK( pGroup && pGroup->get_name_string() == "Group" );
-                    CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-                    CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_no );
+                    CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_bracket );
+                    CHECK( pGroup && pGroup->join_barlines() == EJoinBarlines::k_non_joined_barlines );
                 }
             }
         }
@@ -1197,6 +1198,7 @@ SUITE(MxlAnalyserTest)
             CHECK( pScore != nullptr );
             if (pScore)
             {
+                pScore->end_of_changes();
                 CHECK( pScore->get_num_instruments() == 2 );
                 ImoInstrument* pInstr = pScore->get_instrument(0);
                 CHECK( pInstr != nullptr );
@@ -1217,8 +1219,8 @@ SUITE(MxlAnalyserTest)
                         CHECK( pGroup && pGroup->get_instrument(1) != nullptr );
                         CHECK( pGroup && pGroup->get_abbrev_string() == "" );
                         CHECK( pGroup && pGroup->get_name_string() == "Group" );
-                        CHECK( pGroup && pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-                        CHECK( pGroup && pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
+                        CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_bracket );
+                        CHECK( pGroup && pGroup->join_barlines() == EJoinBarlines::k_mensurstrich_barlines );
                     }
                 }
             }

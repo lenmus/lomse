@@ -34,7 +34,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_xml_parser.h"
 #include "lomse_mnx_analyser.h"
 #include "lomse_internal_model.h"
@@ -103,8 +103,8 @@ public:
         if (m_requestType == k_dynamic_content_request)
         {
             RequestDynamic* pRq = dynamic_cast<RequestDynamic*>(pRequest);
-            ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pRq->get_object() );
-            m_pDoc = pDyn->get_document();
+            AObject dyn = pRq->get_object();
+            m_pDoc = dyn.owner_document().internal_object()->get_im_root();
         }
     }
 

@@ -33,7 +33,7 @@
 #include <vector>
 #include <ostream>
 #include <map>
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_time.h"
 
 using namespace std;

@@ -61,7 +61,7 @@ protected:
 public:
     ProgressBarCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                     float maxValue, LUnits width, LUnits height=-1.0f,
-                    ImoStyle* pStyle=NULL);
+                    ImoStyle* pStyle=nullptr);
     virtual ~ProgressBarCtrl() {}
 
     //Control mandatory overrides

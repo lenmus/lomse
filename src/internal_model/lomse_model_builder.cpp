@@ -29,8 +29,9 @@
 
 #include "lomse_model_builder.h"
 
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
+#include "private/lomse_internal_model_p.h"
 #include "lomse_im_note.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_staffobjs_cursor.h"
@@ -110,6 +111,12 @@ void ModelBuilder::structurize(ImoObj* pImo)
 
         PitchAssigner tuner;
         tuner.assign_pitch(pScore);
+
+        PartIdAssigner parts;
+        parts.assign_parts_id(pScore);
+
+        GroupBarlinesFixer fixer;
+        fixer.set_barline_layout_in_instruments(pScore);
     }
 }
 
@@ -552,6 +559,122 @@ void MidiAssigner::assign_port_and_channel()
                 ++idx;
             }
         }
+    }
+}
+
+
+//=======================================================================================
+// PartIdAssigner implementation
+//=======================================================================================
+PartIdAssigner::PartIdAssigner()
+{
+}
+
+//---------------------------------------------------------------------------------------
+PartIdAssigner::~PartIdAssigner()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void PartIdAssigner::assign_parts_id(ImoScore* pScore)
+{
+    list<long> ids;
+    list<ImoInstrument*> instrs;    //instruments without partID
+    ImoInstrument* pI = pScore->get_instrument(0);
+    while (pI)
+    {
+        string partID = pI->get_instr_id();
+        if (!partID.empty())
+        {
+            //check if partID is like "P###" and extract the number "###"
+            if (partID.front() == 'P' && partID.size() > 1)
+            {
+                string number = partID.substr(1, partID.size() - 1);
+                long nNumber;
+                std::istringstream iss(number);
+                if (!(iss >> std::dec >> nNumber).fail())
+                    ids.push_back(nNumber);
+            }
+        }
+        else
+        {
+            instrs.push_back(pI);
+        }
+        pI = static_cast<ImoInstrument*>(pI->get_next_sibling());
+    }
+
+    list<ImoInstrument*>::iterator it;
+    for (it=instrs.begin(); it != instrs.end(); ++it)
+    {
+        long number = long( pScore->get_num_instruments() );
+        bool found = (std::find(ids.begin(), ids.end(), number) != ids.end());
+        while (found)
+        {
+            ++number;
+            found = (std::find(ids.begin(), ids.end(), number) != ids.end());
+        }
+        stringstream ss;
+        ss << "P" << number;
+        (*it)->set_instr_id(ss.str());
+    }
+}
+
+
+//=======================================================================================
+// GroupBarlinesFixer implementation
+//=======================================================================================
+GroupBarlinesFixer::GroupBarlinesFixer()
+{
+}
+
+//---------------------------------------------------------------------------------------
+GroupBarlinesFixer::~GroupBarlinesFixer()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void GroupBarlinesFixer::set_barline_layout_in_instruments(ImoScore* pScore)
+{
+    //restore default barlines in instruments
+    ImoInstrument* pInstr = pScore->get_instrument(0);
+    while (pInstr)
+    {
+        pInstr->set_barline_layout(ImoInstrument::k_isolated);
+        pInstr = static_cast<ImoInstrument*>(pInstr->get_next_sibling());
+    }
+
+    //compute barlines layout for groups
+    ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+    if (pGroups)
+    {
+        ImoObj::children_iterator itG;
+        for (itG= pGroups->begin(); itG != pGroups->end(); ++itG)
+        {
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(*itG);
+            set_barlines_layout_for(pGrp);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GroupBarlinesFixer::set_barlines_layout_for(ImoInstrGroup* pGrp)
+{
+    if (pGrp->join_barlines() == EJoinBarlines::k_non_joined_barlines)
+        return;
+
+    int layout = (pGrp->join_barlines() == EJoinBarlines::k_joined_barlines
+                    ? ImoInstrument::k_joined
+                    : ImoInstrument::k_mensurstrich);
+
+    int iFirst = pGrp->get_index_to_first_instrument();
+    int iLast = pGrp->get_index_to_last_instrument();
+    for (int i=iFirst; i <= iLast; ++i)
+    {
+        ImoInstrument* pInstr = pGrp->get_instrument(i - iFirst);
+        if (i != iLast)
+            pInstr->set_barline_layout(layout);
+        else if (layout == ImoInstrument::k_mensurstrich)
+            pInstr->set_barline_layout(ImoInstrument::k_nothing);
     }
 }
 

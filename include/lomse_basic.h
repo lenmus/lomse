@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -436,6 +436,12 @@ inline bool is_different(Color c1, Color c2) {
 //
 //
 //};
+
+
+
+
+
+
 
 
 }   //namespace lomse

@@ -35,7 +35,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_midi_table.h"
-#include "lomse_document.h"
+#include "private/lomse_document_p.h"
 #include "lomse_internal_model.h"
 #include "lomse_score_player.h"
 #include "lomse_events.h"
