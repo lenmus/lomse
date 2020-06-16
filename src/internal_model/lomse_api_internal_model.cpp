@@ -52,7 +52,7 @@ namespace lomse
     AXxxx::AXxxx() \
         : AParentClass() \
     { \
-    } \
+    }
 
 
 
@@ -1826,6 +1826,8 @@ LOMSE_IMPLEMENT_IM_API_CLASS(AParagraph, ImoParagraph, AObject)
     having some visual clues, such as a brace or bracket, and a group name. In lomse, a
     group of instruments is represented by an AInstrGroup object, and the AScore object
     is also responsible for managing the collection of all defined instrument groups.
+
+    See @ref api-internal-model-scores.
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some

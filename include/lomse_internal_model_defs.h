@@ -43,30 +43,28 @@ namespace lomse
 
 class Document;
 
-#define LOMSE_DECLARE_IM_API_ROOT_CLASS(AXxxx, ImoXxxx) \
+#define LOMSE_DECLARE_IM_API_ROOT_CLASS \
     protected: \
-        friend class ImoXxxx; \
+        friend class ImoObj; \
         friend class Document; \
         friend class ADocument; \
         friend class IChildren; \
         friend class ISiblings; \
         friend class RequestDynamic; \
-        mutable ImoXxxx* m_pImpl; \
+        mutable ImoObj* m_pImpl; \
         Document* m_pDoc; \
         ImoId m_id; \
         mutable long m_imVersion; \
-        AXxxx(ImoXxxx* impl, Document* doc, long imVers); \
-        inline const ImoXxxx* pimpl() const { return m_pImpl; } \
-        inline ImoXxxx* pimpl() { return m_pImpl; } \
+        AObject(ImoObj* impl, Document* doc, long imVers); \
+        inline const ImoObj* pimpl() const { return m_pImpl; } \
+        inline ImoObj* pimpl() { return m_pImpl; } \
         void ensure_validity() const; \
         struct Private; \
     public: \
-        AXxxx(); \
-        AXxxx(AXxxx &&) noexcept = default;             \
-        AXxxx& operator=(AXxxx &&) noexcept = default;  \
-        AXxxx(const AXxxx& other) = default;            \
-        AXxxx& operator=(const AXxxx& other) = default; \
-        virtual ~AXxxx() = default; \
+        AObject(); \
+        AObject(const AObject& other) = default;            \
+        AObject& operator=(const AObject& other) = default; \
+        virtual ~AObject() = default; \
         bool is_valid() const;
 
 
@@ -82,8 +80,6 @@ class Document;
         struct Private; \
     public: \
         AXxxx(); \
-        AXxxx(AXxxx &&) noexcept = default;             \
-        AXxxx& operator=(AXxxx &&) noexcept = default;  \
         AXxxx(const AXxxx& other) = default;            \
         AXxxx& operator=(const AXxxx& other) = default; \
         virtual ~AXxxx() = default;

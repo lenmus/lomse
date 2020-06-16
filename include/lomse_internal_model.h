@@ -149,7 +149,7 @@ class LOMSE_EXPORT AObject
 {
 protected:
     AObject downcast_to_content_obj();
-    LOMSE_DECLARE_IM_API_ROOT_CLASS(AObject, ImoObj)
+    LOMSE_DECLARE_IM_API_ROOT_CLASS
 
 public:
     //properties

@@ -761,29 +761,32 @@ EImoObjType object_type_to_imo_type(EDocObject type)
 //=======================================================================================
 /** @class ADocument
     The %ADocument class is the API root object that contains, basically, the @IM,
-    a model similar to the DOM in HTML.
-    It represents the whole document and allows to access and modify the content
-    of the document. By accessing and modifying this internal model you
-    have full control over the document content and its properties.
+    a model similar to the DOM in HTML. And the children of this root element represent
+    the basic blocks for building a document: headers, paragraphs, music scores, lists,
+    tables, images, etc.
 
-    The %ADocument class also encapsulates all the internals, providing the basic API
-    for creating, modifying and using a document.
-
-    A lomse document is similar to an HTML document but including also music scores.
-
-    The lomse document supports the most common tags for textual content, such as
-    headings, paragraphs, lists, tables and images, plus specific tags for music scores.
-
-    The document is organized in a way similar to that of an HTML page but with
-    embedded music scores. The document elements support styles (but not CSS).
-
-    You can consider the lomse document as a generic rich text document that also can
+    You can consider a lomse document similar to an HTML document but it can include also
+    music scores. Another difference is that the document objects support styles, but
+    not CSS. Therefore, you can consider the lomse document as a generic rich text
+    document that also can
     contain full-fledged music scores. It is mainly oriented to display music scores
     and to have them inserted in an interactive text document, such as a music theory
     book with chapters, texts, music scores and interactive music exercises.
 
+    The lomse document supports the most common objects for textual content, such as
+    headings, paragraphs, lists, tables and images, plus specific objects for music
+    scores.
+    But for music scores the DOM model analogy is not truly feasible as many music notation
+    markings (like a slur or beam) represent links between objects in the tree.
+    Therefore, lomse or any other program have to maintain
+    self-consistency when there are 'paired elements' representing the starts and ends
+    of things like beams, crescendo markings, slurs, and so on. Therefore, the @IM
+    contains additional structures for correctly representing a music score.
+
     Of course, the document can contain just one full-score, and this will be the case
     when importing music scores in other formats, such as a MusicXML score file.
+
+    See @ref api-internal-model-adocument-content
 
     @warning This documentation is incomplete. The user API for the document
         internal model is currently being defined and, thus, for this class, only some
