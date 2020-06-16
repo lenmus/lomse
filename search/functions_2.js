@@ -1,5 +1,8 @@
 var searchData=
 [
+  ['channel',['channel',['../classAMidiInfo.html#a1ce6da5ff54686fbe6515581868764fd',1,'AMidiInfo']]],
+  ['child_5fat',['child_at',['../classADocument.html#aa92be2769c5c81803e694c6688d64bc9',1,'ADocument']]],
+  ['classid',['classid',['../classADynamic.html#a1fcc4cb51bb26973713d57a05e3b36dd',1,'ADynamic']]],
   ['click_5fevent_5fto_5fcursor_5fstate',['click_event_to_cursor_state',['../classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2',1,'Interactor']]],
   ['cmdaddchordnote',['CmdAddChordNote',['../classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b',1,'CmdAddChordNote']]],
   ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309',1,'CmdAddNoteRest']]],
@@ -25,9 +28,6 @@ var searchData=
   ['cmdtransposediatonically',['CmdTransposeDiatonically',['../classCmdTransposeDiatonically.html#af8b1715ba06b761209e84b51235978b2',1,'CmdTransposeDiatonically']]],
   ['cmdtransposekey',['CmdTransposeKey',['../classCmdTransposeKey.html#a255d20c7fdef759570d747f5f6753ba5',1,'CmdTransposeKey']]],
   ['color',['color',['../classFragmentMark.html#a02de0e8df9b269e72656dfdfacbbb455',1,'FragmentMark']]],
-  ['create_5fempty',['create_empty',['../classDocument.html#acc2ba25bf6cce524930f91e50f02082f',1,'Document']]],
-  ['create_5fprivate_5fstyle',['create_private_style',['../classDocument.html#a110f8e0e8ad2cc6339903ef431d604c7',1,'Document']]],
-  ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],
-  ['create_5fstyle',['create_style',['../classDocument.html#a8361dfe138c7ed8cf25227601c99beb6',1,'Document']]],
-  ['create_5fwith_5fempty_5fscore',['create_with_empty_score',['../classDocument.html#a9cfddc3181afd507ed67b80818c87c19',1,'Document']]]
+  ['create_5fobject',['create_object',['../classADocument.html#a507f50b48cc1e64d0f8a695aaff17b65',1,'ADocument']]],
+  ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]]
 ];

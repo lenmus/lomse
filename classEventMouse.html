@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,7 @@ Inheritance diagram for EventMouse:</div>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classEventMouse.html">EventMouse</a> is an object holding information about a mouse interaction. The event type informs about the specific interaction.</p>
-<p>Operating system raw mouse events should be passed to Lomse to be processed by the currently selected Task object (see <a class="el" href="page-tasks.html#tasks-overview">Task objects</a>). Once done, Lomse will generate relevant events of different type (normally <a class="el" href="classEventMouse.html">EventMouse</a>, <a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> and <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> events) with relevant information about affected <a class="el" href="classDocument.html">Document</a> objects or other. For instance, a mouse click interpreted as a '<em>select object</em>' action will generate a <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> event; or a mouse move could be interpreted as a View drag operation and will produce a change in the viewport origin and a <a class="el" href="classEventPaint.html">EventPaint</a> event for repainting the View.</p>
+<p>Operating system raw mouse events should be passed to Lomse to be processed by the currently selected Task object (see <a class="el" href="page-tasks.html#tasks-overview">Task objects</a>). Once done, Lomse will generate relevant events of different type (normally <a class="el" href="classEventMouse.html">EventMouse</a>, <a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> and <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> events) with relevant information about affected Document objects or other. For instance, a mouse click interpreted as a '<em>select object</em>' action will generate a <a class="el" href="classEventUpdateUI.html">EventUpdateUI</a> event; or a mouse move could be interpreted as a View drag operation and will produce a change in the viewport origin and a <a class="el" href="classEventPaint.html">EventPaint</a> event for repainting the View.</p>
 <p>In particular, <a class="el" href="classEventMouse.html">EventMouse</a> events generation and suggested processing is as follows:</p>
 <p><b>Types k_mouse_in_event and k_mouse_out_event</b></p>
 <p>They are generated in the following situations:</p><ul>
@@ -113,14 +113,14 @@ Inheritance diagram for EventMouse:</div>
 </ul>
 <p><b>Type k_on_click_event</b></p>
 <p>They are generated in the following situations:</p><ul>
-<li>TaskOnlyClicks selected: When mouse left click at any point, except on <a class="el" href="classDocument.html">Document</a> controls (buttons, link, etc.). Probably your application should ignore these events.</li>
+<li>TaskOnlyClicks selected: When mouse left click at any point, except on Document controls (buttons, link, etc.). Probably your application should ignore these events.</li>
 <li>TaskSelection selected: Left click down generates on-click event, to initiate selection process and ask your application to take the relevant decisions about how to continue the selection operation. When processing this event, your application should:<ul>
 <li>switch to TaskSelectionRectangle, or</li>
 <li>switch to task TaskSelectText, or</li>
 <li>select the clicked object and switch to TaskMoveObject. Remember that to switch Task you have to invoke method <a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">Interactor::switch_task()</a>.</li>
 </ul>
 </li>
-<li>TaskDataEntry selected: When mouse left click. This tasks is oriented to inserting new objects in the <a class="el" href="classDocument.html">Document</a> by clicking with the mouse. User moves the mouse and clicks at insertion point. Your application should determine the type of object to insert based on the application active tool and issue an edition command for inserting the object at the position implied by the event click point.</li>
+<li>TaskDataEntry selected: When mouse left click. This tasks is oriented to inserting new objects in the Document by clicking with the mouse. User moves the mouse and clicks at insertion point. Your application should determine the type of object to insert based on the application active tool and issue an edition command for inserting the object at the position implied by the event click point.</li>
 </ul>
 <p><b>Type k_link_clicked_event</b></p>
 <p>This event type is generated to inform about a left mouse click on a link (ImoLink) object.</p>
@@ -334,7 +334,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the ID of the <a class="el" href="classDocument.html">Document</a> object (ImoObj) affected by the event. For instance, for a mouse click event this object will be the ID of the ImoObj pointed by the mouse. </p>
+<p>Returns the ID of the Document object (ImoObj) affected by the event. For instance, for a mouse click event this object will be the ID of the ImoObj pointed by the mouse. </p>
 
 </div>
 </div>
@@ -352,7 +352,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns a pointer to the <a class="el" href="classDocument.html">Document</a> object (ImoObj) affected by the event. For instance, for a mouse click event this object will be the ImoObj pointed by the mouse. </p>
+<p>Returns a pointer to the Document object (ImoObj) affected by the event. For instance, for a mouse click event this object will be the ImoObj pointed by the mouse. </p>
 
 </div>
 </div>
@@ -442,7 +442,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventMouse.html">EventMouse</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:02 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

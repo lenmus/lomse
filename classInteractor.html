@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -103,9 +103,9 @@ Inheritance diagram for Interactor:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The Interactor is the key object to interact with the document (here the name 'Interactor'). It is the interface between your application, the associated View and the <a class="el" href="classDocument.html">Document</a> (see <a class="el" href="page-render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>). It is responsible for translating your application requests into commands that manipulate the associated View and/or the <a class="el" href="classDocument.html">Document</a>, coordinating all the necessary actions. It also provides support for managing the user interaction with your application GUI (see <a class="el" href="page-tasks.html">Interaction with your application GUI</a>).</p>
+<div class="textblock"><p>The Interactor is the key object to interact with the document (here the name 'Interactor'). It is the interface between your application, the associated View and the Document (see <a class="el" href="page-render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>). It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions. It also provides support for managing the user interaction with your application GUI (see <a class="el" href="page-tasks.html">Interaction with your application GUI</a>).</p>
 <p>The Interactor plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
-<p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practice not to save pointers to the Interactor because when processing a Lomse event the <a class="el" href="classDocument.html">Document</a> (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document).</p>
+<p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practice not to save pointers to the Interactor because when processing a Lomse event the Document (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document).</p>
 <p>Lomse provides type <b>SpInteractor</b>, an smart pointer to the Interactor. The recommendation is to use always smart pointers when provided by Lomse instead of using raw pointers. The use of threads, document edition commands, and events processing can invalidate stored pointers in your application. So it is always recommended to get the pointer to the Interactor when needed, by accessing the smart pointer and checking that it is still valid:</p>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    <span class="comment">//safely use the Interactor</span></div><div class="line">    spInteractor-&gt;some_method();</div><div class="line">    ...</div><div class="line">}</div></div><!-- fragment --><p>See:</p><ul>
 <li><a class="el" href="page-render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</li>
@@ -135,8 +135,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3e96befa4410ffe879ed55fc09d6c62b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task</a> (int taskType)</td></tr>
 <tr class="separator:af7c4afa0e8fd9136b5d1f2a52666c44f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7eb3d6d7f505c8e37f22a3ddef38859f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7eb3d6d7f505c8e37f22a3ddef38859f">define_beat</a> (int beatType, TimeUnits duration=0.0)</td></tr>
-<tr class="separator:a7eb3d6d7f505c8e37f22a3ddef38859f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Access to collaborators in MVC model</div></td></tr>
 <tr class="memitem:ab5192c9307818200f5b08e93892c61ed"><td class="memItemLeft" align="right" valign="top">GraphicModel *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">get_graphic_model</a> ()</td></tr>
 <tr class="separator:ab5192c9307818200f5b08e93892c61ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -204,7 +202,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8d486a75231279d13370cb9744f8cf11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a> (Pixels width, bool fForceRedraw=true)</td></tr>
 <tr class="separator:a8d486a75231279d13370cb9744f8cf11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Selection rectangle</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a9de671ca65612c859732ad6434428733"><td class="memItemLeft" align="right" valign="top"><a id="a9de671ca65612c859732ad6434428733"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selection_rectangle</b> (Pixels x1, Pixels y1)</td></tr>
@@ -265,7 +263,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr class="memitem:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a> (int voice)</td></tr>
 <tr class="separator:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Drag image associated to mouse cursor</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
 </div></td></tr>
 <tr class="memitem:ae1718f600ea3dec0017e200e1f00869a"><td class="memItemLeft" align="right" valign="top"><a id="ae1718f600ea3dec0017e200e1f00869a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>show_drag_image</b> (bool value)</td></tr>
@@ -556,41 +554,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::move_cursor_to_click_point(<a class="code" href="group__typedefs.html#gab23ea674e4025666ee4edfb9c6e4b4bd">SpEventMouse</a> event)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div><div class="line">        <span class="keywordflow">return</span>;</div><div class="line"></div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        <span class="keywordflow">if</span> (spIntor-&gt;get_operating_mode() == <a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a43df940a7c732e1e46f30284be5908a4">Interactor::k_mode_edition</a>)</div><div class="line">        {</div><div class="line">            DocCursorState state = spIntor-&gt;click_event_to_cursor_state(event);</div><div class="line">            spIntor-&gt;exec_command(<span class="keyword">new</span> <a class="code" href="classCmdCursor.html">CmdCursor</a>(state));</div><div class="line">        }</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
-<a id="a7eb3d6d7f505c8e37f22a3ddef38859f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7eb3d6d7f505c8e37f22a3ddef38859f">&#9670;&nbsp;</a></span>define_beat()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Interactor::define_beat </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>beatType</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">TimeUnits&#160;</td>
-          <td class="paramname"><em>duration</em> = <code>0.0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Define the duration for one beat, for metronome and for methods that use measure/beat parameters to define a location. This value is shared by all scores contained in the document and can be changed at any time. Changes while the score is being played back are ignored until playback finishes. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">beatType</td><td>A value from enum <a class="el" href="group__enumerations.html#ga0e973f43f78c8517d60e61811c5b9077">EBeatDuration</a>. </td></tr>
-    <tr><td class="paramname">duration</td><td>The duration (in Lomse Time Units) for one beat. You can use a value from enum ENoteDuration casted to double. This parameter is required only when value for parameter <code>beatType</code> is <code>k_beat_specified</code>. For all other values, if a non-zero value is specified, the value will be used for the beat duration in scores without time signature. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a77ba1f1700deaf912f80f7b460ab508f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a77ba1f1700deaf912f80f7b460ab508f">&#9670;&nbsp;</a></span>dump_cursor()</h2>
 
@@ -710,7 +673,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandGenerator::insert_rest(<a class="code" href="group__enumerations.html#ga09a15f850423776c0a4c4e6cc43e7dfc">ENoteType</a> noteType, <span class="keywordtype">int</span> dots, <span class="keywordtype">int</span> voice, <span class="keywordtype">int</span> staff)</div><div class="line">{</div><div class="line">    <span class="comment">//insert a rest at current cursor position</span></div><div class="line"></div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        stringstream src;</div><div class="line">        src &lt;&lt; <span class="stringliteral">&quot;(r &quot;</span></div><div class="line">            <span class="stringliteral">&quot; &quot;</span> &lt;&lt; LdpExporter::notetype_to_string(noteType, dots)</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot; v&quot;</span> &lt;&lt; voice</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot; p&quot;</span> &lt;&lt; staff+1</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div><div class="line">        <span class="keywordtype">string</span> name = <span class="stringliteral">&quot;Insert rest&quot;</span>;</div><div class="line">        spInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a>(src.str(), name) );</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --><p>See <a class="el" href="page-edit-overview.html#edit-overview">How to modify a document</a></p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandGenerator::insert_rest(ENoteType noteType, <span class="keywordtype">int</span> dots, <span class="keywordtype">int</span> voice, <span class="keywordtype">int</span> staff)</div><div class="line">{</div><div class="line">    <span class="comment">//insert a rest at current cursor position</span></div><div class="line"></div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        stringstream src;</div><div class="line">        src &lt;&lt; <span class="stringliteral">&quot;(r &quot;</span></div><div class="line">            <span class="stringliteral">&quot; &quot;</span> &lt;&lt; LdpExporter::notetype_to_string(noteType, dots)</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot; v&quot;</span> &lt;&lt; voice</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot; p&quot;</span> &lt;&lt; staff+1</div><div class="line">            &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div><div class="line">        <span class="keywordtype">string</span> name = <span class="stringliteral">&quot;Insert rest&quot;</span>;</div><div class="line">        spInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a>(src.str(), name) );</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --><p>See <a class="el" href="page-edit-overview.html#edit-overview">How to modify a document</a></p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a> </dd></dl>
 
 </div>
@@ -782,7 +745,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a <a class="el" href="classEventPaint.html">EventPaint</a> event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be re-factored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be re-factored.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -1193,7 +1156,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd><a class="el" href="classDocument.html">Document</a> <a class="el" href="classInteractor.html#ab4dcd3324a54fa2055aa0bf1b9d732e2">Interactor::highlight_object</a> </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Document <a class="el" href="classInteractor.html#ab4dcd3324a54fa2055aa0bf1b9d732e2">Interactor::highlight_object</a> </dd></dl>
 
 </div>
 </div>
@@ -1642,7 +1605,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document.</dd></dl>
 <p>This method should be invoked when processing a <a class="el" href="classEventPlayCtrl.html">EventPlayCtrl</a> of type <code>k_end_of_playback_event</code>. But this method generates a k_end_of_playback_event, this will create a loop!!!! ????????? </p>
 
 </div>
@@ -1946,7 +1909,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd><a class="el" href="classDocument.html">Document</a> <a class="el" href="classInteractor.html#a8a7a86e9ee94e50bc319f9cd02c25902">Interactor::on_visual_tracking</a> </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Document <a class="el" href="classInteractor.html#a8a7a86e9ee94e50bc319f9cd02c25902">Interactor::on_visual_tracking</a> </dd></dl>
 
 </div>
 </div>
@@ -2114,7 +2077,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd><a class="el" href="classDocument.html">Document</a> <a class="el" href="classInteractor.html#a98d316cedd6b7cf08d69ffecc3c2e843">Interactor::remove_highlight_from_object</a> </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Document <a class="el" href="classInteractor.html#a98d316cedd6b7cf08d69ffecc3c2e843">Interactor::remove_highlight_from_object</a> </dd></dl>
 
 </div>
 </div>
@@ -2556,7 +2519,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Set current operation mode. An operation mode defines valid actions and commands on the <a class="el" href="classDocument.html">Document</a>. For instance, in 'read only' mode all actions that could alter <a class="el" href="classDocument.html">Document</a> content will be ignored. Valid operation modes are defined by enum <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a>. Look there for an explanation of the different operating modes.</p>
+<p>Set current operation mode. An operation mode defines valid actions and commands on the Document. For instance, in 'read only' mode all actions that could alter Document content will be ignored. Valid operation modes are defined by enum <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a>. Look there for an explanation of the different operating modes.</p>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div></div><!-- fragment --> 
 </div>
@@ -2648,7 +2611,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </dd>
 </dl>
 <p>Invoking this method is mandatory before doing any operation that would require to render the view. Normally this method is invoked when creating a new view. Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::display_document(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; filename, <span class="keywordtype">int</span> viewType)</div><div class="line">{</div><div class="line">    <span class="comment">//stop playback (just in case an score is being played in another window)</span></div><div class="line">    <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">stop</a>();</div><div class="line"></div><div class="line">    <span class="comment">//get lomse reporter</span></div><div class="line">    ostringstream&amp; reporter = m_appScope.get_lomse_reporter();</div><div class="line">    reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    <span class="comment">//delete current document, view, etc. associated to this window</span></div><div class="line">    <span class="keyword">delete</span> m_pPresenter;</div><div class="line">    <span class="comment">//and load file</span></div><div class="line">    m_pPresenter = m_lomse.<a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(viewType, filename, reporter);</div><div class="line"></div><div class="line">    set_zoom_mode(k_zoom_fit_width);</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        <span class="comment">//connect the View with the window buffer</span></div><div class="line">        spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line"></div><div class="line">        <span class="comment">//register to receive the desired events</span></div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>, <span class="keyword">this</span>, wrapper_update_window);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398">k_do_play_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1">k_control_point_moved_event</a>, <span class="keyword">this</span>, wrapper_on_command_event);</div><div class="line">        <a class="code" href="classDocument.html">Document</a>* pDoc = m_pPresenter-&gt;<a class="code" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a>();</div><div class="line">        pDoc-&gt;<a class="code" href="classObservable.html#aa350bb80a827421d21cb68ee3131f61f">add_event_handler</a>(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div><div class="line"></div><div class="line">        <span class="comment">// display any errors</span></div><div class="line">        <span class="keywordflow">if</span> (!reporter.str().empty())</div><div class="line">        {</div><div class="line">            <span class="keywordtype">string</span> errorMsg = reporter.str();</div><div class="line">            ...</div><div class="line">            ErrorDlg dlg(<span class="keyword">this</span>, errorMsg, ...);</div><div class="line">            dlg.ShowModal();</div><div class="line">        }</div><div class="line">        reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::display_document(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; filename, <span class="keywordtype">int</span> viewType)</div><div class="line">{</div><div class="line">    <span class="comment">//stop playback (just in case an score is being played in another window)</span></div><div class="line">    <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">stop</a>();</div><div class="line"></div><div class="line">    <span class="comment">//get lomse reporter</span></div><div class="line">    ostringstream&amp; reporter = m_appScope.get_lomse_reporter();</div><div class="line">    reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    <span class="comment">//delete current document, view, etc. associated to this window</span></div><div class="line">    <span class="keyword">delete</span> m_pPresenter;</div><div class="line">    <span class="comment">//and load file</span></div><div class="line">    m_pPresenter = m_lomse.<a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(viewType, filename, reporter);</div><div class="line"></div><div class="line">    set_zoom_mode(k_zoom_fit_width);</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        <span class="comment">//connect the View with the window buffer</span></div><div class="line">        spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line"></div><div class="line">        <span class="comment">//register to receive the desired events</span></div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>, <span class="keyword">this</span>, wrapper_update_window);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398">k_do_play_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1">k_control_point_moved_event</a>, <span class="keyword">this</span>, wrapper_on_command_event);</div><div class="line">        Document* pDoc = m_pPresenter-&gt;<a class="code" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a>();</div><div class="line">        pDoc-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div><div class="line"></div><div class="line">        <span class="comment">// display any errors</span></div><div class="line">        <span class="keywordflow">if</span> (!reporter.str().empty())</div><div class="line">        {</div><div class="line">            <span class="keywordtype">string</span> errorMsg = reporter.str();</div><div class="line">            ...</div><div class="line">            ErrorDlg dlg(<span class="keyword">this</span>, errorMsg, ...);</div><div class="line">            dlg.ShowModal();</div><div class="line">        }</div><div class="line">        reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="ab802d6e8a3fc482aa7f0fdf9029aecae"></a>
@@ -2769,7 +2732,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Changes the background color for the View. By default all Views have a gray background and the paper is white. Example, for suppressing the background: </p><div class="fragment"><div class="line">m_pPresenter = lomse.open_document(k_view_single_system, filename);</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line">    spInteractor-&gt;set_view_background( Color(255,255,255) );  <span class="comment">//white</span></div><div class="line">    ...</div></div><!-- fragment --> 
+<p>Changes the background color for the View. By default all Views have a gray background and the paper is white. Example, for suppressing the background: </p><div class="fragment"><div class="line">m_pPresenter = <a class="code" href="namespacelomse.html">lomse</a>.open_document(k_view_single_system, filename);</div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line">    spInteractor-&gt;set_view_background( Color(255,255,255) );  <span class="comment">//white</span></div><div class="line">    ...</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="a81455e8a584d8dff982c3f43e92e7f34"></a>
@@ -3146,7 +3109,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:02 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['file_20formats_20supoported_20by_20lomse',['File formats supoported by Lomse',['../page-file-formats.html',1,'index']]]
+  ['how_20lomse_20callbacks_20work',['How Lomse callbacks work',['../page-callbacks.html',1,'index']]]
 ];

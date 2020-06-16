@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -200,7 +200,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position. </li>
@@ -250,7 +250,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position. </li>
@@ -300,7 +300,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position. </li>
@@ -350,7 +350,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position. </li>
@@ -407,7 +407,7 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position.</li>
@@ -415,7 +415,7 @@ Additional Inherited Members</h2></td></tr>
 </li>
 </ul>
 <p><b>Example</b></p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?)</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?)</dd></dl>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::change_attribute(ImoObj* pImo, <span class="keywordtype">int</span> attrb, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; newValue)</div><div class="line">{</div><div class="line">    <span class="comment">//change attribute value in given object</span></div><div class="line"></div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        <span class="keywordtype">string</span> name = gettext(<span class="stringliteral">&quot;Change string property&quot;</span>);</div><div class="line">        SpInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdChangeAttribute.html#a6f3a3b13898dd749894f2124ea50e1cb">CmdChangeAttribute</a>(pImo, <a class="code" href="group__enumerations.html#ga6d2f4212f1b35b75797fd57153826029">EImoAttribute</a>(attrb), newValue) );</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
@@ -466,14 +466,14 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position.</li>
 </ul>
 </li>
 </ul>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
 
 </div>
 </div>
@@ -524,14 +524,14 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position.</li>
 </ul>
 </li>
 </ul>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
 
 </div>
 </div>
@@ -582,14 +582,14 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 <p><b>Remarks</b></p><ul>
-<li>If target object is not valid (e.g. NULL), the command will not be executed and will return a failure code.</li>
+<li>If target object is not valid (e.g. nullptr), the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
 <li>the selection will not be changed.</li>
 <li>the cursor will not change its position.</li>
 </ul>
 </li>
 </ul>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Replace parameter pImo to use object ID instead of a pointer (?) </dd></dl>
 
 </div>
 </div>
@@ -711,7 +711,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdChangeAttribute.html">CmdChangeAttribute</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:03 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

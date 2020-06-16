@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ Inheritance diagram for RequestFont:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>When a <a class="el" href="classDocument.html">Document</a> uses a font that Lomse can not find it sends this request to the user application, asking for the file path for the font to use. The user application has to answer this request by invoking method <a class="el" href="classRequestFont.html#a84bfe5b1e2e2d2ee9f975166f94f917f">RequestFont::set_font_fullname()</a> passing as argument the path to the font to use.</p>
+<div class="textblock"><p>When a Document uses a font that Lomse can not find it sends this request to the user application, asking for the file path for the font to use. The user application has to answer this request by invoking method <a class="el" href="classRequestFont.html#a84bfe5b1e2e2d2ee9f975166f94f917f">RequestFont::set_font_fullname()</a> passing as argument the path to the font to use.</p>
 <p>Lomse manages fonts in different ways depending on the platform:</p><ul>
 <li>For Linux (and macOS) Lomse uses system installed fonts and makes substitutions when requested font is not available. The <a class="el" href="classRequestFont.html">RequestFont</a> callback is only used when Lomse cannot find the "Bravura.otf" music font needed for rendering musical symbols, when it is not installed in the system (e.g. missing dependency in installation page, local installation from sources, etc.).</li>
 <li>For Windows, Lomse also uses system installed fonts and makes substitutions when requested font is not available, but the substitutions table is small and thus, the <a class="el" href="classRequestFont.html">RequestFont</a> callback is used when Lomse cannot find the the requested font or an appropriate substitution.</li>
@@ -292,7 +292,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_get_font_filename<
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classRequestFont.html">RequestFont</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:02 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

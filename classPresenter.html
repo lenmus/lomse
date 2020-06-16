@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -100,9 +100,9 @@ Inheritance diagram for Presenter:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The Presenter is a facade object responsible for maintaining the life cycle and relationships between the objects in the Lomse MVC model: Views, Interactors and the <a class="el" href="classDocument.html">Document</a>.</p>
+<div class="textblock"><p>The Presenter is a facade object responsible for maintaining the life cycle and relationships between the objects in the Lomse MVC model: Views, Interactors and the Document.</p>
 <p>All these objects are created when invoking one of the <a class="el" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">LomseDoorway::new_document()</a> or <a class="el" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">LomseDoorway::open_document()</a> methods.</p>
-<p>The Presenter, returned by previous methods, gives acess to the <a class="el" href="classDocument.html">Document</a> and to the Interactors associated to the existing View objects for the <a class="el" href="classDocument.html">Document</a>.</p>
+<p>The Presenter, returned by previous methods, gives acess to the Document and to the Interactors associated to the existing View objects for the Document.</p>
 <p>See <a class="el" href="page-render-overview.html">Rendering documents overview</a>. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -119,8 +119,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1d7ee74efa842fc99274ee0f6abb5ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3935244d12adf2de9973953d7fa444b"><td class="memItemLeft" align="right" valign="top">WpDocument&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#af3935244d12adf2de9973953d7fa444b">get_document_weak_ptr</a> ()</td></tr>
 <tr class="separator:af3935244d12adf2de9973953d7fa444b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedd747e959be4ba2ba249f9078623ac9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classDocument.html">Document</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a> ()</td></tr>
+<tr class="memitem:aedd747e959be4ba2ba249f9078623ac9"><td class="memItemLeft" align="right" valign="top">Document *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a> ()</td></tr>
 <tr class="separator:aedd747e959be4ba2ba249f9078623ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70bf977c8264b4756d3f1b7a2598cae6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classADocument.html">ADocument</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#a70bf977c8264b4756d3f1b7a2598cae6">get_document</a> ()</td></tr>
+<tr class="separator:a70bf977c8264b4756d3f1b7a2598cae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd6f651583829e92d4d2d3566c94adad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#acd6f651583829e92d4d2d3566c94adad">set_user_data</a> (void *pData)</td></tr>
 <tr class="separator:acd6f651583829e92d4d2d3566c94adad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3bea16ee1a9c3194525d433ec56cc9f"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#ae3bea16ee1a9c3194525d433ec56cc9f">get_user_data</a> ()</td></tr>
@@ -149,13 +151,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Destructor </p><dl class="section attention"><dt>Attention</dt><dd>As Presenter ownership is transferred to the user application, you have to take care of deleting the Presenter when no longer needed. Deleting the Presenter will automatically cause deletion of all MVC involved objects: the <a class="el" href="classDocument.html">Document</a>, all existing Views and their Interactors, selection sets, undo/redo stack, etc. </dd></dl>
+<p>Destructor </p><dl class="section attention"><dt>Attention</dt><dd>As Presenter ownership is transferred to the user application, you have to take care of deleting the Presenter when no longer needed. Deleting the Presenter will automatically cause deletion of all MVC involved objects: the Document, all existing Views and their Interactors, selection sets, undo/redo stack, etc. </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aedd747e959be4ba2ba249f9078623ac9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedd747e959be4ba2ba249f9078623ac9">&#9670;&nbsp;</a></span>get_document_raw_ptr()</h2>
+<a id="a70bf977c8264b4756d3f1b7a2598cae6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70bf977c8264b4756d3f1b7a2598cae6">&#9670;&nbsp;</a></span>get_document()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -164,7 +166,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classDocument.html">Document</a>* Presenter::get_document_raw_ptr </td>
+          <td class="memname"><a class="el" href="classADocument.html">ADocument</a> Presenter::get_document </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -176,7 +178,33 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the raw pointer to the <a class="el" href="classDocument.html">Document</a> associated to this Presenter. </p>
+<p>Returns an <a class="el" href="classADocument.html">ADocument</a> object for interacting with the internal model. </p>
+
+</div>
+</div>
+<a id="aedd747e959be4ba2ba249f9078623ac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedd747e959be4ba2ba249f9078623ac9">&#9670;&nbsp;</a></span>get_document_raw_ptr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Document* Presenter::get_document_raw_ptr </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns the raw pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -202,7 +230,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a shared pointer to the <a class="el" href="classDocument.html">Document</a> associated to this Presenter. </p>
+<p>Returns a shared pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -220,7 +248,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns a shared pointer to the <a class="el" href="classDocument.html">Document</a> associated to this Presenter. </p>
+<p>Returns a shared pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -320,7 +348,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a pointer to the user data associated with this Presenter (if any). </p><dl class="section return"><dt>Returns</dt><dd>A pointer to the user data, or NULL if no data saved. </dd></dl>
+<p>Returns a pointer to the user data associated with this Presenter (if any). </p><dl class="section return"><dt>Returns</dt><dd>A pointer to the user data, or nullptr if no data saved. </dd></dl>
 
 </div>
 </div>
@@ -353,7 +381,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<p>This method is a commodity for your application, in case you would like to save some data associated to Presenter objects, i.e. for <a class="el" href="classDocument.html">Document</a> identification or other.</p>
+<p>This method is a commodity for your application, in case you would like to save some data associated to Presenter objects, i.e. for Document identification or other.</p>
 <dl class="section attention"><dt>Attention</dt><dd>Your application has the ownership of the associated data. Therefore, this data will not be deleted when the Presenter is deleted. </dd></dl>
 
 </div>
@@ -364,7 +392,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classPresenter.html">Presenter</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:02 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

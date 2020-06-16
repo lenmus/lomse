@@ -1,6 +1,8 @@
 var searchData=
 [
   ['overview',['Overview',['../index.html',1,'']]],
+  ['object_5fid',['object_id',['../classAObject.html#aa27957523282d7d4f6a23383012b539f',1,'AObject::object_id()'],['../classADocument.html#aa27957523282d7d4f6a23383012b539f',1,'ADocument::object_id()']]],
+  ['object_5fname',['object_name',['../classAObject.html#af2d1a1da7e7b9e772f294cc19f8cea68',1,'AObject']]],
   ['observable',['Observable',['../classObservable.html',1,'']]],
   ['observer',['Observer',['../classObserver.html',1,'']]],
   ['octave',['octave',['../classDiatonicPitch.html#aa9d9e55ca3d4bc1af8a55e66d1a78e21',1,'DiatonicPitch::octave()'],['../classMidiPitch.html#a252c59eaa5b6d113bc21eccf055c833b',1,'MidiPitch::octave()'],['../classFPitch.html#a4eae02ca999806784951de7fd493c6ca',1,'FPitch::octave()']]],
@@ -23,5 +25,6 @@ var searchData=
   ['operator_3c_3d',['operator&lt;=',['../classFIntval.html#a1cfdf6a0723bf694d3774c0588d40cce',1,'FIntval::operator&lt;=()'],['../classDiatonicPitch.html#a9f027b0ca3adee0840b186026edc50fa',1,'DiatonicPitch::operator&lt;=()'],['../classFPitch.html#a12730650adbad6b9c962b61ddbf574f9',1,'FPitch::operator&lt;=()']]],
   ['operator_3d_3d',['operator==',['../classFIntval.html#a5c6e152d58ed9b7f5c6ff9ca1397eea6',1,'FIntval::operator==()'],['../classDiatonicPitch.html#a9eea6fc49b6fa7ae94a2076acc1103a1',1,'DiatonicPitch::operator==()'],['../classFPitch.html#a079d1bb586fcd3517561989c9b6dbca1',1,'FPitch::operator==()']]],
   ['operator_3e',['operator&gt;',['../classFIntval.html#aea56ea55e17338ab2330e568c62255a1',1,'FIntval::operator&gt;()'],['../classDiatonicPitch.html#ae0d9a44adfac333270a0d0c59feffa57',1,'DiatonicPitch::operator&gt;()'],['../classFPitch.html#ac9ab498c44c3fa1b45a3cc264658fe10',1,'FPitch::operator&gt;()']]],
-  ['operator_3e_3d',['operator&gt;=',['../classFIntval.html#a1d9cef0fc6af383ce6e5c725ad964ad0',1,'FIntval::operator&gt;=()'],['../classDiatonicPitch.html#a6372dec7b43743db4beaae1a9ebcaf1a',1,'DiatonicPitch::operator&gt;=()'],['../classFPitch.html#a7d889e4c127ea3e585fd036dd9c9f219',1,'FPitch::operator&gt;=()']]]
+  ['operator_3e_3d',['operator&gt;=',['../classFIntval.html#a1d9cef0fc6af383ce6e5c725ad964ad0',1,'FIntval::operator&gt;=()'],['../classDiatonicPitch.html#a6372dec7b43743db4beaae1a9ebcaf1a',1,'DiatonicPitch::operator&gt;=()'],['../classFPitch.html#a7d889e4c127ea3e585fd036dd9c9f219',1,'FPitch::operator&gt;=()']]],
+  ['owner_5fdocument',['owner_document',['../classAObject.html#aa2bccd223819d19242a7309987bc43eb',1,'AObject']]]
 ];

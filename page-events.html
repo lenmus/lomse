@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ Notifications: events and requests</h1>
 <li><b>Requests</b>. When Lomse needs some information or some platform dependent service it sends a <em><a class="el" href="classRequest.html">Request</a></em>. Lomse process is paused until the user application provides the requested data so that Lomse can continue.</li>
 <li><b>Events</b>. They are informative notifications about something, for instance, about a mouse click. Events can refer:<ul>
 <li>To a View, i.e. a <em>playback highlight</em> event, or a <em>window update</em> event.</li>
-<li>To a <a class="el" href="classDocument.html">Document</a> or its content, i.e. a <em>mouse click</em> event; and</li>
+<li>To a Document or its content, i.e. a <em>mouse click</em> event; and</li>
 <li>To a Control object, i.e. a click on a link control.</li>
 </ul>
 </li>
@@ -150,10 +150,10 @@ Events and how are they notified</h1>
 <li><a class="el" href="classEventControlPointMoved.html">EventControlPointMoved</a> (event type <code>k_control_point_moved_event</code>) - User moves a handler: handler released event <div class="fragment"><div class="line">spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1">k_control_point_moved_event</a>, <span class="keyword">this</span>, wrapper_on_command_event);</div></div><!-- fragment --> These events are created only when document edition is enabled.</li>
 </ul>
 </li>
-<li>Register at the <a class="el" href="classDocument.html">Document</a> or at specific objects in the <a class="el" href="classDocument.html">Document</a>:<ul>
+<li>Register at the Document or at specific objects in the Document:<ul>
 <li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_mouse_in_event</code>) - Mouse goes over an object</li>
 <li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_mouse_out_event</code>) - Mouse goes out from an object</li>
-<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_on_click_event</code>) - <a class="el" href="classDocument.html">Document</a>, ImoContentObj: click on object <div class="fragment"><div class="line"><span class="comment">//example 1: register at the document</span></div><div class="line">pDoc-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div><div class="line"><span class="comment">//example 2: register for handling events related to an specific object</span></div><div class="line">ButtonCtrl* pButton = ...</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>);</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da0d97a6ae325de2746db0cea3a4152226">k_mouse_in_event</a>, <span class="keyword">this</span>);</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8">k_mouse_out_event</a>, <span class="keyword">this</span>);</div></div><!-- fragment --></li>
+<li><a class="el" href="classEventMouse.html">EventMouse</a> (type <code>k_on_click_event</code>) - Document, ImoContentObj: click on object <div class="fragment"><div class="line"><span class="comment">//example 1: register at the document</span></div><div class="line">pDoc-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div><div class="line"><span class="comment">//example 2: register for handling events related to an specific object</span></div><div class="line">ButtonCtrl* pButton = ...</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>);</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da0d97a6ae325de2746db0cea3a4152226">k_mouse_in_event</a>, <span class="keyword">this</span>);</div><div class="line">pButton-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daa4abc9bf7bcef49fed7711f1823c91f8">k_mouse_out_event</a>, <span class="keyword">this</span>);</div></div><!-- fragment --></li>
 </ul>
 </li>
 </ul>
@@ -166,7 +166,7 @@ How to register an event handler</h1>
 </ul>
 <p>All Lomse objects that generate events derive from lomse::Observable class. Currently, events can be generated by the following objects:</p><ul>
 <li>A View. For handling the View events you must register an <code>event handler</code> on the <a class="el" href="classInteractor.html">Interactor</a>.</li>
-<li>A <a class="el" href="classDocument.html">Document</a> or a document object (ImoContentObj); and</li>
+<li>A Document or a document object (ImoContentObj); and</li>
 <li>A Control object.</li>
 </ul>
 <p>The parameters for the <code>add_event_handler()</code> method depends on the type of handler method. There are three possibilities:</p>
@@ -200,7 +200,7 @@ Handling requests</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:03 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

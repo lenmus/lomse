@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.0</span>
+   &#160;<span id="projectnumber">0.27.1</span>
    </div>
   </td>
  </tr>
@@ -176,7 +176,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 <p>This command inserts a new block level object (e.g. paragraph, music score, header, etc.). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">type</td><td>Type of block level object to insert. Must be one of the values for block level objects in enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </td></tr>
+    <tr><td class="paramname">type</td><td>Type of block level object to insert. Must be one of the values for block level objects in enum #EImoObjType. </td></tr>
     <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will be replaced by the string "Insert " followed by the name of the object, as implied by param <em>type</em>.</td></tr>
   </table>
   </dd>
@@ -243,7 +243,7 @@ Additional Inherited Members</h2></td></tr>
 <li>First, user creates a new empty document. As the document is empty the cursor points to 'end of document'.</li>
 <li>Then the user clicks on the "add paragraph" tool and execution arrives to the following code:</li>
 </ul>
-<div class="fragment"><div class="line"><span class="comment">//insert a paragraph</span></div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    SpInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(<a class="code" href="group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651fa4f51e41b359184eaf5d9cbe7cca5c560">k_imo_para</a>, <span class="stringliteral">&quot;Add empty paragraph&quot;</span>) );</div></div><!-- fragment --> 
+<div class="fragment"><div class="line"><span class="comment">//insert a paragraph</span></div><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    SpInteractor-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(k_imo_para, <span class="stringliteral">&quot;Add empty paragraph&quot;</span>) );</div></div><!-- fragment --> 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -337,7 +337,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a></li>
-    <li class="footer">Generated on Wed Apr 22 2020 10:26:01 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>
