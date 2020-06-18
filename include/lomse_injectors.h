@@ -65,6 +65,8 @@ class SimpleView;
 class VerticalBookView;
 class HorizontalBookView;
 class SingleSystemView;
+class SinglePageView;
+class FreeFlowView;
 class Interactor;
 class Presenter;
 class LomseDoorway;
@@ -116,7 +118,7 @@ protected:
     //debug options
     bool m_fJustifySystems;         //if false, prevents systems justification
     bool m_fDumpColumnTables;       //dump columns and slices data
-    bool m_fDrawAnchorObjects;      //draw anchor objects (i.e. invisible shapes)
+    bool m_fDrawAnchorObjects;      //draw anchor objects (e.g., invisible shapes)
     bool m_fDrawAnchorLines;        //draw a line at anchor positions (spacing algorithm)
     bool m_fShowShapeBounds;        //draw a box around each shape
     bool m_fUnitTests;              //library is running for Unit Tests
@@ -284,6 +286,9 @@ public:
                                                          Document* pDoc);
     static SingleSystemView* inject_SingleSystemView(LibraryScope& libraryScope,
                                                      Document* pDoc);
+    static SinglePageView* inject_SinglePageView(LibraryScope& libraryScope,
+                                                 Document* pDoc);
+    static FreeFlowView* inject_FreeFlowView(LibraryScope& libraryScope, Document* pDoc);
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
                                          WpDocument wpDoc, View* pView,
                                          DocCommandExecuter* pExec);

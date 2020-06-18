@@ -298,7 +298,7 @@ public:
     /// Operator to cast to an int
     operator int() { return m_pitch; }
 
-    /** Returns the name of this pitch in LPD format, i.e. MidiPitch 60 will
+    /** Returns the name of this pitch in LPD format, e.g., MidiPitch 60 will
         return "c4".    */
     string get_ldp_name();
 
@@ -360,7 +360,7 @@ public:
     FPitch(DiatonicPitch dp, int nAcc);
     /// Constructor from pitch components.
     FPitch(int nStep, int nOctave, int nAcc);
-    /// Constructor from an string representing the pitch in LDP name, i.e. "+c4".
+    /// Constructor from an string representing the pitch in LDP name, e.g., "+c4".
     FPitch(const string& note);
 //    FPitch(int nStep, int nOctave, EKeySignature nKey);
 

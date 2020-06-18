@@ -971,7 +971,7 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, RelationsOrdered)
     {
         //@ Relations must be rendered in a predefined order,
-        //@ i.e. beams before tuplets. For this, they must be stored in
+        //@ e.g., beams before tuplets. For this, they must be stored in
         //@ renderization order.
 
         Document doc(m_libraryScope);

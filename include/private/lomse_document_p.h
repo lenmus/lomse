@@ -93,6 +93,7 @@ enum EDocLayoutOptions
     k_use_paper_height      = 0x0002,   //Use paper height to determine constrains
     k_infinite_width        = 0x0004,   //No width constrains
     k_infinite_height       = 0x0008,   //No height constrains
+    k_use_viewport_width    = 0x0010,   //Use viewport width to determine constrains
 };
 
 

@@ -1564,7 +1564,7 @@ void TimeSliceBarline::assign_spacing_values(vector<StaffObjData*>& data,
     }
 
     //if previous slice is non-timed and is visible, transfer the space to the
-    //previous note so that non-timed is just before the barline (i.e. an intermediate
+    //previous note so that non-timed is just before the barline (e.g., an intermediate
     //clef). But if non-timed i, suppress barline previous space.
     else if (m_prev && m_prev->get_type() == TimeSlice::k_non_timed)
     {

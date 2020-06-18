@@ -330,7 +330,7 @@ bool SystemLayouter::system_must_be_truncated()
     //of type final is entered.
     //
     //Option 3 truncates staff lines after last staff object. It can be
-    //useful for creating score samples (i.e. for ebooks).
+    //useful for creating score samples (e.g., for ebooks).
 
 
     //never truncate empty scores

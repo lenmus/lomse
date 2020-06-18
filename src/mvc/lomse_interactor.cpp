@@ -133,7 +133,7 @@ void Interactor::switch_task(int taskType)
 //---------------------------------------------------------------------------------------
 GraphicModel* Interactor::get_graphic_model()
 {
-    if (!m_pGraphicModel)
+    if (!m_pGraphicModel || graphic_model_must_be_updated())
         create_graphic_model();
     return m_pGraphicModel;
 }
@@ -159,7 +159,8 @@ void Interactor::create_graphic_model()
         {
             LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
             int constrains = pView->get_layout_constrains();
-            DocLayouter layouter(pDoc, m_libScope, constrains);
+            LUnits width = pView->get_viewport_width();
+            DocLayouter layouter(pDoc, m_libScope, constrains, width);
 
             if (pView->is_valid_for_this_view(pDoc))
                 layouter.layout_document();
@@ -178,6 +179,17 @@ void Interactor::create_graphic_model()
         LOMSE_LOG_INFO("gmodel build time = %d ms.", (int)buildTime);
     }
 //    m_idLastMouseOver = k_no_imoid;
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::graphic_model_must_be_updated()
+{
+    //update GM when using a free-flow view and the viewport width has changed
+    GraphicView* pView = dynamic_cast<GraphicView*>(m_pView);
+    if (pView)
+        return pView->graphic_model_must_be_updated();
+    else
+        return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1620,7 +1632,7 @@ void Interactor::on_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
         if (pPlayCtrl)
             pPlayCtrl->on_end_of_playback();
 
-        //AWARE: now generate the end of play event for observers (i.e. an play ctrl) and
+        //AWARE: now generate the end of play event for observers (e.g., an play ctrl) and
         //for the user application. Due to current event handling path, it is non-sense
         //to send again a new end-of-play event to the user application; worse: this
         //could create an infinite processing loop. Therefore, user application must

@@ -285,7 +285,7 @@ typedef Point<Pixels> VPoint;   //point, in pixels
 typedef Size<Pixels> VSize;     //size, in pixels
 typedef Rectangle<Pixels> VRect; //rectangle, in pixels
 
-//for compilers that not use <stdint.h>  (i.e. MS VisualStudio 2003)
+//for compilers that not use <stdint.h>  (e.g., MS VisualStudio 2003)
 #ifndef UINT32_MAX
     typedef int             int_least32_t;
     typedef unsigned int    uint_least32_t;

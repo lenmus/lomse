@@ -775,8 +775,8 @@ protected:
     //-----------------------------------------------------------------------------------
     //@ % color
     //@ The color entity indicates the color of an element. Color may be represented:
-    //@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
-    //@ - as hexadecimal ARGB tuples (i.e. "#40800080" transparent purple).
+    //@ - as hexadecimal RGB triples, as in HTML (e.g., "#800080" purple), or
+    //@ - as hexadecimal ARGB tuples (e.g., "#40800080" transparent purple).
     //@   Alpha 00 means 'totally transparent'; FF = 'totally opaque'
     //@ If RGB is used, the A value is assumed to be FF
     //@
@@ -6298,7 +6298,7 @@ protected:
         //The value must be a comma-separated list of positive integers arranged
         //in ascending order.
         //If error, string "1" is returned
-        //Otherwise any spaces are removed, i.e. "1, 2, 4" --> "1,2,4"
+        //Otherwise any spaces are removed, e.g., "1, 2, 4" --> "1,2,4"
             //TODO
         return string("1");
     }

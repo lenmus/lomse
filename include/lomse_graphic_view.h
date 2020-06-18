@@ -89,7 +89,7 @@ typedef std::shared_ptr<GmoShape>  SpGmoShape;
     This enum describes the available view types for displaying a document.
     - @b k_view_simple means that the document will be displayed not paginated,
         in a single page. It was developed to create small images for
-        controls (i.e. a combobox) by rendering small scores (just one measure)
+        controls (e.g., a combobox) by rendering small scores (just one measure)
         without margins and grey areas (gaps between pages). **[DEPRECATED]**
     - @b k_view_vertical_book means that the document will be displayed as
         book pages, one page after the other in a vertical layout. The user will
@@ -102,6 +102,10 @@ typedef std::shared_ptr<GmoShape>  SpGmoShape;
         from other formats such as MusicXML). It will display the score in a single
         system, as if the paper had infinite width. And for viewing the end of the score
         the user will have to scroll to the right. See SingleSystemView.
+    - @b k_view_single_page is similar to an HTML page. All the document is rendered in
+        a single page having the required height to contain the full document. Is a kind
+        of %k_view_vertical_book but without gaps in the content for separting pages.
+        As with %k_view_vertical_book the user will have to scroll down for advancing.
 
     @#include <lomse_graphic_view.h>
 */
@@ -110,6 +114,8 @@ enum EViewType {
     k_view_vertical_book,
     k_view_horizontal_book,
     k_view_single_system,
+    k_view_single_page,
+    k_view_free_flow,
 };
 
 ///@cond INTERNAL
@@ -199,11 +205,12 @@ public:
     /// @name View settings
     ///@{
 
-    void new_viewport(Pixels x, Pixels y);
+    void new_viewport(Pixels x, Pixels y) override;
+    void get_viewport(Pixels* x, Pixels* y) override { *x = m_vxOrg; *y = m_vyOrg; }
     void set_rendering_buffer(RenderingBuffer* rbuf);
-    void get_viewport(Pixels* x, Pixels* y) { *x = m_vxOrg; *y = m_vyOrg; }
     void set_viewport_at_page_center(Pixels screenWidth);
     virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
+    LUnits get_viewport_width();
     void use_cursor(DocCursor* pCursor);
     void use_selection_set(SelectionSet* pSelectionSet);
     void add_visual_effect(VisualEffect* pEffect);
@@ -339,6 +346,7 @@ public:
 
     //graphical model
     GraphicModel* get_graphic_model();
+    virtual bool graphic_model_must_be_updated() { return false; }
 
     //handlers
     Handler* handlers_hit_test(LUnits x, LUnits y);
@@ -387,11 +395,11 @@ public:
 
     /// @name Scale
     ///@{
-    void zoom_in(Pixels x=0, Pixels y=0);
-    void zoom_out(Pixels x=0, Pixels y=0);
-    void zoom_fit_full(Pixels width, Pixels height);
-    void zoom_fit_width(Pixels width);
-    void set_scale(double scale, Pixels x=0, Pixels y=0);
+    virtual void zoom_in(Pixels x=0, Pixels y=0);
+    virtual void zoom_out(Pixels x=0, Pixels y=0);
+    virtual void zoom_fit_full(Pixels width, Pixels height);
+    virtual void zoom_fit_width(Pixels width);
+    virtual void set_scale(double scale, Pixels x=0, Pixels y=0);
     double get_scale();
     double get_resolution();
 
@@ -518,14 +526,14 @@ public:
     SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~SimpleView() {}
 
-    virtual int page_at_screen_point(double x, double y);
-    void set_viewport_for_page_fit_full(Pixels screenWidth);
-    void get_view_size(Pixels* xWidth, Pixels* yHeight);
-    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
-    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
+    int page_at_screen_point(double x, double y) override;
+    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
+    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
+    int get_layout_constrains() override { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) override { return true; }
 
 protected:
-    void collect_page_bounds();
+    void collect_page_bounds() override;
 
 };
 ///@endcond
@@ -533,7 +541,7 @@ protected:
 
 //---------------------------------------------------------------------------------------
 /** %VerticalBookView is a GraphicView for rendering documents in pages, with the
-    pages spread in vertical (i.e. Adobe PDF Reader, MS Word)
+    pages spread in vertical (e.g., Adobe PDF Reader, MS Word)
 */
 class LOMSE_EXPORT VerticalBookView : public GraphicView
 {
@@ -544,22 +552,22 @@ public:
     VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~VerticalBookView() {}
 
-    void set_viewport_for_page_fit_full(Pixels screenWidth);
-    void get_view_size(Pixels* xWidth, Pixels* yHeight);
-    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
-    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
+    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
+    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
+    int get_layout_constrains() override { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) override { return true; }
 
 ///@endcond
 
 protected:
-    void collect_page_bounds();
+    void collect_page_bounds() override;
 
 };
 
 
 //---------------------------------------------------------------------------------------
 /** %HorizontalBookView is a GraphicView for rendering documents in pages, with the
-    pages spread in horizontal (i.e. Finale, Sibelius)
+    pages spread in horizontal (e.g., Finale, Sibelius)
 */
 class LOMSE_EXPORT HorizontalBookView : public GraphicView
 {
@@ -572,15 +580,15 @@ public:
     HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~HorizontalBookView() {}
 
-    void set_viewport_for_page_fit_full(Pixels screenWidth);
-    void get_view_size(Pixels* xWidth, Pixels* yHeight);
-    virtual int get_layout_constrains() { return k_use_paper_width | k_use_paper_height; }
-    bool is_valid_for_this_view(Document* UNUSED(pDoc)) { return true; }
+    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
+    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
+    int get_layout_constrains() override { return k_use_paper_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) override { return true; }
 
 ///@endcond
 
 protected:
-    void collect_page_bounds();
+    void collect_page_bounds() override;
 
 };
 
@@ -640,19 +648,127 @@ public:
     SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~SingleSystemView() {}
 
-    virtual int page_at_screen_point(double x, double y);
-
-    void set_viewport_for_page_fit_full(Pixels screenWidth);
-    void get_view_size(Pixels* xWidth, Pixels* yHeight);
-    virtual int get_layout_constrains() { return k_infinite_width | k_use_paper_height; }
-    bool is_valid_for_this_view(Document* pDoc);
+    int page_at_screen_point(double x, double y) override;
+    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
+    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
+    int get_layout_constrains() override { return k_infinite_width | k_use_paper_height; }
+    bool is_valid_for_this_view(Document* pDoc) override;
 
 ///@endcond
 
 protected:
-    void collect_page_bounds();
+    void collect_page_bounds() override;
 
 };
+
+
+//---------------------------------------------------------------------------------------
+/** %SinglePageView is a GraphicView for rendering documents in a single page as hight
+    as necessary. It is similar to a VerticalBookView but using a paper size of infinite
+    height, so that only paper width is meaningful and the document has just one page
+    (e.g., an HTML page)
+
+    <b>Margins</b>
+
+    The document is displayed on a white paper and the view has no margins, that is, the
+    default view origin point is (0.0, 0.0). Therefore, document content will be
+    displayed with the margins defined in the document.
+
+
+    <b>Background color</b>
+
+    The white paper is surrounded by the background, that will be visible only whne the
+    user application changes the viewport (e.g., by scrolling right).
+    In %SinglePageView the default background color is white and, as with all Views,
+    the background color can be changed by invoking Interactor::set_view_background().
+
+
+    <b>AutoScroll</b>
+
+    When this View is used for rendering a music score, during playback auto-scroll
+    will be, by default, enabled. This implies that as playback advances the View
+    will generate EventUpdateViewport events so that measure being played is always
+    totally visible.
+*/
+class LOMSE_EXPORT SinglePageView : public GraphicView
+{
+public:
+///@cond INTERNALS
+//excluded from public API because the View methods are managed from Interactor
+
+    SinglePageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
+    virtual ~SinglePageView() {}
+
+    int page_at_screen_point(double x, double y) override;
+    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
+    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
+    int get_layout_constrains() override { return k_use_paper_width | k_infinite_height; }
+    bool is_valid_for_this_view(Document* UNUSED(pDoc)) override { return true; }
+
+///@endcond
+
+protected:
+    void collect_page_bounds() override;
+
+};
+
+
+//---------------------------------------------------------------------------------------
+/** %FreeFlowView is a GraphicView for rendering documents in a single page as hight
+    as necessary. It is similar to a VerticalBookView but using a paper size of infinite
+    height, so that only paper width is meaningful and the document has just one page
+    (e.g., an HTML page)
+
+    <b>Margins</b>
+
+    The document is displayed on a white paper and the view has no margins, that is, the
+    default view origin point is (0.0, 0.0). Therefore, document content will be
+    displayed with the margins defined in the document.
+
+
+    <b>Background color</b>
+
+    The white paper is surrounded by the background, that will be visible only whne the
+    user application changes the viewport (e.g., by scrolling right).
+    In %FreeFlowView the default background color is white and, as with all Views,
+    the background color can be changed by invoking Interactor::set_view_background().
+
+
+    <b>AutoScroll</b>
+
+    When this View is used for rendering a music score, during playback auto-scroll
+    will be, by default, enabled. This implies that as playback advances the View
+    will generate EventUpdateViewport events so that measure being played is always
+    totally visible.
+*/
+class LOMSE_EXPORT FreeFlowView : public SinglePageView
+{
+public:
+///@cond INTERNALS
+//excluded from public API because the View methods are managed from Interactor
+
+    FreeFlowView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
+    virtual ~FreeFlowView() {}
+
+    //overrides for SinglePageView
+    int get_layout_constrains() override { return k_use_viewport_width | k_infinite_height; }
+
+    //overrides for GraphicView
+    bool graphic_model_must_be_updated() override;
+    void zoom_in(Pixels x=0, Pixels y=0) override;
+    void zoom_out(Pixels x=0, Pixels y=0) override;
+    void zoom_fit_full(Pixels width, Pixels height) override;
+    void zoom_fit_width(Pixels width) override;
+    void set_scale(double scale, Pixels x=0, Pixels y=0) override;
+
+    //TODO: Viewport setting methods should be overriden. I have not found scenarios
+    //      requiring to change the x coordinate of the viewport (that is, horizontal
+    //      scrolling should be banned)
+
+///@endcond
+
+};
+
 
 
 

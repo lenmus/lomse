@@ -816,7 +816,7 @@ enum EJustifyLastSystemOpts
 	type final is entered.
 
     Option 'k_truncate_always' truncates staff lines after last staff object. It can
-	be useful for creating score samples (i.e. for ebooks).
+	be useful for creating score samples (e.g., for ebooks).
 
     @#include <lomse_internal_model.h>
 */

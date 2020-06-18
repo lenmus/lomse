@@ -56,12 +56,14 @@ class DocLayouter : public Layouter
 {
 protected:
     ImoDocument* m_pDoc;
+    LUnits m_viewWidth;
 
     //for unit tests: need to access ScoreLayouter.
     Layouter* m_pScoreLayouter;
 
 public:
-    DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains=0);
+    DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains=0,
+                LUnits width=0.0f);
     virtual ~DocLayouter();
 
     void layout_document();

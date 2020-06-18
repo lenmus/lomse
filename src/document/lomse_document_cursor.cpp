@@ -989,7 +989,7 @@ bool DocCursor::jailed_mode_in(ImoId id)
 //{
 //    //if id==k_no_imoid move to first object satisfying all other conditions
 //
-//    //TODO: This method will fail when several objects at same timepos (i.e. notes
+//    //TODO: This method will fail when several objects at same timepos (e.g., notes
 //    //in chord, notes in different voices, prolog -- clef, key, time, note --)
 //    //because it will always move to first object, not to desired one.
 //    //It is necessary to modify parameters list to pass object id and ref.obj id
@@ -2725,7 +2725,7 @@ void ScoreCursor::p_to_start_of_staff(int instr, int staff)
 //{
 //    //if id==k_no_imoid move to first object satisfying all other conditions
 //
-//    //TODO: This method will fail when several objects at same timepos (i.e. notes
+//    //TODO: This method will fail when several objects at same timepos (e.g., notes
 //    //in chord, notes in different voices, prolog -- clef, key, time, note --)
 //    //because it will always move to first object, not to desired one.
 //    //It is necessary to modify parameters list to pass object id and ref.obj id

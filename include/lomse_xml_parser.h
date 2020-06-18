@@ -73,13 +73,13 @@ public:
     enum {
 		k_node_null = 0,	// Empty (null) node handle
 		k_node_document,	// A document tree's absolute root
-		k_node_element,		// Element tag, i.e. '<node/>'
-		k_node_pcdata,		// Plain character data, i.e. 'text'
-		k_node_cdata,		// Character data, i.e. '<![CDATA[text]]>'
-		k_node_comment,		// Comment tag, i.e. '<!-- text -->'
-		k_node_pi,			// Processing instruction, i.e. '<?name?>'
-		k_node_declaration,	// Document declaration, i.e. '<?xml version="1.0"?>'
-		k_node_doctype,		// Document type declaration, i.e. '<!DOCTYPE doc>'
+		k_node_element,		// Element tag, e.g., '<node/>'
+		k_node_pcdata,		// Plain character data, e.g., 'text'
+		k_node_cdata,		// Character data, e.g., '<![CDATA[text]]>'
+		k_node_comment,		// Comment tag, e.g., '<!-- text -->'
+		k_node_pi,			// Processing instruction, e.g., '<?name?>'
+		k_node_declaration,	// Document declaration, e.g., '<?xml version="1.0"?>'
+		k_node_doctype,		// Document type declaration, e.g., '<!DOCTYPE doc>'
         k_node_unknown
     };
 
@@ -116,7 +116,7 @@ class XmlParser : public Parser
 private:
     XmlDocument m_doc;
     XmlNode m_root;
-    string m_encoding;         //i.e. "utf-8"
+    string m_encoding;         //e.g., "utf-8"
     string m_errorMsg;
     int m_errorOffset;
     vector<ptrdiff_t> m_offsetData;     // offset -> line mapping

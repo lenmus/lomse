@@ -1922,7 +1922,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <font> = (font <font_name> <font_size> <font_style>)
-//@ <font_name> = string   i.e. "Times New Roman", "Trebuchet"
+//@ <font_name> = string   e.g., "Times New Roman", "Trebuchet"
 //@ <font_size> = num      in points
 //@ <font_style> = { "bold" | "normal" | "italic" | "bold-italic" }
 //@
@@ -2001,9 +2001,9 @@ public:
 //@ <timeShift> = { start | end | <number> | <duration> }
 //@
 //@ the time shift can be:
-//@   a) one of the tags 'start' and 'end': i.e. (goBack start) (goFwd end)
+//@   a) one of the tags 'start' and 'end': e.g., (goBack start) (goFwd end)
 //@   b) a number: the amount of 256th notes to go forward or backwards
-//@   c) a note/rest duration, i.e. 'e..'
+//@   c) a note/rest duration, e.g., 'e..'
 
 class GoBackFwdLmdAnalyser : public LmdElementAnalyser
 {

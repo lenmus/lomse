@@ -1297,8 +1297,8 @@ void MnxElementAnalyser::get_attributes_for_position(ImoObj* pObj)
 //-----------------------------------------------------------------------------------
 //@ % color
 //@ The color entity indicates the color of an element. Color may be represented:
-//@ - as hexadecimal RGB triples, as in HTML (i.e. "#800080" purple), or
-//@ - as hexadecimal ARGB tuples (i.e. "#40800080" transparent purple).
+//@ - as hexadecimal RGB triples, as in HTML (e.g., "#800080" purple), or
+//@ - as hexadecimal ARGB tuples (e.g., "#40800080" transparent purple).
 //@   Alpha 00 means 'totally transparent'; FF = 'totally opaque'
 //@ If RGB is used, the A value is assumed to be FF
 //@
