@@ -663,10 +663,10 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-/** %SinglePageView is a GraphicView for rendering documents in a single page as hight
+/** %SinglePageView is a GraphicView for rendering documents in a single page as high
     as necessary. It is similar to a VerticalBookView but using a paper size of infinite
     height, so that only paper width is meaningful and the document has just one page
-    (e.g., an HTML page)
+    (e.g., an HTML page having a body of fixed size)
 
     <b>Margins</b>
 
@@ -677,7 +677,7 @@ protected:
 
     <b>Background color</b>
 
-    The white paper is surrounded by the background, that will be visible only whne the
+    The white paper is surrounded by the background, that will be visible only when the
     user application changes the viewport (e.g., by scrolling right).
     In %SinglePageView the default background color is white and, as with all Views,
     the background color can be changed by invoking Interactor::set_view_background().
@@ -714,10 +714,10 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-/** %FreeFlowView is a GraphicView for rendering documents in a single page as hight
+/** %FreeFlowView is a GraphicView for rendering documents in a single page as high
     as necessary. It is similar to a VerticalBookView but using a paper size of infinite
     height, so that only paper width is meaningful and the document has just one page
-    (e.g., an HTML page)
+    (e.g., an HTML page with unconstrained body width)
 
     <b>Margins</b>
 
@@ -728,7 +728,7 @@ protected:
 
     <b>Background color</b>
 
-    The white paper is surrounded by the background, that will be visible only whne the
+    The white paper is surrounded by the background, that will be visible only when the
     user application changes the viewport (e.g., by scrolling right).
     In %FreeFlowView the default background color is white and, as with all Views,
     the background color can be changed by invoking Interactor::set_view_background().
