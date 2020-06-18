@@ -431,6 +431,8 @@ enum
     k_menu_view_vertical_book,
     k_menu_view_horizontal_book,
     k_menu_view_single_system,
+    k_menu_view_single_page,
+    k_menu_view_free_flow,
 
     //menu Effects
     k_menu_effect_highlight,
@@ -532,7 +534,10 @@ void MyFrame::create_menu()
                        _T("Use Vertical book View"), wxITEM_RADIO);
     m_viewMenu->Append(k_menu_view_horizontal_book, _T("k_view_horizontal_book"),
                        _T("Use Horizontal book View"), wxITEM_RADIO);
-
+    m_viewMenu->Append(k_menu_view_single_page, _T("k_view_single_page"),
+                       _T("Use Single Page View"), wxITEM_RADIO);
+    m_viewMenu->Append(k_menu_view_free_flow, _T("k_view_free_flow"),
+                       _T("Use Free Flow View"), wxITEM_RADIO);
     m_effectMenu = new wxMenu;
     m_effectMenu->Append(k_menu_effect_highlight, _T("k_tracking_highlight_notes"),
                          _T("Highlight the notes and rest being played back"), wxITEM_CHECK);
@@ -636,6 +641,10 @@ int MyFrame::select_view_type()
         viewType = k_view_vertical_book;
     else if (m_viewMenu->IsChecked(k_menu_view_horizontal_book))
         viewType = k_view_horizontal_book;
+    else if (m_viewMenu->IsChecked(k_menu_view_single_page))
+        viewType = k_view_single_page;
+    else if (m_viewMenu->IsChecked(k_menu_view_free_flow))
+        viewType = k_view_free_flow;
 
     return viewType;
 }
@@ -1222,17 +1231,15 @@ void MyCanvas::play_start(int effects)
 {
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        Document* pDoc = m_pPresenter->get_document_raw_ptr();
+        ADocument doc = m_pPresenter->get_document();
 
         //AWARE: Then next line of code is just an example, in which it is assumed that
-        //the score to play is the first element in the document.
-        //In a real application, as the document could contain texts, images and many
-        //scores, you shoud get the pointer to the score to play in a suitable way.
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-
-        if (pScore)
+        //the score to play is the first score in the document.
+        AScore score = doc.first_score();
+        if (score.is_valid())
         {
             spInteractor->set_visual_tracking_mode(effects);
+            ImoScore* pScore = score.internal_object();
             m_pPlayer->load_score(pScore, this);
             m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
         }

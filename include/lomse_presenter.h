@@ -166,7 +166,7 @@ public:
         @param pData	The application data to associate with the %Presenter.
 
         This method is a commodity for your application, in case you would like to save
-        some data associated to %Presenter objects, i.e. for Document identification
+        some data associated to %Presenter objects, e.g., for Document identification
         or other.
 
         @attention Your application has the ownership of the associated data.

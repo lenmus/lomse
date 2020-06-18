@@ -107,7 +107,7 @@ public:
         Lomse for reporting errors.
 
         @param pixel_format A value from the global enumeration type #EPixelFormat
-        @param ppi The required resolution in pixels per inch (i.e. 72)
+        @param ppi The required resolution in pixels per inch (e.g., 72)
         @param reverse_y_axis Lomse needs to know if the presentation device in which
             the bitmaps are going to be rendered follows the standard convention
             used in screen displays in which the y coordinates increases downwards,
@@ -409,17 +409,17 @@ public:
 
     //library info
 
-	/** Returns Lomse version as string "major.minor.patch" i.e. "0.17.20"    */
+	/** Returns Lomse version as string "major.minor.patch" e.g., "0.17.20"    */
     string get_version_string();
 
-	/** Returns Lomse version and build information as string. i.e. "0.17.20+aaf5e23"  */
+	/** Returns Lomse version and build information as string. e.g., "0.17.20+aaf5e23"  */
     string get_version_long_string();
 
 	/** Returns the build date and time of the Lomse library. The string is twenty
         characters long and looks like "12-Feb-2016 17:54:03". Date and time are
         separated by one space. Date is in format dd-mm-yyyy and time in format hh:mm:ss.
         Day, hour, minutes and seconds are always padded with zero if only one digit
-        i.e. "02-Mar-2016 07:54:03"    */
+        e.g., "02-Mar-2016 07:54:03"    */
     string get_build_date();
 
 	/** Returns Lomse major version as integer number. For instance, if version string

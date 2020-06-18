@@ -1532,7 +1532,7 @@ public:
 	            //get object pointed by the cursor
                 ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>( m_cursor->get_pointee() );
 
-                //if no object, ignore command. i.e. user clicked 'Del' key on no object
+                //if no object, ignore command. e.g., user clicked 'Del' key on no object
                 if (pSO)
                 {
                     string name = gettext("Delete " + pSO->get_name() );

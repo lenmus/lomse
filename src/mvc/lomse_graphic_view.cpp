@@ -85,6 +85,12 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
         case k_view_single_system:
             return LOMSE_NEW SingleSystemView(libraryScope, pDrawer);
 
+        case k_view_single_page:
+            return LOMSE_NEW SinglePageView(libraryScope, pDrawer);
+
+        case k_view_free_flow:
+            return LOMSE_NEW FreeFlowView(libraryScope, pDrawer);
+
         default:
         {
             LOMSE_LOG_ERROR("[ViewFactory::create_view] invalid view type");
@@ -1051,6 +1057,15 @@ void GraphicView::zoom_fit_width(Pixels screenWidth)
 }
 
 //---------------------------------------------------------------------------------------
+LUnits GraphicView::get_viewport_width()
+{
+    if (m_pRenderBuf && m_pDrawer)  //in unit test they can not exist
+        return m_pDrawer->Pixels_to_LUnits( m_pRenderBuf->width() );
+    else
+        return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::set_viewport_at_page_center(Pixels screenWidth)
 {
     //get page width
@@ -1626,7 +1641,7 @@ void GraphicView::remove_mark(VisualEffect* mark)
 
 //=======================================================================================
 // SimpleView implementation
-// A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
+// A graphic view with one page, no margins (e.g., LenMus ScoreAuxCtrol)
 //=======================================================================================
 SimpleView::SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
@@ -1678,7 +1693,7 @@ void SimpleView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 
 //=======================================================================================
 // VerticalBookView implementation
-// A graphic view with pages in vertical (i.e. Adobe PDF Reader, MS Word)
+// A graphic view with pages in vertical (e.g., Adobe PDF Reader, MS Word)
 //=======================================================================================
 VerticalBookView::VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
@@ -1742,7 +1757,7 @@ void VerticalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 
 //=======================================================================================
 // HorizontalBookView implementation
-// A graphic view with pages in horizontal (i.e. Sibelius)
+// A graphic view with pages in horizontal (e.g., Sibelius)
 //=======================================================================================
 HorizontalBookView::HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : GraphicView(libraryScope, pDrawer)
@@ -1868,6 +1883,132 @@ bool SingleSystemView::is_valid_for_this_view(Document* pDoc)
 {
     return pDoc->get_num_content_items() == 1
             && pDoc->get_content_item(0)->is_score();
+}
+
+
+//=======================================================================================
+// SinglePageView implementation
+// A graphic view with a single page having as much height as necessary (e.g., an HTML
+// page having a fixed <body> width)
+//=======================================================================================
+SinglePageView::SinglePageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDrawer)
+{
+    m_backgroundColor = Color(255, 255, 255);
+}
+
+//---------------------------------------------------------------------------------------
+void SinglePageView::collect_page_bounds()
+{
+    //OPTIMIZATION: this could be computed only once instead of each time the view
+    //is repainted.
+
+    GraphicModel* pGModel = get_graphic_model();
+    UPoint origin(0.0f, 0.0f);
+
+    m_pageBounds.clear();
+    GmoBoxDocPage* pPage = pGModel->get_page(0);
+    URect rect = pPage->get_bounds();
+    UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
+    m_pageBounds.push_back( URect(origin, bottomRight) );
+}
+
+//---------------------------------------------------------------------------------------
+void SinglePageView::set_viewport_for_page_fit_full(Pixels screenWidth)
+{
+    set_viewport_at_page_center(screenWidth);
+}
+
+//---------------------------------------------------------------------------------------
+void SinglePageView::get_view_size(Pixels* xWidth, Pixels* yHeight)
+{
+    *xWidth = 0;
+    *yHeight = 0;
+
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel && pGModel->get_num_pages() > 0)
+    {
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        URect rect = pPage->get_bounds();
+        *xWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+        *yHeight = m_pDrawer->LUnits_to_Pixels(rect.height);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int SinglePageView::page_at_screen_point(double UNUSED(x), double UNUSED(y))
+{
+    return 0;       //SinglePageView is only one page
+}
+
+
+//=======================================================================================
+// FreeFlowView implementation
+// A graphic view with a single page having as much height as necessary and having the
+// width implied by the viewport. (e.g., an HTML page, with no width constrains)
+//=======================================================================================
+FreeFlowView::FreeFlowView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
+    : SinglePageView(libraryScope, pDrawer)
+{
+    m_backgroundColor = Color(255, 255, 255);
+}
+
+//---------------------------------------------------------------------------------------
+bool FreeFlowView::graphic_model_must_be_updated()
+{
+    //update GM when using a free-flow view and the viewport width has changed
+    bool fUpdateModel = m_viewportSize.width != int(m_pRenderBuf->width());
+    m_viewportSize.width = m_pRenderBuf->width();
+    return fUpdateModel;
+}
+
+//---------------------------------------------------------------------------------------
+void FreeFlowView::zoom_in(Pixels UNUSED(x), Pixels UNUSED(y))
+{
+    //increase scale
+    m_transform *= agg::trans_affine_scaling(1.05);
+
+    //invalidate view width
+    m_viewportSize.width = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void FreeFlowView::zoom_out(Pixels UNUSED(x), Pixels UNUSED(y))
+{
+    //decrease scale
+    m_transform *= agg::trans_affine_scaling(1.0/1.05);
+
+    //invalidate view width
+    m_viewportSize.width = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void FreeFlowView::zoom_fit_full(Pixels UNUSED(x), Pixels UNUSED(y))
+{
+    //FreeFlowView does not have any specific height, as it depends on width. Also,
+    //it is not possible to compute height for a given width, and thus the only solution
+    //to fit the content in the viewport is by successive approximations. Therefore,
+    //this operation is not supported and will do nothing, but to log an error.
+    LOMSE_LOG_ERROR("Invoking not supported method for FreeFlowView view type. "
+                    "Please review the logic in your application.");
+}
+
+//---------------------------------------------------------------------------------------
+void FreeFlowView::zoom_fit_width(Pixels UNUSED(width))
+{
+    //FreeFlowView does not have any specific width. Therefore, this operation is
+    //non-sense or, alternatively, the view is always satisfying this. Thus, do nothing.
+}
+
+//---------------------------------------------------------------------------------------
+void FreeFlowView::set_scale(double scale, Pixels UNUSED(x), Pixels UNUSED(y))
+{
+    //determine and apply scaling
+    double factor = scale / m_transform.scale();
+    m_transform *= agg::trans_affine_scaling(factor);
+
+    //invalidate view width
+    m_viewportSize.width = 0;
 }
 
 

@@ -252,7 +252,7 @@ string LibraryScope::get_build_date()
 {
     //__DATE__ string: contains eleven characters and looks like "Feb 12 1996".
     // If the day of the month is less than 10, it is padded with a space on the
-    // left, i.e. "Oct  8 2013"
+    // left, e.g., "Oct  8 2013"
     //__TIME__ : the time at which the preprocessor is being run. The string
     // contains eight characters and looks like "23:59:01"
 
@@ -406,6 +406,21 @@ SingleSystemView* Injector::inject_SingleSystemView(LibraryScope& libraryScope,
 {
     return static_cast<SingleSystemView*>(
                         inject_View(libraryScope, k_view_single_system, pDoc) );
+}
+
+//---------------------------------------------------------------------------------------
+SinglePageView* Injector::inject_SinglePageView(LibraryScope& libraryScope,
+                                                Document* pDoc)
+{
+    return static_cast<SinglePageView*>(
+                        inject_View(libraryScope, k_view_single_page, pDoc) );
+}
+
+//---------------------------------------------------------------------------------------
+FreeFlowView* Injector::inject_FreeFlowView(LibraryScope& libraryScope, Document* pDoc)
+{
+    return static_cast<FreeFlowView*>(
+                        inject_View(libraryScope, k_view_free_flow, pDoc) );
 }
 
 //---------------------------------------------------------------------------------------

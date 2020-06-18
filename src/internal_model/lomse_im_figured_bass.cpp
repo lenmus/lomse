@@ -241,7 +241,7 @@ void ImoFiguredBassInfo::set_from_string(const std::string& sData)
     EIntervalQuality quality = k_interval_as_implied;
     bool fParenthesis = false;
     std::string interval;
-    std::string fingerprint = "";       //explicit present intervals (i.e. "53", "642"
+    std::string fingerprint = "";       //explicit present intervals (e.g., "53", "642"
 
     //Finite automata to parse the string
 

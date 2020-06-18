@@ -176,15 +176,15 @@ void ChordEngraver::decide_on_stem_direction()
     //
     //  a) Two notes in chord:
     //    a1. If the interval above the middle line is greater than the interval below
-    //      the middle line: downward stems. i.e. (a4,d5) (f4,f5) (a4,g5)
+    //      the middle line: downward stems. e.g., (a4,d5) (f4,f5) (a4,g5)
     //      ==>   (MaxNotePos + MinNotePos)/2 > MiddleLinePos
     //
     //    a2. If the interval below the middle line is greater than the interval above
-    //      the middle line: upward stems. i.e. (e4,c5)(g4,c5)(d4,e5)
+    //      the middle line: upward stems. e.g., (e4,c5)(g4,c5)(d4,e5)
     //
     //    a3. If the two notes are at the same distance from the middle line: stem can
     //      go in either direction, but most engravers prefer downward stems.
-    //      i.e. (g4.d5)(a4,c5)
+    //      e.g., (g4.d5)(a4,c5)
     //
     //
     //  b) More than two notes in chord:

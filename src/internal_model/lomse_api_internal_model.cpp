@@ -77,7 +77,7 @@ namespace lomse
 ////    type final is entered.
 ////
 //    Option 'k_truncate_always' truncates staff lines after last staff object. It can
-//    be useful for creating score samples (i.e. for ebooks).
+//    be useful for creating score samples (e.g., for ebooks).
 //        k_isolated=0,       Independent barlines for each score part
 //        k_joined,           Barlines joined across all parts
 //        k_mensurstrich,     Barlines only in the gaps between parts, but not on

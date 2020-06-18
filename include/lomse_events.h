@@ -229,7 +229,7 @@ typedef std::shared_ptr<EventDoc>  SpEventDoc;
 	inform the user application that it must immediately update the content of the
 	window associated to the lomse View, by displaying the current bitmap. User
 	application must put immediately the content of the currently rendered buffer
-	into the window without calling any Lomse methods (i.e. force_redraw) or generating
+	into the window without calling any Lomse methods (e.g., force_redraw) or generating
 	application events. .
 
 	For receiving these events you will have to register a callback when
@@ -661,7 +661,7 @@ typedef std::shared_ptr<EventUpdateUI>  SpEventUpdateUI;
         different box areas. Probably your application should ignore these events.
     - TaskDataEntry selected: As mouse moves, mouse in and out events are generated,
         as mouse flies over the different box areas. Your application can handle these
-        events and react to them as convenient (i.e. highlighting the implied
+        events and react to them as convenient (e.g., highlighting the implied
         insertion point/area).
 
     <b>Type k_on_click_event</b>
@@ -1464,8 +1464,8 @@ public:
         //use operating system services to find a suitable font
 
         //notes on parameters received:
-        // - fontname can be either the face name (i.e. "Book Antiqua") or
-        //   the familly name (i.e. "Liberation sans")
+        // - fontname can be either the face name (e.g., "Book Antiqua") or
+        //   the familly name (e.g., "Liberation sans")
 
         const string& fontname = pRequest->get_fontname();
         bool bold = pRequest->get_bold();
@@ -1553,7 +1553,7 @@ public:
 
     //getters
     /** Returns the <i>fontname</i>. It can be either the face name (i.e.
-        "Book Antiqua") or the familly name (i.e. "Liberation sans"). */
+        "Book Antiqua") or the familly name (e.g., "Liberation sans"). */
     inline const string& get_fontname() { return m_fontname; }
     ///Returns @true is the font is requested in bold face. */
     inline bool get_bold() { return m_bold; }

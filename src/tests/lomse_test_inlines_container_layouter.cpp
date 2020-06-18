@@ -550,7 +550,7 @@ SUITE(InlinesContainerLayouterTest)
         LineReferences engr(120.0f, 350.0f, 500.0f, 650.0f); //top, middle, base, bottom
 
         MyInlinesContainerLayouter lyt(m_libraryScope, line);
-        LUnits shift = 400.0f - 350.0f;     //i.e. sub align
+        LUnits shift = 400.0f - 350.0f;     //e.g., sub align
         lyt.my_update_line_references(engr, shift, false /*text, no_baseline / no text*/);
 
         LineReferences& refs = lyt.get_line_refs();
@@ -574,7 +574,7 @@ SUITE(InlinesContainerLayouterTest)
         LineReferences engr(100.0f, 300.0f, 400.0f, 600.0f); //top, middle, base, bottom
 
         MyInlinesContainerLayouter lyt(m_libraryScope, line);
-        LUnits shift = 120.0f - 300.0f;     //i.e. supper align
+        LUnits shift = 120.0f - 300.0f;     //e.g., supper align
         lyt.my_update_line_references(engr, shift, false /*text, no_baseline / no text*/);
 
         LineReferences& refs = lyt.get_line_refs();

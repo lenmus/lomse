@@ -281,7 +281,7 @@ bool EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
 //            (*it)->notify(pEvent);
             return true;
             //TODO: remove 'return' when following problem is fixed:
-            //    Object receiving notification might modify the document (i.e. link
+            //    Object receiving notification might modify the document (e.g., link
             //    'new problem') and this will invalidate target and all remaining
             //    objects in m_observers (!!!!)
         }

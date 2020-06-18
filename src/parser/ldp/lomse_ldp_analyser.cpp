@@ -1903,7 +1903,7 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ For dynamic content, i.e. exercises
+//@ For dynamic content, e.g., exercises
 //@
 //@ <dynamic> = (dynamic <classid> <param>*)
 //@ <classid> = (classid <label>)
@@ -2312,7 +2312,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <font> = (font <font_name> <font_size> <font_style>)
-//@ <font_name> = string   i.e. "Times New Roman", "Trebuchet"
+//@ <font_name> = string   e.g., "Times New Roman", "Trebuchet"
 //@ <font_size> = num      in points
 //@ <font_style> = { "bold" | "normal" | "italic" | "bold-italic" }
 //@
@@ -2386,7 +2386,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ <goFwd> = (goFwd <duration> [voice])
-//@ <duration> = note/rest duration, letter plus dots, i.e. 'e..'
+//@ <duration> = note/rest duration, letter plus dots, e.g., 'e..'
 //@
 //@ Version 1.x
 //@ <goBack> = (goBack <timeShift>)
@@ -2394,9 +2394,9 @@ public:
 //@ <timeShift> = { start | end | <number> | <duration> }
 //@
 //@ the time shift can be:
-//@   a) one of the tags 'start' and 'end': i.e. (goBack start) (goFwd end)
+//@   a) one of the tags 'start' and 'end': e.g., (goBack start) (goFwd end)
 //@   b) a number: the amount of 256th notes to go forward or backwards
-//@   c) a note/rest duration, i.e. 'e..'
+//@   c) a note/rest duration, e.g., 'e..'
 
 class GoBackFwdAnalyser : public ElementAnalyser
 {
@@ -2504,8 +2504,8 @@ protected:
         pImo->set_visible(false);
 
         // <duration> (label)
-        //AWARE: As goFwd is a rest, only note/rest duration is allowed (i.e. "e.")
-        //       Duration for goFwd is no longer alloed as number (i.e. 32)
+        //AWARE: As goFwd is a rest, only note/rest duration is allowed (e.g., "e.")
+        //       Duration for goFwd is no longer alloed as number (e.g., 32)
         if (get_mandatory(k_label))
             set_duration(pImo);
 

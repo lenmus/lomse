@@ -48,11 +48,13 @@ namespace lomse
 //  delegates in specialized layouters.
 //---------------------------------------------------------------------------------------
 
-DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains)
+DocLayouter::DocLayouter(Document* pDoc, LibraryScope& libraryScope, int constrains,
+                         LUnits width)
     : Layouter(libraryScope)
+    , m_pDoc( pDoc->get_im_root() )
+    , m_viewWidth(width)
     , m_pScoreLayouter(nullptr)
 {
-    m_pDoc = pDoc->get_im_root();
     m_pStyles = m_pDoc->get_styles();
     m_pGModel = LOMSE_NEW GraphicModel();
     m_constrains = constrains;
@@ -137,9 +139,17 @@ GmoBoxDocPage* DocLayouter::create_document_page()
 //---------------------------------------------------------------------------------------
 void DocLayouter::assign_paper_size_to(GmoBox* pBox)
 {
-    m_availableWidth = (m_constrains & k_infinite_width) ? LOMSE_INFINITE_LENGTH
-                        : m_pDoc->get_paper_width() / m_pDoc->get_page_content_scale();
+    //width
+    if (m_constrains & k_infinite_width)
+        m_availableWidth = LOMSE_INFINITE_LENGTH;
+    else if (m_constrains & k_use_viewport_width)
+    {
+        m_availableWidth = m_viewWidth;
+    }
+    else
+        m_availableWidth = m_pDoc->get_paper_width() / m_pDoc->get_page_content_scale();
 
+    //height
     m_availableHeight = (m_constrains & k_infinite_height) ? LOMSE_INFINITE_LENGTH
                          : m_pDoc->get_paper_height() / m_pDoc->get_page_content_scale();
 
