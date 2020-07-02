@@ -208,7 +208,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
         case k_barline_end_repetition:
             //uxPos += m_uRadius;
             uxPos += m_uRadius * 2.7f;   //BUG-BYPASS: Need to shift right the drawing
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             uxPos += m_uRadius + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing;
@@ -220,29 +220,29 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
             uxPos += m_uThickLineWidth + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing + m_uRadius;
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             break;
 
         case k_barline_double_repetition:
             uxPos += m_uRadius;
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             uxPos += m_uSpacing + m_uRadius;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing + m_uRadius;
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             break;
 
         case k_barline_double_repetition_alt:
             uxPos += m_uRadius;
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             uxPos += m_uSpacing + m_uRadius;
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             uxPos += m_uThickLineWidth + m_uSpacing;
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             uxPos += m_uThickLineWidth + m_uSpacing + m_uRadius;
-            draw_two_dots(pDrawer, uxPos, uyTop);
+            draw_two_dots(pDrawer, uxPos, uyTop, color);
             break;
 
         case k_barline_start:
@@ -272,6 +272,7 @@ void GmoShapeBarline::draw_thin_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTop
 {
     pDrawer->begin_path();
     pDrawer->fill(color);
+    pDrawer->stroke(color);
     pDrawer->line(uxPos + m_uThinLineWidth/2, uyTop,
                   uxPos + m_uThinLineWidth/2, uyBottom,
                   m_uThinLineWidth, k_edge_normal);
@@ -284,6 +285,7 @@ void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTo
 {
     pDrawer->begin_path();
     pDrawer->fill(color);
+    pDrawer->stroke(color);
     pDrawer->line(uxPos + uWidth/2, uyTop,
                   uxPos + uWidth/2, uyTop + uHeight,
                   uWidth, k_edge_normal);
@@ -291,11 +293,14 @@ void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits uxPos, LUnits uyTo
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeBarline::draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos)
+void GmoShapeBarline::draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos,
+                                    Color color)
 {
     LUnits uShift1 = m_uSpacing * 3.7f;
     LUnits uShift2 = m_uSpacing * 6.1f;
     pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->stroke(color);
     pDrawer->circle(uxPos, uyPos + uShift1, m_uRadius);
     pDrawer->circle(uxPos, uyPos + uShift2, m_uRadius);
     pDrawer->end_path();
