@@ -232,10 +232,12 @@ protected:
     void decide_line_breaks();
     void page_initializations(GmoBox* pContainerBox);
     void decide_line_sizes();
-    void fill_page_with_empty_systems_if_required();
+    void final_touches();
     bool score_page_is_the_only_content_of_parent_box();
-    void remove_unused_space();
 
+    void fill_page_with_empty_systems_if_required();
+    void remove_unused_space();
+    void center_score_if_requested();
     void delete_system_layouters();
     void get_score_renderization_options();
     void auto_scale();

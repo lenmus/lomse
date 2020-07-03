@@ -4292,6 +4292,7 @@ public:
     {
         return (name == "Score.FillPageWithEmptyStaves")
             || (name == "Score.JustifyFinalBarline")
+            || (name == "Score.Center")
             || (name == "StaffLines.StopAtFinalBarline")    //deprecated 2.1
             || (name == "StaffLines.Hide")
             || (name == "Staff.DrawLeftBarline");

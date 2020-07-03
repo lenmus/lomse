@@ -83,7 +83,7 @@ protected:
                         Color color);
     void draw_thick_line(Drawer* pDrawer, LUnits uxLeft, LUnits uyTop, LUnits uWidth,
                          LUnits uHeight, Color color);
-    void draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos);
+    void draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos, Color color);
 
 };
 

@@ -223,16 +223,15 @@ void ScoreLayouter::layout_in_box()
     }
 
 
-    //add empty systems to fill the page, if option enabled, and
-    //remove unused space
-    bool fMoreColumns = m_iCurColumn < get_num_columns();
-    if (!fMoreColumns)
+    //if no more columns, the score is finished
+    if (m_iCurColumn < get_num_columns())
+        set_layout_result(k_layout_not_finished);
+    else
     {
-        fill_page_with_empty_systems_if_required();
-        remove_unused_space();
+        final_touches();
+        set_layout_result(k_layout_success);
     }
 
-    set_layout_result(fMoreColumns ? k_layout_not_finished : k_layout_success);
     m_pageCursor = m_cursor;
 }
 
@@ -277,6 +276,18 @@ void ScoreLayouter::auto_scale()
     ImoDocument* pDoc = m_pScore->get_document();
     scale *= pDoc->get_page_content_scale();
     pDoc->set_page_content_scale(scale);
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::final_touches()
+{
+    //the score has been layouted. In this method we do any additional layout task
+    //for finishing the score, such as adding empty systems to fill the page, if
+    //requested, as well as removing empty unused space in the page.
+
+    fill_page_with_empty_systems_if_required();
+    remove_unused_space();
+    center_score_if_requested();
 }
 
 //---------------------------------------------------------------------------------------
@@ -719,7 +730,7 @@ void ScoreLayouter::fill_page_with_empty_systems_if_required()
     if (!m_pCurSysLyt->system_must_be_truncated())
     {
         ImoOptionInfo* pOpt = m_pScore->get_option("Score.FillPageWithEmptyStaves");
-       bool fFillPage = pOpt->get_bool_value()
+        bool fFillPage = pOpt->get_bool_value()
                          && !((m_constrains & k_infinite_height)
                               || (m_constrains & k_infinite_width));
         if (fFillPage)
@@ -728,6 +739,32 @@ void ScoreLayouter::fill_page_with_empty_systems_if_required()
             {
                 create_empty_system();
                 add_system_to_page();
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::center_score_if_requested()
+{
+    if (get_num_systems() != 1)
+        return;
+
+    ImoOptionInfo* pOpt = m_pScore->get_option("Score.Center");
+    if (pOpt && pOpt->get_bool_value())
+    {
+        GmoBox* pBPage = m_pItemMainBox;            //ScorePage
+        GmoBox* pBSys = pBPage->get_child_box(0);   //System
+
+        //BoxSystem does not exist when error "not enough space in page"
+        if (pBSys)
+        {
+            LUnits width = pBSys->get_size().width + pBSys->get_origin().x;
+            LUnits pageWidth = pBPage->get_size().width + pBPage->get_origin().x;
+            LUnits shift = (pageWidth - width) / 2.0f;
+            if (shift > 0.0f)
+            {
+                pBSys->shift_origin_and_content(USize(shift, 0.0f));
             }
         }
     }
