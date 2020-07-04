@@ -184,8 +184,8 @@ bool AObject::is_valid() const
 
 ////---------------------------------------------------------------------------------------
 // /* * @memberof AObject
-//    Default constructor. Creates an empty (invalid) IObject. Useful for methods that
-//    returns an IObject when a valid object cannot be returned.
+//    Default constructor. Creates an empty (invalid) AObject. Useful for methods that
+//    returns an AObject when a valid object cannot be returned.
 //*/
 
 ///@cond INTERNALS
@@ -236,7 +236,7 @@ struct AObject::Private
 //        else if (pImo->is_multi_column())
 //        {
 //            ImoMultiColumn* pObj = static_cast<ImoMultiColumn*>(pImo);
-//            return IMultiColumn>(new IMultiColumn(pObj, pDoc, pDoc->get_model_ref()) );
+//            return AMultiColumn>(new AMultiColumn(pObj, pDoc, pDoc->get_model_ref()) );
 //        }
 //        else if (pImo->is_table())
 //        {
@@ -864,12 +864,12 @@ AObject ISiblings::next_sibling() const
     will produce the following structure of API classes:
 
     @verbatim
-                                   AParagraph
-                                        |
-                       +----------------+----------------+
-                       |                |                |
-                 IText (bold)     IText (normal)   IText (normal)
-                   "Hello"          " world! "    "It is a nice day!"
+                                        AParagraph
+                                            |
+                       +--------------------+--------------------+
+                       |                    |                    |
+                   ATextItem (bold)     ATextItem (normal)   ATextItem (normal)
+                   "Hello"              " world! "           "It is a nice day!"
     @endverbatim
 
     For objects, such as AParagraph, that organizes its content in a tree, class
@@ -2493,7 +2493,7 @@ ImoTextItem* ATextItem::internal_object() const
 //                        |
 //                 AAnonymousBlock (inlines container object)
 //                        |
-//                      IText (inline content object)
+//                    ATextItem (inline content object)
 //                "This is some text."
 //    @endverbatim
 //

@@ -843,10 +843,6 @@ enum ERenderSpacingOpts
     k_render_opt_breaker_simple     = 0x0001,   ///< use LinesBreakerSimple.
     k_render_opt_breaker_optimal    = 0x0002,   ///< use LinesBreakerOptimal
     k_render_opt_breaker_no_shrink  = 0x0004,   ///< do not shrink lines
-
-    // Spacing algorithm
-    k_render_opt_dmin_fixed         = 0x0100,   ///< use fixed value for Dmin
-    k_render_opt_dmin_global        = 0x0200,   ///< use min note in score for Dmin
 };
 
 

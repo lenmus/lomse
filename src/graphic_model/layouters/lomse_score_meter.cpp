@@ -61,7 +61,7 @@ ScoreMeter::ScoreMeter(ImoScore* pScore, int numInstruments, int numStaves,
                        LUnits lineSpacing,
                        float rSpacingFactor, ESpacingMethod nSpacingMethod,
                        Tenths rSpacingValue, bool fDrawLeftBarline)
-    : m_renderSpacingOpts(k_render_opt_breaker_simple | k_render_opt_dmin_fixed)
+    : m_renderSpacingOpts(k_render_opt_breaker_simple)
     , m_spacingOptForce(1.4f)
     , m_spacingAlpha(rSpacingFactor)
     , m_spacingDmin(16)
@@ -122,15 +122,13 @@ void ScoreMeter::get_options(ImoScore* pScore)
 
 	m_spacingSmin = tenths_to_logical_max(LOMSE_MIN_SPACE);
 
-    if (m_renderSpacingOpts & k_render_opt_dmin_global)
+    pOpt = pScore->get_option("Render.SpacingDmin");
+    m_spacingDmin = pOpt->get_float_value();
+    if (m_spacingDmin == 0.0f)
     {
-        //k_render_opt_dmin_global
+        //use the minimun note duration in this score
         m_spacingDmin = float(m_pScore->get_staffobjs_table()->min_note_duration());
         m_spacingDmin = min(m_spacingDmin, 16.0f);    //option Render.SpacingMaxDmin ?
-    }
-    else
-    {   //k_render_opt_dmin_fixed
-        m_spacingDmin = 16.0f;      //option Render.SpacingFixedDmin ?
     }
 
 	pOpt = pScore->get_option("Score.FillPageWithEmptyStaves");

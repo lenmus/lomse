@@ -4279,7 +4279,6 @@ public:
             }
         }
 
-
         if (fOk)
             add_to_model(pOpt);
         else
@@ -4313,6 +4312,7 @@ public:
     {
         return (name == "Render.SpacingFactor")
             || (name == "Render.SpacingFopt")
+            || (name == "Render.SpacingDmin")
             ;
     }
 
@@ -4801,7 +4801,7 @@ protected:
             pOpt->set_float_value(1.0f);
 
             pOpt = pScore->get_option("Render.SpacingOptions");
-            pOpt->set_long_value(k_render_opt_breaker_optimal | k_render_opt_dmin_global);
+            pOpt->set_long_value(k_render_opt_breaker_optimal);
         }
         else
         {
