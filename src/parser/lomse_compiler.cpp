@@ -55,7 +55,7 @@ Compiler::~Compiler()
 }
 
 //---------------------------------------------------------------------------------------
-int Compiler::get_num_errors()
+int Compiler::get_num_errors() const
 {
     return m_pParser->get_num_errors();
 }

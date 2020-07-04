@@ -69,6 +69,8 @@ public:
             return Document::k_format_lmd;
         else if (ext == "xml" || ext == "musicxml")
             return Document::k_format_mxl;
+        else if (ext == "mxl")
+            return Document::k_format_mxl_compressed;
         else if (ext == "mnx")
             return Document::k_format_mnx;
         else

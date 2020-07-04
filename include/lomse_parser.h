@@ -64,7 +64,7 @@ public:
     virtual void parse_text(const std::string& sourceText) = 0;
     //virtual void parse_input(LdpReader& reader) = 0;
 
-    inline int get_num_errors() { return m_numErrors; }
+    inline int get_num_errors() const { return m_numErrors; }
 
 };
 

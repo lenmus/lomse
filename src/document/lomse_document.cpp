@@ -38,6 +38,7 @@
 #include "lomse_xml_parser.h"
 #include "lomse_lmd_compiler.h"
 #include "lomse_mxl_compiler.h"
+#include "lomse_compressed_mxl_compiler.h"
 #include "lomse_mnx_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
@@ -205,7 +206,7 @@ int Document::from_file(const string& filename, int format)
     if (m_pImoDoc == nullptr)
         create_empty();
 
-    if (m_pImoDoc && format == Document::k_format_mxl)
+    if (m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
         fix_malformed_musicxml();
 
     return numErrors;
@@ -232,7 +233,7 @@ int Document::from_string(const string& source, int format)
     if (m_pImoDoc == nullptr)
         create_empty();
 
-    if (m_pImoDoc && format == Document::k_format_mxl)
+    if (m_pImoDoc && (format == Document::k_format_mxl || format == Document::k_format_mxl_compressed))
         fix_malformed_musicxml();
 
     return numErrors;
@@ -393,6 +394,11 @@ Compiler* Document::get_compiler_for_format(int format)
 
         case k_format_mxl:
             return Injector::inject_MxlCompiler(m_libraryScope, this);
+
+#if (LOMSE_ENABLE_COMPRESSION == 1)
+        case k_format_mxl_compressed:
+            return Injector::inject_CompressedMxlCompiler(m_libraryScope, this);
+#endif
 
         case k_format_mnx:
             return Injector::inject_MnxCompiler(m_libraryScope, this);

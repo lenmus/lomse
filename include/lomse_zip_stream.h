@@ -35,6 +35,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 #include "unzip.h"      //minizip package
@@ -128,6 +129,7 @@ public:
 
     //operations
     unsigned char* get_as_string();
+    std::vector<unsigned char> get_as_vector();
 
 	//positioning
 	bool move_to_first_entry();

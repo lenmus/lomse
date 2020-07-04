@@ -27,60 +27,42 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_COMPILER_H__
-#define __LOMSE_COMPILER_H__
+#ifndef __LOMSE_COMPRESSED_MXL_COMPILER_H__
+#define __LOMSE_COMPRESSED_MXL_COMPILER_H__
 
-#include "lomse_parser.h"
-#include "lomse_analyser.h"
-
-#include <string>
-using namespace std;
+#include "lomse_compiler.h"
 
 namespace lomse
 {
 
 //forward declarations
-class ModelBuilder;
-class DocumentScope;
-class LibraryScope;
-class ImoDocument;
-class Document;
-
+class MxlCompiler;
+class ZipInputStream;
 
 //---------------------------------------------------------------------------------------
-// Compiler: base class for all compilers
-class Compiler
+// CompressedMxlCompiler: builds the tree for a document
+class CompressedMxlCompiler : public Compiler
 {
 protected:
-    Parser*         m_pParser;
-    Analyser*       m_pAnalyser;
-    ModelBuilder*   m_pModelBuilder;
-    Document*       m_pDoc;
-    string         m_fileLocator;
-
-    Compiler()
-        : m_pParser(nullptr)
-        , m_pAnalyser(nullptr)
-        , m_pModelBuilder(nullptr)
-        , m_pDoc(nullptr)
-    {
-    }
-    Compiler(Parser* p, Analyser* a, ModelBuilder* mb, Document* pDoc);
+    MxlCompiler* m_pMxlCompiler;
 
 public:
-    virtual ~Compiler();
+    explicit CompressedMxlCompiler(MxlCompiler* pMxlCompiler);
+    ~CompressedMxlCompiler();
 
     //compilation
-    virtual ImoDocument* compile_file(const std::string& filename)=0;
-    virtual ImoDocument* compile_string(const std::string& source)=0;
+    ImoDocument* compile_file(const std::string& filename) override;
+    ImoDocument* compile_string(const std::string& source) override;
 
     //info
-    virtual int get_num_errors() const;
-    string get_file_locator() { return m_fileLocator; }
+    int get_num_errors() const override;
 
+protected:
+    std::string get_rootfile_path(ZipInputStream&);
+    std::string read_rootfile(ZipInputStream&);
 };
 
 
 }   //namespace lomse
 
-#endif      //__LOMSE_COMPILER_H__
+#endif      //__LOMSE_COMPRESSED_MXL_COMPILER_H__
