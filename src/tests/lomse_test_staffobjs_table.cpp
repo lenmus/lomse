@@ -773,7 +773,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 31 ++))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 32 ++))" );
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 
@@ -813,7 +813,7 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(key a)" );
         CHECK_ENTRY0(it, 1,	    0,	    0,	0,	    1,	"(time 3 8)" );
         CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(dir 0 p1 (metronome e 40))" );
-        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 31 ++))" );
+        CHECK_ENTRY0(it, 0,	    0,	    0,	0,	    0,	"(n e5 s v1 p1 (beam 32 ++))" );
         CHECK( pTable->min_note_duration() == 16.0 );
     }
 

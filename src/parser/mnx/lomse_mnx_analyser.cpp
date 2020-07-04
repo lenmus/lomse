@@ -2972,8 +2972,7 @@ protected:
 
         //spacing options
         pOpt = pScore->get_option("Render.SpacingOptions");
-        pOpt->set_long_value(k_render_opt_breaker_optimal
-                             | k_render_opt_dmin_global);
+        pOpt->set_long_value(k_render_opt_breaker_optimal);
     }
 
 };

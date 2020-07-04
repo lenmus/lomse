@@ -232,7 +232,7 @@ SUITE(ImVisitorTest)
 //             << ", num_out_nodes=" << v.num_out_nodes() << endl;
 //        cout << doc.dump_ids() << endl;
         CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 109 );
+        CHECK( v.num_in_nodes() == 111 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 
