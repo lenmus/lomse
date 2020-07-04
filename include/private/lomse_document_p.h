@@ -159,6 +159,7 @@ public:
         k_format_ldp = 0,   ///< Lenguaje De Partituras (LDP, LISP like syntax)
         k_format_lmd,       ///< LenMus %Document (LMD, XML syntax)
         k_format_mxl,       ///< MusicXML format
+        k_format_mxl_compressed, ///< Compressed MusicXML format
         k_format_mnx,       ///< W3C MNX format
         k_format_unknown,
     };

@@ -52,6 +52,7 @@ class LmdAnalyser;
 class LmdCompiler;
 class MxlAnalyser;
 class MxlCompiler;
+class CompressedMxlCompiler;
 class MnxAnalyser;
 class MnxCompiler;
 class ModelBuilder;
@@ -267,6 +268,8 @@ public:
     static MxlAnalyser* inject_MxlAnalyser(LibraryScope& libraryScope, Document* pDoc,
                                            XmlParser* pParser);
     static MxlCompiler* inject_MxlCompiler(LibraryScope& libraryScope, Document* pDoc);
+    static CompressedMxlCompiler* inject_CompressedMxlCompiler(LibraryScope& libraryScope,
+                                                               Document* pDoc);
 
     //MNX format
     static MnxAnalyser* inject_MnxAnalyser(LibraryScope& libraryScope, Document* pDoc,

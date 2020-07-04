@@ -39,6 +39,7 @@
 #include "lomse_lmd_compiler.h"
 #include "lomse_mxl_analyser.h"
 #include "lomse_mxl_compiler.h"
+#include "lomse_compressed_mxl_compiler.h"
 #include "lomse_mnx_analyser.h"
 #include "lomse_mnx_compiler.h"
 #include "lomse_model_builder.h"
@@ -332,6 +333,14 @@ MxlCompiler* Injector::inject_MxlCompiler(LibraryScope& libraryScope,
                                  inject_MxlAnalyser(libraryScope, pDoc, pParser),
                                  inject_ModelBuilder(pDoc->get_scope()),
                                  pDoc );
+}
+
+//---------------------------------------------------------------------------------------
+CompressedMxlCompiler* Injector::inject_CompressedMxlCompiler(LibraryScope& libraryScope,
+                                                              Document* pDoc)
+{
+    MxlCompiler* pMxlCompiler = Injector::inject_MxlCompiler(libraryScope, pDoc);
+    return LOMSE_NEW CompressedMxlCompiler(pMxlCompiler);
 }
 
 //---------------------------------------------------------------------------------------

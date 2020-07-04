@@ -417,6 +417,17 @@ unsigned char* ZipInputStream::get_as_string()
     return buffer;
 }
 
+//---------------------------------------------------------------------------------------
+std::vector<unsigned char> ZipInputStream::get_as_vector()
+{
+    long size = get_size();
+    std::vector<unsigned char> buffer(size+1);
+
+    long i = read(buffer.data(), size);
+    buffer[i] = '\0';
+
+    return buffer;
+}
 
 }  //namespace lomse
 

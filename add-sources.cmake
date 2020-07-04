@@ -188,6 +188,7 @@ set(PARSER_FILES
 
     ${LOMSE_SRC_DIR}/parser/mxl/lomse_mxl_analyser.cpp
     ${LOMSE_SRC_DIR}/parser/mxl/lomse_mxl_compiler.cpp
+    ${LOMSE_SRC_DIR}/parser/mxl/lomse_compressed_mxl_compiler.cpp
 
     ${LOMSE_SRC_DIR}/parser/mnx/lomse_mnx_analyser.cpp
     ${LOMSE_SRC_DIR}/parser/mnx/lomse_mnx_compiler.cpp
