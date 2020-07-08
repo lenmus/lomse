@@ -144,7 +144,7 @@ void InlinesContainerLayouter::prepare_line()
 
     bool fBreak = false;
 
-    LOMSE_LOG_TRACE(Logger::k_layout, "available space=%.02f", m_availableSpace);
+    LOMSE_LOG_DEBUG(Logger::k_layout, "available space=%.02f", m_availableSpace);
 
     bool fSomethingAdded = false;
     bool fFirstEngrouterOfLine = true;
@@ -172,7 +172,7 @@ void InlinesContainerLayouter::prepare_line()
         {
             if (!fSomethingAdded)
             {
-                LOMSE_LOG_TRACE(Logger::k_layout, "Line empty! No engrouter created.");
+                LOMSE_LOG_DEBUG(Logger::k_layout, "Line empty! No engrouter created.");
             }
             break;
         }

@@ -43,6 +43,7 @@ GmoBoxScorePage::GmoBoxScorePage(ImoScore* pScore)
     , m_iFirstSystem(-1)
     , m_iLastSystem(-1)
     , m_iPage(0)
+    , m_maxSystemHeight(0.0f)
 {
 }
 
@@ -60,6 +61,9 @@ void GmoBoxScorePage::add_system(GmoBoxSystem* pSystem, int iSystem)
     m_iLastSystem = iSystem;
 
     add_child_box(pSystem);
+    pSystem->set_system_number(iSystem);
+
+    m_maxSystemHeight = max(m_maxSystemHeight, pSystem->get_height());
 }
 
 //---------------------------------------------------------------------------------------
