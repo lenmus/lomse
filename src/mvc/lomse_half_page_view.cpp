@@ -34,6 +34,8 @@
 #include "lomse_screen_drawer.h"
 #include "lomse_interactor.h"
 #include "lomse_box_system.h"
+#include "private/lomse_internal_model_p.h"
+#include "lomse_midi_table.h"
 
 namespace lomse
 {
@@ -42,11 +44,15 @@ namespace lomse
 //=======================================================================================
 // HalfPageView implementation
 //=======================================================================================
+const int k_splitLineHeight = 2;      //line heigth = 2px
+const Color k_splitLineColor = Color(128, 128, 200);
+
+//---------------------------------------------------------------------------------------
 HalfPageView::HalfPageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     : SinglePageView(libraryScope, pDrawer)
     , m_fPlaybackMode(false)
     , m_fSplitMode(false)
-    , m_fIsScore(false)
+    , m_pScore(nullptr)
     , m_buf(nullptr)
     , m_vxOrgPlay{0,0}
     , m_vyOrgPlay{0,0}
@@ -57,8 +63,12 @@ HalfPageView::HalfPageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
 //---------------------------------------------------------------------------------------
 bool HalfPageView::is_valid_for_this_view(Document* pDoc)
 {
-    m_fIsScore = pDoc->get_num_content_items() == 1
-                 && pDoc->get_content_item(0)->is_score();
+    if (pDoc->get_num_content_items() == 1
+        && pDoc->get_content_item(0)->is_score())
+    {
+        m_pScore = static_cast<ImoScore*>(pDoc->get_first_content_item());
+    }
+
     return true;
 }
 
@@ -91,8 +101,8 @@ void HalfPageView::compute_buffer_split()
         m_bufStride = m_pRenderBuf->stride();
 
         //compute window split
-        m_SplitHeight = m_bufHeight / 2 - 5;
-        m_BottomBuf = m_buf + (m_bufHeight / 2 + 5) * m_bufStride;
+        m_SplitHeight = (m_bufHeight - k_splitLineHeight) / 2;
+        m_BottomBuf = m_buf + ((m_bufHeight + k_splitLineHeight) / 2) * m_bufStride;
         m_TopBuf = m_buf;
     }
 }
@@ -147,8 +157,8 @@ void HalfPageView::draw_bottom_window()
 void HalfPageView::draw_separation_line()
 {
     unsigned char* buf = m_buf + m_SplitHeight * m_bufStride;
-    m_pRenderBuf->attach(buf, m_bufWidth, 10, m_bufStride);
-    m_pDrawer->reset(*m_pRenderBuf, Color(128, 128, 200));
+    m_pRenderBuf->attach(buf, m_bufWidth, k_splitLineHeight, m_bufStride);
+    m_pDrawer->reset(*m_pRenderBuf, k_splitLineColor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -205,7 +215,7 @@ void HalfPageView::on_mode_changed(int mode)
 void HalfPageView::decide_split_or_normal_view()
 {
     m_fSplitMode = false;
-    if (m_fPlaybackMode && m_fIsScore)
+    if (m_pScore && m_fPlaybackMode)
     {
         //convert buffer height to LUnits
         LUnits bufHeight = m_pDrawer->Pixels_to_LUnits(m_bufHeight);
@@ -220,44 +230,71 @@ void HalfPageView::decide_split_or_normal_view()
 
         LOMSE_LOG_DEBUG(Logger::k_mvc, "maxHeight = %f, bufHeight=%f", maxHeight, bufHeight);
 
-        //Do not split window if height lower than 2 * maxSystemHeight + some pixels (40px)
-        LUnits extra = m_pDrawer->Pixels_to_LUnits(40);
-        if (bufHeight < (2.0f * maxHeight + extra))
+        //Do not split window if height lower than 2 * maxSystemHeight
+        if (bufHeight < (2.0f * maxHeight))
             return;
 
         //Do not split window if width lower than system width
         GmoBoxSystem* pSys = m_pBSP->get_system(0);
         LUnits bufWidth = m_pDrawer->Pixels_to_LUnits(m_bufWidth);
-        if (bufWidth < (2.0f * extra + pSys->get_width()))
+        if (bufWidth < pSys->get_width())
+            return;
+
+        //do not split if the full score fits in the window
+        if (bufHeight > m_pBSP->get_height())
             return;
 
         m_fSplitMode = true;
 
-        //determine how many systems fit in a sub-window
-        m_nSysIncr = int(((bufHeight / 2.0f) - extra) / maxHeight);
+        m_winHeight = bufHeight / 2.0f;
     }
 }
 
 //---------------------------------------------------------------------------------------
 void HalfPageView::decide_systems_to_display()
 {
-    m_iSystem = 0;                                  //system to display: first system
-    m_curSystem = 0;                                //system being played
-    m_iPlayWindow = 0;                              //playback window: top
-    int iNextWindow = (m_iPlayWindow==0 ? 1 : 0);     //next window: the other one
+    LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
 
-    //set viewport for first window
-    //viewport is in pixels. It refers to user space converted to pixels
-    GmoBoxSystem* pSys = m_pBSP->get_system(m_iSystem);
+    create_systems_jumps_table();
+
+    m_iSystem = 0;                          //index on m_systems: system to display, first one
+    m_curSystem = m_systems[m_iSystem];     //system being played
+    m_iPlayWindow = 0;                      //playback window: 0=top window
+
+    determine_how_many_systems_fit_and_effective_window_height(m_iPlayWindow, m_curSystem);
+
+    //set viewport for first window. Viewport is in pixels
+    GmoBoxSystem* pSys = m_pBSP->get_system( m_curSystem );
 ////    m_vxOrgPlay[m_iPlayWindow] = 0;
     m_vyOrgPlay[m_iPlayWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
 
-    //set viewport for next window
-    m_iSystem += m_nSysIncr;
-    //TODO: limit when max number of systems reached
-    pSys = m_pBSP->get_system(m_iSystem);
-////    m_vxOrgPlay[iNextWindow] = 0;
-    m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
+    //now in top window there are m_nSys[0] systems displayed, starting with m_curSystem
+    //display systems in the other window
+    set_viewport_for_next(1);   //1 = bottom window
+}
+
+//---------------------------------------------------------------------------------------
+void HalfPageView::determine_how_many_systems_fit_and_effective_window_height(int iWindow, int iSys)
+{
+    m_nSys[iWindow] = 0;
+    m_height[iWindow] = 0.0f;
+    while (iSys < m_pBSP->get_num_systems())
+    {
+        GmoBoxSystem* pSys = m_pBSP->get_system(iSys);
+        if (m_winHeight - m_height[iWindow] >= pSys->get_height())
+        {
+            //system fits. Add it
+            ++m_nSys[iWindow];
+            m_height[iWindow] += pSys->get_height();
+        }
+        else
+            break;
+    }
+//    assert(m_nSys[iWindow] > 0);
+
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "iWindow = %d, iSys=%d, m_nSys[iWindow]=%d, m_height[iWindow]=%f",
+                    iWindow, iSys, m_nSys[iWindow], m_height[iWindow]);
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -269,15 +306,17 @@ void HalfPageView::change_viewport_if_necessary(ImoId id)
 }
 
 //---------------------------------------------------------------------------------------
-//void HalfPageView::do_change_viewport_if_necessary()
 void HalfPageView::do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
                                                           bool fTempoLine, bool fViewport)
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
 
     if (!m_fSplitMode)
+    {
         SinglePageView::do_move_tempo_line_and_change_viewport(scoreId, timepos,
                                                                fTempoLine, fViewport);
+        return;
+    }
 
     //Here it is necessary to determine if playback has arrived to switch point. If so,
     //switch windows and display next system
@@ -286,30 +325,62 @@ void HalfPageView::do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUni
     if (!determine_page_system_and_position_for(scoreId, timepos))
         return;
 
-    if (m_pScrollSystem->get_system_number() - m_curSystem >= m_nSysIncr)
+    //check if next system is already displayed in playback window
+    int iFirst = m_pScrollSystem->get_system_number();
+    bool fDisplayed = (iFirst >= m_curSystem) && (iFirst < (m_curSystem + m_nSys[m_iPlayWindow]));
+
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "iFirst = %d, m_iPlayWindow=%d, m_curSystem=%d, m_nSys[m_iPlayWindow]=%d, fDisplayed=%d",
+                    iFirst, m_iPlayWindow, m_curSystem, m_nSys[m_iPlayWindow], (fDisplayed ? 1:0));
+    if (!fDisplayed)
     {
         //playback has arrived to switch point. Switch windows and display next system
         int iNextWindow = m_iPlayWindow;
         m_iPlayWindow = (m_iPlayWindow==0 ? 1 : 0);
         //update system being played
-        m_curSystem  += m_nSysIncr;
-        //update viewport for top window
-        m_iSystem += m_nSysIncr;
-        int numSystems = m_pBSP->get_num_systems();
-        if (m_iSystem < numSystems)
-        {
-            GmoBoxSystem* pSys = m_pBSP->get_system(m_iSystem);
-            m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
-        }
-        else
-        {
-            //set viewport after last system
-            GmoBoxSystem* pSys = m_pBSP->get_system(numSystems - 1);
-            LUnits yAfter = pSys->get_origin().y + pSys->get_height() + 2000.0f;    //2cm
-            m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(yAfter);
-        }
+        m_curSystem = iFirst;
 
+        set_viewport_for_next(iNextWindow);
         do_draw_all();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void HalfPageView::set_viewport_for_next(int iNextWindow)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "iNextWindow=%d, m_iSystem=%d", iNextWindow, m_iSystem);
+    //now in playback window there are m_nSys[iPlay] systems displayed, starting with m_curSystem
+
+    //advance while system already displayed in the playback window
+    int iPlayWindow = (iNextWindow==0 ? 1 : 0);
+    bool fDisplayed = true;     //m_iSystem is displayed
+    int iFirst = -1;
+    while (fDisplayed && m_iSystem < int(m_systems.size()-1))
+    {
+        ++m_iSystem;
+        iFirst = m_systems[m_iSystem];
+        //check if already displayed in playback window
+        fDisplayed = (iFirst >= m_curSystem) && (iFirst < (m_curSystem + m_nSys[iPlayWindow]));
+    }
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "iFirst = %d, m_iSystem=%d, fDisplayed=%d",
+                    iFirst, m_iSystem, (fDisplayed ? 1:0));
+
+    //update viewport for next window
+    if (!fDisplayed && iFirst >= 0)
+    {
+        determine_how_many_systems_fit_and_effective_window_height(iNextWindow, iFirst);
+
+        //display m_nSys[iNextWindow] systems, starting with iFirst
+        GmoBoxSystem* pSys = m_pBSP->get_system(iFirst);
+        m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
+    }
+    else
+    {
+        //set viewport after last system
+        GmoBoxSystem* pSys = m_pBSP->get_system(m_systems.back());
+        LUnits yAfter = pSys->get_origin().y + pSys->get_height() + 2000.0f;    //2cm
+        m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(yAfter);
+
+        m_nSys[iNextWindow] = 0;     //nothing displayed
     }
 }
 
@@ -327,8 +398,7 @@ void HalfPageView::remove_split()
         //Last system is displayed in bottom window. Set viewport so that last system
         //doesn't move from current position
 
-        int numSystems = m_pBSP->get_num_systems();
-        GmoBoxSystem* pSys = m_pBSP->get_system(numSystems - 1);
+        GmoBoxSystem* pSys = m_pBSP->get_system(m_systems.back());
         Pixels y = m_pDrawer->LUnits_to_Pixels( pSys->get_origin().y );
         m_vyOrgPlay[0] = y - m_SplitHeight - 10;
         GraphicView::do_change_viewport(m_vxOrgPlay[0], m_vyOrgPlay[0]);
@@ -338,6 +408,47 @@ void HalfPageView::remove_split()
 //---------------------------------------------------------------------------------------
 void HalfPageView::send_enable_scroll_event(bool enable)
 {
+}
+
+//---------------------------------------------------------------------------------------
+void HalfPageView::create_systems_jumps_table()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
+
+    if (m_pScore)
+    {
+        GraphicModel* pGModel = get_graphic_model();
+        if (!pGModel)
+            return;
+
+        SoundEventsTable* pSM = m_pScore->get_midi_table();
+        vector<MeasuresJumpsEntry*> measuresTable = pSM->get_measures_jumps();
+
+        //now just transform measures into systems
+
+        ImoId scoreId = m_pScore->get_id();
+        int iPrevSys = -1;
+        m_systems.clear();
+        for(auto it : measuresTable)
+        {
+            LOMSE_LOG_INFO(it->dump_entry());
+            GmoBoxSystem* pFromSys = pGModel->get_system_for(scoreId, it->get_from_timepos());
+            GmoBoxSystem* pToSys = pGModel->get_system_for(scoreId, it->get_to_timepos());
+            int iFrom = pFromSys->get_system_number();
+            int iTo = pToSys->get_system_number();
+            LOMSE_LOG_INFO("from s=%d to s=%d", pFromSys->get_system_number(),
+                            pToSys->get_system_number());
+            int i = (iPrevSys != iFrom ? iFrom : iFrom+1);
+            for(; i <= iTo; ++i)
+            {
+                m_systems.push_back(i);
+            }
+            iPrevSys = iTo;
+        }
+
+        for(auto it : m_systems)
+            LOMSE_LOG_INFO("system %d", it);
+    }
 }
 
 

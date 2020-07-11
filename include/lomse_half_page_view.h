@@ -110,13 +110,16 @@ protected:
     void draw_top_window();
     void remove_split();
     void send_enable_scroll_event(bool enable);
+    void set_viewport_for_next(int iNextWindow);
+    void create_systems_jumps_table();
+    void determine_how_many_systems_fit_and_effective_window_height(int iWindow, int iSys);
 
 
 protected:
     //data to control split mode
     bool    m_fPlaybackMode;    //true during playback (pause also included)
     bool    m_fSplitMode;       //true when the view must be split
-    bool    m_fIsScore;         //the document is only one score
+    ImoScore* m_pScore;         //if the document is only one score; otherwise, nullptr
 
     //temporary data: last processed rendering buffer.
     //User app. can change the buffer but the view does not receive notifications.
@@ -131,15 +134,21 @@ protected:
     unsigned char* m_BottomBuf;
     unsigned char* m_TopBuf;
 
+    //temporary data: for controlling real used heigh
+    LUnits m_winHeight;     //total sub-window height
+    LUnits m_height[2];     //sub-window occupied height
+    int m_nSys[2];          //number of systems displayed in each sub-window
+
     //temporary data: viewport origin for each sub-window
     Pixels m_vxOrgPlay[2], m_vyOrgPlay[2];
 
     //temporary data, to control display while playback
     GmoBoxScorePage* m_pBSP;    //score-page, to access systems
-    int m_nSysIncr;         //number of systems per sub-window
-    int m_iSystem;          //next system to display
     int m_iPlayWindow;      //index (0=top or 1=bottom) to playback window
-    int m_curSystem;        //index to current system being played
+    int m_curSystem;        //current system being played (0..n-1)
+    int m_iSystem;          //index on m_systems: next system to display
+    std::vector<int> m_systems;     //indices to systems to play, in playback order
+
 
 ///@endcond
 };

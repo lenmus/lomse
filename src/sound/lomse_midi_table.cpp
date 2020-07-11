@@ -166,14 +166,14 @@ void SoundEventsTable::create_events()
                 else if (pBar->get_type() == k_barline_end_repetition)
                 {
                     int times = pBar->get_num_repeats();
-                    JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                    JumpEntry* pJump = create_jump(measure, jumpToMeasure, times);
                     add_jump(cursor, measure, pJump);
                 }
                 else if (pBar->get_type() == k_barline_double_repetition
                          || pBar->get_type() == k_barline_double_repetition_alt)
                 {
                     int times = pBar->get_num_repeats();
-                    JumpEntry* pJump = create_jump(jumpToMeasure, times);
+                    JumpEntry* pJump = create_jump(measure, jumpToMeasure, times);
                     add_jump(cursor, measure, pJump);
                     jumpToMeasure = measure+1;
                 }
@@ -230,19 +230,19 @@ void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
                 break;
 
             case k_attr_dacapo:
-                pJump = create_jump(1, 1);   //to measure 1, 1 time
+                pJump = create_jump(measure, 1, 1);   //to measure 1, 1 time
                 add_jump(cursor, measure, pJump);
                 break;
 
             case k_attr_dalsegno:
-                pJump = create_jump(0, 1);   //measure unknown, 1 time
+                pJump = create_jump(measure, 0, 1);   //measure unknown, 1 time
                 pJump->set_label("S" + pAttr->get_string_value());
                 add_jump(cursor, measure, pJump);
                 m_pendingLabel.push_back(pJump);
                 break;
 
             case k_attr_fine:
-                pJump = create_jump(-1, 1, 1);   //to end (-1), valid 1 time, the 2nd time
+                pJump = create_jump(measure, -1, 1, 1);   //to end (-1), valid 1 time, the 2nd time
                 add_jump(cursor, measure, pJump);
                 break;
 
@@ -252,7 +252,7 @@ void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
                 break;
 
             case k_attr_tocoda:
-                pJump = create_jump(0, 1, 1);   //measure unknown, 1 time, the 2nd time
+                pJump = create_jump(measure, 0, 1, 1);   //measure unknown, 1 time, the 2nd time
                 pJump->set_label("C" + pAttr->get_string_value());
                 add_jump(cursor, measure, pJump);
                 m_pendingLabel.push_back(pJump);
@@ -300,7 +300,7 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
 
                         //jump for first volta
                         int times = pVB->get_number_of_repetitions();
-                        JumpEntry* pJump = create_jump(measure+1, times);
+                        JumpEntry* pJump = create_jump(measure, measure+1, times);
                         add_jump(cursor, measure, pJump);
 
                         //jumps for the other voltas in this set
@@ -308,7 +308,7 @@ void SoundEventsTable::add_jumps_if_volta_bracket(StaffObjsCursor& cursor,
                         for (int i=2; i <= numVoltas; ++i)
                         {
                             int times = (i == numVoltas ? 0 : 1);
-                            pJump = create_jump(0, times);
+                            pJump = create_jump(measure, 0, times);
                             add_jump(cursor, measure, pJump);
                             m_pending.push_back(pJump);
                         }
@@ -561,7 +561,7 @@ string SoundEventsTable::dump_events_table()
                     msg << "END TABLE ";
                     break;
                 case SoundEvent::k_rhythm_change:
-                    msg << "RITHM CHG ";
+                    msg << "RYTHM CHG ";
                     break;
                 case SoundEvent::k_prog_instr:
                     msg << "PRG INSTR ";
@@ -711,9 +711,10 @@ JumpEntry* SoundEventsTable::get_jump(int i)
 }
 
 //---------------------------------------------------------------------------------------
-JumpEntry* SoundEventsTable::create_jump(int jumpTo, int timesValid, int timesBefore)
+JumpEntry* SoundEventsTable::create_jump(int inMeasure, int jumpTo, int timesValid,
+                                         int timesBefore)
 {
-    JumpEntry* pJump = LOMSE_NEW JumpEntry(jumpTo, timesValid, timesBefore);
+    JumpEntry* pJump = LOMSE_NEW JumpEntry(inMeasure, jumpTo, timesValid, timesBefore);
     m_jumps.push_back(pJump);
     return pJump;
 }
@@ -743,7 +744,7 @@ void SoundEventsTable::add_events_to_jumps()
     vector<JumpEntry*>::iterator it;
     for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
     {
-        int measure = (*it)->get_measure();
+        int measure = (*it)->get_to_measure();
         int nEntry = int(m_events.size() - 1);
         if (measure >= 0)
             nEntry = m_measures[measure];
@@ -766,17 +767,105 @@ int SoundEventsTable::find_measure_for_label(const string& label)
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::reset_jumps()
 {
-    vector<JumpEntry*>::iterator it;
-    for (it=m_jumps.begin(); it != m_jumps.end(); ++it)
-        (*it)->reset_entry();
+    for(auto it : m_jumps)
+        it->reset_entry();
+}
+
+//---------------------------------------------------------------------------------------
+vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
+
+    vector<MeasuresJumpsEntry*> table;
+
+    //traverse the events table as if it were played back, and build the measures jumps table
+    size_t maxEvent = m_events.size();
+    if (m_events.size() == 0)
+    {
+        table.push_back( LOMSE_NEW MeasuresJumpsEntry(0, 0.0, 0, 0.0, 0, 0.0));
+        return table;
+    }
+
+    //Execute control m_events that take place before firts play event
+    size_t i = 0;
+    while ((m_events[i]->EventType == SoundEvent::k_prog_instr)
+           || (m_events[i]->EventType == SoundEvent::k_rhythm_change) )
+    {
+        ++i;
+    }
+
+    //Here i points to the first event to play
+    //loop to process m_events
+    int fromMeasure = m_events[i]->Measure;
+    TimeUnits fromTime = TimeUnits(m_events[i]->DeltaTime);
+    do
+    {
+        //if it is a jump event, execute the jump if applicable
+        if (m_events[i]->EventType == SoundEvent::k_jump)
+        {
+            bool fExecuted = false;
+            JumpEntry* pJump = m_events[i]->pJump;
+            if (pJump->get_visited() >= pJump->get_times_before())
+            {
+                if (pJump->get_times_valid() == 0
+                    || pJump->get_times_valid() > pJump->get_executed())
+                {
+                    int iCur = i;
+                    long curTime =  m_events[iCur]->DeltaTime;     //the jmp entry time
+                    i = pJump->get_event();
+                    TimeUnits jmpTime = TimeUnits(m_events[i]->DeltaTime);
+                    if (pJump->get_times_valid() > pJump->get_executed())
+                        pJump->increment_applied();
+
+                    //find previous timepos (cur timepos is jmp entry timepos,
+                    //that is, barline timepos, the start of next measure timepos)
+                    int j=iCur;
+                    while (j > 0 && m_events[j]->DeltaTime == curTime)
+                        --j;
+                    curTime = m_events[j]->DeltaTime;
+
+                    //create the entry
+                    table.push_back(
+                        LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime,
+                                                     pJump->get_in_measure(), TimeUnits(curTime),
+                                                     int(i), jmpTime) );
+                    //save start data
+                    fromMeasure = pJump->get_to_measure();
+                    fromTime = jmpTime;
+
+                    fExecuted = true;
+                }
+            }
+
+            pJump->increment_visited();
+
+            if (!fExecuted)
+                ++i;
+
+            continue;   //needed if next event is also a jump
+        }
+
+        i++;
+
+    } while (i < maxEvent);
+
+    TimeUnits curTime = TimeUnits(m_events[maxEvent-2]->DeltaTime);
+    table.push_back(
+        LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime, 0, curTime,       //0 = end of score
+                                     int(maxEvent-2), curTime) );
+
+    reset_jumps();
+
+    return table;
 }
 
 
 //=======================================================================================
 // JumpEntry implementation
 //=======================================================================================
-JumpEntry::JumpEntry(int jumpTo, int timesValid, int timesBefore)
-	: m_measure(jumpTo)
+JumpEntry::JumpEntry(int inMeasure, int jumpTo, int timesValid, int timesBefore)
+	: m_inMeasure(inMeasure)
+	, m_toMeasure(jumpTo)
 	, m_timesValid(timesValid)
 	, m_timesBefore(timesBefore)
 	, m_executed(0)
@@ -794,12 +883,40 @@ JumpEntry::~JumpEntry()
 string JumpEntry::dump_entry()
 {
     stringstream s;
-    s << "Jump: m=" << m_measure
+    s << "Jump: in_m=" << m_inMeasure
+      << ", to_m=" << m_toMeasure
       << ", ev=" << m_event
       << ", b=" << m_timesBefore
       << ", v=" << m_timesValid
       << ", vs=" << m_visited
       << ", ex=" << m_executed << endl;
+    return s.str();
+}
+
+
+//=======================================================================================
+// MeasuresJumpsEntry implementation
+//=======================================================================================
+MeasuresJumpsEntry::MeasuresJumpsEntry(int fromMeasure, TimeUnits fromTimepos,
+                                       int toMeasure, TimeUnits toTimepos,
+                                       int jmpEvent, TimeUnits jmpTimepos)
+	: m_fromMeasure(fromMeasure)
+	, m_fromTimepos(fromTimepos)
+	, m_toMeasure(toMeasure)
+	, m_toTimepos(toTimepos)
+	, m_jmpEvent(jmpEvent)
+	, m_jmpTimepos(jmpTimepos)
+{
+}
+
+//---------------------------------------------------------------------------------------
+string MeasuresJumpsEntry::dump_entry()
+{
+    stringstream s;
+    s << "Measures Jump Entry: from_m=" << m_fromMeasure << " (t=" << m_fromTimepos
+      << "), to_m=" << m_toMeasure << " (t=" << m_toTimepos
+      << "), jmp_ev=" << m_jmpEvent
+      << ", jpm_t=" << m_jmpTimepos << endl;
     return s.str();
 }
 

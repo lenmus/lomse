@@ -35,7 +35,6 @@
 
 #include <vector>
 #include <string>
-using namespace std;
 
 
 namespace lomse
@@ -57,42 +56,78 @@ class SoundEventsTable;
 class JumpEntry
 {
 protected:
-	int m_measure;		    //number of the measure to jump to
+	int m_inMeasure;        //number of the measure containing this jump
+	int m_toMeasure;        //number of the measure to jump to
 	int m_timesValid;   	//num.times the jump must be executed
 	int m_timesBefore;      //num.times the jump has to be visited before executing
 	int m_executed;         //num.times the jumpTo has been executed
 	int m_visited;          //num.times the jumpTo has been visited
 	int m_event;            //index to event to jump to
-	string m_label;         //label to jump to (for To Coda, Dal Segno)
+	std::string m_label;         //label to jump to (for To Coda, Dal Segno)
 
 public:
 
-    JumpEntry(int jumpTo, int timesValid, int timesBefore);
+    JumpEntry(int inMeasure, int jumpTo, int timesValid, int timesBefore);
     virtual ~JumpEntry();
 
 	inline void reset_entry() { m_executed = 0; m_visited = 0; }
 
-	inline int get_measure() { return m_measure; }
+	inline int get_to_measure() { return m_toMeasure; }
+	inline int get_in_measure() { return m_inMeasure; }
 	inline int get_times_valid() { return m_timesValid; }
 	inline int get_executed() { return m_executed; }
 	inline int get_times_before() { return m_timesBefore; }
 	inline int get_visited() { return m_visited; }
 	inline int get_event() { return m_event; }
-	inline string& get_label() { return m_label; }
+	inline std::string& get_label() { return m_label; }
 
     inline void set_event(int iEvent) { m_event = iEvent; }
-    inline void set_measure(int measure) { m_measure = measure; }
+    inline void set_measure(int measure) { m_toMeasure = measure; }
     inline void set_times_valid(int times) { m_timesValid = times; }
     inline void increment_applied() { ++m_executed; }
     inline void set_times_before(int times) { m_timesBefore = times; }
     inline void increment_visited() { ++m_visited; }
-    inline void set_label(const string& label) { m_label = label; }
+    inline void set_label(const std::string& label) { m_label = label; }
 
 
     //debug
-    string dump_entry();
+    std::string dump_entry();
 
 };
+
+
+//---------------------------------------------------------------------------------------
+//JumpsEntry: An entry in the MeasuresJumps table. It describes a measure jump in playback.
+class MeasuresJumpsEntry
+{
+protected:
+	int m_fromMeasure;          //number of start measure
+	TimeUnits m_fromTimepos;    //start timepos
+	int m_toMeasure;            //number of last played measure
+	TimeUnits m_toTimepos;      //last timepos
+
+	int m_jmpEvent;            //index to event to jump to
+	TimeUnits m_jmpTimepos;    //timepos to jump to
+
+public:
+
+    MeasuresJumpsEntry(int fromMeasure, TimeUnits fromTimepos,
+                       int toMeasure, TimeUnits toTimepos,
+                       int jmpEvent, TimeUnits jmpTimepos);
+    virtual ~MeasuresJumpsEntry() = default;
+
+    inline int get_from_measure() { return m_fromMeasure; }
+    inline int get_to_measure() { return m_toMeasure; }
+    inline TimeUnits get_from_timepos() { return m_fromTimepos; }
+    inline TimeUnits get_to_timepos() { return m_toTimepos; }
+    inline int get_jmp_event() { return m_jmpEvent; }
+    inline TimeUnits get_jmp_timepos() { return m_jmpTimepos; }
+
+    //debug
+    std::string dump_entry();
+
+};
+
 
 //---------------------------------------------------------------------------------------
 //auxiliary class SoundEvent describes a sound event
@@ -170,12 +205,12 @@ class SoundEventsTable
 protected:
     ImoScore* m_pScore;
     int m_numMeasures;
-    vector<SoundEvent*> m_events;
-    vector<int> m_measures;
-    vector<int> m_channels;
-    vector<JumpEntry*> m_jumps;
-    vector< pair<int, string> > m_targets;          //pair measure, label
-    vector<JumpEntry*> m_pendingLabel;              //jumps to be fixed
+    std::vector<SoundEvent*> m_events;
+    std::vector<int> m_measures;
+    std::vector<int> m_channels;
+    std::vector<JumpEntry*> m_jumps;
+    std::vector< std::pair<int, std::string> > m_targets;          //pair measure, label
+    std::vector<JumpEntry*> m_pendingLabel;              //jumps to be fixed
     TimeUnits m_rAnacrusisMissingTime;
     int m_accidentals[7];
 
@@ -186,8 +221,8 @@ public:
     void create_table();
 
     inline int num_events() { return int(m_events.size()); }
-    vector<SoundEvent*>& get_events() { return m_events; }
-    vector<int>& get_channels() { return m_channels; }
+    std::vector<SoundEvent*>& get_events() { return m_events; }
+    std::vector<int>& get_channels() { return m_channels; }
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
@@ -198,8 +233,11 @@ public:
     JumpEntry* get_jump(int i);
     void reset_jumps();
 
+    //to create systems jumps
+    std::vector<MeasuresJumpsEntry*> get_measures_jumps();
+
     //debug
-    string dump_midi_events();
+    std::string dump_midi_events();
 
 
 protected:
@@ -223,14 +261,14 @@ protected:
     int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeShift);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
-    JumpEntry* create_jump(int jumpTo, int timesValid, int timesBefore=0);
+    JumpEntry* create_jump(int inMeasure, int jumpTo, int timesValid, int timesBefore=0);
     void process_sound_change(ImoSoundChange* pSound, StaffObjsCursor& cursor,
                               int channel, int iInstr, int measure);
 
 
     //debug
-    string dump_events_table();
-    string dump_measures_table();
+    std::string dump_events_table();
+    std::string dump_measures_table();
 };
 
 

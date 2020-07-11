@@ -72,7 +72,7 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 	//returns pointer to GmoBoxSystem for system iSystem (0..n-1)
 
 	int i = iSystem - m_iFirstSystem;
-	if (i < 0)
+	if (i < 0 || i >= get_num_systems())
 		return nullptr;		//the system is not in this page
 	else
 		return static_cast<GmoBoxSystem*>(m_childBoxes[i]);

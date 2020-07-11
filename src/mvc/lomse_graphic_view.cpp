@@ -383,6 +383,8 @@ bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnit
 //    }
 //    //END DEBUG ----------------------------------------------------------
 
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Play system: %d", m_pScrollSystem->get_system_number() );
+
     return true;   //no error
 }
 
