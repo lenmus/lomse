@@ -162,6 +162,13 @@ public:
         return true;
     }
 
+    void dump_measures_jumps(std::vector<MeasuresJumpsEntry*>& jumps)
+    {
+        cout << test_name() << ", dump of jumps:" << endl;
+        for (auto it : jumps)
+            cout << "      " << it->dump_entry();
+    }
+
 };
 
 SUITE(MidiTableTest)
@@ -1003,122 +1010,141 @@ SUITE(MidiTableTest)
         CHECK( check_measures_jump(__LINE__, jumps[2], 3,0) );      //from 3 to end
     }
 
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_07)
-//    {
-//        //@007. [T4] end-repetition barline with volta brackets
-//        //                  vt1    vt2
-//        //  |    |    |     |     :|     |     |     |
-//        //  1    2    3     4      5    6
-//        //                 J 4,1  J 1,1
-//        //                   5,0
-//        load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 3 );
-//        CHECK( check_jump(0, 4,1,0,10) == true );
-//        CHECK( check_jump(1, 5,0,0,13) == true );
-//        CHECK( check_jump(2, 1,1,0,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_08)
-//    {
-//        //@008. [T5]  end-repetition barline with volta, two times
-//        //                  vt1,2  vt3
-//        //  |    |    |     |     :|     |     |     |
-//        //  1    2    3     4      5    6
-//        //                 J4,2   J1,2
-//        //                 J5,0
-//        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 3 );
-//        CHECK( check_jump(0, 4,2,0,10) == true );
-//        CHECK( check_jump(1, 5,0,0,13) == true );
-//        CHECK( check_jump(2, 1,2,0,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_09)
-//    {
-//        //@009. [T7] three voltas
-//        //            vt1   vt2    vt3
-//        //  |    |    |    :|     :|     |     |
-//        //  1    2    3     4      5    6
-//        //           J3,1  J1,1   J1,1
-//        //           J4,1
-//        //           J5,0
-//        load_mxl_score_for_test("07-repeat-barlines-three-volta.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 5 );
-//        CHECK( check_jump(0, 3,1) == true );
-//        CHECK( check_jump(1, 4,1) == true );
-//        CHECK( check_jump(2, 5,0) == true );
-//        CHECK( check_jump(3, 1,1) == true );
-//        CHECK( check_jump(4, 1,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_10)
-//    {
-//        //@010. [T8] three voltas long
-//        //            vt1------- vt2------- vt3---------
-//        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
-//        //  1    2    3     4      5    6     7     8     9    10   11   12
-//        //           J3,1        J1,1        J1,1
-//        //           J5,1
-//        //           J7,0
-//        load_mxl_score_for_test("08-repeat-barlines-three-volta-long.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 5 );
-//        CHECK( check_jump(0, 3,1) == true );
-//        CHECK( check_jump(1, 5,1) == true );
-//        CHECK( check_jump(2, 7,0) == true );
-//        CHECK( check_jump(3, 1,1) == true );
-//        CHECK( check_jump(4, 1,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_11)
-//    {
-//        //@011. three voltas long several times
-//        //            vt1,2------ vt3,5------- vt5---------
-//        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
-//        //  1    2    3     4      5    6     7     8     9    10   11   12
-//        //           J3,2        J1,2        J1,2
-//        //           J5,2
-//        //           J7,0
-//        load_mxl_score_for_test("09-repeat-barlines-three-volta-long-several-times.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 5 );
-//        CHECK( check_jump(0, 3,2) == true );
-//        CHECK( check_jump(1, 5,2) == true );
-//        CHECK( check_jump(2, 7,0) == true );
-//        CHECK( check_jump(3, 1,2) == true );
-//        CHECK( check_jump(4, 1,2) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_51)
-//    {
-//        //@051. da capo
-//        //                            D.C.
-//        //  |      |      |      |      |
-//        //  1      2      3      4
-//        //                             J1,1
-//        load_mxl_score_for_test("51-repeat-da-capo.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 1 );
-//        CHECK( check_jump(0, 1,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_52)
-//    {
-//        //@052. da capo al fine
-//        //             Fine           D.C.
-//        //  |      |      |      |      |
-//        //  1      2      3      4
-//        //              J-1,1,1        J1,1
-//        load_mxl_score_for_test("52-repeat-da-capo-al-fine.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 2);
-//        CHECK( check_jump(0, -1,1,1) == true );
-//        CHECK( check_jump(1, 1,1) == true );
-//    }
-//
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_05)
+    {
+        //@005. [T4] end-repetition barline with volta brackets
+        //                  vt1    vt2
+        //  |    |    |     |     :|     |     |     |
+        //  1    2    3     4      5    6
+        //                 J 4,1  J 1,1
+        //                   5,0
+        load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 4 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[1], 4,4) );      //from 4 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[3], 5,0) );      //from 5 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_06)
+    {
+        //@006. [T5]  end-repetition barline with volta, two times
+        //                  vt1,2  vt3
+        //  |    |    |     |     :|     |     |     |
+        //  1    2    3     4      5    6
+        //                 J4,2   J1,2
+        //                 J5,0
+        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 6 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[1], 4,4) );      //from 4 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[3], 4,4) );      //from 4 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[4], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[5], 5,0) );      //from 5 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_07)
+    {
+        //@007. [T7] three voltas
+        //            vt1   vt2    vt3
+        //  |    |    |    :|     :|     |     |
+        //  1    2    3     4      5    6
+        //           J3,1  J1,1   J1,1
+        //           J4,1
+        //           J5,0
+        load_mxl_score_for_test("07-repeat-barlines-three-volta.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 6 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,3) );      //from 3 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[3], 4,4) );      //from 4 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[4], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[5], 5,0) );      //from 5 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_08)
+    {
+        //@008. [T8] three voltas long
+        //            vt1------- vt2------- vt3---------
+        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
+        //  1    2    3     4      5    6     7     8     9    10   11   12
+        //           J3,1        J1,1        J1,1
+        //           J5,1
+        //           J7,0
+        load_mxl_score_for_test("08-repeat-barlines-three-volta-long.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 6 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[3], 5,6) );      //from 5 to 6
+        CHECK( check_measures_jump(__LINE__, jumps[4], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[5], 7,0) );      //from 7 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_09)
+    {
+        //@009. three voltas long several times
+        //            vt1,2------ vt3,5------- vt5---------
+        //  |    |    |     |    :|     |    :|     |     |    |    |    |    |
+        //  1    2    3     4      5    6     7     8     9    10   11   12
+        //           J3,2        J1,2        J1,2
+        //           J5,2
+        //           J7,0
+        load_mxl_score_for_test("09-repeat-barlines-three-volta-long-several-times.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 10 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[3], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[4], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[5], 5,6) );      //from 5 to 6
+        CHECK( check_measures_jump(__LINE__, jumps[6], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[7], 5,6) );      //from 5 to 6
+        CHECK( check_measures_jump(__LINE__, jumps[8], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[9], 7,0) );      //from 7 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_51)
+    {
+        //@051. da capo
+        //                            D.C.
+        //  |      |      |      |      |
+        //  1      2      3      4
+        //                             J1,1
+        load_mxl_score_for_test("51-repeat-da-capo.xml");
+        //cout << m_pTable->dump_midi_events() << endl;
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        CHECK( jumps.size() == 2 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,4) );      //from 1 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[1], 1,0) );      //from 1 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_52)
+    {
+        //@052. da capo al fine
+        //             Fine           D.C.
+        //  |      |      |      |      |
+        //  1      2      3      4
+        //              J-1,1,1        J1,1
+        load_mxl_score_for_test("52-repeat-da-capo-al-fine.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 2 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,4) );      //from 1 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[1], 1,2) );      //from 1 to 2
+    }
+
 ////    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_53)
 ////    {
 ////        //@053. da capo al segno
@@ -1132,81 +1158,90 @@ SUITE(MidiTableTest)
 ////        CHECK( check_jump(0, 4,1,1) == true );
 ////        CHECK( check_jump(1, 1,1) == true );
 ////    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_54)
-//    {
-//        //@054. dal segno al fine
-//        //         Segno       Fine    D.S.al fine
-//        //  |      |      |      ||      |
-//        //  1      2      3       4
-//        //                     J-1,1,1   J2,1
-//        load_mxl_score_for_test("54-repeat-dal-segno-al-fine.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 2);
-//        CHECK( check_jump(0, -1,1,1) == true );
-//        CHECK( check_jump(1, 2,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_55)
-//    {
-//        //@055. dal segno al coda
-//        //                             To      D.S.al
-//        //            Segno           Coda      Coda   Coda
-//        //  |         |         |        |           ||         |
-//        //  1         2         3        4            5
-//        //                            J5,1,1        J2,1
-//        load_mxl_score_for_test("55-repeat-dal-segno-al-coda.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 2);
-//        CHECK( check_jump(0, 5,1,1) == true );
-//        CHECK( check_jump(1, 2,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_56)
-//    {
-//        //@056. dal segno al coda
-//        //                                     D.C.al
-//        //                To Coda                Coda  Coda
-//        //  |         |         |:      :|           ||         |
-//        //  1         2         3        4            5
-//        //                    J5,1,1   J3,1        J1,1
-//        load_mxl_score_for_test("56-repeat-da-capo-al-coda.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 3);
-//        CHECK( check_jump(0, 5,1,1) == true );
-//        CHECK( check_jump(1, 3,1) == true );
-//        CHECK( check_jump(2, 1,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_57)
-//    {
-//        //@057. dal segno
-//        //            Segno                       D.S.
-//        //  |         |         |:      :|           ||         |
-//        //  1         2         3        4            5
-//        //                             J3,1         J2,1
-//        load_mxl_score_for_test("57-repeat-dal-segno.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 2);
-//        CHECK( check_jump(0, 3,1) == true );
-//        CHECK( check_jump(1, 2,1) == true );
-//    }
-//
-//    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_58)
-//    {
-//        //@058. dal segno al coda
-//        //                   To                 DS al
-//        //            Segno  Coda                Coda  Coda
-//        //  |         |         |:      :|           ||         |
-//        //  1         2         3        4            5
-//        //                    J5,1,1   J3,1        J2,1
-//        load_mxl_score_for_test("58-repeat-dal-segno-al-coda.xml");
-//        //cout << m_pTable->dump_midi_events() << endl;
-//        CHECK( m_pTable->num_jumps() == 3);
-//        CHECK( check_jump(0, 5,1,1) == true );
-//        CHECK( check_jump(1, 3,1) == true );
-//        CHECK( check_jump(2, 2,1) == true );
-//    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_54)
+    {
+        //@054. dal segno al fine
+        //         Segno       Fine    D.S.al fine
+        //  |      |      |      ||      |
+        //  1      2      3       4
+        //                     J-1,1,1   J2,1
+        load_mxl_score_for_test("54-repeat-dal-segno-al-fine.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 2 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,4) );      //from 1 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[1], 2,3) );      //from 2 to 3
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_55)
+    {
+        //@055. dal segno al coda
+        //                             To      D.S.al
+        //            Segno           Coda      Coda   Coda
+        //  |         |         |        |           ||         |
+        //  1         2         3        4            5
+        //                            J5,1,1        J2,1
+        load_mxl_score_for_test("55-repeat-dal-segno-al-coda.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 3 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,4) );      //from 1 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[1], 2,3) );      //from 2 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[2], 5,0) );      //from 5 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_56)
+    {
+        //@056. dal segno al coda
+        //                                     D.C.al
+        //                To Coda                Coda  Coda
+        //  |         |         |:      :|           ||         |
+        //  1         2         3        4            5
+        //                    J5,1,1   J3,1        J1,1
+        load_mxl_score_for_test("56-repeat-da-capo-al-coda.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 4 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 1,2) );      //from 1 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[3], 5,0) );      //from 5 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_57)
+    {
+        //@057. dal segno
+        //            Segno                       D.S.
+        //  |         |         |:      :|           ||         |
+        //  1         2         3        4            5
+        //                             J3,1         J2,1
+        load_mxl_score_for_test("57-repeat-dal-segno.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 3 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 2,0) );      //from 2 to end
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, measures_jumps_58)
+    {
+        //@058. dal segno al coda
+        //                   To                 DS al
+        //            Segno  Coda                Coda  Coda
+        //  |         |         |:      :|           ||         |
+        //  1         2         3        4            5
+        //                    J5,1,1   J3,1        J2,1
+        load_mxl_score_for_test("58-repeat-dal-segno-al-coda.xml");
+		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
+        //dump_measures_jumps(jumps);
+        CHECK( jumps.size() == 4 );
+        CHECK( check_measures_jump(__LINE__, jumps[0], 1,3) );      //from 1 to 3
+        CHECK( check_measures_jump(__LINE__, jumps[1], 3,4) );      //from 3 to 4
+        CHECK( check_measures_jump(__LINE__, jumps[2], 2,2) );      //from 2 to 2
+        CHECK( check_measures_jump(__LINE__, jumps[3], 5,0) );      //from 5 to end
+    }
 
 }
 

@@ -87,6 +87,10 @@ void HalfPageView::compute_buffer_split()
         }
         else if (height == m_bufHeight && buf == m_buf)
             return;
+        else if (buf == m_TopBuf && height == m_usedHeight[0])
+            return;
+        else if (buf == m_BottomBuf && height == m_usedHeight[1])
+            return;
         else if (height == m_SplitHeight && (buf == m_TopBuf || buf == m_BottomBuf))
             return;
         else
@@ -149,6 +153,12 @@ void HalfPageView::do_draw_all()
 void HalfPageView::draw_bottom_window()
 {
     m_pRenderBuf->attach(m_BottomBuf, m_bufWidth, m_SplitHeight, m_bufStride);
+    m_pDrawer->reset(*m_pRenderBuf, Color(255,255,255));
+
+    m_usedHeight[1] = (m_nSys[1] == 0 ? m_SplitHeight
+                                      : unsigned( m_pDrawer->LUnits_to_Pixels(m_height[1]) ));
+
+    m_pRenderBuf->attach(m_BottomBuf, m_bufWidth, m_usedHeight[1], m_bufStride);
     GraphicView::do_change_viewport(m_vxOrgPlay[1], m_vyOrgPlay[1]);
     GraphicView::draw_all();
 }
@@ -165,6 +175,12 @@ void HalfPageView::draw_separation_line()
 void HalfPageView::draw_top_window()
 {
     m_pRenderBuf->attach(m_TopBuf, m_bufWidth, m_SplitHeight, m_bufStride);
+    m_pDrawer->reset(*m_pRenderBuf, Color(255,255,255));
+
+    m_usedHeight[0] = (m_nSys[0] == 0 ? m_SplitHeight
+                                      : unsigned( m_pDrawer->LUnits_to_Pixels(m_height[0]) ));
+
+    m_pRenderBuf->attach(m_TopBuf, m_bufWidth, m_usedHeight[0], m_bufStride);
     GraphicView::do_change_viewport(m_vxOrgPlay[0], m_vyOrgPlay[0]);
     GraphicView::draw_all();
 }
@@ -188,10 +204,12 @@ void HalfPageView::do_change_viewport(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void HalfPageView::on_mode_changed(int mode)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "Change to mode = %d (0=read-only, 1=edition, 2=playback)", mode);
-
     bool fWasInSplitMode = m_fSplitMode;
     m_fPlaybackMode = (mode == Interactor::k_mode_playback);
+
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "Change to mode = %d (0=read-only, 1=edition, "
+                "2=playback), fWasInSplitMode=%d", mode, fWasInSplitMode);
+
     decide_split_or_normal_view();
 
     if (m_fSplitMode)
@@ -214,6 +232,8 @@ void HalfPageView::on_mode_changed(int mode)
 //---------------------------------------------------------------------------------------
 void HalfPageView::decide_split_or_normal_view()
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "In: m_fSplitMode=%d, m_fPlaybackMode=%d", m_fSplitMode, m_fPlaybackMode);
+
     m_fSplitMode = false;
     if (m_pScore && m_fPlaybackMode)
     {
@@ -234,20 +254,27 @@ void HalfPageView::decide_split_or_normal_view()
         if (bufHeight < (2.0f * maxHeight))
             return;
 
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "enough height");
+
         //Do not split window if width lower than system width
         GmoBoxSystem* pSys = m_pBSP->get_system(0);
         LUnits bufWidth = m_pDrawer->Pixels_to_LUnits(m_bufWidth);
         if (bufWidth < pSys->get_width())
             return;
 
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "enough width");
+
         //do not split if the full score fits in the window
         if (bufHeight > m_pBSP->get_height())
             return;
+
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "full score does not fit in window");
 
         m_fSplitMode = true;
 
         m_winHeight = bufHeight / 2.0f;
     }
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "Out: m_fSplitMode=%d", m_fSplitMode);
 }
 
 //---------------------------------------------------------------------------------------
@@ -290,7 +317,6 @@ void HalfPageView::determine_how_many_systems_fit_and_effective_window_height(in
         else
             break;
     }
-//    assert(m_nSys[iWindow] > 0);
 
     LOMSE_LOG_DEBUG(Logger::k_mvc, "iWindow = %d, iSys=%d, m_nSys[iWindow]=%d, m_height[iWindow]=%f",
                     iWindow, iSys, m_nSys[iWindow], m_height[iWindow]);
@@ -372,15 +398,18 @@ void HalfPageView::set_viewport_for_next(int iNextWindow)
         //display m_nSys[iNextWindow] systems, starting with iFirst
         GmoBoxSystem* pSys = m_pBSP->get_system(iFirst);
         m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "Display system=%d in window=%d", iFirst, iNextWindow);
     }
     else
     {
         //set viewport after last system
-        GmoBoxSystem* pSys = m_pBSP->get_system(m_systems.back());
+        int iLast = m_pBSP->get_num_last_system();
+        GmoBoxSystem* pSys = m_pBSP->get_system(iLast);
         LUnits yAfter = pSys->get_origin().y + pSys->get_height() + 2000.0f;    //2cm
         m_vyOrgPlay[iNextWindow] = m_pDrawer->LUnits_to_Pixels(yAfter);
 
         m_nSys[iNextWindow] = 0;     //nothing displayed
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "Clear window=%d, iLast=%d", iNextWindow, iLast);
     }
 }
 
@@ -392,11 +421,13 @@ void HalfPageView::remove_split()
     if (m_iPlayWindow == 0)
     {
         //nothing to do. Last system is displayed in top window. Viewport correctly set
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "Nothing to do. Last system is displayed in top window");
     }
     else
     {
         //Last system is displayed in bottom window. Set viewport so that last system
         //doesn't move from current position
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "Last system is displayed in bottom window");
 
         GmoBoxSystem* pSys = m_pBSP->get_system(m_systems.back());
         Pixels y = m_pDrawer->LUnits_to_Pixels( pSys->get_origin().y );

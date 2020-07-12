@@ -849,10 +849,13 @@ vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
 
     } while (i < maxEvent);
 
-    TimeUnits curTime = TimeUnits(m_events[maxEvent-2]->DeltaTime);
-    table.push_back(
-        LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime, 0, curTime,       //0 = end of score
-                                     int(maxEvent-2), curTime) );
+    if (fromMeasure != -1)      //-1 = it finished before last measure (e.g. 'Fine' mark)
+    {
+        TimeUnits curTime = TimeUnits(m_events[maxEvent-2]->DeltaTime);
+        table.push_back(
+            LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime, 0, curTime,       //0 = end of score
+                                         int(maxEvent-2), curTime) );
+    }
 
     reset_jumps();
 

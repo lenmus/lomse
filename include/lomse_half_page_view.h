@@ -98,7 +98,7 @@ protected:
     void draw_all() override;
     void do_change_viewport(Pixels x, Pixels y) override;
     void do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
-                                                bool fTempoLine, bool fViewport);
+                                                bool fTempoLine, bool fViewport) override;
 
     //specific internal methods for this view
     void compute_buffer_split();
@@ -133,6 +133,7 @@ protected:
     unsigned m_SplitHeight;
     unsigned char* m_BottomBuf;
     unsigned char* m_TopBuf;
+    unsigned m_usedHeight[2];   //real used height by sub-window
 
     //temporary data: for controlling real used heigh
     LUnits m_winHeight;     //total sub-window height
