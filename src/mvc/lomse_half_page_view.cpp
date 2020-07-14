@@ -290,9 +290,16 @@ void HalfPageView::decide_systems_to_display()
 
     determine_how_many_systems_fit_and_effective_window_height(m_iPlayWindow, m_curSystem);
 
+    //determine viewport x position to center page on screen
+    GraphicModel* pGModel = get_graphic_model();
+    GmoBoxDocPage* pPage = pGModel->get_page(0);
+    URect rect = pPage->get_bounds();
+    Pixels pageWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
+    Pixels left = (pageWidth - int(m_bufWidth)) / 2;
+    m_vxOrgPlay[0] = m_vxOrgPlay[1] = left;
+
     //set viewport for first window. Viewport is in pixels
     GmoBoxSystem* pSys = m_pBSP->get_system( m_curSystem );
-////    m_vxOrgPlay[m_iPlayWindow] = 0;
     m_vyOrgPlay[m_iPlayWindow] = m_pDrawer->LUnits_to_Pixels(pSys->get_origin().y);
 
     //now in top window there are m_nSys[0] systems displayed, starting with m_curSystem
@@ -467,7 +474,7 @@ void HalfPageView::create_systems_jumps_table()
             GmoBoxSystem* pToSys = pGModel->get_system_for(scoreId, it->get_to_timepos());
             int iFrom = pFromSys->get_system_number();
             int iTo = pToSys->get_system_number();
-            LOMSE_LOG_INFO("from s=%d to s=%d", pFromSys->get_system_number(),
+            LOMSE_LOG_DEBUG(Logger::k_mvc, "from s=%d to s=%d", pFromSys->get_system_number(),
                             pToSys->get_system_number());
             int i = (iPrevSys != iFrom ? iFrom : iFrom+1);
             for(; i <= iTo; ++i)
@@ -477,8 +484,10 @@ void HalfPageView::create_systems_jumps_table()
             iPrevSys = iTo;
         }
 
-        for(auto it : m_systems)
-            LOMSE_LOG_INFO("system %d", it);
+        #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
+            for(auto it : m_systems)
+                LOMSE_LOG_DEBUG(Logger::k_mvc, "system %d", it);
+        #endif
     }
 }
 

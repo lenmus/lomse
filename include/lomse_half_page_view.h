@@ -42,39 +42,48 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 /** %HalfPageView is a GraphicView for rendering scores.
 
-    It has a double behaviour. For displayin the score, it behaves as a SinglePageView,
-    that is, the score is displayed as ...
+    This view has a double behaviour. In normal mode (no playback) it behaves as
+    SinglePageView, that is the score is rendered on a single page as high as necessary
+    to contain all the score (e.g., an HTML page having a body of fixed size).
 
-    But during playback, the behaviour is different. When playback starts,
-    The window is split horizontally in two halfs, originating two virtual vertical
-    windows, one at top and the other at bottom. In top window it is displayed the first
-    score chunk and the second chunk is displayed in the bottom windows. When playback
-    enters in the bottom window the top windows is updated with the third chunk. Next,
-    when the playback enters again in top window, the bottom window is updated with the
-    next chunk, and so on.
+    But when in playback mode, the bitmap to be rendered in the application window is
+    split horizontally in two halves, originating two virtual vertical windows, one at
+    top and the other at bottom. In the top window it is displayed the first score chunk
+    and the second chunk is displayed in the bottom window. When playback enters in the
+    bottom window the top window is updated with the third chunk. Next, when the playback
+    enters again in the top window, the bottom window is updated with the next chunk,
+    and so on.
 
-    This view solves the problem of repetition marks and jumps: when the half window
-    being played has a jump, the other half window is updated with the next logical system
-    positioned at right measure instead of with the next chunk. The behaviour for the
-    user is simple: when the user finds a jump he/she will know that it is necessary to
-    jump to the other half window, unless the repetition is over and the music should
-    continue from that point.
+    When playback is finished (because the end of the score is reached or because the
+    app stops playback  -- but not when playback is paused --) the display returns
+    automatically to SinglePageView mode.
 
-    But it is only useful when system height is not big, smaller than half window.
+    This view allows to solve the problem page turning and the problem of repetition
+    marks and jumps:  when the window being played has a jump to a system not visible
+    in that window, the other window is updated  with the next logical system (the one
+    containing the jump destination) instead of with the next system. The behaviour for
+    the user is very simple: when the end of the last system in current window is reached
+    or when user finds a jump to a point that is not displayed in current window, he/she
+    will know that it is necessary to jump to the other half window.
 
-    <b>Margins</b>
+    You should note that when the view is split, only full systems are displayed in
+    the sub-windows. This is to avoid doubts about were the music continues, that could
+    appear in cases in which next system is practically fully displayed after current
+    one. It also makes the display more clear.
 
-    The document is displayed on a white paper and the view has no margins, that is, the
-    default view origin point is (0.0, 0.0). Therefore, document content will be
-    displayed with the margins defined in the document.
+    The view does not enter in split mode in the following cases:
+    - when window height is smaller than two times the highest system,
+    - when window width is lower than system width,
+    - when the score fits completely in the window height, or
+    - when the document is not only one score
+    In these cases, playback behaviour will be that of SinglePageView
 
+    When the view is in split mode (during playback) all settings for controlling what
+    to display and how, are fully controlled by the view. Therefore, the user application
+    should disable all user controls that could invoke methods to do changes, such as
+    scroll position, zoom factor or other. Invoking these methods will not cause crashes
+    but will cause unnecessary interference with what is displayed.
 
-    <b>Background color</b>
-
-    The white paper is surrounded by the background, that will be visible only when the
-    user application changes the viewport (e.g., by scrolling right).
-    In %HalfPageView the default background color is white and, as with all Views,
-    the background color can be changed by invoking Interactor::set_view_background().
 */
 class LOMSE_EXPORT HalfPageView : public SinglePageView
 {
