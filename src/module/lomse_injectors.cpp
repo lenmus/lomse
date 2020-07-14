@@ -46,6 +46,7 @@
 #include "private/lomse_document_p.h"
 #include "lomse_font_storage.h"
 #include "lomse_graphic_view.h"
+#include "lomse_half_page_view.h"
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
 #include "lomse_doorway.h"
@@ -430,6 +431,13 @@ FreeFlowView* Injector::inject_FreeFlowView(LibraryScope& libraryScope, Document
 {
     return static_cast<FreeFlowView*>(
                         inject_View(libraryScope, k_view_free_flow, pDoc) );
+}
+
+//---------------------------------------------------------------------------------------
+HalfPageView* Injector::inject_HalfPageView(LibraryScope& libraryScope, Document* pDoc)
+{
+    return static_cast<HalfPageView*>(
+                        inject_View(libraryScope, k_view_half_page, pDoc) );
 }
 
 //---------------------------------------------------------------------------------------

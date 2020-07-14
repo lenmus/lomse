@@ -54,7 +54,8 @@ protected:
 	vector<GmoShapeStaff*> m_staffShapes;
 	vector<int> m_firstStaff;       //index to first staff for each instrument
     TimeGridTable* m_pGridTable;
-    int m_iPage;            //number of score page (0..n-1) in which this system is contained
+    int m_iPage;        //index of score page (0..n-1) in which this system is contained
+    int m_iSystem;      //index of this system in the score (0..n-1)
 
 	vector<int> m_iFirstMeasure;    //index to first measure, per instrument
     vector<int> m_nMeasures;        //number of measures in this system, per instrument
@@ -86,6 +87,7 @@ public:
     LUnits get_x_for_barline_at_time(TimeUnits timepos);
 
 	//miscellaneous info
+	inline int get_system_number() { return m_iSystem; }
     GmoShapeStaff* get_staff_shape(int absStaff);
     GmoShapeStaff* get_staff_shape(int iInstr, int iStaff);
     int instr_number_for_staff(int absStaff);
@@ -132,6 +134,9 @@ protected:
 
     friend class SystemLayouter;
     inline void add_shift_to_start_measure(LUnits width) { m_dxFirstMeasure += width; }
+
+    friend class GmoBoxScorePage;
+    inline void set_system_number(int iSystem) { m_iSystem = iSystem; }
 
 
 };

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,6 +35,7 @@
 #include "lomse_layouter.h"
 #include "lomse_score_layouter.h"
 #include "lomse_calligrapher.h"
+#include "lomse_box_system.h"
 
 
 namespace lomse
@@ -234,7 +235,12 @@ void DocLayouter::fix_document_size()
 
     if (m_constrains & k_infinite_height)
     {
-        //TODO: free flow view
+        //free flow view, single page view
+        //height determined by BoxDocPageContent
+        GmoBoxDocPage* pPage = static_cast<GmoBoxDocPage*>(m_pItemMainBox);
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        LUnits height = pBDPC->get_size().height + 2.0f * pBDPC->get_origin().y;
+        pPage->set_height(height);
     }
 }
 

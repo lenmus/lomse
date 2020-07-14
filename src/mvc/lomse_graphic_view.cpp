@@ -30,7 +30,6 @@
 #define LOMSE_INTERNAL_API
 #include "lomse_graphic_view.h"
 
-#include <cstdio>       //for sprintf
 #include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_screen_drawer.h"
@@ -48,6 +47,7 @@
 #include "lomse_box_slice_instr.h"
 #include "lomse_box_system.h"
 #include "lomse_timegrid_table.h"
+#include "lomse_half_page_view.h"
 
 using namespace std;
 
@@ -90,6 +90,9 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
 
         case k_view_free_flow:
             return LOMSE_NEW FreeFlowView(libraryScope, pDrawer);
+
+        case k_view_half_page:
+            return LOMSE_NEW HalfPageView(libraryScope, pDrawer);
 
         default:
         {
@@ -196,6 +199,13 @@ void GraphicView::add_visual_effect(VisualEffect* pEffect)
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicView::on_mode_changed(int mode)
+{
+    set_visual_effects_for_mode(mode);
+    draw_all_visual_effects();
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::set_visual_effects_for_mode(int mode)
 {
     bool fEditionMode = (mode == Interactor::k_mode_edition);
@@ -281,7 +291,7 @@ void GraphicView::new_viewport(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void GraphicView::do_change_viewport(Pixels x, Pixels y)
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, string(""));
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "New viewport x=%d, y=%d", x, y);
     std::lock_guard<std::mutex> lock(m_viewportMutex);
 
     m_vxOrg = x;
@@ -322,6 +332,8 @@ void GraphicView::move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits t
 void GraphicView::do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
                                                          bool fTempoLine, bool fViewport)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
+
     if (!determine_page_system_and_position_for(scoreId, timepos))
         return;
 
@@ -371,12 +383,16 @@ bool GraphicView::determine_page_system_and_position_for(ImoId scoreId, TimeUnit
 //    }
 //    //END DEBUG ----------------------------------------------------------
 
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, "Play system: %d", m_pScrollSystem->get_system_number() );
+
     return true;   //no error
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::change_viewport_if_necessary(ImoId id)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
+
     //AWARE: This code is executed in the sound thread
 
     std::lock_guard<std::mutex> lock(m_viewportMutex);
@@ -403,6 +419,8 @@ void GraphicView::change_viewport_if_necessary(ImoId id)
 //---------------------------------------------------------------------------------------
 void GraphicView::do_change_viewport_if_necessary()
 {
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
+
     bool fDoScroll = do_determine_if_scroll_needed();
 
     if (fDoScroll)
@@ -485,8 +503,8 @@ bool GraphicView::do_determine_if_scroll_needed()
 //---------------------------------------------------------------------------------------
 void GraphicView::do_change_viewport()
 {
-//    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
-//        "Requesting scroll to m_vxNew=%d, m_vyNew=%d", m_vxNew, m_vyNew);
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player,
+        "Requesting scroll to m_vxNew=%d, m_vyNew=%d", m_vxNew, m_vyNew);
 
     if (m_vyLast != m_vyNew || m_vxLast != m_vxNew)
     {
@@ -1000,6 +1018,11 @@ void GraphicView::zoom_out(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
+
+    if (screenWidth < 10 || screenHeight < 10)
+        return;
+
     //move viewport origin (left-top window corner) to top screen, center
     double rx(double(screenWidth)/2.0);
     double ry(0);
@@ -1032,6 +1055,9 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_fit_width(Pixels screenWidth)
 {
+    if (screenWidth < 10)
+        return;
+
     //move viewport origin (left-top window corner) to top screen, center
     double rx(double(screenWidth)/2.0);
     double ry(0);
@@ -1068,6 +1094,8 @@ LUnits GraphicView::get_viewport_width()
 //---------------------------------------------------------------------------------------
 void GraphicView::set_viewport_at_page_center(Pixels screenWidth)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_score_player, string(""));
+
     //get page width
     //TODO: Width taken for first page. Change this to use currently displayed page
     GraphicModel* pGModel = get_graphic_model();

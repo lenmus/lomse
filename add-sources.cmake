@@ -161,6 +161,7 @@ set(MODULE_FILES
 
 set(MVC_FILES
     ${LOMSE_SRC_DIR}/mvc/lomse_graphic_view.cpp
+    ${LOMSE_SRC_DIR}/mvc/lomse_half_page_view.cpp
     ${LOMSE_SRC_DIR}/mvc/lomse_interactor.cpp
     ${LOMSE_SRC_DIR}/mvc/lomse_presenter.cpp 
     ${LOMSE_SRC_DIR}/mvc/lomse_tasks.cpp
@@ -186,9 +187,9 @@ set(PARSER_FILES
     ${LOMSE_SRC_DIR}/parser/lmd/lomse_lmd_analyser.cpp
     ${LOMSE_SRC_DIR}/parser/lmd/lomse_lmd_compiler.cpp
 
+    ${LOMSE_SRC_DIR}/parser/mxl/lomse_compressed_mxl_compiler.cpp
     ${LOMSE_SRC_DIR}/parser/mxl/lomse_mxl_analyser.cpp
     ${LOMSE_SRC_DIR}/parser/mxl/lomse_mxl_compiler.cpp
-    ${LOMSE_SRC_DIR}/parser/mxl/lomse_compressed_mxl_compiler.cpp
 
     ${LOMSE_SRC_DIR}/parser/mnx/lomse_mnx_analyser.cpp
     ${LOMSE_SRC_DIR}/parser/mnx/lomse_mnx_compiler.cpp

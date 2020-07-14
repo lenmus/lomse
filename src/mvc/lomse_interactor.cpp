@@ -1381,6 +1381,8 @@ void Interactor::zoom_out(Pixels x, Pixels y, bool fForceRedraw)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
+
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -1394,6 +1396,8 @@ void Interactor::zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_fit_width(Pixels width, bool fForceRedraw)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "width=%d", width);
+
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -1935,8 +1939,7 @@ void Interactor::set_operating_mode(int mode)
         GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
         if (pGView)
         {
-            pGView->set_visual_effects_for_mode(mode);
-            pGView->draw_all_visual_effects();
+            pGView->on_mode_changed(mode);
             request_window_update();
         }
     }
@@ -1976,7 +1979,7 @@ void Interactor::enable_edition_restricted_to(ImoId id)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     m_pCursor->jailed_mode_in(id);
     if (pGView)
-        pGView->set_visual_effects_for_mode(k_mode_edition);
+        pGView->on_mode_changed(k_mode_edition);
 }
 
 //---------------------------------------------------------------------------------------

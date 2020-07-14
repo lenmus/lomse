@@ -68,6 +68,7 @@ class HorizontalBookView;
 class SingleSystemView;
 class SinglePageView;
 class FreeFlowView;
+class HalfPageView;
 class Interactor;
 class Presenter;
 class LomseDoorway;
@@ -289,9 +290,10 @@ public:
                                                          Document* pDoc);
     static SingleSystemView* inject_SingleSystemView(LibraryScope& libraryScope,
                                                      Document* pDoc);
-    static SinglePageView* inject_SinglePageView(LibraryScope& libraryScope,
-                                                 Document* pDoc);
+    static SinglePageView* inject_SinglePageView(LibraryScope& libraryScope, Document* pDoc);
     static FreeFlowView* inject_FreeFlowView(LibraryScope& libraryScope, Document* pDoc);
+    static HalfPageView* inject_HalfPageView(LibraryScope& libraryScope, Document* pDoc);
+
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
                                          WpDocument wpDoc, View* pView,
                                          DocCommandExecuter* pExec);

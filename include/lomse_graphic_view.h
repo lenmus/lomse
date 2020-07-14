@@ -116,6 +116,7 @@ enum EViewType {
     k_view_single_system,
     k_view_single_page,
     k_view_free_flow,
+    k_view_half_page,
 };
 
 ///@cond INTERNAL
@@ -214,7 +215,7 @@ public:
     void use_cursor(DocCursor* pCursor);
     void use_selection_set(SelectionSet* pSelectionSet);
     void add_visual_effect(VisualEffect* pEffect);
-    void set_visual_effects_for_mode(int mode);
+    virtual void on_mode_changed(int mode);
 
     ///@}    //View settings
 
@@ -444,7 +445,7 @@ public:
 protected:
     GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
 
-    void draw_all();
+    virtual void draw_all();
     void draw_graphic_model();
     void draw_time_grid();
     void generate_paths();
@@ -469,7 +470,8 @@ protected:
     void layout_selection_highlight();
     void delete_all_handlers();
     void add_handler(int iHandler, GmoObj* pOwnerGmo);
-    void do_change_viewport(Pixels x, Pixels y);
+    virtual void do_change_viewport(Pixels x, Pixels y);
+    void set_visual_effects_for_mode(int mode);
 
     //scrolling and tempo line
 
@@ -507,8 +509,8 @@ protected:
     void do_change_viewport();
 
 
-    void do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
-                                                bool fTempoLine, bool fViewport);
+    virtual void do_move_tempo_line_and_change_viewport(ImoId scoreId, TimeUnits timepos,
+                                                        bool fTempoLine, bool fViewport);
 
 };
 
@@ -768,82 +770,6 @@ public:
 ///@endcond
 
 };
-
-
-//---------------------------------------------------------------------------------------
-/** %HalfPageView is a GraphicView for rendering scores.
-
-    It has a double behaviour. For displayin the score, it behaves as a SinglePageView,
-    taht is, the score is displayed as ...
-
-    But during playback, the behaviour is different. When playback starts,
-    The window is split horizontally in two halfs, originating two virtual vertical
-    windows, one at top and the other at bottom. In top window it is displayed the first
-    score chunk and the second chunk is displayed in the bottom windows. When playback
-    enters in the bottom window the top windows is updated with the third chunk. Next,
-    when the playback enters again in top window, the bottom window is updated with the
-    next chunk, and so on.
-
-- It allows to solve the problem of repetition marks and jumps: when the window being played has a jump, the other window is updated with the next logical system positioned at right measure instead of with the next chunk. The behaviour for the user is simple: when the user finds a jump he/she will know that it is necessary to jump to the other half window, unless the repetition is over and the music should continue from that point.
-
-- But, as other solutions, it is only useful when system height is not big, in this case when it is smaller than half window.
-
-    <b>Margins</b>
-
-    The document is displayed on a white paper and the view has no margins, that is, the
-    default view origin point is (0.0, 0.0). Therefore, document content will be
-    displayed with the margins defined in the document.
-
-
-    <b>Background color</b>
-
-    The white paper is surrounded by the background, that will be visible only when the
-    user application changes the viewport (e.g., by scrolling right).
-    In %FreeFlowView the default background color is white and, as with all Views,
-    the background color can be changed by invoking Interactor::set_view_background().
-
-
-    <b>AutoScroll</b>
-
-    When this View is used for rendering a music score, during playback auto-scroll
-    will be, by default, enabled. This implies that as playback advances the View
-    will generate EventUpdateViewport events so that measure being played is always
-    totally visible.
-*/
-class LOMSE_EXPORT HalfPageView : public GraphicView
-{
-public:
-///@cond INTERNALS
-//excluded from public API because the View methods are managed from Interactor
-
-    HalfPageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~HalfPageView() {}
-
-//    //overrides for SinglePageView
-//    int get_layout_constrains() override { return k_use_viewport_width | k_infinite_height; }
-//
-//    //overrides for GraphicView
-//    bool graphic_model_must_be_updated() override;
-//    void zoom_in(Pixels x=0, Pixels y=0) override;
-//    void zoom_out(Pixels x=0, Pixels y=0) override;
-//    void zoom_fit_full(Pixels width, Pixels height) override;
-//    void zoom_fit_width(Pixels width) override;
-//    void set_scale(double scale, Pixels x=0, Pixels y=0) override;
-
-    int page_at_screen_point(double x, double y) override;
-    void set_viewport_for_page_fit_full(Pixels screenWidth) override;
-    void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
-    int get_layout_constrains() override { return k_use_paper_width | k_infinite_height; }
-    bool is_valid_for_this_view(Document* UNUSED(pDoc)) override { return true; }
-
-///@endcond
-
-protected:
-    void collect_page_bounds() override;
-
-};
-
-
 
 
 }   //namespace lomse

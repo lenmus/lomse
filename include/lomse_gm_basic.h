@@ -568,9 +568,10 @@ public:
 class GmoBoxScorePage : public GmoBox
 {
 protected:
-    int m_iFirstSystem;     //0..n-1
-    int m_iLastSystem;      //0..n-1
-    int m_iPage;            //0..n-1        number of this score page
+    int m_iFirstSystem;         //0..n-1
+    int m_iLastSystem;          //0..n-1
+    int m_iPage;                //0..n-1        number of this score-page
+    LUnits m_maxSystemHeight;   //height of highest system in this page
 
 public:
     GmoBoxScorePage(ImoScore* pScore);
@@ -587,6 +588,7 @@ public:
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
 	inline int get_page_number() { return m_iPage; }
+    LUnits get_max_system_height() { return m_maxSystemHeight; }
 
 	//timepos information
 	TimeUnits end_time();
