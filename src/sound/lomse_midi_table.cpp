@@ -77,18 +77,34 @@ SoundEventsTable::SoundEventsTable(ImoScore* pScore)
 SoundEventsTable::~SoundEventsTable()
 {
     delete_events_table();
+    delete_jumps_table();
+    delete_measures_jumps_table();
     m_measures.clear();
     m_channels.clear();
-    m_jumps.clear();
 }
 
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::delete_events_table()
 {
-    std::vector<SoundEvent*>::iterator it;
-    for (it = m_events.begin(); it != m_events.end(); ++it)
-        delete *it;
+    for (auto it : m_events)
+        delete it;
     m_events.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::delete_jumps_table()
+{
+    for (auto it : m_jumps)
+        delete it;
+    m_jumps.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::delete_measures_jumps_table()
+{
+    for (auto it : m_measuresJumps)
+        delete it;
+    m_measuresJumps.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -238,7 +254,6 @@ void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
                 pJump = create_jump(measure, 0, 1);   //measure unknown, 1 time
                 pJump->set_label("S" + pAttr->get_string_value());
                 add_jump(cursor, measure, pJump);
-                m_pendingLabel.push_back(pJump);
                 break;
 
             case k_attr_fine:
@@ -255,7 +270,6 @@ void SoundEventsTable::process_sound_change(ImoSoundChange* pSound,
                 pJump = create_jump(measure, 0, 1, 1);   //measure unknown, 1 time, the 2nd time
                 pJump->set_label("C" + pAttr->get_string_value());
                 add_jump(cursor, measure, pJump);
-                m_pendingLabel.push_back(pJump);
                 break;
 
             case k_attr_dynamics:
@@ -776,14 +790,16 @@ vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, std::string());
 
-    vector<MeasuresJumpsEntry*> table;
+    //if already create just return it
+    if (m_measuresJumps.size() > 0)
+        return m_measuresJumps;
 
     //traverse the events table as if it were played back, and build the measures jumps table
     size_t maxEvent = m_events.size();
     if (m_events.size() == 0)
     {
-        table.push_back( LOMSE_NEW MeasuresJumpsEntry(0, 0.0, 0, 0.0, 0, 0.0));
-        return table;
+        m_measuresJumps.push_back( LOMSE_NEW MeasuresJumpsEntry(0, 0.0, 0, 0.0, 0, 0.0));
+        return m_measuresJumps;
     }
 
     //Execute control m_events that take place before firts play event
@@ -825,7 +841,7 @@ vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
                     curTime = m_events[j]->DeltaTime;
 
                     //create the entry
-                    table.push_back(
+                    m_measuresJumps.push_back(
                         LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime,
                                                      pJump->get_in_measure(), TimeUnits(curTime),
                                                      int(i), jmpTime) );
@@ -852,14 +868,14 @@ vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
     if (fromMeasure != -1)      //-1 = it finished before last measure (e.g. 'Fine' mark)
     {
         TimeUnits curTime = TimeUnits(m_events[maxEvent-2]->DeltaTime);
-        table.push_back(
+        m_measuresJumps.push_back(
             LOMSE_NEW MeasuresJumpsEntry(fromMeasure, fromTime, 0, curTime,       //0 = end of score
                                          int(maxEvent-2), curTime) );
     }
 
     reset_jumps();
 
-    return table;
+    return m_measuresJumps;
 }
 
 

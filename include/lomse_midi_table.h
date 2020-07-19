@@ -209,8 +209,8 @@ protected:
     std::vector<int> m_measures;
     std::vector<int> m_channels;
     std::vector<JumpEntry*> m_jumps;
+    std::vector<MeasuresJumpsEntry*> m_measuresJumps;
     std::vector< std::pair<int, std::string> > m_targets;          //pair measure, label
-    std::vector<JumpEntry*> m_pendingLabel;              //jumps to be fixed
     TimeUnits m_rAnacrusisMissingTime;
     int m_accidentals[7];
 
@@ -258,6 +258,8 @@ protected:
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
     void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
     void delete_events_table();
+    void delete_jumps_table();
+    void delete_measures_jumps_table();
     int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeShift);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
