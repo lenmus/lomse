@@ -181,6 +181,7 @@ void Document::initialize()
 //---------------------------------------------------------------------------------------
 void Document::set_imo_doc(ImoDocument* pImoDoc)
 {
+    delete m_pImoDoc;
     m_pImoDoc = pImoDoc;
     set_box_level_creator_api_parent( m_pImoDoc );
 }
@@ -243,6 +244,7 @@ int Document::from_string(const string& source, int format)
 int Document::from_checkpoint(const string& data)
 {
     //delete old internal model
+    delete m_pImoDoc;
     m_pImoDoc = nullptr;
     m_flags = k_dirty;
 

@@ -6286,6 +6286,7 @@ public:
         else
         {
             error_msg("Empty <sound> element. Ignored.");
+            delete pSC;
             return nullptr;
         }
 
@@ -7389,7 +7390,9 @@ ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 bool MxlAnalyser::analyse_node_bool(XmlNode* pNode, ImoObj* pAnchor)
 {
     MxlElementAnalyser* a = new_analyser( pNode->name(), pAnchor );
-    return a->analyse_node_bool(pNode);
+    bool value = a->analyse_node_bool(pNode);
+    delete a;
+    return value;
 }
 
 //---------------------------------------------------------------------------------------

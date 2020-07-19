@@ -2077,17 +2077,22 @@ public:
         // global content applies. The parts attribute is a list of part element IDs
         // as an unordered set of space-separated tokens.
 
-        //create the measures table for this global
-        MeasuresVector* pMeasures = m_pAnalyser->new_global(parts);
+        MeasuresVector* pMeasures = nullptr;
 
         //fill the table
         int numMeasures = 0;
         while (more_children_to_analyse())
         {
-            ++numMeasures;
             m_childToAnalyse = get_child_to_analyse();
             if (m_childToAnalyse.name() == "measure")
             {
+                ++numMeasures;
+                if (!pMeasures)
+                {
+                    //create the measures table for this global
+                    pMeasures = m_pAnalyser->new_global(parts);
+                }
+
                 pMeasures->push_back(m_childToAnalyse);
                 move_to_next_child();
             }
@@ -3573,14 +3578,14 @@ MnxAnalyser::~MnxAnalyser()
 //---------------------------------------------------------------------------------------
 void MnxAnalyser::delete_globals()
 {
-    map<string, MeasuresVector*>::iterator it;
-    for (it=m_globals.begin(); it != m_globals.end(); ++it)
+    if (m_globals.size() > 0)
     {
+        map<string, MeasuresVector*>::iterator it = m_globals.begin();
         MeasuresVector* measures = it->second;
         measures->clear();
-        it->second = nullptr;
+        delete measures;
+        m_globals.clear();
     }
-    m_globals.clear();
 }
 
 //---------------------------------------------------------------------------------------

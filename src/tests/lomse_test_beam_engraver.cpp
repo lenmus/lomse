@@ -243,17 +243,19 @@ public:
         delete m_pNoteEngrv;
         delete m_pBeamEngrv;
         delete m_pBeamShape;
-
-        std::vector<GmoShapeNote*>::iterator it;
-        for (it = m_shapes.begin(); it != m_shapes.end(); ++it)
-            delete *it;
-        m_shapes.clear();
+        delete m_pGModel;
 
         m_pMeter = nullptr;
         m_pStorage = nullptr;
         m_pNoteEngrv = nullptr;
         m_pBeamEngrv = nullptr;
         m_pBeamShape = nullptr;
+        m_pGModel = nullptr;
+
+        std::vector<GmoShapeNote*>::iterator it;
+        for (it = m_shapes.begin(); it != m_shapes.end(); ++it)
+            delete *it;
+        m_shapes.clear();
 
         delete m_pDocLayouter;
         delete m_pDoc;

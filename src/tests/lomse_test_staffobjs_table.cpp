@@ -120,19 +120,20 @@ class ColStaffObjsBuilderTestFixture
 public:
     LibraryScope m_libraryScope;
     Document* m_pDoc;
-    LdpTree* m_pTree;
+    ImoScore* m_pScore;
     LdpFactory* m_pLdpFactory;
 
     ColStaffObjsBuilderTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_pDoc(nullptr)
-        , m_pTree(nullptr)
+        , m_pScore(nullptr)
     {
         m_pLdpFactory = m_libraryScope.ldp_factory();
     }
 
     ~ColStaffObjsBuilderTestFixture()    //TearDown fixture
     {
+        delete m_pScore;
         delete m_pDoc;
     }
 
@@ -141,7 +142,7 @@ public:
         return UnitTest::CurrentTest::Details()->testName;
     }
 
-    ImoScore* create_score(const string &ldp, ostream& reporter=cout)
+    void create_score(const string &ldp, ostream& reporter=cout)
     {
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         LdpParser parser(reporter, m_libraryScope.ldp_factory());
@@ -150,7 +151,7 @@ public:
         LdpAnalyser a(reporter, m_libraryScope, m_pDoc);
         ImoObj* pImo = a.analyse_tree_and_get_object(pTree);
         delete pTree->get_root();
-        return dynamic_cast<ImoScore*>(pImo);
+        m_pScore = dynamic_cast<ImoScore*>(pImo);
     }
 
 };
@@ -164,13 +165,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_01)
     {
         //@01. R1-2 & R999. Single line: By timepos in arrival order
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 q)(n e4 q)(barline)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -190,7 +191,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_02)
     {
         //@02. R2. Two lines: By timepos. Non-timed before timed
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
             "(clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
@@ -200,7 +201,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -225,7 +226,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_03)
     {
         //@03. Multi-metric: Barlines must precede all existing objects at same timepos
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
             "(clef G)(time 4 4)(n c4 q)(n e4 q)(n g4 q)(n c5 q)(barline)"
@@ -235,7 +236,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -264,7 +265,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_04)
     {
         //@04. R3. <direction> and <sound> can not go between clefs/key/time
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
             "(clef G)(dir (metronome e 40))(n e5 q)"
@@ -274,7 +275,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -296,7 +297,7 @@ SUITE(ColStaffObjsBuilderTest)
     {
         //@05. R4. <direction> and <sound> can not go between clefs/key/time
         stringstream errormsg;
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument (musicData"
             "(clef G)(r q)(barline)"
@@ -307,7 +308,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         , errormsg);
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -335,7 +336,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_06)
     {
         //@06. R5.
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
             "(clef G)(time 2 4)"
@@ -346,7 +347,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
 //        cout << test_name() << endl;
 //        cout << pTable->dump();
@@ -373,12 +374,12 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_01)
     {
         //@01. empty score creates empty table
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 0 );
@@ -388,13 +389,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_02)
     {
         //@02. each voice uses a different time counter
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 e v2)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 5 );
@@ -415,13 +416,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_03)
     {
         //@03. barline is placed at maximum time reached in the measure
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)(barline)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
@@ -443,14 +444,14 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_04)
     {
         //@04. after barline voices are correctly positioned
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)(barline)"
             "(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 10 );
@@ -476,13 +477,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_05)
     {
         //@05. key and time signatures generate secondary entries
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0) (instrument (staves 2)(musicData "
             "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
@@ -504,14 +505,14 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_06)
     {
         //@06. chord notes have time and staff properly assigned
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0) (instrument (staves 2)(musicData "
             "(clef G p1)(clef F4 p2)(key C)(time 2 4)(chord (n c3 w p2)(n g3 w p2)"
             "(n e4 w p1)(n c5 w p1))(barline)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 11 );
@@ -539,13 +540,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_07)
     {
         //@07. anchor staffobjs
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 1.5) (instrument (musicData "
             "(clef G)(key C)(n f4 q)(text \"Hello world\")(barline)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 5 );
@@ -567,13 +568,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_08)
     {
         //@08. anacruxis detected and its duration computed
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0) (instrument (musicData "
             "(clef G)(time 3 4)(n c4 q)(barline)(n d4 e.)(n d4 s)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 6 );
@@ -596,13 +597,13 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_09)
     {
         //@09. goFwd replaced by special invisible rest
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (musicData "
             "(clef G)(n c4 e v1)(goFwd e v1)(n e4 e v1)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
@@ -622,14 +623,14 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_10)
     {
         //@10. notes in other voices intermixed in beamed group
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument#100 (musicData "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(n c2 w v3)(barline)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
@@ -651,14 +652,14 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_11)
     {
         //@11. intermediate non-time get assigned right time
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)(instrument (staves 2)(musicData "
             "(clef G p1)(clef F4 p2)(n c4 q p1 v1)(n e4 e v1)"
             "(n c3 e p2 v2)(clef G p2)(n c4 e v2)"
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 7 );
@@ -681,7 +682,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine2x_12)
     {
         //@12. barlines properly ordered and with right time
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 2.0)"
             "(instrument#100 (staves 2)"
             "(musicData (clef G p1)(clef F4 p2)"
@@ -697,7 +698,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 4 );
         CHECK( pTable->num_entries() == 26 );
@@ -741,7 +742,7 @@ SUITE(ColStaffObjsBuilderTest)
     {
         //@13. Direction in prolog is re-ordered after prolog
 
-        ImoScore* pScore = create_score(    //unit test score 02033
+        create_score(    //unit test score 02033
             "(score (vers 2.1)"
             "(instrument P1"
             "(musicData (clef G) (dir (metronome e 40))"
@@ -755,7 +756,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 12 );
@@ -781,7 +782,7 @@ SUITE(ColStaffObjsBuilderTest)
     {
         //@14. Direction before prolog is re-ordered
 
-        ImoScore* pScore = create_score(    //unit test score 02034
+        create_score(    //unit test score 02034
             "(score (vers 2.1)"
             "(instrument P1"
             "(musicData (dir (metronome e 40))(clef G)"
@@ -795,7 +796,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 12 );
@@ -1314,7 +1315,7 @@ SUITE(ColStaffObjsBuilderTest)
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_12)
     {
         //@12. barlines properly ordered and with right time
-        ImoScore* pScore = create_score(
+        create_score(
             "(score (vers 1.6)"
             "(instrument#100 (staves 2)"
             "(musicData (clef G p1)(clef F4 p2)"
@@ -1328,7 +1329,7 @@ SUITE(ColStaffObjsBuilderTest)
             ")))"
         );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pTable = builder.build(pScore);
+        ColStaffObjs* pTable = builder.build(m_pScore);
 
         CHECK( pTable->num_lines() == 4 );
         CHECK( pTable->num_entries() == 26 );

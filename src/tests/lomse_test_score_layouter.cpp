@@ -723,9 +723,9 @@ SUITE(ScoreLayouterTest)
         CHECK( pBox->get_width() == 19000.0f );
         CHECK( pBox->get_height() == 2735.0f );
 
-        //scoreLyt.my_delete_all();
+        scoreLyt.delete_pendig_aux_objects();
+        scoreLyt.delete_system_boxes();
     }
-
 
     //@1xx. ColumnBuilder adds measure information to columns --------------------------
 

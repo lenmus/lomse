@@ -148,11 +148,11 @@ class FontSelector
 {
 protected:
     LibraryScope* m_pLibScope;
-    map<string, string> m_cache;
+    std::map<string, string> m_cache;
 
 public:
     FontSelector(LibraryScope* pLibScope) : m_pLibScope(pLibScope) {}
-    ~FontSelector() {}
+    ~FontSelector() { m_cache.clear(); }
 
     std::string find_font(const std::string& language,
                           const std::string& fontFile,

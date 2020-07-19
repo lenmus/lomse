@@ -1819,6 +1819,12 @@ Color& ImoColorDto::set_from_string(const std::string& hex)
 //=======================================================================================
 // ImoControl implementation
 //=======================================================================================
+ImoControl::~ImoControl()
+{
+    delete m_ctrol;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoControl::attach_control(Control* ctrol)
 {
     m_ctrol = ctrol;
@@ -2522,6 +2528,13 @@ ImoInstrument::~ImoInstrument()
 
     delete m_pMeasures;
     delete m_pLastMeasureInfo;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::set_measures_table(ImMeasuresTable* pTable)
+{
+    delete m_pMeasures;
+    m_pMeasures = pTable;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3285,6 +3298,17 @@ ImoScore::~ImoScore()
     delete m_pColStaffObjs;
     delete_text_styles();
     delete m_pMidiTable;
+    m_titles.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::delete_text_styles()
+{
+    map<std::string, ImoStyle*>::const_iterator it;
+    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
+        delete it->second;
+
+    m_nameToStyle.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3405,16 +3429,6 @@ void ImoScore::set_staffobjs_table(ColStaffObjs* pColStaffObjs)
 {
     delete m_pColStaffObjs;
     m_pColStaffObjs = pColStaffObjs;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoScore::delete_text_styles()
-{
-    map<std::string, ImoStyle*>::const_iterator it;
-    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
-        delete it->second;
-
-    m_nameToStyle.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3773,7 +3787,7 @@ ImoStyle* ImoScore::create_default_style()
     pDefStyle->max_width( k_default_max_width );
     pDefStyle->width( k_default_width );
 
-    m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
+//    m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
     add_style(pDefStyle);
     return pDefStyle;
 }
@@ -3937,7 +3951,6 @@ ImoScorePlayer::ImoScorePlayer()
 //---------------------------------------------------------------------------------------
 ImoScorePlayer::~ImoScorePlayer()
 {
-    delete m_pPlayer;
 }
 
 //---------------------------------------------------------------------------------------
@@ -4070,6 +4083,25 @@ ImoMidiInfo* ImoSoundChange::get_midi_info(const string& soundId)
 //=======================================================================================
 // ImoStyle implementation
 //=======================================================================================
+ImoStyle::~ImoStyle()
+{
+    m_lunitsProps.clear();
+    m_floatProps.clear();
+    m_stringProps.clear();
+    m_intProps.clear();
+    m_colorProps.clear();
+
+//    std::map<int, LUnits> empty_map_lunitsProps;
+//    empty_map_lunitsProps.swap(m_lunitsProps);
+//    std::map<int, float> empty_map_floatProps;
+//    empty_map_floatProps.swap(m_floatProps);
+//    std::map<int, string> empty_map_stringProps;
+//    empty_map_stringProps.swap(m_stringProps);
+//    std::map<int, int> empty_map_intProps;
+//    std::map<int, Color> empty_map_colorProps;
+}
+
+//---------------------------------------------------------------------------------------
 bool ImoStyle::is_default_style_with_default_values()
 {
     //returns true if it is a default style and contains default values
@@ -4819,6 +4851,16 @@ ImoStyles::~ImoStyles()
 }
 
 //---------------------------------------------------------------------------------------
+void ImoStyles::delete_text_styles()
+{
+    map<std::string, ImoStyle*>::const_iterator it;
+    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
+        delete it->second;
+
+    m_nameToStyle.clear();
+}
+
+//---------------------------------------------------------------------------------------
 void ImoStyles::accept_visitor(BaseVisitor& v)
 {
     Visitor<ImoObj>* vObj = nullptr;
@@ -5007,16 +5049,6 @@ void ImoStyles::create_default_styles()
     pStyle->margin_bottom(300);
     add_style(pStyle);
 
-}
-
-//---------------------------------------------------------------------------------------
-void ImoStyles::delete_text_styles()
-{
-    map<std::string, ImoStyle*>::const_iterator it;
-    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
-        delete it->second;
-
-    m_nameToStyle.clear();
 }
 
 

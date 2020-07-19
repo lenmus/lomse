@@ -125,6 +125,7 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
 
     clear_all();
 
+    delete m_pTokenizer;
     m_pTokenizer = LOMSE_NEW LdpTokenizer(reader, m_reporter);
     m_pTokenizer->skip_utf_bom();
     m_state = A0_WaitingForStartOfElement;
@@ -176,6 +177,7 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
         return;
     }
 
+    delete m_tree;
     m_tree = LOMSE_NEW LdpTree(m_curNode);
 }
 

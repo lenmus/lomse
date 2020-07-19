@@ -71,6 +71,7 @@ PartsEngraver::~PartsEngraver()
     delete_group_engravers();
     delete_instrument_engravers();
     delete m_pRightAlignerFirst;
+    delete m_pRightAlignerOther;
 }
 
 //---------------------------------------------------------------------------------------
@@ -148,6 +149,8 @@ void PartsEngraver::decide_systems_indentation()
 
     //Create a RightAligner to contain and assign final positions to all
     //names, brackets and braces. Initially empty.
+    delete m_pRightAlignerFirst;
+    delete m_pRightAlignerOther;
     m_pRightAlignerFirst = LOMSE_NEW RightAligner();
     m_pRightAlignerOther = LOMSE_NEW RightAligner();
 

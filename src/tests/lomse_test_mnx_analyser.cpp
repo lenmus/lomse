@@ -157,7 +157,7 @@ SUITE(MnxAnalyserTest)
 //        pScore->end_of_changes();
 //        cout << pScore->to_string_with_ids() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_002)
@@ -191,7 +191,7 @@ SUITE(MnxAnalyserTest)
         CHECK( doc.is_dirty() == true );
         CHECK( pDoc && pDoc->get_num_content_items() == 1 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_003)
@@ -228,7 +228,7 @@ SUITE(MnxAnalyserTest)
         it=globals.begin();
         CHECK( it->first == "*$SINGLE-PART$*");
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_004)
@@ -270,7 +270,7 @@ SUITE(MnxAnalyserTest)
         CHECK (it->first == "P2");
         CHECK (pMeasures1 == pMeasures2);
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, MnxAnalyser_global_005)
@@ -332,7 +332,7 @@ SUITE(MnxAnalyserTest)
         CHECK (time.name() == "time");
         CHECK (time.attribute_value("signature") == "2/4");
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -404,7 +404,7 @@ SUITE(MnxAnalyserTest)
         CHECK( pInfo && pInfo->count == 1 );
 //        cout << test_name() << ": count=" << pInfo->count << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, measure_002)
@@ -500,7 +500,7 @@ SUITE(MnxAnalyserTest)
 
         CHECK( pInfo1 != pInfo2 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MnxAnalyserTestFixture, measure_003)
@@ -579,7 +579,7 @@ SUITE(MnxAnalyserTest)
         CHECK( pInfo != nullptr );
         CHECK( pInfo && pInfo->count == 1 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -608,7 +608,7 @@ SUITE(MnxAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 

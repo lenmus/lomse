@@ -191,6 +191,9 @@ std::string FontSelector::find_font(const std::string& language,
 
     LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());
     m_cache.insert(make_pair(key, fullpath));
+
+    FcConfigDestroy(config);
+
     return fullpath;
 }
 

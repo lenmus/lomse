@@ -726,7 +726,6 @@ SUITE(DocCommandTest)
         CHECK( is_equal_time(pSC->time(), 32.0) );
 //        cout << "cursor points to " << pSC->staffobj_internal()->to_string()
 //             << " at timepos " << pSC->time() << endl;
-
     }
 
     TEST_FIXTURE(DocCommandTestFixture, add_noterest_0301_ur)
@@ -1902,12 +1901,13 @@ SUITE(DocCommandTest)
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdCursor(126L);    //first note
 
-        MySelectionSet sel(m_pDoc);
-        executer.execute(&cursor, pCmd, &sel);
-
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( pCmd->get_name() == "Cursor: point to" );
+
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
+
         CHECK( cursor.get_pointee_id() == 126L );
         CHECK( m_pDoc->is_dirty() == false );
     }
@@ -3220,8 +3220,8 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        pCmd = LOMSE_NEW CmdCursor(128L);     //point to first note
-        executer.execute(&cursor, pCmd, &sel);
+        DocCommand* pCmd1 = LOMSE_NEW CmdCursor(128L);     //point to first note
+        executer.execute(&cursor, pCmd1, &sel);
         ImoObj* pNoteE4 = *cursor;
 
         pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
@@ -3232,8 +3232,8 @@ SUITE(DocCommandTest)
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteE4->get_id() );
 
-        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_move_next);     //point note c4
-        executer.execute(&cursor, pCmd, &sel);
+        DocCommand* pCmd2 = LOMSE_NEW CmdCursor(CmdCursor::k_move_next);     //point note c4
+        executer.execute(&cursor, pCmd2, &sel);
         CHECK ( (*cursor)->is_note() );
         ImoNote* pNoteC4 = static_cast<ImoNote*>(*cursor);
         CHECK ( pNoteC4->get_fpitch() == C4_FPITCH );
@@ -3342,16 +3342,19 @@ SUITE(DocCommandTest)
         DocCursor cursor(&doc);
         cursor.enter_element();
 
-        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
+        DocCommand* pCmd1 = LOMSE_NEW CmdInsertStaffObj("(clef G)");
         MySelectionSet sel(&doc);
-        executer.execute(&cursor, pCmd, &sel);
-        pCmd = LOMSE_NEW CmdInsertStaffObj("(n c4 q)");
-        executer.execute(&cursor, pCmd, &sel);
-        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_move_prev);     //to inserted note
-        executer.execute(&cursor, pCmd, &sel);
+        executer.execute(&cursor, pCmd1, &sel);
+
+        DocCommand* pCmd2 = LOMSE_NEW CmdInsertStaffObj("(n c4 q)");
+        executer.execute(&cursor, pCmd2, &sel);
+
+        DocCommand* pCmd3 = LOMSE_NEW CmdCursor(CmdCursor::k_move_prev);     //to inserted note
+        executer.execute(&cursor, pCmd3, &sel);
         ImoObj* pNoteC4 = *cursor;
-        pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
-        executer.execute(&cursor, pCmd, &sel);
+
+        DocCommand* pCmd4 = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
+        executer.execute(&cursor, pCmd4, &sel);
 
         executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note c4
         CHECK( *cursor != nullptr );
@@ -3983,14 +3986,14 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_set, 126L);    //rest
+        //cout << "cmd name = " << pCmd->get_name() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: set selection" );
 
         MySelectionSet sel(m_pDoc);
         executer.execute(&cursor, pCmd, &sel);
 
-        //cout << "cmd name = " << pCmd->get_name() << endl;
         //cout << sel.dump_selection() << endl;
-        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
-        CHECK( pCmd->get_name() == "Selection: set selection" );
         CHECK( sel.num_selected() == 1 );
         ImoObj* pObj = m_pDoc->get_pointer_to_imo(126L);
         CHECK( sel.contains(pObj) == true );
@@ -4010,12 +4013,12 @@ SUITE(DocCommandTest)
         sel.debug_add(pObj);
 
         DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_add, 125L);    //first note
-        executer.execute(&cursor, pCmd, &sel);
-
 //        cout << "cmd name = " << pCmd->get_name() << endl;
-//        cout << sel.dump_selection() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( pCmd->get_name() == "Selection: add obj. to selection" );
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << sel.dump_selection() << endl;
         CHECK( sel.num_selected() == 2 );
         pObj = m_pDoc->get_pointer_to_imo(125L);
         CHECK( sel.contains(pObj) == true );
@@ -4039,12 +4042,13 @@ SUITE(DocCommandTest)
         sel.debug_add(pObj);
 
         DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_remove, 126L);
-        executer.execute(&cursor, pCmd, &sel);
-
 //        cout << "cmd name = " << pCmd->get_name() << endl;
-//        cout << sel.dump_selection() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( pCmd->get_name() == "Selection: remove obj. from selection" );
+
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << sel.dump_selection() << endl;
         CHECK( sel.num_selected() == 1 );
         pObj = m_pDoc->get_pointer_to_imo(125L);
         CHECK( sel.contains(pObj) == true );
@@ -4066,12 +4070,12 @@ SUITE(DocCommandTest)
         sel.debug_add(pObj);
 
         DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_clear);
-        executer.execute(&cursor, pCmd, &sel);
-
 //        cout << "cmd name = " << pCmd->get_name() << endl;
-//        cout << sel.dump_selection() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( pCmd->get_name() == "Selection: clear selection" );
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << sel.dump_selection() << endl;
         CHECK( sel.num_selected() == 0 );
         CHECK( m_pDoc->is_dirty() == false );
     }
@@ -4091,12 +4095,12 @@ SUITE(DocCommandTest)
         sel.debug_add(pObj);
 
         DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_add, 126L);
-        executer.execute(&cursor, pCmd, &sel);
-
 //        cout << "cmd name = " << pCmd->get_name() << endl;
-//        cout << sel.dump_selection() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( pCmd->get_name() == "Selection: add obj. to selection" );
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << sel.dump_selection() << endl;
         CHECK( sel.num_selected() == 2 );
         pObj = m_pDoc->get_pointer_to_imo(125L);
         CHECK( sel.contains(pObj) == true );
