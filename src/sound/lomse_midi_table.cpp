@@ -79,8 +79,6 @@ SoundEventsTable::~SoundEventsTable()
     delete_events_table();
     delete_jumps_table();
     delete_measures_jumps_table();
-    m_measures.clear();
-    m_channels.clear();
 }
 
 //---------------------------------------------------------------------------------------

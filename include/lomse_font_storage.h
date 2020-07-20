@@ -152,7 +152,7 @@ protected:
 
 public:
     FontSelector(LibraryScope* pLibScope) : m_pLibScope(pLibScope) {}
-    ~FontSelector() { m_cache.clear(); }
+    ~FontSelector() {}
 
     std::string find_font(const std::string& language,
                           const std::string& fontFile,

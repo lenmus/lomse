@@ -689,8 +689,6 @@ MeasuresTableBuilder::MeasuresTableBuilder()
 //---------------------------------------------------------------------------------------
 MeasuresTableBuilder::~MeasuresTableBuilder()
 {
-    m_instruments.clear();
-    m_measures.clear();
 }
 
 //---------------------------------------------------------------------------------------

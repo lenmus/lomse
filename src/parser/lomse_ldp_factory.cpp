@@ -480,9 +480,6 @@ LdpFactory::~LdpFactory()
 	map<std::string, LdpFunctor*>::const_iterator it;
     for (it = m_NameToFunctor.begin(); it != m_NameToFunctor.end(); ++it)
         delete it->second;
-
-    m_NameToFunctor.clear();
-    m_TypeToName.clear();
 }
 
 LdpElement* LdpFactory::create(const std::string& name, int numLine) const

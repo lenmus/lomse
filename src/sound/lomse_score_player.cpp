@@ -49,7 +49,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     : m_libScope(libScope)
-    , m_pThread( std::unique_ptr<SoundThread>(nullptr) )
+    , m_pThread(nullptr)
     , m_pMidi(pMidi)
     , m_fPaused(false)
     , m_fRunning(false)
@@ -284,19 +284,16 @@ void ScorePlayer::stop()
 
         m_pTable->reset_jumps();
         m_pThread.reset();
-        m_pThread = std::unique_ptr<SoundThread>(nullptr);
     }
 
     if (m_pThread)
     {
         LOMSE_LOG_DEBUG(Logger::k_score_player, "Deleting thread ...");
         if (m_pThread->joinable())
-        {
             m_pThread->join();
-            m_pThread.reset();
-        }
+
+        m_pThread.reset();
     }
-    m_pThread = std::unique_ptr<SoundThread>(nullptr);
 
     m_fRunning = false;
     m_fShouldStop = false;

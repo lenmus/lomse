@@ -95,9 +95,6 @@ MnxPartList::~MnxPartList()
         for (int i=0; i < m_numInstrs; ++i)
             delete m_instruments[i];
     }
-    m_instruments.clear();
-    m_locators.clear();
-    m_partAdded.clear();
 }
 
 //---------------------------------------------------------------------------------------

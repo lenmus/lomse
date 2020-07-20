@@ -60,9 +60,6 @@ SelectionSet::SelectionSet(Document* pDoc)
 //---------------------------------------------------------------------------------------
 SelectionSet::~SelectionSet()
 {
-    m_gmos.clear();
-    m_imos.clear();
-    m_ids.clear();
     delete m_pValidator;
     delete m_pCollection;
 }

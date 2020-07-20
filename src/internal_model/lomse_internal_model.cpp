@@ -1044,7 +1044,6 @@ void ImoAuxRelObj::set_prev_ARO(ImoAuxRelObj* pPrev)
 //=======================================================================================
 ImoRelObj::~ImoRelObj()
 {
-    m_relatedObjects.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -3298,7 +3297,6 @@ ImoScore::~ImoScore()
     delete m_pColStaffObjs;
     delete_text_styles();
     delete m_pMidiTable;
-    m_titles.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -4085,20 +4083,6 @@ ImoMidiInfo* ImoSoundChange::get_midi_info(const string& soundId)
 //=======================================================================================
 ImoStyle::~ImoStyle()
 {
-    m_lunitsProps.clear();
-    m_floatProps.clear();
-    m_stringProps.clear();
-    m_intProps.clear();
-    m_colorProps.clear();
-
-//    std::map<int, LUnits> empty_map_lunitsProps;
-//    empty_map_lunitsProps.swap(m_lunitsProps);
-//    std::map<int, float> empty_map_floatProps;
-//    empty_map_floatProps.swap(m_floatProps);
-//    std::map<int, string> empty_map_stringProps;
-//    empty_map_stringProps.swap(m_stringProps);
-//    std::map<int, int> empty_map_intProps;
-//    std::map<int, Color> empty_map_colorProps;
 }
 
 //---------------------------------------------------------------------------------------
