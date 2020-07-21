@@ -6425,9 +6425,7 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 LdpAnalyser::~LdpAnalyser()
 {
     delete_relation_builders();
-    m_lyrics.clear();
-    m_lyricIndex.clear();
-    m_lyricsPlacement.clear();
+    delete m_pMeasureInfo;      //in unit test could have been not used
 }
 
 //---------------------------------------------------------------------------------------

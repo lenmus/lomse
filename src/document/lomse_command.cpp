@@ -332,8 +332,10 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
             update_selection(pSelection, pCmd);
             m_pDoc->set_modified();
         }
-        else
+        else if (pCmd->is_reversible())
             delete pUE;
+        else
+            delete pCmd;
     }
     else
     {
@@ -342,6 +344,8 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
             m_error = "Command ignored. Can not set target";
         else
             m_error = error;
+
+        delete pCmd;
     }
 
     return result;

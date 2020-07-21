@@ -71,7 +71,6 @@ LyricEngraver::LyricEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
 //---------------------------------------------------------------------------------------
 LyricEngraver::~LyricEngraver()
 {
-    m_lyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------

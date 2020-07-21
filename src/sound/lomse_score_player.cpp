@@ -201,12 +201,13 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
     m_fFinalEventSent = false;
 
     //Create a new thread. It starts immediately to execute do_play()
-    delete m_pThread;
+    m_pThread.reset();
     m_fPlaying = true;
     m_startMutex.lock();
-    m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
-                                nEvStart, nEvEnd, m_fVisualTracking,
-                                m_nMM, m_pInteractor);
+    m_pThread = std::unique_ptr<SoundThread>(
+        LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
+                              nEvStart, nEvEnd, m_fVisualTracking,
+                              m_nMM, m_pInteractor) );
     m_startMutex.unlock();
     LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::play_segment]");
 }
@@ -282,14 +283,17 @@ void ScorePlayer::stop()
         m_pThread->join();
 
         m_pTable->reset_jumps();
-
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "Deleting thread ...");
-        delete m_pThread;
-        m_pThread = nullptr;
+        m_pThread.reset();
     }
 
     if (m_pThread)
-        m_pThread = nullptr;
+    {
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "Deleting thread ...");
+        if (m_pThread->joinable())
+            m_pThread->join();
+
+        m_pThread.reset();
+    }
 
     m_fRunning = false;
     m_fShouldStop = false;

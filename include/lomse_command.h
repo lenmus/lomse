@@ -294,6 +294,11 @@ public:
         : pCmd(cmd), cursorState(state), selState(sel)
     {
     }
+    ///destructor
+    ~UndoElement()
+    {
+        delete pCmd;
+    }
 };
 
 

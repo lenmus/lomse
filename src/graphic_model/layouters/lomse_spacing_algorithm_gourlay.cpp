@@ -1634,7 +1634,6 @@ TimeSliceNoterest::TimeSliceNoterest(ColStaffObjsEntry* pEntry, int column, int 
 //---------------------------------------------------------------------------------------
 TimeSliceNoterest::~TimeSliceNoterest()
 {
-    m_lyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------

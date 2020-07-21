@@ -701,11 +701,7 @@ void ScoreLayouter::delete_not_used_objects()
     //it is necessary to delete objects that, in normal processing, will be deleted
     //in other places
 
-    //pendig aux objects
-    std::list<PendingAuxObjs*>::iterator itPAO;
-    for (itPAO = m_pendingAuxObjs.begin(); itPAO != m_pendingAuxObjs.end(); ++itPAO)
-        delete *itPAO;
-    m_pendingAuxObjs.clear();
+    delete_pendig_aux_objects();
 
     //not used shapes
     for (int iCol = 0; iCol < get_num_columns(); ++iCol)
@@ -716,7 +712,31 @@ void ScoreLayouter::delete_not_used_objects()
     //not used engravers
     m_engravers.delete_engravers();
 
-    //system boxes
+    delete_system_boxes();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::delete_pendig_aux_objects()
+{
+    //delete pendig aux objects
+    //Sanitizing method for unit tests. When the score layout process is not finished,
+    //it is necessary to delete objects that, in normal processing, will be deleted
+    //in other places
+
+    std::list<PendingAuxObjs*>::iterator itPAO;
+    for (itPAO = m_pendingAuxObjs.begin(); itPAO != m_pendingAuxObjs.end(); ++itPAO)
+        delete *itPAO;
+    m_pendingAuxObjs.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::delete_system_boxes()
+{
+    //delete system boxes
+    //Sanitizing method for unit tests. When the score layout process is not finished,
+    //it is necessary to delete objects that, in normal processing, will be deleted
+    //in other places
+
     std::vector<SystemLayouter*>::iterator it;
     for (it = m_sysLayouters.begin(); it != m_sysLayouters.end(); ++it)
     {

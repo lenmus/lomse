@@ -145,6 +145,8 @@ void OverlaysGenerator::save_rendering_buffer()
     unsigned h = m_pCanvasBuffer->height();
     int stride = m_pCanvasBuffer->stride();
     size_t bytes = h * abs(stride);
+    if (bytes == 0)
+        return;     //in Unit Tests
     if (m_pSaveBytes == nullptr || bytes != m_savedBuffer.height() * m_savedBuffer.stride())
     {
         delete m_pSaveBytes;

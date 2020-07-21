@@ -70,7 +70,11 @@ public:
     {
         m_lineRefs = refs;
     }
-    virtual ~MyInlinesContainerLayouter() {}
+    virtual ~MyInlinesContainerLayouter() {
+        std::list<Engrouter*>::iterator it;
+        for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
+        delete *it;
+    }
 
     GmoBox* my_get_main_box() { return m_pItemMainBox; }
     UPoint my_get_cursor() { return m_pageCursor; }

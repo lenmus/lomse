@@ -1202,6 +1202,7 @@ SUITE(DocCursorTest)
         ImoScore* pScore = static_cast<ImoScore*>( *cursor );
         ImoDocument* pImoDoc = pScore->get_document();
         pImoDoc->erase(pScore);
+        delete pScore;
 
         cursor.reset_and_point_after(id);
 
@@ -1221,6 +1222,7 @@ SUITE(DocCursorTest)
         ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
         ImoDocument* pImoDoc = pImo->get_document();
         pImoDoc->erase(pImo);
+        delete pImo;
 
         cursor.reset_and_point_after(id);     //should move to end
 
@@ -1249,6 +1251,7 @@ SUITE(DocCursorTest)
         ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
         ImoDocument* pImoDoc = pImo->get_document();
         pImoDoc->erase(pImo);
+        delete pImo;
 
         cursor.reset_and_point_after(id);
 
@@ -1268,6 +1271,7 @@ SUITE(DocCursorTest)
         ImoScore* pImo = static_cast<ImoScore*>( *cursor );
         ImoDocument* pImoDoc = pImo->get_document();
         pImoDoc->erase(pImo);
+        delete pImo;
 
         cursor.reset_and_point_after(id);     //should move to end
 
@@ -1291,6 +1295,7 @@ SUITE(DocCursorTest)
         ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
         ImoDocument* pImoDoc = pImo->get_document();
         pImoDoc->erase(pImo);
+        delete pImo;
 
         cursor.reset_and_point_after(id);     //should move to paragraph 15
 

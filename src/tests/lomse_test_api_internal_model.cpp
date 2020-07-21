@@ -361,6 +361,9 @@ SUITE(InternalModelApiTest)
 //        Document* pDoc = doc.internal_object();
 //        pDoc->end_of_changes();
 //        cout << pDoc->to_string(true) << endl;
+
+        //needed until detached objects are automatically managed
+        delete txt.internal_object();
     }
 
 
@@ -410,6 +413,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_dynamic() );
         ADynamic dyn = obj.downcast_to_dynamic();
         CHECK( dyn.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, adynamic_0200)
@@ -488,6 +494,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_instrument() );
         AInstrument instr = obj.downcast_to_instrument();
         CHECK( instr.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ainstrument_0102)
@@ -570,6 +579,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_instr_group() );
         AInstrGroup group = obj.downcast_to_instr_group();
         CHECK( group.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ainstrgroup_0110)
@@ -803,6 +815,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_link() );
         ALink link = obj.downcast_to_link();
         CHECK( link.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, alink_0200)
@@ -938,6 +953,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_list() );
         AList lst = obj.downcast_to_list();
         CHECK( lst.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, alist_0200)
@@ -1066,6 +1084,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_paragraph() );
         AParagraph para = obj.downcast_to_paragraph();
         CHECK( para.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, aparagraph_0200)
@@ -1177,6 +1198,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_score() );
         AScore score = obj.downcast_to_score();
         CHECK( score.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, ascore_0201)
@@ -1912,6 +1936,9 @@ SUITE(InternalModelApiTest)
         CHECK( obj.is_text_item() );
         ATextItem txt = obj.downcast_to_text_item();
         CHECK( txt.is_valid() );
+
+        //needed until detached objects are automatically managed
+        delete obj.internal_object();
     }
 
     TEST_FIXTURE(InternalModelApiTestFixture, atextitem_0200)

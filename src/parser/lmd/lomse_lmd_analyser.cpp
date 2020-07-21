@@ -5824,7 +5824,6 @@ LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 LmdAnalyser::~LmdAnalyser()
 {
     delete_relation_builders();
-    m_NameToTag.clear();
 }
 
 //---------------------------------------------------------------------------------------

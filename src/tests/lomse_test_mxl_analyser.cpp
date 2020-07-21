@@ -246,7 +246,7 @@ SUITE(MxlAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
         CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_02)
@@ -271,7 +271,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_document() == true );
         CHECK( errormsg.str() == expected.str() );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_03)
@@ -297,7 +297,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pDoc != nullptr );
         CHECK( pDoc && pDoc->get_num_content_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_04)
@@ -335,7 +335,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_05)
@@ -371,7 +371,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_06)
@@ -400,7 +400,7 @@ SUITE(MxlAnalyserTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != nullptr );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_07)
@@ -434,7 +434,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pInstr != nullptr );
         CHECK( pInstr->get_num_staves() == 1 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_08)
@@ -470,7 +470,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD != nullptr );
         CHECK( pMD->get_num_items() == 0 );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_09)
@@ -525,7 +525,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -562,7 +562,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pMD->get_num_items() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -615,7 +615,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup && pGroup->get_symbol() == k_group_symbol_none );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_02)
@@ -658,7 +658,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_03)
@@ -701,7 +701,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroups == nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_04)
@@ -750,7 +750,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_05)
@@ -799,7 +799,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_06)
@@ -848,7 +848,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_07)
@@ -909,7 +909,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_08)
@@ -970,7 +970,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_09)
@@ -1029,7 +1029,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_10)
@@ -1090,7 +1090,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_11)
@@ -1155,7 +1155,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_part_group_12)
@@ -1227,7 +1227,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1293,7 +1293,7 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_02)
@@ -1319,7 +1319,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot == nullptr);
         CHECK( a.current_divisions() == 7.0f );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_03)
@@ -1349,7 +1349,7 @@ SUITE(MxlAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( a.current_divisions() == 1.0f );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1379,7 +1379,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pBarline && pBarline->is_visible() );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1409,7 +1409,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "420: timepos= " << a.get_current_time() << endl;
 //
 //        a.do_not_delete_instruments_in_destructor();
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
+//        delete pRoot;
 //    }
 
 
@@ -1439,7 +1439,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pClef && pClef->get_staff() == 0 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_02)
@@ -1466,7 +1466,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pClef && pClef->get_clef_type() == k_clef_G2 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_03)
@@ -1493,7 +1493,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pClef && pClef->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1531,7 +1531,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_02)
@@ -1577,7 +1577,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_03)
@@ -1621,7 +1621,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_words_04)
@@ -1771,7 +1771,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_coda_13)
@@ -1812,7 +1812,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1846,7 +1846,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_02)
@@ -1876,7 +1876,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -1945,7 +1945,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, measure_02)
@@ -2042,7 +2042,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, measure_03)
@@ -2142,7 +2142,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -2212,7 +2212,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, metronome_02)
@@ -2281,7 +2281,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, metronome_03)
@@ -2346,7 +2346,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 //    TEST_FIXTURE(MxlAnalyserTestFixture, metronome_04)
@@ -2402,7 +2402,7 @@ SUITE(MxlAnalyserTest)
 //        CHECK( pMM->has_parenthesis() == false );
 //
 //        a.do_not_delete_instruments_in_destructor();
-//        if (pRoot && !pRoot->is_document()) delete pRoot;
+//        delete pRoot;
 //    }
 
 
@@ -2478,7 +2478,7 @@ SUITE(MxlAnalyserTest)
 //             << "pan= " << pMidi->get_midi_pan() << endl
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     //@ midi-instrument -----------------------------------------------------------------
@@ -2528,7 +2528,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_02)
@@ -2621,7 +2621,7 @@ SUITE(MxlAnalyserTest)
 //             << "pan= " << pMidi->get_midi_pan() << endl
 //             << "elevation= " << pMidi->get_midi_elevation() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, midi_instrument_03)
@@ -2667,7 +2667,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pInfo->get_score_instr_id() == "P1-I1" );
         CHECK( pInfo->get_score_instr_name() == "Marimba" );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -2706,7 +2706,7 @@ SUITE(MxlAnalyserTest)
         CHECK( a.get_last_note() == pNote );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_01)
@@ -2742,7 +2742,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_02)
@@ -2778,7 +2778,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_03)
@@ -2815,7 +2815,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_04)
@@ -2853,7 +2853,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_05)
@@ -2892,7 +2892,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_06)
@@ -2928,7 +2928,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->get_stem_direction() == k_stem_down );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_07)
@@ -2985,7 +2985,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_08)
@@ -3048,7 +3048,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == true );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_09)
@@ -3085,7 +3085,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_10)
@@ -3124,7 +3124,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote && pNote->is_end_of_chord() == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -3206,7 +3206,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, octave_shift_02)
@@ -3289,7 +3289,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -3323,7 +3323,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRest->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -3366,7 +3366,7 @@ SUITE(MxlAnalyserTest)
         ImoSoundInfo* pInfo = pInstr->get_sound_info(0);
         CHECK( pInfo == nullptr );
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_02)
@@ -3409,7 +3409,7 @@ SUITE(MxlAnalyserTest)
 //        cout << test_name() << endl;
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_03)
@@ -3453,7 +3453,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_04)
@@ -3498,7 +3498,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "score-instr: id= " << pInfo->get_score_instr_id()
 //             << ", name= " << pInfo->get_score_instr_name() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, score_instrument_05)
@@ -3548,7 +3548,7 @@ SUITE(MxlAnalyserTest)
 //             << ", abbrev= " << pInfo->get_score_instr_abbrev()
 //             << ", sound= " << pInfo->get_score_instr_sound() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -3588,7 +3588,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote != nullptr );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -3614,7 +3614,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot == nullptr);
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_02)
@@ -3642,7 +3642,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC && pSC->get_bool_attribute(k_attr_pizzicato) == false );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_03)
@@ -3669,7 +3669,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 75.0f );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_04)
@@ -3697,7 +3697,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 70.0f );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_05)
@@ -3728,7 +3728,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC && pSC->get_float_attribute(k_attr_tempo) == 72.5f );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_06)
@@ -3767,7 +3767,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pSC && pSC->get_attribute_node(k_attr_tocoda) != nullptr  );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_07)
@@ -3823,7 +3823,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_08)
@@ -3923,7 +3923,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_sound_09)
@@ -4025,7 +4025,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -4058,7 +4058,7 @@ SUITE(MxlAnalyserTest)
 //             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_02)
@@ -4086,7 +4086,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pTimeSignature && pTimeSignature->get_bottom_number() == 4 );
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -4129,7 +4129,7 @@ SUITE(MxlAnalyserTest)
 //             << ", time_modifier_bottom= " << pNote->get_time_modifier_bottom() << endl;
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     //@ tuplet --------------------------------------------------------------------------
@@ -4210,7 +4210,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_02)
@@ -4273,7 +4273,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_03)
@@ -4349,7 +4349,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_04)
@@ -4481,7 +4481,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -4566,7 +4566,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_06)
@@ -4645,7 +4645,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_07)
@@ -4722,7 +4722,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -4828,7 +4828,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, volta_bracket_02)
@@ -4933,7 +4933,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_volta_bracket_03)
@@ -5062,7 +5062,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_02)
@@ -5145,7 +5145,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_03)
@@ -5228,7 +5228,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_04)
@@ -5310,7 +5310,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_wedge_05)
@@ -5392,7 +5392,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 
@@ -5449,7 +5449,7 @@ SUITE(MxlAnalyserTest)
             }
         }
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_misc_malformed_10)
@@ -5540,8 +5540,7 @@ SUITE(MxlAnalyserTest)
         }
 
         a.do_not_delete_instruments_in_destructor();
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
-
 }
 

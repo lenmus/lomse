@@ -102,8 +102,12 @@ public:
         {
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
-        //delete m_pThread;
-        m_pThread = nullptr;
+        if (m_pThread && m_pThread->joinable())
+        {
+            m_pThread->join();
+            m_pThread.reset();
+        }
+        m_pThread = std::unique_ptr<SoundThread>(nullptr);
     }
 
     inline const char* test_name()
@@ -143,8 +147,12 @@ public:
         {
             std::this_thread::sleep_for( std::chrono::milliseconds(100) );
         }
-        //delete m_pThread;
-        m_pThread = nullptr;
+        if (m_pThread && m_pThread->joinable())
+        {
+            m_pThread->join();
+            m_pThread.reset();
+        }
+        m_pThread = std::unique_ptr<SoundThread>(nullptr);
     }
 };
 

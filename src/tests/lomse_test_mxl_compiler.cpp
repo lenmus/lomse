@@ -91,7 +91,7 @@ SUITE(MxlCompilerTest)
         CHECK( pScore != nullptr );
         CHECK( pScore && pScore->get_num_instruments() == 1 );
         CHECK( pScore && pScore->get_staffobjs_table() != nullptr );
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
     TEST_FIXTURE(MxlCompilerTestFixture, MxlCompilerFromFile_100)
@@ -121,7 +121,7 @@ SUITE(MxlCompilerTest)
 //        cout << "Test: MxlCompilerFromFile_100" << endl;
 //        cout << doc.to_string() << endl;
 
-        if (pRoot && !pRoot->is_document()) delete pRoot;
+        delete pRoot;
     }
 
 };

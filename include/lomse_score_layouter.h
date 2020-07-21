@@ -201,6 +201,8 @@ public:
     //support for debugging and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
     void delete_not_used_objects();
+    void delete_pendig_aux_objects();
+    void delete_system_boxes();
     void trace_column(int iCol, int level);
     ColumnData* get_column(int i);
 

@@ -82,6 +82,8 @@ public:
     {
         delete m_pDoc;
         m_pDoc = nullptr;
+        m_pScore = nullptr;
+        m_pTable = nullptr;
     }
 
     inline const char* test_name()

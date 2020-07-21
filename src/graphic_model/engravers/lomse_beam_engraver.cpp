@@ -68,7 +68,6 @@ BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
 //---------------------------------------------------------------------------------------
 BeamEngraver::~BeamEngraver()
 {
-    m_noteRests.clear();
 }
 
 //---------------------------------------------------------------------------------------
