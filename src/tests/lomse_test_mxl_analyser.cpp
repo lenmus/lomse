@@ -3128,6 +3128,166 @@ SUITE(MxlAnalyserTest)
     }
 
 
+    //@ grace notes ---------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_01)
+    {
+        //@01 grace relobj. previous note, grace note and principal note
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            ImoMusicData* pMD = pInstr->get_musicdata();
+            CHECK( pMD != nullptr );
+            CHECK( pMD->get_num_children() == 5 );
+
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK( (*it) && (*it)->is_clef() );
+
+            ++it;
+            ImoNote* pNoteFirst = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNoteFirst != nullptr );
+            CHECK( pNoteFirst && pNoteFirst->is_regular_note() == true );
+
+            ++it;
+            ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote != nullptr );
+            CHECK( pNote && pNote->is_grace_note() == true );
+            ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+            CHECK( pGraceRO != nullptr );
+
+            ++it;
+            ImoNote* pNotePpal = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNotePpal != nullptr );
+            CHECK( pNotePpal && pNotePpal->is_regular_note() == true );
+//            CHECK( pNote && pNote->is_start_of_chord() == false );
+//            CHECK( pNote && pNote->is_end_of_chord() == true );
+
+            ++it;
+            CHECK( (*it) && (*it)->is_barline() );
+
+            //check grace relationship
+            CHECK( pGraceRO->get_principal_note() == pNotePpal );
+            CHECK( pGraceRO->get_previous_note() == pNoteFirst );
+            CHECK( pGraceRO->get_num_objects() == 2 );
+            CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+            CHECK( pGraceRO->has_slash() == true );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_02)
+    {
+        //@02 grace relobj. previous note, two grace notes and principal note
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            ImoInstrument* pInstr = pScore->get_instrument(0);
+            ImoMusicData* pMD = pInstr->get_musicdata();
+            CHECK( pMD != nullptr );
+            CHECK( pMD->get_num_children() == 6 );
+
+            ImoObj::children_iterator it = pMD->begin();
+            CHECK( (*it) && (*it)->is_clef() );
+
+            ++it;
+            ImoNote* pNoteFirst = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNoteFirst != nullptr );
+            CHECK( pNoteFirst && pNoteFirst->is_regular_note() == true );
+
+            ++it;
+            ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote != nullptr );
+            CHECK( pNote && pNote->is_grace_note() == true );
+            ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+            CHECK( pGraceRO != nullptr );
+
+            ++it;
+            pNote = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNote != nullptr );
+            CHECK( pNote && pNote->is_grace_note() == true );
+            CHECK( pNote->get_grace_relobj() == pGraceRO );
+
+            ++it;
+            ImoNote* pNotePpal = dynamic_cast<ImoNote*>( *it );
+            CHECK( pNotePpal != nullptr );
+            CHECK( pNotePpal && pNotePpal->is_regular_note() == true );
+//            CHECK( pNote && pNote->is_start_of_chord() == false );
+//            CHECK( pNote && pNote->is_end_of_chord() == true );
+
+            ++it;
+            CHECK( (*it) && (*it)->is_barline() );
+
+            //check grace relationship
+            CHECK( pGraceRO->get_principal_note() == pNotePpal );
+            CHECK( pGraceRO->get_previous_note() == pNoteFirst );
+            CHECK( pGraceRO->get_num_objects() == 3 );
+            CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+            CHECK( pGraceRO->has_slash() == true );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+
+
     //@ octave-shift --------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, octave_shift_01)

@@ -3725,7 +3725,7 @@ public:
         else
         {
             pNote = static_cast<ImoNote*>(
-                          ImFactory::inject(k_imo_note, pDoc, get_node_id()) );
+                          ImFactory::inject(k_imo_note_regular, pDoc, get_node_id()) );
             pNR = pNote;
         }
 

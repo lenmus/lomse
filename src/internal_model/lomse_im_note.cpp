@@ -197,8 +197,8 @@ list<TIntAttribute> ImoNoteRest::get_supported_attributes()
 //=======================================================================================
 // ImoNote implementation
 //=======================================================================================
-ImoNote::ImoNote()
-    : ImoNoteRest(k_imo_note)
+ImoNote::ImoNote(int type)
+    : ImoNoteRest(type)
     , m_step(k_no_pitch)
     , m_octave(4)
     , m_actual_acc(k_acc_not_computed)
@@ -213,7 +213,7 @@ ImoNote::ImoNote()
 //---------------------------------------------------------------------------------------
 ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, int dots,
                  int staff, int voice, int stem)
-    : ImoNoteRest(k_imo_note)
+    : ImoNoteRest(k_imo_note_regular)
     , m_step(step)
     , m_octave(octave)
     , m_actual_acc(k_acc_not_computed)
@@ -276,6 +276,12 @@ bool ImoNote::has_beam()
         ImoNote* pNote = static_cast<ImoNote*>(pChord->get_start_object());
         return pNote->is_beamed();
     }
+}
+
+//---------------------------------------------------------------------------------------
+ImoGraceRelObj* ImoNote::get_grace_relobj()
+{
+    return static_cast<ImoGraceRelObj*>( find_relation(k_imo_grace_relobj) );
 }
 
 //---------------------------------------------------------------------------------------

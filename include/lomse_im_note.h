@@ -179,7 +179,7 @@ protected:
     ImoTie* m_pTiePrev;
 
     friend class ImFactory;
-    ImoNote();
+    ImoNote(int type);
     ImoNote(int step, int octave, int noteType, EAccidentals accidentals=k_no_accidentals,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
@@ -297,6 +297,10 @@ public:
         Method ImoNote::has_been() is reliable in all circumstances and cases.
     */
     bool has_beam();
+
+    //grace notes related to this note
+    ImoGraceRelObj* get_grace_relobj();
+
 
     //pitch. Only valid when m_actual_acc is computed
     FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals

@@ -42,6 +42,8 @@
 #include "lomse_score_iterator.h"
 #include "lomse_model_builder.h"
 #include "lomse_time.h"
+#include "lomse_xml_parser.h"
+#include "lomse_mxl_analyser.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -1768,6 +1770,64 @@ SUITE(ColStaffObjsBuilderTest)
 
         delete tree->get_root();
         if (pRoot && !pRoot->is_document()) delete pRoot;
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjs1x_100)
+    {
+        //@100. Grace notes
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+            "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+            "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+            "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc != nullptr );
+        CHECK( pDoc && pDoc->get_num_content_items() == 0 );
+
+
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+        cout << test_name() << endl;
+        cout << pColStaffObjs->dump();
+//        CHECK( pColStaffObjs->num_lines() == 2 );
+//        CHECK( pColStaffObjs->num_entries() == 10 );
+//                   // (clef G p1)
+//        ++it;       //(clef F4 p2)
+//        ++it;       //(key D)
+//        ++it;       //(key D)
+//        ++it;       //(time 2 4)
+//        CHECK( (*it)->imo_object()->is_time_signature() == true );
+//        CHECK( (*it)->line() == 0 );
+//        ++it;       //(time 2 4)
+//        CHECK( (*it)->imo_object()->is_time_signature() == true );
+//        CHECK( (*it)->line() == 1 );
+//        ++it;       //(n c4 q v2 p1)
+//        CHECK( (*it)->imo_object()->is_note() == true );
+//        CHECK( (*it)->line() == 0 );
+
+        delete pRoot;
     }
 
 }

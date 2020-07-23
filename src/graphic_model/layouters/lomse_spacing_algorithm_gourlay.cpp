@@ -171,7 +171,9 @@ void SpAlgGourlay::include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iI
                 curType = TimeSlice::k_non_timed;
                 break;
 
-            case k_imo_note:
+            case k_imo_note_regular:
+            case k_imo_note_grace:
+            case k_imo_note_cue:
             case k_imo_rest:
                 curType = TimeSlice::k_noterest;
                 break;

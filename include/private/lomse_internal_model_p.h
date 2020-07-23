@@ -690,7 +690,9 @@ enum EImoObjType
     k_imo_figured_bass,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figured bass mark
     k_imo_go_back_fwd,      ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GoBackFwd
     k_imo_key_signature,    ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Key signature
-    k_imo_note,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note
+    k_imo_note_regular,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note (regular)
+    k_imo_note_grace,       ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note (grace)
+    k_imo_note_cue,         ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Note (cue)
     k_imo_rest,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rest
     k_imo_sound_change,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Playback parameters
     k_imo_system_break,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System break
@@ -729,6 +731,7 @@ enum EImoObjType
     k_imo_relobj,           ///< &nbsp;&nbsp;&nbsp;&nbsp; <b>Relation objects. Any of the following:</b>
     k_imo_beam,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Beam
     k_imo_chord,            ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Chord
+    k_imo_grace_relobj,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Grace notes relationship
     k_imo_octave_shift,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Octave-shift line
     k_imo_slur,             ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Slur
     k_imo_tie,              ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tie
@@ -1442,6 +1445,7 @@ public:
     inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
     inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
     bool is_gap();      ///a rest representing a goFwd element
+    inline bool is_grace_relobj() { return m_objtype == k_imo_grace_relobj; }
     inline bool is_heading() { return m_objtype == k_imo_heading; }
     inline bool is_image() { return m_objtype == k_imo_image; }
     inline bool is_inline_wrapper() { return m_objtype == k_imo_inline_wrapper; }
@@ -1459,9 +1463,11 @@ public:
     inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
     inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
     inline bool is_music_data() { return m_objtype == k_imo_music_data; }
-    inline bool is_note() { return m_objtype == k_imo_note; }
-    inline bool is_note_rest() { return m_objtype == k_imo_note
-               || m_objtype == k_imo_rest; }
+    inline bool is_note() { return is_regular_note() || is_grace_note() || is_cue_note(); }
+    inline bool is_regular_note() { return m_objtype == k_imo_note_regular; }
+    inline bool is_grace_note() { return m_objtype == k_imo_note_grace; }
+    inline bool is_cue_note() { return m_objtype == k_imo_note_cue; }
+    inline bool is_note_rest() { return is_note() || m_objtype == k_imo_rest; }
     inline bool is_octave_shift() { return m_objtype == k_imo_octave_shift; }
     inline bool is_octave_shift_dto() { return m_objtype == k_imo_octave_shift_dto; }
     inline bool is_option() { return m_objtype == k_imo_option; }
@@ -3066,7 +3072,8 @@ protected:
 public:
     virtual ~ImoChord() {}
 
-    void reorganize_after_object_deletion() {}
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -3670,9 +3677,11 @@ public:
     //type of beam
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
 
-    void reorganize_after_object_deletion();
     int get_max_staff();
     int get_min_staff();
+
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -4551,6 +4560,60 @@ public:
     {
         m_rTimeShift = (m_fFwd ? rTime : -rTime);
     }
+};
+
+//---------------------------------------------------------------------------------------
+/** When one or more consecutive grace notes appear in the score, this auxiliary RelObj
+    is responsible for relating the grace notes to its principal note, and also to
+    manage the common properties for the group of grace notes
+*/
+class ImoGraceRelObj : public ImoRelObj
+{
+protected:
+    int         m_graceType;    //a value from enum
+    bool        m_fSlash;       //true when grace notes are notated with a diagonal stroke
+    ImoNote*    m_pPrincipalNote;   //ptr to principal note
+    ImoNote*    m_pPrevNote;        //ptr to previous note
+
+    friend class ImFactory;
+    ImoGraceRelObj()
+        : ImoRelObj(k_imo_grace_relobj)
+        , m_graceType(k_grace_steal_previous)
+        , m_fSlash(true)
+        , m_pPrincipalNote(nullptr)
+        , m_pPrevNote(nullptr)
+    {
+    }
+
+public:
+    virtual ~ImoGraceRelObj() {}
+
+    // grace notes behaviour
+    enum EGraceType
+    {
+        k_grace_steal_previous = 0, ///< grace note occupies a time interval that ends before the
+                                    ///< expected onset of the next non-grace event, shortening
+                                    ///< the duration of the preceding non-grace event.
+        k_grace_steal_following,    ///< grace note occupies a time interval starting at the
+                                    ///< expected onset of the next non-grace event, both delaying
+                                    ///< its onset and shortening its duration.
+        k_grace_make_time,          ///< grace note delays the onset of the next non-grace event.
+    };
+
+    //getters
+    inline ImoNote* get_principal_note() { return m_pPrincipalNote; }
+    inline ImoNote* get_previous_note() { return m_pPrevNote; }
+    inline int get_grace_type() { return m_graceType; }
+    inline bool has_slash() { return m_fSlash; }
+
+    //setters
+    inline void set_principal_note(ImoNote* pNote) { m_pPrincipalNote = pNote; }
+    inline void set_previous_note(ImoNote* pNote) { m_pPrevNote = pNote; }
+    inline void set_grace_type(int graceType) { m_graceType = graceType; }
+    inline void set_slash(bool value) { m_fSlash = value; }
+
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -5891,7 +5954,8 @@ public:
     ImoBezierInfo* get_start_bezier_or_create();
     ImoBezierInfo* get_stop_bezier_or_create();
 
-    void reorganize_after_object_deletion();
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -6457,7 +6521,8 @@ public:
     ImoBezierInfo* get_start_bezier_or_create();
     ImoBezierInfo* get_stop_bezier_or_create();
 
-    void reorganize_after_object_deletion();
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 // raw info about a pending tie
@@ -6855,7 +6920,8 @@ public:
         return m_nPlacement;
     }
 
-    void reorganize_after_object_deletion();
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -7099,7 +7165,8 @@ public:
     inline int get_shift_steps() { return m_steps; }
     inline int get_octave_shift_number() { return m_octaveShiftNum; }
 
-    void reorganize_after_object_deletion();
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -7240,7 +7307,7 @@ public:
 
 
     //required override for ImoRelObj
-    void reorganize_after_object_deletion();
+    void reorganize_after_object_deletion() override;
 
 };
 
@@ -7404,7 +7471,8 @@ public:
     inline int get_wedge_number() { return m_wedgeNum; }
 //    inline Color get_color() { return m_color; }
 
-    void reorganize_after_object_deletion();
+    //required override for ImoRelObj
+    void reorganize_after_object_deletion() override;
 };
 
 // raw info about a pending wedge

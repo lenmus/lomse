@@ -4037,8 +4037,8 @@ public:
         bool fInChord = false;
         bool fIsRest = false;
 
-        //for now, ignore cue & grace notes
-        if (fIsCue || fIsGrace)
+        //for now, ignore cue notes
+        if (fIsCue)
             return nullptr;
 
         // [<chord>]
@@ -4065,7 +4065,8 @@ public:
         }
         else
         {
-            pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
+            int type = (fIsGrace ? k_imo_note_grace : k_imo_note_regular);
+            pNote = static_cast<ImoNote*>(ImFactory::inject(type, pDoc));
             pNR = pNote;
             if (get_optional("unpitched"))
                 pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
@@ -4080,9 +4081,6 @@ public:
 
         //tie, except for cue notes
         //AWARE: <tie> is for sound
-        if (!fIsCue && get_optional("tie"))
-        {
-        }
         if (!fIsCue && get_optional("tie"))
         {
         }
@@ -4157,10 +4155,34 @@ public:
         add_to_model(pNR);
         add_to_spanners(pNote);
 
+        //deal with grace notes
+        ImoNote* pPrevNote = m_pAnalyser->get_last_note();
+        if (fIsGrace && (pPrevNote == nullptr || !pPrevNote->is_grace_note()) )
+        {
+            //start grace notes relationship
+            ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
+                                        ImFactory::inject(k_imo_grace_relobj, pDoc));
+            pNote->include_in_relation(pDoc, pGraceRO);
+            pGraceRO->set_previous_note(pPrevNote);
+        }
+        else if (fIsGrace && (pPrevNote && pPrevNote->is_grace_note()) )
+        {
+            //this note is not the first grace note in the relation. Continue it.
+            ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
+            pNote->include_in_relation(pDoc, pGraceRO);
+        }
+        else if (!fIsGrace && (pPrevNote && pPrevNote->is_grace_note()) )
+        {
+            //this note is the principal. Finish grace notes relationship
+            ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
+            pNote->include_in_relation(pDoc, pGraceRO);
+            pGraceRO->set_principal_note(pNote);
+        }
+
+
         //deal with notes in chord
         if (!fIsRest && fInChord)
         {
-            ImoNote* pPrevNote = m_pAnalyser->get_last_note();
             ImoChord* pChord;
             if (pPrevNote->is_in_chord())
             {
@@ -4222,6 +4244,8 @@ protected:
     {
         int noteType = k_unknown_notetype;
         TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
+        if (units == 0.0)
+            units = 0.125;    //grace notes will have the duration of a 2048th note
         if (!type.empty())
             noteType = to_note_type(type);
         else if (pNR->is_rest())

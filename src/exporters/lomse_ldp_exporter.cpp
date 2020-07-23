@@ -1848,7 +1848,13 @@ public:
             m_pExporter->set_processing_chord(true);
         }
 
-        start_element("n", m_pObj->get_id());
+        if (m_pObj->is_grace_note())
+            start_element("grace", m_pObj->get_id());
+        else if (m_pObj->is_cue_note())
+            start_element("cue", m_pObj->get_id());
+        else
+            start_element("n", m_pObj->get_id());
+
         m_source << " ";
         add_pitch();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
@@ -3403,7 +3409,9 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_lyric:           return LOMSE_NEW LyricLdpGenerator(pImo, this);
         case k_imo_metronome_mark:  return LOMSE_NEW MetronomeLdpGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataLdpGenerator(pImo, this);
-        case k_imo_note:            return LOMSE_NEW NoteLdpGenerator(pImo, this);
+        case k_imo_note_regular:    return LOMSE_NEW NoteLdpGenerator(pImo, this);
+        case k_imo_note_grace:      return LOMSE_NEW NoteLdpGenerator(pImo, this);
+//        case k_imo_note_cue:        return LOMSE_NEW NoteLdpGenerator(pImo, this);
         case k_imo_rest:            return LOMSE_NEW RestLdpGenerator(pImo, this);
         case k_imo_system_break:    return LOMSE_NEW SystemBreakLdpGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);

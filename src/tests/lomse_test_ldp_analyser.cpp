@@ -5781,11 +5781,11 @@ SUITE(LdpAnalyserTest)
         stringstream expected;
         expected << "Line 0. Requesting to tie notes of different voice or pitch. Tie number 12 will be ignored." << endl;
 
-        ImoNote* startNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* startNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         startNote->set_notated_pitch(2, k_octave_4, k_sharp);
         startNote->set_note_type(k_eighth);
 
-        ImoNote* endNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* endNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         endNote->set_notated_pitch(2, k_octave_3, k_sharp);
         endNote->set_note_type(k_eighth);
 
@@ -6374,13 +6374,13 @@ SUITE(LdpAnalyserTest)
 
         ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
 
-        ImoNote* pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote1->set_note_type(k_16th);
         ImoBeamDto dto1;
         ImoBeamData* pData1 = ImFactory::inject_beam_data(&doc, &dto1);
         pNote1->include_in_relation(&doc, pBeam, pData1);
 
-        ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote2->set_note_type(k_eighth);
         ImoBeamDto dto2;
         ImoBeamData* pData2 = ImFactory::inject_beam_data(&doc, &dto2);
@@ -6412,13 +6412,13 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
 
         ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
-        ImoNote* pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote1->set_note_type(k_eighth);
         ImoBeamDto dto1;
         ImoBeamData* pData1 = ImFactory::inject_beam_data(&doc, &dto1);
         pNote1->include_in_relation(&doc, pBeam, pData1);
 
-        ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote2->set_note_type(k_eighth);
         ImoBeamDto dto2;
         ImoBeamData* pData2 = ImFactory::inject_beam_data(&doc, &dto2);

@@ -2585,7 +2585,7 @@ public:
         int octave = 4;
         EAccidentals accidentals = k_no_accidentals;
         float alter = 0.0f;
-        ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
+        ImoNote* pNR = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, pDoc));
         if (MnxAnalyser::pitch_to_components(pitch, &step, &octave,&accidentals, &alter))
         {
             error_msg("Unknown note pitch '" + pitch + "'. Replaced by 'C4'.");

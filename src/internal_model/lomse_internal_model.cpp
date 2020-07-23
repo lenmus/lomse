@@ -444,7 +444,9 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_figured_bass] = "figured-bass";
         m_TypeToName[k_imo_go_back_fwd] = "go-back-fwd";
         m_TypeToName[k_imo_key_signature] = "key-signature";
-        m_TypeToName[k_imo_note] = "note";
+        m_TypeToName[k_imo_note_regular] = "note";
+        m_TypeToName[k_imo_note_grace] = "grace-note";
+        m_TypeToName[k_imo_note_cue] = "cue-note";
         m_TypeToName[k_imo_rest] = "rest";
         m_TypeToName[k_imo_system_break] = "system-break";
         m_TypeToName[k_imo_time_signature] = "time-signature";
@@ -555,6 +557,7 @@ const string& ImoObj::get_name(int type)
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
+        m_TypeToName[k_imo_grace_relobj] = "grace-relobj";
         m_TypeToName[k_imo_octave_shift] = "octave-shift";
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
@@ -2467,6 +2470,19 @@ ImoDynamic::~ImoDynamic()
     for (it = m_params.begin(); it != m_params.end(); ++it)
         delete *it;
     m_params.clear();
+}
+
+
+//=======================================================================================
+// ImoGraceRelObj implementation
+//=======================================================================================
+void ImoGraceRelObj::reorganize_after_object_deletion()
+{
+    //A grace notes relobj involves the grace notes and their principal note.
+    //Thehe grace relationship must be deleted when the principal note
+    //is deleted (it should also delete the grace notes) or when the last grace note
+    //is deleted. In both cases, the grace relationship is automatically deleted when
+    //only one note remains in the relationship. So nothing to do here.
 }
 
 

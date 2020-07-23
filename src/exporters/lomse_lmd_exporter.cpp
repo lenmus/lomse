@@ -1918,7 +1918,7 @@ LmdGenerator* LmdExporter::new_generator(ImoObj* pImo)
         case k_imo_instrument:      return LOMSE_NEW InstrumentLmdGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLmdGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataLmdGenerator(pImo, this);
-        case k_imo_note:            return LOMSE_NEW NoteLmdGenerator(pImo, this);
+        case k_imo_note_regular:            return LOMSE_NEW NoteLmdGenerator(pImo, this);
         case k_imo_para:            return LOMSE_NEW ParagraphLmdGenerator(pImo, this);
         case k_imo_rest:            return LOMSE_NEW RestLmdGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreLmdGenerator(pImo, this);
