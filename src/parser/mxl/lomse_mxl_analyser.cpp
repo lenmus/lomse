@@ -372,7 +372,9 @@ protected:
     int get_mandatory_integer_attribute(const string& name, int nDefault,
                                         const string& element);
     int get_optional_int_attribute(const string& name, int nDefault);
-    bool get_optional_yes_no_attribute(const string& name, bool fDefault);
+    bool get_optional_yes_no_attribute(const string& name, bool fDefault) {
+        return get_optional_yes_no_attribute(&m_analysedNode, name, fDefault);
+    }
     float get_optional_float_attribute(const string& name, float rDefault);
 
     //methods to get value of current node
@@ -381,6 +383,19 @@ protected:
     //methods to get value of current child
     int get_child_pcdata_int(const string& name, int nMin, int nMax, int nDefault);
     float get_child_pcdata_float(const string& name, float rMin, float rMax, float rDefault);
+
+    //methods to get attributes from current child
+    bool get_child_optional_yes_no_attribute(const string& name, bool fDefault) {
+        return get_optional_yes_no_attribute(&m_childToAnalyse, name, fDefault);
+    }
+    float get_child_attribute_as_float(const string& name, float rDefault) {
+        return get_node_attribute_as_float(&m_childToAnalyse, name, rDefault);
+    }
+
+    //auxiliary, for getting attributes from a node
+    bool get_optional_yes_no_attribute(XmlNode* node, const string& name, bool fDefault);
+    float get_node_attribute_as_float(XmlNode* node, const string& name, float rDefault);
+
 
     //building the model
     void add_to_model(ImoObj* pImo, int type=-1);
@@ -1184,7 +1199,14 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 //---------------------------------------------------------------------------------------
 float MxlElementAnalyser::get_attribute_as_float(const string& name, float rDefault)
 {
-    string number = m_analysedNode.attribute_value(name);
+    return get_node_attribute_as_float(&m_analysedNode, name, rDefault);
+}
+
+//---------------------------------------------------------------------------------------
+float MxlElementAnalyser::get_node_attribute_as_float(XmlNode* node, const string& name,
+                                                      float rDefault)
+{
+    string number = node->attribute_value(name);
     float rNumber;
     bool fError = false;
     try
@@ -1250,12 +1272,36 @@ int MxlElementAnalyser::get_mandatory_integer_attribute(const string& name, int 
     return attrb;
 }
 
+////---------------------------------------------------------------------------------------
+//bool MxlElementAnalyser::get_optional_yes_no_attribute(const string& name, bool fDefault)
+//{
+//    if (has_attribute(&m_analysedNode, name))
+//    {
+//        string value = m_analysedNode.attribute_value(name);
+//        if (value == "yes")
+//            return true;
+//        else if (value == "no")
+//            return false;
+//        else
+//        {
+//
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+//                m_analysedNode.name() + ": invalid value for yes-no attribute '"
+//                + name + "'. Value '" + (fDefault ? "yes" : "no") + "' assumed.");
+//            return fDefault;
+//        }
+//    }
+//    else
+//        return fDefault;
+//}
+
 //---------------------------------------------------------------------------------------
-bool MxlElementAnalyser::get_optional_yes_no_attribute(const string& name, bool fDefault)
+bool MxlElementAnalyser::get_optional_yes_no_attribute(XmlNode* node, const string& name,
+                                                       bool fDefault)
 {
-    if (has_attribute(&m_analysedNode, name))
+    if (has_attribute(node, name))
     {
-        string value = m_analysedNode.attribute_value(name);
+        string value = node->attribute_value(name);
         if (value == "yes")
             return true;
         else if (value == "no")
@@ -1263,8 +1309,8 @@ bool MxlElementAnalyser::get_optional_yes_no_attribute(const string& name, bool 
         else
         {
 
-            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                m_analysedNode.name() + ": invalid value for yes-no attribute '"
+            report_msg(m_pAnalyser->get_line_number(node),
+                node->name() + ": invalid value for yes-no attribute '"
                 + name + "'. Value '" + (fDefault ? "yes" : "no") + "' assumed.");
             return fDefault;
         }
@@ -3110,6 +3156,7 @@ protected:
 
 };
 
+
 //@--------------------------------------------------------------------------------------
 //@ <harp-pedals>
 class HarpPedalsMxlAnalyser : public MxlElementAnalyser
@@ -4017,8 +4064,11 @@ class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
 protected:
     ImoBeamDto* m_pBeamInfo;
-//    ImoSlurDto* m_pSlurDto;
-//    std::string m_srcOldTuplet;
+    //data for grace notes
+    int m_type;
+    float m_percentage;
+    TimeUnits m_makeTime;
+    bool m_fSlash;
 
 public:
     NoteRestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
@@ -4033,7 +4083,47 @@ public:
     ImoObj* do_analysis()
     {
         bool fIsCue = get_optional("cue");
-        bool fIsGrace = get_optional("grace");
+
+        // [<grace>]
+        bool fIsGrace = false;
+        if (get_optional("grace"))
+        {
+            //The grace element indicates that this note is a grace note
+            //Only the values from first grace note in the group will be used but
+            //at this point it is not known if this grace note is the first one in
+            //the group and so all parameters are saved
+            XmlNode graceNode = m_childToAnalyse;
+            fIsGrace = true;
+
+            //@<!ELEMENT grace EMPTY>
+            //@<!ATTLIST grace
+            //@    steal-time-previous CDATA #IMPLIED
+            //@    steal-time-following CDATA #IMPLIED
+            //@    make-time CDATA #IMPLIED
+            //@    slash %yes-no; #IMPLIED
+            //@>
+            m_fSlash = get_child_optional_yes_no_attribute("slash", true);
+
+            m_percentage = (m_fSlash ? 10.0f : 50.0f);
+            m_type = ImoGraceRelObj::k_grace_steal_previous;
+            if (graceNode.has_attribute("steal-time-previous"))
+            {
+                m_percentage = get_child_attribute_as_float("steal-time-previous", m_percentage);
+            }
+            if (graceNode.has_attribute("steal-time-following"))
+            {
+                m_percentage = get_child_attribute_as_float("steal-time-following", m_percentage);
+                m_type = ImoGraceRelObj::k_grace_steal_following;
+            }
+            m_percentage /= 100.0f;
+
+            if (graceNode.has_attribute("make-time"))
+            {
+                //TODO: Investigate what is this for and what to do
+                m_type = ImoGraceRelObj::k_grace_make_time;
+            }
+        }
+
         bool fInChord = false;
         bool fIsRest = false;
 
@@ -4164,6 +4254,10 @@ public:
                                         ImFactory::inject(k_imo_grace_relobj, pDoc));
             pNote->include_in_relation(pDoc, pGraceRO);
             pGraceRO->set_previous_note(pPrevNote);
+            pGraceRO->set_grace_type(m_type);
+            pGraceRO->set_slash(m_fSlash);
+            pGraceRO->set_percentage(m_percentage);
+            pGraceRO->set_time_to_make(m_makeTime);
         }
         else if (fIsGrace && (pPrevNote && pPrevNote->is_grace_note()) )
         {
@@ -4177,6 +4271,7 @@ public:
             ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
             pNote->include_in_relation(pDoc, pGraceRO);
             pGraceRO->set_principal_note(pNote);
+            fix_durations_in_grace_notes_group(pGraceRO);
         }
 
 
@@ -4244,8 +4339,6 @@ protected:
     {
         int noteType = k_unknown_notetype;
         TimeUnits units = m_pAnalyser->duration_to_timepos(duration);
-        if (units == 0.0)
-            units = 0.125;    //grace notes will have the duration of a 2048th note
         if (!type.empty())
             noteType = to_note_type(type);
         else if (pNR->is_rest())
@@ -4290,7 +4383,70 @@ protected:
             }
         }
 
+        if (units == 0.0 && pNR->is_grace_note())
+            units = to_duration(noteType, dots);
+
         pNR->set_type_dots_duration(noteType, dots, units);
+    }
+
+    //----------------------------------------------------------------------------------
+    void fix_durations_in_grace_notes_group(ImoGraceRelObj* pGRO)
+    {
+        ImoNote* pPpal = pGRO->get_principal_note();
+        ImoNote* pPrev = pGRO->get_previous_note();
+
+        //determine cumulative duration
+        TimeUnits gDur = 0.0;
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pGRO->get_related_objects();
+        for (auto p : notes)
+        {
+            if (p.first->is_grace_note())
+                gDur += p.first->get_duration();
+            else
+                break;
+        }
+
+        //determine time to steal
+        double percentage = pGRO->get_percentage();
+        TimeUnits dur = 0.0;
+
+        //if not make time, discount time from next/prev
+        if (pGRO->get_grace_type() != ImoGraceRelObj::k_grace_make_time)
+        {
+            //decide were to take time from
+            ImoNoteRest* pTarget = nullptr;
+            if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+                pTarget = pPrev;
+            else    //k_grace_steal_following
+                pTarget = pPpal;
+
+            if (pTarget)
+            {
+                TimeUnits targetDur = pTarget->get_duration();
+                dur = targetDur * percentage;
+                pTarget->set_duration(targetDur - dur);
+            }
+            else
+            {
+                //use a quarter note
+                dur = TimeUnits(k_duration_quarter) * percentage;
+//                if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+//                    dur = - dur;
+            }
+        }
+
+        //assign duration to each grace note as a share of cumulative duration
+        double alpha = dur / gDur;
+        for (auto p : notes)
+        {
+            if (p.first->is_grace_note())
+            {
+                ImoNote* pN = static_cast<ImoNote*>(p.first);
+                pN->set_duration( alpha * pN->get_duration() );
+            }
+            else
+                break;
+        }
     }
 
     //----------------------------------------------------------------------------------

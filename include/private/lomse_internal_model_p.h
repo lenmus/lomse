@@ -4572,6 +4572,8 @@ class ImoGraceRelObj : public ImoRelObj
 protected:
     int         m_graceType;    //a value from enum
     bool        m_fSlash;       //true when grace notes are notated with a diagonal stroke
+    float       m_percentage;       //percentage of time to steal
+    TimeUnits   m_makeTime;         //duration to assign
     ImoNote*    m_pPrincipalNote;   //ptr to principal note
     ImoNote*    m_pPrevNote;        //ptr to previous note
 
@@ -4605,12 +4607,16 @@ public:
     inline ImoNote* get_previous_note() { return m_pPrevNote; }
     inline int get_grace_type() { return m_graceType; }
     inline bool has_slash() { return m_fSlash; }
+    inline float get_percentage() { return m_percentage; }
+    inline TimeUnits get_time_to_make() { return m_makeTime; }
 
     //setters
     inline void set_principal_note(ImoNote* pNote) { m_pPrincipalNote = pNote; }
     inline void set_previous_note(ImoNote* pNote) { m_pPrevNote = pNote; }
     inline void set_grace_type(int graceType) { m_graceType = graceType; }
     inline void set_slash(bool value) { m_fSlash = value; }
+    inline void set_percentage(float value) { m_percentage = value; }
+    inline void set_time_to_make(TimeUnits value) { m_makeTime = value; }
 
     //required override for ImoRelObj
     void reorganize_after_object_deletion() override;

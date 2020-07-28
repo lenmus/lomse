@@ -45,6 +45,7 @@
 #include "lomse_time.h"
 #include "lomse_import_options.h"
 #include "lomse_im_attributes.h"
+#include "lomse_staffobjs_table.h"
 
 #include <regex>
 
@@ -212,6 +213,26 @@ public:
             }
         }
         return tuplets;
+    }
+
+    void check_staffobj(int iLine, ColStaffObjsEntry* pEntry, int type, int line,
+                        TimeUnits timepos, TimeUnits duration)
+    {
+        bool fTypeOK = (pEntry->imo_object()->get_obj_type() == type);
+        bool fLineOK = (pEntry->line() == line);
+        bool fTimePosOK = is_equal_time(pEntry->time(), timepos);
+        bool fDurationOK = is_equal_time(pEntry->duration(), duration);
+        CHECK( fTypeOK );
+        CHECK( fLineOK );
+        CHECK( fTimePosOK );
+        CHECK( fDurationOK );
+        if (!(fTypeOK && fLineOK && fTimePosOK && fDurationOK))
+        {
+            cout << test_name() << " (line " << iLine << ") " << endl;
+            cout << "    imo=" << pEntry->imo_object()->get_name()
+                 << ", line=" << pEntry->line() << ", timepos=" << pEntry->time()
+                 << ", duration=" << pEntry->duration() << endl;
+        }
     }
 
 };
@@ -3130,9 +3151,9 @@ SUITE(MxlAnalyserTest)
 
     //@ grace notes ---------------------------------------------------------------------
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_01)
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_001)
     {
-        //@01 grace relobj. previous note, grace note and principal note
+        //@001 grace created. relobj created. Defaults OK. Prev & Ppal notes identified
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -3204,9 +3225,9 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_02)
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_002)
     {
-        //@02 grace relobj. previous note, two grace notes and principal note
+        //@002 grace relobj. Intermediate grace notes added to the group
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -3286,6 +3307,520 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_003)
+    {
+    	//@003. grace notes. slash attribute processed
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();
+                //it -> clef
+        ++it;   //first note
+        ++it;   //first grace note
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->is_grace_note() == true );
+        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+        CHECK( pGraceRO != nullptr );
+
+        //check grace relationship
+        CHECK( pGraceRO->get_num_objects() == 2 );
+        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+        CHECK( pGraceRO->has_slash() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_004)
+    {
+    	//@004. grace notes. steal-time-previous attribute processed
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();
+                //it -> clef
+        ++it;   //first note
+        ++it;   //first grace note
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->is_grace_note() == true );
+        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+        CHECK( pGraceRO != nullptr );
+
+        //check grace relationship
+        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+        CHECK( pGraceRO->has_slash() == true );
+        CHECK( pGraceRO->get_percentage() == 0.2f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_005)
+    {
+    	//@005. grace notes. steal-time-following attribute processed
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();
+                //it -> clef
+        ++it;   //first note
+        ++it;   //first grace note
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->is_grace_note() == true );
+        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+        CHECK( pGraceRO != nullptr );
+
+        //check grace relationship
+        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_following );
+        CHECK( pGraceRO->has_slash() == true );
+        CHECK( pGraceRO->get_percentage() == 0.3f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_006)
+//    {
+//    	//@006. grace notes. make-time attribute processed
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        XmlParser parser;
+//        stringstream expected;
+//        parser.parse_text(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "<note><grace make-time=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "</measure></part></score-partwise>"
+//        );
+//        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+//        XmlNode* tree = parser.get_tree_root();
+//        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+//
+////        cout << test_name() << endl;
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//        CHECK( pRoot != nullptr);
+//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+//        ImoInstrument* pInstr = pScore->get_instrument(0);
+//        ImoMusicData* pMD = pInstr->get_musicdata();
+//        ImoObj::children_iterator it = pMD->begin();
+//                //it -> clef
+//        ++it;   //first note
+//        ++it;   //first grace note
+//        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+//        CHECK( pNote != nullptr );
+//        CHECK( pNote && pNote->is_grace_note() == true );
+//        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+//        CHECK( pGraceRO != nullptr );
+//
+//        //check grace relationship
+//        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_following );
+//        CHECK( pGraceRO->has_slash() == true );
+//        CHECK( pGraceRO->get_time_to_make() == 0.3f );
+//
+//        a.do_not_delete_instruments_in_destructor();
+//        delete pRoot;
+//    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_007)
+    {
+    	//@007. slash yes (acciaccaturas) are played short. default percentage 0.1
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();
+                //it -> clef
+        ++it;   //first note
+        ++it;   //first grace note
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->is_grace_note() == true );
+        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+        CHECK( pGraceRO != nullptr );
+
+        //check grace relationship
+        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+        CHECK( pGraceRO->has_slash() == true );
+        CHECK( pGraceRO->get_percentage() == 0.1f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_008)
+    {
+    	//@008. slash no (appoggiaturas) are played long. default percentage 0.5
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "</measure></part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoObj::children_iterator it = pMD->begin();
+                //it -> clef
+        ++it;   //first note
+        ++it;   //first grace note
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != nullptr );
+        CHECK( pNote && pNote->is_grace_note() == true );
+        ImoGraceRelObj* pGraceRO = pNote->get_grace_relobj();
+        CHECK( pGraceRO != nullptr );
+
+        //check grace relationship
+        CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
+        CHECK( pGraceRO->has_slash() == false );
+        CHECK( pGraceRO->get_percentage() == 0.5f );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_200)
+    {
+        //@200. Ppal note triggers duration computation. One grace. From previous 10%
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 57.6);    //previous dur 90%
+        ++it;       //(grace d5 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);     //grace dur 10%, the time stolen
+        ++it;       //(n c5 h v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. unmodified
+        ++it;       //(barline simple)
+        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_201)
+    {
+        //@201. Ppal note triggers duration computation. One grace. From next 30%
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 38.4);     //grace dur 30% of next
+        ++it;       //(n c5 h v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 102.4, 89.6);   //ppal. dur 70%
+        ++it;       //(barline simple)
+        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_202)
+    {
+        //@202. Ppal note triggers duration computation. Two graces. From previous 20%
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 6 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //prev. dur 80%
+        ++it;       //(grace d5 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 6.4);     //graces dur 20% of prev
+        ++it;       //(grace b4 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);
+        ++it;       //(n c5 h v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. dur 100%
+        ++it;       //(barline simple)
+        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_203)
+    {
+        //@203. Ppal note triggers duration computation. Two graces. From next 40%
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"40\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 6 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
+        ++it;       //(grace b4 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
+        ++it;       //(n c5 h v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+        ++it;       //(barline simple)
+        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_240)
+    {
+        //@240. steal from previous but does not exist. Score initial timepos updated
+        stringstream errormsg;
+        stringstream expected;
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 4 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(grace d5 e v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 0, 12.8);     //grace dur 20% of quarter
+        ++it;       //(n c5 h v1 p1)
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
+        ++it;       //(barline simple)
+        check_staffobj(__LINE__, *it, k_imo_barline, 0, 140.8, 0.0);
+    }
 
 
     //@ octave-shift --------------------------------------------------------------------

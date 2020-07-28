@@ -123,6 +123,10 @@ public:
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
 
+protected:
+    friend class NoteRestMxlAnalyser;
+    inline void set_duration(TimeUnits duration) { m_duration = duration; }
+
 };
 
 //---------------------------------------------------------------------------------------
