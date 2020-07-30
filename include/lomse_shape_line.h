@@ -122,6 +122,23 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+class GmoShapeGraceStroke : public GmoShapeLine, public VoiceRelatedShape
+{
+protected:
+    friend class NoteEngraver;
+    friend class StemFlagEngraver;
+    GmoShapeGraceStroke(ImoObj* pCreatorImo, LUnits xStart, LUnits yStart, LUnits xEnd,
+                        LUnits yEnd, LUnits uWidth, Color color)
+        : GmoShapeLine(pCreatorImo, 0, xStart, yStart, xEnd, yEnd, uWidth, 0.0f,
+                       k_line_solid, color, k_edge_normal, k_cap_none, k_cap_none)
+        , VoiceRelatedShape()
+    {
+    }
+
+public:
+};
+
 ////---------------------------------------------------------------------------------------
 //
 //class GmoShapeFBLine : public GmoShapeLine

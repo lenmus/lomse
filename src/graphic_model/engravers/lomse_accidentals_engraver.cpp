@@ -44,12 +44,13 @@ namespace lomse
 // AccidentalsEngraver implementation
 //---------------------------------------------------------------------------------------
 AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
-                                         ScoreMeter* pScoreMeter, int iInstr, int iStaff)
+                                         ScoreMeter* pScoreMeter, int iInstr, int iStaff,
+                                         double fontSize)
     : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_accidentals(k_no_accidentals)
     , m_fCautionary(false)
     , m_pContainer(nullptr)
-    , m_fontSize(0.0)
+    , m_fontSize(fontSize)
     , m_pNote(nullptr)
     , m_numGlyphs(0)
 {
@@ -64,7 +65,6 @@ GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoNote* pNote,
 {
     m_accidentals = accidentals;
     m_fCautionary = fCautionary;
-    m_fontSize = determine_font_size();
     m_pNote = pNote;
     m_color = color;
 

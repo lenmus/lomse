@@ -56,7 +56,7 @@ protected:
 
 public:
     AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                        int iInstr, int iStaff);
+                        int iInstr, int iStaff, double fontSize);
     ~AccidentalsEngraver() {}
 
     GmoShapeAccidentals* create_shape(ImoNote* pNote, UPoint uPos,

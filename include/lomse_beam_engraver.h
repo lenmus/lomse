@@ -133,6 +133,7 @@ protected:
     bool m_fDefaultSteams;  //at least one stem with default position
     bool m_fStemsUp;        //only meaningfull if m_fStemsMixed==false. True if all stems
                             //forced up or default position
+    bool m_fGraceNotes;     //beamed grace notes
 
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes

@@ -194,6 +194,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark  ";
         m_typeToName[k_shape_fermata]           = "fermata        ";
         m_typeToName[k_shape_flag]              = "flag           ";
+        m_typeToName[k_shape_grace_stroke]      = "grace-stroke   ";
         m_typeToName[k_shape_image]             = "image          ";
         m_typeToName[k_shape_invisible]         = "invisible      ";
         m_typeToName[k_shape_key_signature]     = "key            ";

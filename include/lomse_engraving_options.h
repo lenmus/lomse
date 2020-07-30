@@ -74,6 +74,8 @@ namespace lomse
 #define LOMSE_SPACE_AFTER_ACCIDENTALS    1.5f
 #define LOMSE_SPACE_BETWEEN_ACCIDENTALS  1.5f
 #define LOMSE_LEGER_LINE_OUTGOING        5.0f
+#define LOMSE_GRACE_NOTES_SCALE          0.65f  //Scaling factor for grace notes size
+#define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size
 
 //System layouter
     //spacing function parameters
@@ -126,6 +128,10 @@ namespace lomse
 //lyrics
 #define LOMSE_LYRICS_SPACE_TO_MUSIC     12.0f //space between first lyric line and other music notation
 #define LOMSE_LYRICS_LINES_EXTRA_SPACE   3.0f //additional space between two lyric lines
+
+//playback
+#define LOMSE_STEAL_TIME_SHORT          20.0f //"Playback/Percentage of time to steal for acciaccatura grace notes"
+#define LOMSE_STEAL_TIME_LONG           50.0f //"Playback/Percentage of time to steal for appoggiatura grace notes"
 
 
 }   //namespace lomse

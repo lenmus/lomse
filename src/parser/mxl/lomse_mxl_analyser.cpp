@@ -4064,6 +4064,7 @@ class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
 protected:
     ImoBeamDto* m_pBeamInfo;
+    ImoBeamDto* m_pBeamGraceInfo;
     //data for grace notes
     int m_type;
     float m_percentage;
@@ -4075,64 +4076,33 @@ public:
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_pBeamInfo(nullptr)
-//        , m_pSlurDto(nullptr)
-//        , m_srcOldTuplet("")
+        , m_pBeamGraceInfo(nullptr)
     {
     }
 
     ImoObj* do_analysis()
     {
+            //attribs
+
+        //attrb: print-object
+        bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
+
+            //elements
+
+        // [<cue>]
         bool fIsCue = get_optional("cue");
-
-        // [<grace>]
-        bool fIsGrace = false;
-        if (get_optional("grace"))
-        {
-            //The grace element indicates that this note is a grace note
-            //Only the values from first grace note in the group will be used but
-            //at this point it is not known if this grace note is the first one in
-            //the group and so all parameters are saved
-            XmlNode graceNode = m_childToAnalyse;
-            fIsGrace = true;
-
-            //@<!ELEMENT grace EMPTY>
-            //@<!ATTLIST grace
-            //@    steal-time-previous CDATA #IMPLIED
-            //@    steal-time-following CDATA #IMPLIED
-            //@    make-time CDATA #IMPLIED
-            //@    slash %yes-no; #IMPLIED
-            //@>
-            m_fSlash = get_child_optional_yes_no_attribute("slash", true);
-
-            m_percentage = (m_fSlash ? 10.0f : 50.0f);
-            m_type = ImoGraceRelObj::k_grace_steal_previous;
-            if (graceNode.has_attribute("steal-time-previous"))
-            {
-                m_percentage = get_child_attribute_as_float("steal-time-previous", m_percentage);
-            }
-            if (graceNode.has_attribute("steal-time-following"))
-            {
-                m_percentage = get_child_attribute_as_float("steal-time-following", m_percentage);
-                m_type = ImoGraceRelObj::k_grace_steal_following;
-            }
-            m_percentage /= 100.0f;
-
-            if (graceNode.has_attribute("make-time"))
-            {
-                //TODO: Investigate what is this for and what to do
-                m_type = ImoGraceRelObj::k_grace_make_time;
-            }
-        }
-
-        bool fInChord = false;
-        bool fIsRest = false;
-
         //for now, ignore cue notes
         if (fIsCue)
             return nullptr;
 
+        // [<grace>]
+        bool fIsGrace = get_optional("grace");
+        if (fIsGrace)
+            analyse_grace();
+
         // [<chord>]
-        if (get_optional("chord"))
+        bool fInChord = get_optional("chord");
+        if (fInChord)
         {
             //The chord element indicates that this note is an additional chord tone
             //with the preceding note. The duration of this note can be no longer
@@ -4146,7 +4116,9 @@ public:
         ImoNote* pNote = nullptr;
         ImoRest* pRest = nullptr;
 
-        if (get_optional("rest"))
+        // [<rest>]
+        bool fIsRest = get_optional("rest");
+        if (fIsRest)
         {
             fIsRest = true;
             pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
@@ -4221,11 +4193,11 @@ public:
 
         // [<staff>]
         if (get_optional("staff"))
-            pNR->set_staff(get_child_value_integer(1) - 1);
+            set_staff(pNR);
 
         // <beam>*
         while (get_optional("beam"))
-            analyse_beam();
+            analyse_beam(fIsGrace);
         add_beam_info(pNR);
 
         // <notations>*
@@ -4242,6 +4214,7 @@ public:
 
         error_if_more_elements();
 
+        pNR->set_visible(fVisible);
         add_to_model(pNR);
         add_to_spanners(pNote);
 
@@ -4449,6 +4422,22 @@ protected:
         }
     }
 
+    void set_staff(ImoNoteRest* pNR)
+    {
+        int iStaff = get_child_value_integer(1);
+        ImoInstrument* pInstr = m_pAnalyser->get_current_instrument();
+        //in unit tests instrument could not exist
+        if (pInstr && (iStaff < 1 || pInstr->get_num_staves() < iStaff))
+        {
+            stringstream msg;
+            msg << "Invalid staff number " << iStaff << ". Must be greater than 0 and not higher"
+                << " than number of staves in instrument. Replaced by 1.";
+            error_msg2(msg.str());
+            iStaff = 1;
+        }
+        pNR->set_staff(iStaff-1);
+    }
+
     //----------------------------------------------------------------------------------
     void set_notated_accidentals(ImoNote* pNote)
     {
@@ -4558,25 +4547,23 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-    void analyse_beam()
+    void analyse_beam(bool fIsGrace)
     {
         //@ <!ELEMENT beam (#PCDATA)>
         //@ <!ATTLIST beam number %beam-level; "1" repeater %yes-no; #IMPLIED >
 
-        // attrib: number
+        // attrib: number.   It is the level of the beam: 1..6
         const string& level = m_childToAnalyse.attribute_value("number");
         int iLevel;
         if (m_pAnalyser->to_integer(level, &iLevel))
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Missing or invalid beam number '" + level + "'. Beam ignored.");
             return;
         }
 
-        if (iLevel <= 0 || iLevel > 6)
+        if (iLevel < 1 || iLevel > 6)
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid beam number '" + level +"'. Beam ignored.");
             return;
@@ -4597,7 +4584,6 @@ protected:
             iType = ImoBeam::k_backward;
         else
         {
-            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <beam> value '" + type + "'. Beam ignored");
             return;
@@ -4605,6 +4591,20 @@ protected:
 
         if (m_pBeamInfo == nullptr)
             m_pBeamInfo = LOMSE_NEW ImoBeamDto();
+
+        //beam number is the beam reference. In MusicXML beams do not have a unique
+        //reference. The analyser assumes that during the analysis one beamed group
+        //can not begin until the end of the previous one is found. Therefore, as only
+        //one beam can be in process, we assing number "1" to any beam being processed.
+        //The exception I found was grace notes: grace notes can start a new beam while
+        //there is still an open beam for regular notes. So, as a by pass, I assign
+        //beam number "2" to grace notes beams. I in future, it is found that several
+        //beams can be open at the same time, it would be necessry to find an ad-hoc
+        //method to identify them and to assign a different beam number to each one.
+        if (fIsGrace)
+            m_pBeamInfo->set_beam_number(2);
+        else
+            m_pBeamInfo->set_beam_number(1);
 
         m_pBeamInfo->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
         m_pBeamInfo->set_beam_type(--iLevel, iType);
@@ -4633,6 +4633,45 @@ protected:
         pNR->set_voice(voice);
     }
 
+    //----------------------------------------------------------------------------------
+    void analyse_grace()
+    {
+        //The grace element indicates that this note is a grace note
+        //Only the values from first grace note in the group will be used but
+        //at this point it is not known if this grace note is the first one in
+        //the group and so all parameters are saved
+
+        //@<!ELEMENT grace EMPTY>
+        //@<!ATTLIST grace
+        //@    steal-time-previous CDATA #IMPLIED
+        //@    steal-time-following CDATA #IMPLIED
+        //@    make-time CDATA #IMPLIED
+        //@    slash %yes-no; #IMPLIED
+        //@>
+
+        XmlNode graceNode = m_childToAnalyse;
+
+        m_fSlash = get_child_optional_yes_no_attribute("slash", false);
+
+        m_percentage = (m_fSlash ? LOMSE_STEAL_TIME_SHORT : LOMSE_STEAL_TIME_LONG);
+        m_type = ImoGraceRelObj::k_grace_steal_previous;
+        if (graceNode.has_attribute("steal-time-previous"))
+        {
+            m_percentage = get_child_attribute_as_float("steal-time-previous", m_percentage);
+        }
+        if (graceNode.has_attribute("steal-time-following"))
+        {
+            m_percentage = get_child_attribute_as_float("steal-time-following", m_percentage);
+            m_type = ImoGraceRelObj::k_grace_steal_following;
+        }
+        m_percentage /= 100.0f;
+
+        if (graceNode.has_attribute("make-time"))
+        {
+            //TODO: Investigate what is this for and what to do
+            m_type = ImoGraceRelObj::k_grace_make_time;
+        }
+    }
 
 };
 

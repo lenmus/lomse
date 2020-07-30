@@ -67,7 +67,7 @@ public:
 
 protected:
     int find_glyph(int clefType);
-    double determine_font_size();
+    double determine_font_size() override;
     Tenths get_glyph_offset();
 
     GmoShape* m_pClefShape;

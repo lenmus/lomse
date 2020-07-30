@@ -148,7 +148,8 @@ GmoShape* BeamEngraver::create_last_shape(Color color)
 //---------------------------------------------------------------------------------------
 void BeamEngraver::create_shape()
 {
-    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
+    LUnits beamThickness = (m_fGraceNotes ? m_uBeamThickness * 0.8f : m_uBeamThickness);
+    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, beamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
     m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed && !m_fCrossStaff);
@@ -226,6 +227,7 @@ void BeamEngraver::collect_information()
     m_fCrossStaff = false;      //assume no cross staff beam
     m_fDefaultSteams = true;    //assume at least one stem with default position
     m_fStemsUp = true;          //Only valid if m_fStemsMixed==false
+    m_fGraceNotes = false;      //assume regular notes
 
     m_numStemsDown = 0;
     m_numNotes = 0;
@@ -243,6 +245,7 @@ void BeamEngraver::collect_information()
         if ((it->first)->is_note())      //ignore rests
         {
 		    ImoNote* pNote = static_cast<ImoNote*>(it->first);
+		    m_fGraceNotes |= pNote->is_grace_note();
             GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>((*it).second);
             if (pNoteShape->is_shape_chord_base_note())
             {
@@ -294,7 +297,7 @@ void BeamEngraver::collect_information()
 void BeamEngraver::decide_on_stems_direction()
 {
     //At this point flags are set as follows:
-    //  m_fStemForced: true if at laest one stem direction is forced
+    //  m_fStemForced: true if at least one stem direction is forced
     //  m_fStemsMixed: true if there are forced stems in both directions
     //  m_fCrossStaff: true the beam has notes on different staves
     //  m_fStemsDown: either false or the direction of last forced stem
@@ -366,6 +369,10 @@ void BeamEngraver::decide_beam_position()
             }
         }
     }
+
+    //for grace notes place beams above
+    if (m_fGraceNotes)
+        m_fBeamAbove = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -462,6 +469,10 @@ void BeamEngraver::compute_beam_segments()
         uBeamSpacing += uStaffSpace + (uStaffLine - 5.0f * m_uBeamThickness) / 4.0f;
     else
         uBeamSpacing += uStaffSpace + (uStaffLine - 6.0f * m_uBeamThickness) / 5.0f;
+
+    //reduce beam thickness for grace notes
+    if (m_fGraceNotes)
+        uBeamSpacing *= LOMSE_GRACE_NOTES_SCALE;
 
     LUnits uxPrev=0, uyPrev=0, uxCur=0, uyCur=0;    // points for previous and current note
     LUnits uyShift = 0;     // shift, to separate a beam line from the previous one
@@ -589,7 +600,7 @@ void BeamEngraver::compute_beam_segments()
 
     //take beam thickness into account for bounding box
     m_origin.y -= uHalfBeam;
-    m_size.height += m_uBeamThickness;
+    m_size.height += (m_fGraceNotes ? m_uBeamThickness * LOMSE_GRACE_NOTES_SCALE : m_uBeamThickness);
 
     //adjust segments to make them relative to m_origin
     make_segments_relative();
@@ -598,7 +609,7 @@ void BeamEngraver::compute_beam_segments()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd)
 {
-    LUnits uSpace = m_uBeamThickness / 2.0f;
+    LUnits uSpace = (m_fGraceNotes ? m_uBeamThickness * LOMSE_GRACE_NOTES_SCALE : m_uBeamThickness) / 2.0f;
     LUnits uyShift = m_fBeamAbove ? uSpace : -uSpace;
 
     m_segments.push_back(uxStart);
@@ -1009,10 +1020,10 @@ float BeamEngraver::get_staff_length_for_beam(int iNote)
             stemLength += (m_numLevels - 2);
     }
 
-
-
-
-    return stemLength;  //in spaces
+    if (m_fGraceNotes)
+        return stemLength * LOMSE_GRACE_NOTES_SCALE;
+    else
+        return stemLength;  //in spaces
 }
 
 //---------------------------------------------------------------------------------------
@@ -1179,6 +1190,13 @@ void BeamEngraver::assing_stem_length_to_outer_notes(float slant, int pos0, int 
         LUnits incr = (m_numLevels - 2);
         stemS += incr;
         stemL += incr;
+    }
+
+    //for grace notes reduce stems length
+    if (m_fGraceNotes)
+    {
+        stemS *= LOMSE_GRACE_NOTES_SCALE;
+        stemL *= LOMSE_GRACE_NOTES_SCALE;
     }
 
     //transfer stems to notes

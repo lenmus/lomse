@@ -176,7 +176,7 @@ public:
                 k_shape_bracket, k_shape_button,
                 k_shape_clef, k_shape_coda_segno,
                 k_shape_debug, k_shape_dot, k_shape_dynamics_mark,
-                k_shape_fermata, k_shape_flag, k_shape_image,
+                k_shape_fermata, k_shape_flag, k_shape_grace_stroke, k_shape_image,
                 k_shape_invisible, k_shape_key_signature, k_shape_lyrics,
                 k_shape_metronome_glyph, k_shape_metronome_mark,
                 k_shape_line, k_shape_note, k_shape_chord_base_note, k_shape_notehead,
@@ -236,6 +236,7 @@ public:
     inline bool is_shape_dynamics_mark() { return m_objtype == k_shape_dynamics_mark; }
     inline bool is_shape_fermata() { return m_objtype == k_shape_fermata; }
     inline bool is_shape_flag() { return m_objtype == k_shape_flag; }
+    inline bool is_shape_grace_stroke() { return m_objtype == k_shape_grace_stroke; }
     inline bool is_shape_image() { return m_objtype == k_shape_image; }
     inline bool is_shape_invisible() { return m_objtype == k_shape_invisible; }
     inline bool is_shape_key_signature() { return m_objtype == k_shape_key_signature; }

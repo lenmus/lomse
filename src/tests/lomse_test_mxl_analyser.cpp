@@ -3402,7 +3402,7 @@ SUITE(MxlAnalyserTest)
 
         //check grace relationship
         CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
-        CHECK( pGraceRO->has_slash() == true );
+        CHECK( pGraceRO->has_slash() == false );
         CHECK( pGraceRO->get_percentage() == 0.2f );
 
         a.do_not_delete_instruments_in_destructor();
@@ -3422,7 +3422,7 @@ SUITE(MxlAnalyserTest)
             "<clef><sign>G</sign><line>2</line></clef></attributes>"
             "<note><pitch><step>G</step><octave>4</octave></pitch>"
                 "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
-            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+            "<note><grace slash=\"yes\" steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
                 "<voice>1</voice><type>eighth</type></note>"
             "<note><pitch><step>C</step><octave>5</octave></pitch>"
                 "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
@@ -3556,7 +3556,7 @@ SUITE(MxlAnalyserTest)
         //check grace relationship
         CHECK( pGraceRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous );
         CHECK( pGraceRO->has_slash() == true );
-        CHECK( pGraceRO->get_percentage() == 0.1f );
+        CHECK( pGraceRO->get_percentage() == 0.2f );
 
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
@@ -3645,9 +3645,9 @@ SUITE(MxlAnalyserTest)
         ColStaffObjsIterator it = pColStaffObjs->begin();
                    // (clef G p1)
         ++it;       //(n g4 q v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 57.6);    //previous dur 90%
+        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //previous dur 80%
         ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);     //grace dur 10%, the time stolen
+        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);     //grace dur 20%, the time stolen
         ++it;       //(n c5 h v1 p1)
         check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. unmodified
         ++it;       //(barline simple)
