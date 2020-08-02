@@ -49,8 +49,18 @@ namespace lomse
 string ColStaffObjsEntry::dump(bool fWithIds)
 {
     stringstream s;
-    s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time() << "\t"
-      << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+    if (m_pImo->is_grace_note())
+    {
+        ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(m_pImo);
+        s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time()
+          << "-" << pGrace->get_align_timepos() - time() << "\t"
+          << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+    }
+    else
+    {
+        s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time() << "\t"
+          << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+    }
     return s.str();
 }
 
@@ -184,10 +194,31 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     ImoStaffObj* pB = b->imo_object();
     ImoStaffObj* pA = a->imo_object();
 
+    //R7. Graces in the same timepos must go ordered by align timepos
+    if (pA->is_grace_note() && pB->is_grace_note())
+    {
+        ImoGraceNote* pGA = static_cast<ImoGraceNote*>(pA);
+        ImoGraceNote* pGB = static_cast<ImoGraceNote*>(pB);
+
+        if ( is_lower_time(pGB->get_align_timepos(), pGA->get_align_timepos()) )
+            return true;    //B cannot go after A, Try with A-1
+
+        if ( is_greater_time(pGB->get_align_timepos(), pGA->get_align_timepos()) )
+            return false;   //insert B after A
+    }
+
     //R4. barlines must go before all other objects  at same timepos having
     //    high measure number
     if (pB->is_barline() && (b->measure() < a->measure()) )
         return true;    //B (barline) cannot go after A, Try with A-1
+
+    //R6. Graces in the same timepos must go before note/rest in that timepos
+    if (pB->is_grace_note() && (pA->is_rest() || pA->is_regular_note() || pA->is_cue_note()) )
+        return true;    //B (grace) cannot go after A, Try with A-1
+
+    //R7. Graces in the same timepos go ordered by align timepos
+    if (pB->is_grace_note() && (pA->is_rest() || pA->is_regular_note() || pA->is_cue_note()) )
+        return true;    //B (grace) cannot go after A, Try with A-1
 
     //R5. Non-timed must go before barlines at the same timepos with equal measure
     //    number. But if non-timed is also a barline preserve insertion order
@@ -197,7 +228,7 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         return true;    //B (non-timed) cannot go after A (barline), Try with A-1
 
     //R2. note/rest can not go before non-timed at same timepos
-    if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+    if (pA->is_note_rest() && pB->get_duration() == 0.0f && !pB->is_grace_note())
         return true;    //B cannot go after A, Try with A-1
 
     //R3. <direction> and <sound> can not go between clefs/key/time ==>
@@ -470,7 +501,8 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
-        m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
+        if (!pNR->is_grace_note())
+            m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
     }
     int nLine = get_line_for(nVoice, nStaff);
     m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
@@ -488,6 +520,7 @@ void ColStaffObjsBuilderEngine1x::reset_counters()
 {
     m_nCurMeasure = 0;
     m_rCurTime = 0.0;
+    m_rCurAlignTime = 0.0;
     m_rMaxSegmentTime = 0.0;
     m_rStartSegmentTime = 0.0;
 }
@@ -499,9 +532,20 @@ void ColStaffObjsBuilderEngine1x::determine_timepos(ImoStaffObj* pSO)
 
     if (pSO->is_note())
     {
-        ImoNote* pNote = static_cast<ImoNote*>(pSO);
-        if (!pNote->is_in_chord() || pNote->is_end_of_chord())
-            m_rCurTime += pSO->get_duration();
+        if (pSO->is_grace_note())
+        {
+            ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(pSO);
+            pGrace->set_align_timepos(m_rCurAlignTime);
+            if (!pGrace->is_in_chord() || pGrace->is_end_of_chord())
+                m_rCurAlignTime += 1.0;
+        }
+        else
+        {
+            ImoNote* pNote = static_cast<ImoNote*>(pSO);
+            if (!pNote->is_in_chord() || pNote->is_end_of_chord())
+                m_rCurTime += pSO->get_duration();
+            m_rCurAlignTime = m_rCurTime;
+        }
     }
     else if (pSO->is_barline())
         pSO->set_time(m_rMaxSegmentTime);
@@ -535,6 +579,7 @@ void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
         m_rCurTime = (time < m_rStartSegmentTime ? m_rStartSegmentTime : time);
         m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     }
+    m_rCurAlignTime = m_rCurTime;
 }
 
 //---------------------------------------------------------------------------------------

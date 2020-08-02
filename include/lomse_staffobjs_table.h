@@ -350,12 +350,14 @@ public:
     ColStaffObjsBuilderEngine1x(ImoScore* pScore)
         : ColStaffObjsBuilderEngine(pScore)
         , m_rCurTime(0.0)
+        , m_rCurAlignTime(0.0)
     {
     }
     virtual ~ColStaffObjsBuilderEngine1x() {}
 
 private:
     TimeUnits   m_rCurTime;
+    TimeUnits   m_rCurAlignTime;
 
     void initializations();
     void create_entries(int nInstr);

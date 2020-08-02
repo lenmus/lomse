@@ -919,13 +919,13 @@ bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits r
     }
 
     //in clear-cuts mode, break at suitable note/rests
-    if (!fBreak && m_breakMode == k_clear_cuts && pSO->is_note_rest())
+    if (!fBreak && m_breakMode == k_clear_cuts && pSO->is_note_rest() && !pSO->is_grace_note())
     {
         fBreak = is_suitable_note_rest(pSO, rTime);
     }
 
     //save data
-    if (pSO->is_note_rest())
+    if (pSO->is_note_rest() && !pSO->is_grace_note())
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         m_beamed[iLine] = pNR->is_beamed() && !pNR->is_end_of_beam();

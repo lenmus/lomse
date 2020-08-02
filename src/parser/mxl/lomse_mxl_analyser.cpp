@@ -2325,8 +2325,8 @@ public:
         // attrib: %print-style;
         get_attributes_for_print_style(pClef);
 
-        // attrib: %print-object;
-        //TODO
+        //attrb: print-object
+        bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
 
             //content
 
@@ -2354,6 +2354,7 @@ public:
 
         error_if_more_elements();
 
+        pClef->set_visible(fVisible);
         add_to_model(pClef);
         return pClef;
     }
@@ -4142,9 +4143,15 @@ public:
             duration = get_child_value_integer(0);
 
         //tie, except for cue notes
+        //(tie, tie?)?
         //AWARE: <tie> is for sound
         if (!fIsCue && get_optional("tie"))
         {
+            //TODO: first tie element
+            if (get_optional("tie"))
+            {
+                //TODO: second tie element
+            }
         }
 
         // [<instrument>]
@@ -4365,57 +4372,57 @@ protected:
     //----------------------------------------------------------------------------------
     void fix_durations_in_grace_notes_group(ImoGraceRelObj* pGRO)
     {
-        ImoNote* pPpal = pGRO->get_principal_note();
-        ImoNote* pPrev = pGRO->get_previous_note();
-
-        //determine cumulative duration
-        TimeUnits gDur = 0.0;
+//        ImoNote* pPpal = pGRO->get_principal_note();
+//        ImoNote* pPrev = pGRO->get_previous_note();
+//
+//        //determine cumulative duration
+//        TimeUnits gDur = 0.0;
         list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pGRO->get_related_objects();
-        for (auto p : notes)
-        {
-            if (p.first->is_grace_note())
-                gDur += p.first->get_duration();
-            else
-                break;
-        }
-
-        //determine time to steal
-        double percentage = pGRO->get_percentage();
-        TimeUnits dur = 0.0;
-
-        //if not make time, discount time from next/prev
-        if (pGRO->get_grace_type() != ImoGraceRelObj::k_grace_make_time)
-        {
-            //decide were to take time from
-            ImoNoteRest* pTarget = nullptr;
-            if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
-                pTarget = pPrev;
-            else    //k_grace_steal_following
-                pTarget = pPpal;
-
-            if (pTarget)
-            {
-                TimeUnits targetDur = pTarget->get_duration();
-                dur = targetDur * percentage;
-                pTarget->set_duration(targetDur - dur);
-            }
-            else
-            {
-                //use a quarter note
-                dur = TimeUnits(k_duration_quarter) * percentage;
-//                if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
-//                    dur = - dur;
-            }
-        }
-
-        //assign duration to each grace note as a share of cumulative duration
-        double alpha = dur / gDur;
+//        for (auto p : notes)
+//        {
+//            if (p.first->is_grace_note())
+//                gDur += p.first->get_duration();
+//            else
+//                break;
+//        }
+//
+//        //determine time to steal
+//        double percentage = pGRO->get_percentage();
+//        TimeUnits dur = 0.0;
+//
+//        //if not make time, discount time from next/prev
+//        if (pGRO->get_grace_type() != ImoGraceRelObj::k_grace_make_time)
+//        {
+//            //decide were to take time from
+//            ImoNoteRest* pTarget = nullptr;
+//            if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+//                pTarget = pPrev;
+//            else    //k_grace_steal_following
+//                pTarget = pPpal;
+//
+//            if (pTarget)
+//            {
+//                TimeUnits targetDur = pTarget->get_duration();
+//                dur = targetDur * percentage;
+//                pTarget->set_duration(targetDur - dur);
+//            }
+//            else
+//            {
+//                //use a quarter note
+//                dur = TimeUnits(k_duration_quarter) * percentage;
+////                if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+////                    dur = - dur;
+//            }
+//        }
+//
+//        //assign duration to each grace note as a share of cumulative duration
+//        double alpha = dur / gDur;
         for (auto p : notes)
         {
             if (p.first->is_grace_note())
             {
                 ImoNote* pN = static_cast<ImoNote*>(p.first);
-                pN->set_duration( alpha * pN->get_duration() );
+                pN->set_duration(0.0);  // alpha * pN->get_duration() );
             }
             else
                 break;

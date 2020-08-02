@@ -3613,214 +3613,214 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_200)
-    {
-        //@200. Ppal note triggers duration computation. One grace. From previous 10%
-        stringstream errormsg;
-        stringstream expected;
-        Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><pitch><step>G</step><octave>4</octave></pitch>"
-                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
-            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
-
-        CHECK( pColStaffObjs->num_lines() == 1 );
-        CHECK( pColStaffObjs->num_entries() == 5 );
-
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-                   // (clef G p1)
-        ++it;       //(n g4 q v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //previous dur 80%
-        ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);     //grace dur 20%, the time stolen
-        ++it;       //(n c5 h v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. unmodified
-        ++it;       //(barline simple)
-        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_201)
-    {
-        //@201. Ppal note triggers duration computation. One grace. From next 30%
-        stringstream errormsg;
-        stringstream expected;
-        Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><pitch><step>G</step><octave>4</octave></pitch>"
-                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
-            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
-
-        CHECK( pColStaffObjs->num_lines() == 1 );
-        CHECK( pColStaffObjs->num_entries() == 5 );
-
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-                   // (clef G p1)
-        ++it;       //(n g4 q v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
-        ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 38.4);     //grace dur 30% of next
-        ++it;       //(n c5 h v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 102.4, 89.6);   //ppal. dur 70%
-        ++it;       //(barline simple)
-        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_202)
-    {
-        //@202. Ppal note triggers duration computation. Two graces. From previous 20%
-        stringstream errormsg;
-        stringstream expected;
-        Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><pitch><step>G</step><octave>4</octave></pitch>"
-                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
-            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
-
-        CHECK( pColStaffObjs->num_lines() == 1 );
-        CHECK( pColStaffObjs->num_entries() == 6 );
-
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-                   // (clef G p1)
-        ++it;       //(n g4 q v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //prev. dur 80%
-        ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 6.4);     //graces dur 20% of prev
-        ++it;       //(grace b4 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);
-        ++it;       //(n c5 h v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. dur 100%
-        ++it;       //(barline simple)
-        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_203)
-    {
-        //@203. Ppal note triggers duration computation. Two graces. From next 40%
-        stringstream errormsg;
-        stringstream expected;
-        Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><pitch><step>G</step><octave>4</octave></pitch>"
-                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
-            "<note><grace steal-time-following=\"40\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
-
-        CHECK( pColStaffObjs->num_lines() == 1 );
-        CHECK( pColStaffObjs->num_entries() == 6 );
-
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-                   // (clef G p1)
-        ++it;       //(n g4 q v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
-        ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
-        ++it;       //(grace b4 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
-        ++it;       //(n c5 h v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
-        ++it;       //(barline simple)
-        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
-    }
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_240)
-    {
-        //@240. steal from previous but does not exist. Score initial timepos updated
-        stringstream errormsg;
-        stringstream expected;
-        Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
-        CHECK( pScore != nullptr );
-        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
-//        cout << pColStaffObjs->dump();
-
-        CHECK( pColStaffObjs->num_lines() == 1 );
-        CHECK( pColStaffObjs->num_entries() == 4 );
-
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-                   // (clef G p1)
-        ++it;       //(grace d5 e v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 0, 12.8);     //grace dur 20% of quarter
-        ++it;       //(n c5 h v1 p1)
-        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
-        ++it;       //(barline simple)
-        check_staffobj(__LINE__, *it, k_imo_barline, 0, 140.8, 0.0);
-    }
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_200)
+//    {
+//        //@200. Ppal note triggers duration computation. One grace. From previous 10%
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "</measure></part></score-partwise>"
+//            , Document::k_format_mxl
+//        );
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+////        cout << test_name() << endl;
+////        cout << pColStaffObjs->dump();
+//
+//        CHECK( pColStaffObjs->num_lines() == 1 );
+//        CHECK( pColStaffObjs->num_entries() == 5 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//                   // (clef G p1)
+//        ++it;       //(n g4 q v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //previous dur 80%
+//        ++it;       //(grace d5 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);     //grace dur 20%, the time stolen
+//        ++it;       //(n c5 h v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. unmodified
+//        ++it;       //(barline simple)
+//        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+//    }
+//
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_201)
+//    {
+//        //@201. Ppal note triggers duration computation. One grace. From next 30%
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "</measure></part></score-partwise>"
+//            , Document::k_format_mxl
+//        );
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+////        cout << test_name() << endl;
+////        cout << pColStaffObjs->dump();
+//
+//        CHECK( pColStaffObjs->num_lines() == 1 );
+//        CHECK( pColStaffObjs->num_entries() == 5 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//                   // (clef G p1)
+//        ++it;       //(n g4 q v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+//        ++it;       //(grace d5 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 38.4);     //grace dur 30% of next
+//        ++it;       //(n c5 h v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 102.4, 89.6);   //ppal. dur 70%
+//        ++it;       //(barline simple)
+//        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+//    }
+//
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_202)
+//    {
+//        //@202. Ppal note triggers duration computation. Two graces. From previous 20%
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "</measure></part></score-partwise>"
+//            , Document::k_format_mxl
+//        );
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+////        cout << test_name() << endl;
+////        cout << pColStaffObjs->dump();
+//
+//        CHECK( pColStaffObjs->num_lines() == 1 );
+//        CHECK( pColStaffObjs->num_entries() == 6 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//                   // (clef G p1)
+//        ++it;       //(n g4 q v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //prev. dur 80%
+//        ++it;       //(grace d5 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 51.2, 6.4);     //graces dur 20% of prev
+//        ++it;       //(grace b4 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);
+//        ++it;       //(n c5 h v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. dur 100%
+//        ++it;       //(barline simple)
+//        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+//    }
+//
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_203)
+//    {
+//        //@203. Ppal note triggers duration computation. Two graces. From next 40%
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+//            "<note><grace steal-time-following=\"40\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "</measure></part></score-partwise>"
+//            , Document::k_format_mxl
+//        );
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+////        cout << test_name() << endl;
+////        cout << pColStaffObjs->dump();
+//
+//        CHECK( pColStaffObjs->num_lines() == 1 );
+//        CHECK( pColStaffObjs->num_entries() == 6 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//                   // (clef G p1)
+//        ++it;       //(n g4 q v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+//        ++it;       //(grace d5 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
+//        ++it;       //(grace b4 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
+//        ++it;       //(n c5 h v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+//        ++it;       //(barline simple)
+//        check_staffobj(__LINE__, *it, k_imo_barline, 0, 192.0, 0.0);
+//    }
+//
+//    TEST_FIXTURE(MxlAnalyserTestFixture, grace_notes_240)
+//    {
+//        //@240. steal from previous but does not exist. Score initial timepos updated
+//        stringstream errormsg;
+//        stringstream expected;
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+//            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+//            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+//            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>eighth</type></note>"
+//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "</measure></part></score-partwise>"
+//            , Document::k_format_mxl
+//        );
+//        CHECK( errormsg.str() == expected.str() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+//        CHECK( pScore != nullptr );
+//        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+////        cout << test_name() << endl;
+////        cout << pColStaffObjs->dump();
+//
+//        CHECK( pColStaffObjs->num_lines() == 1 );
+//        CHECK( pColStaffObjs->num_entries() == 4 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//                   // (clef G p1)
+//        ++it;       //(grace d5 e v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_grace, 0, 0, 12.8);     //grace dur 20% of quarter
+//        ++it;       //(n c5 h v1 p1)
+//        check_staffobj(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
+//        ++it;       //(barline simple)
+//        check_staffobj(__LINE__, *it, k_imo_barline, 0, 140.8, 0.0);
+//    }
 
 
     //@ octave-shift --------------------------------------------------------------------

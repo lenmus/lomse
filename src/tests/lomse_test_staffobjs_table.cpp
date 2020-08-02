@@ -124,11 +124,13 @@ public:
     Document* m_pDoc;
     ImoScore* m_pScore;
     LdpFactory* m_pLdpFactory;
+    std::string m_scores_path;
 
     ColStaffObjsBuilderTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
         , m_pDoc(nullptr)
         , m_pScore(nullptr)
+        , m_scores_path(TESTLIB_SCORES_PATH)
     {
         m_pLdpFactory = m_libraryScope.ldp_factory();
     }
@@ -357,7 +359,7 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_06)
     {
-        //@06. R5.
+        //@06. R5. Non-timed must go before barlines with equal measure number
         create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
@@ -390,6 +392,67 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      0, 128,     1, "(barline simple)" );
     }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_07)
+    {
+        //@07. R6. Graces in the same timepos must go before note/rest in that timepos
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10022-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 e v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace b4 e v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e5 h v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 h v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_08)
+    {
+        //@08. R7. Graces in the same timepos go ordered by align timepos
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10024-beamed-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 8 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 52 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 52 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+    }
+
 
     // ColStaffObjsBuilderEngine2x ------------------------------------------------------
 
@@ -1391,6 +1454,157 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK( pTable->min_note_duration() == 32.0 );
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_13)
+    {
+        //@13. align timepos assigned to grace notes
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10023-beamed-graces.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 5 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 ++))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace c5 s v1 p1 (stem up)(beam 41 --))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n b4 q v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_14)
+    {
+        //@14. align timepos for grace notes in two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10022-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 e v1 p1 (stem up))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace b4 e v2 p1 (stem down))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e5 h v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 h v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_15)
+    {
+        //@15. align timepos for beamed grace notes in two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10024-beamed-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 8 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 52 ++))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 52 --))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, engine1x_16)
+    {
+        //@16. align timepos for grace notes in chord
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "10025-graces-chord.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 5 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+
+        ImoGraceNote* pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(chord (grace d5 e v1 p1 (stem up))" );
+
+        pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
+        CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace f5 e v1 p1 (stem up)))" );
+
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 q v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+
 //Additional test for ColStaffObjsIterator -------------------------------------
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, CSOIteratorAtEnd)
@@ -1794,18 +2008,21 @@ SUITE(ColStaffObjsBuilderTest)
 
 //    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, grace_notes_100)
 //    {
-//        //@100. steal from previous but does not exist. Score initial timepos updated
+//        //@100. auxiliary, for checking the ColStaffObjs
 //        stringstream errormsg;
 //        stringstream expected;
 //        Document doc(m_libraryScope);
+//        //002-beamed-graces.xml
 //        doc.from_string(
 //            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
 //            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
 //            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-//            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
-//                "<voice>1</voice><type>eighth</type></note>"
-//            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-//                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+//            "<note><grace/><pitch><step>D</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>16th</type><stem>up</stem><beam number=\"1\">begin</beam></note>"
+//            "<note><grace/><pitch><step>C</step><octave>5</octave></pitch>"
+//                "<voice>1</voice><type>16th</type><stem>up</stem><beam number=\"1\">end</beam></note>"
+//            "<note><pitch><step>B</step><octave>4</octave></pitch>"
+//                "<duration>2</duration><voice>1</voice><type>quarter</type><stem>down</stem></note>"
 //            "</measure></part></score-partwise>"
 //            , Document::k_format_mxl
 //        );
@@ -1815,18 +2032,18 @@ SUITE(ColStaffObjsBuilderTest)
 //        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
 //        cout << test_name() << endl;
 //        cout << pColStaffObjs->dump();
-//
-//        CHECK( pColStaffObjs->num_lines() == 1 );
-//        CHECK( pColStaffObjs->num_entries() == 4 );
-//
-//        ColStaffObjsIterator it = pColStaffObjs->begin();
-//                   // (clef G p1)
-//        ++it;       //(grace d5 e v1 p1)
-//        check_entry(__LINE__, *it, k_imo_note_grace, 0, 0, 12.8);     //grace dur 20% of quarter
-//        ++it;       //(n c5 h v1 p1)
-//        check_entry(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
-//        ++it;       //(barline simple)
-//        check_entry(__LINE__, *it, k_imo_barline, 0, 140.8, 0.0);
+////
+////        CHECK( pColStaffObjs->num_lines() == 1 );
+////        CHECK( pColStaffObjs->num_entries() == 4 );
+////
+////        ColStaffObjsIterator it = pColStaffObjs->begin();
+////                   // (clef G p1)
+////        ++it;       //(grace d5 e v1 p1)
+////        check_entry(__LINE__, *it, k_imo_note_grace, 0, 0, 12.8);     //grace dur 20% of quarter
+////        ++it;       //(n c5 h v1 p1)
+////        check_entry(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
+////        ++it;       //(barline simple)
+////        check_entry(__LINE__, *it, k_imo_barline, 0, 140.8, 0.0);
 //    }
 
 }

@@ -315,6 +315,25 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------------
+/** ImoGraceNote represents a grace note in the score.
+**/
+class ImoGraceNote : public ImoNote
+{
+protected:
+    TimeUnits m_alignTime;  //to simplify spacing algorithm a pseudo-timepos is assigned
+
+    friend class ImFactory;
+    ImoGraceNote() : ImoNote(k_imo_note_grace), m_alignTime(0.0) {}
+
+public:
+    virtual ~ImoGraceNote() {}
+
+    inline void set_align_timepos(TimeUnits value) { m_alignTime = value; }
+    inline TimeUnits get_align_timepos() { return m_alignTime; }
+
+};
+
 
 }   //namespace lomse
 

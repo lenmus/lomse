@@ -95,9 +95,9 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();           break;
         case k_imo_multicolumn:         pObj = LOMSE_NEW ImoMultiColumn(pDoc);    break;
         case k_imo_music_data:          pObj = LOMSE_NEW ImoMusicData();          break;
-        case k_imo_note_cue:            pObj = LOMSE_NEW ImoNote(k_imo_note_cue);       break;
-        case k_imo_note_grace:          pObj = LOMSE_NEW ImoNote(k_imo_note_grace);     break;
-        case k_imo_note_regular:        pObj = LOMSE_NEW ImoNote(k_imo_note_regular);   break;
+        case k_imo_note_cue:            pObj = LOMSE_NEW ImoNote(k_imo_note_cue); break;
+        case k_imo_note_grace:          pObj = LOMSE_NEW ImoGraceNote();          break;
+        case k_imo_note_regular:        pObj = LOMSE_NEW ImoNote(k_imo_note_regular);  break;
         case k_imo_octave_shift:        pObj = LOMSE_NEW ImoOctaveShift();        break;
         case k_imo_octave_shift_dto:    pObj = LOMSE_NEW ImoOctaveShiftDto();     break;
         case k_imo_option:              pObj = LOMSE_NEW ImoOptionInfo();         break;
