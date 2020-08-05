@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,18 +49,27 @@ namespace lomse
 string ColStaffObjsEntry::dump(bool fWithIds)
 {
     stringstream s;
-    if (m_pImo->is_grace_note())
+    s << fixed << setprecision(0) << setfill(' ');
+    s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time();
+    if (m_pImo->is_note_rest())
     {
-        ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(m_pImo);
-        s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time()
-          << "-" << pGrace->get_align_timepos() - time() << "\t"
-          << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+        if (m_pImo->is_grace_note())
+        {
+            ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(m_pImo);
+            s << "-" << pGrace->get_align_timepos() - time();
+        }
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(m_pImo);
+        s << "\t" << setprecision(2)
+          << pNR->get_playback_time() << "\t" << pNR->get_playback_duration()
+          << setprecision(0);
     }
     else
     {
-        s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time() << "\t"
-          << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+        s << "\t" << "-" << "\t" << "-";
     }
+    s << "\t" << m_line
+      << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
+
     return s.str();
 }
 
@@ -100,13 +109,14 @@ ColStaffObjs::~ColStaffObjs()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::add_entry(int measure, int instr, int voice, int staff,
-                             ImoStaffObj* pImo)
+ColStaffObjsEntry* ColStaffObjs::add_entry(int measure, int instr, int voice, int staff,
+                                           ImoStaffObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
         LOMSE_NEW ColStaffObjsEntry(measure, instr, voice, staff, pImo);
     add_entry_to_list(pEntry);
     ++m_numEntries;
+    return pEntry;
 }
 
 //---------------------------------------------------------------------------------------
@@ -115,8 +125,8 @@ string ColStaffObjs::dump(bool fWithIds)
     stringstream s;
     ColStaffObjs::iterator it;
     s << "Num.entries = " << num_entries() << endl;
-    //    +.......+.......+.......+.......+.......+.......+
-    s << "instr   staff   meas.   time    line    object" << endl;
+    //    +.......+.......+.......+.......+.......+.......+.......+.......+
+    s << "instr   staff   meas.   time    play    pdur    line    object" << endl;
     s << "----------------------------------------------------------------" << endl;
     for (it=begin(); it != end(); ++it)
     {
@@ -206,6 +216,10 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         if ( is_greater_time(pGB->get_align_timepos(), pGA->get_align_timepos()) )
             return false;   //insert B after A
     }
+
+    //R8. Graces must go before barlines in the same timepos (after graces)
+    if (pA->is_grace_note() && pB->is_barline())
+        return false;   //insert B after A (preserve order of barlines)
 
     //R4. barlines must go before all other objects  at same timepos having
     //    high measure number
@@ -444,6 +458,208 @@ void ColStaffObjsBuilderEngine::set_min_note_duration()
     m_pColStaffObjs->set_min_note(m_minNoteDuration);
 }
 
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::compute_playback_time()
+{
+    for (auto pEntry : m_graces)
+    {
+        ImoGraceNote* pGrace = static_cast<ImoGraceNote*>(pEntry->imo_object());
+        ImoGraceRelObj* pGraceRO = pGrace->get_grace_relobj();
+        if (static_cast<ImoGraceNote*>(pGraceRO->get_start_object()) == pGrace)
+            process_grace_relobj(pGrace, pGraceRO, pEntry);
+    }
+}
+
+//----------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
+                                                     ImoGraceRelObj* pGRO,
+                                                     ColStaffObjsEntry* pEntry)
+{
+    //this method is invoked only for the first grace note of each grace relobj.
+
+
+    //default playback time of first grace in the group
+    TimeUnits gracePlayTime = pGrace->get_playback_time();
+
+    //decide were to take time from and locate the associated regular note
+    ImoNote* pTarget = nullptr;
+    if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_following)
+        pTarget = locate_grace_principal_note(pEntry);
+    else
+        pTarget = locate_grace_previous_note(pEntry);
+
+
+//    //Include the regular note as part of the Grace RelObj
+//    //This is not currently necessary but, perhaps in future it could be necessary
+//    //to determine if a regular note has graces associated to it. In that case
+//    //this code shows how to do it.
+//    if (pTarget)
+//    {
+//        //add principal or previous note to the relationship
+//        Document* pDoc = m_pImScore->get_the_document();
+//        pTarget->include_in_relation(pDoc, pGRO);
+//    }
+
+
+    //determine time to steal
+    double percentage = pGRO->get_percentage();
+    TimeUnits dur = 0.0;
+
+    //if not make time, discount time from next/prev
+    TimeUnits newTargetDur = 0.0;
+    if (pGRO->get_grace_type() != ImoGraceRelObj::k_grace_make_time)
+    {
+        if (pTarget)
+        {
+            TimeUnits targetDur = pTarget->get_duration();
+            dur = targetDur * percentage;
+            newTargetDur = targetDur - dur;
+            pTarget->set_playback_duration(newTargetDur);
+
+            //deal with chords
+            if (pTarget->is_note())
+            {
+                ImoNote* pNote = static_cast<ImoNote*>(pTarget);
+                if (pNote->is_in_chord())
+                {
+                    ImoChord* pChord = pNote->get_chord();
+                    list< pair<ImoStaffObj*, ImoRelDataObj*> >& chordNotes = pChord->get_related_objects();
+                    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
+                    for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
+                    {
+                        ImoNote* pNote = static_cast<ImoNote*>((*itC).first);
+                        pNote->set_playback_duration(newTargetDur);
+                    }
+                }
+            }
+        }
+        else
+        {
+            //use a quarter note
+            dur = TimeUnits(k_duration_quarter) * percentage;
+        }
+
+        //set prev or ppal playback time and duration
+        if (pTarget)
+        {
+            if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+            {
+                //steal from prev. Fix playback time of grace note
+                gracePlayTime = pTarget->get_playback_time() + pTarget->get_playback_duration();
+            }
+            else
+            {
+                //steal from next. Grace playback time is the timepos of ppal note
+                gracePlayTime = pTarget->get_playback_time();
+                TimeUnits newPlaytime = gracePlayTime + dur;
+                pTarget->set_playback_time(newPlaytime);
+
+                //deal with chords
+                if (pTarget->is_note())
+                {
+                    ImoNote* pNote = static_cast<ImoNote*>(pTarget);
+                    if (pNote->is_in_chord())
+                    {
+                        ImoChord* pChord = pNote->get_chord();
+                        list< pair<ImoStaffObj*, ImoRelDataObj*> >& chordNotes = pChord->get_related_objects();
+                        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator itC;
+                        for (itC=chordNotes.begin(); itC != chordNotes.end(); ++itC)
+                        {
+                            ImoNote* pNote = static_cast<ImoNote*>((*itC).first);
+                            pNote->set_playback_time(newPlaytime);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //if no previous but not at start of score (second voices) shift back graces play time.
+    //test score: unit-tests/grace-notes/214-grace-chord-two-voices-previos-note.xml
+    if (!pTarget && (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
+        && (!is_lower_time(gracePlayTime, dur)) )
+    {
+        gracePlayTime -= dur;
+    }
+
+
+    //count number of grace notes
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes
+                                 = pGRO->get_related_objects();
+    int numGraces = 0;
+    for (auto p : notes)
+    {
+        ImoNote* pN = static_cast<ImoNote*>(p.first);
+        if (pN->is_grace_note() &&
+            ((pN->is_in_chord() && pN->is_start_of_chord()) || !pN->is_in_chord()) )
+            ++numGraces;
+        else
+            break;
+    }
+
+    //assign duration to each grace note
+    dur /= double(numGraces);
+    for (auto p : notes)
+    {
+        if (p.first->is_grace_note())
+        {
+            ImoNote* pN = static_cast<ImoNote*>(p.first);
+            pN->set_playback_duration(dur);
+            pN->set_playback_time(gracePlayTime);
+            if (!pN->is_in_chord() || pN->is_end_of_chord())
+                gracePlayTime += dur;
+        }
+        else
+            break;
+    }
+
+    pGRO = nullptr;
+}
+
+//----------------------------------------------------------------------------------
+ImoNote* ColStaffObjsBuilderEngine::locate_grace_principal_note(ColStaffObjsEntry* pEntry)
+{
+    int line = pEntry->line();
+    int instr = pEntry->num_instrument();
+
+    pEntry = pEntry->get_next();
+    while(pEntry)
+    {
+        ImoStaffObj* pSO = pEntry->imo_object();
+        if (pSO->is_regular_note()
+            && pEntry->num_instrument() == instr
+            && pEntry->line() == line
+           )
+        {
+            return static_cast<ImoNote*>(pSO);
+        }
+        pEntry = pEntry->get_next();
+    }
+    return nullptr;
+}
+
+//----------------------------------------------------------------------------------
+ImoNote* ColStaffObjsBuilderEngine::locate_grace_previous_note(ColStaffObjsEntry* pEntry)
+{
+    int line = pEntry->line();
+    int instr = pEntry->num_instrument();
+
+    pEntry = pEntry->get_prev();
+    while(pEntry)
+    {
+        ImoStaffObj* pSO = pEntry->imo_object();
+        if (pSO->is_regular_note()
+            && pEntry->num_instrument() == instr
+            && pEntry->line() == line
+           )
+        {
+            return static_cast<ImoNote*>(pSO);
+        }
+        pEntry = pEntry->get_prev();
+    }
+    return nullptr;
+}
+
 
 //=======================================================================================
 // ColStaffObjsBuilderEngine1x implementation: algorithm to create a ColStaffObjs
@@ -488,6 +704,8 @@ void ColStaffObjsBuilderEngine1x::create_entries(int nInstr)
             ++it;
         }
     }
+
+    compute_playback_time();
 }
 
 //---------------------------------------------------------------------------------------
@@ -505,7 +723,10 @@ void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInst
             m_minNoteDuration = min(m_minNoteDuration, pNR->get_duration());
     }
     int nLine = get_line_for(nVoice, nStaff);
-    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+    ColStaffObjsEntry* pEntry = m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr,
+                                                           nLine, nStaff, pSO);
+    if (pSO->is_grace_note())
+        m_graces.push_back(pEntry);
 }
 
 //---------------------------------------------------------------------------------------

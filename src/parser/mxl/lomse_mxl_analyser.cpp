@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -4227,31 +4227,26 @@ public:
 
         //deal with grace notes
         ImoNote* pPrevNote = m_pAnalyser->get_last_note();
-        if (fIsGrace && (pPrevNote == nullptr || !pPrevNote->is_grace_note()) )
+        if (fIsGrace)
         {
-            //start grace notes relationship
-            ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
-                                        ImFactory::inject(k_imo_grace_relobj, pDoc));
-            pNote->include_in_relation(pDoc, pGraceRO);
-            pGraceRO->set_previous_note(pPrevNote);
-            pGraceRO->set_grace_type(m_type);
-            pGraceRO->set_slash(m_fSlash);
-            pGraceRO->set_percentage(m_percentage);
-            pGraceRO->set_time_to_make(m_makeTime);
-        }
-        else if (fIsGrace && (pPrevNote && pPrevNote->is_grace_note()) )
-        {
-            //this note is not the first grace note in the relation. Continue it.
-            ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
-            pNote->include_in_relation(pDoc, pGraceRO);
-        }
-        else if (!fIsGrace && (pPrevNote && pPrevNote->is_grace_note()) )
-        {
-            //this note is the principal. Finish grace notes relationship
-            ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
-            pNote->include_in_relation(pDoc, pGraceRO);
-            pGraceRO->set_principal_note(pNote);
-            fix_durations_in_grace_notes_group(pGraceRO);
+            if (pPrevNote == nullptr || !pPrevNote->is_grace_note())
+            {
+                //start grace notes relationship
+                ImoGraceRelObj* pGraceRO = static_cast<ImoGraceRelObj*>(
+                                            ImFactory::inject(k_imo_grace_relobj, pDoc));
+
+                pNote->include_in_relation(pDoc, pGraceRO);
+                pGraceRO->set_grace_type(m_type);
+                pGraceRO->set_slash(m_fSlash);
+                pGraceRO->set_percentage(m_percentage);
+                pGraceRO->set_time_to_make(m_makeTime);
+            }
+            else if (pPrevNote && pPrevNote->is_grace_note())
+            {
+                //this note is not the first grace note in the relation. Continue it.
+                ImoGraceRelObj* pGraceRO = pPrevNote->get_grace_relobj();
+                pNote->include_in_relation(pDoc, pGraceRO);
+            }
         }
 
 
@@ -4363,72 +4358,13 @@ protected:
             }
         }
 
-        if (units == 0.0 && pNR->is_grace_note())
-            units = to_duration(noteType, dots);
+//        if (units == 0.0 && pNR->is_grace_note())
+//            units = to_duration(noteType, dots);
 
         pNR->set_type_dots_duration(noteType, dots, units);
     }
 
     //----------------------------------------------------------------------------------
-    void fix_durations_in_grace_notes_group(ImoGraceRelObj* pGRO)
-    {
-//        ImoNote* pPpal = pGRO->get_principal_note();
-//        ImoNote* pPrev = pGRO->get_previous_note();
-//
-//        //determine cumulative duration
-//        TimeUnits gDur = 0.0;
-        list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pGRO->get_related_objects();
-//        for (auto p : notes)
-//        {
-//            if (p.first->is_grace_note())
-//                gDur += p.first->get_duration();
-//            else
-//                break;
-//        }
-//
-//        //determine time to steal
-//        double percentage = pGRO->get_percentage();
-//        TimeUnits dur = 0.0;
-//
-//        //if not make time, discount time from next/prev
-//        if (pGRO->get_grace_type() != ImoGraceRelObj::k_grace_make_time)
-//        {
-//            //decide were to take time from
-//            ImoNoteRest* pTarget = nullptr;
-//            if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
-//                pTarget = pPrev;
-//            else    //k_grace_steal_following
-//                pTarget = pPpal;
-//
-//            if (pTarget)
-//            {
-//                TimeUnits targetDur = pTarget->get_duration();
-//                dur = targetDur * percentage;
-//                pTarget->set_duration(targetDur - dur);
-//            }
-//            else
-//            {
-//                //use a quarter note
-//                dur = TimeUnits(k_duration_quarter) * percentage;
-////                if (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
-////                    dur = - dur;
-//            }
-//        }
-//
-//        //assign duration to each grace note as a share of cumulative duration
-//        double alpha = dur / gDur;
-        for (auto p : notes)
-        {
-            if (p.first->is_grace_note())
-            {
-                ImoNote* pN = static_cast<ImoNote*>(p.first);
-                pN->set_duration(0.0);  // alpha * pN->get_duration() );
-            }
-            else
-                break;
-        }
-    }
-
     void set_staff(ImoNoteRest* pNR)
     {
         int iStaff = get_child_value_integer(1);

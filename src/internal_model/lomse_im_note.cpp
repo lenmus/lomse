@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,6 +47,9 @@ ImoNoteRest::ImoNoteRest(int objtype)
     , m_timeModifierTop(1)
     , m_timeModifierBottom(1)
     , m_duration(k_duration_quarter)
+    , m_playDuration(m_duration)
+    , m_eventDuration(m_duration)
+    , m_playTime(0.0)
 {
 }
 
@@ -110,6 +113,8 @@ void ImoNoteRest::set_time_modification(int numerator, int denominator)
 
     double modifier = double(m_timeModifierTop) / double(m_timeModifierBottom);
     m_duration = to_duration(m_nNoteType, m_nDots) * modifier;
+    m_playDuration = m_duration;
+    m_eventDuration = m_duration;
 }
 
 //---------------------------------------------------------------------------------------
@@ -118,6 +123,8 @@ void ImoNoteRest::set_note_type_and_dots(int noteType, int dots)
     m_nNoteType = noteType;
     m_nDots = dots;
     m_duration = to_duration(m_nNoteType, m_nDots);
+    m_playDuration = m_duration;
+    m_eventDuration = m_duration;
 }
 
 //---------------------------------------------------------------------------------------
@@ -126,6 +133,8 @@ void ImoNoteRest::set_type_dots_duration(int noteType, int dots, TimeUnits durat
     m_nNoteType = noteType;
     m_nDots = dots;
     m_duration = duration;
+    m_playDuration = m_duration;
+    m_eventDuration = m_duration;
 
     m_timeModifierTop = 1;
     m_timeModifierBottom = 1;

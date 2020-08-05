@@ -166,6 +166,8 @@ void XmlParser::parse_file(const std::string& filename, bool UNUSED(fErrorMsg))
     {
         m_errorMsg = string(result.description());
         m_errorOffset = int(result.offset);
+        m_reporter << "Pos: " << m_errorOffset << ". Error: " << m_errorMsg
+                   << ". File=" << filename << endl;
     }
     find_root();
 }
@@ -185,6 +187,7 @@ void XmlParser::parse_char_string(char* str)
     {
         m_errorMsg = string(result.description());
         m_errorOffset = int(result.offset);
+        m_reporter << "Pos: " << m_errorOffset << ". Error: " << m_errorMsg << endl;
     }
     find_root();
 }

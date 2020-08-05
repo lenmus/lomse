@@ -178,6 +178,27 @@ public:
         }
     }
 
+    void check_note(int iLine, ColStaffObjsEntry* pEntry, int type, int line,
+                    TimeUnits playtime, TimeUnits playdur)
+    {
+        bool fTypeOK = (pEntry->imo_object()->get_obj_type() == type);
+        bool fLineOK = (pEntry->line() == line);
+        ImoNote* pNote = static_cast<ImoNote*>(pEntry->imo_object());
+        bool fPlayTimeOK = is_equal_time(pNote->get_playback_time(), playtime);
+        bool fDurationOK = is_equal_time(pNote->get_playback_duration(), playdur);
+        CHECK( fTypeOK );
+        CHECK( fLineOK );
+        CHECK( fPlayTimeOK );
+        CHECK( fDurationOK );
+        if (!(fTypeOK && fLineOK && fPlayTimeOK && fDurationOK))
+        {
+            cout << test_name() << " (line " << iLine << ") " << endl;
+            cout << "    imo=" << pEntry->imo_object()->get_name() << " expected: "
+                 << playtime << "  " << playdur << "  " << line << "  "
+                 << pNote->to_string_with_ids() << endl;
+        }
+    }
+
 };
 
 
@@ -445,13 +466,596 @@ SUITE(ColStaffObjsBuilderTest)
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace e5 s v1 p1 (stem up)(beam 41 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 52 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 51 ++))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(grace d5 s v1 p1 (stem up)(beam 41 --))" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 52 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 51 --))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
     }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_09)
+    {
+        //@09. R8. Graces must go before barlines in the same timepos (after graces)
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "00632-after-graces.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n +f4 q v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +f4 s v1 p1 (stem up)(beam 44 ==))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
+    {
+        //@200. One grace. From previous 10%
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace slash=\"yes\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //previous dur 80%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);     //grace dur 20%, the time stolen
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. unmodified
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_201)
+    {
+        //@201. One grace. From next 30%
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"30\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 64.0, 38.4);     //grace dur 30% of next
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 102.4, 89.6);   //ppal. dur 70%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_202)
+    {
+        //@202. Two graces. From previous 20%
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 6 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);    //prev. dur 80%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 51.2, 6.4);     //graces dur 20% of prev
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 57.6, 6.4);
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);   //ppal. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_203)
+    {
+        //@203. Two graces. From next 40%
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"40\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 6 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_204)
+    {
+        //@204. graces steal from prev chord. All chord notes play duration shortened
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "<note><chord/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "<note><grace steal-time-previous=\"10\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 7 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(chord (n g4 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 115.2);    //prev. dur 90%
+        ++it;       //(n b4 h v1 p1))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 115.2);    //prev. dur 90%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 115.2, 6.4);     //graces total dur 10%
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 121.6, 6.4);
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 128.0, 128.0);   //ppal. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_205)
+    {
+        //@205. graces steal from next chord. All chord notes start play time and
+	    //      duration are modified
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-following=\"40\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "<note><chord/><pitch><step>E</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 7 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
+        ++it;       //(chord (n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+        ++it;       //(n e5 h v1 p1))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_206)
+    {
+        //@206. graces steal from prev chord. Additional notes in second voice in
+	    //      chord timepos are not affected
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/206-chord-second-voice-and graces.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(chord (n g4 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 115.2);    //prev. dur 90%
+        ++it;       //(n b4 h v1 p1 (stem up)))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 115.2);    //prev. dur 90%
+        ++it;       //(n d4 h v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 0.0, 128.0);    //other voice. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 115.2, 6.4);     //graces total dur 10%
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 121.6, 6.4);
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 128.0, 128.0);   //ppal. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_207)
+    {
+        //@205. graces steal from next chord. All chord notes start play time and
+	    //      duration are modified
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/207-graces-and-chord-second-voice.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 64.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 64.0, 25.6);     //graces dur 40% of next
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 89.6, 25.6);
+        ++it;       //(chord (n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+        ++it;       //(n e5 h v1 p1))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 115.2, 76.8);   //ppal. dur 60%
+        ++it;       //(n e5 h v1 p1))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 64.0, 128.0);   //second voice. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_208)
+    {
+        //@208. graces at end. From previous 25%
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>2</duration><voice>1</voice><type>quarter</type></note>"
+            "<note><grace steal-time-previous=\"25\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 q v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 48.0);    //prev. dur 75%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 48.0, 8.0);     //graces dur 25% of prev
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 56.0, 8.0);
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_209)
+    {
+        //@209. graces at end. From next 10% but no next. Use quarter note
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><pitch><step>G</step><octave>4</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "<note><grace steal-time-following=\"10\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><grace slash=\"no\"/><pitch><step>B</step><octave>4</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n g4 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 128.0);    //prev. dur 100%
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 128.0, 3.2);     //graces total dur 10% of quarter
+        ++it;       //(grace b4 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 131.2, 3.2);
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_210)
+    {
+        //@210. steal from previous but does not exist. Use quarter note
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
+            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
+            "<clef><sign>G</sign><line>2</line></clef></attributes>"
+            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
+                "<voice>1</voice><type>eighth</type></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>4</duration><voice>1</voice><type>half</type></note>"
+            "</measure></part></score-partwise>"
+            , Document::k_format_mxl
+        );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 4 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);     //grace dur 20% of quarter
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0, 128.0);   //ppal. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_211)
+    {
+        //@211. playback time for graces in chord properly computed
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/211-graces-chord.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(chord (grace#37 d5 e v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);  //grace dur 20% of quarter
+        ++it;       //(grace#40 f5 e v1 p1 (stem up)))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);  //grace dur 20% of quarter
+        ++it;       //(n#43 c5 q v1 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 12.8, 51.2);   //ppal. dur 80%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_212)
+    {
+        //@212. playback time for graces in two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/212-beamed-graces-two-voices.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(grace#37 e5 s v1 p1 (stem up)(beam#41 41 ++))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);  //graces total dur 20% of half
+        ++it;       //(grace#48 a4 s v2 p1 (stem down)(beam#52 52 ++))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 0.0, 12.8);
+        ++it;       //(grace#40 d5 s v1 p1 (stem up)(beam#41 41 --))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 12.8, 12.8);  //graces total dur 20% of half
+        ++it;       //(grace#51 g4 s v2 p1 (stem down)(beam#52 52 --))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 12.8, 12.8);
+        ++it;       //(n#45 c5 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 25.6, 102.4);   //ppal. dur 80%
+        ++it;       //(n#56 f4 h v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 25.6, 102.4);   //ppal. dur 80%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_213)
+    {
+        //@213. locate previous note when graces in two voices
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/213-grace-previous-note.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 11 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n#37 c5 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);  //prev. dur 80%
+        ++it;       //(n#39 f4 q v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 0.0, 51.2);  //prev. dur 80%
+        ++it;       //(barline#40 simple)
+        ++it;       //(grace#41 g5 e v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(grace#48 f4 e v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(n#44 e5 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);  //normal. dur 100%
+        ++it;       //(n#51 a4 h v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 64.0, 128.0);  //normal. dur 100%
+        ++it;       //(n#46 e5 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 192.0, 64.0);  //normal. dur 100%
+        ++it;       //(n#53 a4 q v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 192.0, 64.0);  //normal. dur 100%
+   }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_214)
+    {
+        //@214. chord two voices steal prev, but no prev in second voice
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/214-grace-chord-two-voices-previos-note.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 12 );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                   // (clef G p1)
+        ++it;       //(n#37 c5 q v1 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 0.0, 51.2);  //prev. dur 80%
+        ++it;       //(barline#38 simple)
+        ++it;       //(chord (grace#39 d5 e v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(grace#42 f5 e v1 p1 (stem up)))
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(chord (grace#48 b4 e v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(grace#51 g4 e v2 p1 (stem down)))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 51.2, 12.8);  //grace dur 20%
+        ++it;       //(n#45 e5 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 64.0, 128.0);  //normal. dur 100%
+        ++it;       //(n#54 a4 h v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 64.0, 128.0);  //normal. dur 100%
+        ++it;       //(n#46 e5 q v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 192.0, 64.0);  //normal. dur 100%
+        ++it;       //(n#55 a4 q v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 192.0, 64.0);  //normal. dur 100%
+   }
 
 
     // ColStaffObjsBuilderEngine2x ------------------------------------------------------
@@ -1554,7 +2158,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 0.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 52 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace a4 s v2 p1 (stem down)(beam 51 ++))" );
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
@@ -1562,7 +2166,7 @@ SUITE(ColStaffObjsBuilderTest)
 
         pNote = static_cast<ImoGraceNote*>((*it)->imo_object());
         CHECK( is_equal_time(pNote->get_align_timepos(), 1.0 ) );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 52 --))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(grace g4 s v2 p1 (stem down)(beam 51 --))" );
 
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 h v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n f4 h v2 p1 (stem down))" );
@@ -2006,7 +2610,7 @@ SUITE(ColStaffObjsBuilderTest)
         if (pRoot && !pRoot->is_document()) delete pRoot;
     }
 
-//    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, grace_notes_100)
+//    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_100)
 //    {
 //        //@100. auxiliary, for checking the ColStaffObjs
 //        stringstream errormsg;

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,13 +30,13 @@
 #ifndef __LOMSE_STAFFOBJS_TABLE_H__
 #define __LOMSE_STAFFOBJS_TABLE_H__
 
-#include <vector>
-#include <ostream>
-#include <map>
 #include "private/lomse_document_p.h"
 #include "lomse_time.h"
 
-using namespace std;
+//std
+#include <vector>
+#include <ostream>
+#include <map>
 
 namespace lomse
 {
@@ -44,15 +44,16 @@ namespace lomse
 #define LOMSE_NO_NOTE_DURATION  100000000.0f    //any too high value for note/rest
 
 //forward declarations
-class ImoObj;
-class ImoStaffObj;
-class ImoGoBackFwd;
 class ImoAuxObj;
 class ImoDirection;
-class ImoScore;
-class ImoTimeSignature;
 class ImoGoBackFwd;
+class ImoGraceNote;
+class ImoGraceRelObj;
 class ImoMusicData;
+class ImoObj;
+class ImoScore;
+class ImoStaffObj;
+class ImoTimeSignature;
 
 
 //---------------------------------------------------------------------------------------
@@ -98,7 +99,7 @@ public:
     }
 
     //debug
-    string dump(bool fWithIds=true);
+    std::string dump(bool fWithIds=true);
     std::string to_string();
     std::string to_string_with_ids();
 
@@ -144,7 +145,8 @@ public:
     inline TimeUnits min_note_duration() { return m_minNoteDuration; }
 
     //table management
-    void add_entry(int measure, int instr, int voice, int staff, ImoStaffObj* pImo);
+    ColStaffObjsEntry* add_entry(int measure, int instr, int voice, int staff,
+                                 ImoStaffObj* pImo);
     void delete_entry_for(ImoStaffObj* pSO);
 
     //iterator related
@@ -226,7 +228,7 @@ public:
     inline iterator find(ImoStaffObj* pSO) { return iterator(find_entry_for(pSO)); }
 
     //debug
-    string dump(bool fWithIds=true);
+    std::string dump(bool fWithIds=true);
 
 protected:
 
@@ -305,6 +307,7 @@ protected:
     TimeUnits   m_rStartSegmentTime;
     TimeUnits   m_minNoteDuration;
     StaffVoiceLineTable  m_lines;
+    std::vector<ColStaffObjsEntry*> m_graces;       //entries for grace notes
 
     ColStaffObjsBuilderEngine(ImoScore* pScore)
         : m_pColStaffObjs(nullptr)
@@ -332,6 +335,11 @@ protected:
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     void set_min_note_duration();
+    void compute_playback_time();
+    void process_grace_relobj(ImoGraceNote* pGrace, ImoGraceRelObj* pGRO,
+                              ColStaffObjsEntry* pEntry);
+    ImoNote* locate_grace_principal_note(ColStaffObjsEntry* pEntry);
+    ImoNote* locate_grace_previous_note(ColStaffObjsEntry* pEntry);
 
 };
 
@@ -359,16 +367,19 @@ private:
     TimeUnits   m_rCurTime;
     TimeUnits   m_rCurAlignTime;
 
-    void initializations();
-    void create_entries(int nInstr);
+    //overrides for base class ColStaffObjsBuilderEngine
+    void initializations() override;
+    void determine_timepos(ImoStaffObj* pSO) override;
+    void create_entries(int nInstr) override;
+    void prepare_for_next_instrument() override;
+
+    //specific
     void reset_counters();
-    void determine_timepos(ImoStaffObj* pSO);
     void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     ImoDirection* anchor_object(ImoAuxObj* pImo);
     void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
-    void prepare_for_next_instrument();
 
 };
 
@@ -382,7 +393,7 @@ private:
 class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
 {
 protected:
-    vector<TimeUnits> m_rCurTime;
+    std::vector<TimeUnits> m_rCurTime;
     int m_curVoice;
 
 public:
@@ -394,13 +405,17 @@ public:
     virtual ~ColStaffObjsBuilderEngine2x() {}
 
 private:
-    void initializations();
-    void create_entries(int nInstr);
+
+    //overrides for base class ColStaffObjsBuilderEngine
+    void initializations() override;
+    void determine_timepos(ImoStaffObj* pSO) override;
+    void create_entries(int nInstr) override;
+    void prepare_for_next_instrument() override;
+
+    //specific
     void reset_counters();
-    void determine_timepos(ImoStaffObj* pSO);
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    void prepare_for_next_instrument();
 
 };
 

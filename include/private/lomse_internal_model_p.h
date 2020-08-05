@@ -2718,7 +2718,7 @@ public:
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
-    inline void set_time(TimeUnits rTime) { m_time = rTime; }
+    virtual void set_time(TimeUnits rTime) { m_time = rTime; }
     inline void set_measure(int measure) { m_measure = measure; }
 
     //other
@@ -4564,8 +4564,7 @@ public:
 
 //---------------------------------------------------------------------------------------
 /** When one or more consecutive grace notes appear in the score, this auxiliary RelObj
-    is responsible for relating the grace notes to its principal note, and also to
-    manage the common properties for the group of grace notes
+    is responsible for relating all the grace notes in a group
 */
 class ImoGraceRelObj : public ImoRelObj
 {
@@ -4574,16 +4573,12 @@ protected:
     bool        m_fSlash;       //true when grace notes are notated with a diagonal stroke
     float       m_percentage;       //percentage of time to steal
     TimeUnits   m_makeTime;         //duration to assign
-    ImoNote*    m_pPrincipalNote;   //ptr to principal note
-    ImoNote*    m_pPrevNote;        //ptr to previous note
 
     friend class ImFactory;
     ImoGraceRelObj()
         : ImoRelObj(k_imo_grace_relobj)
         , m_graceType(k_grace_steal_previous)
         , m_fSlash(true)
-        , m_pPrincipalNote(nullptr)
-        , m_pPrevNote(nullptr)
     {
     }
 
@@ -4603,16 +4598,12 @@ public:
     };
 
     //getters
-    inline ImoNote* get_principal_note() { return m_pPrincipalNote; }
-    inline ImoNote* get_previous_note() { return m_pPrevNote; }
     inline int get_grace_type() { return m_graceType; }
     inline bool has_slash() { return m_fSlash; }
     inline float get_percentage() { return m_percentage; }
     inline TimeUnits get_time_to_make() { return m_makeTime; }
 
     //setters
-    inline void set_principal_note(ImoNote* pNote) { m_pPrincipalNote = pNote; }
-    inline void set_previous_note(ImoNote* pNote) { m_pPrevNote = pNote; }
     inline void set_grace_type(int graceType) { m_graceType = graceType; }
     inline void set_slash(bool value) { m_fSlash = value; }
     inline void set_percentage(float value) { m_percentage = value; }
