@@ -136,6 +136,7 @@ protected:
     bool m_fStemDown;
     bool m_fWithFlag;
     bool m_fShortFlag;
+    bool m_fHasBeam;
     bool m_fCrossStaffChord;
     LUnits m_uStemLength;
     Color m_color;
@@ -156,13 +157,13 @@ public:
     virtual ~StemFlagEngraver() {}
 
     void add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteType, bool fStemDown,
-                               bool fWithFlag, bool fShortFlag, LUnits stemLength,
-                               Color color);
+                               bool fWithFlag, bool fShortFlag, bool fHasBeam,
+                               LUnits stemLength, Color color);
 
     void add_stem_flag_to_chord(GmoShapeNote* pMinNoteShape, GmoShapeNote* pMaxNoteShape,
                        GmoShapeNote* pBaseNoteShape, int noteType, bool fStemDown, bool fWithFlag,
-                       bool fShortFlag, bool fCrossStaffChord, LUnits stemLength,
-                       Color color);
+                       bool fShortFlag, bool fHasBeam, bool fCrossStaffChord,
+                       LUnits stemLength, Color color);
     void add_stroke_shape();
 
 protected:

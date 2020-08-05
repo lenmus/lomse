@@ -521,6 +521,7 @@ void ChordEngraver::add_stem_and_flag()
     int nPosOnStaff = pDataFlag->posOnStaff;
 
     //create the shape and attach it to notes
+    bool fHasBeam = is_chord_beamed();
     bool fShortFlag = false;
     Tenths length = 0.0f;
 
@@ -531,7 +532,7 @@ void ChordEngraver::add_stem_and_flag()
     else
     {
         length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
-        if (!is_chord_beamed() && length < 35.0f && m_noteType > k_eighth)
+        if (!fHasBeam && length < 35.0f && m_noteType > k_eighth)
             length = 35.0f;     // 3.5 spaces
 
         fShortFlag = (length < 35.0f);
@@ -543,7 +544,7 @@ void ChordEngraver::add_stem_and_flag()
     StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff, m_fontSize);
 
     engrv.add_stem_flag_to_chord(pMinNoteShape, pMaxNoteShape, m_pBaseNoteData->pNoteShape,
-                        m_noteType, is_stem_down(), has_flag(), fShortFlag,
+                        m_noteType, is_stem_down(), has_flag(), fShortFlag, fHasBeam,
                         m_fCrossStaffChord, stemLength, m_color);
 
     //for grace notes, add the stroke shape if required

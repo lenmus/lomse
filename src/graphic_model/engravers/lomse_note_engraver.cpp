@@ -269,7 +269,8 @@ void NoteEngraver::add_stem_and_flag_if_required()
 
     if (has_stem() && !is_in_chord())
     {
-        bool fHasFlag = (!is_beamed() && has_flag());
+        bool fHasBeam = is_beamed();
+        bool fHasFlag = (!fHasBeam && has_flag());
         bool fShortFlag = false;
         Tenths length = 0.0f;
 
@@ -291,7 +292,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
         StemFlagEngraver engrv(m_libraryScope, m_pMeter, m_pNote, m_iInstr, m_iStaff,
                                m_fontSize);
         engrv.add_stem_flag_to_note(m_pNoteShape, m_noteType, m_fStemDown, fHasFlag,
-                                    fShortFlag, stemLength, m_color);
+                                    fShortFlag, fHasBeam, stemLength, m_color);
         m_pNoteShape->set_up_oriented(!m_fStemDown);
 
         //if it is a grace note, add stroke shape if necessary
@@ -665,7 +666,7 @@ StemFlagEngraver::StemFlagEngraver(LibraryScope& libraryScope, ScoreMeter* pScor
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteType,
                                      bool fStemDown, bool fWithFlag, bool fShortFlag,
-                                     LUnits stemLength, Color color)
+                                     bool fHasBeam, LUnits stemLength, Color color)
 {
     m_pRefNoteShape = pNoteShape;
     m_pFlagNoteShape = pNoteShape;
@@ -675,6 +676,7 @@ void StemFlagEngraver::add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteT
     m_fStemDown = fStemDown;
     m_fWithFlag = fWithFlag;
     m_fShortFlag = fShortFlag;
+    m_fHasBeam = fHasBeam;
     m_fCrossStaffChord = false;
     m_uStemLength = stemLength;
     m_color = color;
@@ -687,7 +689,8 @@ void StemFlagEngraver::add_stem_flag_to_chord(GmoShapeNote* pMinNoteShape,
                                      GmoShapeNote* pMaxNoteShape,
                                      GmoShapeNote* pBaseNoteShape, int noteType,
                                      bool fStemDown, bool fWithFlag, bool fShortFlag,
-                                     bool fCrossStaffChord, LUnits stemLength, Color color)
+                                     bool fHasBeam, bool fCrossStaffChord,
+                                     LUnits stemLength, Color color)
 {
     m_pRefNoteShape = (fStemDown ? pMaxNoteShape : pMinNoteShape);
     m_pFlagNoteShape = (fStemDown ? pMinNoteShape : pMaxNoteShape);
@@ -697,6 +700,7 @@ void StemFlagEngraver::add_stem_flag_to_chord(GmoShapeNote* pMinNoteShape,
     m_fStemDown = fStemDown;
     m_fWithFlag = fWithFlag;
     m_fShortFlag = fShortFlag;
+    m_fHasBeam = fHasBeam;
     m_fCrossStaffChord = fCrossStaffChord;
     m_uStemLength = stemLength;
     m_color = color;
@@ -790,10 +794,12 @@ void StemFlagEngraver::add_flag_shape_if_required()
 void StemFlagEngraver::add_stroke_shape()
 {
     LUnits xStart, yStart, xEnd, yEnd = 0.0;
+    LUnits uxFlagLeft = 0.0f;
     if (m_pFlagShape)
     {
-        //single note or chord
-        xStart = m_uxStem - m_pFlagShape->get_width() * 0.4f;
+        //single note with flag or chord
+        uxFlagLeft = m_pFlagShape->get_width() * 0.4f;
+        xStart = m_uxStem - uxFlagLeft;
         xEnd = m_uxStem + m_pFlagShape->get_width();
         yStart = (m_fStemDown ? m_yStemBottom - tenths_to_logical(14.0f)
                               : m_yStemTop + tenths_to_logical(14.0f));
@@ -801,12 +807,26 @@ void StemFlagEngraver::add_stroke_shape()
     }
     else
     {
-        //beamed note, chord or grace note without flag
-        xStart = m_uxStem - m_pFlagNoteShape->get_width() / 2.0f;
-        yStart = m_yStemTop + tenths_to_logical(14.0f);
-        xEnd = m_uxStem + m_pFlagNoteShape->get_width();
-        yEnd = m_yStemTop;
+        //grace note without flag, beamed note or chord
+        uxFlagLeft = tenths_to_logical(4.0f);
+        xStart = m_uxStem - uxFlagLeft;
+        yStart = (m_fStemDown ? m_yStemBottom - tenths_to_logical(14.0f)
+                              : m_yStemTop + tenths_to_logical(14.0f));
+        xEnd = m_uxStem + uxFlagLeft + (m_fHasBeam ? uxFlagLeft : 0.0f);
+        yEnd = yStart - (m_fStemDown ? xStart-xEnd : xEnd-xStart);
     }
+
+    //fix anchor when stem down
+    if (m_fStemDown)
+    {
+        LUnits anchor = m_pFlagNoteShape->get_anchor_offset();
+        if (anchor <= 0.0f)
+        {
+            anchor = min(anchor, -uxFlagLeft);
+            m_pFlagNoteShape->set_anchor_offset(anchor);
+        }
+    }
+
 
     LUnits uWidth = tenths_to_logical(LOMSE_STEM_THICKNESS) * 0.7f * LOMSE_GRACE_NOTES_SCALE;
     GmoShape* pShape = LOMSE_NEW GmoShapeGraceStroke(m_pCreatorImo, xStart, yStart,
