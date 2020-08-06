@@ -306,6 +306,7 @@ protected:
     TimeUnits   m_rMaxSegmentTime;
     TimeUnits   m_rStartSegmentTime;
     TimeUnits   m_minNoteDuration;
+    TimeUnits   m_gracesAnacruxisTime;
     StaffVoiceLineTable  m_lines;
     std::vector<ColStaffObjsEntry*> m_graces;       //entries for grace notes
 
@@ -316,6 +317,7 @@ protected:
         , m_rMaxSegmentTime(0.0)
         , m_rStartSegmentTime(0.0)
         , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
+        , m_gracesAnacruxisTime(0.0)
     {}
 
 public:
@@ -326,7 +328,7 @@ public:
 protected:
     virtual void initializations()=0;
     virtual void determine_timepos(ImoStaffObj* pSO)=0;
-    virtual void create_entries(int nInstr)=0;
+    virtual void create_entries_for_instrument(int nInstr)=0;
     virtual void prepare_for_next_instrument()=0;
 
     void create_table();
@@ -340,6 +342,7 @@ protected:
                               ColStaffObjsEntry* pEntry);
     ImoNote* locate_grace_principal_note(ColStaffObjsEntry* pEntry);
     ImoNote* locate_grace_previous_note(ColStaffObjsEntry* pEntry);
+    void fix_negative_playback_times();
 
 };
 
@@ -370,7 +373,7 @@ private:
     //overrides for base class ColStaffObjsBuilderEngine
     void initializations() override;
     void determine_timepos(ImoStaffObj* pSO) override;
-    void create_entries(int nInstr) override;
+    void create_entries_for_instrument(int nInstr) override;
     void prepare_for_next_instrument() override;
 
     //specific
@@ -409,7 +412,7 @@ private:
     //overrides for base class ColStaffObjsBuilderEngine
     void initializations() override;
     void determine_timepos(ImoStaffObj* pSO) override;
-    void create_entries(int nInstr) override;
+    void create_entries_for_instrument(int nInstr) override;
     void prepare_for_next_instrument() override;
 
     //specific

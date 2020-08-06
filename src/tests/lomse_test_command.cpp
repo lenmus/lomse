@@ -1000,7 +1000,7 @@ SUITE(DocCommandTest)
             "(barline simple)"
             ")))");
         doc.clear_dirty();
-        //cout << "993 test_command:   " << doc.to_string(true) << endl;
+        //cout << test_name() << doc.to_string(true) << endl;
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.point_to(124L);       //points to first note

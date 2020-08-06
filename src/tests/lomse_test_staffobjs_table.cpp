@@ -222,7 +222,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 4 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -252,7 +251,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 9 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -287,7 +285,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 13 );
-//        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -326,7 +323,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 5 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -359,7 +355,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 12 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -398,7 +393,6 @@ SUITE(ColStaffObjsBuilderTest)
 //        cout << pTable->dump();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 9 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -419,7 +413,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@07. R6. Graces in the same timepos must go before note/rest in that timepos
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10022-graces-two-voices.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/222-graces-two-voices.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -430,7 +424,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -448,7 +441,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@08. R7. Graces in the same timepos go ordered by align timepos
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10024-beamed-graces-two-voices.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/224-beamed-graces-two-voices.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -459,7 +452,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 8 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -479,7 +471,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@09. R8. Graces must go before barlines in the same timepos (after graces)
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "00632-after-graces.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/218-after-graces.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -490,7 +482,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -895,32 +886,26 @@ SUITE(ColStaffObjsBuilderTest)
         //@210. steal from previous but does not exist. Use quarter note
 
         Document doc(m_libraryScope);
-        doc.from_string(
-            "<score-partwise><part-list><score-part id=\"P1\" /></part-list>"
-            "<part id=\"P1\"><measure number=\"1\"><attributes><divisions>2</divisions>"
-            "<clef><sign>G</sign><line>2</line></clef></attributes>"
-            "<note><grace steal-time-previous=\"20\"/><pitch><step>D</step><octave>5</octave></pitch>"
-                "<voice>1</voice><type>eighth</type></note>"
-            "<note><pitch><step>C</step><octave>5</octave></pitch>"
-                "<duration>4</duration><voice>1</voice><type>half</type></note>"
-            "</measure></part></score-partwise>"
-            , Document::k_format_mxl
-        );
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/210-grace-note.xml",
+                      Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
         ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
-//        cout << test_name() << endl;
+//        cout << test_name() << ". Anacruxis missing time="
+//             << pColStaffObjs->anacrusis_missing_time() << endl;
 //        cout << pColStaffObjs->dump();
 
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 4 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 51.2) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
                    // (clef G p1)
         ++it;       //(grace d5 e v1 p1)
         check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);     //grace dur 20% of quarter
         ++it;       //(n c5 h v1 p1)
-        check_note(__LINE__, *it, k_imo_note_regular, 0, 0, 128.0);   //ppal. dur 100%
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_211)
@@ -1020,7 +1005,8 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_214)
     {
-        //@214. chord two voices steal prev, but no prev in second voice
+        //@214. graces in second voice that steal prev, but no prev in second voice:
+        //      playback time shifted back when not at start of score
 
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "unit-tests/grace-notes/214-grace-chord-two-voices-previos-note.xml",
@@ -1056,6 +1042,105 @@ SUITE(ColStaffObjsBuilderTest)
         ++it;       //(n#55 a4 q v2 p1 (stem down))
         check_note(__LINE__, *it, k_imo_note_regular, 1, 192.0, 64.0);  //normal. dur 100%
    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_215)
+    {
+        //@215. graces at start that steal from previous create anacruxis start
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/215-graces-anacruxis-start.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 11 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 32.0) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                    //(clef#36 G p1)
+        ++it;       //(clef#37 F4 p2)
+        ++it;       //(grace#40 a2 t v3 p2 (stem up)(slur#52 1 start)(beam#46 46 +++))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 0.0, 10.67);  //graces total dur 50% of quarter
+        ++it;       //(grace#43 +c3 t v3 p2 (stem up)(beam#46 46 ===))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 10.67, 10.67);
+        ++it;       //(grace#45 e3 t v3 p2 (stem up)(beam#46 46 ---))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 21.33, 10.67);
+        ++it;       //(n#38 a5 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 32.0, 128.0);  //dur 100%
+        ++it;       //(n#51 a3 e v3 p2 (stem down)(slur#52 1 stop)(beam#59 59 +))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 32.0, 32.0);  //dur 100%
+        ++it;       //(n#56 a3 e v3 p2 (stem down)(beam#59 59 =))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 64.0, 32.0);  //dur 100%
+        ++it;       //(n#57 a3 e v3 p2 (stem down)(beam#59 59 =))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 96.0, 32.0);  //dur 100%
+        ++it;       //(n#58 a3 e v3 p2 (stem down)(beam#59 59 -))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 128.0, 32.0);  //dur 100%
+   }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_216)
+    {
+        //@216. graces anacruxis time when time signature
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/216-grace-anacruxis-time-signature.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 1 );
+        CHECK( pColStaffObjs->num_entries() == 5 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 115.2) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                    //(clef G p1)
+        ++it;       //(time 2 4)
+        ++it;       //(grace d5 e v1 p1)
+        check_note(__LINE__, *it, k_imo_note_grace, 0, 0.0, 12.8);     //grace dur 20% of quarter
+        ++it;       //(n c5 h v1 p1)
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 12.8, 128.0);   //ppal. dur 100%
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_217)
+    {
+        //@217. graces anacruxis greater than notated anacruxis
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/217-graces-anacruxis-greater-than-notated.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+//        cout << test_name() << ". Anacruxis missing time="
+//             << pColStaffObjs->anacrusis_missing_time() << endl;
+//        cout << pColStaffObjs->dump();
+
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 8 );
+        CHECK( is_equal_time(pColStaffObjs->anacrusis_missing_time(), 102.4) );
+        CHECK( pColStaffObjs->is_anacrusis_start() == true );
+
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+                    //(clef G p1)
+        ++it;       //(time 2 4)
+        ++it;       //(n#38 d5 s v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 9.6, 16.0);   //anacrux. dur 100%
+        ++it;       //(barline#39 simple)
+        ++it;       //(grace#42 f4 e v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_grace, 1, 0, 25.6);     //grace dur 40% of quarter
+        ++it;       //(n#40 c5 h v1 p1 (stem up))
+        check_note(__LINE__, *it, k_imo_note_regular, 0, 25.6, 128.0);   //ppal. dur 100%
+        ++it;       //(n#45 g4 h v2 p1 (stem down))
+        check_note(__LINE__, *it, k_imo_note_regular, 1, 25.6, 128.0);   //ppal. dur 100%
+    }
 
 
     // ColStaffObjsBuilderEngine2x ------------------------------------------------------
@@ -2063,7 +2148,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@13. align timepos assigned to grace notes
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10023-beamed-graces.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/223-beamed-graces.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -2074,7 +2159,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 5 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2098,7 +2182,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@14. align timepos for grace notes in two voices
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10022-graces-two-voices.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/222-graces-two-voices.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -2109,7 +2193,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 6 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2134,7 +2217,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@15. align timepos for beamed grace notes in two voices
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10024-beamed-graces-two-voices.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/224-beamed-graces-two-voices.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -2145,7 +2228,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 8 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
 
         ColStaffObjsIterator it = pTable->begin();
@@ -2178,7 +2260,7 @@ SUITE(ColStaffObjsBuilderTest)
         //@16. align timepos for grace notes in chord
 
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "10025-graces-chord.xml",
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/225-graces-chord.xml",
                       Document::k_format_mxl);
         ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
         CHECK( pScore != nullptr );
@@ -2189,7 +2271,6 @@ SUITE(ColStaffObjsBuilderTest)
 
         CHECK( pTable->num_lines() == 1 );
         CHECK( pTable->num_entries() == 5 );
-        CHECK( pTable->is_anacrusis_start() == false );
         CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
 
         ColStaffObjsIterator it = pTable->begin();

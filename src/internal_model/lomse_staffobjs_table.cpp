@@ -124,7 +124,8 @@ string ColStaffObjs::dump(bool fWithIds)
 {
     stringstream s;
     ColStaffObjs::iterator it;
-    s << "Num.entries = " << num_entries() << endl;
+    s << "Num.entries = " << num_entries()
+      << ", anacruxis missing time = " << m_rMissingTime << endl;
     //    +.......+.......+.......+.......+.......+.......+.......+.......+
     s << "instr   staff   meas.   time    play    pdur    line    object" << endl;
     s << "----------------------------------------------------------------" << endl;
@@ -376,9 +377,10 @@ void ColStaffObjsBuilderEngine::create_table()
     int totalInstruments = m_pImScore->get_num_instruments();
     for (int instr = 0; instr < totalInstruments; instr++)
     {
-        create_entries(instr);
+        create_entries_for_instrument(instr);
         prepare_for_next_instrument();
     }
+    compute_playback_time();
     collect_anacrusis_info();
 }
 
@@ -399,11 +401,18 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
             break;
         }
         else if (pSO->is_note_rest())
-            return;
+            break;
         ++it;
     }
     if (pTS == nullptr)
+    {
+        if (m_gracesAnacruxisTime > 0.0)
+        {
+            fix_negative_playback_times();
+            m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacruxisTime);
+        }
         return;
+    }
 
     // find first barline
     ++it;
@@ -418,11 +427,26 @@ void ColStaffObjsBuilderEngine::collect_anacrusis_info()
         ++it;
     }
     if (rTime <= 0.0)
+    {
+    //TODO: test case can not be generated with MusicXML
+//        if (m_gracesAnacruxisTime > 0.0)
+//        {
+//            fix_negative_playback_times();
+//            m_pColStaffObjs->set_anacrusis_missing_time(64.0 - m_gracesAnacruxisTime);
+//        }
         return;
+    }
 
-    //determine if anacrusis
-    TimeUnits measureDuration = pTS->get_measure_duration();
-    m_pColStaffObjs->set_anacrusis_missing_time(max(0.0, measureDuration - rTime));
+    //fix negative playback times
+    if (m_gracesAnacruxisTime > 0.0)
+        fix_negative_playback_times();
+
+    //set anacruxis missing time
+    TimeUnits measureTime = pTS->get_measure_duration();
+    TimeUnits anacruxis = (is_lower_time(rTime, measureTime) ? rTime : 0.0);
+    anacruxis += m_gracesAnacruxisTime;
+    if (anacruxis > 0.0)
+        m_pColStaffObjs->set_anacrusis_missing_time(max(0.0, measureTime - anacruxis));
 }
 
 //---------------------------------------------------------------------------------------
@@ -574,12 +598,14 @@ void ColStaffObjsBuilderEngine::process_grace_relobj(ImoGraceNote* pGrace,
         }
     }
 
-    //if no previous but not at start of score (second voices) shift back graces play time.
+
+    //if no previous shift back graces play time.
     //test score: unit-tests/grace-notes/214-grace-chord-two-voices-previos-note.xml
-    if (!pTarget && (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous)
-        && (!is_lower_time(gracePlayTime, dur)) )
+    if (!pTarget && (pGRO->get_grace_type() == ImoGraceRelObj::k_grace_steal_previous))
     {
         gracePlayTime -= dur;
+        if (gracePlayTime < 0.0)
+            m_gracesAnacruxisTime = max(m_gracesAnacruxisTime, -gracePlayTime);
     }
 
 
@@ -660,6 +686,23 @@ ImoNote* ColStaffObjsBuilderEngine::locate_grace_previous_note(ColStaffObjsEntry
     return nullptr;
 }
 
+//----------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::fix_negative_playback_times()
+{
+    ColStaffObjsIterator it = m_pColStaffObjs->begin();
+    while(it != m_pColStaffObjs->end())
+    {
+        ImoStaffObj* pSO = (*it)->imo_object();
+        if (pSO->is_note_rest())
+        {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pSO );
+            TimeUnits playtime = pNR->get_playback_time();
+            pNR->set_playback_time(playtime + m_gracesAnacruxisTime);
+        }
+        ++it;
+    }
+}
+
 
 //=======================================================================================
 // ColStaffObjsBuilderEngine1x implementation: algorithm to create a ColStaffObjs
@@ -670,7 +713,7 @@ void ColStaffObjsBuilderEngine1x::initializations()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine1x::create_entries(int nInstr)
+void ColStaffObjsBuilderEngine1x::create_entries_for_instrument(int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
     ImoMusicData* pMusicData = pInstr->get_musicdata();
@@ -704,8 +747,6 @@ void ColStaffObjsBuilderEngine1x::create_entries(int nInstr)
             ++it;
         }
     }
-
-    compute_playback_time();
 }
 
 //---------------------------------------------------------------------------------------
@@ -832,7 +873,7 @@ void ColStaffObjsBuilderEngine2x::initializations()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilderEngine2x::create_entries(int nInstr)
+void ColStaffObjsBuilderEngine2x::create_entries_for_instrument(int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
     ImoMusicData* pMusicData = pInstr->get_musicdata();
