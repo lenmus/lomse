@@ -53,7 +53,7 @@ int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeSh
     // and returns the type of beat: either an integer positive value 0..n, meaning
     // 'on-beat', where n is the beat number, or -1 meaning 'off-beat'
     //
-    // Parameter timeShift can be useful for taking into account anacrusis start
+    // Parameter timeShift can be useful for taking into account anacruxis start
 
     int beatType = pTS->get_bottom_number();
     TimeUnits beatDuration = pTS->get_ref_note_duration();

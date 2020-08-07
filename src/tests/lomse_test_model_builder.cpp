@@ -331,7 +331,7 @@ SUITE(PitchAssignerTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_lines() == 2 );
         CHECK( pTable->num_entries() == 14 );
-        CHECK( pTable->is_anacrusis_start() == false );
+        CHECK( pTable->is_anacruxis_start() == false );
 
         ColStaffObjsIterator it = pTable->begin();
         while(!(*it)->imo_object()->is_note())

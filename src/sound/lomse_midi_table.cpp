@@ -70,6 +70,7 @@ SoundEventsTable::SoundEventsTable(ImoScore* pScore)
     : m_pScore(pScore)
     , m_numMeasures(0)
     , m_rAnacrusisMissingTime(0.0)
+    , m_rAnacrusisExtraTime(0.0)
 {
 }
 
@@ -148,7 +149,8 @@ void SoundEventsTable::create_events()
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
-    m_rAnacrusisMissingTime = cursor.anacrusis_missing_time();
+    m_rAnacrusisMissingTime = cursor.anacruxis_missing_time();
+    m_rAnacrusisExtraTime = cursor.anacruxis_extra_time();
 
     //iterate over the collection to create the MIDI events
     while(!cursor.is_end())
@@ -386,7 +388,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
         {
             //It is not tied to the previous one. Generate NoteOn event to
             //start the sound and highlight the note
-            int volume = compute_volume(rTime, pTS, cursor.anacrusis_missing_time());
+            int volume = compute_volume(rTime, pTS, cursor.anacruxis_missing_time());
             store_event(rTime, SoundEvent::k_note_on, channel, pitch,
                         volume, step, pNR, measure);
         }

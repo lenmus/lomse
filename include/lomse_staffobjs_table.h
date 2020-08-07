@@ -128,6 +128,7 @@ protected:
     int m_numLines;
     int m_numEntries;
     TimeUnits m_rMissingTime;
+    TimeUnits m_rAnacruxisExtraTime;    //extra anacruxis time introduced by grace notes
     TimeUnits m_minNoteDuration;
 
     ColStaffObjsEntry* m_pFirst;
@@ -140,8 +141,9 @@ public:
     //table info
     inline int num_entries() { return m_numEntries; }
     inline int num_lines() { return m_numLines; }
-    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
-    inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
+    inline bool is_anacruxis_start() { return is_greater_time(m_rMissingTime, 0.0); }
+    inline TimeUnits anacruxis_missing_time() { return m_rMissingTime; }
+    inline TimeUnits anacruxis_extra_time() { return m_rAnacruxisExtraTime; }
     inline TimeUnits min_note_duration() { return m_minNoteDuration; }
 
     //table management
@@ -238,7 +240,8 @@ protected:
     friend class ColStaffObjsBuilderEngine2x;
 
     inline void set_total_lines(int number) { m_numLines = number; }
-    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    inline void set_anacruxis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    inline void set_anacruxis_extra_time(TimeUnits rTime) { m_rAnacruxisExtraTime = rTime; }
     void sort_table();
     static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
     inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
@@ -332,7 +335,7 @@ protected:
     virtual void prepare_for_next_instrument()=0;
 
     void create_table();
-    void collect_anacrusis_info();
+    void collect_anacruxis_info();
     int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
