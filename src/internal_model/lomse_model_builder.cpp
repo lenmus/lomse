@@ -351,6 +351,11 @@ void PitchAssigner::reset_accidentals(ImoKeySignature* pKey, int idx)
         for (int i=0; i < 7; ++i)
             m_context[idx][i] = accidentals[i];
     }
+    else
+    {
+        for (int i=0; i < 7; ++i)
+            m_context[idx][i] = 0;
+    }
 }
 
 //---------------------------------------------------------------------------------------

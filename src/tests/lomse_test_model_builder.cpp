@@ -389,6 +389,29 @@ SUITE(PitchAssignerTest)
         CHECK( pNote2->get_notated_accidentals() == k_sharp );
     }
 
+    TEST_FIXTURE(PitchAssignerTestFixture, pitch_assigner_09)
+    {
+        //@09. issue with natural after barline: context is reset when no key sign.
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/other/01-issue-with-natural.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        StaffObjsCursor cursor(pScore);
+        while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
+        {
+            cursor.move_next();
+        }
+        ImoNote* pNote1 = static_cast<ImoNote*>( cursor.get_staffobj() );
+        cursor.move_next();     //barline
+        cursor.move_next();
+        ImoNote* pNote2 = static_cast<ImoNote*>( cursor.get_staffobj() );
+
+        CHECK( pNote1->get_notated_accidentals() == k_sharp );
+        CHECK( pNote2->get_notated_accidentals() == k_no_accidentals );
+    }
+
 };
 
 
