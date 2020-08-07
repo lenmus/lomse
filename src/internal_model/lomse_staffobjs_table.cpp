@@ -220,9 +220,13 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
             return false;   //insert B after A
     }
 
-    //R8. Graces must go before barlines in the same timepos (after graces)
-    if (pA->is_grace_note() && pB->is_barline())
-        return false;   //insert B after A (preserve order of barlines)
+    //R8. Insertion order of graces and barlines in an instrument must be preserved.
+    //    Barlines defined after grace notes in other instruments must go before those
+    //    grace notes (two parts)
+    if (pA->is_grace_note() && pB->is_barline()
+            && (a->num_instrument() == b->num_instrument())
+       )
+        return false;   //preserve definition order: insert barline B after grace A
 
     //R4. barlines must go before all other objects  at same timepos having
     //    high measure number

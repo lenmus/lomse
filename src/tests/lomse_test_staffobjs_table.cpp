@@ -468,7 +468,7 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_09)
     {
-        //@09. R8. Graces must go before barlines in the same timepos (after graces)
+        //@09. R8. After graces must go before the barline in the same timepos
 
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "unit-tests/grace-notes/218-after-graces.xml",
@@ -492,6 +492,41 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +f4 s v1 p1 (stem up)(beam 44 ==))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(grace +e4 s v1 p1 (stem up)(beam 44 --))" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_10)
+    {
+        //@10. R8. Graces must go before barlines in the same timepos (two parts)
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/grace-notes/227-grace-notes-two-parts-alignment.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 13 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_eighth)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n a4 e v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n d4 e v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(barline simple)" );
+        CHECK_ENTRY0(it, 1,    0,      0,  32,     1, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace b4 s v1 p1 (stem up)(beam 58 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +c5 s v1 p1 (stem up)(beam 58 ==))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(grace +d5 s v1 p1 (stem up)(beam 58 --))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  32,     0, "(n e5 q v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 1,    0,      1,  32,     1, "(n c4 q v1 p1 (stem up))" );
+        CHECK_ENTRY0(it, 0,    0,      1,  96,     0, "(barline simple)" );
+        CHECK_ENTRY0(it, 1,    0,      1,  96,     1, "(barline simple)" );
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
