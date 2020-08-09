@@ -3128,6 +3128,44 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_11)
+    {
+        //@11. Missing <duration> in regular note/rest
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Part '', measure ''. Note/Rest: missing <duration> element. Assuming 1." << endl;
+        parser.parse_text("<note><pitch><step>B</step><alter>2</alter>"
+            "<octave>2</octave></pitch></note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
+        CHECK( pNote != nullptr );
+        CHECK( is_equal_float(pNote->get_actual_accidentals(), 2.0f) );
+        CHECK( pNote && pNote->get_notated_accidentals() == k_invalid_accidentals );
+        CHECK( pNote && pNote->get_dots() == 0 );
+        CHECK( pNote && pNote->get_note_type() == k_quarter );
+        CHECK( pNote && pNote->get_octave() == 2 );
+        CHECK( pNote && pNote->get_step() == k_step_B );
+        CHECK( pNote && pNote->get_duration() == k_duration_quarter );
+        CHECK( pNote && pNote->is_in_chord() == false );
+        CHECK( pNote && pNote->is_start_of_chord() == false );
+        CHECK( pNote && pNote->is_end_of_chord() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
 
     //@ grace notes ---------------------------------------------------------------------
 

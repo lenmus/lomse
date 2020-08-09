@@ -4139,8 +4139,16 @@ public:
 
         // <duration>, except for grace notes
         int duration = 0;
-        if (!fIsGrace && get_optional("duration"))
-            duration = get_child_value_integer(0);
+        if (!fIsGrace)
+        {
+            if (get_optional("duration"))
+                duration = get_child_value_integer(0);
+            else
+            {
+                error_msg2("Note/Rest: missing <duration> element. Assuming 1.");
+                duration = 1;
+            }
+        }
 
         //tie, except for cue notes
         //(tie, tie?)?
@@ -4357,9 +4365,6 @@ protected:
                 noteType = k_256th;
             }
         }
-
-//        if (units == 0.0 && pNR->is_grace_note())
-//            units = to_duration(noteType, dots);
 
         pNR->set_type_dots_duration(noteType, dots, units);
     }
