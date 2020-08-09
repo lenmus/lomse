@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -128,6 +128,7 @@ class GmoShapeGraceStroke : public GmoShapeLine, public VoiceRelatedShape
 protected:
     friend class NoteEngraver;
     friend class StemFlagEngraver;
+    friend class BeamEngraver;
     GmoShapeGraceStroke(ImoObj* pCreatorImo, LUnits xStart, LUnits yStart, LUnits xEnd,
                         LUnits yEnd, LUnits uWidth, Color color)
         : GmoShapeLine(pCreatorImo, 0, xStart, yStart, xEnd, yEnd, uWidth, 0.0f,

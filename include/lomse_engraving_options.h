@@ -52,8 +52,9 @@ namespace lomse
 
 //Beams
 // Rule B1 (GOULD, p.17)(STONE, p.9) Beam thickness is 1/2 space
-#define LOMSE_BEAM_THICKNESS             5.0f   //"Beam/Thickness of beam line/"
+#define LOMSE_BEAM_THICKNESS             5.0f   //"Beam/Thickness of beam line"
 #define LOMSE_BEAM_HOOK_LENGTH          11.0f
+#define LOMSE_GRACES_BEAM_THICKNESS      3.0f   //"Beam/Thickness of beam line for grace notes"
 
 //Instruments
 #define LOMSE_INSTR_SPACE_AFTER_NAME    10.0f   //"Instr/Space after name/"
@@ -74,7 +75,7 @@ namespace lomse
 #define LOMSE_SPACE_AFTER_ACCIDENTALS    1.5f
 #define LOMSE_SPACE_BETWEEN_ACCIDENTALS  1.5f
 #define LOMSE_LEGER_LINE_OUTGOING        5.0f
-#define LOMSE_GRACE_NOTES_SCALE          0.65f  //Scaling factor for grace notes size
+#define LOMSE_GRACE_NOTES_SCALE          0.60f  //Scaling factor for grace notes size
 #define LOMSE_CUE_NOTES_SCALE            0.75f  //Scaling factor for cue notes size
 
 //System layouter

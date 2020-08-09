@@ -549,7 +549,7 @@ void ChordEngraver::add_stem_and_flag()
 
     //for grace notes, add the stroke shape if required
     ImoNote* pBaseNote = get_base_note();
-    if (pBaseNote->is_grace_note())
+    if (pBaseNote->is_grace_note() && !pBaseNote->is_beamed())
     {
         ImoGraceRelObj* pRO = static_cast<ImoGraceRelObj*>(
                                     pBaseNote->get_grace_relobj() );

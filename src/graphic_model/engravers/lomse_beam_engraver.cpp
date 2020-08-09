@@ -36,6 +36,7 @@
 #include "lomse_im_note.h"
 #include "lomse_gm_basic.h"
 #include "lomse_shape_note.h"
+#include "lomse_shape_line.h"
 #include "lomse_note_engraver.h"
 
 #include <cmath>        // fabs
@@ -140,16 +141,17 @@ GmoShape* BeamEngraver::create_last_shape(Color color)
 
     reposition_rests();
     compute_beam_segments();
+    adjust_stems_length_if_double_beamed();
     create_shape();
     add_shape_to_noterests();
+    add_stroke_for_graces();
     return m_pBeamShape;
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::create_shape()
 {
-    LUnits beamThickness = (m_fGraceNotes ? m_uBeamThickness * 0.8f : m_uBeamThickness);
-    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, beamThickness, m_color);
+    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
     m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed && !m_fCrossStaff);
@@ -166,6 +168,40 @@ void BeamEngraver::add_shape_to_noterests()
     //set voice
     it = m_noteRests.begin();
     m_pBeamShape->set_voice( (it->first)->get_voice() );
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::add_stroke_for_graces()
+{
+    //for beams in grace notes adds a stroke shape included in the first note shape
+
+    if (!(m_fGraceNotes))
+        return;
+
+    pair<ImoNoteRest*, GmoShape*> p = m_noteRests.front();
+    ImoGraceNote* pNote = static_cast<ImoGraceNote*>(p.first);
+    ImoGraceRelObj* pGRO = static_cast<ImoGraceRelObj*>( pNote->get_grace_relobj() );
+    if (pGRO && pGRO->has_slash())
+    {
+        GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>(p.second);
+
+        bool fStemUp = pShapeNote->is_up();
+        LUnits yStemTop = pShapeNote->get_stem_y_flag();
+
+        LUnits uxLeft = tenths_to_logical(4.0f);
+        LUnits xStart = m_pBeamShape->get_left() - uxLeft;
+        LUnits yStart = yStemTop + (fStemUp ? tenths_to_logical(8.0f)
+                                            : -tenths_to_logical(8.0f));
+        LUnits xEnd = xStart + 3.0f * uxLeft;
+        LUnits yEnd = yStart - (fStemUp ? xEnd-xStart : xStart-xEnd);
+
+        LUnits uWidth = tenths_to_logical(LOMSE_STEM_THICKNESS) * 0.7f * LOMSE_GRACE_NOTES_SCALE;
+        GmoShape* pShape = LOMSE_NEW GmoShapeGraceStroke(pNote, xStart, yStart,
+                                                         xEnd, yEnd, uWidth, m_color);
+
+        pShapeNote->add(pShape);
+    }
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -235,7 +271,6 @@ void BeamEngraver::collect_information()
     m_maxStaff = 0;
 
     m_fStemsDown = false;       //set stems up by default (old code. to be removed)
-    m_uBeamThickness = m_pMeter->tenths_to_logical(LOMSE_BEAM_THICKNESS, m_iInstr, m_iStaff);
 
     bool fLastForcedStemUp = false;
     int prevStaff = 0;
@@ -291,6 +326,11 @@ void BeamEngraver::collect_information()
             }
         }
     }
+
+	m_uBeamThickness =
+	    m_pMeter->tenths_to_logical((m_fGraceNotes ? LOMSE_GRACES_BEAM_THICKNESS
+	                                               : LOMSE_BEAM_THICKNESS),
+                                    m_iInstr, m_iStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -321,6 +361,10 @@ void BeamEngraver::decide_beam_position()
     {
         //Cross-staff and double-steamed beams.
         m_fBeamAbove = !m_fStemsDown;
+
+        //for grace notes place beams above
+        if (m_fGraceNotes)
+            m_fBeamAbove = true;
     }
     else
     {
@@ -339,40 +383,42 @@ void BeamEngraver::decide_beam_position()
         {
             //all stems are default direction. Therefore, rules D1 & D2 apply.
 
-            //determine max distance above/below middle line
-            int maxAboveDistance = -1;       //-1 means no note above middle line
-            int maxBelowDistance = -1;       //-1 means no note below middle line
-            for (int i=0; i < m_numNotes; ++i)
-            {
-                int pos = m_note[i]->get_pos_on_staff() - 6;    // 6 is middle line
-                if (pos > 0)
-                    maxAboveDistance = max (maxAboveDistance, pos);
-                else
-                    maxBelowDistance = max(maxBelowDistance, -pos);
-            }
-
-            //D1. (Stone, p.50) The farthest note (extreme note) from the middle line of
-            //    the staff determines the direction of all stems in the beamed group.
-            if ((maxBelowDistance == -1) || (maxAboveDistance > maxBelowDistance))
-            {
-                m_fBeamAbove = false;
-            }
-            else if ((maxAboveDistance == -1) || (maxBelowDistance > maxAboveDistance))
-            {
+            if (m_fGraceNotes)              //for grace notes place beams above
                 m_fBeamAbove = true;
-            }
             else
             {
-                //D2. (Stone, p.50) If there are two extreme notes in opposite directions and
-                //    at the same distance from middle line, then group will be stemmed down.
-                m_fBeamAbove = false;
+                //determine max distance above/below middle line
+                int maxAboveDistance = -1;       //-1 means no note above middle line
+                int maxBelowDistance = -1;       //-1 means no note below middle line
+                for (int i=0; i < m_numNotes; ++i)
+                {
+                    int pos = m_note[i]->get_pos_on_staff() - 6;    // 6 is middle line
+                    if (pos > 0)
+                        maxAboveDistance = max (maxAboveDistance, pos);
+                    else
+                        maxBelowDistance = max(maxBelowDistance, -pos);
+                }
+
+                //D1. (Stone, p.50) The farthest note (extreme note) from the middle line of
+                //    the staff determines the direction of all stems in the beamed group.
+                if ((maxBelowDistance == -1) || (maxAboveDistance > maxBelowDistance))
+                {
+                    m_fBeamAbove = false;
+                }
+                else if ((maxAboveDistance == -1) || (maxBelowDistance > maxAboveDistance))
+                {
+                    m_fBeamAbove = true;
+                }
+                else
+                {
+                    //D2. (Stone, p.50) If there are two extreme notes in opposite directions and
+                    //    at the same distance from middle line, then group will be stemmed down.
+                    m_fBeamAbove = false;
+                }
             }
+
         }
     }
-
-    //for grace notes place beams above
-    if (m_fGraceNotes)
-        m_fBeamAbove = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -460,19 +506,20 @@ void BeamEngraver::compute_beam_segments()
 
     LUnits uStaffSpace = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
     LUnits uStaffLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff);
-    LUnits uBeamSpacing = m_uBeamThickness;
-    if (m_numLevels <= 3)
-        uBeamSpacing += uStaffSpace + (uStaffLine - 3.0f * m_uBeamThickness) / 2.0f;
-    else if (m_numLevels == 4)
-        uBeamSpacing += uStaffSpace + (uStaffLine - 4.0f * m_uBeamThickness) / 3.0f;
-    else if (m_numLevels == 5)
-        uBeamSpacing += uStaffSpace + (uStaffLine - 5.0f * m_uBeamThickness) / 4.0f;
-    else
-        uBeamSpacing += uStaffSpace + (uStaffLine - 6.0f * m_uBeamThickness) / 5.0f;
-
-    //reduce beam thickness for grace notes
+    LUnits uBeamSpacing = m_uBeamThickness;     //distance fron one beam to the next one
     if (m_fGraceNotes)
-        uBeamSpacing *= LOMSE_GRACE_NOTES_SCALE;
+        uBeamSpacing *= 1.5;
+    else
+    {
+        if (m_numLevels <= 3)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 3.0f * m_uBeamThickness) / 2.0f;
+        else if (m_numLevels == 4)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 4.0f * m_uBeamThickness) / 3.0f;
+        else if (m_numLevels == 5)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 5.0f * m_uBeamThickness) / 4.0f;
+        else
+            uBeamSpacing += uStaffSpace + (uStaffLine - 6.0f * m_uBeamThickness) / 5.0f;
+    }
 
     LUnits uxPrev=0, uyPrev=0, uxCur=0, uyCur=0;    // points for previous and current note
     LUnits uyShift = 0;     // shift, to separate a beam line from the previous one
@@ -600,7 +647,7 @@ void BeamEngraver::compute_beam_segments()
 
     //take beam thickness into account for bounding box
     m_origin.y -= uHalfBeam;
-    m_size.height += (m_fGraceNotes ? m_uBeamThickness * LOMSE_GRACE_NOTES_SCALE : m_uBeamThickness);
+    m_size.height += m_uBeamThickness;
 
     //adjust segments to make them relative to m_origin
     make_segments_relative();
@@ -609,7 +656,7 @@ void BeamEngraver::compute_beam_segments()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd)
 {
-    LUnits uSpace = (m_fGraceNotes ? m_uBeamThickness * LOMSE_GRACE_NOTES_SCALE : m_uBeamThickness) / 2.0f;
+    LUnits uSpace = m_uBeamThickness / 2.0f;
     LUnits uyShift = m_fBeamAbove ? uSpace : -uSpace;
 
     m_segments.push_back(uxStart);
@@ -661,10 +708,17 @@ void BeamEngraver::compute_beam_and_stems_for_simple_beams()
     {
         create_horizontal_beam_and_set_stems(pos0, posN);
     }
+    else if (m_fGraceNotes)
+    {
+        float slant = assign_slant_to_beam_for_grace_notes(pos0, posN);
+        assing_stem_length_to_outer_grace_notes(slant, pos0, posN);
+        if (m_numNotes > 2)
+            assing_stem_length_to_inner_notes();
+    }
     else
     {
-        float slant = assign_slant_to_beam(pos0, posN);
-        assing_stem_length_to_outer_notes(slant, pos0, posN);
+        float slant = assign_slant_to_beam_for_regular_notes(pos0, posN);
+        assing_stem_length_to_outer_regular_notes(slant, pos0, posN);
         if (m_numNotes > 2)
             assing_stem_length_to_inner_notes();
     }
@@ -689,11 +743,28 @@ void BeamEngraver::beam_angle_and_stems_for_cross_staff_and_double_steamed_beams
 	int n = m_numNotes - 1;	// index to last element
 	bool fAdjustIntermediateFlags = m_numNotes > 2;
 
-    m_uBeamThickness = m_pMeter->tenths_to_logical(LOMSE_BEAM_THICKNESS, m_iInstr, m_iStaff);
+//	m_uBeamThickness =
+//	    m_pMeter->tenths_to_logical((m_fGraceNotes ? LOMSE_GRACES_BEAM_THICKNESS
+//	                                               : LOMSE_BEAM_THICKNESS),
+//                                    m_iInstr, m_iStaff);
 
 	//determine beam angle (measured in staff spaces).
 	//negative angle means that first note is lower pitch than last note.
     LUnits Ay = yFlag[n] - yFlag[0];
+
+    //For grace notes force horizontal beam
+    if (m_fGraceNotes && Ay != 0.0f)
+    {
+        LUnits uyIncr = abs(Ay / 2.0f);
+        if (yNote[0] < yFlag[0])
+            uyIncr = -uyIncr;
+
+        yFlag[0] -= uyIncr;
+        yFlag[n] += uyIncr;
+        m_note[0]->set_stem_length( fabs(yFlag[0] - yNote[0]) );
+        m_note[n]->set_stem_length( fabs(yFlag[n] - yNote[n]) );
+        Ay = 0.0f;
+    }
 
     //End of rules. Following code is for adjusting the stems for the remaing notes
     if (fAdjustIntermediateFlags)
@@ -782,6 +853,22 @@ void BeamEngraver::beam_angle_and_stems_for_cross_staff_and_double_steamed_beams
 }
 
 //---------------------------------------------------------------------------------------
+void BeamEngraver::adjust_stems_length_if_double_beamed()
+{
+    if (m_fGraceNotes && (m_fCrossStaff || m_fStemsMixed || m_fHasChords))
+    {
+        //increment length of downstems so that they reach lowest beam line
+
+        LUnits uyIncr = m_size.height;
+        for(int i=0; i < m_numNotes; i++)
+        {
+            if (!m_note[i]->is_up())
+                m_note[i]->increment_stem_length(uyIncr);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
 bool BeamEngraver::has_repeated_pattern_of_pitches()
 {
     if (m_numNotes == 2)
@@ -846,7 +933,71 @@ void BeamEngraver::increment_cross_staff_stems(LUnits yIncrement)
 }
 
 //---------------------------------------------------------------------------------------
-float BeamEngraver::assign_slant_to_beam(int pos0, int posN)
+float BeamEngraver::assign_slant_to_beam_for_grace_notes(int pos0, int posN)
+{
+    //Rules for assigning the slant when the beam is not horizontal
+
+
+    float slant = 0.25f;    //minimun slant: 1/4 space
+    if (m_numNotes > 2)
+    {
+        //slant will depend on number of steps between notes:
+        //  0 : slant=0 (horizontal)
+        //  1-2: slant=0.25
+        //  3-4: slant=0.5
+        //  > 4: slant=0.75
+        int steps = abs(pos0-posN);
+        if (steps == 0)
+            slant = 0.0f;
+        else if (steps < 3)
+            slant = 0.25f;
+        else if (steps < 5)
+            slant = 0.50f;
+        else
+            slant = 0.75f;
+    }
+
+    return slant;
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::assing_stem_length_to_outer_grace_notes(float slant, int pos0, int posN)
+{
+    //slant is always positive
+
+    //identify the outer note having the shortest stem
+    int posS = 0;   //posOnStaff for outer note with shortest stem
+    int iS = 0;     //index for outer note with shortest stem
+    int iL = 0;     //index for outer note with longest stem
+    if ((pos0 < posN && m_fBeamAbove) || (pos0 > posN && !m_fBeamAbove))
+    {
+        posS = posN;
+        iS = m_numNotes - 1;
+        iL = 0;
+    }
+    else
+    {
+        posS = pos0;
+        iS = 0;
+        iL = m_numNotes - 1;
+    }
+
+    //assign length (in spaces) to shortest stem note:
+    //   If note on line assign it 2.3 spaces, else assign 1.8 spaces.
+    float stemS = (abs(posS % 2) == 0 ? 2.3f : 1.8f);
+
+    //assign length to the other stem note:
+    float stemL = stemS + abs(pos0-posN) * 0.50f;     //increment so the beam is horizontal
+    stemL -= slant;         //apply the slant
+
+    //transfer stems to notes
+    LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+    m_note[iS]->set_stem_length(stemS * staffSpace);
+    m_note[iL]->set_stem_length(stemL * staffSpace);
+}
+
+//---------------------------------------------------------------------------------------
+float BeamEngraver::assign_slant_to_beam_for_regular_notes(int pos0, int posN)
 {
     //Rules for assigning the slant when the beam is not horizontal
 
@@ -1075,7 +1226,7 @@ void BeamEngraver::create_horizontal_beam_and_set_stems(int pos0, int posN)
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::assing_stem_length_to_outer_notes(float slant, int pos0, int posN)
+void BeamEngraver::assing_stem_length_to_outer_regular_notes(float slant, int pos0, int posN)
 {
     //slant is the desired slant (0.25 | 0.5 | 1.0 | 1.25 | 1.50 | 2.0) in spaces.
     //slant is negative when beam going down
@@ -1190,13 +1341,6 @@ void BeamEngraver::assing_stem_length_to_outer_notes(float slant, int pos0, int 
         LUnits incr = (m_numLevels - 2);
         stemS += incr;
         stemL += incr;
-    }
-
-    //for grace notes reduce stems length
-    if (m_fGraceNotes)
-    {
-        stemS *= LOMSE_GRACE_NOTES_SCALE;
-        stemL *= LOMSE_GRACE_NOTES_SCALE;
     }
 
     //transfer stems to notes

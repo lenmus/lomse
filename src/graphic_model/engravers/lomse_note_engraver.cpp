@@ -296,7 +296,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
         m_pNoteShape->set_up_oriented(!m_fStemDown);
 
         //if it is a grace note, add stroke shape if necessary
-        if (m_pNote->is_grace_note() && !is_in_chord())
+        if (m_pNote->is_grace_note() && !is_in_chord() && !is_beamed())
         {
             ImoGraceRelObj* pRO = static_cast<ImoGraceRelObj*>(
                                         m_pNote->get_grace_relobj() );
