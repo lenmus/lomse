@@ -44,6 +44,7 @@
 #include "lomse_accidentals_engraver.h"
 #include "lomse_chord_engraver.h"
 #include "lomse_internal_model.h"
+#include "lomse_staffobjs_cursor.h"
 
 #include <sstream>
 using namespace std;
@@ -81,7 +82,7 @@ NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 
 //---------------------------------------------------------------------------------------
 GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, int octaveShift,
-                                     UPoint uPos, Color color)
+                                     UPoint uPos, StaffObjsCursor* pCursor, Color color)
 {
     //save data and initialize
     m_pNote = pNote;
@@ -90,6 +91,7 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, int octaveShi
     m_symbolSize = (pNote->is_regular_note() ? k_size_full : k_size_cue);
     m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
     m_color = color;
+    m_pCursor = pCursor;
     m_pNoteShape = nullptr;
     m_pNoteheadShape = nullptr;
     m_fontSize = determine_font_size();
@@ -159,8 +161,8 @@ void NoteEngraver::create_shape()
 {
 	//create the note container shape
 	if (m_pNote->is_start_of_chord())
-        m_pNoteShape = LOMSE_NEW GmoShapeChordBaseNote(m_pNote, m_uxLeft, m_uyTop,
-                                                       m_color, m_libraryScope);
+	    m_pNoteShape = LOMSE_NEW GmoShapeChordBaseNote(m_pNote, m_uxLeft, m_uyTop,
+                                                           m_color, m_libraryScope);
     else
         m_pNoteShape = LOMSE_NEW GmoShapeNote(m_pNote, m_uxLeft, m_uyTop, m_color,
                                               m_libraryScope);
@@ -196,7 +198,22 @@ UPoint NoteEngraver::get_drag_offset()
 void NoteEngraver::determine_stem_direction()
 {
 
-    if (m_pNote->is_grace_note())
+    ImoBeam* pBeam = m_pNote->get_beam();
+    if (pBeam && pBeam->contains_chords())
+    {
+        //As the stem will be engraved by the beam, it doesn't matter with stem
+        //direction is set in this method
+        m_fStemDown = false;
+        if (m_pNote == pBeam->get_start_object())
+        {
+            //When the note is in a beam and the beam contains chords, stem direction
+            //will be computed by the BeamedChordHelper.
+            vector<int> clefs = m_pCursor->get_applicable_clefs_for_instrument(m_iInstr);
+            BeamedChordHelper helper(pBeam, &clefs);
+            m_fStemDown = helper.compute_stems_directions();
+        }
+    }
+    else if (m_pNote->is_grace_note())
     {
         //for grace notes stem is always up unless stem down explicitly requested
         m_fStemDown = (m_pNote->get_stem_direction() == k_stem_down);
@@ -292,7 +309,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
         StemFlagEngraver engrv(m_libraryScope, m_pMeter, m_pNote, m_iInstr, m_iStaff,
                                m_fontSize);
         engrv.add_stem_flag_to_note(m_pNoteShape, m_noteType, m_fStemDown, fHasFlag,
-                                    fShortFlag, fHasBeam, stemLength, m_color);
+                                    fShortFlag, fHasBeam, stemLength, false, m_color);
         m_pNoteShape->set_up_oriented(!m_fStemDown);
 
         //if it is a grace note, add stroke shape if necessary
@@ -393,24 +410,11 @@ int NoteEngraver::get_glyph_for_notehead(int noteheadType)
 //---------------------------------------------------------------------------------------
 int NoteEngraver::get_pos_on_staff()
 {
-    // Returns the position on the staff (line/space) referred to the first ledger
-    // line of the staff. Depends on clef:
-    //        0 - on first ledger line (C note in G clef)
-    //        1 - on next space (D in G clef)
-    //        2 - on first line (E not in G clef)
-    //        3 - on first space
-    //        4 - on second line
-    //        5 - on second space
-    //        etc.
-
-    if (!m_pNote->is_pitch_defined())
-        return 0;   //first bottom ledger line
-    else
-        return pitch_to_pos_on_staff(m_clefType);
+    return pitch_to_pos_on_staff(m_pNote, m_clefType, m_octaveShift);
 }
 
 //---------------------------------------------------------------------------------------
-int NoteEngraver::pitch_to_pos_on_staff(int clefType)
+int NoteEngraver::pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octaveShift)
 {
     // Returns the position on the staff (line/space) referred to the first ledger line of
     // the staff. Depends on clef:
@@ -422,8 +426,11 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
     //        5 - on second space
     //        etc.
 
-    DiatonicPitch dpitch(m_pNote->get_step(), m_pNote->get_octave());
-    dpitch += m_octaveShift;
+    if (!pNote->is_pitch_defined())
+        return 0;   //first bottom ledger line
+
+    DiatonicPitch dpitch(pNote->get_step(), pNote->get_octave());
+    dpitch += octaveShift;
 
 	// pitch is defined. Position will depend on key
     switch (clefType)
@@ -625,6 +632,7 @@ void NoteEngraver::layout_chord()
     pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
                              0.0f, 0.0f, 0.0f, m_idxStaff, nullptr);
 
+    pEngrv->save_applicable_clefs(m_pCursor, m_iInstr);
     pEngrv->create_shapes(pChord->get_color());
 
     m_pEngravers->remove_engraver(pChord);
@@ -646,71 +654,36 @@ StemFlagEngraver::StemFlagEngraver(LibraryScope& libraryScope, ScoreMeter* pScor
     , m_fStemDown(false)
     , m_fWithFlag(false)
     , m_fShortFlag(false)
-    , m_fCrossStaffChord(false)
     , m_uStemLength(0.0f)
     , m_fontSize(fontSize)
     , m_pCreatorImo(pCreatorImo)
-    , m_pFlagNoteShape(nullptr)
-    , m_pRefNoteShape(nullptr)
-    , m_pBaseNoteShape(nullptr)
+    , m_pNoteShape(nullptr)
     , m_pFlagShape(nullptr)
+    , m_pNoteheadShape(nullptr)
     , m_uStemThickness(0.0f)
     , m_uxStem(0.0f)
     , m_yStemTop(0.0f)
-    , m_yStemFlag(0.0f)
     , m_yStemBottom(0.0f)
-    , m_pRefNoteheadShape(nullptr)
 {
 }
 
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteType,
                                      bool fStemDown, bool fWithFlag, bool fShortFlag,
-                                     bool fHasBeam, LUnits stemLength, Color color)
+                                     bool fHasBeam, LUnits stemLength,
+                                     bool fNoteheadReversed, Color color)
 {
-    m_pRefNoteShape = pNoteShape;
-    m_pFlagNoteShape = pNoteShape;
-    m_pBaseNoteShape = pNoteShape;
-    m_pRefNoteheadShape = pNoteShape->get_notehead_shape();
+    m_pNoteShape = pNoteShape;
+    m_pNoteheadShape = pNoteShape->get_notehead_shape();
     m_noteType = noteType;
     m_fStemDown = fStemDown;
     m_fWithFlag = fWithFlag;
     m_fShortFlag = fShortFlag;
     m_fHasBeam = fHasBeam;
-    m_fCrossStaffChord = false;
+    m_fNoteheadReversed = fNoteheadReversed;
     m_uStemLength = stemLength;
     m_color = color;
 
-    add_stem_and_flag();
-}
-
-//---------------------------------------------------------------------------------------
-void StemFlagEngraver::add_stem_flag_to_chord(GmoShapeNote* pMinNoteShape,
-                                     GmoShapeNote* pMaxNoteShape,
-                                     GmoShapeNote* pBaseNoteShape, int noteType,
-                                     bool fStemDown, bool fWithFlag, bool fShortFlag,
-                                     bool fHasBeam, bool fCrossStaffChord,
-                                     LUnits stemLength, Color color)
-{
-    m_pRefNoteShape = (fStemDown ? pMaxNoteShape : pMinNoteShape);
-    m_pFlagNoteShape = (fStemDown ? pMinNoteShape : pMaxNoteShape);
-    m_pBaseNoteShape = pBaseNoteShape;
-    m_pRefNoteheadShape = m_pRefNoteShape->get_notehead_shape();
-    m_noteType = noteType;
-    m_fStemDown = fStemDown;
-    m_fWithFlag = fWithFlag;
-    m_fShortFlag = fShortFlag;
-    m_fHasBeam = fHasBeam;
-    m_fCrossStaffChord = fCrossStaffChord;
-    m_uStemLength = stemLength;
-    m_color = color;
-
-    add_stem_and_flag();
-}
-
-//---------------------------------------------------------------------------------------
-void StemFlagEngraver::add_stem_and_flag()
-{
     determine_stem_x_left();
     determine_stem_y_pos();
     add_stem_shape();
@@ -720,53 +693,11 @@ void StemFlagEngraver::add_stem_and_flag()
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_stem_shape()
 {
-    if (m_fCrossStaffChord)
-    {
-        //For chords across two or more staves it is required to split the stem into
-        //two segments, one for the flag (the 'fixed segment' or 'flag segment') and
-        //anoter segment joining all noteheads (the 'extensible segment').
-        //The flag segment will be attached to the lowest pitch note when stem down or
-        //to the highest pith note when stem up.
-        //Base note will store a ptr. to the note shape receiving the flag segment.
-
-        //flag segment. Fixed
-        LUnits yTop = (m_fStemDown ? m_yStemFlag : m_yStemTop);
-        LUnits yBottom = (m_fStemDown ? m_yStemBottom : m_yStemFlag);
-        GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, yTop,
-                                                      0.0f, yBottom, m_fStemDown,
-                                                      m_uStemThickness, m_color);
-        add_voice(pShape);
-        m_pFlagNoteShape->add_stem(pShape);
-
-        //extensible segment.
-        if (m_pRefNoteShape != m_pFlagNoteShape)
-        {
-            LUnits yTop = (m_fStemDown ? m_yStemTop : m_yStemFlag);
-            LUnits yBottom = (m_fStemDown ? m_yStemFlag : m_yStemBottom);
-            GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, yTop,
-                                                          0.0f, yBottom, m_fStemDown,
-                                                          m_uStemThickness, m_color);
-            add_voice(pShape);
-            m_pRefNoteShape->add_stem(pShape);
-        }
-
-        //set pointer to flag segment in chord base note shape
-        static_cast<GmoShapeChordBaseNote*>(m_pBaseNoteShape)->set_flag_note(m_pFlagNoteShape);
-    }
-    else
-    {
-        //Just the fixed segment
-        GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, m_yStemTop,
-                                                      0.0f, m_yStemBottom, m_fStemDown,
-                                                      m_uStemThickness, m_color);
-        add_voice(pShape);
-        m_pBaseNoteShape->add_stem(pShape);
-
-        //set pointer to flag segment in chord base note shape
-        if (m_pBaseNoteShape->is_shape_chord_base_note())
-            static_cast<GmoShapeChordBaseNote*>(m_pBaseNoteShape)->set_flag_note(m_pBaseNoteShape);
-    }
-
+    GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, m_yStemTop,
+                                                  0.0f, m_yStemBottom, m_fStemDown,
+                                                  m_uStemThickness, m_color);
+    add_voice(pShape);
+    m_pNoteShape->add_stem(pShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -786,18 +717,19 @@ void StemFlagEngraver::add_flag_shape_if_required()
         m_pFlagShape = LOMSE_NEW GmoShapeFlag(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
                                               m_color, m_libraryScope, m_fontSize);
         add_voice(m_pFlagShape);
-        m_pFlagNoteShape->add_flag(m_pFlagShape);
+        m_pNoteShape->add_flag(m_pFlagShape);
     }
 }
 
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_stroke_shape()
 {
+    //invoked only for isolated notes and for chords but not for beams
+
     LUnits xStart, yStart, xEnd, yEnd = 0.0;
     LUnits uxFlagLeft = 0.0f;
     if (m_pFlagShape)
     {
-        //single note with flag or chord
         uxFlagLeft = m_pFlagShape->get_width() * 0.4f;
         xStart = m_uxStem - uxFlagLeft;
         xEnd = m_uxStem + m_pFlagShape->get_width();
@@ -807,7 +739,7 @@ void StemFlagEngraver::add_stroke_shape()
     }
     else
     {
-        //grace note without flag, beamed note or chord
+        //grace note withou flag: grace quarter notes
         uxFlagLeft = tenths_to_logical(4.0f);
         xStart = m_uxStem - uxFlagLeft;
         yStart = (m_fStemDown ? m_yStemBottom - tenths_to_logical(14.0f)
@@ -819,11 +751,11 @@ void StemFlagEngraver::add_stroke_shape()
     //fix anchor when stem down
     if (m_fStemDown)
     {
-        LUnits anchor = m_pFlagNoteShape->get_anchor_offset();
+        LUnits anchor = m_pNoteShape->get_anchor_offset();
         if (anchor <= 0.0f)
         {
             anchor = min(anchor, -uxFlagLeft);
-            m_pFlagNoteShape->set_anchor_offset(anchor);
+            m_pNoteShape->set_anchor_offset(anchor);
         }
     }
 
@@ -831,7 +763,7 @@ void StemFlagEngraver::add_stroke_shape()
     LUnits uWidth = tenths_to_logical(LOMSE_STEM_THICKNESS) * 0.7f * LOMSE_GRACE_NOTES_SCALE;
     GmoShape* pShape = LOMSE_NEW GmoShapeGraceStroke(m_pCreatorImo, xStart, yStart,
                                                      xEnd, yEnd, uWidth, m_color);
-    m_pFlagNoteShape->add(pShape);
+    m_pNoteShape->add(pShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -839,36 +771,30 @@ void StemFlagEngraver::determine_stem_x_left()
 {
     m_uStemThickness = tenths_to_logical(LOMSE_STEM_THICKNESS);
 
-    if (m_fStemDown)
-		m_uxStem = m_pRefNoteheadShape->get_left();
+    bool fAtLeft = m_fStemDown;
+    if (m_fNoteheadReversed)
+        fAtLeft = !fAtLeft;
+
+    if (fAtLeft)
+		m_uxStem = m_pNoteheadShape->get_left();
     else
-		m_uxStem = m_pRefNoteheadShape->get_right() - m_uStemThickness;
+		m_uxStem = m_pNoteheadShape->get_right() - m_uStemThickness;
 }
 
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::determine_stem_y_pos()
 {
-    GmoShape* pTopNotehead = (m_fStemDown ? m_pRefNoteShape : m_pFlagNoteShape)->get_notehead_shape();
-    GmoShape* pBottomNotehead = (m_fStemDown ? m_pFlagNoteShape : m_pRefNoteShape)->get_notehead_shape();
-    LUnits halfNotehead = pTopNotehead->get_height() / 2.0f;
+    GmoShape* pNotehead = m_pNoteShape->get_notehead_shape();
+    LUnits halfNotehead = pNotehead->get_height() / 2.0f;
 
-    //top of fixed/extensible when up/down, respectively
-    m_yStemTop = pTopNotehead->get_top() + halfNotehead;
-
-    //bottom of extensible/fixed when up/down, respectively
-    m_yStemBottom = pBottomNotehead->get_top() + halfNotehead;
+    m_yStemTop = pNotehead->get_top() + halfNotehead;
+    m_yStemBottom = m_yStemTop;
 
     //re-arrange from top to bottom
     if (m_fStemDown)
-    {
-        m_yStemFlag = m_yStemBottom;
         m_yStemBottom += m_uStemLength;
-    }
     else
-    {
-        m_yStemFlag = m_yStemTop;
         m_yStemTop -= m_uStemLength;
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -913,11 +839,8 @@ LUnits StemFlagEngraver::get_glyph_offset(int iGlyph)
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_voice(VoiceRelatedShape* pVRS)
 {
-    if (m_pRefNoteShape)
-    {
-        VoiceRelatedShape* pNote = static_cast<VoiceRelatedShape*>(m_pRefNoteShape);
-        pVRS->set_voice(pNote->get_voice());
-    }
+    VoiceRelatedShape* pNote = static_cast<VoiceRelatedShape*>(m_pNoteShape);
+    pVRS->set_voice(pNote->get_voice());
 }
 
 

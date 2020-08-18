@@ -45,11 +45,9 @@ namespace lomse
 //=======================================================================================
 GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo,
                            LUnits UNUSED(x), LUnits UNUSED(y), Color color,
-                           LibraryScope& libraryScope)
+                           LibraryScope& UNUSED(libraryScope))
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_note, 0, color)
     , VoiceRelatedShape()
-    , m_pFontStorage( libraryScope.font_storage() )
-    , m_libraryScope(libraryScope)
     , m_pNoteheadShape(nullptr)
 	, m_pStemShape(nullptr)
     , m_pAccidentalsShape(nullptr)
@@ -61,6 +59,8 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo,
     , m_uLineOutgoing(0)
     , m_uLineThickness(0)
     , m_lineSpacing(0)
+    , m_chordNoteType(k_chord_note_no)
+    , m_pBaseNoteShape(nullptr)
 {
 }
 
@@ -307,6 +307,15 @@ bool GmoShapeNote::is_in_chord()
 }
 
 //---------------------------------------------------------------------------------------
+bool GmoShapeNote::is_cross_staff_chord()
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
+    if (pNote)
+        return pNote->is_cross_staff_chord();
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
 void GmoShapeNote::set_color(Color color)
 {
     m_pNoteheadShape->set_color(color);
@@ -331,16 +340,41 @@ void GmoShapeNote::dump(ostream& outStream, int level)
 }
 
 
+//=======================================================================================
+// GmoShapeChordBaseNote implementation
+//=======================================================================================
+void GmoShapeChordBaseNote::set_flag_note(GmoShapeNote* pNote)
+{
+    m_pFlagNote = pNote;
+    pNote->set_chord_note_type(k_chord_note_flag);
+    pNote->set_base_note_shape(this);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeChordBaseNote::set_link_note(GmoShapeNote* pNote)
+{
+    m_pLinkNote = pNote;
+    pNote->set_chord_note_type(k_chord_note_link);
+    pNote->set_base_note_shape(this);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeChordBaseNote::set_start_note(GmoShapeNote* pNote)
+{
+    m_pStartNote = pNote;
+    pNote->set_chord_note_type(k_chord_note_start);
+    pNote->set_base_note_shape(this);
+}
+
 
 //=======================================================================================
 // GmoShapeRest implementation
 //=======================================================================================
 GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx,
                            LUnits UNUSED(x), LUnits UNUSED(y), Color color,
-                           LibraryScope& libraryScope)
+                           LibraryScope& UNUSED(libraryScope))
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_rest, idx, color)
     , VoiceRelatedShape()
-    , m_libraryScope(libraryScope)
 	, m_pBeamShape(nullptr)
 {
 }

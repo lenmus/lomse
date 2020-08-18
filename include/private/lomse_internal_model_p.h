@@ -77,6 +77,7 @@ class ImoDocument;
 //---------------------------------------------------------------------------------------
 //forward declarations
 class ColStaffObjs;
+class ColStaffObjsEntry;
 class LdpElement;
 class SoundEventsTable;
 class Document;
@@ -588,6 +589,40 @@ enum ERepeatMark
     k_repeat_dal_segno_al_fine,		///< Dal Segno al Fine
     k_repeat_dal_segno_al_coda,		///< Dal Segno al Coda
     k_repeat_to_coda,				///< To Coda
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    When engravers decide the direction for an stem, the computed value is represented
+    by a value from this enum.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EComputedStem
+{
+    k_computed_stem_undecided,       ///< No yet computed
+    k_computed_stem_up,              ///< Stem will be up. Not forced by the user
+    k_computed_stem_down,            ///< Stem will be down. Not forced by the user
+    k_computed_stem_forced_up,       ///< Stem is forced by the user to be up
+    k_computed_stem_forced_down,     ///< Stem is forced by the user to be down
+    k_computed_stem_none,            ///< No stem
+};
+
+//-----------------------------------------------------------------------------
+/** @ingroup enumerations
+
+    When engravers decide the position for a beam, the computed value is represented
+    by a value from this enum.
+
+    @#include <lomse_internal_model.h>
+*/
+enum EComputedBeam
+{
+    k_beam_undecided = 0,   ///< No yet computed
+    k_beam_above,           ///< Beam will be placed above. Stems up
+    k_beam_below,           ///< Beam will be placed below. Stems down
+    k_beam_double_stemmed,  ///< Beam with stems at both sides
 };
 
 //-----------------------------------------------------------------------------
@@ -2686,13 +2721,13 @@ class ImoStaffObj : public ImoScoreObj
 {
 protected:
     int m_staff;
-    int m_measure;
     TimeUnits m_time;
+    ColStaffObjsEntry* m_pEntry;        //entry in ColStaffObjs table associated to this staffobj
 
     ImoStaffObj(int objtype)
-        : ImoScoreObj(objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
+        : ImoScoreObj(objtype), m_staff(0), m_time(0.0), m_pEntry(nullptr) {}
     ImoStaffObj(ImoId id, int objtype)
-        : ImoScoreObj(id, objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
+        : ImoScoreObj(id, objtype), m_staff(0), m_time(0.0), m_pEntry(nullptr) {}
 
 public:
     virtual ~ImoStaffObj();
@@ -2714,12 +2749,12 @@ public:
     inline TimeUnits get_time() { return m_time; }
     virtual TimeUnits get_duration() { return 0.0; }
     inline int get_staff() { return m_staff; }
-    inline int get_measure() { return m_measure; }
+    inline ColStaffObjsEntry* get_colstaffobjs_entry() { return m_pEntry; }
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
     virtual void set_time(TimeUnits rTime) { m_time = rTime; }
-    inline void set_measure(int measure) { m_measure = measure; }
+    inline void set_colstaffobjs_entry(ColStaffObjsEntry* pEntry) { m_pEntry = pEntry; }
 
     //other
     ImoInstrument* get_instrument();
@@ -2814,7 +2849,7 @@ protected:
 public:
     virtual ~ImoRelObj();
 
-    void push_back(ImoStaffObj* pSO, ImoRelDataObj* pData);
+    virtual void push_back(ImoStaffObj* pSO, ImoRelDataObj* pData);
     void remove(ImoStaffObj* pSO);
     void remove_all();
     inline int get_num_objects()
@@ -3066,14 +3101,44 @@ public:
 class ImoChord : public ImoRelObj
 {
 protected:
+    bool m_fCrossStaff;        //it is a cross-staff chord
+    int m_stemDirection;       //value from EComputedStem enum
+
+    friend class ChordEngraver;
+    friend class BeamedChordHelper;
+    inline void set_stem_direction(int value) { m_stemDirection = value; }
+
     friend class ImFactory;
-    ImoChord() : ImoRelObj(k_imo_chord) {}
+    ImoChord()
+        : ImoRelObj(k_imo_chord)
+        , m_fCrossStaff(false)
+        , m_stemDirection(k_computed_stem_undecided)
+    {
+    }
 
 public:
     virtual ~ImoChord() {}
 
+    inline bool is_cross_staff() { return m_fCrossStaff; }
+    void update_cross_staff_data();
+    ImoNote* get_start_note();
+    ImoNote* get_end_note();
+    inline bool is_stem_up() { return m_stemDirection == k_computed_stem_up
+                                      || m_stemDirection == k_computed_stem_forced_up; }
+    inline bool is_stem_down() { return m_stemDirection == k_computed_stem_down
+                                        || m_stemDirection == k_computed_stem_forced_down; }
+    inline bool is_stem_forced_up() { return m_stemDirection == k_computed_stem_forced_up; }
+    inline bool is_stem_forced_down() { return m_stemDirection == k_computed_stem_forced_down; }
+    inline bool is_stem_direction_decided() { return m_stemDirection != k_computed_stem_undecided; }
+    inline bool is_stem_forced() { return m_stemDirection == k_computed_stem_forced_down
+                                          || m_stemDirection == k_computed_stem_forced_up; }
+
     //required override for ImoRelObj
-    void reorganize_after_object_deletion() override {}
+    void reorganize_after_object_deletion() override;
+
+    //override for ImoRelObj
+    void push_back(ImoStaffObj* pSO, ImoRelDataObj* pData) override;
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -3668,17 +3733,24 @@ public:
 class ImoBeam : public ImoRelObj
 {
 protected:
+    vector<int>* m_pStemsDir;     //engravers computed values for stem directions
+
+    friend class BeamedChordHelper;
+    void set_stems_direction(vector<int>* pStemsDir);
+
     friend class ImFactory;
-    ImoBeam() : ImoRelObj(k_imo_beam) {}
+    ImoBeam() : ImoRelObj(k_imo_beam), m_pStemsDir(nullptr) {}
 
 public:
-    virtual ~ImoBeam() {}
+    virtual ~ImoBeam() { delete m_pStemsDir; }
 
     //type of beam
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
 
     int get_max_staff();
     int get_min_staff();
+    bool contains_chords();
+    inline vector<int>* get_stems_direction() const { return m_pStemsDir; }
 
     //required override for ImoRelObj
     void reorganize_after_object_deletion() override;

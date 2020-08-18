@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -390,8 +390,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 int octaveShift = m_pSysCursor->get_applicable_octave_shift();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
-                         pagePos, clefType, octaveShift);
-                //TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
+                         pagePos, clefType, octaveShift, 0, m_pSysCursor);
                 m_pSpAlgorithm->include_object(m_pSysCursor->cur_entry(), m_iColumn,
                                                iInstr, iStaff, pSO, pShape);
 

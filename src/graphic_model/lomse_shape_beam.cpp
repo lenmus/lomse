@@ -46,6 +46,7 @@ GmoShapeBeam::GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness, Color col
     , VoiceRelatedShape()
     , m_uBeamThickness(uBeamThickness)
     , m_BeamFlags(0)
+    , m_staff(0)
 {
 }
 
@@ -56,13 +57,23 @@ GmoShapeBeam::~GmoShapeBeam()
 
 //---------------------------------------------------------------------------------------
 void GmoShapeBeam::set_layout_data(std::list<LUnits>& segments, UPoint origin,
-                                   USize size, UPoint outerLeft, UPoint outerRight)
+                                   USize size, UPoint outerLeft, UPoint outerRight,
+                                   bool fCrossStaff, bool fChord, int beamPos, int staff)
 {
     m_segments = segments;
     m_origin = origin;
     m_size = size;
     m_outerLeftPoint = outerLeft;
     m_outerRightPoint = outerRight;
+    fCrossStaff ? m_BeamFlags |= k_cross_staff : m_BeamFlags &= ~k_cross_staff;
+    fChord ? m_BeamFlags |= k_for_chord : m_BeamFlags &= ~k_for_chord;
+    m_staff = staff;
+    if (beamPos == EComputedBeam::k_beam_double_stemmed)
+        m_BeamFlags |= GmoShapeBeam::k_beam_double_stemmed;
+    else if (beamPos == EComputedBeam::k_beam_above)
+        m_BeamFlags |= GmoShapeBeam::k_beam_above;
+    else
+        m_BeamFlags |= GmoShapeBeam::k_beam_below;
 }
 
 //---------------------------------------------------------------------------------------

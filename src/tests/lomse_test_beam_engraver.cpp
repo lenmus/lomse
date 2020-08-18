@@ -65,18 +65,15 @@ public:
     {
     }
 
-    inline void my_collect_information() { collect_information(); }
-    inline void my_decide_beam_position() { decide_beam_position(); }
+    inline void my_decide_stems_direction() { decide_stems_direction(); }
     inline bool my_stems_forced() { return m_fStemForced; }
-    inline bool my_stems_mixed() { return m_fStemsMixed; }
-    inline bool my_stems_down() { return m_fStemsDown; }
-    inline bool my_stems_default() { return m_fDefaultSteams; }
     inline bool my_stems_up() { return m_fStemsUp; }
-    inline bool my_is_beam_above() { return m_fBeamAbove; }
+    inline int my_get_beam_position() { return m_beamPos; }
     inline bool my_is_cross_staff() { return m_fCrossStaff; }
-    inline int my_get_num_stems_down() { return m_numStemsDown; }
+    inline bool my_is_double_stemmed() { return m_fDoubleStemmed; }
+    inline int my_get_max_staff() { return m_maxStaff; }
+    inline int my_get_min_staff() { return m_minStaff; }
     inline int my_get_num_notes() { return m_numNotes; }
-    inline int my_get_average_pos_on_staff() { return m_averagePosOnStaff; }
     inline bool my_has_repeated_pattern_of_pitches() {
         return has_repeated_pattern_of_pitches();
     }
@@ -374,7 +371,7 @@ public:
     void check_repeated_pattern_of_pitches(int iLine, ImoBeam* pBeam, bool fExpected)
     {
         prepare_to_engrave_beam(pBeam);
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
         bool fResult = m_pBeamEngrv->my_has_repeated_pattern_of_pitches();
         bool fSuccess = (fResult == fExpected);
         CHECK( fSuccess );
@@ -390,7 +387,7 @@ public:
     void check_all_notes_outside_first_ledger_line(int iLine, ImoBeam* pBeam, bool fExpected)
     {
         prepare_to_engrave_beam(pBeam);
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
         bool fResult = m_pBeamEngrv->my_check_all_notes_outside_first_ledger_line();
         bool fSuccess = (fResult == fExpected);
         CHECK( fSuccess );
@@ -464,23 +461,23 @@ SUITE(BeamEngraverTest)
     }
 
 
-    // collect_information --------------------------------------------------------------
+    // decide_stems_direction --------------------------------------------------------------
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_p11)
     {
-        //@p11. collect_information(). Stems default, beam above
+        //@p11. decide_stems_direction(). Stems default, beam above
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_down() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_stems_up() == true );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 0 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
 
         delete_test_data();
     }
@@ -488,65 +485,63 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_p12)
     {
-        //@p12. collect_information(). Stems forced, beam above
+        //@p12. decide_stems_direction(). Stems forced, beam above
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+ (stem up))(n f4 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_down() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_stems_up() == true );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 0 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_p13)
     {
-        //@p13. collect_information(). Stems forced
+        //@p13. decide_stems_direction(). Stems forced
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c5 e g+)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );   //for now forced to false
-        CHECK( m_pBeamEngrv->my_stems_down() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
+        CHECK( m_pBeamEngrv->my_stems_up() == true );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-//        cout << "num stems down = " << m_pBeamEngrv->my_get_num_stems_down() << endl;
-//        cout << "num notes = " << m_pBeamEngrv->my_get_num_notes() << endl;
-//        cout << "average pos = " << m_pBeamEngrv->my_get_average_pos_on_staff() << endl;
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 0 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_p14)
     {
-        //@p14. collect_information(). Stems mixed
+        //@p14. decide_stems_direction(). Stems mixed
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n c4 e g+ (stem down))(n f4 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == true );
-        CHECK( m_pBeamEngrv->my_stems_down() == false );    //value forced by last forced stem
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == true );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 0 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_p15)
     {
-        //@p15. collect_information(). Cross-staff
+        //@p15. decide_stems_direction(). Cross-staff
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam_two_staves(doc,
             "(n a3 e p2 (beam 1 +))"
@@ -556,12 +551,13 @@ SUITE(BeamEngraverTest)
         );
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == true );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 1 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
 
         delete_test_data();
     }
@@ -574,44 +570,36 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_020)
     {
-        //@020. D1. The farthst note from the middle line determines beam position.
-        //      Case 1: farthest note above forces beam below.
+        //@020. D1. The furthest note from the middle line determines beam position.
+        //      Case 1: furthest note above forces beam below.
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n f5 e g+)(n f4 e)(n f5 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == false );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_below );
 
         delete_test_data();
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_021)
     {
-        //@021. D1. The farthest note from the middle line determines beam position.
-        //      Case 2: farthest note below forces beam above.
+        //@021. D1. The furthest note from the middle line determines beam position.
+        //      Case 2: furthest note below forces beam above.
         Document doc(m_libraryScope);
         ImoBeam* pBeam = create_beam(doc, "(n d5 e g+)(n f4 e)(n d5 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == true );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_above );
 
         delete_test_data();
     }
@@ -624,16 +612,12 @@ SUITE(BeamEngraverTest)
         ImoBeam* pBeam = create_beam(doc, "(n g4 e g+)(n a4 e)(n b4 e)(n d5 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == false );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == false );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_below );
 
         delete_test_data();
     }
@@ -647,16 +631,12 @@ SUITE(BeamEngraverTest)
             "(n d5 e g+)(n f4 e (stem down))(n d5 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == false );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_below );
 
         delete_test_data();
     }
@@ -670,16 +650,12 @@ SUITE(BeamEngraverTest)
             "(n f5 e g+ (stem up))(n f4 e)(n f5 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == true );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_above );
 
         delete_test_data();
     }
@@ -693,16 +669,12 @@ SUITE(BeamEngraverTest)
             "(n g4 e g+ (stem down))(n a4 e (stem down))(n b4 e)(n f4 e g-)");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == false );
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == false );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
-
-        m_pBeamEngrv->my_decide_beam_position();
-
-        CHECK( m_pBeamEngrv->my_is_beam_above() == false );
+        CHECK( m_pBeamEngrv->my_get_beam_position() == k_beam_below );
 
         delete_test_data();
     }
@@ -716,11 +688,10 @@ SUITE(BeamEngraverTest)
             "(n g4 e g+ (stem down))(n a4 e)(n b4 e)(n d5 e g- (stem up))");
         prepare_to_engrave_beam(pBeam);
 
-        m_pBeamEngrv->my_collect_information();
+        m_pBeamEngrv->my_decide_stems_direction();
 
         CHECK( m_pBeamEngrv->my_stems_forced() == true );
-        CHECK( m_pBeamEngrv->my_stems_mixed() == true );
-        CHECK( m_pBeamEngrv->my_stems_default() == false );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == true );
         CHECK( m_pBeamEngrv->my_is_cross_staff() == false );
 
         delete_test_data();
@@ -1047,42 +1018,42 @@ SUITE(BeamEngraverTest)
 
     // 2xx. Tests for beam slant --------------------------------------------------------
 
-//    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_200)
-//    {
-//        //@200. R2. Beam slant. Case 1: distance 3 spaces gives slant 1/4
-//        ColStaffObjs* pTable = do_layout(
-//            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 30)",
-//            //
-//            "(n d5 e g+)(n b3 e g-)"
-//            "(n d6 e g+)(n d5 e g-)"
-//            "(n d6 e g+ (stem up))(n d5 e g- (stem up))"
-//            "(n d5 e g+ (stem down))(n b3 e g- (stem down))"
-//            "(n b3 e g+)(n d5 e g-)"
-//            "(n d5 e g+)(n d6 e g-)"
-//            "(n d5 e g+ (stem up))(n d6 e g- (stem up))"
-//            "(n b3 e g+ (stem down))(n d5 e g- (stem down))"
-//        );
-//        ColStaffObjsIterator it = pTable->begin();  //clef
-//
-//        ++it;   //1st note. group 1
-//        check_slant_and_stems(__LINE__, 0.25f, &it);
-//        ++it;   //3rd note. group 2
-//        check_slant_and_stems(__LINE__, 0.25f, &it);
-//        ++it;   //5th note. group 3
-//        check_slant_and_stems(__LINE__, 0.25f, &it);
-//        ++it;   //7th note. group 4
-//        check_slant_and_stems(__LINE__, 0.25f, &it);
-//        ++it;   //9th note. group 5
-//        check_slant_and_stems(__LINE__, -0.25f, &it);
-//        ++it;   //11th note. group 6
-//        check_slant_and_stems(__LINE__, -0.25f, &it);
-//        ++it;   //13th note. group 7
-//        check_slant_and_stems(__LINE__, -0.25f, &it);
-//        ++it;   //15th note. group 8
-//        check_slant_and_stems(__LINE__, -0.25f, &it);
-//
-//        delete_test_data();
-//    }
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_200)
+    {
+        //@200. R2. Beam slant. Case 1: distance 3 spaces gives slant 1/4
+        ColStaffObjs* pTable = do_layout(
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 30)",
+            //
+            "(n d5 e g+)(n b3 e g-)"
+            "(n d6 e g+)(n d5 e g-)"
+            "(n d6 e g+ (stem up))(n d5 e g- (stem up))"
+            "(n d5 e g+ (stem down))(n b3 e g- (stem down))"
+            "(n b3 e g+)(n d5 e g-)"
+            "(n d5 e g+)(n d6 e g-)"
+            "(n d5 e g+ (stem up))(n d6 e g- (stem up))"
+            "(n b3 e g+ (stem down))(n d5 e g- (stem down))"
+        );
+        ColStaffObjsIterator it = pTable->begin();  //clef
+
+        ++it;   //1st note. group 1
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //3rd note. group 2
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //5th note. group 3
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //7th note. group 4
+        check_slant_and_stems(__LINE__, 0.25f, &it);
+        ++it;   //9th note. group 5
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //11th note. group 6
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //13th note. group 7
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+        ++it;   //15th note. group 8
+        check_slant_and_stems(__LINE__, -0.25f, &it);
+
+        delete_test_data();
+    }
 
     TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_201)
     {

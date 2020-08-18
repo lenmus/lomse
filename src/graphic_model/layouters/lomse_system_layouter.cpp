@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,6 +50,7 @@
 #include "lomse_tree.h"
 #include "lomse_shape_beam.h"
 #include "lomse_beam_engraver.h"
+#include "lomse_chord_engraver.h"
 
 #include <sstream>
 #include <algorithm>
@@ -1092,14 +1093,15 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
                                                  int iStaff, int idxStaff)
 {
     //in case of cross-staff beams (beams with flag stem segments in two or more staves),
-    //the beam must be placed on bottom staff. In all other cases (beams in a single staff
-    //or beams conecting notes in two staves but with all stems in the same direction)
-    //the stem shape must be placed in top staff
+    //the beam must be placed on bottom staff when below or in top staff when above.
+    //In all other cases (beams in a single staff or double beamed) the stem shape must
+    //be placed in top staff
     bool fDeleteEngraver = true;
     if (pRO->is_beam())
     {
         int staff = static_cast<ImoBeam*>(pRO)->get_min_staff();
-        if (static_cast<GmoShapeBeam*>(pShape)->is_cross_staff())
+        GmoShapeBeam* pSB = static_cast<GmoShapeBeam*>(pShape);
+        if (pSB->is_cross_staff() && pSB->is_beam_below())
         {
             staff = static_cast<ImoBeam*>(pRO)->get_max_staff();
             fDeleteEngraver = false;

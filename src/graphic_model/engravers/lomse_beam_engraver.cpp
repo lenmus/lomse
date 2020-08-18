@@ -53,16 +53,16 @@ BeamEngraver::BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
     , m_pBeamShape(nullptr)
     , m_pBeam(nullptr)
     , m_uBeamThickness(0.0f)
-    , m_fBeamAbove(false)
-    , m_fStemForced(false)
-    , m_fStemsMixed(false)
-    , m_fStemsDown(false)
-    , m_fCrossStaff(false)
-    , m_numStemsDown(0)
+    , m_beamPos(k_beam_undecided)
+    , m_fDoubleStemmed(false)
+    , m_fGraceNotes(false)
+    , m_fChord(false)
     , m_numNotes(0)
-    , m_averagePosOnStaff(0)
     , m_maxStaff(0)
+    , m_minStaff(0)
     , m_numLevels(1)
+    , m_fStemForced(false)
+    , m_fStemsUp(false)
 {
 }
 
@@ -83,8 +83,7 @@ void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_iStaff = iStaff;
     m_pBeam = dynamic_cast<ImoBeam*>(pRO);
 
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+    add_note_rest(pSO, pStaffObjShape);
 
     m_idxStaff = idxStaff;
     m_pVProfile = pVProfile;
@@ -99,8 +98,7 @@ void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                        int UNUSED(idxStaff),
                                        VerticalProfile* UNUSED(pVProfile))
 {
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+    add_note_rest(pSO, pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -112,7 +110,28 @@ void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     int UNUSED(idxStaff),
                                     VerticalProfile* UNUSED(pVProfile))
 {
+    add_note_rest(pSO, pStaffObjShape);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
+{
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
+
+    if (pNR->is_note())
+    {
+        ImoNote* pNote = static_cast<ImoNote*>(pNR);
+        if (pNote->is_in_chord())
+        {
+            //for beamed chords, the beam has to use the flag note and its shape instead
+            //of the base note and its shape
+            pStaffObjShape =
+                    static_cast<GmoShapeChordBaseNote*>(pStaffObjShape)->get_flag_note();
+        }
+
+        pNR = static_cast<ImoNote*>(pStaffObjShape->get_creator_imo());
+    }
+
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 }
 
@@ -128,16 +147,15 @@ GmoShape* BeamEngraver::create_first_or_intermediate_shape(Color color)
 GmoShape* BeamEngraver::create_last_shape(Color color)
 {
     m_color = color;
-    collect_information();
-    decide_on_stems_direction();
-    decide_beam_position();
-    change_stems_direction();
+    decide_stems_direction();
     determine_number_of_beam_levels();
 
-    if (m_fCrossStaff || m_fStemsMixed || m_fHasChords)
-        beam_angle_and_stems_for_cross_staff_and_double_steamed_beams();
+    if (m_fDoubleStemmed)
+        beam_angle_and_stems_for_double_stemmed_beams();
+    else if (m_fCrossStaff)
+        beam_angle_and_stems_for_cross_staff_beams();
     else
-        compute_beam_and_stems_for_simple_beams();
+        beam_angle_and_stems_for_simple_beams();
 
     reposition_rests();
     compute_beam_segments();
@@ -153,9 +171,12 @@ void BeamEngraver::create_shape()
 {
     m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
-                                  m_outerLeftPoint, m_outerRightPoint);
-    m_pBeamShape->set_add_to_vprofile(!m_fStemsMixed && !m_fCrossStaff);
-    m_pBeamShape->set_cross_staff(m_fCrossStaff);
+                                  m_outerLeftPoint, m_outerRightPoint,
+                                  m_fCrossStaff, m_fChord, m_beamPos,
+                                  (m_beamPos == k_beam_above ? m_minStaff : m_maxStaff) );
+
+    //add the beam to the vertical profile only when not double-stemmed (why?)
+    m_pBeamShape->set_add_to_vprofile(true);    //!m_fDoubleStemmed);
 }
 
 //---------------------------------------------------------------------------------------
@@ -205,6 +226,30 @@ void BeamEngraver::add_stroke_for_graces()
 }
 
 //---------------------------------------------------------------------------------------
+ImoNote* BeamEngraver::get_first_note()
+{
+    std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        if ((it->first)->is_note())
+            return static_cast<ImoNote*>(it->first);
+    }
+    return nullptr;     //??????? Cannot arrive here!
+}
+
+//---------------------------------------------------------------------------------------
+ImoNote* BeamEngraver::get_last_note()
+{
+    std::list< pair<ImoNoteRest*, GmoShape*> >::reverse_iterator it;
+    for(it=m_noteRests.rbegin(); it != m_noteRests.rend(); ++it)
+    {
+        if ((it->first)->is_note())
+            return static_cast<ImoNote*>(it->first);
+    }
+    return nullptr;     //??????? Cannot arrive here!
+}
+
+//---------------------------------------------------------------------------------------
 void BeamEngraver::reposition_rests()
 {
     //compute the average position of all noteheads.
@@ -247,33 +292,115 @@ void BeamEngraver::reposition_rests()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::collect_information()
+void BeamEngraver::decide_stems_direction()
+{
+    vector<int>* pStemsDir = m_pBeam->get_stems_direction();
+    if (pStemsDir)
+    {
+        m_fChord = true;
+        decide_stems_direction_for_beams_with_chords();
+    }
+    else
+    {
+        m_fChord = false;
+        decide_stems_direction_for_beams_without_chords();
+    }
+
+    //get beam thickness
+	m_uBeamThickness =
+	    m_pMeter->tenths_to_logical((m_fGraceNotes ? LOMSE_GRACES_BEAM_THICKNESS
+	                                               : LOMSE_BEAM_THICKNESS),
+                                    m_iInstr, m_iStaff);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::decide_stems_direction_for_beams_without_chords()
 {
     //In next loop we collect information:
     //- filter out the rests: collect all the notes in vector m_notes
 	//- determine if it is a cross-staff beam (flag m_fCrossStaff)
-	//- determine if it is a beam with mixed stems, some up and some down (flag m_fStemsMixed)
+	//- determine if it is a beam with mixed stems, some up and some down (flag m_fDoubleStemmed)
+	//- when not double-stemmed, determine if steams are default or forced up (m_fStemsUp)
 	//- determine if any stem is forced or all have default direction (m_fStemForced)
-    //look for the stem direction of most notes. If one note has its stem direction
-    //forced (by a tie, probably) forces the beam stems in this direction
+	//- determine if the beam contains grace notes (m_fGraceNotes)
+	//- count notes and determine max and min staff
 
-    m_fHasChords = false;       //assume no chords in the beamed group
     m_fStemForced = false;      //assume no stem forced
-    m_fStemsMixed = false;      //assume no mixed stems
-    m_fCrossStaff = false;      //assume no cross staff beam
-    m_fDefaultSteams = true;    //assume at least one stem with default position
-    m_fStemsUp = true;          //Only valid if m_fStemsMixed==false
+    m_fStemsUp = true;          //Only valid if m_fDoubleStemmed==false
+
+    m_fDoubleStemmed = false;   //assume no mixed stems
     m_fGraceNotes = false;      //assume regular notes
 
-    m_numStemsDown = 0;
     m_numNotes = 0;
-    m_averagePosOnStaff = 0;    //to determine majoritary stem direction
     m_maxStaff = 0;
+    m_minStaff = 0;
 
-    m_fStemsDown = false;       //set stems up by default (old code. to be removed)
 
     bool fLastForcedStemUp = false;
-    int prevStaff = 0;
+    std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+    GmoShapeNote* pNoteShape = nullptr;
+    for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
+	{
+        if ((it->first)->is_note())      //ignore rests
+        {
+		    ImoNote* pNote = static_cast<ImoNote*>(it->first);
+		    m_fGraceNotes |= pNote->is_grace_note();
+            pNoteShape = static_cast<GmoShapeNote*>((*it).second);
+            m_note.push_back(pNoteShape);
+            m_numNotes++;
+
+		    //compute m_maxStaff & m_minStaff
+            m_minStaff = min(m_minStaff, pNote->get_staff());
+            m_maxStaff = max(m_maxStaff, pNote->get_staff());
+
+            //compute m_fDoubleStemmed & m_fStemForced
+            if (!pNote->is_stem_default())
+            {
+                //stem is forced
+                bool fStemUp = pNote->is_stem_up();
+                if (m_numNotes > 1)
+                {
+                    m_fDoubleStemmed |= (fLastForcedStemUp != fStemUp);
+                }
+                fLastForcedStemUp = fStemUp;
+
+                m_fStemForced = true;
+                m_fStemsUp &= fStemUp;
+            }
+        }
+    }
+
+    m_fCrossStaff = (m_minStaff != m_maxStaff);
+
+    //At this point flags are set as follows:
+    //  m_fStemForced: true if at least one stem direction is forced
+    //  m_fDoubleStemmed: true if there are forced stems in both directions
+    //  m_fCrossStaff: true if beam flag notes are on different staves
+    //  m_fStemsUp: only meaningfull if m_fDoubleStemmed==false. True if all stems
+    //                forced up or default position
+
+    decide_beam_position();
+    change_stems_direction();
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::decide_stems_direction_for_beams_with_chords()
+{
+    //In beams with chords, all stems information is already computed and stored in
+    //the beam and in the chords, and the beam position has already been decided.
+    //Just retrieve this information and compute additional needed data:
+    //- filter out the rests: collect all the notes in vector m_notes
+	//- determine if it is a cross-staff beam (flag m_fCrossStaff)
+	//- determine if it is a beam with mixed stems, some up and some down (flag m_fDoubleStemmed)
+	//- determine if the beam contains grace notes (m_fGraceNotes)
+	//- count notes and determine max and min staff
+
+	//compute m_numNotes, m_maxStaff, m_minStaff and m_fGraceNotes
+    m_fGraceNotes = false;
+    m_numNotes = 0;
+    m_maxStaff = 0;
+    m_minStaff = 0;
+
     std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
     for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
 	{
@@ -282,89 +409,50 @@ void BeamEngraver::collect_information()
 		    ImoNote* pNote = static_cast<ImoNote*>(it->first);
 		    m_fGraceNotes |= pNote->is_grace_note();
             GmoShapeNote* pNoteShape = static_cast<GmoShapeNote*>((*it).second);
-            if (pNoteShape->is_shape_chord_base_note())
-            {
-                m_fHasChords = true;
-                pNoteShape = static_cast<GmoShapeChordBaseNote*>(pNoteShape)->get_flag_note();
-            }
             m_note.push_back(pNoteShape);
             m_numNotes++;
 
-            //compute m_fCrossStaff & m_maxStaff
-            if (m_numNotes == 1)
-                prevStaff = pNote->get_staff();
-            else
-            {
-                int curStaff = pNote->get_staff();
-                m_fCrossStaff |= (prevStaff != curStaff);
-                m_maxStaff = max(m_maxStaff, curStaff);
-                prevStaff = curStaff;
-            }
-
-            //compute m_fStemsMixed, m_fStemForced, m_fStemsUp, m_fDefaultSteams & m_fStemsDown
-            if (!pNote->is_stem_default())
-            {
-                bool fStemUp = pNote->is_stem_up();
-                if (m_numNotes > 1)
-                {
-                    m_fStemsMixed |= (fLastForcedStemUp != fStemUp);
-                }
-                fLastForcedStemUp = fStemUp;
-
-                m_fStemForced = true;
-                m_fStemsUp &= fStemUp;
-                m_fDefaultSteams = false;
-                m_fStemsDown = pNote->is_stem_down();
-                //stem forced by last forced stem
-            }
-            else
-            {
-                m_averagePosOnStaff += pNoteShape->get_pos_on_staff();
-                GmoShapeStem* pStemShape = pNoteShape->get_stem_shape();
-                if (pStemShape && pStemShape->is_stem_down())
-                    m_numStemsDown++;
-            }
+		    //compute m_maxStaff & m_minStaff
+            m_minStaff = min(m_minStaff, pNote->get_staff());
+            m_maxStaff = max(m_maxStaff, pNote->get_staff());
         }
     }
 
-	m_uBeamThickness =
-	    m_pMeter->tenths_to_logical((m_fGraceNotes ? LOMSE_GRACES_BEAM_THICKNESS
-	                                               : LOMSE_BEAM_THICKNESS),
-                                    m_iInstr, m_iStaff);
-}
+    m_fCrossStaff = (m_minStaff != m_maxStaff);
 
-//---------------------------------------------------------------------------------------
-void BeamEngraver::decide_on_stems_direction()
-{
-    //At this point flags are set as follows:
-    //  m_fStemForced: true if at least one stem direction is forced
-    //  m_fStemsMixed: true if there are forced stems in both directions
-    //  m_fCrossStaff: true the beam has notes on different staves
-    //  m_fStemsDown: either false or the direction of last forced stem
-    //  m_fDefaultSteams: true if at least one stem with default position
-    //  m_fStemsUp: only meaningfull if m_fStemsMixed==false. True if all stems
-    //                forced up or default position
+    //compute flag m_fDoubleStemmed and transfer stems to note shapes
+    m_fDoubleStemmed = false;
 
-    //C1. If beam placement is not forced, it is determined by the number of notes
-    //    above/bellow the staff middle line
-    if (!m_fCrossStaff && !m_fStemForced && m_numNotes > 0)
-        m_fStemsDown = (m_averagePosOnStaff / m_numNotes) > 6;
+    vector<int>* pStemsDir = m_pBeam->get_stems_direction();
+    bool fFirstUp = (pStemsDir->front() == k_computed_stem_forced_up
+                || pStemsDir->front() == k_computed_stem_up);
+    for (size_t i=0; i < pStemsDir->size(); ++i)
+    {
+        bool fUp = (pStemsDir->at(i) == k_computed_stem_forced_up
+                    || pStemsDir->at(i) == k_computed_stem_up);
 
-    //Cx. if all forced in the same direction this direction forces beam placement
-                //stem forced by last forced stem
+        m_fDoubleStemmed |= (fFirstUp != fUp);
+    }
+
+    //decide beam position
+    if (m_fDoubleStemmed)
+        m_beamPos = k_beam_double_stemmed;
+    else
+        m_beamPos = (fFirstUp ? k_beam_above : k_beam_below);
+
+    change_stems_direction();
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::decide_beam_position()
 {
-    if (m_fCrossStaff || m_fStemsMixed)
+    if (m_fDoubleStemmed)
     {
-        //Cross-staff and double-steamed beams.
-        m_fBeamAbove = !m_fStemsDown;
+        m_beamPos = k_beam_double_stemmed;
 
-        //for grace notes place beams above
-        if (m_fGraceNotes)
-            m_fBeamAbove = true;
+//        //for grace notes force to place beams above
+//        if (m_fGraceNotes)
+//            m_beamPos = k_beam_above;
     }
     else
     {
@@ -377,14 +465,14 @@ void BeamEngraver::decide_beam_position()
             //    forced by it.
             //D4. When there are more than one stem forced and all forced in the
             //    same direction this direction forces beam placement.
-            m_fBeamAbove = m_fStemsUp;
+            m_beamPos = (m_fStemsUp ? k_beam_above : k_beam_below);
         }
         else
         {
             //all stems are default direction. Therefore, rules D1 & D2 apply.
 
             if (m_fGraceNotes)              //for grace notes place beams above
-                m_fBeamAbove = true;
+                m_beamPos = k_beam_above;
             else
             {
                 //determine max distance above/below middle line
@@ -399,79 +487,60 @@ void BeamEngraver::decide_beam_position()
                         maxBelowDistance = max(maxBelowDistance, -pos);
                 }
 
-                //D1. (Stone, p.50) The farthest note (extreme note) from the middle line of
+                //D1. (Stone, p.50) The furthest note (extreme note) from the middle line of
                 //    the staff determines the direction of all stems in the beamed group.
                 if ((maxBelowDistance == -1) || (maxAboveDistance > maxBelowDistance))
                 {
-                    m_fBeamAbove = false;
+                    m_beamPos = k_beam_below;
                 }
                 else if ((maxAboveDistance == -1) || (maxBelowDistance > maxAboveDistance))
                 {
-                    m_fBeamAbove = true;
+                    m_beamPos = k_beam_above;
                 }
                 else
                 {
                     //D2. (Stone, p.50) If there are two extreme notes in opposite directions and
                     //    at the same distance from middle line, then group will be stemmed down.
-                    m_fBeamAbove = false;
+                    m_beamPos = k_beam_below;
                 }
             }
 
         }
     }
+
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::change_stems_direction()
 {
-    if (m_fCrossStaff || m_fStemsMixed || m_fHasChords)
+    if (m_fDoubleStemmed)
     {
-        //Cross-staff and double-steamed beams.
-        //Old behaviour
-        if (!m_fStemForced)
+        if (m_fCrossStaff)
         {
+            //CD1. when cross-staff double-stemmed, all notes in lower staff go up and
+            //     in upper staff go down.
             std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
             for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
             {
-                if (it->first->is_note())
+                if ((it->first)->is_note())      //ignore rests
                 {
+                    ImoNote* pNote = static_cast<ImoNote*>(it->first);
                     GmoShapeNote* pShape = static_cast<GmoShapeNote*>(it->second);
-//                    if (pShape->is_shape_chord_base_note())
-//                    {
-//                        pNoteShape = static_cast<GmoShapeChordBaseNote*>(pNoteShape)->get_flag_note();
-//                    }
-                    pShape->set_stem_down(m_fStemsDown);
+                    pShape->set_stem_down( pNote->get_staff() == 0 );
                 }
             }
         }
     }
     else
     {
-        //Normal single staff beams.
-
-        //TODO: BeamEngraver::change_stems_direction
-        ////  Is this rule correct? I do not thing so.
-        ////correct beam position (and reverse stems direction) if first note of beamed
-        ////group is tied to a previous note and the stems' directions are not forced
-        //if (!m_fStemForced && m_noteRests.front()->is_note())
-        //{
-        //    ImoNote* pFirst = (ImoNote*)m_noteRests.front();
-        //    if (pFirst->IsTiedToPrev())
-        //        m_fStemsDown = pFirst->GetTiedNotePrev()->is_stem_down();
-        //}
-
-        //Change the stems direction of notes unless they are forced.
+        //Change stems direction of note shapes, to ensure they have the right direction
         std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
         for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
         {
             if ((it->first)->is_note())      //ignore rests
             {
-                ImoNote* pNote = static_cast<ImoNote*>(it->first);
                 GmoShapeNote* pShape = static_cast<GmoShapeNote*>(it->second);
-                if (pNote->is_stem_default())
-                {
-                    pShape->set_stem_down(!m_fBeamAbove);    //m_fStemsDown);
-                }
+                pShape->set_stem_down(m_beamPos == k_beam_below);
             }
         }
     }
@@ -495,6 +564,29 @@ void BeamEngraver::determine_number_of_beam_levels()
         }
         m_numLevels = max(m_numLevels, iLevel);
     }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits BeamEngraver::compute_beam_height()
+{
+    LUnits uStaffSpace = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
+    LUnits uStaffLine = m_pMeter->line_thickness_for_instr_staff(m_iInstr, m_iStaff);
+    LUnits uBeamSpacing = m_uBeamThickness;     //distance fron one beam to the next one
+    if (m_fGraceNotes)
+        uBeamSpacing *= 1.5;
+    else
+    {
+        if (m_numLevels <= 3)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 3.0f * m_uBeamThickness) / 2.0f;
+        else if (m_numLevels == 4)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 4.0f * m_uBeamThickness) / 3.0f;
+        else if (m_numLevels == 5)
+            uBeamSpacing += uStaffSpace + (uStaffLine - 5.0f * m_uBeamThickness) / 4.0f;
+        else
+            uBeamSpacing += uStaffSpace + (uStaffLine - 6.0f * m_uBeamThickness) / 5.0f;
+    }
+
+    return m_numLevels * m_uBeamThickness + (m_numLevels - 1) * uBeamSpacing;
 }
 
 //---------------------------------------------------------------------------------------
@@ -622,7 +714,7 @@ void BeamEngraver::compute_beam_segments()
                     fEndPointComputed = false;
                     if (iLevel == 0)
                     {
-                        if (m_fBeamAbove)
+                        if (m_beamPos == k_beam_above)
                         {
                             m_outerLeftPoint = UPoint(uxStart, uyStart - uHalfBeam);
                             m_outerRightPoint = UPoint(uxEnd, uyEnd - uHalfBeam);
@@ -642,7 +734,7 @@ void BeamEngraver::compute_beam_segments()
         }
 
         // displace y coordinate for next beam line
-        uyShift += (m_fBeamAbove ? uBeamSpacing : - uBeamSpacing);
+        uyShift += (m_beamPos == k_beam_above ? uBeamSpacing : - uBeamSpacing);
     }
 
     //take beam thickness into account for bounding box
@@ -657,7 +749,7 @@ void BeamEngraver::compute_beam_segments()
 void BeamEngraver::add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd)
 {
     LUnits uSpace = m_uBeamThickness / 2.0f;
-    LUnits uyShift = m_fBeamAbove ? uSpace : -uSpace;
+    LUnits uyShift = (m_beamPos == k_beam_above ? uSpace : -uSpace);
 
     m_segments.push_back(uxStart);
     m_segments.push_back(uyStart + uyShift);
@@ -699,11 +791,17 @@ void BeamEngraver::make_segments_relative()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::compute_beam_and_stems_for_simple_beams()
+void BeamEngraver::beam_angle_and_stems_for_simple_beams()
 {
     int pos0 = m_note[0]->get_pos_on_staff();
     int posN = m_note[m_numNotes-1]->get_pos_on_staff();
 
+    angle_and_stems_for_simple_beams(pos0, posN);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::angle_and_stems_for_simple_beams(int pos0, int posN)
+{
     if (beam_must_be_horizontal(pos0, posN))
     {
         create_horizontal_beam_and_set_stems(pos0, posN);
@@ -725,7 +823,27 @@ void BeamEngraver::compute_beam_and_stems_for_simple_beams()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::beam_angle_and_stems_for_cross_staff_and_double_steamed_beams()
+void BeamEngraver::beam_angle_and_stems_for_cross_staff_beams()
+{
+    //stems are attached to notes on both staves and, thus, pos on staff is not valid
+    //to determine beam angle an stems because they can be referred to different staves.
+    //To use them, I introduce an arbitrary correction: as first staff is above second
+    //staff, pos on second staff will be corrected by substracting the positions for
+    //imaginary lines between both staves so that pos 0 in second staff becomes pos -20.
+    //This trick allows to use the same algorithm to compute angle and stems tha
+    //for normal beams.
+
+    ImoNote* pNote0 = get_first_note();
+    ImoNote* pNoteN = get_last_note();
+
+    int pos0 = m_note[0]->get_pos_on_staff() - 20 * pNote0->get_staff();
+    int posN = m_note[m_numNotes-1]->get_pos_on_staff() - 20 * pNoteN->get_staff();
+
+    angle_and_stems_for_simple_beams(pos0, posN);
+}
+
+//---------------------------------------------------------------------------------------
+void BeamEngraver::beam_angle_and_stems_for_double_stemmed_beams()
 {
     // At this point all stems have the standard size and the stem start and end points
     // are computed (start point = nearest to notehead)
@@ -742,11 +860,6 @@ void BeamEngraver::beam_angle_and_stems_for_cross_staff_and_double_steamed_beams
     }
 	int n = m_numNotes - 1;	// index to last element
 	bool fAdjustIntermediateFlags = m_numNotes > 2;
-
-//	m_uBeamThickness =
-//	    m_pMeter->tenths_to_logical((m_fGraceNotes ? LOMSE_GRACES_BEAM_THICKNESS
-//	                                               : LOMSE_BEAM_THICKNESS),
-//                                    m_iInstr, m_iStaff);
 
 	//determine beam angle (measured in staff spaces).
 	//negative angle means that first note is lower pitch than last note.
@@ -850,22 +963,56 @@ void BeamEngraver::beam_angle_and_stems_for_cross_staff_and_double_steamed_beams
             m_note[i]->set_stem_length( fabs(yFlag[i] - yNote[i]) );
         }
     }
+
+//    if (m_fDoubleStemmed)
+//    {
+//
+//        //CD2. All stems must have at least a length of 2.5 spaces
+//        LUnits staffSpace = m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+//        LUnits minLength = 2.5f * staffSpace + compute_beam_height();
+//        LUnits incrUp = 0.0f;
+//        LUnits incrDown = 0.0f;
+//        for(int i=0; i < m_numNotes; ++i)
+//        {
+//            if (m_note[i]->is_up())
+//                incrUp = max(incrUp, minLength - m_note[i]->get_stem_height());
+//            else
+//                incrDown = max(incrDown, minLength - m_note[i]->get_stem_height());
+//        }
+//        if (incrUp > 0.0f || incrDown > 0.0f)
+//        {
+//            for(int i=0; i < m_numNotes; ++i)
+//            {
+//                if (m_note[i]->is_up())
+//                {
+//                    if (incrUp > 0.0f)
+//                        m_note[i]->increment_stem_length(incrUp);
+//                }
+//                else
+//                {
+//                    if (incrDown > 0.0f)
+//                        m_note[i]->increment_stem_length(incrDown);
+//                }
+//            }
+//        }
+//    }
+
 }
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::adjust_stems_length_if_double_beamed()
 {
-    if (m_fGraceNotes && (m_fCrossStaff || m_fStemsMixed || m_fHasChords))
-    {
-        //increment length of downstems so that they reach lowest beam line
-
-        LUnits uyIncr = m_size.height;
-        for(int i=0; i < m_numNotes; i++)
-        {
-            if (!m_note[i]->is_up())
-                m_note[i]->increment_stem_length(uyIncr);
-        }
-    }
+//    if (m_fDoubleStemmed)
+//    {
+//        //increment length of downstems so that they reach lowest beam line
+//
+//        LUnits uyIncr = m_size.height;
+//        for(int i=0; i < m_numNotes; i++)
+//        {
+//            if (!m_note[i]->is_up())
+//                m_note[i]->increment_stem_length(uyIncr);
+//        }
+//    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -969,7 +1116,8 @@ void BeamEngraver::assing_stem_length_to_outer_grace_notes(float slant, int pos0
     int posS = 0;   //posOnStaff for outer note with shortest stem
     int iS = 0;     //index for outer note with shortest stem
     int iL = 0;     //index for outer note with longest stem
-    if ((pos0 < posN && m_fBeamAbove) || (pos0 > posN && !m_fBeamAbove))
+    if ((pos0 < posN && m_beamPos == k_beam_above)
+        || (pos0 > posN && m_beamPos == k_beam_below))
     {
         posS = posN;
         iS = m_numNotes - 1;
@@ -1070,7 +1218,7 @@ bool BeamEngraver::beam_must_be_horizontal(int pos0, int posN)
     if (!fHorizontal && m_numNotes > 2)
     {
         //check if any intermediate note is placed nearer than both outer notes
-        if (m_fBeamAbove)
+        if (m_beamPos == k_beam_above)
         {
             int refPos = max(pos0, posN);
             for(int i=1; i < m_numNotes-1; i++)
@@ -1105,12 +1253,13 @@ float BeamEngraver::get_staff_length_for_beam(int iNote)
         //    a stem of 3.25 spaces and notes on a space have 3.5 spaces except for
         //    notes with stem up on 2nd space or with stem down on 3rd space, that
         //    has a stem length of 3.0 spaces (K.Stone rules).
-        if ((m_fBeamAbove && posOnStaff > -1 && posOnStaff <= 6) ||
-            (!m_fBeamAbove && posOnStaff >= 6 && posOnStaff <= 13) )
+        if ((m_beamPos == k_beam_above && posOnStaff > -1 && posOnStaff <= 6) ||
+            (m_beamPos == k_beam_below && posOnStaff >= 6 && posOnStaff <= 13) )
         {
             if (abs(posOnStaff) % 2 == 1)    //note on space
             {
-                if ((m_fBeamAbove && posOnStaff == 5) || (!m_fBeamAbove && posOnStaff == 7))
+                if ((m_beamPos == k_beam_above && posOnStaff == 5)
+                    || (m_beamPos == k_beam_below && posOnStaff == 7))
                     stemLength = 3.0;
                 else
                     stemLength = 3.5;
@@ -1125,7 +1274,8 @@ float BeamEngraver::get_staff_length_for_beam(int iNote)
         //A3. Beams out the staff. Notes with stems upwards from 3rd space inclusive
         //    (c5 in G) or with stems downwards from 2nd line inclusive (g4 in G)
         //    have a length of 2.5 spaces, except a4 & c5 that have 2.75 (test 208).
-        else if ((m_fBeamAbove && posOnStaff > 6) || (!m_fBeamAbove && posOnStaff < 6))
+        else if ((m_beamPos == k_beam_above && posOnStaff > 6)
+                 || (m_beamPos == k_beam_below && posOnStaff < 6))
         {
             if (posOnStaff == 5 || posOnStaff == 7)
                 stemLength = 2.75;
@@ -1183,7 +1333,7 @@ void BeamEngraver::create_horizontal_beam_and_set_stems(int pos0, int posN)
     //determine nearest note to the beam
     int n = m_numNotes - 1;	        // index to last note
     int iNote = 0;
-    if (m_fBeamAbove)
+    if (m_beamPos == k_beam_above)
     {
         int maxPos = max(pos0, posN);
         iNote = (pos0 > posN ? 0 : n);
@@ -1239,7 +1389,8 @@ void BeamEngraver::assing_stem_length_to_outer_regular_notes(float slant, int po
     int iS = 0;     //index for outer note with shortest stem
     int posL = 0;   //posOnStaff for outer note with longest stem
     int iL = 0;     //index for outer note with longest stem
-    if ((pos0 < posN && m_fBeamAbove) || (pos0 > posN && !m_fBeamAbove))
+    if ((pos0 < posN && m_beamPos == k_beam_above)
+        || (pos0 > posN && m_beamPos == k_beam_below))
     {
         posS = posN;
         iS = m_numNotes - 1;

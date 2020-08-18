@@ -9,8 +9,8 @@
         (chord (n e3 q)(n g3 q))
         
         //second voice
-        (chord (n e4 e. v2 (stem up)(beam 1 +))(n g4 e.))
-        (chord (n d4 s (stem up)(beam 1 -b))(n f4 s))
+        (chord (n e4 e. v2 (stem up)(beam 1 +))(n g4 e. (stem up)))
+        (chord (n d4 s (stem up)(beam 1 -b))(n f4 s (stem up)))
         
         (barline end)
       )

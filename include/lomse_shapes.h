@@ -342,6 +342,7 @@ private:
 
 protected:
     friend class StemFlagEngraver;
+    friend class ChordEngraver;
     GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits uExtraLength,
                  LUnits yEnd, bool fStemDown, LUnits uWidth, Color color);
 
