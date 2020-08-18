@@ -1712,7 +1712,7 @@ MnxGenerator* MnxExporter::new_generator(ImoObj* pImo)
         case k_imo_instrument:      return LOMSE_NEW InstrumentMnxGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureMnxGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataMnxGenerator(pImo, this);
-        case k_imo_note:            return LOMSE_NEW NoteMnxGenerator(pImo, this);
+        case k_imo_note_regular:            return LOMSE_NEW NoteMnxGenerator(pImo, this);
         case k_imo_rest:            return LOMSE_NEW RestMnxGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreMnxGenerator(pImo, this);
         case k_imo_direction:          return LOMSE_NEW SpacerMnxGenerator(pImo, this);

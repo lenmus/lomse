@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,6 +53,7 @@ SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
     , m_numShapes(0)
     , m_pSlur(nullptr)
     , m_fSlurBelow(false)
+    , m_fSlurForGraces(false)
     , m_uPrologWidth(0.0f)
     , m_pStartNote(nullptr)
     , m_pEndNote(nullptr)
@@ -97,6 +98,8 @@ void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 
     m_uStaffTop = yTop - m_pEndNoteShape->get_top();     //relative to note top;
 
+    m_fSlurForGraces = m_pStartNote->is_grace_note() || m_pEndNote->is_grace_note();
+
     m_idxStaff = idxStaff;
     m_pVProfile = pVProfile;
 }
@@ -105,13 +108,14 @@ void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 void SlurEngraver::decide_placement()
 {
     //[Read, p.266] placement: at notehead side when all notes in same direction.
-    //When mixed directions, preferred above
+    //When mixed directions, preferred above. Except when grace notes: at grace notehead
+    //side
 
     bool fMixed = is_end_point_set() &&
                   ( (m_pStartNoteShape->is_up() && !m_pEndNoteShape->is_up())
                      || (!m_pStartNoteShape->is_up() && m_pEndNoteShape->is_up()) );
 
-    if (fMixed)
+    if (fMixed && !m_fSlurForGraces)
         m_fSlurBelow = false;
     else
         m_fSlurBelow = m_pStartNoteShape->is_up() ? true : false;
@@ -337,12 +341,12 @@ void SlurEngraver::compute_default_control_points(UPoint* points)
     LUnits D = (points+ImoBezierInfo::k_end)->x - (points+ImoBezierInfo::k_start)->x;
     LUnits d = D / 5.8f;
 
-    //approx. burda, assuming horizontal base line
+    //rough approx., assuming horizontal base line
     LUnits minHeight = abs((points+ImoBezierInfo::k_start)->y - (points+ImoBezierInfo::k_end)->y );
     LUnits height = minHeight + tenths_to_logical(12.0);
 
     m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
-    LUnits hc = height; //m_thickness * 4.5f;
+    LUnits hc = (m_fSlurForGraces ? m_thickness * 2.5f : height);
     (points+ImoBezierInfo::k_ctrol1)->x = (points+ImoBezierInfo::k_start)->x + d;
     (points+ImoBezierInfo::k_ctrol1)->y = (points+ImoBezierInfo::k_start)->y + (m_fSlurBelow ? hc : -hc);
 
@@ -383,7 +387,7 @@ void SlurEngraver::compute_end_point(UPoint* point)
 {
     //over stem. Otherwise, place slur over note-head
     bool fOverStem = false;
-    if (m_pEndNote->has_stem())
+    if (m_pEndNote->has_stem() && !m_fSlurForGraces)
     {
         fOverStem = (m_fSlurBelow && m_pEndNote->is_stem_down())
                     || (!m_fSlurBelow && m_pEndNote->is_stem_up());

@@ -376,7 +376,7 @@ SUITE(InternalModelApiTest)
         theDoc.from_string(
             "<lenmusdoc vers='0.0'><content>"
                 "<dynamic classid=\"test\" />"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -427,7 +427,7 @@ SUITE(InternalModelApiTest)
                 "<dynamic classid=\"Foo\" />"
                 "<dynamic classid=\"Bar\" />"
                 "<para>This is a paragraph</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -780,7 +780,7 @@ SUITE(InternalModelApiTest)
                     "<txt>Some text</txt>"
                     "<link url='This is 2nd url'>This is the second link</link>"
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -831,7 +831,7 @@ SUITE(InternalModelApiTest)
                     "<link url='This is 2nd url'>This is the second link</link>"
                     "<txt>Some text</txt>"
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -873,7 +873,7 @@ SUITE(InternalModelApiTest)
                         "And let's finish."
                     "</link>"
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -922,7 +922,7 @@ SUITE(InternalModelApiTest)
                     "<listitem>The second item</listitem>"
                     "<listitem>The end of the list</listitem>"
                 "</orderedlist>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -974,7 +974,7 @@ SUITE(InternalModelApiTest)
                     "<listitem>Two</listitem>"
                 "</orderedlist>"
                 "<para>This is a paragraph</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -1011,7 +1011,7 @@ SUITE(InternalModelApiTest)
                     "<listitem>The second item</listitem>"
                     "<listitem>The end of the list</listitem>"
                 "</itemizedlist>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -1134,7 +1134,7 @@ SUITE(InternalModelApiTest)
                     "<txt>with three items.</txt>"     //<txt style='bold'>
                     " And the third one."
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -1901,7 +1901,7 @@ SUITE(InternalModelApiTest)
                     "<txt>Now, the second one. </txt>"
                     "And let's finish."
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();
@@ -1952,7 +1952,7 @@ SUITE(InternalModelApiTest)
                     "<txt>Now, the second one. </txt>"
                     "And let's finish."
                 "</para>"
-            "<content/></lenmusdoc>"
+            "</content></lenmusdoc>"
             , Document::k_format_lmd
         );
         ADocument doc = theDoc.get_document_api();

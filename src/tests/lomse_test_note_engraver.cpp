@@ -82,7 +82,7 @@ public:
         Document doc(m_libraryScope);
         m_pTuplet = static_cast<ImoTuplet*>( ImFactory::inject(k_imo_tuplet, &doc) );
 
-        m_pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        m_pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         m_pNote1->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         m_pNote1->set_note_type(k_eighth);
         m_pNote1->set_dots(0);
@@ -92,7 +92,7 @@ public:
 
         m_pNote1->include_in_relation(&doc, m_pTuplet, nullptr);
 
-        m_pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        m_pNote2 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         m_pNote2->set_notated_pitch(k_step_E, k_octave_4, k_no_accidentals);
 
         ImoTupletDto dto2;
@@ -100,7 +100,7 @@ public:
 
         m_pNote2->include_in_relation(&doc, m_pTuplet, nullptr);
 
-        m_pNote3 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        m_pNote3 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         m_pNote3->set_notated_pitch(k_step_G, k_octave_4, k_no_accidentals);
 
         ImoTupletDto dto3;
@@ -150,7 +150,7 @@ SUITE(NoteEngraverTest)
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ShapeInBlock)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
 
@@ -173,7 +173,7 @@ SUITE(NoteEngraverTest)
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadAndStem)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_quarter);
 
@@ -198,7 +198,7 @@ SUITE(NoteEngraverTest)
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadStemAndFlag)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
 
@@ -225,7 +225,7 @@ SUITE(NoteEngraverTest)
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ShapeInBlockWithDot)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
         pNote->set_dots(1);
@@ -251,7 +251,7 @@ SUITE(NoteEngraverTest)
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadStemFlagTwoDots)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(2);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -58,6 +58,7 @@ protected:
     int m_clefType;
     int m_octaveShift;
     int m_idxStaff;
+    int m_symbolSize;
     EngraversMap* m_pEngravers;
 
 public:
@@ -79,6 +80,7 @@ protected:
     void add_stem_and_flag_if_required();
     void add_leger_lines_if_necessary();
     void add_shapes_for_dots_if_required();
+    void add_stroke_to_grace_note_if_required();
 
     void add_voice(VoiceRelatedShape* pVRS);
     void determine_stem_direction();
@@ -119,6 +121,9 @@ protected:
     Color m_color;
     double m_fontSize;
 
+    //overrides for Engraver
+    double determine_font_size() override;
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -131,6 +136,7 @@ protected:
     bool m_fStemDown;
     bool m_fWithFlag;
     bool m_fShortFlag;
+    bool m_fHasBeam;
     bool m_fCrossStaffChord;
     LUnits m_uStemLength;
     Color m_color;
@@ -143,20 +149,22 @@ protected:
     GmoShapeNote* m_pRefNoteShape;      //Ref note is opposite one: the max pitch note
                                         //for stem down or the min pitch note for stem up.
     GmoShapeNote* m_pBaseNoteShape;
+    GmoShapeFlag* m_pFlagShape;
 
 public:
     StemFlagEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                     ImoObj* pCreatorImo, int iInstr, int iStaff);
+                     ImoObj* pCreatorImo, int iInstr, int iStaff, double fontSize=0.0);
     virtual ~StemFlagEngraver() {}
 
     void add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteType, bool fStemDown,
-                               bool fWithFlag, bool fShortFlag, LUnits stemLength,
-                               Color color);
+                               bool fWithFlag, bool fShortFlag, bool fHasBeam,
+                               LUnits stemLength, Color color);
 
     void add_stem_flag_to_chord(GmoShapeNote* pMinNoteShape, GmoShapeNote* pMaxNoteShape,
                        GmoShapeNote* pBaseNoteShape, int noteType, bool fStemDown, bool fWithFlag,
-                       bool fShortFlag, bool fCrossStaffChord, LUnits stemLength,
-                       Color color);
+                       bool fShortFlag, bool fHasBeam, bool fCrossStaffChord,
+                       LUnits stemLength, Color color);
+    void add_stroke_shape();
 
 protected:
     void add_stem_and_flag();
@@ -164,7 +172,6 @@ protected:
     void determine_stem_y_pos();
     void add_stem_shape();
     void add_flag_shape_if_required();
-
     void add_voice(VoiceRelatedShape* pVRS);
 
 

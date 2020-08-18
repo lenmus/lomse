@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -78,19 +78,31 @@ protected:
     int         m_nVoice;
     int         m_timeModifierTop;
     int         m_timeModifierBottom;
-    TimeUnits   m_duration;
+    TimeUnits   m_duration;             //nominal duration implied by note type and dots
+    TimeUnits   m_playDuration;         //playback duration: nominal duration for playback
+    TimeUnits   m_eventDuration;        //event duration: real duration for playback
+    TimeUnits   m_playTime;             //playback time: on-set time for playback
 
 public:
     ImoNoteRest(int objtype);
     virtual ~ImoNoteRest() {}
 
+    //overrides to ImoStaffObj
+    TimeUnits get_duration() override { return m_duration; }
+    void set_time(TimeUnits rTime) override {
+        m_time = rTime;
+        m_playTime = rTime;
+    }
+
     //getters
     inline int get_note_type() { return m_nNoteType; }
-    inline TimeUnits get_duration() { return m_duration; }
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
     inline int get_time_modifier_top() { return m_timeModifierTop; }
     inline int get_time_modifier_bottom() { return m_timeModifierBottom; }
+    inline TimeUnits get_playback_duration() { return m_playDuration; }
+    inline TimeUnits get_event_duration() { return m_eventDuration; }
+    inline TimeUnits get_playback_time() { return m_playTime; }
 
     //setters
     inline void set_note_type(int noteType) { m_nNoteType = noteType; }
@@ -99,6 +111,9 @@ public:
     void set_note_type_and_dots(int noteType, int dots);
     void set_time_modification(int numerator, int denominator);
     void set_type_dots_duration(int noteType, int dots, TimeUnits duration);
+    inline void set_playback_duration(TimeUnits value) { m_playDuration = value; }
+    inline void set_event_duration(TimeUnits value) { m_eventDuration = value; }
+    inline void set_playback_time(TimeUnits value) { m_playTime = value; }
 
     //beam
     ImoBeam* get_beam();
@@ -122,6 +137,8 @@ public:
     virtual void set_int_attribute(TIntAttribute attrib, int value);
     virtual int get_int_attribute(TIntAttribute attrib);
     virtual list<TIntAttribute> get_supported_attributes();
+
+protected:
 
 };
 
@@ -179,7 +196,7 @@ protected:
     ImoTie* m_pTiePrev;
 
     friend class ImFactory;
-    ImoNote();
+    ImoNote(int type);
     ImoNote(int step, int octave, int noteType, EAccidentals accidentals=k_no_accidentals,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
@@ -298,12 +315,35 @@ public:
     */
     bool has_beam();
 
+    //grace notes related to this note
+    ImoGraceRelObj* get_grace_relobj();
+
+
     //pitch. Only valid when m_actual_acc is computed
     FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals
     float get_frequency();          //frequecy, in Herzs
     MidiPitch get_midi_pitch();     //MidiPitch
     int get_midi_bend();            //Midi bend (two bytes)
     float get_cents();              //deviation from diatonic pitch implied by step and octave, in cents.
+
+};
+
+//---------------------------------------------------------------------------------------
+/** ImoGraceNote represents a grace note in the score.
+**/
+class ImoGraceNote : public ImoNote
+{
+protected:
+    TimeUnits m_alignTime;  //to simplify spacing algorithm a pseudo-timepos is assigned
+
+    friend class ImFactory;
+    ImoGraceNote() : ImoNote(k_imo_note_grace), m_alignTime(0.0) {}
+
+public:
+    virtual ~ImoGraceNote() {}
+
+    inline void set_align_timepos(TimeUnits value) { m_alignTime = value; }
+    inline TimeUnits get_align_timepos() { return m_alignTime; }
 
 };
 

@@ -111,18 +111,22 @@ protected:
     void compute_beam_and_stems_for_simple_beams();
     void beam_angle_and_stems_for_cross_staff_and_double_steamed_beams();
     void compute_beam_segments();
+    void adjust_stems_length_if_double_beamed();
 	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
     void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
     void make_segments_relative();
     void determine_number_of_beam_levels();
+    void add_stroke_for_graces();
 
     bool has_repeated_pattern_of_pitches();
     bool check_all_notes_outside_first_ledger_line();
     float get_staff_length_for_beam(int iNote);
-    float assign_slant_to_beam(int pos0, int posN);
+    float assign_slant_to_beam_for_grace_notes(int pos0, int posN);
+    float assign_slant_to_beam_for_regular_notes(int pos0, int posN);
     bool beam_must_be_horizontal(int pos0, int posN);
     void create_horizontal_beam_and_set_stems(int pos0, int posN);
-    void assing_stem_length_to_outer_notes(float slant, int pos0, int posN);
+    void assing_stem_length_to_outer_regular_notes(float slant, int pos0, int posN);
+    void assing_stem_length_to_outer_grace_notes(float slant, int pos0, int posN);
     void assing_stem_length_to_inner_notes();
 
     bool m_fHasChords;      //the beam has chords
@@ -133,6 +137,7 @@ protected:
     bool m_fDefaultSteams;  //at least one stem with default position
     bool m_fStemsUp;        //only meaningfull if m_fStemsMixed==false. True if all stems
                             //forced up or default position
+    bool m_fGraceNotes;     //beamed grace notes
 
     int m_numStemsDown;     //number of noteheads with stem down
     int m_numNotes;         //total number of notes

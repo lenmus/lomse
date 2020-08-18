@@ -827,8 +827,8 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
     ImoInstrument* pInstr = pPAO->m_pInstr;
     int idxStaff = pPAO->m_idxStaff;
 
-    //RelObjs
-    if (pAR->is_relobj() && !pAR->is_chord())
+    //RelObjs. Exclude chords and grace notes RelObjs as they do no generate shapes
+    if (pAR->is_relobj() && !pAR->is_chord() && !pAR->is_grace_relobj())
     {
         ImoRelObj* pRO = static_cast<ImoRelObj*>(pAR);
 
@@ -872,6 +872,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                       iLine, prologWidth, pInstr,
                                                       idxStaff, m_pVProfile);
             GmoShape* pAuxShape = m_pShapesCreator->create_last_shape(pRO);
+            if (pAuxShape)
             add_last_rel_shape_to_model(pAuxShape, pRO, GmoShape::k_layer_aux_objs,
                                         iCol, iInstr, iStaff, idxStaff);
 

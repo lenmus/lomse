@@ -78,6 +78,7 @@ protected:
     ColStaffObjsEntry*  m_pLastEntry;
     int                 m_prevType;
     TimeUnits           m_prevTime;
+    TimeUnits           m_prevAlignTime;    //for grace notes
     int                 m_numEntries;
     ColumnDataGourlay*  m_pCurColumn;
     int                 m_numSlices;
@@ -296,6 +297,7 @@ protected:
     friend class TimeSliceNonTimed;
     friend class TimeSliceBarline;
     friend class TimeSliceNoterest;
+    friend class TimeSliceGraces;
     ColStaffObjsEntry*  m_firstEntry;
     ColStaffObjsEntry*  m_lastEntry;
     int         m_iFirstData;   //index to first StaffObjData element for this slice
@@ -332,6 +334,7 @@ public:
         k_non_timed,
         k_noterest,
         k_barline,
+        k_graces,
     };
 
     //creation
@@ -489,6 +492,24 @@ public:
                                         LUnits yPos, LUnits* yMin, LUnits* yMax,
                                         ScoreMeter* pMeter,
                                         VerticalProfile* pVProfile) override;
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// TimeSliceGraces
+// An slice for grace notes
+class TimeSliceGraces : public TimeSlice
+{
+protected:
+
+public:
+    TimeSliceGraces(ColStaffObjsEntry* pEntry, int column, int iData);
+    virtual ~TimeSliceGraces();
+
+    //overrides
+    void assign_spacing_values(vector<StaffObjData*>& data, ScoreMeter* pMeter,
+                               TextMeter& textMeter) override;
 
 };
 

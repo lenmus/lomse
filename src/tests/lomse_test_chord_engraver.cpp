@@ -57,7 +57,7 @@ class MyChordEngraver : public ChordEngraver
 {
 public:
     MyChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes)
-        : ChordEngraver(libraryScope, pScoreMeter, numNotes)
+        : ChordEngraver(libraryScope, pScoreMeter, numNotes, 21.0f, k_size_full)
     {
     }
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -212,7 +212,8 @@ protected:
     std::vector<MeasuresJumpsEntry*> m_measuresJumps;
     std::vector< std::pair<int, std::string> > m_targets;          //pair measure, label
     TimeUnits m_rAnacrusisMissingTime;
-    int m_accidentals[7];
+    TimeUnits m_rAnacrusisExtraTime;
+
 
 public:
     SoundEventsTable(ImoScore* pScore);
@@ -226,7 +227,8 @@ public:
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
-    inline TimeUnits get_anacrusis_missing_time() { return m_rAnacrusisMissingTime; }
+    inline TimeUnits get_anacruxis_missing_time() { return m_rAnacrusisMissingTime; }
+    inline TimeUnits get_anacruxis_extra_time() { return m_rAnacrusisExtraTime; }
 
     //jumps table
     inline int num_jumps() { return int(m_jumps.size()); }
@@ -255,14 +257,12 @@ protected:
     void replace_label_in_jumps();
     int find_measure_for_label(const string& label);
     void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
-    void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
+    void add_rythm_change(int measure, ImoTimeSignature* pTS);
     void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
     void delete_events_table();
     void delete_jumps_table();
     void delete_measures_jumps_table();
     int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS, TimeUnits timeShift);
-    void reset_accidentals(ImoKeySignature* pKey);
-    void update_context_accidentals(ImoNote* pNote);
     JumpEntry* create_jump(int inMeasure, int jumpTo, int timesValid, int timesBefore=0);
     void process_sound_change(ImoSoundChange* pSound, StaffObjsCursor& cursor,
                               int channel, int iInstr, int measure);

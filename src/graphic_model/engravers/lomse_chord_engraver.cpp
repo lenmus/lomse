@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -50,7 +50,7 @@ namespace lomse
 // ClefEngraver implementation
 //=======================================================================================
 ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                             int numNotes)
+                             int numNotes, double fontSize, int symbolSize)
     : RelObjEngraver(libraryScope, pScoreMeter)
     , m_pChord(nullptr)
     , m_pBaseNoteData(nullptr)
@@ -62,6 +62,8 @@ ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_noteType(0)
     , m_stemWidth(0.0f)
     , m_numNotesMissing(numNotes)
+    , m_fontSize(fontSize)
+    , m_symbolSize(symbolSize)
 {
 }
 
@@ -216,27 +218,35 @@ void ChordEngraver::decide_on_stem_direction()
                  && !is_chord_beamed();
 
 
-    if (m_noteType < k_half)
-        m_fStemDown = false;                    //c1. layout as if stem up
-
-    else if (stemType == k_stem_up)
-        m_fStemDown = false;                    //force stem up
-
-    else if (stemType == k_stem_down)
-        m_fStemDown = true;                     //force stem down
-
-    else if (stemType == k_stem_none)
-        m_fStemDown = false;                    //c1. layout as if stem up
-
-    else if (stemType == k_stem_default)     //as decided by program
+    if (pBaseNote->is_grace_note())
     {
-        //majority rule
-        int weight = 0;
-        std::list<ChordNoteData*>::iterator it;
-        for(it=m_notes.begin(); it != m_notes.end(); ++it)
-            weight += (*it)->posOnStaff;
+        //for grace notes stem is always up unless stem down explicitly requested
+        m_fStemDown = (stemType == k_stem_down);
+    }
+    else
+    {
+        if (m_noteType < k_half)
+            m_fStemDown = false;                    //c1. layout as if stem up
 
-        m_fStemDown = ( weight >= 6 * int(m_notes.size()) );
+        else if (stemType == k_stem_up)
+            m_fStemDown = false;                    //force stem up
+
+        else if (stemType == k_stem_down)
+            m_fStemDown = true;                     //force stem down
+
+        else if (stemType == k_stem_none)
+            m_fStemDown = false;                    //c1. layout as if stem up
+
+        else if (stemType == k_stem_default)     //as decided by program
+        {
+            //majority rule
+            int weight = 0;
+            std::list<ChordNoteData*>::iterator it;
+            for(it=m_notes.begin(); it != m_notes.end(); ++it)
+                weight += (*it)->posOnStaff;
+
+            m_fStemDown = ( weight >= 6 * int(m_notes.size()) );
+        }
     }
 }
 
@@ -511,16 +521,44 @@ void ChordEngraver::add_stem_and_flag()
     int nPosOnStaff = pDataFlag->posOnStaff;
 
     //create the shape and attach it to notes
-    Tenths length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
-    if (!is_chord_beamed() && length < 35.0f && m_noteType > k_eighth)
-        length = 35.0f;     // 3.5 spaces
-    bool fShortFlag = (length < 35.0f);
+    bool fHasBeam = is_chord_beamed();
+    bool fShortFlag = false;
+    Tenths length = 0.0f;
+
+    if (m_symbolSize == k_size_cue)
+    {
+        length = 22.5f;     // 2 1/4 spaces. E.Gould p.126
+    }
+    else
+    {
+        length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
+        if (!fHasBeam && length < 35.0f && m_noteType > k_eighth)
+            length = 35.0f;     // 3.5 spaces
+
+        fShortFlag = (length < 35.0f);
+   }
+
     LUnits stemLength = tenths_to_logical(length);
-    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff);
+
+
+    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff, m_fontSize);
 
     engrv.add_stem_flag_to_chord(pMinNoteShape, pMaxNoteShape, m_pBaseNoteData->pNoteShape,
-                        m_noteType, is_stem_down(), has_flag(), fShortFlag,
+                        m_noteType, is_stem_down(), has_flag(), fShortFlag, fHasBeam,
                         m_fCrossStaffChord, stemLength, m_color);
+
+    //for grace notes, add the stroke shape if required
+    ImoNote* pBaseNote = get_base_note();
+    if (pBaseNote->is_grace_note() && !pBaseNote->is_beamed())
+    {
+        ImoGraceRelObj* pRO = static_cast<ImoGraceRelObj*>(
+                                    pBaseNote->get_grace_relobj() );
+        if (pRO && pRO->has_slash()
+            && pBaseNote == static_cast<ImoNote*>(pRO->get_start_object()) )
+        {
+            engrv.add_stroke_shape();
+        }
+    }
 }
 
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,13 +30,13 @@
 #ifndef __LOMSE_STAFFOBJS_TABLE_H__
 #define __LOMSE_STAFFOBJS_TABLE_H__
 
-#include <vector>
-#include <ostream>
-#include <map>
 #include "private/lomse_document_p.h"
 #include "lomse_time.h"
 
-using namespace std;
+//std
+#include <vector>
+#include <ostream>
+#include <map>
 
 namespace lomse
 {
@@ -44,15 +44,16 @@ namespace lomse
 #define LOMSE_NO_NOTE_DURATION  100000000.0f    //any too high value for note/rest
 
 //forward declarations
-class ImoObj;
-class ImoStaffObj;
-class ImoGoBackFwd;
 class ImoAuxObj;
 class ImoDirection;
-class ImoScore;
-class ImoTimeSignature;
 class ImoGoBackFwd;
+class ImoGraceNote;
+class ImoGraceRelObj;
 class ImoMusicData;
+class ImoObj;
+class ImoScore;
+class ImoStaffObj;
+class ImoTimeSignature;
 
 
 //---------------------------------------------------------------------------------------
@@ -98,7 +99,7 @@ public:
     }
 
     //debug
-    string dump(bool fWithIds=true);
+    std::string dump(bool fWithIds=true);
     std::string to_string();
     std::string to_string_with_ids();
 
@@ -127,6 +128,7 @@ protected:
     int m_numLines;
     int m_numEntries;
     TimeUnits m_rMissingTime;
+    TimeUnits m_rAnacruxisExtraTime;    //extra anacruxis time introduced by grace notes
     TimeUnits m_minNoteDuration;
 
     ColStaffObjsEntry* m_pFirst;
@@ -139,12 +141,14 @@ public:
     //table info
     inline int num_entries() { return m_numEntries; }
     inline int num_lines() { return m_numLines; }
-    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
-    inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
+    inline bool is_anacruxis_start() { return is_greater_time(m_rMissingTime, 0.0); }
+    inline TimeUnits anacruxis_missing_time() { return m_rMissingTime; }
+    inline TimeUnits anacruxis_extra_time() { return m_rAnacruxisExtraTime; }
     inline TimeUnits min_note_duration() { return m_minNoteDuration; }
 
     //table management
-    void add_entry(int measure, int instr, int voice, int staff, ImoStaffObj* pImo);
+    ColStaffObjsEntry* add_entry(int measure, int instr, int voice, int staff,
+                                 ImoStaffObj* pImo);
     void delete_entry_for(ImoStaffObj* pSO);
 
     //iterator related
@@ -226,7 +230,7 @@ public:
     inline iterator find(ImoStaffObj* pSO) { return iterator(find_entry_for(pSO)); }
 
     //debug
-    string dump(bool fWithIds=true);
+    std::string dump(bool fWithIds=true);
 
 protected:
 
@@ -236,7 +240,8 @@ protected:
     friend class ColStaffObjsBuilderEngine2x;
 
     inline void set_total_lines(int number) { m_numLines = number; }
-    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    inline void set_anacruxis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
+    inline void set_anacruxis_extra_time(TimeUnits rTime) { m_rAnacruxisExtraTime = rTime; }
     void sort_table();
     static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
     inline void set_min_note(TimeUnits duration) { m_minNoteDuration = duration; }
@@ -304,7 +309,9 @@ protected:
     TimeUnits   m_rMaxSegmentTime;
     TimeUnits   m_rStartSegmentTime;
     TimeUnits   m_minNoteDuration;
+    TimeUnits   m_gracesAnacruxisTime;
     StaffVoiceLineTable  m_lines;
+    std::vector<ColStaffObjsEntry*> m_graces;       //entries for grace notes
 
     ColStaffObjsBuilderEngine(ImoScore* pScore)
         : m_pColStaffObjs(nullptr)
@@ -313,6 +320,7 @@ protected:
         , m_rMaxSegmentTime(0.0)
         , m_rStartSegmentTime(0.0)
         , m_minNoteDuration(LOMSE_NO_NOTE_DURATION)
+        , m_gracesAnacruxisTime(0.0)
     {}
 
 public:
@@ -323,15 +331,21 @@ public:
 protected:
     virtual void initializations()=0;
     virtual void determine_timepos(ImoStaffObj* pSO)=0;
-    virtual void create_entries(int nInstr)=0;
+    virtual void create_entries_for_instrument(int nInstr)=0;
     virtual void prepare_for_next_instrument()=0;
 
     void create_table();
-    void collect_anacrusis_info();
+    void collect_anacruxis_info();
     int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     void set_min_note_duration();
+    void compute_playback_time();
+    void process_grace_relobj(ImoGraceNote* pGrace, ImoGraceRelObj* pGRO,
+                              ColStaffObjsEntry* pEntry);
+    ImoNote* locate_grace_principal_note(ColStaffObjsEntry* pEntry);
+    ImoNote* locate_grace_previous_note(ColStaffObjsEntry* pEntry);
+    void fix_negative_playback_times();
 
 };
 
@@ -350,23 +364,28 @@ public:
     ColStaffObjsBuilderEngine1x(ImoScore* pScore)
         : ColStaffObjsBuilderEngine(pScore)
         , m_rCurTime(0.0)
+        , m_rCurAlignTime(0.0)
     {
     }
     virtual ~ColStaffObjsBuilderEngine1x() {}
 
 private:
     TimeUnits   m_rCurTime;
+    TimeUnits   m_rCurAlignTime;
 
-    void initializations();
-    void create_entries(int nInstr);
+    //overrides for base class ColStaffObjsBuilderEngine
+    void initializations() override;
+    void determine_timepos(ImoStaffObj* pSO) override;
+    void create_entries_for_instrument(int nInstr) override;
+    void prepare_for_next_instrument() override;
+
+    //specific
     void reset_counters();
-    void determine_timepos(ImoStaffObj* pSO);
     void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     ImoDirection* anchor_object(ImoAuxObj* pImo);
     void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
-    void prepare_for_next_instrument();
 
 };
 
@@ -380,7 +399,7 @@ private:
 class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
 {
 protected:
-    vector<TimeUnits> m_rCurTime;
+    std::vector<TimeUnits> m_rCurTime;
     int m_curVoice;
 
 public:
@@ -392,13 +411,17 @@ public:
     virtual ~ColStaffObjsBuilderEngine2x() {}
 
 private:
-    void initializations();
-    void create_entries(int nInstr);
+
+    //overrides for base class ColStaffObjsBuilderEngine
+    void initializations() override;
+    void determine_timepos(ImoStaffObj* pSO) override;
+    void create_entries_for_instrument(int nInstr) override;
+    void prepare_for_next_instrument() override;
+
+    //specific
     void reset_counters();
-    void determine_timepos(ImoStaffObj* pSO);
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    void prepare_for_next_instrument();
 
 };
 

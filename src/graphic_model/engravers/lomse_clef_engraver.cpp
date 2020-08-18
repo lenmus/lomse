@@ -151,8 +151,8 @@ int ClefEngraver::find_glyph(int clefType)
 //---------------------------------------------------------------------------------------
 double ClefEngraver::determine_font_size()
 {
-    double fontSize = 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff)
-                     / 180.0;
+    double fontSize = Engraver::determine_font_size();
+
     switch (m_symbolSize)
     {
         case k_size_cue:        return fontSize * 0.80;

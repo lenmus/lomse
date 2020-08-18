@@ -80,10 +80,13 @@ protected:
     int m_noteType;
     LUnits m_stemWidth;
     int m_numNotesMissing;
+    double m_fontSize;
+    int m_symbolSize;
 
 
 public:
-    ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes);
+    ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes,
+                  double fontSize, int symbolSize);
     virtual ~ChordEngraver();
 
     //implementation of virtual methods from RelObjEngraver

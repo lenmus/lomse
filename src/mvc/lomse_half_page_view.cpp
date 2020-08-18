@@ -444,7 +444,7 @@ void HalfPageView::remove_split()
 }
 
 //---------------------------------------------------------------------------------------
-void HalfPageView::send_enable_scroll_event(bool enable)
+void HalfPageView::send_enable_scroll_event(bool UNUSED(enable))
 {
 }
 

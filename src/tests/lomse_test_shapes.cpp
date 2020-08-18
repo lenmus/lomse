@@ -97,7 +97,7 @@ SUITE(GmoShapeTest)
     TEST_FIXTURE(GmoShapeTestFixture, Composite_IsLocked)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
         pNote->set_notated_accidentals(k_no_accidentals);
@@ -119,7 +119,7 @@ SUITE(GmoShapeTest)
     TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
         pNote->set_note_type(k_whole);
 
@@ -155,7 +155,7 @@ SUITE(GmoShapeTest)
     TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds2)
     {
         Document doc(m_libraryScope);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_flat);
         pNote->set_note_type(k_whole);
 

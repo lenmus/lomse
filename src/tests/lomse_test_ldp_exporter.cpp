@@ -945,7 +945,7 @@ SUITE(LdpExporterTest)
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
         ImoNote* pImo = static_cast<ImoNote*>(
-                                        pMD->get_child_of_type(k_imo_note) );
+                                        pMD->get_child_of_type(k_imo_note_regular) );
 
         LdpExporter exporter(&m_libraryScope);
         exporter.set_remove_newlines(true);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,6 +70,7 @@ SoundEventsTable::SoundEventsTable(ImoScore* pScore)
     : m_pScore(pScore)
     , m_numMeasures(0)
     , m_rAnacrusisMissingTime(0.0)
+    , m_rAnacrusisExtraTime(0.0)
 {
 }
 
@@ -148,9 +149,8 @@ void SoundEventsTable::create_events()
                             //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
-    m_rAnacrusisMissingTime = cursor.anacrusis_missing_time();
-    ImoKeySignature* pKey = nullptr;
-    reset_accidentals(pKey);
+    m_rAnacrusisMissingTime = cursor.anacruxis_missing_time();
+    m_rAnacrusisExtraTime = cursor.anacruxis_extra_time();
 
     //iterate over the collection to create the MIDI events
     while(!cursor.is_end())
@@ -166,8 +166,6 @@ void SoundEventsTable::create_events()
         }
         else if (pSO->is_barline())
         {
-            reset_accidentals(pKey);
-
             //only repetitions and volta brackets in first instrument are taken into
             //consideration. Otherwise redundant invalid jumps would be created.
             if (cursor.num_instrument() == 0)
@@ -197,12 +195,7 @@ void SoundEventsTable::create_events()
         }
         else if (pSO->is_time_signature())
         {
-            add_rythm_change(cursor, measure, static_cast<ImoTimeSignature*>(pSO));
-        }
-        else if (pSO->is_key_signature())
-        {
-            pKey = static_cast<ImoKeySignature*>( pSO );
-            reset_accidentals(pKey);
+            add_rythm_change(measure, static_cast<ImoTimeSignature*>(pSO));
         }
         else if (pSO->is_direction())
         {
@@ -370,14 +363,14 @@ void SoundEventsTable::store_jump_event(TimeUnits rTime, JumpEntry* pJump, int m
 void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
                                            int measure)
 {
-    ImoStaffObj* pSO = cursor.get_staffobj();
+    ImoNoteRest* pNR = static_cast<ImoNoteRest*>( cursor.get_staffobj() );
     ImoTimeSignature* pTS = cursor.get_applicable_time_signature();
     ImoNote* pNote = nullptr;
     int step = 0;
     int pitch = 0;
-    if (pSO->is_note())
+    if (pNR->is_note())
     {
-        pNote = static_cast<ImoNote*>(pSO);
+        pNote = static_cast<ImoNote*>(pNR);
         pitch = int(pNote->get_midi_pitch());
     }
 
@@ -387,36 +380,36 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     //(rests, tied notes...)
 
     //Generate Note ON event
-    TimeUnits rTime = cursor.time();
-    if (pSO->is_note())
+    TimeUnits rTime = pNR->get_playback_time();
+    if (pNR->is_note())
     {
         //It is a note. Generate Note On event
         if (!pNote->is_tied_prev())
         {
             //It is not tied to the previous one. Generate NoteOn event to
             //start the sound and highlight the note
-            int volume = compute_volume(rTime, pTS, cursor.anacrusis_missing_time());
+            int volume = compute_volume(rTime, pTS, cursor.anacruxis_missing_time());
             store_event(rTime, SoundEvent::k_note_on, channel, pitch,
-                        volume, step, pSO, measure);
+                        volume, step, pNR, measure);
         }
         else
         {
             //This note is tied to the previous one. Generate only a VisualOn event as the
             //sound is already started by the previous note.
             store_event(rTime, SoundEvent::k_visual_on, channel, pitch,
-                        0, step, pSO, measure);
+                        0, step, pNR, measure);
         }
     }
     else
     {
         //it is a rest. Generate only event for visual highlight
-        if (pSO->is_visible())
-            store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pSO, measure);
+        if (pNR->is_visible())
+            store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pNR, measure);
     }
 
     //generate NoteOff event
-    rTime += pSO->get_duration();
-    if (pSO->is_note())
+    rTime += pNR->get_playback_duration();
+    if (pNR->is_note())
     {
         //It is a note
         if (!pNote->is_tied_next())
@@ -424,29 +417,28 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
             //It is not tied to next note. Generate NoteOff event to stop the sound and
             //un-highlight the note
             store_event(rTime, SoundEvent::k_note_off, channel, pitch,
-                        0, step, pSO, measure);
+                        0, step, pNR, measure);
         }
         else
         {
             //This note is tied to the next one. Generate only a VisualOff event so that
             //the note will be un-highlighted but the sound will not be stopped.
             store_event(rTime, SoundEvent::k_visual_off, channel, pitch,
-                        0, step, pSO, measure);
+                        0, step, pNR, measure);
         }
     }
     else
     {
         //Is a rest. Generate only a VisualOff event
-        if (pSO->is_visible())
-            store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pSO, measure);
+        if (pNR->is_visible())
+            store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pNR, measure);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
-                                        ImoTimeSignature* pTS)
+void SoundEventsTable::add_rythm_change(int measure, ImoTimeSignature* pTS)
 {
-    TimeUnits rTime = cursor.time();
+    TimeUnits rTime = pTS->get_time();
     int topNumber = pTS->get_top_number();
     int numBeats = pTS->get_num_pulses();
     int beatDuration = int( pTS->get_ref_note_duration() );
@@ -656,65 +648,6 @@ int SoundEventsTable::compute_volume(TimeUnits timePos, ImoTimeSignature* pTS,
 }
 
 //---------------------------------------------------------------------------------------
-void SoundEventsTable::reset_accidentals(ImoKeySignature* pKey)
-{
-    if (pKey)
-    {
-        int keyType = pKey->get_key_type();
-        KeyUtilities::get_accidentals_for_key(keyType, m_accidentals);
-    }
-    else
-    {
-        for (int iStep=0; iStep < 7; ++iStep)
-            m_accidentals[iStep] = 0;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void SoundEventsTable::update_context_accidentals(ImoNote* pNote)
-{
-    int step = pNote->get_step();
-    EAccidentals acc = pNote->get_notated_accidentals();
-    switch (acc)
-    {
-        case k_no_accidentals:
-            //do not modify context
-            break;
-        case k_natural:
-            //force 'natural' (=no accidentals)
-            m_accidentals[step] = 0;
-            break;
-        case k_flat:
-            //lower one semitone
-            m_accidentals[step] -= 1;
-            break;
-        case k_natural_flat:
-            //Force one flat
-            m_accidentals[step] = -1;
-            break;
-        case k_sharp:
-            //raise one semitone
-            m_accidentals[step] += 1;
-            break;
-        case k_natural_sharp:
-            //force one sharp
-            m_accidentals[step] = 1;
-            break;
-        case k_flat_flat:
-            //lower two semitones
-            m_accidentals[step] -= 2;
-            break;
-        case k_sharp_sharp:
-        case k_double_sharp:
-            //raise two semitones
-            m_accidentals[step] += 2;
-            break;
-        default:
-            ;
-    }
-}
-
-//---------------------------------------------------------------------------------------
 JumpEntry* SoundEventsTable::get_jump(int i)
 {
     if (i < int(m_jumps.size()))
@@ -734,7 +667,8 @@ JumpEntry* SoundEventsTable::create_jump(int inMeasure, int jumpTo, int timesVal
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump)
 {
-    TimeUnits rTime = cursor.time();
+    ImoStaffObj* pSO = cursor.get_staffobj();
+    TimeUnits rTime = pSO->get_time();
     store_jump_event(rTime, pJump, measure);
 }
 
