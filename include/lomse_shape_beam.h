@@ -48,8 +48,6 @@ class GmoShapeBeam : public GmoSimpleShape, public VoiceRelatedShape
 protected:
     LUnits m_uBeamThickness;
     std::list<LUnits> m_segments;
-	UPoint m_outerLeftPoint;
-    UPoint m_outerRightPoint;
     unsigned int m_BeamFlags;
     int m_staff;
 
@@ -61,17 +59,20 @@ public:
     ~GmoShapeBeam();
 
     void set_layout_data(std::list<LUnits>& segments, UPoint origin, USize size,
-                         UPoint outerLeft, UPoint outerRight, bool fCrossStaff,
-                         bool fChord, int beamPos, int staff);
+                         bool fCrossStaff, bool fChord, int beamPos, int staff);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
-    //provide geometry reference info, for other related shapes
-    UPoint get_outer_left_reference_point() { return m_outerLeftPoint; }
-    UPoint get_outer_right_reference_point() { return m_outerRightPoint; }
+    //provide geometry reference info, for tuplets and other related shapes
+    //Reference points are:
+    //- top of principal beam when beam above
+    //- bottom of principal beam when beam below
+    //- center line of principal beam when double-stemmed
+    UPoint get_outer_left_reference_point();
+    UPoint get_outer_right_reference_point();
 
     //layout
     inline bool is_cross_staff() { return (m_BeamFlags & k_cross_staff) != 0; }
-    inline bool is_chord() { return (m_BeamFlags & k_for_chord) != 0; }
+    inline bool has_chords() { return (m_BeamFlags & k_has_chords) != 0; }
     inline bool get_staff() { return m_staff; }
     inline bool is_beam_below() { return (m_BeamFlags & k_beam_below) != 0; }
     inline bool is_beam_above() { return (m_BeamFlags & k_beam_above) != 0; }
@@ -85,7 +86,7 @@ protected:
     //flag values
     enum {
         k_cross_staff           = 0x0001,   //the beam has stems (flag segment) in at least two staves
-        k_for_chord             = 0x0002,   //it is a beam for a chord
+        k_has_chords            = 0x0002,   //the beam has at least one chord
         k_beam_below            = 0x0004,   //the beam is placed below
         k_beam_above            = 0x0008,   //the beam is placed above
         k_beam_double_stemmed   = 0x0010,   //the beam is double stemmed

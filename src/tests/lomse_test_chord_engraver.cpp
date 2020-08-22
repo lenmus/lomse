@@ -1102,7 +1102,7 @@ SUITE(ChordEngraverTest)
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Presenter* pPresenter = doorway.open_document(k_view_vertical_book,
-                        m_scores_path + "unit-tests/chords/01-beam-forced-down.xml");
+            m_scores_path + "unit-tests/chords/440-beamed-chord-both-up.lms");
         Document* pDoc = pPresenter->get_document_raw_ptr();
         Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
         pIntor->get_graphic_model();        //force to engrave the score

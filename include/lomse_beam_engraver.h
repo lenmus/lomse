@@ -54,6 +54,37 @@ class VerticalProfile;
 
 
 //---------------------------------------------------------------------------------------
+/** SegmentData: Helper struct for storing data about one beam segment
+*/
+struct SegmentData
+{
+    int iLevel;                 //segment level: 0..5. 0=ppal, 1=next level, etc.
+    LUnits xStart;
+    LUnits yStart;
+    LUnits xEnd;
+    LUnits yEnd;
+    GmoShapeNote* pStartNote;   //nullptr for forward hook, == pEndNote for backward hook
+    GmoShapeNote* pEndNote;
+    int position;               //from enum EComputedBeam
+    bool fOpposite;             //segment with outher notes in opposite direction
+
+    SegmentData(int level, LUnits xs, LUnits ys, LUnits xe, LUnits ye, GmoShapeNote* pSN,
+                GmoShapeNote* pEN, int pos)
+        : iLevel(level)
+        , xStart(xs)
+        , yStart(ys)
+        , xEnd(xe)
+        , yEnd(ye)
+        , pStartNote(pSN)
+        , pEndNote(pEN)
+        , position(pos)
+        , fOpposite(false)
+    {
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class BeamEngraver : public RelObjEngraver
 {
 protected:
@@ -66,8 +97,6 @@ protected:
     USize m_size;
     LUnits m_uBeamThickness;
     int m_beamPos;              //computed beam position. Value from enum EComputedBeam
-	UPoint m_outerLeftPoint;
-    UPoint m_outerRightPoint;
 
     bool m_fDoubleStemmed;      //stems forced: not all stems in the same direction
     bool m_fCrossStaff;         //the flag notes are on both staves
@@ -78,7 +107,6 @@ protected:
     int m_minStaff;     //for cross-staff beams, the lowest staff. For normal beams, just the staff
     int m_numLevels;    //number of beam levels for this beam;
     std::vector<GmoShapeNote*> m_note;      //shapes for notes. Rests removed.
-
 
 public:
     BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
@@ -113,44 +141,56 @@ public:
 
 protected:
     void add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape);
+    void determine_number_of_beam_levels();
+    void decide_stems_direction();
+        void decide_stems_direction_for_beams_with_chords();
+        void decide_stems_direction_for_beams_without_chords();
+            void decide_beam_position();
+        void change_stems_direction();
+    void reposition_rests();
+
+    void compute_beam_segments();
+        void engrave_beam_segments_for_double_stemmed();
+            void determine_segments(ImoBeam* pBeam, std::vector<SegmentData>* pSegs);
+            void classify_segments(std::vector<SegmentData>* pSegs);
+	        void position_segments(std::vector<SegmentData>* pSegs);
+        void engrave_beam_segments_for_simple_beams();
+            void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
+            void make_segments_relative();
+
     void create_shape();
     void add_shape_to_noterests();
-    void reposition_rests();
-    void decide_stems_direction();
-    void decide_stems_direction_for_beams_with_chords();
-    void decide_stems_direction_for_beams_without_chords();
-    void decide_beam_position();
-    void change_stems_direction();
-    void beam_angle_and_stems_for_simple_beams();
-    void beam_angle_and_stems_for_cross_staff_beams();
-    void beam_angle_and_stems_for_double_stemmed_beams();
-    void compute_beam_segments();
-    void adjust_stems_length_if_double_beamed();
-	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
-    void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
-    void make_segments_relative();
-    void determine_number_of_beam_levels();
     void add_stroke_for_graces();
 
-    bool has_repeated_pattern_of_pitches();
-    bool check_all_notes_outside_first_ledger_line();
-    float get_staff_length_for_beam(int iNote);
-    float assign_slant_to_beam_for_grace_notes(int pos0, int posN);
-    float assign_slant_to_beam_for_regular_notes(int pos0, int posN);
-    void angle_and_stems_for_simple_beams(int pos0, int posN);
-    bool beam_must_be_horizontal(int pos0, int posN);
-    void create_horizontal_beam_and_set_stems(int pos0, int posN);
-    void assing_stem_length_to_outer_regular_notes(float slant, int pos0, int posN);
-    void assing_stem_length_to_outer_grace_notes(float slant, int pos0, int posN);
-    void assing_stem_length_to_inner_notes();
-    ImoNote* get_first_note();
-    ImoNote* get_last_note();
-    LUnits compute_beam_height();
+    //simple beams (and cross-staff but not double-stemmed)
+    void beam_angle_and_stems_for_simple_beams();
+        void create_horizontal_beam_and_set_stems(int pos0, int posN);
+            float get_staff_length_for_beam(int iNote);
+        float assign_slant_to_beam_for_grace_notes(int pos0, int posN);
+        void assing_stem_length_to_outer_grace_notes(float slant, int pos0, int posN);
+        float assign_slant_to_beam_for_regular_notes(int pos0, int posN);
+            bool check_all_notes_outside_first_ledger_line();
+        void assing_stem_length_to_outer_regular_notes(float slant, int pos0, int posN);
+        void assing_stem_length_to_inner_notes();
 
+    //cross-double-stemmed beams (cross-staff double-stemmed)
+    void beam_angle_and_stems_for_cross_double_stemmed_beams();
+        float determine_slant_direction_for_cross_double_stemmed(
+                                                std::vector<GmoShapeNote*>& upNoteShapes,
+                                                std::vector<GmoShapeNote*>& downNoteShapes);
+            float assign_slant_for_cross_double_stemmed(std::vector<GmoShapeNote*>& noteShapes);
+                float compute_slant_for_cross_double_stemmed(int pos0, int posN);
+        void compute_stems_for_cross_double_stemmed(float slant,
+                                                std::vector<GmoShapeNote*>& upNoteShapes,
+                                                std::vector<GmoShapeNote*>& downNoteShapes);
+
+
+    static bool has_repeated_pattern_of_pitches(std::vector<GmoShapeNote*>& noteShapes);
+    static bool beam_must_be_horizontal(std::vector<GmoShapeNote*>& noteShapes);
 
 
     //temporary, only while determining stem position. Methods: decide_stems_direction(),
-    //decide_stems_direction(), decide_beam_position(), change_stems_direction()
+    //decide_beam_position(), change_stems_direction()
     bool m_fStemForced;     //at least one stem forced
     bool m_fStemsUp;        //only meaningfull if m_fDoubleStemed==false. True if all stems
                             //forced up or default position

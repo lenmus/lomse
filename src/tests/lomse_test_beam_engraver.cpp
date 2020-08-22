@@ -75,11 +75,45 @@ public:
     inline int my_get_min_staff() { return m_minStaff; }
     inline int my_get_num_notes() { return m_numNotes; }
     inline bool my_has_repeated_pattern_of_pitches() {
-        return has_repeated_pattern_of_pitches();
+        return has_repeated_pattern_of_pitches(m_note);
     }
     inline bool my_check_all_notes_outside_first_ledger_line() {
         return check_all_notes_outside_first_ledger_line();
     }
+    inline void my_determine_number_of_beam_levels() {
+        determine_number_of_beam_levels();
+    }
+
+    float my_determine_slant_direction_for_cross_double_stemmed() {
+        vector<GmoShapeNote*> upNoteShapes;
+        vector<GmoShapeNote*> downNoteShapes;
+        list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
+        for(it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
+        {
+            ImoNoteRest* pNR = (*it).first;
+            if (pNR->is_note())
+            {
+                GmoShapeNote* pShapeNote = static_cast<GmoShapeNote*>((*it).second);
+                if (pShapeNote->is_up())
+                    upNoteShapes.push_back(pShapeNote);
+                else
+                    downNoteShapes.push_back(pShapeNote);
+            }
+        }
+        return determine_slant_direction_for_cross_double_stemmed(upNoteShapes,
+                                                                        downNoteShapes);
+    }
+
+    void my_determine_segments(ImoBeam* pBeam, std::vector<SegmentData>* pSegs) {
+        determine_segments(pBeam, pSegs);
+    }
+    void my_classify_segments(std::vector<SegmentData>* pSegs) {
+        classify_segments(pSegs);
+    }
+    void my_position_segments(std::vector<SegmentData>* pSegs) {
+        position_segments(pSegs);
+    }
+
 
 };
 
@@ -119,6 +153,7 @@ public:
     {
     }
 
+    //-----------------------------------------------------------------------------------
     ImoBeam* create_beam(Document& doc, const string& src)
     {
         string ldp = "(score (vers 2.0)(instrument (musicData (clef G)";
@@ -133,6 +168,7 @@ public:
         return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
     }
 
+    //-----------------------------------------------------------------------------------
     ImoBeam* create_beam_two_staves(Document& doc, const string& src)
     {
         string ldp = "(score (vers 2.0)(instrument (staves 2)"
@@ -149,6 +185,7 @@ public:
         return dynamic_cast<ImoBeam*>( pNote1->get_relation(0) );
     }
 
+    //-----------------------------------------------------------------------------------
     void prepare_to_engrave_beam(ImoBeam* pBeam)
     {
         int iInstr = 0;
@@ -207,6 +244,7 @@ public:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     ColStaffObjs* do_layout(const string& options, const string& ldpNotes)
     {
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
@@ -260,12 +298,38 @@ public:
         m_pDoc = nullptr;
     }
 
+//    //-----------------------------------------------------------------------------------
+//    ImoBeam* get_beam(Document* pDoc)
+//    {
+//        ImoScore* pScore = static_cast<ImoScore*>(pDoc->get_content_item(0));
+//        StaffObjsCursor cursor(pScore);
+//        while(!cursor.is_end() && !cursor.get_staffobj()->is_note())
+//        {
+//            cursor.move_next();
+//        }
+//        if (cursor.is_end())
+//            return nullptr;
+//
+//        while(!cursor.is_end())
+//        {
+//            if (cursor.get_staffobj()->is_note())
+//            {
+//                ImoNote* pNote = static_cast<ImoNote*>( cursor.get_staffobj() );
+//                if (pNote->is_beamed())
+//                    return pNote->get_beam();
+//            }
+//            cursor.move_next();
+//        }
+//        return nullptr;
+//    }
+
+    //-----------------------------------------------------------------------------------
     inline const char* test_name()
     {
         return UnitTest::CurrentTest::Details()->testName;
     }
 
-
+    //-----------------------------------------------------------------------------------
     void check_stem_is_equal(int iLine, int iNote, ColStaffObjsIterator* pIt, float expected)
     {
         //pIt points to first note
@@ -284,19 +348,21 @@ public:
         }
     }
 
-
+    //-----------------------------------------------------------------------------------
     void check_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
                                int numStemsInChord = 2)
     {
             do_check_slant_and_stems(iLine, expectedSlant, pIt, 1, numStemsInChord);
     }
 
+    //-----------------------------------------------------------------------------------
     void check_chord_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
                                      int numNotesPerStem, int numStemsInChord=2)
     {
             do_check_slant_and_stems(iLine, expectedSlant, pIt, numNotesPerStem, numStemsInChord);
     }
 
+    //-----------------------------------------------------------------------------------
     void do_check_slant_and_stems(int iLine, float expectedSlant, ColStaffObjsIterator* pIt,
                                   int numNotesPerStem, int numStemsInChord)
     {
@@ -368,6 +434,7 @@ public:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     void check_repeated_pattern_of_pitches(int iLine, ImoBeam* pBeam, bool fExpected)
     {
         prepare_to_engrave_beam(pBeam);
@@ -384,6 +451,7 @@ public:
         delete_test_data();
     }
 
+    //-----------------------------------------------------------------------------------
     void check_all_notes_outside_first_ledger_line(int iLine, ImoBeam* pBeam, bool fExpected)
     {
         prepare_to_engrave_beam(pBeam);
@@ -1363,6 +1431,554 @@ SUITE(BeamEngraverTest)
         delete_test_data();
     }
 
+
+    // 3xx. Tests for cross-staff double-stemmed beams ----------------------------------
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_300)
+    {
+        //@300. cross-staff double-stemmed. Two notes. beam up
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n a3 e p2 (stem up)(beam 1 +))"
+            "(n e4 e p1 (stem down)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        CHECK( m_pBeamEngrv->my_stems_forced() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == true );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == true );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 1 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
+
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 1.0f );
+//        cout << test_name() << ", slant=" << slant << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_301)
+    {
+        //@301. cross-staff double-stemmed. Two notes. beam down
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n e4 e p1 (stem down)(beam 1 +))"
+            "(n a3 e p2 (stem up)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        CHECK( m_pBeamEngrv->my_stems_forced() == true );
+        CHECK( m_pBeamEngrv->my_is_double_stemmed() == true );
+        CHECK( m_pBeamEngrv->my_is_cross_staff() == true );
+        CHECK( m_pBeamEngrv->my_get_max_staff() == 1 );
+        CHECK( m_pBeamEngrv->my_get_min_staff() == 0 );
+
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == -1.0f );
+//        cout << test_name() << ", slant=" << slant << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_302)
+    {
+        //@302. cross-staff double-stemmed. Three notes, outher notes in different
+        //      staff. Beam down
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n e4 e p1 (stem down)(beam 1 +))"
+            "(n g4 e p1 (stem down)(beam 1 =))"
+            "(n a3 e p2 (stem up)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == -1.0f );
+//        cout << test_name() << ", slant=" << slant << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_303)
+    {
+        //@303. cross-staff double-stemmed. Three notes, outher notes in the
+        //      same staff. Beam up
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n f3 e p2 (stem up)(beam 1 +))"
+            "(n e4 e p1 (stem down)(beam 1 =))"
+            "(n a3 e p2 (stem up)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 1.0f );
+//        cout << test_name() << ", slant=" << slant << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_304)
+    {
+        //@304. cross-staff double-stemmed. Three notes, outher notes in the
+        //      same staff. Beam horizontal
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n a4 e p1 (stem down)(beam 1 +))"
+            "(n e3 e p2 (stem up)(beam 1 =))"
+            "(n a4 e p1 (stem down)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 0.0f );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_310)
+    {
+        //@310. cross-staff double-stemmed. Four or more notes and only one note in one
+        //      side. Beam horizontal
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n a4 e p1 (stem down)(beam 1 +))"
+            "(n c5 e p1 (stem down)(beam 1 =))"
+            "(n e3 e p2 (stem up)(beam 1 =))"
+            "(n a4 e p1 (stem down)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 0.0f );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_311)
+    {
+        //@311. cross-staff double-stemmed. Four or more notes and only one note in one
+        //      side. Opposite to 310. Beam horizontal
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n e3 e p2 (stem up)(beam 1 +))"
+            "(n c3 e p2 (stem up)(beam 1 =))"
+            "(n g4 e p1 (stem down)(beam 1 =))"
+            "(n e3 e p2 (stem up)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 0.0f );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_312)
+    {
+        //@312. cross-staff double-stemmed. Four or more notes and only one note in one
+        //      side. Intermediate note near beam forces beam horizontal
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n c3 e p2 (stem up)(beam 1 +))"
+            "(n e3 e p2 (stem up)(beam 1 =))"
+            "(n g4 e p1 (stem down)(beam 1 =))"
+            "(n d3 e p2 (stem up)(beam 1 -))"
+        );
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_decide_stems_direction();
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+
+        float slant = m_pBeamEngrv->my_determine_slant_direction_for_cross_double_stemmed();
+        CHECK( slant == 0.0f );
+//        cout << test_name() << ", slant=" << slant << endl;
+
+        delete_test_data();
+    }
+
+
+    // preliminary test -----------------------------------------------------------------
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_501)
+    {
+        //@501. simple beam, two notes one segment
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n c4 e g+)(n f4 e g-)");
+        CHECK( pBeam != nullptr );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 1 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[1] );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_segments_engraver_502)
+    {
+        //@502. simple beam, forward hook
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam(doc, "(n c4 s g+)(n f4 e. g-)");
+        CHECK( pBeam != nullptr );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 2 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[1] );
+        CHECK( segs[1].pStartNote == nullptr );
+        CHECK( segs[1].pEndNote == m_shapes[1] );
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_510)
+    {
+        //@510. R1a. one subgroup, one segment [E.Gould, p.316 (a)-1]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n c3 e p2 (stem up)(beam 1 +))"
+            "(n g4 s p1 (stem down)(beam 1 =+))"
+            "(n g4 s p1 (stem down)(beam 1 --))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 2 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[2] );
+        CHECK( segs[1].pStartNote == m_shapes[1] );
+        CHECK( segs[1].pEndNote == m_shapes[2] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_above );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_511)
+    {
+        //@511. R1a. one subgroup, two segments [E.Gould, p.316 (a)-2]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n c3 s p2 (stem up)(beam 1 ++))"
+            "(n c3 s p2 (stem up)(beam 1 ==))"
+            "(n c3 s p2 (stem up)(beam 1 =-))"
+            "(n g4 e p1 (stem down)(beam 1 -))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 2 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[3] );
+        CHECK( segs[1].pStartNote == m_shapes[0] );
+        CHECK( segs[1].pEndNote == m_shapes[2] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_below );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_512)
+    {
+        //@512. R1a. three subgroups, six segments [E.Gould, p.316 (a)-3]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 t p1 (stem down)(beam 1 +++))"
+            "(n g4 t p1 (stem down)(beam 1 ===))"
+            "(n g4 t p1 (stem down)(beam 1 ===))"
+            "(n g4 t p1 (stem down)(beam 1 =--))"
+            "(n c3 s. p2 (stem up)(beam 1 =+))"
+            "(n c3 t p2 (stem up)(beam 1 =-b))"
+            "(n g4 s p1 (stem down)(beam 1 =+))"
+            "(n g4 s p1 (stem down)(beam 1 --))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 6 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[7] );
+        CHECK( segs[1].pStartNote == m_shapes[0] );
+        CHECK( segs[1].pEndNote == m_shapes[3] );
+        CHECK( segs[2].pStartNote == m_shapes[4] );
+        CHECK( segs[2].pEndNote == m_shapes[5] );
+        CHECK( segs[3].pStartNote == m_shapes[6] );
+        CHECK( segs[3].pEndNote == m_shapes[7] );
+        CHECK( segs[4].pStartNote == m_shapes[0] );
+        CHECK( segs[4].pEndNote == m_shapes[3] );
+        CHECK( segs[5].pStartNote == m_shapes[5] );
+        CHECK( segs[5].pEndNote == m_shapes[5] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_above );
+        CHECK( segs[2].position == k_beam_below );
+        CHECK( segs[3].position == k_beam_above );
+        CHECK( segs[4].position == k_beam_above );
+        CHECK( segs[5].position == k_beam_below );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << ", pos3=" << segs[2].position
+//             << ", pos4=" << segs[3].position << ", pos5=" << segs[4].position
+//             << ", pos6=" << segs[5].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_513)
+    {
+        //@513. R1b. two subgroups, three segments [E.Gould, p.316 (b)]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 s p1 (stem down)(beam 1 ++))"
+            "(n c3 s p2 (stem up)(beam 1 ==))"
+            "(n c3 s p2 (stem up)(beam 1 ==))"
+            "(n g4 s p1 (stem down)(beam 1 =-))"
+            "(n c3 s p2 (stem up)(beam 1 =+))"
+            "(n g4 s p1 (stem down)(beam 1 ==))"
+            "(n c3 s p2 (stem up)(beam 1 --))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 3 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[6] );
+        CHECK( segs[1].pStartNote == m_shapes[0] );
+        CHECK( segs[1].pEndNote == m_shapes[3] );
+        CHECK( segs[2].pStartNote == m_shapes[4] );
+        CHECK( segs[2].pEndNote == m_shapes[6] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_above );
+        CHECK( segs[2].position == k_beam_below );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << ", pos3=" << segs[2].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_514)
+    {
+        //@514. R1c. beam fractional [E.Gould, p.316 (c)]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 e p1 (stem down)(beam 1 +))"
+            "(n c3 s p2 (stem up)(beam 1 =b))"
+            "(n c3 e p2 (stem up)(beam 1 =))"
+            "(n g4 s p1 (stem down)(beam 1 -b))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 3 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[3] );
+        CHECK( segs[1].pStartNote == m_shapes[1] );
+        CHECK( segs[1].pEndNote == m_shapes[1] );
+        CHECK( segs[2].pStartNote == m_shapes[3] );
+        CHECK( segs[2].pEndNote == m_shapes[3] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_below );
+        CHECK( segs[2].position == k_beam_above );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << ", pos3=" << segs[2].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_515)
+    {
+        //@515. R2.1. on the opposite side of first note [E.Gould, p.316 fig.3]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 s p1 (stem down)(beam 1 ++))"
+            "(n g4 s p1 (stem down)(beam 1 ==))"
+            "(n c3 s p2 (stem up)(beam 1 =-))"
+            "(n g4 e p1 (stem down)(beam 1 -))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 2 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[3] );
+        CHECK( segs[1].pStartNote == m_shapes[0] );
+        CHECK( segs[1].pEndNote == m_shapes[2] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_below );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_516)
+    {
+        //@516. R2.2. on the same side of first note [E.Gould, p.316 fig.4]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 e p1 (stem down)(beam 1 +))"
+            "(n g4 s p1 (stem down)(beam 1 =+))"
+            "(n c3 s p2 (stem up)(beam 1 --))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 2 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[2] );
+        CHECK( segs[1].pStartNote == m_shapes[1] );
+        CHECK( segs[1].pEndNote == m_shapes[2] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_above );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << endl;
+
+        delete_test_data();
+    }
+
+    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_517)
+    {
+        //@517. R2.3. when several mixed, all in the same side [E.Gould, p.317 fig.1]
+
+        Document doc(m_libraryScope);
+        ImoBeam* pBeam = create_beam_two_staves(doc,
+            "(n g4 e p1 (stem down)(beam 1 +))"
+            "(n c3 s p2 (stem up)(beam 1 =+))"
+            "(n g4 s p1 (stem down)(beam 1 =-))"
+            "(n g4 s p1 (stem down)(beam 1 =+))"
+            "(n c3 s p2 (stem up)(beam 1 --))"
+        );
+
+        prepare_to_engrave_beam(pBeam);
+        m_pBeamEngrv->my_determine_number_of_beam_levels();
+        m_pBeamEngrv->my_decide_stems_direction();
+
+        vector<SegmentData> segs;
+        m_pBeamEngrv->my_determine_segments(pBeam, &segs);
+
+        CHECK( segs.size() == 3 );
+        CHECK( segs[0].pStartNote == m_shapes[0] );
+        CHECK( segs[0].pEndNote == m_shapes[4] );
+        CHECK( segs[1].pStartNote == m_shapes[1] );
+        CHECK( segs[1].pEndNote == m_shapes[2] );
+        CHECK( segs[2].pStartNote == m_shapes[3] );
+        CHECK( segs[2].pEndNote == m_shapes[4] );
+
+        m_pBeamEngrv->my_classify_segments(&segs);
+
+        CHECK( segs[0].position != k_beam_undecided );
+        CHECK( segs[1].position == k_beam_below );
+        CHECK( segs[1].position == k_beam_below );
+//        cout << test_name() << ", pos1=" << segs[0].position
+//             << ", pos2=" << segs[1].position << ", pos3=" << segs[2].position << endl;
+
+        delete_test_data();
+    }
+
+
 //    TEST_FIXTURE(BeamEngraverTestFixture, beam_engraver_900)
 //    {
 //        //@900. Beam slant: error in chords
@@ -1393,6 +2009,5 @@ SUITE(BeamEngraverTest)
 //        delete_test_data();
 //    }
 
-}
-
+};
 

@@ -668,7 +668,7 @@ void ChordEngraver::add_stem_link_segment()
     LUnits yBottom = pBottomNotehead->get_top() + halfNotehead;
 
     GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pLinkNoteData->pNote, m_uxStem, yTop,
-                                                  0.0f, yBottom, m_fStemDown,
+                                                  yBottom, m_fStemDown,
                                                   m_uStemThickness, m_color);
     add_voice(pShape);
     pLinkNoteShape->add_stem(pShape);
@@ -693,7 +693,7 @@ void ChordEngraver::add_stem_extensible_segment_if_required()
     LUnits yBottom = pBottomNotehead->get_top() + halfNotehead;
 
     GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pStartNoteData->pNote, m_uxStem, yTop,
-                                                  0.0f, yBottom, m_fStemDown,
+                                                  yBottom, m_fStemDown,
                                                   m_uStemThickness, m_color);
     add_voice(pShape);
     pStartNoteShape->add_stem(pShape);
@@ -763,40 +763,33 @@ bool BeamedChordHelper::compute_stems_directions()
 {
     //returns first chord/single note stem direction
 
-//    if beam position is forced
-//        update stem direction in all ImoChord
-//    else
+    //get ImoBeam. It contains the base notes for all chords in the beam.
+    //And loop for each chord base note to determine its chord stem direction
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& baseNotes = m_pBeam->get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    ImoNote* pPrevBase = nullptr;
+    for(it = baseNotes.begin(); it != baseNotes.end(); ++it)
     {
-        //get ImoBeam. It contains the base notes for all chords in the beam.
-        //And loop for each chord base note to determine its chord stem direction
-
-        //loop for all chords/single notes in the beam
-        list< pair<ImoStaffObj*, ImoRelDataObj*> >& baseNotes = m_pBeam->get_related_objects();
-        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
-        ImoNote* pPrevBase = nullptr;
-        for(it = baseNotes.begin(); it != baseNotes.end(); ++it)
+        if (((*it).first)->is_note())       //there can be rests in the beam
         {
-            if (((*it).first)->is_note())       //there can be rests in the beam
-            {
-                ImoNote* pBase = static_cast<ImoNote*>((*it).first);
-                if (!pPrevBase)
-                    pPrevBase = pBase;
-
-                if (pBase->is_in_chord())
-                    compute_stem_direction_for_chord(pBase, pPrevBase, m_pClefs);
-                else
-                    compute_stem_direction_for_note(pBase, pPrevBase, m_pClefs);
-
+            ImoNote* pBase = static_cast<ImoNote*>((*it).first);
+            if (!pPrevBase)
                 pPrevBase = pBase;
-            }
-            else
-                m_pStemsDir->push_back(k_computed_stem_none);
-        }
 
-        //all stems directions are computed
-        int beamPos = determine_beam_position();
-        transfer_stem_directions_to_notes(m_pBeam, beamPos);
+            if (pBase->is_in_chord())
+                compute_stem_direction_for_chord(pBase, pPrevBase, m_pClefs);
+            else
+                compute_stem_direction_for_note(pBase, pPrevBase, m_pClefs);
+
+            pPrevBase = pBase;
+        }
+        else
+            m_pStemsDir->push_back(k_computed_stem_none);
     }
+
+    //all stems directions are computed
+    int beamPos = determine_beam_position();
+    transfer_stem_directions_to_notes(m_pBeam, beamPos);
 
     return m_pStemsDir->front() == k_computed_stem_down
         || m_pStemsDir->front() == k_computed_stem_forced_down;

@@ -121,7 +121,6 @@ public:
     LUnits get_stem_left() const;
     LUnits get_stem_y_flag() const;
     LUnits get_stem_y_note() const;
-    LUnits get_stem_extra_length() const;
 
     //re-shaping
     void set_stem_down(bool down);

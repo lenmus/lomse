@@ -283,12 +283,6 @@ LUnits GmoShapeNote::get_stem_y_note() const
 }
 
 //---------------------------------------------------------------------------------------
-LUnits GmoShapeNote::get_stem_extra_length() const
-{
-    return (m_pStemShape ? m_pStemShape->get_extra_length() : 0.0f);
-}
-
-//---------------------------------------------------------------------------------------
 bool GmoShapeNote::has_beam()
 {
     ImoNote* pNote = dynamic_cast<ImoNote*>(m_pCreatorImo);
@@ -334,7 +328,7 @@ void GmoShapeNote::dump(ostream& outStream, int level)
               << setw(10) << round_half_up(m_origin.x) << ", "
               << setw(10) << round_half_up(m_origin.y) << ", "
               << setw(10) << round_half_up(m_size.width) << ", "
-              << setw(10) << round_half_up(m_size.height) << endl;
+              << setw(10) << round_half_up(m_size.height) << ", s=" << get_stem_height() << endl;
 
     outStream.flags( f );  //restore formating options
 }
@@ -348,6 +342,7 @@ void GmoShapeChordBaseNote::set_flag_note(GmoShapeNote* pNote)
     m_pFlagNote = pNote;
     pNote->set_chord_note_type(k_chord_note_flag);
     pNote->set_base_note_shape(this);
+    //pNote->set_color( Color(255,0,0) );
 }
 
 //---------------------------------------------------------------------------------------

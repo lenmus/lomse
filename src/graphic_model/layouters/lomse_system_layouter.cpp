@@ -1093,15 +1093,15 @@ void SystemLayouter::add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pR
                                                  int iStaff, int idxStaff)
 {
     //in case of cross-staff beams (beams with flag stem segments in two or more staves),
-    //the beam must be placed on bottom staff when below or in top staff when above.
-    //In all other cases (beams in a single staff or double beamed) the stem shape must
-    //be placed in top staff
+    //the beam must be placed on bottom staff when below or double-stemmed or in top
+    //staff when above.
+    //For beams in a single staff the beam shape must be placed in that staff
     bool fDeleteEngraver = true;
     if (pRO->is_beam())
     {
         int staff = static_cast<ImoBeam*>(pRO)->get_min_staff();
         GmoShapeBeam* pSB = static_cast<GmoShapeBeam*>(pShape);
-        if (pSB->is_cross_staff() && pSB->is_beam_below())
+        if (pSB->is_cross_staff() && !pSB->is_beam_above())
         {
             staff = static_cast<ImoBeam*>(pRO)->get_max_staff();
             fDeleteEngraver = false;

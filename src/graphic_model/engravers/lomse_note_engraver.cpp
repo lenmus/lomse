@@ -694,7 +694,7 @@ void StemFlagEngraver::add_stem_flag_to_note(GmoShapeNote* pNoteShape, int noteT
 void StemFlagEngraver::add_stem_shape()
 {
     GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, m_yStemTop,
-                                                  0.0f, m_yStemBottom, m_fStemDown,
+                                                  m_yStemBottom, m_fStemDown,
                                                   m_uStemThickness, m_color);
     add_voice(pShape);
     m_pNoteShape->add_stem(pShape);

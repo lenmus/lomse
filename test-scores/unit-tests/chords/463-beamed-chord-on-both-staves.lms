@@ -1,0 +1,7 @@
+(score (vers 2.0) (instrument (staves 2)(musicData
+    (clef G p1)(clef F4 p2)(key C)
+    (chord (n c5 s p1 (beam 4 ++))(n e5 s)(n g5 s))
+    (chord (n c5 s p1 (beam 4 ==))(n f5 s)(n a5 s))
+    (chord (n d3 s p2 (beam 4 ==))(n g3 s)(n b3 s))
+    (chord (n g3 s p2 (beam 4 --))(n e3 s)(n c3 s))
+)))

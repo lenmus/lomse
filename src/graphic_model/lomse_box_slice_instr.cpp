@@ -35,6 +35,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_shape_beam.h"
 #include "lomse_system_layouter.h"
+#include "lomse_im_note.h"
 
 
 namespace lomse
@@ -120,7 +121,7 @@ GmoBoxSliceStaff::~GmoBoxSliceStaff()
 //---------------------------------------------------------------------------------------
 void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                                          LUnits barlinesHeight,
-                                         SystemLayouter* pSysLayouter, int staff)
+                                         SystemLayouter* pSysLayouter, int UNUSED(staff))
 
 {
     LUnits yShift = yShifts[m_idxStaff];
@@ -146,15 +147,15 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                 GmoShapeBeam* pShapeBeam = static_cast<GmoShapeBeam*>(*it);
                 if (pShapeBeam->is_cross_staff())
                 {
-                    if (!pShapeBeam->is_chord())
-                    {
+//                    if (!pShapeBeam->has_chords())
+//                    {
                         LUnits down = (yShift + yShifts[m_idxStaff-1]) / 2.0f;
                         LUnits increment = (yShift - yShifts[m_idxStaff-1]) / 2.0f;
                         pSysLayouter->increment_cross_staff_stems(pShapeBeam, increment);
                         (*it)->reposition_shape(down);
-                    }
-                    else if (pShapeBeam->get_staff() == staff)
-                        (*it)->reposition_shape(yShift);
+//                    }
+//                    else //if (pShapeBeam->get_staff() == staff)
+//                        (*it)->reposition_shape(yShift);
                 }
                 else
                     (*it)->reposition_shape(yShift);
@@ -178,6 +179,13 @@ void GmoBoxSliceStaff::reposition_shapes(const vector<LUnits>& yShifts,
                         pShapeNote->increment_stem_length(increment);
                     }
                 }
+//                ImoNote* pNote = static_cast<ImoNote*>(pShapeNote->get_creator_imo());
+//                if (pNote->is_beamed() && pShapeNote->is_up())
+//                {
+//                    ImoBeam* pBeam = pNote->get_beam();
+//                    if (pBeam->is_cross_staff())
+//                        pShapeNote->increment_stem_length(yShift);
+//                }
             }
             else if ((*it)->is_shape_barline())
             {
