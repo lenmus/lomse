@@ -183,10 +183,14 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     reposition_full_measure_rests();
     engrave_system_details(m_iSystem);
 
-    //dbg_add_vertical_profile_shape();   //<-- debug. Comment out!
+    if (m_libraryScope.draw_vertical_profile())
+        dbg_add_vertical_profile_shape();
 
     engrave_measure_numbers();
-    move_staves_to_avoid_collisions();
+
+    if (!m_libraryScope.draw_vertical_profile())
+        move_staves_to_avoid_collisions();
+
     engrave_instrument_details();
     add_instruments_info();
 

@@ -787,6 +787,8 @@ void GraphicView::draw_graphic_model()
     m_options.draw_anchor_objects = m_libraryScope.draw_anchor_objects();
     m_options.draw_anchor_lines = m_libraryScope.draw_anchor_lines();
     m_options.draw_shape_bounds = m_libraryScope.draw_shape_bounds();
+    m_options.draw_slur_points = m_libraryScope.draw_slur_ctrol_points();
+    m_options.draw_vertical_profile = m_libraryScope.draw_vertical_profile();
     m_options.read_only_mode =
         m_pInteractor->get_operating_mode() != Interactor::k_mode_edition;
 

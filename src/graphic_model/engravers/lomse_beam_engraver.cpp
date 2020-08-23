@@ -148,10 +148,8 @@ GmoShape* BeamEngraver::create_last_shape(Color color)
     decide_stems_direction();
     determine_number_of_beam_levels();
 
-    if (m_fDoubleStemmed) // && m_fCrossStaff)      //double-stemmed cross-staff
+    if (m_fDoubleStemmed)
         beam_angle_and_stems_for_cross_double_stemmed_beams();
-//    else if (m_fDoubleStemmed)  //doble-stemmed single staff
-//        beam_angle_and_stems_for_cross_staff_beams();
     else
         beam_angle_and_stems_for_simple_beams();
 
