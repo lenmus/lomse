@@ -48,14 +48,13 @@ class GmoShapeAccidentals;
 class GmoShapeFlag;
 class FontStorage;
 class GmoShapeBeam;
+class GmoShapeChordBaseNote;
 
 
 //---------------------------------------------------------------------------------------
 class GmoShapeNote : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
-    FontStorage* m_pFontStorage;
-    LibraryScope& m_libraryScope;
     GmoShapeNotehead* m_pNoteheadShape;
 	GmoShapeStem* m_pStemShape;
     GmoShapeAccidentals* m_pAccidentalsShape;
@@ -69,6 +68,19 @@ protected:
     LUnits m_uLineOutgoing;
     LUnits m_uLineThickness;
     LUnits m_lineSpacing;
+
+    //for notes in chord
+    enum {
+        k_chord_note_no = 0,
+        k_chord_note_flag,
+        k_chord_note_link,
+        k_chord_note_start,
+    };
+
+    int m_chordNoteType;                        //chord note type, from enum
+    GmoShapeChordBaseNote* m_pBaseNoteShape;    //ptr to base note shape
+
+
 
  public:    //TO_FIX: constructor used in tests
     //friend class NoteEngraver;
@@ -109,7 +121,6 @@ public:
     LUnits get_stem_left() const;
     LUnits get_stem_y_flag() const;
     LUnits get_stem_y_note() const;
-    LUnits get_stem_extra_length() const;
 
     //re-shaping
     void set_stem_down(bool down);
@@ -122,10 +133,18 @@ public:
     //info
     inline bool is_up() { return m_fUpOriented; }
     inline void set_up_oriented(bool value) { m_fUpOriented = value; }
+    inline bool is_chord_flag_note() { return m_chordNoteType == k_chord_note_flag; }
+    inline bool is_chord_link_note() { return m_chordNoteType == k_chord_note_link; }
+    inline bool is_chord_start_note() { return m_chordNoteType == k_chord_note_start; }
+    inline bool is_chord_note() { return m_chordNoteType != k_chord_note_no; }
 
     //info from parent ImoNote
     bool has_beam();
     bool is_in_chord();
+    bool is_cross_staff_chord();
+
+    //for chords
+    inline GmoShapeChordBaseNote* get_base_note_shape() { return m_pBaseNoteShape; }
 
     //used for debug
     void set_color(Color color);
@@ -135,6 +154,12 @@ public:
 protected:
     void draw_leger_lines(Drawer* pDrawer);
 
+    //for chords
+    friend class GmoShapeChordBaseNote;
+    inline void set_chord_note_type(int type) { m_chordNoteType = type; }
+    inline void set_base_note_shape(GmoShapeChordBaseNote* pShape) { m_pBaseNoteShape = pShape; }
+
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -142,21 +167,29 @@ class GmoShapeChordBaseNote : public GmoShapeNote
 {
 protected:
     GmoShapeNote* m_pFlagNote;  //note containing the fixed segment for the stem
+    GmoShapeNote* m_pLinkNote;  //note containing the link segment for the stem
+    GmoShapeNote* m_pStartNote; //note containing the extensible segment for the stem
 
 public:
     GmoShapeChordBaseNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                           LibraryScope& libraryScope)
         : GmoShapeNote(pCreatorImo, x, y, color, libraryScope)
         , m_pFlagNote(nullptr)
+        , m_pLinkNote(nullptr)
+        , m_pStartNote(nullptr)
     {
         m_objtype = GmoObj::k_shape_chord_base_note;
     }
 
     inline GmoShapeNote* get_flag_note() { return m_pFlagNote; }
+    inline GmoShapeNote* get_link_note() { return m_pLinkNote; }
+    inline GmoShapeNote* get_start_note() { return m_pStartNote; }
 
 protected:
-    friend class StemFlagEngraver;
-    inline void set_flag_note(GmoShapeNote* pNote) { m_pFlagNote = pNote; }
+    friend class ChordEngraver;
+    void set_flag_note(GmoShapeNote* pNote);
+    void set_link_note(GmoShapeNote* pNote);
+    void set_start_note(GmoShapeNote* pNote);
 
 };
 
@@ -218,7 +251,6 @@ protected:
 class GmoShapeRest : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
-    LibraryScope& m_libraryScope;
 	GmoShapeBeam* m_pBeamShape;
 
 public:     //TO_FIX: Constructor used in tests

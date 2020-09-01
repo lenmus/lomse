@@ -216,6 +216,7 @@ ImoNote::ImoNote(int type)
     , m_stemDirection(k_stem_default)
     , m_pTieNext(nullptr)
     , m_pTiePrev(nullptr)
+    , m_computedStem(k_computed_stem_undecided)
 {
 }
 
@@ -275,6 +276,13 @@ bool ImoNote::is_end_of_chord()
 }
 
 //---------------------------------------------------------------------------------------
+bool ImoNote::is_cross_staff_chord()
+{
+    ImoChord* pChord = get_chord();
+    return pChord && pChord->is_cross_staff();
+}
+
+//---------------------------------------------------------------------------------------
 bool ImoNote::has_beam()
 {
     ImoChord* pChord = get_chord();
@@ -282,7 +290,7 @@ bool ImoNote::has_beam()
         return is_beamed();
     else
     {
-        ImoNote* pNote = static_cast<ImoNote*>(pChord->get_start_object());
+        ImoNote* pNote = pChord->get_start_note();
         return pNote->is_beamed();
     }
 }

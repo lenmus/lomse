@@ -147,8 +147,9 @@ public:
 SUITE(NoteEngraverTest)
 {
 
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ShapeInBlock)
+    TEST_FIXTURE(NoteEngraverTestFixture, note_engraver_01)
     {
+        //@01 - shape in block, no stem no flag
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note_regular, &doc));
         pNote->set_notated_pitch(k_step_C, k_octave_4, k_no_accidentals);
@@ -165,6 +166,7 @@ SUITE(NoteEngraverTest)
         std::list<GmoShape*>::iterator it = components.begin();
         CHECK( components.size() == 1 );
         CHECK( (*it)->is_shape_notehead() );
+        CHECK( pNote->get_computed_stem() == k_computed_stem_undecided );
 
         delete pNote;
         delete pShape;

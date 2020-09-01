@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -109,29 +109,23 @@ void VerticalProfile::update(GmoShape* pShape, int idxStaff)
         update_shape(pNotehead, idxStaff);
         update_shape(pNote->get_accidentals_shape(), idxStaff);
 
-        //for isolated notes, add stem and flag
-        if (!pNote->is_in_chord() && !pNote->has_beam())
+        //for not beamed notes add stem and flag
+        if (!pNote->has_beam())
         {
-            update_shape(pNote->get_stem_shape(), idxStaff);
-            update_shape(pNote->get_flag_shape(), idxStaff);
-            return;
-        }
-
-        //for chords accross two staves, only the fixed segment stem must be added.
-        if (pNote->is_in_chord() && pNote->is_shape_chord_base_note())
-        {
-            GmoShapeNote* pFlagNote = static_cast<GmoShapeChordBaseNote*>(pNote)->get_flag_note();
-            if (pFlagNote)  //whole note chords do not have flag note
+            if (!pNote->is_chord_note() || pNote->is_chord_flag_note())
             {
-                update_shape(pFlagNote->get_stem_shape(), idxStaff);
-                update_shape(pFlagNote->get_flag_shape(), idxStaff);
+                //for isolated notes or chord flag notes, add stem and flag
+                update_shape(pNote->get_stem_shape(), idxStaff);
+                update_shape(pNote->get_flag_shape(), idxStaff);
             }
             return;
         }
-
-        //if arrives here, it is a beamed note.
-        //for beamed groups, the stem does not contribute to VProfile. So do not add it.
-        return;
+        else
+        {
+            //it is a beamed note.
+            //for beamed groups, the stem does not contribute to VProfile. So do not add it.
+            return;
+        }
     }
 
     //For beams, the beam is not added when cross-staff beam

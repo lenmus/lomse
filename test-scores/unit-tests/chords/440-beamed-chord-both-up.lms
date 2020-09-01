@@ -1,0 +1,10 @@
+(score (vers 2.1)
+    (opt StaffLines.Truncate 3)     //after last object
+    (opt Staff.DrawLeftBarline no)
+    (instrument (musicData
+        (clef G)
+        (key C)
+        (chord (n a4 e (beam 1 +))(n f4 e))
+        (chord (n c4 e (beam 1 -))(n g4 e))
+        (spacer 50)
+)))

@@ -338,12 +338,12 @@ class GmoShapeStem : public GmoShapeSimpleLine, public VoiceRelatedShape
 {
 private:
 	bool m_fStemDown;
-    LUnits m_uExtraLength;
 
 protected:
     friend class StemFlagEngraver;
-    GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits uExtraLength,
-                 LUnits yEnd, bool fStemDown, LUnits uWidth, Color color);
+    friend class ChordEngraver;
+    GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits yEnd,
+                 bool fStemDown, LUnits uWidth, Color color);
 
 public:
     void change_length(LUnits length);
@@ -351,7 +351,6 @@ public:
     void set_stem_up(LUnits xRight, LUnits yNote);
     void set_stem_down(LUnits xLeft, LUnits yNote);
 	void adjust(LUnits xLeft, LUnits yTop, LUnits height, bool fStemDown);
-    inline LUnits get_extra_length() { return m_uExtraLength; }
     LUnits get_y_note();
     LUnits get_y_flag();
 };

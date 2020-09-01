@@ -1511,6 +1511,30 @@ int ImoBeam::get_min_staff()
     return iStaff;
 }
 
+//---------------------------------------------------------------------------------------
+bool ImoBeam::contains_chords()
+{
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    for (it=notes.begin(); it != notes.end(); ++it)
+    {
+        if ((*it).first->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+            if (pNote->is_in_chord())
+                return true;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoBeam::set_stems_direction(vector<int>* pStemsDir)
+{
+    delete m_pStemsDir;
+    m_pStemsDir = pStemsDir;
+}
+
 
 //=======================================================================================
 // ImoBezierInfo implementation
@@ -1815,6 +1839,51 @@ Color& ImoColorDto::set_from_string(const std::string& hex)
         m_color = Color(0,0,0,255);
         return m_color;
     }
+}
+
+
+//=======================================================================================
+// ImoChord implementation
+//=======================================================================================
+void ImoChord::update_cross_staff_data()
+{
+    m_fCrossStaff = false;
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    it = m_relatedObjects.begin();
+    ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+    int staff = pNote->get_staff();
+
+    for (++it; it != m_relatedObjects.end(); ++it)
+    {
+        ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+        if ((m_fCrossStaff = (pNote->get_staff() != staff) ))
+            break;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoChord::reorganize_after_object_deletion()
+{
+    update_cross_staff_data();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoChord::push_back(ImoStaffObj* pSO, ImoRelDataObj* pData)
+{
+    ImoRelObj::push_back(pSO, pData);
+    update_cross_staff_data();
+}
+
+//---------------------------------------------------------------------------------------
+ImoNote* ImoChord::get_start_note()
+{
+    return static_cast<ImoNote*>(get_start_object());
+}
+
+//---------------------------------------------------------------------------------------
+ImoNote* ImoChord::get_end_note()
+{
+    return static_cast<ImoNote*>(get_end_object());
 }
 
 

@@ -36,6 +36,8 @@
 #include "lomse_score_meter.h"
 #include "lomse_engraving_options.h"
 #include "lomse_logger.h"
+#include "lomse_staffobjs_table.h"
+#include "lomse_staffobjs_cursor.h"
 
 #include <cstdlib>      //abs
 #include <stdexcept>
@@ -55,7 +57,6 @@ ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter
     , m_pChord(nullptr)
     , m_pBaseNoteData(nullptr)
     , m_fStemDown(false)
-    , m_fCrossStaffChord(false)
     , m_fHasStem(false)
     , m_fHasFlag(false)
     , m_fSomeNoteReversed(false)
@@ -120,10 +121,17 @@ void ChordEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
+void ChordEngraver::save_applicable_clefs(StaffObjsCursor* pCursor, int iInstr)
+{
+    m_clefs = pCursor->get_applicable_clefs_for_instrument(iInstr);
+}
+
+//---------------------------------------------------------------------------------------
 int ChordEngraver::create_shapes(Color color)
 {
     m_color = color;
-    decide_on_stem_direction();
+    decide_stem_direction();
+    find_reference_notes();
     layout_noteheads();
     layout_accidentals();
     add_stem_and_flag();
@@ -132,7 +140,7 @@ int ChordEngraver::create_shapes(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape, int idxStaff)
+void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape, int UNUSED(idxStaff))
 {
     m_numNotesMissing--;
     ImoNote* pNote = static_cast<ImoNote*>(pSO);
@@ -159,22 +167,125 @@ void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape, int idx
                 ChordNoteData* pData =
                     LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	            m_notes.insert(it, 1, pData);
-
-                m_fCrossStaffChord |= (m_idxStaff != idxStaff);
                 return;
             }
         }
         ChordNoteData* pData = LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
-
-	    m_fCrossStaffChord |= (m_idxStaff != idxStaff);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::decide_on_stem_direction()
+void ChordEngraver::find_reference_notes()
 {
-    //  Rules (taken from ref. [2] www.coloradocollege.edu)
+    m_pStartNoteData = (m_fStemDown ? m_notes.back() : m_notes.front());
+    m_pFlagNoteData = (m_fStemDown ? m_notes.front() : m_notes.back());
+
+    m_pLinkNoteData = nullptr;
+    if (m_pChord->is_cross_staff())
+    {
+        int staff = m_pFlagNoteData->pNote->get_staff();
+        if (m_fStemDown)
+        {
+            std::list<ChordNoteData*>::iterator it;
+            for(it=m_notes.begin(); it != m_notes.end(); ++it)
+            {
+                if ((*it)->pNote->get_staff() != staff)
+                    break;
+                m_pLinkNoteData = *it;
+            }
+        }
+        else
+        {
+            std::list<ChordNoteData*>::reverse_iterator it;
+            for(it=m_notes.rbegin(); it != m_notes.rend(); ++it)
+            {
+                if ((*it)->pNote->get_staff() != staff)
+                    break;
+                m_pLinkNoteData = *it;
+            }
+        }
+    }
+
+    //Fix for special cases
+    if (!m_pLinkNoteData)
+    {
+        //For single-staff chords, the link note is the same than the start note and
+        //thus, start note does no exists as no extensible segment exists.
+        m_pLinkNoteData = m_pStartNoteData;
+        m_pStartNoteData = nullptr;
+    }
+    else if (m_pLinkNoteData == m_pFlagNoteData )
+    {
+        //For cross-staff chords, when only two notes, one on each staff, the link note
+        //and the link segment do not exist. But the loop for finding the link note
+        //will point it to the flag note
+        m_pLinkNoteData = nullptr;
+    }
+
+    //set ptrs. to reference notes in base note
+
+    //set pointer to flag segment in chord base note shape
+    GmoShapeChordBaseNote* pBaseNoteShape =
+                    static_cast<GmoShapeChordBaseNote*>(m_pBaseNoteData->pNoteShape);
+    pBaseNoteShape->set_flag_note(m_pFlagNoteData->pNoteShape);
+    if (m_pLinkNoteData)
+        pBaseNoteShape->set_link_note(m_pLinkNoteData->pNoteShape);
+    if (m_pStartNoteData)
+        pBaseNoteShape->set_start_note(m_pStartNoteData->pNoteShape);
+
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::decide_stem_direction()
+{
+    ImoNote* pBaseNote = get_base_note();
+    ImoChord* pChord = pBaseNote->get_chord();
+    m_noteType = pBaseNote->get_note_type();
+    int stemType = pBaseNote->get_stem_direction();
+
+    m_fHasStem = (m_noteType >= k_half) && (stemType != k_stem_none);
+    m_fHasFlag = m_fHasStem && (m_noteType > k_quarter) && !is_chord_beamed();
+
+    //if stem is forced, we have finished
+    if (stemType == k_stem_down || stemType == k_stem_up)
+    {
+        m_fStemDown = (stemType == k_stem_down);
+        pChord->set_stem_direction(m_fStemDown ? k_computed_stem_forced_down
+                                               : k_computed_stem_forced_up);
+        return;
+    }
+
+    //if beamed chord, compute stem direction for all chords and single notes in the beam
+    ImoBeam* pBeam = pBaseNote->get_beam();
+    if (pBeam && pBaseNote == pBeam->get_start_object())
+    {
+        BeamedChordHelper helper(pBeam, &m_clefs);
+        m_fStemDown = helper.compute_stems_directions();
+    }
+
+    //do not compute chord stem direction if already computed in the beam
+    if (pChord->is_stem_direction_decided())
+        m_fStemDown = pChord->is_stem_down();
+    else
+    {
+        int meanPos = 0;
+        std::list<ChordNoteData*>::iterator it;
+        for(it=m_notes.begin(); it != m_notes.end(); ++it)
+            meanPos += (*it)->posOnStaff;
+        meanPos /= int(m_notes.size());
+        m_fStemDown = decide_stem_direction(pBaseNote, pChord, meanPos);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool ChordEngraver::decide_stem_direction(ImoNote* pBaseNote, ImoChord* pChord,
+                                          int meanPos)
+{
+    //returns TRUE if stem down, false if stem up
+
+    //  Rules from E.Gould, p.47-48
+    //  coincide with rules from ref. [2] www.coloradocollege.edu
     //
     //  a) Two notes in chord:
     //    a1. If the interval above the middle line is greater than the interval below
@@ -204,50 +315,41 @@ void ChordEngraver::decide_on_stem_direction()
     //      the notes are above the middle: downward stems. Else: upward stems.
     //      ==>   Mean(NotePos) > MiddleLinePos -> downward
     //
-    //  Additional rules (mine):
-    //  c) chords without stem (notes longer than half notes):
-    //    c1. layout as if stem was up
+    //  c) chords without stem (notes longer than half notes) (from E.Gould):
+    //      c1. layout as if they had stem and apply the previous rules.
 
-    ImoNote* pBaseNote = get_base_note();
-    m_noteType = pBaseNote->get_note_type();
+
+    //proceed to compute stem direction
+    bool fStemDown = false;
+    int noteType = pBaseNote->get_note_type();
     int stemType = pBaseNote->get_stem_direction();
-
-    m_fHasStem = m_noteType >= k_half
-                 && stemType != k_stem_none;
-    m_fHasFlag = m_fHasStem && m_noteType > k_quarter
-                 && !is_chord_beamed();
-
 
     if (pBaseNote->is_grace_note())
     {
         //for grace notes stem is always up unless stem down explicitly requested
-        m_fStemDown = (stemType == k_stem_down);
+        fStemDown = (stemType == k_stem_down);
+        pChord->set_stem_direction(fStemDown ? k_computed_stem_down
+                                             : k_computed_stem_up);
     }
-    else
+
+    else if ((noteType < k_half)               //c1. layout as if they had stem
+        || (stemType == k_stem_none)        //b3. majority rule
+        || (stemType == k_stem_default))    //b3. majority rule
     {
-        if (m_noteType < k_half)
-            m_fStemDown = false;                    //c1. layout as if stem up
-
-        else if (stemType == k_stem_up)
-            m_fStemDown = false;                    //force stem up
-
-        else if (stemType == k_stem_down)
-            m_fStemDown = true;                     //force stem down
-
-        else if (stemType == k_stem_none)
-            m_fStemDown = false;                    //c1. layout as if stem up
-
-        else if (stemType == k_stem_default)     //as decided by program
-        {
-            //majority rule
-            int weight = 0;
-            std::list<ChordNoteData*>::iterator it;
-            for(it=m_notes.begin(); it != m_notes.end(); ++it)
-                weight += (*it)->posOnStaff;
-
-            m_fStemDown = ( weight >= 6 * int(m_notes.size()) );
-        }
+        ////b3. majority rule
+        fStemDown = ( meanPos >= 6);
+        pChord->set_stem_direction(fStemDown ? k_computed_stem_down
+                                             : k_computed_stem_up);
     }
+
+    else    // (stemType == k_stem_down || stemType == k_stem_up)
+    {
+        fStemDown = (stemType == k_stem_down);
+        pChord->set_stem_direction(fStemDown ? k_computed_stem_forced_down
+                                             : k_computed_stem_forced_up);
+    }
+
+    return fStemDown;
 }
 
 //---------------------------------------------------------------------------------------
@@ -279,6 +381,7 @@ void ChordEngraver::align_noteheads()
             USize shift(xShift, 0.0f);
             (*it)->pNoteShape->shift_origin(shift);
         }
+        (*it)->pNoteShape->set_up_oriented(!m_fStemDown);
     }
 
 }
@@ -501,26 +604,25 @@ LUnits ChordEngraver::check_if_accidentals_overlap(GmoShapeAccidentals* pPrevAcc
 //---------------------------------------------------------------------------------------
 void ChordEngraver::add_stem_and_flag()
 {
-    //  Rules (taken from ref. [1] Music Publishers' Association)
-    //
-    //  p.3, b) ... When there is more than one note head on a stem,as in a chord, the
-    //          stem length is calculated from the note closest to the end of the stem.
-
     if (!has_stem())
         return;
 
-    //the stem length must be increased with the distance from min note to max note.
-    GmoShapeNote* pMinNoteShape = m_notes.front()->pNoteShape;
-    GmoShapeNote* pMaxNoteShape = m_notes.back()->pNoteShape;
-
-    //stem and the flag is computed for max/min note, depending on stem direction
-    ChordNoteData* pDataFlag = (is_stem_down() ? m_notes.front() : m_notes.back());
-    ImoNote* pNoteFlag = pDataFlag->pNote;  //min note for stem down, max for stem up
-    int instr = pDataFlag->iInstr;
+    ImoNote* pNoteFlag = m_pFlagNoteData->pNote;
+    int instr = m_pFlagNoteData->iInstr;
     int staff = pNoteFlag->get_staff();
-    int nPosOnStaff = pDataFlag->posOnStaff;
 
-    //create the shape and attach it to notes
+    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff, m_fontSize);
+
+    determine_stem_x_left();
+    add_stem_flag_segment(&engrv);
+    add_stem_link_segment();
+    add_stem_extensible_segment_if_required();
+    add_stroke_for_graces_if_required(&engrv);
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_stem_flag_segment(StemFlagEngraver* engrv)
+{
     bool fHasBeam = is_chord_beamed();
     bool fShortFlag = false;
     Tenths length = 0.0f;
@@ -531,6 +633,7 @@ void ChordEngraver::add_stem_and_flag()
     }
     else
     {
+        int nPosOnStaff = m_pFlagNoteData->posOnStaff;
         length = NoteEngraver::get_standard_stem_length(nPosOnStaff, is_stem_down());
         if (!fHasBeam && length < 35.0f && m_noteType > k_eighth)
             length = 35.0f;     // 3.5 spaces
@@ -539,15 +642,66 @@ void ChordEngraver::add_stem_and_flag()
    }
 
     LUnits stemLength = tenths_to_logical(length);
+    GmoShapeNote* pFlagNoteShape = m_pFlagNoteData->pNoteShape;
 
+    engrv->add_stem_flag_to_note(pFlagNoteShape, m_noteType, is_stem_down(), has_flag(),
+                                 fShortFlag, fHasBeam, stemLength,
+                                 m_pFlagNoteData->fNoteheadReversed, m_color);
+}
 
-    StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNoteFlag, instr, staff, m_fontSize);
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_stem_link_segment()
+{
+    //For cross-staff chords, when only two notes, one on each staff, the link note is
+    //the same than the start note and, thus, link note does no exists
+    if (!m_pLinkNoteData)
+        return;
 
-    engrv.add_stem_flag_to_chord(pMinNoteShape, pMaxNoteShape, m_pBaseNoteData->pNoteShape,
-                        m_noteType, is_stem_down(), has_flag(), fShortFlag, fHasBeam,
-                        m_fCrossStaffChord, stemLength, m_color);
+    GmoShapeNote* pFlagNoteShape = m_pFlagNoteData->pNoteShape;
+    GmoShapeNote* pLinkNoteShape = m_pLinkNoteData->pNoteShape;
 
-    //for grace notes, add the stroke shape if required
+    GmoShape* pTopNotehead = (m_fStemDown ? pLinkNoteShape : pFlagNoteShape)->get_notehead_shape();
+    GmoShape* pBottomNotehead = (m_fStemDown ? pFlagNoteShape : pLinkNoteShape)->get_notehead_shape();
+    LUnits halfNotehead = pTopNotehead->get_height() / 2.0f;
+
+    LUnits yTop = pTopNotehead->get_top() + halfNotehead;
+    LUnits yBottom = pBottomNotehead->get_top() + halfNotehead;
+
+    GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pLinkNoteData->pNote, m_uxStem, yTop,
+                                                  yBottom, m_fStemDown,
+                                                  m_uStemThickness, m_color);
+    add_voice(pShape);
+    pLinkNoteShape->add_stem(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_stem_extensible_segment_if_required()
+{
+    if (!m_pChord->is_cross_staff())
+        return;
+
+    //for cross-staff chords the flag note can be the only one in that staff and then
+    //there is no link note
+    GmoShapeNote* pRefNoteShape = (m_pLinkNoteData ? m_pLinkNoteData : m_pFlagNoteData)->pNoteShape;
+    GmoShapeNote* pStartNoteShape = m_pStartNoteData->pNoteShape;
+
+    GmoShape* pTopNotehead = (m_fStemDown ? pStartNoteShape : pRefNoteShape)->get_notehead_shape();
+    GmoShape* pBottomNotehead = (m_fStemDown ? pRefNoteShape : pStartNoteShape)->get_notehead_shape();
+    LUnits halfNotehead = pTopNotehead->get_height() / 2.0f;
+
+    LUnits yTop = pTopNotehead->get_top() + halfNotehead;
+    LUnits yBottom = pBottomNotehead->get_top() + halfNotehead;
+
+    GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pStartNoteData->pNote, m_uxStem, yTop,
+                                                  yBottom, m_fStemDown,
+                                                  m_uStemThickness, m_color);
+    add_voice(pShape);
+    pStartNoteShape->add_stem(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_stroke_for_graces_if_required(StemFlagEngraver* engrv)
+{
     ImoNote* pBaseNote = get_base_note();
     if (pBaseNote->is_grace_note() && !pBaseNote->is_beamed())
     {
@@ -556,9 +710,350 @@ void ChordEngraver::add_stem_and_flag()
         if (pRO && pRO->has_slash()
             && pBaseNote == static_cast<ImoNote*>(pRO->get_start_object()) )
         {
-            engrv.add_stroke_shape();
+            engrv->add_stroke_shape();
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_voice(VoiceRelatedShape* pVRS)
+{
+    VoiceRelatedShape* pNote = static_cast<VoiceRelatedShape*>(m_pBaseNoteData->pNoteShape);
+    pVRS->set_voice(pNote->get_voice());
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::determine_stem_x_left()
+{
+    GmoShapeNote* pFlagNoteShape = m_pFlagNoteData->pNoteShape;
+    m_uStemThickness = tenths_to_logical(LOMSE_STEM_THICKNESS);
+
+    bool fAtLeft = m_fStemDown;
+    if (m_pFlagNoteData->fNoteheadReversed)
+        fAtLeft = !fAtLeft;
+
+    if (fAtLeft)
+		m_uxStem = pFlagNoteShape->get_notehead_left();
+    else
+		m_uxStem = pFlagNoteShape->get_notehead_right() - m_uStemThickness;
+}
+
+
+//=======================================================================================
+// BeamedChordHelper implementation
+//=======================================================================================
+BeamedChordHelper::BeamedChordHelper(ImoBeam* pBeam, std::vector<int>* pClefs)
+    : m_numStaves(pClefs->size())
+    , m_nUpForced(0)
+    , m_nDownForced(0)
+    , m_pBeam(pBeam)
+    , m_pClefs(pClefs)
+    , m_pStemsDir(nullptr)
+{
+    m_totalPosOnStaff.assign(m_numStaves, 0);
+    m_numNotes.assign(m_numStaves, 0);
+    m_maxPosOnStaff.assign(m_numStaves, -20);
+    m_minPosOnStaff.assign(m_numStaves, 20);
+    if (pBeam)      //in unit tests pBeam can be nullptr
+        m_pStemsDir = LOMSE_NEW vector<int>;    //(pBeam->get_num_objects());
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamedChordHelper::compute_stems_directions()
+{
+    //returns first chord/single note stem direction
+
+    //get ImoBeam. It contains the base notes for all chords in the beam.
+    //And loop for each chord base note to determine its chord stem direction
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& baseNotes = m_pBeam->get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    ImoNote* pPrevBase = nullptr;
+    for(it = baseNotes.begin(); it != baseNotes.end(); ++it)
+    {
+        if (((*it).first)->is_note())       //there can be rests in the beam
+        {
+            ImoNote* pBase = static_cast<ImoNote*>((*it).first);
+            if (!pPrevBase)
+                pPrevBase = pBase;
+
+            if (pBase->is_in_chord())
+                compute_stem_direction_for_chord(pBase, pPrevBase, m_pClefs);
+            else
+                compute_stem_direction_for_note(pBase, pPrevBase, m_pClefs);
+
+            pPrevBase = pBase;
+        }
+        else
+            m_pStemsDir->push_back(k_computed_stem_none);
+    }
+
+    //all stems directions are computed
+    int beamPos = determine_beam_position();
+    transfer_stem_directions_to_notes(m_pBeam, beamPos);
+
+    return m_pStemsDir->front() == k_computed_stem_down
+        || m_pStemsDir->front() == k_computed_stem_forced_down;
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamedChordHelper::compute_stem_direction_for_chord(ImoNote* pBaseNote,
+                                                         ImoNote* pLastNote,
+                                                         vector<int>* pLastClefs)
+{
+    //receives the base note for the new chord whose stem direction we have to compute,
+    //a vector of applicable clefs for each staff, and the last note for which this
+    //vector was computed
+    //returns TRUE if stem down
+
+    find_applicable_clefs(pBaseNote, pLastNote, pLastClefs);
+
+    ImoChord* pChord = pBaseNote->get_chord();
+    m_chords.push_back(pChord);
+    int computedStem = k_computed_stem_undecided;
+    int stemType = pBaseNote->get_stem_direction();
+    bool fStemDown = (stemType == k_stem_down);
+
+    if (stemType == k_stem_down || stemType == k_stem_up)
+    {
+        //stem is forced, we have finished
+        fStemDown ? ++m_nDownForced : ++m_nUpForced;
+        computedStem = (fStemDown ? k_computed_stem_forced_down
+                                  : k_computed_stem_forced_up);
+        pChord->set_stem_direction(computedStem);
+        m_pStemsDir->push_back(computedStem);
+    }
+    else
+    {
+        //stem not forced. collect chord notes and compute stem direction
+        vector<ImoNote*> chordNotes = collect_chord_notes(pChord);
+        int meanPosOnStaff = determine_mean_pos_on_staff(chordNotes, pLastClefs);
+        fStemDown = ChordEngraver::decide_stem_direction(pBaseNote, pChord, meanPosOnStaff);
+        computedStem = (fStemDown ? k_computed_stem_down : k_computed_stem_up);
+    }
+
+    pChord->set_stem_direction(computedStem);
+    m_pStemsDir->push_back(computedStem);
+    return fStemDown;
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamedChordHelper::compute_stem_direction_for_note(ImoNote* pNote,
+                                                        ImoNote* pLastNote,
+                                                        vector<int>* pClefs)
+{
+    //receives a single note whose stem direction we have to compute,
+    //a vector of applicable clefs for each staff, and the last note for which this
+    //vector was computed.
+    //returns TRUE if stem down
+
+    find_applicable_clefs(pNote, pLastNote, pClefs);
+
+    //if stem is forced, we have finished
+    int stemType = pNote->get_stem_direction();
+    bool fStemDown = (stemType == k_stem_down);
+
+    if (stemType == k_stem_down || stemType == k_stem_up)
+    {
+        //stem is forced, we have finished
+        fStemDown ? ++m_nDownForced : ++m_nUpForced;
+        m_pStemsDir->push_back(fStemDown ? k_computed_stem_forced_down
+                                         : k_computed_stem_forced_up);
+    }
+    else
+    {
+        //stem not forced. compute stem direction
+        int staff = pNote->get_staff();
+        int clefType =  pClefs->at(staff);
+        int pos = NoteEngraver::pitch_to_pos_on_staff(pNote, clefType, 0);
+
+        m_totalPosOnStaff[staff] += pos;
+        m_maxPosOnStaff[staff] = max(m_maxPosOnStaff[staff], pos);
+        m_minPosOnStaff[staff] = min(m_minPosOnStaff[staff], pos);
+        ++m_numNotes[staff];
+
+        fStemDown = (pos >= 6);
+        m_pStemsDir->push_back(fStemDown ? k_computed_stem_down : k_computed_stem_up);
+    }
+    return fStemDown;
+}
+
+//---------------------------------------------------------------------------------------
+vector<ImoNote*> BeamedChordHelper::collect_chord_notes(ImoChord* pChord)
+{
+    //access the ColStaffObj table and collect all the chord notes and their applicable
+    //clefs and updates the pLastKnown vector. Returns the chord notes and their clefs
+
+    vector<ImoNote*> chordNotes;
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pChord->get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    for(it = notes.begin(); it != notes.end(); ++it)
+    {
+        ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+        chordNotes.push_back(pNote);
+    }
+
+    return chordNotes;
+}
+
+//---------------------------------------------------------------------------------------
+int BeamedChordHelper::determine_mean_pos_on_staff(vector<ImoNote*>& chordNotes,
+                                                   vector<int>* pClefs)
+{
+    int posOnStaff = 0;
+    for (size_t i = 0; i < chordNotes.size(); ++i)
+    {
+        ImoNote* pNote = chordNotes[i];
+        int clefType =  pClefs->at(pNote->get_staff());
+        int pos = NoteEngraver::pitch_to_pos_on_staff(pNote, clefType, 0);
+
+        int staff = pNote->get_staff();
+        m_totalPosOnStaff[staff] += pos;
+        m_maxPosOnStaff[staff] = max(m_maxPosOnStaff[staff], pos);
+        m_minPosOnStaff[staff] = min(m_minPosOnStaff[staff], pos);
+        ++m_numNotes[staff];
+
+        posOnStaff += pos;
+    }
+
+    return posOnStaff / int(chordNotes.size());
+}
+
+//---------------------------------------------------------------------------------------
+void BeamedChordHelper::find_applicable_clefs(ImoNote* pBaseNote, ImoNote* pLastNote,
+                                              vector<int>* pLastClefs)
+{
+    //access the ColStaffObj table and collect the applicable clefs in all staves
+    //at location given by pBaseNote. pLastNote points to the note for which its
+    //applicable clefs are known. These clefs are in vector pLastClefs that is
+    //updated.
+
+    ColStaffObjsEntry* pEntry = pLastNote->get_colstaffobjs_entry();
+    while(pEntry && pEntry->imo_object() != pBaseNote)
+    {
+        if (pEntry->imo_object()->is_clef())
+        {
+            ImoClef* clef = static_cast<ImoClef*>( pEntry->imo_object() );
+            int staff = clef->get_staff();
+            pLastClefs->at(staff) = clef->get_clef_type();
+        }
+        pEntry = pEntry->get_next();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int BeamedChordHelper::determine_beam_position()
+{
+    //Rules:
+    //  if some chords direction forced:
+    //      all in the same direction: force all others
+    //      in different directions: double-stemmed
+    //  else (no chord forced)
+    //      apply majority rule using all chords notes
+
+    bool fStemsDown = false;
+    bool fDoubleStemmed = false;
+    if (m_nUpForced > 0)
+    {
+        if (m_nDownForced == 0)
+            fStemsDown = false;     //stems forced up. beam above
+        else
+            fDoubleStemmed = true;  //forced in mixed directions: double-stemmed beam
+    }
+    else if (m_nDownForced > 0)
+        fStemsDown = true;   //stems forced down. beam below
+    else
+    {
+        //apply stem direction rules
+        if (m_numStaves > 1)
+        {
+            //when two staves, the chord can be on any staff or be cross-staff
+            if (m_numNotes[0] == 0)
+            {
+                //412. all chords in staff 1. stem direction rules for staff 1
+                fStemsDown = apply_stem_direction_rules_for_staff(1);
+            }
+            else if (m_numNotes[1] == 0)
+            {
+                //408, 410, 411. all chords in staff 0. stem direction rules for staff 0
+                fStemsDown = apply_stem_direction_rules_for_staff(0);
+            }
+            else
+            {
+                //413, 414
+                //notes on both staves. Either, chords in both staves or cross staff.
+                //Prefer single-stemmed so apply stem direction rules for combined staves
+                fStemsDown = apply_stem_direction_rules_for_both_staves();
+            }
+        }
+        else    //409. only one staff. stem direction rules for staff 0
+        {
+            fStemsDown = apply_stem_direction_rules_for_staff(0);
+        }
+    }
+
+    //decide beam position
+    if (fDoubleStemmed)
+        return k_beam_double_stemmed;
+    else
+        return (fStemsDown ? k_beam_below : k_beam_above);
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamedChordHelper::apply_stem_direction_rules_for_staff(int iStaff)
+{
+    int sum = m_maxPosOnStaff[iStaff] + m_minPosOnStaff[iStaff];
+    if (sum > 12)
+        return true;  //stem down
+    else if (sum == 12)
+        return (m_totalPosOnStaff[0] >= 6 * m_numNotes[0]);   //majority rule
+    else
+        return false;     //stem up
+}
+
+//---------------------------------------------------------------------------------------
+bool BeamedChordHelper::apply_stem_direction_rules_for_both_staves()
+{
+    int sum = m_maxPosOnStaff[0] + m_minPosOnStaff[1];
+
+    if (sum > 12)   //furthest note. stem down
+        return true;
+
+    else if (sum == 12) //both furthest equal. Majority rule
+        return ((m_totalPosOnStaff[0] + m_totalPosOnStaff[1]) >=
+                6 * (m_numNotes[0] + m_numNotes[1]) );
+
+    else    //furthest note. stem up
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+void BeamedChordHelper::transfer_stem_directions_to_notes(ImoBeam* pBeam, int beamPos)
+{
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& baseNotes = pBeam->get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    int iItem = 0;
+    int iChord = 0;
+    for(it = baseNotes.begin(); it != baseNotes.end(); ++it, ++iItem)
+    {
+        if (((*it).first)->is_note())       //there can be rests in the beam
+        {
+            int stem = m_pStemsDir->at(iItem);
+            if (beamPos == k_beam_above && stem != k_computed_stem_forced_up)
+                stem = k_computed_stem_up;
+            else if (beamPos == k_beam_below && stem != k_computed_stem_forced_down)
+                stem = k_computed_stem_down;
+
+            ImoNote* pNote = static_cast<ImoNote*>((*it).first);
+            pNote->set_computed_stem(stem);
+            if (pNote->is_start_of_chord())
+            {
+                m_chords[iChord++]->set_stem_direction(stem);
+            }
+            m_pStemsDir->at(iItem) = stem;
+        }
+    }
+
+    pBeam->set_stems_direction(m_pStemsDir);
 }
 
 

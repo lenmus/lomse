@@ -81,6 +81,7 @@ public:
         , m_pNext(nullptr)
         , m_pPrev(nullptr)
     {
+        m_pImo->set_colstaffobjs_entry(this);
     }
 
     //getters

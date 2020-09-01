@@ -39,9 +39,6 @@
         <type>eighth</type>
         <stem default-y="19">up</stem>
         <staff>2</staff>
-        <notations>
-          <slur number="1" placement="above" type="start"/>
-        </notations>
       </note>
       <direction placement="below">
         <direction-type>

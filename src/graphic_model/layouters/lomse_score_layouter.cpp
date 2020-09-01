@@ -1080,7 +1080,7 @@ ShapesCreator::~ShapesCreator()
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                                UPoint pos, int clefType, int octaveShift,
-                                               unsigned flags)
+                                               unsigned flags, StaffObjsCursor* pCursor)
 {
     //factory method to create shapes for staffobjs
 
@@ -1125,7 +1125,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_engravers,
                                iInstr, iStaff);
             Color color = pImo->get_color();
-            GmoShape* pShape = engrv.create_shape(pImo, clefType, octaveShift, pos, color);
+            GmoShape* pShape = engrv.create_shape(pImo, clefType, octaveShift, pos,
+                                                  pCursor, color);
 
             //AWARE: Chords are an exception to the way relations are engraved. This
             //is because chords affect to note positions (reverse noteheads, shift

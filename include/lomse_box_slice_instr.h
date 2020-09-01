@@ -72,7 +72,7 @@ public:
 //---------------------------------------------------------------------------------------
 /** Class GmoBoxSliceStaff represents one staff in a SliceInstr. It is a container
     for the shapes associated to a staff, to simplify tasks requiring to access the
-    shapes for one staff, such as moving them when thet staff is moved.
+    shapes for one staff, such as moving them when the staff is moved.
 
     The bounding box is not relevant for any task, so it is not computed.
 */
@@ -88,7 +88,7 @@ public:
     //helpers for layout
     /**  Move shapes to theirs final 'y' positions and increment barlines height. */
     void reposition_shapes(const vector<LUnits>& yShifts, LUnits barlinesHeight,
-                           SystemLayouter* pSysLayouter);
+                           SystemLayouter* pSysLayouter, int staff);
 
 protected:
     void dump(ostream& outStream, int level) override;

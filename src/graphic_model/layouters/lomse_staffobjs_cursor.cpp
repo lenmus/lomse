@@ -380,6 +380,30 @@ void StaffObjsCursor::staff_index_to_instr_staff(int idx, int* iInstr, int* iSta
     }
 }
 
+//---------------------------------------------------------------------------------------
+int StaffObjsCursor::num_staves_for_instrument(int iInstr)
+{
+    int startIdx = m_staffIndex[iInstr];
+    if (iInstr == (m_numInstruments-1))
+        return m_numStaves - startIdx;
+    else
+        return m_staffIndex[iInstr+1] - startIdx;
+}
+
+//---------------------------------------------------------------------------------------
+vector<int> StaffObjsCursor::get_applicable_clefs_for_instrument(int iInstr)
+{
+    int numStaves = num_staves_for_instrument(iInstr);
+    vector<int> clefs(numStaves);
+    int idx = staff_index_for(iInstr, 0);
+    for (int i=0; i < numStaves; ++i, ++idx)
+    {
+        ImoClef* clef = static_cast<ImoClef*>( m_clefs[idx]->imo_object() );
+        clefs[i] = clef->get_clef_type();
+    }
+    return clefs;
+}
+
 
 }  //namespace lomse
 

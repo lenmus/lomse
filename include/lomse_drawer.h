@@ -85,12 +85,13 @@ enum ERenderOptions
 //---------------------------------------------------------------------------------------
 struct RenderOptions
 {
-    //for debug: draw a box around boxes of selected types
-    bitset<GmoObj::k_max> boxes;
-
+    //for debug
+    bitset<GmoObj::k_max> boxes;    //draw a box around boxes of selected types
     bool draw_anchor_objects;   //draw anchor objs. (e.g., invisible shapes)
     bool draw_anchor_lines;     //draw anchor lines. (spacing algorithm)
     bool draw_shape_bounds;     //draw bounds around selected shapes
+    bool draw_slur_points;      //draw control and reference points in slurs and ties
+    bool draw_vertical_profile;     //draw vertical profile
     //bool g_fShowMargins;    //draw margins in scores, so user can change them
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
 
@@ -129,6 +130,8 @@ struct RenderOptions
         : draw_anchor_objects(false)
         , draw_anchor_lines(false)
         , draw_shape_bounds(false)
+        , draw_slur_points(false)
+        , draw_vertical_profile(false)
         , scale(1.0)
         , background_color(127, 127, 127)       //grey
         , highlighted_color(255,0,0)            //red

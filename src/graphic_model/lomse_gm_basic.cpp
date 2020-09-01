@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -203,7 +203,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_metronome_glyph]   = "metronome-glyph";
         m_typeToName[k_shape_metronome_mark]    = "metronome-mark ";
         m_typeToName[k_shape_note]              = "note           ";
-        m_typeToName[k_shape_chord_base_note]   = "base-note      ";
+        m_typeToName[k_shape_chord_base_note]   = "chord-base-note";
         m_typeToName[k_shape_notehead]          = "notehead       ";
         m_typeToName[k_shape_octave_shift]      = "octave-shift   ";
         m_typeToName[k_shape_octave_glyph]      = "octave-glyph   ";

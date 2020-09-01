@@ -350,7 +350,7 @@ public:
     //StaffObj shapes
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                     UPoint pos, int clefType=0, int octaveShift=0,
-                                    unsigned flags=0);
+                                    unsigned flags=0, StaffObjsCursor* pCursor=nullptr);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
                                   int idxStaff, VerticalProfile* pVProfile,
                                   GmoShape* pParentShape);

@@ -52,14 +52,14 @@ enum ENoteHeads
 };
 
 //---------------------------------------------------------------------------------------
-//stem
+//stem notated values
 enum ENoteStem
 {
-    k_stem_default = 0,
-    k_stem_up,
-    k_stem_down,
-    k_stem_double,
-    k_stem_none,
+    k_stem_default = 0,     ///< No notated value. Stem should follow engraving rules
+    k_stem_up,              ///< Stem must go up
+    k_stem_down,            ///< Stem must go down
+    k_stem_double,          ///< Two stems, one up and the other down
+    k_stem_none,            ///< No stem
 };
 
 //---------------------------------------------------------------------------------------
@@ -191,9 +191,12 @@ protected:
     int          m_options;
 
     //stem and ties
-    int     m_stemDirection;
+    int     m_stemDirection;        //value from ENoteStem
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
+
+    //computed values for layout
+    int     m_computedStem;         //value from ENoteStem
 
     friend class ImFactory;
     ImoNote(int type);
@@ -291,7 +294,8 @@ public:
     inline void set_tie_next(ImoTie* pStartTie) { m_pTieNext = pStartTie; }
     inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
 
-    //stem
+    //notated stem
+    /** Stem direction, as notated in source file */
     inline bool has_stem() { return m_nNoteType >= k_half; }
     inline int get_stem_direction() { return m_stemDirection; }
     inline void set_stem_direction(int value) { m_stemDirection = value; }
@@ -300,11 +304,26 @@ public:
     inline bool is_stem_default() { return m_stemDirection == k_stem_default; }
     inline bool is_stem_none() { return m_stemDirection == k_stem_none; }
 
+    //computed stem
+    /** Engravers decide the direction for the stem and set the value */
+    inline int get_computed_stem() { return m_computedStem; }
+    inline void set_computed_stem(int value) { m_computedStem = value; }
+    inline bool is_computed_stem_up() { return m_computedStem == k_computed_stem_up
+                                            || m_computedStem == k_computed_stem_forced_up; }
+    inline bool is_computed_stem_down() { return m_computedStem == k_computed_stem_down
+                                            || m_computedStem == k_computed_stem_forced_down; }
+    inline bool is_computed_stem_forced_up() { return m_computedStem == k_computed_stem_forced_up; }
+    inline bool is_computed_stem_forced_down() { return m_computedStem == k_computed_stem_forced_down; }
+    inline bool is_computed_stem_forced() { return m_computedStem == k_computed_stem_forced_down
+                                                || m_computedStem == k_computed_stem_forced_up; }
+    inline bool is_computed_stem_none() { return m_computedStem == k_computed_stem_none; }
+
     //in chord
     bool is_in_chord();
     ImoChord* get_chord();
     bool is_start_of_chord();
     bool is_end_of_chord();
+    bool is_cross_staff_chord();
 
     /** Method ImoNoteRest::is_beamed() informs if the note has an attached beam
         relation, and not if the note is in a beamed group. Take into account that
