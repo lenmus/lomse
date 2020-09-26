@@ -134,9 +134,9 @@ public:
     ImoTuplet* get_first_tuplet();
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    virtual void set_int_attribute(TIntAttribute attrib, int value) override;
+    virtual int get_int_attribute(TIntAttribute attrib) override;
+    virtual list<TIntAttribute> get_supported_attributes() override;
 
 protected:
 
