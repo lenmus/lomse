@@ -2,7 +2,7 @@
 # This is part of CMake configuration file for building makefiles and installfiles
 # for the Lomse library
 #-------------------------------------------------------------------------------------
-# This moule is for defining the source files to compile for building the library
+# This module is for defining the source files to compile for building the library
 #
 #-------------------------------------------------------------------------------------
 
@@ -225,7 +225,7 @@ if( LOMSE_ENABLE_COMPRESSION )
 endif()
 
 # platform dependent implementation files
-if(UNIX)
+if(UNIX AND NOT APPLE)
     set(PLATFORM_FILES
         ${LOMSE_SRC_DIR}/platform/lomse_linux.cpp
     )
