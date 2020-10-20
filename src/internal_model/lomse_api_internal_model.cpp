@@ -819,6 +819,25 @@ ImoObj* AObject::internal_object() const
 
 
 //=======================================================================================
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(AObjectWithSiblings, ImoObj, AObject)
+
+//---------------------------------------------------------------------------------------
+AObject AObjectWithSiblings::previous_sibling() const
+{
+    ensure_validity();
+    return AObject::Private::previous_sibling(m_pImpl, m_pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+AObject AObjectWithSiblings::next_sibling() const
+{
+    ensure_validity();
+    return AObject::Private::next_sibling(m_pImpl, m_pDoc);
+}
+
+#else
+//=======================================================================================
 /** @class ISiblings
     @extends AObject
     ISiblings class provides sibling traversal methods for objects supporting them
@@ -846,11 +865,118 @@ AObject ISiblings::next_sibling() const
     ensure_validity();
     return AObject::Private::next_sibling(m_pImpl, m_pDoc);
 }
+#endif      //if (LOMSE_BYPASS_ISSUE_253 == 1)
 
 //@}    //Document content traversal
 
 
 
+//=======================================================================================
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(AObjectWithSiblingsAndChildren, ImoObj, AObjectWithSiblings)
+
+//---------------------------------------------------------------------------------------
+int AObjectWithSiblingsAndChildren::num_children() const
+{
+    ensure_validity();
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        return pBlock->get_num_content_items();
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        return pBlock->get_num_items();
+    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        return pBlock->get_num_items();
+    }
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------
+AObject AObjectWithSiblingsAndChildren::child_at(int iItem) const
+{
+    ensure_validity();
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_content_item(iItem);
+        if (pImo)
+            return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        if (iItem < pBlock->get_num_children())
+        {
+            ImoObj* pImo = pBlock->get_child(iItem);
+            return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+        }
+    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_item(iItem);
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    return AObject();
+}
+
+//---------------------------------------------------------------------------------------
+AObject AObjectWithSiblingsAndChildren::first_child() const
+{
+    ensure_validity();
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_first_content_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_first_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_first_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    return AObject();
+}
+
+//---------------------------------------------------------------------------------------
+AObject AObjectWithSiblingsAndChildren::last_child() const
+{
+    ensure_validity();
+    if (m_pImpl->is_blocks_container())
+    {
+        ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_last_content_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_inlines_container())
+    {
+        ImoInlinesContainer* pBlock = static_cast<ImoInlinesContainer*>(m_pImpl);
+        ImoContentObj* pImo = pBlock->get_last_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    else if (m_pImpl->is_box_inline())
+    {
+        ImoBoxInline* pBlock = static_cast<ImoBoxInline*>(m_pImpl);
+        ImoInlineLevelObj* pImo = pBlock->get_last_item();
+        return AObject::Private::downcast_content_obj(pImo, m_pDoc);
+    }
+    return AObject();
+}
+
+#else
 //=======================================================================================
 /** @class IChildren
     @extends AObject
@@ -991,6 +1117,7 @@ AObject IChildren::last_child() const
     }
     return AObject();
 }
+#endif      //if (LOMSE_BYPASS_ISSUE_253 == 1)
 
 //@}    //Document content traversal
 
@@ -1008,7 +1135,11 @@ AObject IChildren::last_child() const
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(ADynamic, ImoDynamic, AObjectWithSiblingsAndChildren)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(ADynamic, ImoDynamic, AObject)
+#endif
 
 //---------------------------------------------------------------------------------------
 /** @memberof ADynamic
@@ -1441,7 +1572,11 @@ bool AInstrGroup::set_range(int iFirstInstr, int iLastInstr)
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(ALink, ImoLink, AObjectWithSiblingsAndChildren)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(ALink, ImoLink, AObject)
+#endif
 
 //---------------------------------------------------------------------------------------
 /** @memberof ALink
@@ -1472,7 +1607,11 @@ ImoLink* ALink::internal_object() const
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(AList, ImoList, AObjectWithSiblingsAndChildren)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(AList, ImoList, AObject)
+#endif
 
 //---------------------------------------------------------------------------------------
 /** @memberof AList
@@ -1808,7 +1947,11 @@ void AMidiInfo::set_elevation(int value)
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(AParagraph, ImoParagraph, AObjectWithSiblingsAndChildren)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(AParagraph, ImoParagraph, AObject)
+#endif
 
 
 
@@ -1833,7 +1976,11 @@ LOMSE_IMPLEMENT_IM_API_CLASS(AParagraph, ImoParagraph, AObject)
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(AScore, ImoScore, AObjectWithSiblings)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(AScore, ImoScore, AObject)
+#endif
 
 //---------------------------------------------------------------------------------------
 /** @memberof AScore
@@ -2445,7 +2592,11 @@ AMidiInfo ASoundInfo::midi_info() const
         internal model is currently being defined and, thus, for this class, only some
         methods have been defined.
 */
+#if (LOMSE_BYPASS_ISSUE_253 == 1)
+LOMSE_IMPLEMENT_IM_API_CLASS(ATextItem, ImoTextItem, AObjectWithSiblings)
+#else
 LOMSE_IMPLEMENT_IM_API_CLASS(ATextItem, ImoTextItem, AObject)
+#endif
 
 //---------------------------------------------------------------------------------------
 /** @memberof ATextItem
