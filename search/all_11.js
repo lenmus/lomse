@@ -52,6 +52,7 @@ var searchData=
   ['set_5fwidth',['set_width',['../classTempoLine.html#a77fec9b68721babbfece733171b5d3e7',1,'TempoLine']]],
   ['should_5fenable_5fedit_5fredo',['should_enable_edit_redo',['../classInteractor.html#a1fb104713775c65888909f3f1404faad',1,'Interactor']]],
   ['should_5fenable_5fedit_5fundo',['should_enable_edit_undo',['../classInteractor.html#abd162053d322ad64eb94159e1437ce1e',1,'Interactor']]],
+  ['singlepageview',['SinglePageView',['../classSinglePageView.html',1,'']]],
   ['singlesystemview',['SingleSystemView',['../classSingleSystemView.html',1,'']]],
   ['sound_5finfo_5fat',['sound_info_at',['../classAInstrument.html#af4e994c487e8a4278706c950466c747c',1,'AInstrument']]],
   ['speventaction',['SpEventAction',['../group__typedefs.html#ga34260574c352da837e370c25b30e8ca3',1,'lomse_events.h']]],

@@ -102,7 +102,7 @@ Inheritance diagram for EventPaint:</div>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>An event to inform user application about the need to repaint the screen.</p>
-<p>The View content (the buffer bitmap) has been updated by Lomse and the user application is not aware of this update. Therefore, Lomse sends this event to inform the user application that it must immediately update the content of the window associated to the lomse View, by displaying the current bitmap. User application must put immediately the content of the currently rendered buffer into the window without calling any Lomse methods (i.e. force_redraw) or generating application events. .</p>
+<p>The View content (the buffer bitmap) has been updated by Lomse and the user application is not aware of this update. Therefore, Lomse sends this event to inform the user application that it must immediately update the content of the window associated to the lomse View, by displaying the current bitmap. User application must put immediately the content of the currently rendered buffer into the window without calling any Lomse methods (e.g., force_redraw) or generating application events. .</p>
 <p>For receiving these events you will have to register a callback when the View is created. For processing these events take into account that this event is decoupled by design: user must do repaint immediately, without more delays; your application should just blit the new bitmap onto the window.</p>
 <p><b>Example</b></p>
 <p>For instance, in an application written using the wxWidgets framework you could do something as:</p>
@@ -298,7 +298,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_end_of_playback_ev
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classEventPaint.html">EventPaint</a></li>
-    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Oct 29 2020 15:35:52 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

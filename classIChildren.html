@@ -103,12 +103,12 @@ Inheritance diagram for IChildren:</div>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Some API clases present a virtual structure similar to a tree. For instance, <a class="el" href="classAParagraph.html">AParagraph</a> class can be seen as a container for text with different styles. Thus, the following LDP source code: </p><div class="fragment"><div class="line">(para (txt (style bold) <span class="stringliteral">&quot;Hello&quot;</span>) (txt <span class="stringliteral">&quot; world! &quot;</span>)(txt <span class="stringliteral">&quot;It is a nice day!&quot;</span>))</div></div><!-- fragment --><p>will produce the following structure of API classes:</p>
-<pre class="fragment">                               AParagraph
-                                    |
-                   +----------------+----------------+
-                   |                |                |
-             IText (bold)     IText (normal)   IText (normal)
-               "Hello"          " world! "    "It is a nice day!"
+<pre class="fragment">                                    AParagraph
+                                        |
+                   +--------------------+--------------------+
+                   |                    |                    |
+               ATextItem (bold)     ATextItem (normal)   ATextItem (normal)
+               "Hello"              " world! "           "It is a nice day!"
 </pre><p>For objects, such as <a class="el" href="classAParagraph.html">AParagraph</a>, that organizes its content in a tree, class IChildren provides the methods for child content traversal. IChildren is just an interface class and thus, you will never directly manage <a class="el" href="classIChildren.html">IChildren</a> objects but objects derived from this class. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -212,7 +212,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>num_children</b> () co
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classIChildren.html">IChildren</a></li>
-    <li class="footer">Generated on Tue Jun 16 2020 16:38:04 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Oct 29 2020 15:35:52 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

@@ -19,5 +19,6 @@ var searchData=
   ['_7eobserver',['~Observer',['../classObserver.html#afcc6b67be6c386f2f3d2c363aa59cb47',1,'Observer']]],
   ['_7epresenter',['~Presenter',['../classPresenter.html#a07b9bfdb69702b53e0797001e242fa9f',1,'Presenter']]],
   ['_7erequest',['~Request',['../classRequest.html#a45cc5d15eb7b9c9e97bd7328c9a90d3f',1,'Request']]],
-  ['_7escoreplayer',['~ScorePlayer',['../classScorePlayer.html#af49944a8a16d360b82e01d39e571bc2a',1,'ScorePlayer']]]
+  ['_7escoreplayer',['~ScorePlayer',['../classScorePlayer.html#af49944a8a16d360b82e01d39e571bc2a',1,'ScorePlayer']]],
+  ['_7eundoelement',['~UndoElement',['../classUndoElement.html#ab8df4a206cb81676c4b28d86e485ef0c',1,'UndoElement']]]
 ];
