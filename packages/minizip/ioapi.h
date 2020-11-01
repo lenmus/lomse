@@ -21,7 +21,8 @@
 #ifndef _ZLIBIOAPI64_H
 #define _ZLIBIOAPI64_H
 
-#if (!defined(_WIN32)) && (!defined(WIN32))
+// Lomse: excluded Android to avoid binary incompatibility with versions before Android 7
+#if (!defined(_WIN32)) && (!defined(WIN32)) && (!defined(ANDROID))
 
   // Linux needs this to support file operation on files larger then 4+GB
   // But might need better if/def to select just the platforms that needs them.
