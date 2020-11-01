@@ -17,7 +17,7 @@
 #include "ioapi.h"
 
 //Lomse. Fix compilation on macOS, where ftello64, fseeko64 and fopen64 are not defined.
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(ANDROID)
     #define ftello64 ftello
     #define fseeko64 fseeko
     #define fopen64 fopen
