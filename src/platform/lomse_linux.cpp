@@ -52,16 +52,13 @@ namespace lomse
 //=======================================================================================
 // Logger implementation
 //=======================================================================================
-Logger::Logger(int mode)
-    : m_mode(mode)
-    , m_areas(0xffffffff)       //all areas enabled
+std::string Logger::get_default_log_path()
 {
     struct passwd* pw = getpwuid(getuid());
     const char* homedir = pw->pw_dir;
     string logPath(homedir);
     logPath += "/lomse-log.txt";
-    dbgLogger.open(logPath);
-    LOMSE_LOG_INFO("lomse log path=%s", logPath.c_str());
+    return logPath;
 }
 
 

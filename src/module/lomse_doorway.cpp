@@ -53,7 +53,7 @@ namespace lomse
 //=======================================================================================
 //platform independent methods
 //=======================================================================================
-LomseDoorway::LomseDoorway()
+LomseDoorway::LomseDoorway(std::ostream* logStream, std::ostream* forensicLogStream)
     : m_pLibraryScope(nullptr)
     , m_platform{ EPixelFormat::k_pix_format_undefined, false, 72.0 }
     , m_pFunc_notify(null_notify_function)
@@ -61,21 +61,13 @@ LomseDoorway::LomseDoorway()
     , m_pObj_notify(nullptr)
     , m_pObj_request(nullptr)
 {
-    clear_forensic_log();
+    logger.init(logStream, forensicLogStream);
 }
 
 //---------------------------------------------------------------------------------------
 LomseDoorway::~LomseDoorway()
 {
     delete m_pLibraryScope;
-}
-
-//---------------------------------------------------------------------------------------
-void LomseDoorway::clear_forensic_log()
-{
-    ofstream logger;
-    logger.open("forensic_log.txt");
-    logger.close();
 }
 
 //---------------------------------------------------------------------------------------

@@ -76,8 +76,7 @@ void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
     //default implementation based on restoring from saved checkpoint data
 
     //log command for forensic analysis
-    ofstream logger;
-    logger.open("forensic_log.txt", std::ofstream::out | std::ofstream::app);
+    ostream& logger = get_global_logger().get_forensic_log_stream();
 
     logger << "---------------------------------------------"
            << "---------------------------------------------" << endl;
@@ -97,7 +96,7 @@ void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
         pDoc->from_checkpoint(m_checkpoint);
 
     logger << "IdAssigner. After: " << pDoc->dump_ids() << endl;
-    logger.close();
+    get_global_logger().close_forensic_log();
 }
 
 //---------------------------------------------------------------------------------------
@@ -105,8 +104,7 @@ void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* pCursor)
 {
     //save data for forensic analysis if a crash
 
-    ofstream logger;
-    logger.open("forensic_log.txt", std::ofstream::out | std::ofstream::app);
+    ostream& logger = get_global_logger().get_forensic_log_stream();
 
     logger << "---------------------------------------------"
            << "---------------------------------------------" << endl;
@@ -116,11 +114,11 @@ void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* pCursor)
     logger << "Cursor: " << pCursor->dump_cursor();
     logger << "Checkpoint data (last id " << m_idChk << "):" << endl;
     logger << m_checkpoint << endl;
-    logger.close();
+    get_global_logger().close_forensic_log();
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommand::log_command(ofstream &logger)
+void DocCommand::log_command(ostream &logger)
 {
     //default implementation. Should be overriden in specific commands
     logger << "Command. Name: " << this->get_name() << endl;
@@ -503,7 +501,7 @@ CmdAddChordNote::CmdAddChordNote(const string& pitch, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddChordNote::log_command(ofstream &logger)
+void CmdAddChordNote::log_command(ostream &logger)
 {
     logger << "Command CmdAddChordNote. Name: '" << this->get_name()
         << ", pitch: " << m_pitch << endl;
@@ -613,7 +611,7 @@ CmdAddNoteRest::CmdAddNoteRest(const string& source, int UNUSED(editMode),
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddNoteRest::log_command(ofstream &logger)
+void CmdAddNoteRest::log_command(ostream &logger)
 {
     logger << "Command CmdAddNoteRest. Name: '" << this->get_name()
         << ", source: " << m_source << endl;
@@ -941,7 +939,7 @@ int CmdAddTie::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddTie::log_command(ofstream &logger)
+void CmdAddTie::log_command(ostream &logger)
 {
     logger << "Command CmdAddTie. Name: '" << this->get_name()
         << ", start & end notes: " << m_startId << ", " << m_endId << endl;
@@ -1015,7 +1013,7 @@ int CmdAddTuplet::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddTuplet::log_command(ofstream &logger)
+void CmdAddTuplet::log_command(ostream &logger)
 {
     logger << "Command CmdAddTuplet. Name: '" << this->get_name()
         << ", start & end notes: " << m_startId << ", " << m_endId
@@ -1086,7 +1084,7 @@ int CmdBreakBeam::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdBreakBeam::log_command(ofstream &logger)
+void CmdBreakBeam::log_command(ostream &logger)
 {
     logger << "Command CmdBreakBeam. Name: '" << this->get_name()
         << ", before note: " << m_beforeId << endl;
@@ -1226,7 +1224,7 @@ int CmdChangeAccidentals::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(p
 }
 
 //---------------------------------------------------------------------------------------
-void CmdChangeAccidentals::log_command(ofstream &logger)
+void CmdChangeAccidentals::log_command(ostream &logger)
 {
     logger << "Command CmdChangeAccidentals. Name: '" << this->get_name() << endl;
 }
@@ -2528,7 +2526,7 @@ int CmdJoinBeam::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
 }
 
 //---------------------------------------------------------------------------------------
-void CmdJoinBeam::log_command(ofstream &logger)
+void CmdJoinBeam::log_command(ostream &logger)
 {
     logger << "Command CmdJoinBeam. Name: '" << this->get_name()
         << ", notes:";
