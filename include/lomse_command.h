@@ -205,7 +205,7 @@ protected:
     void log_forensic_data(Document* pDoc, DocCursor* pCursor);
     void set_command_name(const string& name, ImoObj* pImo);
     int validate_source(const string& source);
-    virtual void log_command(ofstream &logger);
+    virtual void log_command(ostream &logger);
 
 };
 
@@ -429,7 +429,7 @@ public:
 
 protected:
     void update_selection(SelectionSet* pSelection);
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 
 };
 
@@ -540,7 +540,7 @@ protected:
 
     //overrides and mandatory virtual methods
     void set_command_name();
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 
 };
 
@@ -598,7 +598,7 @@ public:
     ///@endcond
 
 protected:
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -666,7 +666,7 @@ public:
     ///@endcond
 
 protected:
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -723,7 +723,7 @@ public:
     ///@endcond
 
 protected:
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -781,7 +781,7 @@ public:
     ///@endcond
 
 protected:
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -1840,7 +1840,7 @@ public:
     ///@endcond
 
 protected:
-    void log_command(ofstream &logger);
+    void log_command(ostream &logger);
 };
 
 //---------------------------------------------------------------------------------------

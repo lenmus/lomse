@@ -43,11 +43,9 @@ namespace lomse
 //=======================================================================================
 // Logger implementation
 //=======================================================================================
-Logger::Logger(int mode)
-    : m_mode(mode)
-    , m_areas(0xffffffff)       //all areas enabled
+std::string Logger::get_default_log_path()
 {
-    dbgLogger.open("lomse-log.txt");
+    return "lomse-log.txt";
 }
 
 //=======================================================================================

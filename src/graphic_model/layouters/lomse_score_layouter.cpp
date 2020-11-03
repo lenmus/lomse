@@ -1662,7 +1662,7 @@ void LinesBreakerOptimal::retrieve_breaks_sequence()
     if (fTrace)
     {
         dbgLogger << "Breaks computed. Entries: ************************************" << endl;
-        dump_entries(dbgLogger);
+        dump_entries(logger.get_stream());
     }
 
     int i = m_numCols;

@@ -42,8 +42,6 @@ using namespace std;
 namespace lomse
 {
 
-extern ofstream dbgLogger;
-
 #if (LOMSE_COMPILER_MSVC == 1)
     #define __PRETTY_FUNCTION__       __FUNCTION__
 #endif
@@ -82,12 +80,23 @@ enum {
 class Logger
 {
 private:
+    std::ostream* m_logStream;
+    std::ostream* m_customForensicLogStream;
+    std::ofstream m_forensicLogStream;
     int m_mode;
     uint_least32_t m_areas;
+    bool m_initialized = false;
 
 public:
     Logger(int mode=k_normal_mode);
     ~Logger();
+
+    void init(std::ostream* logStream = nullptr, std::ostream* forensicLogStream = nullptr);
+    void deinit();
+    std::ostream& get_stream() { return *m_logStream; }
+
+    std::ostream& get_forensic_log_stream();
+    void close_forensic_log();
 
     inline bool debug_mode_enabled() { return m_mode == k_debug_mode; }
     inline bool trace_mode_enabled() { return m_mode == k_trace_mode; }
@@ -169,10 +178,34 @@ protected:
     void log_message(const string& file, int line, const string& prettyFunction,
                      const string& prefix, const string& msg);
     string format(const char* fmtstr, va_list args);
+
+    void clear_forensic_log();
+
+    std::string get_default_log_path();
 };
 
 extern Logger logger;
 
+inline Logger& get_global_logger() { return logger; }
+
+class StreamLogger
+{
+public:
+    template<typename T>
+    StreamLogger& operator<<(const T& t) {
+        logger.get_stream() << t;
+        return *this;
+    }
+
+    // Overload for I/O manipulators (e.g. std::endl)
+    StreamLogger& operator<<(std::ostream& (*manip)(std::ostream&)) {
+        logger.get_stream() << manip;
+        return *this;
+    }
+};
+
+extern StreamLogger dbgLogger;
+extern std::ofstream nullLogger;
 
 }   //namespace lomse
 

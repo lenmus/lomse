@@ -96,7 +96,8 @@ protected:
 public:
 	/** Constructor. Your application should create only one instance of LomseDoorway
         and its life scope should be as long as your application need to use Lomse.  */
-    LomseDoorway();
+    explicit LomseDoorway(std::ostream* logStream = nullptr,
+                          std::ostream* forensicLogStream = nullptr);
     virtual ~LomseDoorway();
 
     //library initialization and configuration
@@ -444,9 +445,6 @@ public:
     //communication with user application
     inline void post_event(SpEventInfo pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
     inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
-
-protected:
-    void clear_forensic_log();
 
 ///@endcond
 };
