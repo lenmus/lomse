@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,8 +82,8 @@ public:
     DefaultTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope);
     ~DefaultTextSplitter() {}
 
-    Engrouter* get_next_text_engrouter(LUnits maxSpace, bool fRemoveLeftSpaces);
-    bool more_text();
+    Engrouter* get_next_text_engrouter(LUnits maxSpace, bool fRemoveLeftSpaces) override;
+    bool more_text() override;
 
 protected:
 
@@ -102,8 +102,8 @@ public:
     ChineseTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope);
     ~ChineseTextSplitter() {}
 
-    Engrouter* get_next_text_engrouter(LUnits maxSpace, bool fRemoveLeftSpaces);
-    bool more_text();
+    Engrouter* get_next_text_engrouter(LUnits maxSpace, bool fRemoveLeftSpaces) override;
+    bool more_text() override;
 
 };
 

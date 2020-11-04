@@ -1341,7 +1341,7 @@ public:
     }
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v);
+    virtual void accept_visitor(BaseVisitor& v) override;
     virtual bool has_visitable_children()
     {
         return has_children();
@@ -2355,12 +2355,12 @@ public:
     ImoAuxObj* find_attachment(int type);
 
     //overrides for Observable children
-    EventNotifier* get_event_notifier();
-    void add_event_handler(int eventType, EventHandler* pHandler);
+    EventNotifier* get_event_notifier() override;
+    void add_event_handler(int eventType, EventHandler* pHandler) override;
     void add_event_handler(int eventType, void* pThis,
-                           void (*pt2Func)(void* pObj, SpEventInfo event) );
+                           void (*pt2Func)(void* pObj, SpEventInfo event) ) override;
     void add_event_handler(int eventType,
-                           void (*pt2Func)(SpEventInfo event) );
+                           void (*pt2Func)(SpEventInfo event) ) override;
 
     //style
     virtual ImoStyle* get_style(bool fInherit=true);
@@ -2388,15 +2388,15 @@ public:
     }
 
     //IM attributes interface
-    void set_int_attribute(TIntAttribute attrib, int value);
-    int get_int_attribute(TIntAttribute attrib);
-    void set_bool_attribute(TIntAttribute attrib, bool value);
-    bool get_bool_attribute(TIntAttribute attrib);
-    void set_double_attribute(TIntAttribute attrib, double value);
-    double get_double_attribute(TIntAttribute attrib);
-    void set_string_attribute(TIntAttribute attrib, const std::string& value);
-    std::string get_string_attribute(TIntAttribute attrib);
-    list<TIntAttribute> get_supported_attributes();
+    void set_int_attribute(TIntAttribute attrib, int value) override;
+    int get_int_attribute(TIntAttribute attrib) override;
+    void set_bool_attribute(TIntAttribute attrib, bool value) override;
+    bool get_bool_attribute(TIntAttribute attrib) override;
+    void set_double_attribute(TIntAttribute attrib, double value) override;
+    double get_double_attribute(TIntAttribute attrib) override;
+    void set_string_attribute(TIntAttribute attrib, const std::string& value) override;
+    std::string get_string_attribute(TIntAttribute attrib) override;
+    list<TIntAttribute> get_supported_attributes() override;
 
 };
 
@@ -2438,11 +2438,8 @@ public:
     virtual ~ImoRelations();
 
     //overrides, to traverse this special node
-    void accept_visitor(BaseVisitor& v);
-    bool has_visitable_children()
-    {
-        return get_num_items() > 0;
-    }
+    void accept_visitor(BaseVisitor& v) override;
+    bool has_visitable_children() override { return get_num_items() > 0; }
 
     //contents
     ImoRelObj* get_item(int iItem);   //iItem = 0..n-1
@@ -2706,11 +2703,11 @@ public:
     inline void set_color(Color color) { m_color = color; }
 
     //IM attributes interface
-    void set_int_attribute(TIntAttribute attrib, int value);
-    int get_int_attribute(TIntAttribute attrib);
-    void set_color_attribute(TIntAttribute attrib, Color value);
-    Color get_color_attribute(TIntAttribute attrib);
-    list<TIntAttribute> get_supported_attributes();
+    void set_int_attribute(TIntAttribute attrib, int value) override;
+    int get_int_attribute(TIntAttribute attrib) override;
+    void set_color_attribute(TIntAttribute attrib, Color value) override;
+    Color get_color_attribute(TIntAttribute attrib) override;
+    list<TIntAttribute> get_supported_attributes() override;
 
 
 };
@@ -2761,9 +2758,9 @@ public:
     ImoScore* get_score();
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    virtual void set_int_attribute(TIntAttribute attrib, int value) override;
+    virtual int get_int_attribute(TIntAttribute attrib) override;
+    virtual list<TIntAttribute> get_supported_attributes() override;
 
 };
 
@@ -3665,7 +3662,7 @@ public:
     virtual ~ImoAnonymousBlock() {}
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v);
+    virtual void accept_visitor(BaseVisitor& v) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -3720,12 +3717,12 @@ public:
     inline void set_measure_info(TypeMeasureInfo* pInfo) { m_pMeasureInfo = pInfo; }
 
     //overrides: barlines always in staff 0
-    void set_staff(int UNUSED(staff)) { m_staff = 0; }
+    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    virtual void set_int_attribute(TIntAttribute attrib, int value) override;
+    virtual int get_int_attribute(TIntAttribute attrib) override;
+    virtual list<TIntAttribute> get_supported_attributes() override;
 
 };
 
@@ -3966,10 +3963,7 @@ public:
     }
 
     //properties
-    bool can_generate_secondary_shapes()
-    {
-        return true;
-    }
+    bool can_generate_secondary_shapes() override { return true; }
 
 };
 
@@ -5152,16 +5146,10 @@ public:
     void transpose(const int semitones);
 
     //overrides: key signatures always in staff 0
-    void set_staff(int UNUSED(staff))
-    {
-        m_staff = 0;
-    }
+    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
 
     //properties
-    bool can_generate_secondary_shapes()
-    {
-        return true;
-    }
+    bool can_generate_secondary_shapes() override { return true; }
 
 };
 
@@ -5488,7 +5476,7 @@ public:
     virtual ~ImoParagraph() {}
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v);
+    virtual void accept_visitor(BaseVisitor& v) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -5555,7 +5543,7 @@ public:
     }
 
     //required by Visitable parent class
-    virtual void accept_visitor(BaseVisitor& v);
+    virtual void accept_visitor(BaseVisitor& v) override;
 
 };
 
@@ -5893,7 +5881,7 @@ public:
     SoundEventsTable* get_midi_table();
 
     //required by Visitable parent class
-    void accept_visitor(BaseVisitor& v);
+    void accept_visitor(BaseVisitor& v) override;
 
     //instruments
     void add_instrument(ImoInstrument* pInstr, const std::string& partId="");
@@ -6289,11 +6277,8 @@ public:
     virtual ~ImoStyles();
 
     //overrides, to traverse this special node
-    void accept_visitor(BaseVisitor& v);
-    bool has_visitable_children()
-    {
-        return m_nameToStyle.size() > 0;
-    }
+    void accept_visitor(BaseVisitor& v) override;
+    bool has_visitable_children() override { return m_nameToStyle.size() > 0; }
 
     //styles
     void add_style(ImoStyle* pStyle);
@@ -6774,16 +6759,10 @@ public:
     }
 
     //overrides: time signatures always in staff 0
-    void set_staff(int UNUSED(staff))
-    {
-        m_staff = 0;
-    }
+    void set_staff(int UNUSED(staff)) override { m_staff = 0; }
 
     //properties
-    bool can_generate_secondary_shapes()
-    {
-        return true;
-    }
+    bool can_generate_secondary_shapes() override { return true; }
 
     //other
     bool is_compound_meter();

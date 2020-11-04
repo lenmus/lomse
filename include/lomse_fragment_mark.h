@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -81,8 +81,8 @@ public:
         : VisualEffect(view, libraryScope) {}
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer)=0;
-    URect get_bounds()=0;
+    void on_draw(ScreenDrawer* pDrawer) override =0;
+    URect get_bounds() override =0;
 
 protected:
     friend class OverlaysGenerator;
@@ -353,8 +353,8 @@ public:
     FragmentMark(GraphicView* view, LibraryScope& libraryScope);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 
     //initial data for position and context
     void initialize(LUnits xPos, GmoBoxSystem* pBoxSystem, bool fBarline=false);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -62,8 +62,8 @@ public:
     MxlCompiler(LibraryScope& libraryScope, Document* pDoc);
 
     //compilation
-    ImoDocument* compile_file(const std::string& filename);
-    ImoDocument* compile_string(const std::string& source);
+    ImoDocument* compile_file(const std::string& filename) override;
+    ImoDocument* compile_string(const std::string& source) override;
 
 protected:
     ImoDocument* compile_parsed_tree(XmlNode* root);

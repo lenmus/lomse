@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,8 +70,8 @@ public:
     virtual ~JpgImageDecoder() {}
 
     //mandatory overrides
-    bool can_decode(InputStream* file);
-    SpImage decode_file(InputStream* file);
+    bool can_decode(InputStream* file) override;
+    SpImage decode_file(InputStream* file) override;
 };
 
 #if (LOMSE_ENABLE_PNG == 1)
@@ -84,8 +84,8 @@ public:
     virtual ~PngImageDecoder() {}
 
     //mandatory overrides
-    bool can_decode(InputStream* file);
-    SpImage decode_file(InputStream* file);
+    bool can_decode(InputStream* file) override;
+    SpImage decode_file(InputStream* file) override;
 
 };
 #endif // LOMSE_ENABLE_PNG

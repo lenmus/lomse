@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -87,7 +87,7 @@ public:
         : RelationBuilder<ImoTieDto, LmdAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
     virtual ~LmdTiesBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTieDto* pEndDto);
+    void add_relation_to_staffobjs(ImoTieDto* pEndDto) override;
 
 protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
@@ -105,7 +105,7 @@ public:
         : RelationBuilder<ImoBeamDto, LmdAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
     virtual ~LmdBeamsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo) override;
 };
 
 
@@ -118,7 +118,7 @@ public:
         : RelationBuilder<ImoSlurDto, LmdAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
     virtual ~LmdSlursBuilder() {}
 
-    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo) override;
 };
 
 
@@ -160,7 +160,7 @@ public:
         : RelationBuilder<ImoTupletDto, LmdAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
     virtual ~LmdTupletsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo) override;
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
 };
 

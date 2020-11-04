@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1566,13 +1566,13 @@ public:
     inline std::shared_ptr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
 
     //mandatory override required by EventHandler
-	void handle_event(SpEventInfo pEvent);
+	void handle_event(SpEventInfo pEvent) override;
 
     //Deprecated ?
     virtual void highlight_voice(int voice);
 
     //mandatory overrides from Observable
-    EventNotifier* get_event_notifier() { return this; }
+    EventNotifier* get_event_notifier() override { return this; }
 
     //for auto-scroll during playback
     virtual void change_viewport_if_necessary(ImoId id);

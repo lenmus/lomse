@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -110,39 +110,39 @@ public:
 
 
     //spacing algorithm main actions
-    void do_spacing(int iCol, bool fTrace=false);
-    void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement);
+    void do_spacing(int iCol, bool fTrace=false) override;
+    void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) override;
 
     //for lines break algorithm
-    float determine_penalty_for_line(int iSystem, int i, int j);
+    float determine_penalty_for_line(int iSystem, int i, int j) override;
     bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
-                          int i, int j);
+                          int i, int j) override;
 
     //information about a column
-    bool is_empty_column(int iCol);
-    LUnits get_column_width(int iCol);
-    virtual int get_column_barlines_information(int iCol);
+    bool is_empty_column(int iCol) override;
+    LUnits get_column_width(int iCol) override;
+    int get_column_barlines_information(int iCol) override;
 
     //methods to compute results
-    TimeGridTable* create_time_grid_table_for_column(int iCol);
+    TimeGridTable* create_time_grid_table_for_column(int iCol) override;
 
     //debug
-    void dump_column_data(int iCol, ostream& outStream);
+    void dump_column_data(int iCol, ostream& outStream) override;
 
     //column creation: collecting content
-    void start_column_measurements(int iCol);
+    void start_column_measurements(int iCol) override;
     void include_object(ColStaffObjsEntry* pCurEntry, int iCol, int iInstr, int iStaff,
-                        ImoStaffObj* pSO, GmoShape* pShape, bool fInProlog=false);
+                        ImoStaffObj* pSO, GmoShape* pShape, bool fInProlog=false) override;
     void include_full_measure_rest(GmoShape* pRestShape, ColStaffObjsEntry* pCurEntry,
-                                   GmoShape* pNonTimedShape);
-    void finish_column_measurements(int iCol);
+                                   GmoShape* pNonTimedShape) override;
+    void finish_column_measurements(int iCol) override;
 
     //auxiliary: shapes and boxes
-    void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
-    void delete_shapes(int iCol);
+    void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox, int iInstr) override;
+    void delete_shapes(int iCol) override;
     void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-                                         LUnits yShift, LUnits* yMin, LUnits* yMax);
-    void reposition_full_measure_rests(int iFirstCol, int iLastCol, GmoBoxSystem* pBox);
+                                         LUnits yShift, LUnits* yMin, LUnits* yMax) override;
+    void reposition_full_measure_rests(int iFirstCol, int iLastCol, GmoBoxSystem* pBox) override;
 
 protected:
     void new_column(TimeSlice* pSlice);

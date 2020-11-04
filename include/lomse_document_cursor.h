@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -177,7 +177,7 @@ public:
     ~ScoreCursorState() {}
 
     //mandatory overrides
-    ImoId pointee_id() { return id(); }
+    ImoId pointee_id() override { return id(); }
 
     //getters
     inline int instrument() { return m_instr; }
@@ -406,23 +406,23 @@ public:
 
     //mandatory overrides from ElementCursor
         //positioning
-    void point_to(ImoObj* pImo);
-    void point_to(ImoId nId);
-    void move_next() { to_next_staffobj(); }
-    void move_prev() { to_prev_staffobj(); }
-    void move_up();
-    void move_down();
+    void point_to(ImoObj* pImo) override;
+    void point_to(ImoId nId) override;
+    void move_next() override { to_next_staffobj(); }
+    void move_prev() override { to_prev_staffobj(); }
+    void move_up() override;
+    void move_down() override;
         //saving/restoring state
-    SpElementCursorState get_state();
-    void restore_state(SpElementCursorState spState);
+    SpElementCursorState get_state() override;
+    void restore_state(SpElementCursorState spState) override;
         //info
     inline ImoObj* operator *() { return staffobj(); }
-    inline ImoObj* get_pointee() { return staffobj(); }
-    inline ImoId get_pointee_id() { return staffobj_id(); }
-    SpElementCursorState find_previous_pos_state();
+    ImoObj* get_pointee() override { return staffobj(); }
+    ImoId get_pointee_id() override { return staffobj_id(); }
+    SpElementCursorState find_previous_pos_state() override;
         //special operations for restoring cursor validity after Document modification
-    void reset_and_point_to(ImoId nId);
-    void reset_and_point_after(ImoId id);
+    void reset_and_point_to(ImoId nId) override;
+    void reset_and_point_after(ImoId id) override;
 
     //specific methods
 
@@ -483,7 +483,7 @@ public:
     void change_voice_to(int voice);
 
     //debug & unit tests
-    string dump_cursor();
+    string dump_cursor() override;
 
 protected:
     //support: related to time info

@@ -97,7 +97,7 @@ public:
     inline void set_tail_type(ELineCap nHeadType) { m_nEndCap = nHeadType; }
 
     //implementation of virtual methods from base class
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //overrides
     bool HitTest(UPoint& uPoint);

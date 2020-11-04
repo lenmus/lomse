@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -65,14 +65,14 @@ protected:
 
 public:
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //dynamic modification
     void set_text(const std::string& text);
 
 protected:
     void select_font();
-    Color get_normal_color();
+    Color get_normal_color() override;
 
 };
 
@@ -95,7 +95,7 @@ protected:
 
 public:
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //for unit tests
     inline LUnits get_top_line() { return m_origin.y + m_halfLeading; }
@@ -104,7 +104,7 @@ public:
 
 protected:
     void select_font();
-    Color get_normal_color();
+    Color get_normal_color() override;
 
 };
 
@@ -155,7 +155,7 @@ public:
     virtual ~GmoShapeTextBox();
 
     //implementation of virtual methods from base class
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
 //    //other
 //    string dump(int nIndent);

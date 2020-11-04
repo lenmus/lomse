@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -72,7 +72,7 @@ public:
                   Color color, int niente, LUnits radius);
     virtual ~GmoShapeWedge();
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //construction
     enum {
@@ -82,10 +82,10 @@ public:
     };
 
     //support for handlers
-    int get_num_handlers();
-    UPoint get_handler_point(int i);
-    void on_handler_dragged(int iHandler, UPoint newPos);
-    void on_end_of_handler_drag(int iHandler, UPoint newPos);
+    int get_num_handlers() override;
+    UPoint get_handler_point(int i) override;
+    void on_handler_dragged(int iHandler, UPoint newPos) override;
+    void on_end_of_handler_drag(int iHandler, UPoint newPos) override;
 
 protected:
     void save_points_and_compute_bounds(UPoint* points);

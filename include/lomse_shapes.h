@@ -60,7 +60,7 @@ protected:
 public:
     virtual ~GmoShapeGlyph() {}
 
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
 protected:
     GmoShapeGlyph(ImoObj* pCreatorImo, int type, ShapeId idx, unsigned int nGlyph,
@@ -197,7 +197,7 @@ public:
     void set_image(SpImage image);
 
 public:
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ protected:
     GmoShapeInvisible(ImoObj* pCreatorImo, ShapeId idx, UPoint uPos, USize uSize);
 
 public:
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ public:
 
 
     //implementation of virtual methods from base class
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //settings
     inline void set_radius(LUnits radius) { m_radius = radius; }
@@ -321,7 +321,7 @@ public:
     virtual ~GmoShapeSimpleLine() {}
 
     //implementation of virtual methods from base class
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
 protected:
     GmoShapeSimpleLine(ImoObj* pCreatorImo, int type, LUnits xStart, LUnits yStart,

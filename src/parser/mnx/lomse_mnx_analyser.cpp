@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1367,7 +1367,7 @@ public:
         {
         }
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         error_msg("Missing analyser for element '" + m_tag + "'. Node ignored.");
         set_result(nullptr);
@@ -1392,7 +1392,7 @@ public:
                       LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrib: value - optional value of a beamed group within a parent
         //TODO
@@ -1448,7 +1448,7 @@ public:
         {}
 
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
@@ -1630,7 +1630,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrb: profile
         if (get_attribute("profile") != "standard")
@@ -1680,7 +1680,7 @@ public:
                           LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
 		//TODO: implement Analyser
         set_result(nullptr);
@@ -1717,7 +1717,7 @@ public:
         {}
 
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //In MNX Clefs, time signatures and key signatures are
         //treated as attributes of a measure, not as objects and, therefore, ordering
@@ -1849,7 +1849,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);
@@ -1885,7 +1885,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //First step: extract information -----------------------------------------------
 
@@ -2038,7 +2038,7 @@ public:
                           LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);
@@ -2065,7 +2065,7 @@ public:
                       LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrib: parts
         string parts = get_optional_string_attribute("parts", "*$SINGLE-PART$*");
@@ -2130,7 +2130,7 @@ public:
                     LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
 		//TODO: implement Analyser
         set_result(nullptr);
@@ -2154,7 +2154,7 @@ public:
                                LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);
@@ -2180,7 +2180,7 @@ public:
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
@@ -2347,7 +2347,7 @@ public:
     }
 
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         ImoMusicData* pMD = nullptr;
         if (m_pAnchor && m_pAnchor->is_music_data())
@@ -2486,7 +2486,7 @@ public:
                    LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         ImoDocument* pImoDoc = nullptr;
 
@@ -2554,7 +2554,7 @@ public:
                     LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrib: pitch
         string pitch = get_mandatory_string_attribute("pitch", "", "note");
@@ -2697,7 +2697,7 @@ public:
                     LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         ImoInstrument* pInstrument = create_instrument();
 
@@ -2807,7 +2807,7 @@ public:
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    bool do_analysis()
+    bool do_analysis() override
     {
 //        //attrb: print-object
 //        string print = get_optional_string_attribute("print-object", "yes");
@@ -2862,7 +2862,7 @@ public:
                     LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrib: pitch
         string pitch = get_optional_string_attribute("pitch", "");
@@ -2920,7 +2920,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoContent* pContent = static_cast<ImoContent*>(
@@ -3007,7 +3007,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         // attrib: orient
         //TODO
@@ -3062,7 +3062,7 @@ public:
     {
     }
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //attrib: staff
         int staff = get_optional_int_attribute("staff", 1) - 1;
@@ -3215,7 +3215,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
 		//TODO: implement Analyser
         set_result(nullptr);
@@ -3241,7 +3241,7 @@ public:
                     LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //attrib: signature
         string signature = get_mandatory_string_attribute("signature", "4/4", "time");
@@ -3386,7 +3386,7 @@ public:
                       LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);
@@ -3410,7 +3410,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);
@@ -3434,7 +3434,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MnxElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    bool do_analysis()
+    bool do_analysis() override
     {
         //TODO: implement Analyser
         set_result(nullptr);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -76,8 +76,8 @@ public:
     inline void hide_caret() { m_fVisible = false; }
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds() { return m_bounds; }
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override { return m_bounds; }
 
     //caret shapes
     enum { k_top_level=0, k_box, k_line, k_block, };

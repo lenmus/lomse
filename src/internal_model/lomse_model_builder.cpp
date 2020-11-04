@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -69,10 +69,10 @@ public:
     }
 	virtual ~VisitorForStructurizables() {}
 
-    void start_visit(ImoScore* pImo) { m_builder->structurize(pImo); }
+    void start_visit(ImoScore* pImo) override { m_builder->structurize(pImo); }
     //void start_visit(ImoOtherStructurizable* pImo) { m_builder->structurize(pImo); }
 
-	void end_visit(ImoScore* UNUSED(pImo)) {}
+	void end_visit(ImoScore* UNUSED(pImo)) override {}
     //void end_visit(ImoOtherStructurizable* pImo) {}
 
 };

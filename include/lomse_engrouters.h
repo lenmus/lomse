@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -160,8 +160,8 @@ public:
         : Engrouter(pCreatorImo, libraryScope) {}
     virtual ~BoxEngrouter();
 
-    void measure();
-    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void measure() override;
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs) override;
     void layout_and_measure();
     void update_measures(LUnits lineHeight);
 
@@ -191,8 +191,8 @@ public:
         : Engrouter(pCreatorImo, libraryScope) {}
     virtual ~ImageEngrouter() {}
 
-    void measure();
-    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void measure() override;
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs) override;
 };
 
 //---------------------------------------------------------------------------------------
@@ -216,8 +216,8 @@ public:
     inline const wstring& get_text() { return m_text; }
     inline const string& get_font_file() { return m_fontFile; }
 
-    void measure();
-    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void measure() override;
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs) override;
 
     //info
     inline LUnits get_descent() { return m_descent; }
@@ -238,8 +238,8 @@ public:
     InlineWrapperEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
     virtual ~InlineWrapperEngrouter() {}
 
-    virtual void measure() = 0;
-    virtual GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    virtual void measure() override = 0;
+    virtual GmoObj* create_gm_object(UPoint pos, LineReferences& refs) override;
 
 protected:
     LUnits add_engrouters_to_box(GmoBox* pBox, LineReferences& refs);
@@ -274,8 +274,8 @@ public:
     virtual ~ControlEngrouter() {}
 
     //implementation of Engrouter virtual pure methods
-    void measure();
-    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void measure() override;
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs) override;
 };
 
 
@@ -291,8 +291,8 @@ public:
     virtual ~NullEngrouter() {}
 
     //implementation of Engrouter virtual pure methods
-    void measure() {}
-    GmoObj* create_gm_object(UPoint UNUSED(pos), LineReferences& UNUSED(refs))
+    void measure() override {}
+    GmoObj* create_gm_object(UPoint UNUSED(pos), LineReferences& UNUSED(refs)) override
     {
         return nullptr;
     }
