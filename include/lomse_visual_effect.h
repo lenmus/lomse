@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -123,8 +123,8 @@ public:
     void move_to(LUnits x, LUnits y);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 
 protected:
     void delete_shape();
@@ -152,8 +152,8 @@ public:
     void set_end_point(LUnits x, LUnits y);
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 };
 ///@endcond
 
@@ -192,8 +192,8 @@ public:
     void remove_all_highlight();
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 
 ///@endcond
 };
@@ -215,8 +215,8 @@ public:
     virtual ~SelectionHighlight() {}
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 
     //other
     bool are_handlers_needed();

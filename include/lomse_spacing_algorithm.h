@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -271,51 +271,51 @@ public:
     //------------------------------------------------------------------------------
 
     //collect content
-    void split_content_in_columns();
+    void split_content_in_columns() override;
     //spacing algorithm
-    void do_spacing_algorithm();
+    void do_spacing_algorithm() override;
     //boxes and shapes
-    virtual void add_shapes_to_boxes(int iCol, VerticalProfile* pVProfile);
-    virtual GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr);
-    virtual void set_slice_final_position(int iCol, LUnits left, LUnits top);
-    virtual void create_boxes_for_column(int iCol, LUnits left, LUnits top);
-    LUnits get_staves_height();
+    void add_shapes_to_boxes(int iCol, VerticalProfile* pVProfile) override;
+    GmoBoxSliceInstr* get_slice_instr(int iCol, int iInstr) override;
+    void set_slice_final_position(int iCol, LUnits left, LUnits top) override;
+    void create_boxes_for_column(int iCol, LUnits left, LUnits top) override;
+    LUnits get_staves_height() override;
     ///store slice box for column iCol and access it
-    virtual void use_this_slice_box(int iCol, GmoBoxSlice* pBoxSlice);
-    virtual GmoBoxSlice* get_slice_box(int iCol);
-    virtual bool has_system_break(int iCol);
-    virtual void delete_box_and_shapes(int iCol);
+    void use_this_slice_box(int iCol, GmoBoxSlice* pBoxSlice) override;
+    GmoBoxSlice* get_slice_box(int iCol) override;
+    bool has_system_break(int iCol) override;
+    void delete_box_and_shapes(int iCol) override;
     //other
-    virtual TypeMeasureInfo* get_measure_info_for_column(int iCol);
-    virtual GmoShapeBarline* get_start_barline_shape_for_column(int iCol);
+    TypeMeasureInfo* get_measure_info_for_column(int iCol) override;
+    GmoShapeBarline* get_start_barline_shape_for_column(int iCol) override;
 
 
     //methods in base class SpacingAlgorithm that still need to be created
     //------------------------------------------------------------------------
 
-    virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
-            LUnits yShift,
-            LUnits* yMin, LUnits* yMax) = 0;
-    virtual void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) = 0;
-
-    //for line break algorithm
-    virtual bool is_empty_column(int iCol) = 0;
-
-    //information about a column
-    virtual LUnits get_column_width(int iCol) = 0;
-    virtual int get_column_barlines_information(int iCol) = 0;
-
-    //methods to compute results
-    virtual TimeGridTable* create_time_grid_table_for_column(int iCol) = 0;
-
-    //methods for line break
-    virtual float determine_penalty_for_line(int iSystem, int i, int j) = 0;
-    virtual bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
-                                  int i, int j) = 0;
-
-    //debug
-    virtual void dump_column_data(int iCol, ostream& outStream) = 0;
-    virtual ColumnData* get_column(int i);
+//    virtual void reposition_slices_and_staffobjs(int iFirstCol, int iLastCol,
+//            LUnits yShift,
+//            LUnits* yMin, LUnits* yMax) = 0;
+//    virtual void justify_system(int iFirstCol, int iLastCol, LUnits uSpaceIncrement) = 0;
+//
+//    //for line break algorithm
+//    virtual bool is_empty_column(int iCol) = 0;
+//
+//    //information about a column
+//    virtual LUnits get_column_width(int iCol) = 0;
+//    virtual int get_column_barlines_information(int iCol) = 0;
+//
+//    //methods to compute results
+//    virtual TimeGridTable* create_time_grid_table_for_column(int iCol) = 0;
+//
+//    //methods for line break
+//    virtual float determine_penalty_for_line(int iSystem, int i, int j) = 0;
+//    virtual bool is_better_option(float prevPenalty, float newPenalty, float nextPenalty,
+//                                  int i, int j) = 0;
+//
+//    //debug
+//    virtual void dump_column_data(int iCol, ostream& outStream) = 0;
+    ColumnData* get_column(int i) override;
 
 
     //new methods to be implemented by derived classes (apart from previous methods)
@@ -343,21 +343,21 @@ public:
     virtual void add_shapes_to_box(int iCol, GmoBoxSliceInstr* pSliceInstrBox,
                                    int iInstr) = 0;
 
-    virtual void delete_shapes(int iCol) = 0;
+//    virtual void delete_shapes(int iCol) = 0;
 
 
     //new methods for this class, normally no need to override
     //-------------------------------------------------------------------------
 
     ///Returns the number of columns in which the content has been split
-    virtual int get_num_columns();
+    int get_num_columns() override;
 
     ///save context information (clef, key) for iCol, and access it
     virtual void save_context(int iCol, int iInstr, int iStaff,
                               ColStaffObjsEntry* pClefEntry,
                               ColStaffObjsEntry* pKeyEntry);
-    virtual ColStaffObjsEntry* get_prolog_clef(int iCol, ShapeId idx);
-    virtual ColStaffObjsEntry* get_prolog_key(int iCol, ShapeId idx);
+    ColStaffObjsEntry* get_prolog_clef(int iCol, ShapeId idx) override;
+    ColStaffObjsEntry* get_prolog_key(int iCol, ShapeId idx) override;
 
     ///system break found while collecting content for iCol
     virtual void set_system_break(int iCol, bool value);
@@ -373,7 +373,7 @@ public:
     virtual void set_slice_width(int iCol, LUnits width);
 
     ///activate trace for iCol at level traceLevel
-    virtual void set_trace_level(int iCol, int nTraceLevel);
+    void set_trace_level(int iCol, int nTraceLevel) override;
 
 
 };

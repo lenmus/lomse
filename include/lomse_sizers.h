@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -106,7 +106,7 @@ public:
     inline void set_orientation(int orientation) { m_orientation = orientation; }
     inline bool is_vertical() { return m_orientation == k_vertical; }
 
-    void layout(LUnits width, LUnits height);
+    void layout(LUnits width, LUnits height) override;
 
 protected:
     void layout_vertical(LUnits width, LUnits height);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -76,78 +76,78 @@ public:
 
     // SVG path commands
     // http://www.w3.org/TR/SVG/paths.html#PathData
-    void begin_path();                                  //SVG: <path>
-    void end_path();                                    //SVG: </path>
-    void close_subpath();                               //SVG: Z, z
-    void move_to(double x, double y);                   //SVG: M
-    void move_to_rel(double x, double y);               //SVG: m
-    void line_to(double x,  double y);                  //SVG: L
-    void line_to_rel(double x,  double y);              //SVG: l
-    void hline_to(double x);                            //SVG: H
-    void hline_to_rel(double x);                        //SVG: h
-    void vline_to(double y);                            //SVG: V
-    void vline_to_rel(double y);                        //SVG: v
-    void cubic_bezier(double x1, double y1,             //SVG: Q
-                      double x, double y);
-    void cubic_bezier_rel(double x1, double y1,         //SVG: q
-                          double x, double y);
-    void cubic_bezier(double x, double y);              //SVG: T
-    void cubic_bezier_rel(double x, double y);          //SVG: t
-    void quadratic_bezier(double x1, double y1,         //SVG: C
+    void begin_path() override;                                  //SVG: <path>
+    void end_path() override;                                    //SVG: </path>
+    void close_subpath() override;                               //SVG: Z, z
+    void move_to(double x, double y) override;                   //SVG: M
+    void move_to_rel(double x, double y) override;               //SVG: m
+    void line_to(double x,  double y) override;                  //SVG: L
+    void line_to_rel(double x,  double y) override;              //SVG: l
+    void hline_to(double x) override;                            //SVG: H
+    void hline_to_rel(double x) override;                        //SVG: h
+    void vline_to(double y) override;                            //SVG: V
+    void vline_to_rel(double y) override;                        //SVG: v
+    void cubic_bezier(double x1, double y1,                      //SVG: Q
+                      double x, double y) override;
+    void cubic_bezier_rel(double x1, double y1,                  //SVG: q
+                          double x, double y) override;
+    void cubic_bezier(double x, double y) override;              //SVG: T
+    void cubic_bezier_rel(double x, double y) override;          //SVG: t
+    void quadratic_bezier(double x1, double y1,                  //SVG: C
                           double x2, double y2,
-                          double x, double y);
-    void quadratic_bezier_rel(double x1, double y1,     //SVG: c
+                          double x, double y) override;
+    void quadratic_bezier_rel(double x1, double y1,              //SVG: c
                               double x2, double y2,
-                              double x, double y);
-    void quadratic_bezier(double x2, double y2,         //SVG: S
-                          double x, double y);
-    void quadratic_bezier_rel(double x2, double y2,     //SVG: s
-                              double x, double y);
+                              double x, double y) override;
+    void quadratic_bezier(double x2, double y2,                  //SVG: S
+                          double x, double y) override;
+    void quadratic_bezier_rel(double x2, double y2,              //SVG: s
+                              double x, double y) override;
 
 
     // SVG basic shapes commands
-    void rect(UPoint pos, USize size, LUnits radius);               //SVG: <rect>                                      //SVG: <rect>
-    void circle(LUnits xCenter, LUnits yCenter, LUnits radius);     //SVG: <circle>
+    void rect(UPoint pos, USize size, LUnits radius) override;               //SVG: <rect>                                      //SVG: <rect>
+    void circle(LUnits xCenter, LUnits yCenter, LUnits radius) override;     //SVG: <circle>
     //virtual void ellipse() = 0;                                   //SVG: <ellipse>
     void line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
-              LUnits width, ELineEdge nEdge=k_edge_normal);         //SVG: <line>
+              LUnits width, ELineEdge nEdge=k_edge_normal) override;         //SVG: <line>
     //virtual void polyline() = 0;                                  //SVG: <polyline>
-    virtual void polygon(int n, UPoint points[]);                   //SVG: <polygon>
+    virtual void polygon(int n, UPoint points[]) override;                   //SVG: <polygon>
 
     // not the same but similar to SVG path command
-    void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true);
+    void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) override;
 
 
     // Attribute setting functions.
-    void fill(Color color);
-    void stroke(Color color);
-    void even_odd(bool flag);
-    void stroke_width(double w);
-    void fill_none();
-    void stroke_none();
-    void fill_opacity(unsigned op);
-    void stroke_opacity(unsigned op);
-    void line_join(line_join_e join);
-    void line_cap(line_cap_e cap);
-    void miter_limit(double ml);
-    void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2);
-    void gradient_color(Color c1, Color c2, double start, double stop);
-    void gradient_color(Color c1, double start, double stop);
+    void fill(Color color) override;
+    void stroke(Color color) override;
+    void even_odd(bool flag) override;
+    void stroke_width(double w) override;
+    void fill_none() override;
+    void stroke_none() override;
+    void fill_opacity(unsigned op) override;
+    void stroke_opacity(unsigned op) override;
+    void line_join(line_join_e join) override;
+    void line_cap(line_cap_e cap) override;
+    void miter_limit(double ml) override;
+    void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2) override;
+    void gradient_color(Color c1, Color c2, double start, double stop) override;
+    void gradient_color(Color c1, double start, double stop) override;
 
 
     // current font
     bool select_font(const std::string& language,
                      const std::string& fontFile,
                      const std::string& fontName, double height,
-                     bool fBold=false, bool fItalic=false);
+                     bool fBold=false, bool fItalic=false) override;
     bool select_raster_font(const std::string& language,
                             const std::string& fontFile,
                             const std::string& fontName, double height,
-                            bool fBold=false, bool fItalic=false);
+                            bool fBold=false, bool fItalic=false) override;
     bool select_vector_font(const std::string& language,
                             const std::string& fontFile,
                             const std::string& fontName, double height,
-                            bool fBold=false, bool fItalic=false);
+                            bool fBold=false, bool fItalic=false) override;
 
     //inline void FtSetFontSize(double rPoints) { return m_pMFM->SetFontSize(rPoints); }
     //inline void FtSetFontHeight(double rPoints) { return m_pMFM->SetFontHeight(rPoints); }
@@ -169,9 +169,9 @@ public:
 
     // text rederization
     void gsv_text(double x, double y, const char* str);
-    int draw_text(double x, double y, const std::string& str);
-    int draw_text(double x, double y, const wstring& str);
-    void draw_glyph(double x, double y, unsigned int ch);
+    int draw_text(double x, double y, const std::string& str) override;
+    int draw_text(double x, double y, const wstring& str) override;
+    void draw_glyph(double x, double y, unsigned int ch) override;
 
     //void FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos);
     //void FtSetTextPositionPixels(lmPixels vxPos, lmPixels vyPos);
@@ -182,21 +182,21 @@ public:
 
     //copy/blend a bitmap
     //-----------------------
-    void copy_bitmap(RenderingBuffer& bmap, UPoint pos);
+    void copy_bitmap(RenderingBuffer& bmap, UPoint pos) override;
     void copy_bitmap(RenderingBuffer& bmap,
                      Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
-                     UPoint dest);
+                     UPoint dest) override;
     void draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
                      Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
                      LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
                      EResamplingQuality resamplingMode,
-                     double alpha=1.0);
+                     double alpha=1.0) override;
 
 
     //SVG line with start/end markers
     //-----------------------
     void line_with_markers(UPoint start, UPoint end, LUnits width,
-                           ELineCap startCap, ELineCap endCap);
+                           ELineCap startCap, ELineCap endCap) override;
 
 
     // point conversion
@@ -213,9 +213,9 @@ public:
     void reset(RenderingBuffer& buf, Color bgcolor);
     void set_viewport(Pixels x, Pixels y);
     void set_transform(TransAffine& transform);
-    void set_shift(LUnits x, LUnits y);
-    void remove_shift();
-    void render();
+    void set_shift(LUnits x, LUnits y) override;
+    void remove_shift() override;
+    void render() override;
     void render(FontRasterizer& ras, FontScanline& sl, Color color);
 
 

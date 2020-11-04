@@ -62,7 +62,7 @@ public:
         : RelationBuilder<ImoTieDto, MxlAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
     virtual ~MxlTiesBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTieDto* pEndDto);
+    void add_relation_to_staffobjs(ImoTieDto* pEndDto) override;
 
 protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
@@ -80,7 +80,7 @@ public:
         : RelationBuilder<ImoBeamDto, MxlAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
     virtual ~MxlBeamsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo) override;
 };
 
 
@@ -93,7 +93,7 @@ public:
         : RelationBuilder<ImoSlurDto, MxlAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
     virtual ~MxlSlursBuilder() {}
 
-    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo) override;
 };
 
 
@@ -106,7 +106,7 @@ public:
         : RelationBuilder<ImoTupletDto, MxlAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
     virtual ~MxlTupletsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo) override;
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
     void add_to_open_tuplets(ImoNoteRest* pNR);
     void get_factors_from_nested_tuplets(int* pTop, int* pBottom);
@@ -130,7 +130,7 @@ public:
     }
     virtual ~MxlVoltasBuilder() {}
 
-    void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo) override;
 };
 
 
@@ -146,7 +146,7 @@ public:
     }
     virtual ~MxlWedgesBuilder() {}
 
-    void add_relation_to_staffobjs(ImoWedgeDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoWedgeDto* pEndInfo) override;
 };
 
 
@@ -162,7 +162,7 @@ public:
     }
     virtual ~MxlOctaveShiftBuilder() {}
 
-    void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo) override;
     void add_to_open_octave_shifts(ImoNote* pNote);
 };
 

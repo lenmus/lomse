@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -110,7 +110,7 @@ public:
         //m_pObj = static_cast<ImoXXXXX*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         //start_element("xxxxx", m_pObj);
         close_start_tag();
@@ -132,7 +132,7 @@ public:
         m_pObj = static_cast<ImoBarline*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("barline", m_pObj);
         close_start_tag();
@@ -164,7 +164,7 @@ public:
         m_pObj = static_cast<ImoClef*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         if (m_pExporter->current_open_tag() != "directions")
         {
@@ -207,7 +207,7 @@ public:
         m_pObj = static_cast<ImoContentObj*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         add_user_location();
         add_attachments();
@@ -297,7 +297,7 @@ public:
         m_pObj = static_cast<ImoStyle*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("defineStyle", m_pObj);
         close_start_tag();
@@ -595,7 +595,7 @@ public:
     {
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("TODO", m_pImo);
         close_start_tag();
@@ -620,7 +620,7 @@ public:
         m_pObj = pImo;
     }
 
-    string generate_source()
+    string generate_source() override
     {
         return m_source.str();
     }
@@ -639,7 +639,7 @@ public:
         m_pObj = static_cast<ImoInstrument*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("part", m_pObj);
         close_start_tag();
@@ -704,7 +704,7 @@ public:
         m_pObj = static_cast<ImoKeySignature*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("key", m_pObj);
         close_start_tag();
@@ -769,7 +769,7 @@ public:
         m_pObj = static_cast<ImoDocument*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         m_source << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         add_comment();
@@ -841,7 +841,7 @@ public:
         m_pObj = static_cast<ImoMusicData*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         add_staffobjs();
         empty_line();
@@ -990,7 +990,7 @@ public:
         m_pObj = static_cast<ImoNote*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         if (m_pExporter->current_open_tag() == "directions")
             end_element();
@@ -1083,7 +1083,7 @@ public:
         m_pObj = static_cast<ImoRest*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         if (m_pExporter->current_open_tag() == "directions")
             end_element();
@@ -1123,7 +1123,7 @@ public:
         m_pObj = static_cast<ImoScore*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("score", m_pObj);
         close_start_tag();
@@ -1273,7 +1273,7 @@ public:
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         add_visible();
         add_color();
@@ -1311,7 +1311,7 @@ public:
         m_pObj = static_cast<ImoDirection*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         start_element("spacer", m_pObj);
         close_start_tag();
@@ -1334,7 +1334,7 @@ public:
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         add_staff_num();
         source_for_base_scoreobj(m_pObj);
@@ -1373,7 +1373,7 @@ public:
         m_pObj = static_cast<ImoStyles*>(pImo);
     }
 
-    string generate_source()
+    string generate_source() override
     {
         if (there_is_any_non_default_style())
         {

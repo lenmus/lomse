@@ -760,7 +760,7 @@ public:
     /** Returns a pointer to the Observable object (an ImoContentObj) related to the
         event. It is either the mouse pointed object or the first ancestor of type
         ImoContentObj in the internal model hierarchy. */
-    Observable* get_source();
+    Observable* get_source() override;
 
     /** Returns the ID of the Document object (ImoObj) affected by the event. For
         instance, for a mouse click event this object will be the ID of the ImoObj

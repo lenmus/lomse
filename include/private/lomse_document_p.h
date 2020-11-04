@@ -596,9 +596,9 @@ public:
         this Observable object. For %Document class the EventNotifier is itself, so
         this method returns the <i>this</i> pointer.
     */
-    EventNotifier* get_event_notifier() { return this; }
+    EventNotifier* get_event_notifier() override { return this; }
 
-    Observable* get_observable_child(int childType, ImoId childId);
+    Observable* get_observable_child(int childType, ImoId childId) override;
 
 
     //internal model and ID management

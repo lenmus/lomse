@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -57,10 +57,10 @@ protected:
 public:
 	virtual ~GmoShapeBracketBrace();
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //VertexSource
-    void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; m_nContour = 0; }
+    void rewind(int UNUSED(pathId) = 0) override { m_nCurVertex = 0; m_nContour = 0; }
 
 
 protected:
@@ -82,10 +82,10 @@ public:
 	~GmoShapeBrace();
 
     //VertexSource
-    unsigned vertex(double* px, double* py);
+    unsigned vertex(double* px, double* py) override;
 
 protected:
-    void set_affine_transform();
+    void set_affine_transform() override;
 
 };
 
@@ -106,10 +106,10 @@ public:
     ~GmoShapeBracket();
 
     //VertexSource
-    unsigned vertex(double* px, double* py);
+    unsigned vertex(double* px, double* py) override;
 
 protected:
-    void set_affine_transform();
+    void set_affine_transform() override;
 
 };
 
@@ -130,7 +130,7 @@ public:
     ~GmoShapeSquaredBracket();
 
 	//implementation of pure virtual methods in base class
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
 protected:
 

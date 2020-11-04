@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -126,20 +126,20 @@ public:
     inline void set_style(ImoStyle* pStyle) { m_style = pStyle; }
 
     //mandatory overrides from Observable
-    EventNotifier* get_event_notifier() { return m_pDoc->get_event_notifier(); }
+    EventNotifier* get_event_notifier() override { return m_pDoc->get_event_notifier(); }
 
     //overrides for Observable children
-    void add_event_handler(int eventType, EventHandler* pHandler)
+    void add_event_handler(int eventType, EventHandler* pHandler) override
     {
         m_pDoc->add_event_handler(Observable::k_control, m_id, eventType, pHandler);
     }
     void add_event_handler(int eventType, void* pThis,
-                           void (*pt2Func)(void* pObj, SpEventInfo event) )
+                           void (*pt2Func)(void* pObj, SpEventInfo event) ) override
     {
         m_pDoc->add_event_handler(Observable::k_control, m_id, eventType,
                                   pThis, pt2Func);
     }
-    void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) )
+    void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) ) override
     {
         m_pDoc->add_event_handler(Observable::k_control, m_id, eventType, pt2Func);
     }

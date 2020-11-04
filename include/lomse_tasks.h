@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -137,8 +137,8 @@ public:
     }
     ~TaskDragView() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
 
 protected:
     //actions
@@ -156,7 +156,7 @@ public:
     TaskNull(Interactor* pIntor) : Task(TaskFactory::k_task_null, pIntor) {}
     ~TaskNull() {}
 
-    void process_event(Event UNUSED(event)) {}
+    void process_event(Event UNUSED(event)) override {}
 
 };
 
@@ -177,8 +177,8 @@ public:
     TaskOnlyClicks(Interactor* pIntor);
     ~TaskOnlyClicks() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
 
 protected:
     //actions
@@ -203,8 +203,8 @@ public:
     TaskSelection(Interactor* pIntor);
     ~TaskSelection() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
 
 protected:
     //actions
@@ -268,8 +268,8 @@ public:
     TaskSelectionRectangle(Interactor* pIntor);
     ~TaskSelectionRectangle() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
     void set_first_point(Pixels xStart, Pixels yStart);
 
 protected:
@@ -295,8 +295,8 @@ public:
     TaskMoveObject(Interactor* pIntor);
     ~TaskMoveObject() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
     void set_first_point(Pixels xStart, Pixels yStart);
 
 protected:
@@ -323,8 +323,8 @@ public:
     TaskDataEntry(Interactor* pIntor);
     ~TaskDataEntry() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
 
 protected:
     //actions
@@ -350,8 +350,8 @@ public:
     TaskMoveHandler(Interactor* pIntor);
     ~TaskMoveHandler() {}
 
-    void init_task();
-    void process_event(Event event);
+    void init_task() override;
+    void process_event(Event event) override;
     void set_first_point(Pixels xStart, Pixels yStart);
 
 protected:

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -309,7 +309,7 @@ public:
     virtual ~LdpElement();
 
     //overrides to Visitable class members
-	virtual void accept_visitor(BaseVisitor& v);
+	virtual void accept_visitor(BaseVisitor& v) override;
 
     //getters and setters
 	inline void set_value(const std::string& value) { m_value = value; }
@@ -364,7 +364,7 @@ class LdpObject : public LdpElement
 			{ LdpObject<type>* o = LOMSE_NEW LdpObject<type>; assert(o!=0); return o; }
 
         //! implementation of Visitable interface
-        virtual void accept_visitor(BaseVisitor& v) {
+        void accept_visitor(BaseVisitor& v) override {
 			if (Visitor<LdpObject<type> >* p = dynamic_cast<Visitor<LdpObject<type> >*>(&v))
             {
 				p->start_visit(this);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,7 +63,7 @@ public:
         : RelationBuilder<ImoTieDto, MnxAnalyser>(reporter, pAnalyser, "tie", "Tie") {}
     virtual ~MnxTiesBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTieDto* pEndDto);
+    void add_relation_to_staffobjs(ImoTieDto* pEndDto) override;
 
 protected:
     bool notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote);
@@ -81,7 +81,7 @@ public:
         : RelationBuilder<ImoBeamDto, MnxAnalyser>(reporter, pAnalyser, "beam", "Beam") {}
     virtual ~MnxBeamsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoBeamDto* pEndInfo) override;
 };
 
 
@@ -122,7 +122,7 @@ public:
         : RelationBuilder<ImoSlurDto, MnxAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
     virtual ~MnxSlursBuilder() {}
 
-    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoSlurDto* pEndInfo) override;
 };
 
 
@@ -135,7 +135,7 @@ public:
         : RelationBuilder<ImoTupletDto, MnxAnalyser>(reporter, pAnalyser, "tuplet", "Tuplet") {}
     virtual ~MnxTupletsBuilder() {}
 
-    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoTupletDto* pEndInfo) override;
     inline bool is_tuplet_open() { return m_pendingItems.size() > 0; }
     void add_to_open_tuplets(ImoNoteRest* pNR);
     void get_factors_from_nested_tuplets(int* pTop, int* pBottom);
@@ -154,7 +154,7 @@ public:
     {}
     virtual ~MnxVoltasBuilder() {}
 
-    void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo);
+    void add_relation_to_staffobjs(ImoVoltaBracketDto* pEndInfo) override;
 };
 
 

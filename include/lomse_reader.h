@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,12 +82,12 @@ public:
     LdpFileReader(const std::string& locator);
     virtual ~LdpFileReader();
 
-    virtual char get_next_char();
-    virtual void repeat_last_char();
-    virtual bool is_ready();
-    virtual bool end_of_data();
-    virtual int get_line_number() { return m_numLine; }
-    virtual string get_locator() { return m_locator; }
+    char get_next_char() override;
+    void repeat_last_char() override;
+    bool is_ready() override;
+    bool end_of_data() override;
+    int get_line_number() override { return m_numLine; }
+    string get_locator() override { return m_locator; }
 
 };
 
@@ -100,12 +100,12 @@ public:
     LdpTextReader(const std::string& sourceText);
     virtual ~LdpTextReader() {}
 
-    virtual char get_next_char();
-    virtual void repeat_last_char();
-    virtual bool is_ready();
-    virtual bool end_of_data();
-    virtual int get_line_number() { return 0; }
-    virtual string get_locator() { return "string:"; }
+    char get_next_char() override;
+    void repeat_last_char() override;
+    bool is_ready() override;
+    bool end_of_data() override;
+    int get_line_number() override { return 0; }
+    string get_locator() override { return "string:"; }
 
 private:
     stringstream   m_stream;

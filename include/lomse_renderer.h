@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -231,7 +231,7 @@ public:
     ~RendererTemplate() {}
 
     //-----------------------------------------------------------------------------------
-    void initialize(RenderingBuffer& buf, Color bgcolor)
+    void initialize(RenderingBuffer& buf, Color bgcolor) override
     {
         m_rbuf.attach(buf.buf(), buf.width(), buf.height(), buf.stride());
         m_renBase.reset_clipping(true);
@@ -243,7 +243,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    void render()
+    void render() override
     {
         agg::rasterizer_scanline_aa<> ras;
         agg::scanline_p8 sl;
@@ -273,7 +273,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    void render_gsv_text(double x, double y, const char* str)
+    void render_gsv_text(double x, double y, const char* str) override
     {
         agg::gsv_text t;
         t.size(10.0);
@@ -295,7 +295,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    void render(FontRasterizer& ras, FontScanline& sl, Color color)
+    void render(FontRasterizer& ras, FontScanline& sl, Color color) override
     {
         m_renSolid.color( to_rgba(color) );
         agg::render_scanlines(ras, sl, m_renSolid);
@@ -303,24 +303,24 @@ public:
 
     //-----------------------------------------------------------------------------------
     // Expand all polygons
-    void expand(double value) { m_curved_trans_contour.width(value); }
+    void expand(double value) override { m_curved_trans_contour.width(value); }
 
     //-----------------------------------------------------------------------------------
-    void get_bounding_rect(double* x1, double* y1, double* x2, double* y2)
+    void get_bounding_rect(double* x1, double* y1, double* x2, double* y2) override
     {
         agg::conv_transform<agg::path_storage> trans(m_path, m_transform);
         agg::bounding_rect(trans, *this, 0, m_attr_storage.size(), x1, y1, x2, y2);
     }
 
     //-----------------------------------------------------------------------------------
-    void copy_from(RenderingBuffer& bmap, const AggRectInt* srcRect, int xDest, int yDest)
+    void copy_from(RenderingBuffer& bmap, const AggRectInt* srcRect, int xDest, int yDest) override
     {
         m_renBase.copy_from(bmap, srcRect, xDest, yDest);
     }
 
     //-----------------------------------------------------------------------------------
     void blend_from(RenderingBuffer& bmap, const AggRectInt* srcRect, int xShift,
-                    int yShift, unsigned alpha)
+                    int yShift, unsigned alpha) override
     {
         typedef agg::pixfmt_rgba32   ImgPixFmt;
         ImgPixFmt img_pixf(bmap);
@@ -333,7 +333,7 @@ public:
                        double srcX1, double srcY1, double srcX2, double srcY2,
                        double dstX1, double dstY1, double dstX2, double dstY2,
                        EResamplingQuality resamplingMode,
-                       double alpha)
+                       double alpha) override
     {
         //set affine transformation (rotation, scale, translation, skew)
         set_transformation();

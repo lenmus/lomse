@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -86,9 +86,9 @@ public:
     virtual ~TableLayouter();
 
     //mandatory overrides
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
-    void prepare_to_start_layout();
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
+    void prepare_to_start_layout() override;
 
 protected:
     void create_sections_layouters();
@@ -127,9 +127,9 @@ public:
     virtual ~TableSectionLayouter();
 
     //mandatory overrides
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
-    void prepare_to_start_layout();
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
+    void prepare_to_start_layout() override;
 
     //specific
     inline void set_origin(UPoint pos) { m_pageCursor = pos; }
@@ -167,8 +167,8 @@ public:
     virtual ~TableRowLayouter();
 
     //implementation of Layouter virtual methods
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
 
 protected:
     LUnits layout_cell(TableCellLayouter* pCellLayouter, GmoBox* pParentBox, UPoint pos);

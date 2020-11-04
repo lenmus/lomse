@@ -60,7 +60,7 @@ public:
 
     void set_layout_data(std::list<LUnits>& segments, UPoint origin, USize size,
                          bool fCrossStaff, bool fChord, int beamPos, int staff);
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //provide geometry reference info, for tuplets and other related shapes
     //Reference points are:

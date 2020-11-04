@@ -365,8 +365,8 @@ public:
     GmoShape* find_related_shape(int type);
 
     //other flags
-    void set_hover(bool value) { value ? m_flags |= k_hover : m_flags &= ~k_hover; }
-    void set_in_link(bool value) { value ? m_flags |= k_in_link : m_flags &= ~k_in_link; }
+    void set_hover(bool value) override { value ? m_flags |= k_hover : m_flags &= ~k_hover; }
+    void set_in_link(bool value) override { value ? m_flags |= k_in_link : m_flags &= ~k_in_link; }
     void set_flag_value(bool value, unsigned int flag) {
         value ? m_flags |= flag : m_flags &= ~flag;
     }
@@ -386,7 +386,7 @@ public:
     static ShapeId generate_main_or_implicity_shape_id(int iStaff) { return iStaff; }
 
     //test and debug
-    void dump(ostream& outStream, int level);
+    void dump(ostream& outStream, int level) override;
     void set_color(Color color) { m_color = color; }
 
 protected:
@@ -431,8 +431,8 @@ public:
     GmoShape* get_shape(int i);  //i = 0..n-1
 
     //flags
-    void set_hover(bool value) { set_flag_value(value, k_hover); }
-    void set_in_link(bool value) { set_flag_value(value, k_in_link); }
+    void set_hover(bool value) override { set_flag_value(value, k_hover); }
+    void set_in_link(bool value) override { set_flag_value(value, k_in_link); }
     void set_has_edit_focus(bool value) { set_flag_value(value, k_has_edit_focus); }
     void set_flag_value(bool value, unsigned int flag);
 
@@ -514,7 +514,7 @@ public:
     int get_page_number(GmoBoxDocPage* pBoxPage);
 
     //overrides
-    GraphicModel* get_graphic_model() { return m_pGModel; }
+    GraphicModel* get_graphic_model() override { return m_pGModel; }
 
 };
 
@@ -534,7 +534,7 @@ public:
     inline int get_number() { return m_numPage; }
 
     //renderization
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //shapes
     void add_to_tables(GmoShape* pShape);
@@ -652,14 +652,14 @@ public:
     void notify_event(SpEventInfo pEvent);
 
     //GmoBox override
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
     //accessors
     inline Control* get_creator_control() { return m_pControl; }
 
 protected:
     //overrides
-    ImoStyle* get_style() { return m_pStyle; }
+    ImoStyle* get_style() override { return m_pStyle; }
 };
 
 //---------------------------------------------------------------------------------------

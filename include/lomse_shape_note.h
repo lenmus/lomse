@@ -259,7 +259,7 @@ public:     //TO_FIX: Constructor used in tests
                  LibraryScope& libraryScope);
 
 public:
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 };
 
 //---------------------------------------------------------------------------------------

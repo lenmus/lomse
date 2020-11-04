@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -780,7 +780,7 @@ public:
     NullAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         string name = m_pLdpFactory->get_name( m_pAnalysedNode->get_type() );
         m_reporter << "Missing analyser for element '" << name << "'. Node ignored." << endl;
@@ -801,7 +801,7 @@ public:
                        ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoLineStyle* pLine = static_cast<ImoLineStyle*>(
@@ -862,7 +862,7 @@ public:
                          LibraryScope& libraryScope, ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoArticulationSymbol* pImo = static_cast<ImoArticulationSymbol*>(
@@ -929,7 +929,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
@@ -1032,7 +1032,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBeamDto* pInfo = static_cast<ImoBeamDto*>(
@@ -1104,7 +1104,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBezierInfo* pBezier = static_cast<ImoBezierInfo*>(
@@ -1166,7 +1166,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoBorderDto* border = LOMSE_NEW ImoBorderDto();
 
@@ -1215,7 +1215,7 @@ public:
                          LibraryScope& libraryScope, ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoArticulationSymbol* pImo = static_cast<ImoArticulationSymbol*>(
@@ -1298,7 +1298,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoChord* pChord = static_cast<ImoChord*>(
@@ -1357,7 +1357,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>(
@@ -1429,7 +1429,7 @@ public:
     ColorAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
 
         if (!get_optional(k_label) || !set_color())
@@ -1465,7 +1465,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoContent* pContent = static_cast<ImoContent*>(
@@ -1509,7 +1509,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSystemBreak* pCtrl = static_cast<ImoSystemBreak*>(
@@ -1533,7 +1533,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoCursorInfo* pCursor = static_cast<ImoCursorInfo*>(
@@ -1585,7 +1585,7 @@ public:
                         ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoStyle* pStyle;
         string name;
@@ -1869,7 +1869,7 @@ public:
                       LibraryScope& libraryScope, ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDirection* pDir = static_cast<ImoDirection*>(
@@ -1927,7 +1927,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDynamic* pDyn = static_cast<ImoDynamic*>(
@@ -1970,7 +1970,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // <string>
         if (!get_mandatory(k_string))
@@ -2055,7 +2055,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoFermata* pImo = static_cast<ImoFermata*>(
@@ -2207,7 +2207,7 @@ public:
                         ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
 
         // <figuredBassSymbols> (string)
@@ -2327,7 +2327,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
 
@@ -2405,7 +2405,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         if (m_pAnalyser->get_score_version() < 200)
             do_analysis_v1();
@@ -2603,7 +2603,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // "line"
         if (get_optional(k_label))
@@ -2662,7 +2662,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 
@@ -2775,7 +2775,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // <level> (num)
         if (get_mandatory(k_number))
@@ -2811,7 +2811,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoImage* pImg = static_cast<ImoImage*>(
@@ -2854,7 +2854,7 @@ public:
                        ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSoundInfo* pInfo = static_cast<ImoSoundInfo*>(
@@ -2920,7 +2920,7 @@ public:
                        ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         m_pAnalyser->clear_pending_relations();
         m_pAnalyser->reset_defaults_for_instrument();
@@ -3054,7 +3054,7 @@ public:
                          ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
@@ -3098,7 +3098,7 @@ public:
     LanguageAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
     }
 };
@@ -3113,7 +3113,7 @@ public:
     LenmusdocAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoDocument* pImoDoc = nullptr;
 
@@ -3209,7 +3209,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
@@ -3263,7 +3263,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoLink* pLink = static_cast<ImoLink*>(
@@ -3312,7 +3312,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ELdpElement type = m_pAnalysedNode->get_type();
 
@@ -3343,7 +3343,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoListItem* pListItem = static_cast<ImoListItem*>(
@@ -3374,7 +3374,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
@@ -3514,7 +3514,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoMetronomeMark* pMtr = static_cast<ImoMetronomeMark*>(
@@ -3606,7 +3606,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
@@ -3706,7 +3706,7 @@ public:
     {
     }
 
-    void do_analysis()
+    void do_analysis() override
     {
         bool fIsRest = m_pAnalysedNode->is_type(k_rest);
         bool fInChord = !fIsRest && m_pAnalysedNode->is_type(k_na);
@@ -4209,7 +4209,7 @@ public:
                 ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // <name> (label)
         string name;
@@ -4378,7 +4378,7 @@ public:
                        ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoPageInfo* pInfo = static_cast<ImoPageInfo*>(
@@ -4435,7 +4435,7 @@ public:
                         ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         //ImoPageInfo dto;
@@ -4480,7 +4480,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         //ImoPageInfo dto;
@@ -4511,7 +4511,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParagraph* pPara = static_cast<ImoParagraph*>(
@@ -4538,7 +4538,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         string name;
         string value = "";
@@ -4584,7 +4584,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
 
@@ -4638,7 +4638,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoPointDto point;
@@ -4667,7 +4667,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // [<cursor>]
         analyse_optional(k_cursor, m_pAnchor);
@@ -4691,7 +4691,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScore* pScore = static_cast<ImoScore*>(
@@ -4825,7 +4825,7 @@ public:
                         ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
@@ -4879,7 +4879,7 @@ public:
                  ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSizeDto size;
@@ -4914,7 +4914,7 @@ public:
                 ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
         pInfo->set_id( get_node_id() );
@@ -4972,7 +4972,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDirection* pSpacer = static_cast<ImoDirection*>(
@@ -5024,7 +5024,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
@@ -5124,7 +5124,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoStyles* pStyles = static_cast<ImoStyles*>(
@@ -5150,7 +5150,7 @@ public:
                          ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSystemInfo* pInfo = static_cast<ImoSystemInfo*>(
@@ -5195,7 +5195,7 @@ public:
                           ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoSystemInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_system_info())
@@ -5231,7 +5231,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTable* pTable= static_cast<ImoTable*>(
@@ -5266,7 +5266,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableBody* pBody = static_cast<ImoTableBody*>(
@@ -5296,7 +5296,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableCell* pImo = static_cast<ImoTableCell*>(
@@ -5338,7 +5338,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // <style>
         if (get_optional(k_style) && m_pAnchor->is_table())
@@ -5364,7 +5364,7 @@ public:
                       ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableHead* pHead = static_cast<ImoTableHead*>(
@@ -5391,7 +5391,7 @@ public:
                      ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableRow* pRow = static_cast<ImoTableRow*>(
@@ -5443,7 +5443,7 @@ public:
                     ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTextBlockInfo box;
@@ -5535,7 +5535,7 @@ public:
     {
     }
 
-    void do_analysis()
+    void do_analysis() override
     {
         string styleName = "Default style";
 
@@ -5611,7 +5611,7 @@ public:
     {
     }
 
-    void do_analysis()
+    void do_analysis() override
     {
         // <string>
         if (get_mandatory(k_string))
@@ -5675,7 +5675,7 @@ public:
                 ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         //AWARE: ImoTieDto will be discarded. So no ID will be assigned to avoid
         //problems with undo/redo
@@ -5731,7 +5731,7 @@ public:
                           ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTimeModificationDto* pTime = static_cast<ImoTimeModificationDto*>(
@@ -5787,7 +5787,7 @@ public:
                           ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
@@ -5882,7 +5882,7 @@ public:
                   ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         // [<h-align>]
         int nAlignment = k_halign_left;
@@ -5954,7 +5954,7 @@ public:
                    ImoObj* pAnchor)
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    void do_analysis()
+    void do_analysis() override
     {
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_id( get_node_id() );

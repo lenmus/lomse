@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -154,7 +154,7 @@ public:
     }
 
     //operations
-    string get_locator_for_image(const string& imagename);
+    string get_locator_for_image(const string& imagename) override;
 
 };
 
@@ -199,11 +199,11 @@ public:
 	LocalInputStream(const std::string& filelocator);
 	virtual ~LocalInputStream() {}
 
-    char get_char();
-    void unget();
-    bool is_open();
-    bool eof();
-    long read(unsigned char* pDestBuffer, long nBytesToRead);
+    char get_char() override;
+    void unget() override;
+    bool is_open() override;
+    bool eof() override;
+    long read(unsigned char* pDestBuffer, long nBytesToRead) override;
 };
 
 

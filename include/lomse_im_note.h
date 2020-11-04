@@ -134,9 +134,9 @@ public:
     ImoTuplet* get_first_tuplet();
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    void set_int_attribute(TIntAttribute attrib, int value) override;
+    int get_int_attribute(TIntAttribute attrib) override;
+    list<TIntAttribute> get_supported_attributes() override;
 
 protected:
 
@@ -162,9 +162,9 @@ protected:
     inline void mark_as_full_measure(bool value) { m_fFullMeasureRest = value; }
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    void set_int_attribute(TIntAttribute attrib, int value) override;
+    int get_int_attribute(TIntAttribute attrib) override;
+    list<TIntAttribute> get_supported_attributes() override;
 
 public:
     virtual ~ImoRest() {}
@@ -204,9 +204,9 @@ protected:
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
     //IM attributes interface
-    virtual void set_int_attribute(TIntAttribute attrib, int value);
-    virtual int get_int_attribute(TIntAttribute attrib);
-    virtual list<TIntAttribute> get_supported_attributes();
+    void set_int_attribute(TIntAttribute attrib, int value) override;
+    int get_int_attribute(TIntAttribute attrib) override;
+    list<TIntAttribute> get_supported_attributes() override;
 
 public:
     virtual ~ImoNote();

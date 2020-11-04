@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -79,9 +79,9 @@ public:
     virtual ~InlinesContainerLayouter();
 
     //mandatory overrides
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
-    void prepare_to_start_layout();
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
+    void prepare_to_start_layout() override;
 
     //other
     inline LineReferences& get_line_refs() { return m_lineRefs; }

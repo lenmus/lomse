@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -128,7 +128,7 @@ public:
         //m_pObj = static_cast<ImoXXXXX*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         //start_element("xxxxx", m_pObj->get_id());
         end_element();
@@ -149,7 +149,7 @@ public:
         m_pObj = static_cast<ImoArticulationSymbol*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_articulation();
         if (m_pObj->is_accent() || m_pObj->is_stress())
@@ -326,7 +326,7 @@ public:
         m_pObj = static_cast<ImoBarline*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("barline", m_pObj->get_id());
         add_barline_type_and_middle();
@@ -375,7 +375,7 @@ public:
     {
     }
 
-    string generate_source(ImoObj* pParent=nullptr)
+    string generate_source(ImoObj* pParent=nullptr) override
     {
         m_pNR = static_cast<ImoNoteRest*>( pParent );
 
@@ -461,7 +461,7 @@ public:
         m_pObj = static_cast<ImoClef*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("clef", m_pObj->get_id());
         add_type();
@@ -511,7 +511,7 @@ public:
         m_pObj = static_cast<ImoContentObj*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         add_user_location();
         add_attachments();
@@ -587,7 +587,7 @@ public:
         m_pObj = static_cast<ImoStyle*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("defineStyle", k_no_imoid, k_in_new_line);
         add_name();
@@ -865,7 +865,7 @@ public:
         m_pObj = static_cast<ImoDirection*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         if (m_pObj->has_attachments() || m_pObj->get_num_relations() > 0)
             start_element("dir", m_pObj->get_id());
@@ -918,7 +918,7 @@ public:
         m_pObj = static_cast<ImoDynamicsMark*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("dyn", m_pObj->get_id());
         add_dynamics_string();
@@ -951,7 +951,7 @@ public:
     {
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("TODO: ", m_pImo->get_id());
         m_source << " No LdpGenerator for Imo. Imo name=" << m_pImo->get_name()
@@ -974,7 +974,7 @@ public:
         m_pObj = static_cast<ImoFermata*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("fermata", m_pObj->get_id());
         add_symbol();
@@ -1029,7 +1029,7 @@ public:
         m_pObj = pImo;
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         return m_source.str();
     }
@@ -1049,7 +1049,7 @@ public:
 
     //TODO: This exporter must generate 2.0 code. Therefore, it is invalid to generate
     // goBack. Instead must convert it to 2.0
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         empty_line();
         bool fFwd = m_pObj->is_forward();
@@ -1091,7 +1091,7 @@ public:
         m_pObj = static_cast<ImoInstrument*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("instrument", m_pObj->get_id());
         add_part_id();
@@ -1270,7 +1270,7 @@ public:
         m_pObj = static_cast<ImoKeySignature*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("key", m_pObj->get_id());
 
@@ -1304,7 +1304,7 @@ public:
         m_pObj = static_cast<ImoDocument*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("lenmusdoc", m_pObj->get_id());
         m_source << " ";
@@ -1368,7 +1368,7 @@ public:
         m_pObj = static_cast<ImoLyric*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("lyric", m_pObj->get_id());
         add_lyric_number();
@@ -1429,7 +1429,7 @@ public:
         m_pScore = pExporter->get_current_score();
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("musicData", m_pObj->get_id());
         space_needed();
@@ -1773,7 +1773,7 @@ public:
         m_pImo = static_cast<ImoMetronomeMark*>( pImo );
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("metronome", m_pImo->get_id());
         add_marks();
@@ -1839,7 +1839,7 @@ public:
         m_pObj = static_cast<ImoNote*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         if (m_pObj->is_start_of_chord())
         {
@@ -2001,7 +2001,7 @@ public:
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         add_user_location();
         add_visible( m_pObj->is_visible() );
@@ -2041,7 +2041,7 @@ public:
         m_pObj = static_cast<ImoRest*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         if (is_rest())
             generate_rest();
@@ -2101,7 +2101,7 @@ public:
         m_pObj = static_cast<ImoScoreLine*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("line", m_pObj->get_id());
         add_start_point();
@@ -2215,7 +2215,7 @@ public:
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         add_visible( m_pObj->is_visible() );
         add_color_if_not_black( m_pObj->get_color() );
@@ -2237,7 +2237,7 @@ public:
         m_pObj = static_cast<ImoScoreText*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("text", m_pObj->get_id());
         add_text();
@@ -2273,7 +2273,7 @@ public:
     {
     }
 
-    string generate_source(ImoObj* pParent =nullptr)
+    string generate_source(ImoObj* pParent =nullptr) override
     {
         m_pNote = static_cast<ImoNote*>( pParent );
 
@@ -2355,7 +2355,7 @@ public:
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         add_staff_num();
         add_relobjs();
@@ -2423,7 +2423,7 @@ public:
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         add_staff_num();
         source_for_print_options(m_pObj);
@@ -2460,7 +2460,7 @@ public:
         m_pImo = static_cast<ImoSystemBreak*>( pImo );
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("newSystem", m_pImo->get_id());
         end_element(k_in_same_line);
@@ -2483,7 +2483,7 @@ public:
     {
     }
 
-    string generate_source(ImoObj* pParent=nullptr)
+    string generate_source(ImoObj* pParent=nullptr) override
     {
         m_pNote = static_cast<ImoNote*>( pParent );
 
@@ -2565,7 +2565,7 @@ public:
         m_pObj = static_cast<ImoTimeSignature*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("time", m_pObj->get_id());
         add_content();
@@ -2607,7 +2607,7 @@ public:
         m_pObj = static_cast<ImoScoreTitle*>(pImo);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         start_element("title", m_pObj->get_id());
         add_text();
@@ -2642,7 +2642,7 @@ public:
     {
     }
 
-    string generate_source(ImoObj* pParent=nullptr)
+    string generate_source(ImoObj* pParent=nullptr) override
     {
         m_pNR = static_cast<ImoNoteRest*>( pParent );
 
@@ -2754,7 +2754,7 @@ public:
         pExporter->set_current_score(m_pObj);
     }
 
-    string generate_source(ImoObj* UNUSED(pParent) =nullptr)
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
     {
         //TODO: commented elements
 

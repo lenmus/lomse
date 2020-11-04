@@ -1594,7 +1594,7 @@ public:
         {
         }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         error_msg("Missing analyser for element '" + m_tag + "'. Node ignored.");
         return nullptr;
@@ -1610,7 +1610,7 @@ public:
                                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -1640,7 +1640,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
@@ -1856,7 +1856,7 @@ public:
         {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //In MusicXML. Clefs, time signatures and key signatures are
         //treated as attributes of a measure, not as objects and, therefore, ordering
@@ -2002,7 +2002,7 @@ public:
     }
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
 
@@ -2268,7 +2268,7 @@ public:
                        LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -2304,7 +2304,7 @@ public:
     }
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
@@ -2468,7 +2468,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -2492,7 +2492,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
@@ -2528,7 +2528,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -2544,7 +2544,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -2568,7 +2568,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDirection* pDirection = static_cast<ImoDirection*>(
@@ -2652,9 +2652,9 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis() { return nullptr; }
+    ImoObj* do_analysis() override { return nullptr; }
 
-    bool do_analysis_bool()
+    bool do_analysis_bool() override
     {
         bool fSpanner = false;
         while (more_children_to_analyse())
@@ -2738,7 +2738,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoStaffObj* pSO = nullptr;
         if (m_pAnchor && (m_pAnchor->is_note_rest() || m_pAnchor->is_direction()))
@@ -2835,7 +2835,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoBarline* pBarline = nullptr;
         if (m_pAnchor && m_pAnchor->is_barline())
@@ -2987,7 +2987,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -3020,7 +3020,7 @@ public:
                     ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
@@ -3106,7 +3106,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         bool fFwd = (m_analysedNode.name() == "forward");
         ImoStaffObj* pSO = nullptr;
@@ -3167,7 +3167,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -3183,7 +3183,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -3234,7 +3234,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
@@ -3396,7 +3396,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
@@ -3512,7 +3512,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoMusicData* pMD = nullptr;
         if (m_pAnchor && m_pAnchor->is_music_data())
@@ -3640,7 +3640,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         if (m_pAnchor == nullptr || !m_pAnchor->is_direction())
         {
@@ -3746,7 +3746,7 @@ public:
     }
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //anchor parent is ImoSounds when analysing <score-instrument> or
         //ImoSoundChange when analysing <sound>
@@ -3891,7 +3891,7 @@ public:
                               LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //anchor parent is ImoSounds when analysing <score-instrument> or
         //ImoSoundChange when analysing <sound>
@@ -4016,7 +4016,7 @@ public:
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
@@ -4081,7 +4081,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
             //attribs
 
@@ -4635,7 +4635,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //attrb: id
         string id = get_optional_string_attribute("id", "");
@@ -4742,7 +4742,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
@@ -4871,7 +4871,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
@@ -5040,7 +5040,7 @@ public:
                          LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //attrb: number
         int number = get_attribute_as_integer("number", -1);
@@ -5211,7 +5211,7 @@ public:
     PartListMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         // part-group*
         while (analyse_optional("part-group"));
@@ -5256,7 +5256,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //attrb: print-object
         string print = get_optional_string_attribute("print-object", "yes");
@@ -5303,7 +5303,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -5319,7 +5319,7 @@ public:
                           LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -5338,7 +5338,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //anchor object is ImoNote
         ImoNote* pNote = nullptr;
@@ -5453,7 +5453,7 @@ public:
                             LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -5481,7 +5481,7 @@ public:
                      ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //TODO: Finish this
 
@@ -5571,7 +5571,7 @@ public:
                          LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -5605,7 +5605,7 @@ public:
                                LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
         if (!pInstr)
@@ -5682,7 +5682,7 @@ public:
     ScorePartMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         //attrb: id
         string id = get_mandatory_string_attribute("id", "", "score-part");
@@ -5772,7 +5772,7 @@ public:
     ScorePartwiseMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDocument* pImoDoc = nullptr;
 
@@ -5937,7 +5937,7 @@ public:
                           LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -5961,7 +5961,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
@@ -5997,7 +5997,7 @@ public:
                            LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
 		//TODO
         return nullptr;
@@ -6021,7 +6021,7 @@ public:
                         LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
@@ -6152,7 +6152,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
@@ -6301,7 +6301,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSoundChange* pSC = static_cast<ImoSoundChange*>(
@@ -6493,7 +6493,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoLyricsTextInfo* pParent = nullptr;
         if (m_pAnchor && m_pAnchor->is_lyrics_text_info())
@@ -6564,7 +6564,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNote* pNote = nullptr;
         if (m_pAnchor && m_pAnchor->is_note())
@@ -6698,7 +6698,7 @@ public:
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
@@ -6766,7 +6766,7 @@ public:
         {
         }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         if (m_pAnchor && m_pAnchor->is_note_rest())
             m_pNR = static_cast<ImoNote*>(m_pAnchor);
@@ -6864,7 +6864,7 @@ public:
         {
         }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoNoteRest* pNR = nullptr;
         if (m_pAnchor && m_pAnchor->is_note_rest())
@@ -7063,7 +7063,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         if (m_pAnchor && m_pAnchor->is_tuplet_dto())
             m_pInfo = static_cast<ImoTupletDto*>(m_pAnchor);
@@ -7111,7 +7111,7 @@ public:
                                  LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoSoundInfo* pInfo = dynamic_cast<ImoSoundInfo*>(m_pAnchor);
         //ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
@@ -7165,7 +7165,7 @@ public:
     {
     }
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())
@@ -7294,7 +7294,7 @@ public:
                      LibraryScope& libraryScope, ImoObj* pAnchor)
         : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
-    ImoObj* do_analysis()
+    ImoObj* do_analysis() override
     {
         ImoDirection* pDirection = nullptr;
         if (m_pAnchor && m_pAnchor->is_direction())

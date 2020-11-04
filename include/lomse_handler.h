@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -79,12 +79,12 @@ public:
     virtual ~HandlerCircle();
 
     //mandatory overrides from VisualEffect
-    void on_draw(ScreenDrawer* pDrawer);
-    URect get_bounds();
+    void on_draw(ScreenDrawer* pDrawer) override;
+    URect get_bounds() override;
 
     //mandatory overrides from Handler
-    bool hit_test(LUnits x, LUnits y);
-    void move_to(UPoint pos);
+    bool hit_test(LUnits x, LUnits y) override;
+    void move_to(UPoint pos) override;
 
 
 protected:

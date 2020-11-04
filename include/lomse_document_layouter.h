@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,14 +70,14 @@ public:
     void layout_empty_document();
 
     //implementation of virtual methods in Layouter base class
-    void layout_in_box() {}
+    void layout_in_box() override {}
     void create_main_box(GmoBox* UNUSED(pParentBox), UPoint UNUSED(pos),
-                         LUnits UNUSED(width), LUnits UNUSED(height)) {}
-    GmoBox* start_new_page();
+                         LUnits UNUSED(width), LUnits UNUSED(height)) override {}
+    GmoBox* start_new_page() override;
 
     //only for unit tests
     ScoreLayouter* get_score_layouter();
-    void save_score_layouter(Layouter* pLayouter);
+    void save_score_layouter(Layouter* pLayouter) override;
 
 protected:
     int layout_content();

@@ -93,7 +93,7 @@ public:
     int num_out_nodes() { return m_nodesOut; }
     int max_depth() { return m_maxDepth; }
 
-    void start_visit(ImoObj* pImo)
+    void start_visit(ImoObj* pImo) override
     {
         int type = pImo->get_obj_type();
         const string& name = pImo->get_name();
@@ -115,7 +115,7 @@ public:
             m_maxDepth = m_indent;
     }
 
-	void end_visit(ImoObj* pImo)
+	void end_visit(ImoObj* pImo) override
     {
         m_indent--;
         m_nodesOut++;

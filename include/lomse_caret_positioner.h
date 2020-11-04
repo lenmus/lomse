@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -133,9 +133,9 @@ public:
     ScoreCaretPositioner(GraphicModel* pGModel);
     virtual ~ScoreCaretPositioner();
 
-    void layout_caret(Caret* pCaret, DocCursor* pCursor);
+    void layout_caret(Caret* pCaret, DocCursor* pCursor) override;
     SpElementCursorState click_point_to_cursor_state(int iPage, LUnits x, LUnits y,
-                                               ImoObj* pImo, GmoObj* pGmo);
+                                               ImoObj* pImo, GmoObj* pGmo) override;
 
 protected:
     void caret_on_pointed_object(Caret* pCaret);

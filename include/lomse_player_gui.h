@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -92,12 +92,12 @@ public:
     virtual ~PlayerNoGui() {}
 
     //mandatory overrides
-    virtual void on_end_of_playback() {}
-    virtual int get_play_mode() { return m_playMode; }
-    virtual int get_metronome_mm() { return m_metronomeMM; }
-    virtual Metronome* get_metronome() { return NULL; }
-    virtual bool countoff_status() { return m_countoffStatus; }
-    virtual bool metronome_status() { return m_metronomeStatus; }
+    void on_end_of_playback() override {}
+    int get_play_mode() override { return m_playMode; }
+    int get_metronome_mm() override { return m_metronomeMM; }
+    Metronome* get_metronome() override { return nullptr; }
+    bool countoff_status() override { return m_countoffStatus; }
+    bool metronome_status() override { return m_metronomeStatus; }
 
     //setters
     inline void set_play_mode(int value) { m_playMode = value; };

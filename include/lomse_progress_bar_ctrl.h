@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -65,16 +65,16 @@ public:
     virtual ~ProgressBarCtrl() {}
 
     //Control mandatory overrides
-    USize measure();
-    GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos);
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-    void handle_event(SpEventInfo pEvent);
-    LUnits width() { return m_width; }
-    LUnits height() { return m_height; }
-    LUnits top() { return m_pos.y; }
-    LUnits bottom() { return m_pos.y + m_height; }
-    LUnits left() { return m_pos.x; }
-    LUnits right() { return m_pos.x + m_width; }
+    USize measure() override;
+    GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos) override;
+    void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
+    void handle_event(SpEventInfo pEvent) override;
+    LUnits width() override { return m_width; }
+    LUnits height() override { return m_height; }
+    LUnits top() override { return m_pos.y; }
+    LUnits bottom() override { return m_pos.y + m_height; }
+    LUnits left() override { return m_pos.x; }
+    LUnits right() override { return m_pos.x + m_width; }
 
     //specific methods
     void set_value(float value);

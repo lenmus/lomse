@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -179,9 +179,9 @@ public:
                   LibraryScope& libraryScope);
     virtual ~ScoreLayouter();
 
-    void prepare_to_start_layout();
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+    void prepare_to_start_layout() override;
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
 
     //info
     virtual int get_num_columns();
@@ -437,7 +437,7 @@ public:
                        SpacingAlgorithm* pSpAlgorithm, std::vector<int>& breaks);
     virtual ~LinesBreakerSimple() {}
 
-    void decide_line_breaks();
+    void decide_line_breaks() override;
 };
 
 
@@ -450,7 +450,7 @@ public:
                         SpacingAlgorithm* pSpAlgorithm, std::vector<int>& breaks);
     virtual ~LinesBreakerOptimal() {}
 
-    void decide_line_breaks();
+    void decide_line_breaks() override;
 
     //support for debug and tests
     void dump_entries(ostream& outStream=logger.get_stream());

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,8 +70,8 @@ public:
     virtual ~ContentLayouter() {}
 
     //implementation of Layouter virtual methods
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
 
 };
 
@@ -93,8 +93,8 @@ public:
     virtual ~MultiColumnLayouter();
 
     //implementation of Layouter virtual methods
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+    void layout_in_box() override;
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
 
 protected:
     void layout_column(Layouter* pColLayouter, GmoBox* pParentBox,
@@ -113,9 +113,9 @@ public:
     virtual ~BlocksContainerLayouter() {}
 
     //generic implementation of Layouter virtual methods
-    virtual void layout_in_box();
+    virtual void layout_in_box() override;
     virtual void create_main_box(GmoBox* pParentBox, UPoint pos,
-                                 LUnits width, LUnits height);
+                                 LUnits width, LUnits height) override;
 };
 
 //----------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ public:
 
     //overrides
     //void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height) override;
 };
 
 //---------------------------------------------------------------------------------------
