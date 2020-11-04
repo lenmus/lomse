@@ -2,6 +2,7 @@ var searchData=
 [
   ['the_20document_20api',['The Document API',['../page-api-internal-model.html',1,'index']]],
   ['tutorials_20and_20samples',['Tutorials and samples',['../page-examples.html',1,'']]],
+  ['the_20logging_20system',['The logging system',['../page-logging.html',1,'index']]],
   ['target',['target',['../classObserver.html#a7b64fb9806df6b102ba37a65c809c3ee',1,'Observer']]],
   ['tempoline',['TempoLine',['../classTempoLine.html',1,'']]],
   ['thickness',['thickness',['../classFragmentMark.html#aabaec0d2044ac088a1387530166af875',1,'FragmentMark']]],

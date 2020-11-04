@@ -99,8 +99,8 @@ $(document).ready(function(){initNavTree('classLomseDoorway.html','');});
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3c49065371b1185e0d04b690c1cb6b05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a> ()</td></tr>
-<tr class="separator:a3c49065371b1185e0d04b690c1cb6b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11e5e5ecf94ab8913c0e7e211c1748de"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a11e5e5ecf94ab8913c0e7e211c1748de">LomseDoorway</a> (std::ostream *logStream=nullptr, std::ostream *forensicLogStream=nullptr)</td></tr>
+<tr class="separator:a11e5e5ecf94ab8913c0e7e211c1748de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01e4f12682054e5a96afa236501ac80f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a> (int pixel_format, int ppi, bool reverse_y_axis, ostream &amp;reporter=cout)</td></tr>
 <tr class="separator:a01e4f12682054e5a96afa236501ac80f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5e0a00a93e25a7d8b51b39302f41a15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a> (void *pThis, void(*pt2Func)(void *, <a class="el" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a>))</td></tr>
@@ -143,19 +143,38 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3a36010468381eb7f8bcd7cebdd2c152"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3c49065371b1185e0d04b690c1cb6b05"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c49065371b1185e0d04b690c1cb6b05">&#9670;&nbsp;</a></span>LomseDoorway()</h2>
+<a id="a11e5e5ecf94ab8913c0e7e211c1748de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11e5e5ecf94ab8913c0e7e211c1748de">&#9670;&nbsp;</a></span>LomseDoorway()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">LomseDoorway::LomseDoorway </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>logStream</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">std::ostream *&#160;</td>
+          <td class="paramname"><em>forensicLogStream</em> = <code>nullptr</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <p>Constructor. Your application should create only one instance of <a class="el" href="classLomseDoorway.html">LomseDoorway</a> and its life scope should be as long as your application need to use Lomse. </p>
 
@@ -757,7 +776,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classLomseDoorway.html">LomseDoorway</a></li>
-    <li class="footer">Generated on Thu Oct 29 2020 15:35:52 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

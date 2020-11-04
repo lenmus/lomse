@@ -229,6 +229,10 @@ var NAVTREEINDEX0 =
 "page-introduction.html#overview-rendering":[0,0,3],
 "page-introduction.html#overview-sound-engine":[0,0,6],
 "page-library-license.html":[4],
+"page-logging.html":[0,11],
+"page-logging.html#logging-areas":[0,11,2],
+"page-logging.html#logging-methods":[0,11,1],
+"page-logging.html#logging-overview":[0,11,0],
 "page-printing.html":[0,2],
 "page-printing.html#print-buffer-size":[0,2,1],
 "page-printing.html#print-overview":[0,2,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX0 =
 "page-sound-generation.html#how-to-play-score":[0,4,3],
 "page-sound-generation.html#implementing-player-gui":[0,4,5],
 "page-sound-generation.html#page-sound-generation-overview":[0,4,0],
-"page-sound-generation.html#playback-summary":[0,4,1],
-"page-sound-generation.html#sound-generation-external-player":[0,4,6],
-"page-tasks.html":[0,5],
-"page-tasks.html#gui-interaction":[0,5,0],
-"page-tasks.html#task-data-entry":[0,5,1,6]
+"page-sound-generation.html#playback-summary":[0,4,1]
 };

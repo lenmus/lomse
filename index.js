@@ -77,5 +77,10 @@ var index =
       [ "Events and how are they notified", "page-events.html#events-list", null ],
       [ "How to register an event handler", "page-events.html#event-handlers", null ],
       [ "Handling requests", "page-events.html#handling-requests", null ]
+    ] ],
+    [ "The logging system", "page-logging.html", [
+      [ "Logging disabling and customization", "page-logging.html#logging-overview", null ],
+      [ "Logging methods", "page-logging.html#logging-methods", null ],
+      [ "Logging areas and messages selection", "page-logging.html#logging-areas", null ]
     ] ]
 ];
