@@ -38,6 +38,7 @@ If you are new to Lomse, @b please read the @subpage page-introduction and then 
 - @subpage page-coordinates-viewport
 - @subpage page-callbacks
 - @subpage page-events
+- @subpage page-logging
 
 
 */
