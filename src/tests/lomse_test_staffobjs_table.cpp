@@ -306,7 +306,7 @@ SUITE(ColStaffObjsBuilderTest)
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_04)
     {
-        //@04. R3. <direction> and <sound> can not go between clefs/key/time
+        //@04. R3. <direction>, <sound> and <transpose> can not go between clefs/key/time
         create_score(
             "(score (vers 2.0)"
             "(instrument (musicData "
@@ -527,6 +527,40 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,    0,      1,  32,     1, "(n c4 q v1 p1 (stem up))" );
         CHECK_ENTRY0(it, 0,    0,      1,  96,     0, "(barline simple)" );
         CHECK_ENTRY0(it, 1,    0,      1,  96,     1, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_11)
+    {
+        //@11. R3. <transpose> can not go between clefs/key/time
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/transpose/001-transpose.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 3 );
+        CHECK( pTable->num_entries() == 17 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key D)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time common)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(clef G p1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(key A)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(time common)" );
+        CHECK_ENTRY0(it, 2,    0,      0,   0,     2, "(clef G p1)" );
+        CHECK_ENTRY0(it, 2,    0,      0,   0,     2, "(key C)" );
+        CHECK_ENTRY0(it, 2,    0,      0,   0,     2, "(time common)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(transpose -1 -2 -1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(transpose -1 -9 -5)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n d4 q v1 p1)" );
     }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)

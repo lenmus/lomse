@@ -139,6 +139,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_tie_dto:             pObj = LOMSE_NEW ImoTieDto();             break;
         case k_imo_time_modification_dto:  pObj = LOMSE_NEW ImoTimeModificationDto();  break;
         case k_imo_time_signature:      pObj = LOMSE_NEW ImoTimeSignature();      break;
+        case k_imo_transpose:           pObj = LOMSE_NEW ImoTranspose();          break;
         case k_imo_tuplet:              pObj = LOMSE_NEW ImoTuplet();             break;
         case k_imo_tuplet_dto:          pObj = LOMSE_NEW ImoTupletDto();          break;
         case k_imo_volta_bracket:       pObj = LOMSE_NEW ImoVoltaBracket();       break;

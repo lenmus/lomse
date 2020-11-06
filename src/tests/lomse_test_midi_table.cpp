@@ -74,7 +74,7 @@ public:
         , m_pDoc(nullptr)
     {
         m_scores_path = TESTLIB_SCORES_PATH;
-        m_scores_path += "unit-tests/repeats/";
+        m_scores_path += "unit-tests/";
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
@@ -590,7 +590,7 @@ SUITE(MidiTableTest)
         //  |    |    |    :|     |     |
         //  1    2    3     4     5
         //                 J 2,1
-        load_mxl_score_for_test("01-repeat-end-repetition-barline.xml");
+        load_mxl_score_for_test("repeats/01-repeat-end-repetition-barline.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 1 );
         CHECK( check_jump(0, 1,1,0,1) == true );
@@ -602,7 +602,7 @@ SUITE(MidiTableTest)
         //  |    |     |:    |    :|     |     |
         //  1    2     3     4     5     6
         //                       J 3,1
-        load_mxl_score_for_test("02-repeat-start-end-repetition-barlines.xml");
+        load_mxl_score_for_test("repeats/02-repeat-start-end-repetition-barlines.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 1 );
         CHECK( check_jump(0, 3,1,0,6) == true );
@@ -635,7 +635,7 @@ SUITE(MidiTableTest)
         //  |    |    :|:    |    :|     |     |
         //  1    2     3     4     5     6
         //            J 1,1       J 3,1
-        load_mxl_score_for_test("03-repeat-double-end-repetition-barlines.xml");
+        load_mxl_score_for_test("repeats/03-repeat-double-end-repetition-barlines.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 2 );
         CHECK( check_jump(0, 1,1,0,1) == true );
@@ -650,7 +650,7 @@ SUITE(MidiTableTest)
         //  1    2    3     4      5    6
         //                 J 4,1  J 1,1
         //                   5,0
-        load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
+        load_mxl_score_for_test("repeats/04-repeat-barline-simple-volta.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 3 );
         CHECK( check_jump(0, 4,1,0,10) == true );
@@ -666,7 +666,7 @@ SUITE(MidiTableTest)
         //  1    2    3     4      5    6
         //                 J4,2   J1,2
         //                 J5,0
-        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
+        load_mxl_score_for_test("repeats/05-repeat-barline-simple-volta-two-times.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 3 );
         CHECK( check_jump(0, 4,2,0,10) == true );
@@ -683,7 +683,7 @@ SUITE(MidiTableTest)
         //           J3,1  J1,1   J1,1
         //           J4,1
         //           J5,0
-        load_mxl_score_for_test("07-repeat-barlines-three-volta.xml");
+        load_mxl_score_for_test("repeats/07-repeat-barlines-three-volta.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 5 );
         CHECK( check_jump(0, 3,1) == true );
@@ -702,7 +702,7 @@ SUITE(MidiTableTest)
         //           J3,1        J1,1        J1,1
         //           J5,1
         //           J7,0
-        load_mxl_score_for_test("08-repeat-barlines-three-volta-long.xml");
+        load_mxl_score_for_test("repeats/08-repeat-barlines-three-volta-long.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 5 );
         CHECK( check_jump(0, 3,1) == true );
@@ -721,7 +721,7 @@ SUITE(MidiTableTest)
         //           J3,2        J1,2        J1,2
         //           J5,2
         //           J7,0
-        load_mxl_score_for_test("09-repeat-barlines-three-volta-long-several-times.xml");
+        load_mxl_score_for_test("repeats/09-repeat-barlines-three-volta-long-several-times.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 5 );
         CHECK( check_jump(0, 3,2) == true );
@@ -738,7 +738,7 @@ SUITE(MidiTableTest)
         //  |      |      |      |      |
         //  1      2      3      4
         //                             J1,1
-        load_mxl_score_for_test("51-repeat-da-capo.xml");
+        load_mxl_score_for_test("repeats/51-repeat-da-capo.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 1 );
         CHECK( check_jump(0, 1,1) == true );
@@ -751,7 +751,7 @@ SUITE(MidiTableTest)
         //  |      |      |      |      |
         //  1      2      3      4
         //              J-1,1,1        J1,1
-        load_mxl_score_for_test("52-repeat-da-capo-al-fine.xml");
+        load_mxl_score_for_test("repeats/52-repeat-da-capo-al-fine.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 2);
         CHECK( check_jump(0, -1,1,1) == true );
@@ -765,7 +765,7 @@ SUITE(MidiTableTest)
 //        //  |      |      |      ||      |
 //        //  1      2      3       4
 //        //        J4,1,1                J1,1
-//        load_mxl_score_for_test("53-repeat-da-capo-al-segno.xml");
+//        load_mxl_score_for_test("repeats/53-repeat-da-capo-al-segno.xml");
 //        cout << m_pTable->dump_midi_events() << endl;
 //        CHECK( m_pTable->num_jumps() == 2);
 //        CHECK( check_jump(0, 4,1,1) == true );
@@ -779,7 +779,7 @@ SUITE(MidiTableTest)
         //  |      |      |      ||      |
         //  1      2      3       4
         //                     J-1,1,1   J2,1
-        load_mxl_score_for_test("54-repeat-dal-segno-al-fine.xml");
+        load_mxl_score_for_test("repeats/54-repeat-dal-segno-al-fine.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 2);
         CHECK( check_jump(0, -1,1,1) == true );
@@ -794,7 +794,7 @@ SUITE(MidiTableTest)
         //  |         |         |        |           ||         |
         //  1         2         3        4            5
         //                            J5,1,1        J2,1
-        load_mxl_score_for_test("55-repeat-dal-segno-al-coda.xml");
+        load_mxl_score_for_test("repeats/55-repeat-dal-segno-al-coda.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 2);
         CHECK( check_jump(0, 5,1,1) == true );
@@ -809,7 +809,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                    J5,1,1   J3,1        J1,1
-        load_mxl_score_for_test("56-repeat-da-capo-al-coda.xml");
+        load_mxl_score_for_test("repeats/56-repeat-da-capo-al-coda.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 3);
         CHECK( check_jump(0, 5,1,1) == true );
@@ -824,7 +824,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                             J3,1         J2,1
-        load_mxl_score_for_test("57-repeat-dal-segno.xml");
+        load_mxl_score_for_test("repeats/57-repeat-dal-segno.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 2);
         CHECK( check_jump(0, 3,1) == true );
@@ -839,7 +839,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                    J5,1,1   J3,1        J2,1
-        load_mxl_score_for_test("58-repeat-dal-segno-al-coda.xml");
+        load_mxl_score_for_test("repeats/58-repeat-dal-segno-al-coda.xml");
         //cout << m_pTable->dump_midi_events() << endl;
         CHECK( m_pTable->num_jumps() == 3);
         CHECK( check_jump(0, 5,1,1) == true );
@@ -952,6 +952,76 @@ SUITE(MidiTableTest)
     }
 
 
+    //@ Transposition computation -------------------------------------------------------
+
+    TEST_FIXTURE(MidiTableTestFixture, transpose_01)
+    {
+        //01. Transpose information added to pitch
+
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<key><fifths>2</fifths></key>"
+                "<time><beats>4</beats><beat-type>4</beat-type></time>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+                "<transpose><diatonic>-1</diatonic><chromatic>-2</chromatic></transpose>"
+            "</attributes>"
+            "<note><pitch><step>D</step><octave>4</octave></pitch>"
+                "<duration>4</duration><type>16th</type></note>"
+            "</measure>"
+            "</part></score-partwise>"
+            , Document::k_format_mxl
+        );
+
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable && pTable->num_events() == 5 );
+        CHECK( pTable && pTable->get_anacruxis_missing_time() == 0.0 );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[0]->EventType == SoundEvent::k_prog_instr );
+        CHECK( events[0]->DeltaTime == 0L );
+        CHECK( events[1]->EventType == SoundEvent::k_rhythm_change );
+        CHECK( events[1]->DeltaTime == 0L );
+        CHECK( events[2]->EventType == SoundEvent::k_note_on );
+        CHECK( events[2]->DeltaTime == 0L );
+        CHECK( events[2]->NotePitch == 60);
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, transpose_02)
+    {
+        //02. Transpose example
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "transpose/001-transpose.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable && pTable->num_events() == 13 );
+        CHECK( pTable && is_equal_time(pTable->get_anacruxis_missing_time(), 192.0) );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[6]->EventType == SoundEvent::k_note_on );
+        CHECK( events[6]->DeltaTime == 0L );
+        CHECK( events[6]->NotePitch == 60);
+        CHECK( events[7]->EventType == SoundEvent::k_note_on );
+        CHECK( events[7]->DeltaTime == 0L );
+        CHECK( events[7]->NotePitch == 60);
+        CHECK( events[8]->EventType == SoundEvent::k_note_on );
+        CHECK( events[8]->DeltaTime == 0L );
+        CHECK( events[8]->NotePitch == 60);
+    }
+
+
     //@ Measures jumps table ------------------------------------------------------------
 
     TEST_FIXTURE(MidiTableTestFixture, measures_jumps_01)
@@ -975,7 +1045,7 @@ SUITE(MidiTableTest)
         //  |    |    |    :|     |     |
         //  1    2    3     4     5
         //                 J 2,1
-        load_mxl_score_for_test("01-repeat-end-repetition-barline.xml");
+        load_mxl_score_for_test("repeats/01-repeat-end-repetition-barline.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 2 );
@@ -989,7 +1059,7 @@ SUITE(MidiTableTest)
         //  |    |     |:    |    :|     |     |
         //  1    2     3     4     5     6
         //                       J 3,1
-        load_mxl_score_for_test("02-repeat-start-end-repetition-barlines.xml");
+        load_mxl_score_for_test("repeats/02-repeat-start-end-repetition-barlines.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 2 );
@@ -1003,7 +1073,7 @@ SUITE(MidiTableTest)
         //  |    |    :|:    |    :|     |     |
         //  1    2     3     4     5     6
         //            J 1,1       J 3,1
-        load_mxl_score_for_test("03-repeat-double-end-repetition-barlines.xml");
+        load_mxl_score_for_test("repeats/03-repeat-double-end-repetition-barlines.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 3 );
@@ -1020,7 +1090,7 @@ SUITE(MidiTableTest)
         //  1    2    3     4      5    6
         //                 J 4,1  J 1,1
         //                   5,0
-        load_mxl_score_for_test("04-repeat-barline-simple-volta.xml");
+        load_mxl_score_for_test("repeats/04-repeat-barline-simple-volta.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 4 );
@@ -1038,7 +1108,7 @@ SUITE(MidiTableTest)
         //  1    2    3     4      5    6
         //                 J4,2   J1,2
         //                 J5,0
-        load_mxl_score_for_test("05-repeat-barline-simple-volta-two-times.xml");
+        load_mxl_score_for_test("repeats/05-repeat-barline-simple-volta-two-times.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 6 );
@@ -1059,7 +1129,7 @@ SUITE(MidiTableTest)
         //           J3,1  J1,1   J1,1
         //           J4,1
         //           J5,0
-        load_mxl_score_for_test("07-repeat-barlines-three-volta.xml");
+        load_mxl_score_for_test("repeats/07-repeat-barlines-three-volta.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 6 );
@@ -1080,7 +1150,7 @@ SUITE(MidiTableTest)
         //           J3,1        J1,1        J1,1
         //           J5,1
         //           J7,0
-        load_mxl_score_for_test("08-repeat-barlines-three-volta-long.xml");
+        load_mxl_score_for_test("repeats/08-repeat-barlines-three-volta-long.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 6 );
@@ -1101,7 +1171,7 @@ SUITE(MidiTableTest)
         //           J3,2        J1,2        J1,2
         //           J5,2
         //           J7,0
-        load_mxl_score_for_test("09-repeat-barlines-three-volta-long-several-times.xml");
+        load_mxl_score_for_test("repeats/09-repeat-barlines-three-volta-long-several-times.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 10 );
@@ -1124,7 +1194,7 @@ SUITE(MidiTableTest)
         //  |      |      |      |      |
         //  1      2      3      4
         //                             J1,1
-        load_mxl_score_for_test("51-repeat-da-capo.xml");
+        load_mxl_score_for_test("repeats/51-repeat-da-capo.xml");
         //cout << m_pTable->dump_midi_events() << endl;
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         CHECK( jumps.size() == 2 );
@@ -1139,7 +1209,7 @@ SUITE(MidiTableTest)
         //  |      |      |      |      |
         //  1      2      3      4
         //              J-1,1,1        J1,1
-        load_mxl_score_for_test("52-repeat-da-capo-al-fine.xml");
+        load_mxl_score_for_test("repeats/52-repeat-da-capo-al-fine.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 2 );
@@ -1154,7 +1224,7 @@ SUITE(MidiTableTest)
 ////        //  |      |      |      ||      |
 ////        //  1      2      3       4
 ////        //        J4,1,1                J1,1
-////        load_mxl_score_for_test("53-repeat-da-capo-al-segno.xml");
+////        load_mxl_score_for_test("repeats/53-repeat-da-capo-al-segno.xml");
 ////        cout << m_pTable->dump_midi_events() << endl;
 ////        CHECK( m_pTable->num_jumps() == 2);
 ////        CHECK( check_jump(0, 4,1,1) == true );
@@ -1168,7 +1238,7 @@ SUITE(MidiTableTest)
         //  |      |      |      ||      |
         //  1      2      3       4
         //                     J-1,1,1   J2,1
-        load_mxl_score_for_test("54-repeat-dal-segno-al-fine.xml");
+        load_mxl_score_for_test("repeats/54-repeat-dal-segno-al-fine.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 2 );
@@ -1184,7 +1254,7 @@ SUITE(MidiTableTest)
         //  |         |         |        |           ||         |
         //  1         2         3        4            5
         //                            J5,1,1        J2,1
-        load_mxl_score_for_test("55-repeat-dal-segno-al-coda.xml");
+        load_mxl_score_for_test("repeats/55-repeat-dal-segno-al-coda.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 3 );
@@ -1201,7 +1271,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                    J5,1,1   J3,1        J1,1
-        load_mxl_score_for_test("56-repeat-da-capo-al-coda.xml");
+        load_mxl_score_for_test("repeats/56-repeat-da-capo-al-coda.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 4 );
@@ -1218,7 +1288,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                             J3,1         J2,1
-        load_mxl_score_for_test("57-repeat-dal-segno.xml");
+        load_mxl_score_for_test("repeats/57-repeat-dal-segno.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 3 );
@@ -1235,7 +1305,7 @@ SUITE(MidiTableTest)
         //  |         |         |:      :|           ||         |
         //  1         2         3        4            5
         //                    J5,1,1   J3,1        J2,1
-        load_mxl_score_for_test("58-repeat-dal-segno-al-coda.xml");
+        load_mxl_score_for_test("repeats/58-repeat-dal-segno-al-coda.xml");
 		std::vector<MeasuresJumpsEntry*> jumps = m_pTable->get_measures_jumps();
         //dump_measures_jumps(jumps);
         CHECK( jumps.size() == 4 );

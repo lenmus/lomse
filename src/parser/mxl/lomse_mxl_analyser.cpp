@@ -289,6 +289,7 @@ enum EMxlTag
     k_mxl_tag_tied,
     k_mxl_tag_time,
     k_mxl_tag_time_modification,
+    k_mxl_tag_transpose,
     k_mxl_tag_tuplet,
     k_mxl_tag_tuplet_actual,
     k_mxl_tag_tuplet_normal,
@@ -1858,6 +1859,8 @@ public:
 
     ImoObj* do_analysis() override
     {
+        ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+
         //In MusicXML. Clefs, time signatures and key signatures are
         //treated as attributes of a measure, not as objects and, therefore, ordering
         //is not important for MusicXML and this information is
@@ -1909,28 +1912,7 @@ public:
         while (get_optional("clef"))
             clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, nullptr) );
 
-        // staff-details*
-        while (get_optional("staff-details"))
-            ; //TODO <staff-details>
-
-        // transpose*
-        while (get_optional("transpose"))
-            ; //TODO <transpose>
-
-        // directive*
-        while (get_optional("directive"))
-            ; //TODO <directive>
-
-        // measure-style*
-        while (get_optional("measure-style"))
-            ; //TODO <measure-style>
-//        <measure-style>
-//          <multiple-rest>1</multiple-rest>
-//        </measure-style>
-
-        error_if_more_elements();
-
-        //add elements to model, in right order
+        //add clefs, keys and time signatures to model, in right order
         vector<ImoObj*>::const_iterator it;
         for (it = clefs.begin(); it != clefs.end(); ++it)
         {
@@ -1947,6 +1929,29 @@ public:
             if (*it)
                 add_to_model(*it);
         }
+
+
+        // staff-details*
+        while (get_optional("staff-details"))
+            ; //TODO <staff-details>
+
+        // transpose*
+        while (get_optional("transpose"))
+            m_pAnalyser->analyse_node(&m_childToAnalyse, pMD);
+
+        // directive*
+        while (get_optional("directive"))
+            ; //TODO <directive>
+
+        // measure-style*
+        while (get_optional("measure-style"))
+            ; //TODO <measure-style>
+//        <measure-style>
+//          <multiple-rest>1</multiple-rest>
+//        </measure-style>
+
+        error_if_more_elements();
+
         return m_pAnchor;
     }
 
@@ -6837,6 +6842,67 @@ protected:
     }
 };
 
+//---------------------------------------------------------------------------------------
+//@ <!ELEMENT transpose
+//@ 	(diatonic?, chromatic, octave-change?, double?)>
+//@ <!ATTLIST transpose
+//@     number CDATA #IMPLIED
+//@     %optional-unique-id;
+//@ >
+//@ <!ELEMENT diatonic (#PCDATA)>
+//@ <!ELEMENT chromatic (#PCDATA)>
+//@ <!ELEMENT octave-change (#PCDATA)>
+//@ <!ELEMENT double EMPTY>
+//@
+class TransposeMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    TransposeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        {
+        }
+
+    ImoObj* do_analysis() override
+    {
+        // attrib: number CDATA #IMPLIED
+        int iStaff = get_attribute_as_integer("number", -1);
+        if (iStaff > 0)
+            --iStaff;
+
+        // attrib: %optional-unique-id;
+            //TODO
+
+
+        //elements
+
+        //diatonic?
+        int diatonic = analyze_optional_child_pcdata_int("diatonic", -7, +7, 0);
+
+        //chromatic
+        int chromatic = 0;
+        if (get_mandatory("chromatic"))
+            chromatic = get_child_pcdata_int("chromatic", -12, +12, 0);
+
+        //octave-change?
+        int octaves = analyze_optional_child_pcdata_int("octave-change", -8, +8, 0);
+
+        //double?
+        bool doubled = get_optional("double");
+
+        error_if_more_elements();
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTranspose* pSO = static_cast<ImoTranspose*>(
+                                ImFactory::inject(k_imo_transpose, pDoc));
+        pSO->init(iStaff, chromatic, diatonic, octaves, doubled);
+
+        add_to_model(pSO);
+        return pSO;
+    }
+
+protected:
+};
 
 //---------------------------------------------------------------------------------------
 //@ <!ELEMENT tuplet (tuplet-actual?, tuplet-normal?)>
@@ -7487,6 +7553,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["tied"] = k_mxl_tag_tied;
     m_NameToEnum["time"] = k_mxl_tag_time;
     m_NameToEnum["time-modification"] = k_mxl_tag_time_modification;
+    m_NameToEnum["transpose"] = k_mxl_tag_transpose;
     m_NameToEnum["tuplet"] = k_mxl_tag_tuplet;
     m_NameToEnum["tuplet-actual"] = k_mxl_tag_tuplet_actual;
     m_NameToEnum["tuplet-normal"] = k_mxl_tag_tuplet_normal;
@@ -8022,6 +8089,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_tied:                 return LOMSE_NEW TiedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_time:                 return LOMSE_NEW TimeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_time_modification:    return LOMSE_NEW TimeModificationXmlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_transpose:            return LOMSE_NEW TransposeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet:               return LOMSE_NEW TupletMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_actual:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tuplet_normal:        return LOMSE_NEW TupletNumbersMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

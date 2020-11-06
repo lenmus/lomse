@@ -2740,6 +2740,42 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+//@ <transpose> = (transpose <staves><chromatic>[<diatonic>][<octaves>][<doubled>])
+class TransposeLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoTranspose* m_pObj;
+
+public:
+    TransposeLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoTranspose*>(pImo);
+    }
+
+    string generate_source(ImoObj* UNUSED(pParent) =nullptr) override
+    {
+        start_element("transpose", m_pObj->get_id());
+        m_source << " " << m_pObj->get_applicable_staff();
+        m_source << " " << m_pObj->get_chromatic();
+        int value = m_pObj->get_diatonic();
+        if (value != 0)
+            m_source << " " << value;
+        value = m_pObj->get_octave_change();
+        if (value != 0)
+            m_source << " " << value;
+        bool doubled = m_pObj->get_doubled();
+        if (doubled != 0)
+            m_source << " true";
+
+        source_for_attachments(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+};
+
+//---------------------------------------------------------------------------------------
 //AWARE: Must be defined after TitleLdpGenerator and DefineStyleLdpGenerator as uses both
 
 class ScoreLdpGenerator : public LdpGenerator
@@ -3420,6 +3456,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
         case k_imo_slur:            return LOMSE_NEW SlurLdpGenerator(pImo, this);
         case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);
         case k_imo_tie:             return LOMSE_NEW TieLdpGenerator(pImo, this);
+        case k_imo_transpose:       return LOMSE_NEW TransposeLdpGenerator(pImo, this);
         default:
             return new ErrorLdpGenerator(pImo, this);
     }

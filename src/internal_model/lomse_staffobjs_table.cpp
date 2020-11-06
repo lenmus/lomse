@@ -252,9 +252,9 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
     if (pA->is_note_rest() && pB->get_duration() == 0.0f && !pB->is_grace_note())
         return true;    //B cannot go after A, Try with A-1
 
-    //R3. <direction> and <sound> can not go between clefs/key/time ==>
+    //R3. <direction>, <sound> and <transpose> can not go between clefs/key/time ==>
     //    clef/key/time can not go after direction. Missing: in other instruments/staves
-    if ((pA->is_direction() || pA->is_sound_change())
+    if ((pA->is_direction() || pA->is_sound_change() || pA->is_transpose())
         && (pB->is_clef() || pB->is_time_signature() || pB->is_key_signature()))
     {
         return true;    //move clef/key/time before 'A' object

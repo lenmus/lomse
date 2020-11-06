@@ -732,6 +732,7 @@ enum EImoObjType
     k_imo_sound_change,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Playback parameters
     k_imo_system_break,     ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System break
     k_imo_time_signature,   ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Time signature
+    k_imo_transpose,        ///< &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Transposition information
     k_imo_staffobj_last,
 
     // ImoAuxObj (A)
@@ -1550,6 +1551,7 @@ public:
     inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
     inline bool is_time_signature() { return m_objtype == k_imo_time_signature; }
     inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
+    inline bool is_transpose() { return m_objtype == k_imo_transpose; }
     inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
     inline bool is_volta_bracket() { return m_objtype == k_imo_volta_bracket; }
@@ -4760,6 +4762,57 @@ public:
     ImoMidiInfo* get_midi_info(const std::string& soundId);
 
 
+};
+
+//---------------------------------------------------------------------------------------
+/** ImoTranspose staffobj represents what must be added to the written pitch to get the
+    correct sounding pitch. The transposition is represented by:
+
+    - m_chromatic: the number of semitones needed to get from written to sounding
+        pitch. It does not include octaves
+    - m_octaveChange: how many octaves to add to get from written pitch to sounding pitch.
+    - m_diatonic: number of steps, for correct spelling of enharmonic transpositions.
+    - m_doubled: if @TRUE indicates that the music is doubled one octave down from what
+        is currently written (as is the case for mixed cello / bass parts in
+        orchestral literature).
+    - m_numStaff. If -1, this transposition applies to all staves in the instrument.
+      Otherwise, it applies only to the specified staff (0..n-1)
+*/
+class ImoTranspose : public ImoStaffObj
+{
+protected:
+    int m_numStaff;
+    int m_diatonic;
+    int m_chromatic;
+    int m_octaveChange;
+    bool m_doubled;
+
+    friend class ImFactory;
+    ImoTranspose()
+        : ImoStaffObj(k_imo_transpose)
+    {
+        init(-1, 0, 0, 0, false);
+    }
+
+public:
+    virtual ~ImoTranspose() {}
+
+    inline int get_applicable_staff() { return m_numStaff; }
+    inline int get_diatonic() { return m_diatonic; }
+    inline int get_chromatic() { return m_chromatic; }
+    inline int get_octave_change() { return m_octaveChange; }
+    inline bool get_doubled() { return m_doubled; }
+
+protected:
+    friend class TransposeMxlAnalyser;
+    void init(int iStaff, int chromatic, int diatonic, int octaves, bool doubled)
+    {
+        m_numStaff = iStaff;
+        m_diatonic = diatonic;
+        m_chromatic = chromatic;
+        m_octaveChange = octaves;
+        m_doubled = doubled;
+    }
 };
 
 //---------------------------------------------------------------------------------------
