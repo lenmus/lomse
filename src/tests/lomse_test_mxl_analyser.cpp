@@ -4630,6 +4630,189 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+
+    //@ transpose -----------------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, transpose_01)
+    {
+        //@01 transpose parsed. Minimum content
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<transpose><chromatic>-2</chromatic></transpose>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_transpose() == true );
+        ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
+        CHECK( pSO != nullptr );
+        CHECK( pSO && pSO->get_chromatic() == -2 );
+        CHECK( pSO && pSO->get_diatonic() == 0 );
+        CHECK( pSO && pSO->get_doubled() == false );
+        CHECK( pSO && pSO->get_applicable_staff() == -1 );
+        CHECK( pSO && pSO->get_octave_change() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, transpose_02)
+    {
+        //@02 transpose parsed. All elements
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<transpose number='2'>"
+                "<diatonic>-4</diatonic>"
+                "<chromatic>-7</chromatic>"
+                "<octave-change>1</octave-change>"
+                "<double/>"
+            "</transpose>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_transpose() == true );
+        ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
+        CHECK( pSO != nullptr );
+        CHECK( pSO && pSO->get_chromatic() == -7 );
+        CHECK( pSO && pSO->get_diatonic() == -4 );
+        CHECK( pSO && pSO->get_doubled() == true );
+        CHECK( pSO && pSO->get_applicable_staff() == 1 );
+        CHECK( pSO && pSO->get_octave_change() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, transpose_03)
+    {
+        //@03 transpose parsed. Error missing mandatory 'chromatic' element
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <transpose>: missing mandatory element <chromatic>."
+                 << endl;
+        parser.parse_text(
+            "<transpose>"
+                "<diatonic>-4</diatonic>"
+            "</transpose>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_transpose() == true );
+        ImoTranspose* pSO = dynamic_cast<ImoTranspose*>( pRoot );
+        CHECK( pSO != nullptr );
+        CHECK( pSO && pSO->get_chromatic() == 0 );
+        CHECK( pSO && pSO->get_diatonic() == -4 );
+        CHECK( pSO && pSO->get_doubled() == false );
+        CHECK( pSO && pSO->get_applicable_staff() == -1 );
+        CHECK( pSO && pSO->get_octave_change() == 0 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, transpose_04)
+    {
+        //@04 transpose added to MusicData in right order
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Music</part-name></score-part>"
+            "</part-list><part id='P1'>"
+            "<measure number='1'>"
+            "<attributes>"
+                "<key><fifths>2</fifths></key>"
+                "<time><beats>4</beats><beat-type>4</beat-type></time>"
+                "<clef><sign>G</sign><line>2</line></clef>"
+                "<transpose><diatonic>-4</diatonic><chromatic>-7</chromatic></transpose>"
+            "</attributes>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        CHECK( pDoc != nullptr );
+        if (pDoc)
+        {
+            CHECK( pDoc->get_num_content_items() == 1 );
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            CHECK( pScore != nullptr );
+            if (pScore)
+            {
+                CHECK( pScore->get_num_instruments() == 1 );
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                CHECK( pInstr != nullptr );
+                if (pInstr)
+                {
+                    CHECK( pInstr->get_num_staves() == 1 );
+                    ImoMusicData* pMD = pInstr->get_musicdata();
+                    CHECK( pMD != nullptr );
+                    CHECK( pMD->get_num_items() == 5 );
+                    ImoObj::children_iterator it = pMD->begin();
+                    CHECK( (*it)->is_clef() == true );
+//                    cout << (*it)->get_name() << endl;
+                    ++it;
+                    CHECK( (*it)->is_key_signature() == true );
+//                    cout << (*it)->get_name() << endl;
+                    ++it;
+                    CHECK( (*it)->is_time_signature() == true );
+//                    cout << (*it)->get_name() << endl;
+                    ++it;
+                    CHECK( (*it)->is_transpose() == true );
+//                    cout << (*it)->get_name() << endl;
+                    ++it;
+                    CHECK( (*it)->is_barline() == true );
+//                    cout << (*it)->get_name() << endl;
+                }
+            }
+        }
+
+        delete pRoot;
+    }
+
+
     //@ tuplet --------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, tuplet_01)

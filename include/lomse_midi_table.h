@@ -47,6 +47,7 @@ class ImoStaffObj;
 class ImoKeySignature;
 class ImoTimeSignature;
 class ImoNote;
+class ImoTranspose;
 class StaffObjsCursor;
 class SoundEvent;
 class SoundEventsTable;
@@ -208,6 +209,7 @@ protected:
     std::vector<SoundEvent*> m_events;
     std::vector<int> m_measures;
     std::vector<int> m_channels;
+    std::vector<int> m_semitones;       //transposition for each staff
     std::vector<JumpEntry*> m_jumps;
     std::vector<MeasuresJumpsEntry*> m_measuresJumps;
     std::vector< std::pair<int, std::string> > m_targets;          //pair measure, label
@@ -251,12 +253,13 @@ protected:
     void close_table();
     void sort_by_time();
     void create_measures_table();
+    void save_transposition_information(StaffObjsCursor& cursor, int iInstr, ImoTranspose* pTrp);
     void add_jumps_if_volta_bracket(StaffObjsCursor& cursor, ImoBarline* pBar,
                                     int measure);
     void add_events_to_jumps();
     void replace_label_in_jumps();
     int find_measure_for_label(const string& label);
-    void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
+    void add_noterest_events(StaffObjsCursor& cursor, int measure);
     void add_rythm_change(int measure, ImoTimeSignature* pTS);
     void add_jump(StaffObjsCursor& cursor, int measure, JumpEntry* pJump);
     void delete_events_table();

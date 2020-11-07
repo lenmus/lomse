@@ -144,9 +144,11 @@ void SoundEventsTable::program_sounds_for_instruments()
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::create_events()
 {
-    StaffObjsCursor cursor(m_pScore);
     ImoStaffObj* pSO = nullptr;
-                            //TODO change so that anacruxis measure is counted as 0
+    StaffObjsCursor cursor(m_pScore);
+    m_semitones.assign(cursor.get_num_staves(), 0);
+
+    //TODO change so that anacruxis measure is counted as 0
     int jumpToMeasure = 1;
 
     m_rAnacrusisMissingTime = cursor.anacruxis_missing_time();
@@ -160,9 +162,7 @@ void SoundEventsTable::create_events()
         pSO = cursor.get_staffobj();
         if (pSO->is_note_rest())
         {
-            int iInstr = cursor.num_instrument();
-            int channel = m_channels[iInstr];
-            add_noterest_events(cursor, channel, measure);
+            add_noterest_events(cursor, measure);
         }
         else if (pSO->is_barline())
         {
@@ -214,6 +214,12 @@ void SoundEventsTable::create_events()
             int iInstr = cursor.num_instrument();
             int channel = m_channels[iInstr];
             process_sound_change(pSound, cursor, channel, iInstr, measure);
+        }
+        else if (pSO->is_transpose())
+        {
+            ImoTranspose* pTrp = static_cast<ImoTranspose*>(pSO);
+            int iInstr = cursor.num_instrument();
+            save_transposition_information(cursor, iInstr, pTrp);
         }
 
         cursor.move_next();
@@ -360,18 +366,20 @@ void SoundEventsTable::store_jump_event(TimeUnits rTime, JumpEntry* pJump, int m
 }
 
 //---------------------------------------------------------------------------------------
-void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
-                                           int measure)
+void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int measure)
 {
     ImoNoteRest* pNR = static_cast<ImoNoteRest*>( cursor.get_staffobj() );
     ImoTimeSignature* pTS = cursor.get_applicable_time_signature();
     ImoNote* pNote = nullptr;
+    int iInstr = cursor.num_instrument();
+    int channel = m_channels[iInstr];
     int step = 0;
     int pitch = 0;
     if (pNR->is_note())
     {
         pNote = static_cast<ImoNote*>(pNR);
-        pitch = int(pNote->get_midi_pitch());
+        int idx = cursor.staff_index();
+        pitch = int(pNote->get_midi_pitch()) + m_semitones[idx];
     }
 
     //AWARE: Visual on/off events are implicit in note on/off events and these
@@ -808,6 +816,33 @@ vector<MeasuresJumpsEntry*> SoundEventsTable::get_measures_jumps()
     reset_jumps();
 
     return m_measuresJumps;
+}
+
+//---------------------------------------------------------------------------------------
+void SoundEventsTable::save_transposition_information(StaffObjsCursor& cursor,
+                                                      int iInstr, ImoTranspose* pTrp)
+{
+    ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+    int numStaves = pInstr->get_num_staves();
+
+    //determine semitones to substract
+    int semitones = pTrp->get_chromatic();
+
+    //save semitones
+    int iStaff = pTrp->get_applicable_staff();
+    if (iStaff == -1)
+    {
+        for (int i=0; i < numStaves; ++i)
+        {
+            int idx = cursor.staff_index_for(iInstr, i);
+            m_semitones[idx] = semitones;
+        }
+    }
+    else
+    {
+        int idx = cursor.staff_index_for(iInstr, iStaff);
+        m_semitones[idx] = semitones;
+    }
 }
 
 

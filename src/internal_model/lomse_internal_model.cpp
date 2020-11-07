@@ -509,6 +509,7 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_text_style] = "text-style";
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
         m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
+        m_TypeToName[k_imo_transpose] = "transpose";
         m_TypeToName[k_imo_tuplet_dto] = "tuplet-dto";
         m_TypeToName[k_imo_volta_bracket_dto] = "volta_bracket_dto";
         m_TypeToName[k_imo_wedge_dto] = "wedge_dto";
