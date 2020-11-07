@@ -7278,7 +7278,7 @@ protected:
     bool m_fStart;
     int m_steps;
     int m_octaveShiftNum;
-    ImoNote* m_pNote;
+    ImoNoteRest* m_pNR;
     Color m_color;
     int m_lineNum;
     int m_iStaff;
@@ -7289,7 +7289,7 @@ public:
         , m_fStart(true)
         , m_steps(0)
         , m_octaveShiftNum(0)
-        , m_pNote(nullptr)
+        , m_pNR(nullptr)
         , m_color(Color(0,0,0))
         , m_lineNum(0)
         , m_iStaff(0)
@@ -7299,7 +7299,7 @@ public:
 
     //setters
     inline void set_line_number(int value) { m_lineNum = value; }
-    inline void set_staffobj(ImoNote* pNote) { m_pNote = pNote; }
+    inline void set_staffobj(ImoNoteRest* pNR) { m_pNR = pNR; }
     inline void set_shift_steps(int value) { m_steps = value; }
     inline void set_start(bool value) { m_fStart = value; }
     inline void set_octave_shift_number(int value) { m_octaveShiftNum = value; }
@@ -7318,7 +7318,7 @@ public:
     inline int get_item_number() { return get_octave_shift_number(); }
     bool is_start_of_relation() { return is_start(); }
     bool is_end_of_relation() { return !is_start(); }
-    inline ImoNote* get_staffobj() { return m_pNote; }
+    inline ImoNoteRest* get_staffobj() { return m_pNR; }
 };
 
 

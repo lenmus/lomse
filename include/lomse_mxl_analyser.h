@@ -163,7 +163,7 @@ public:
     virtual ~MxlOctaveShiftBuilder() {}
 
     void add_relation_to_staffobjs(ImoOctaveShiftDto* pEndInfo) override;
-    void add_to_open_octave_shifts(ImoNote* pNote);
+    void add_to_open_octave_shifts(ImoNoteRest* pNR);
 };
 
 
@@ -448,8 +448,8 @@ public:
     }
 
     //interface for MxlOctaveShiftBuilder
-    inline void add_to_open_octave_shifts(ImoNote* pNote) {
-        m_pOctaveShiftBuilder->add_to_open_octave_shifts(pNote);
+    inline void add_to_open_octave_shifts(ImoNoteRest* pNR) {
+        m_pOctaveShiftBuilder->add_to_open_octave_shifts(pNR);
     }
 
     //information for reporting errors
