@@ -4231,7 +4231,7 @@ public:
 
         pNR->set_visible(fVisible);
         add_to_model(pNR);
-        add_to_spanners(pNote);
+        add_to_spanners(pNR);
 
         //deal with grace notes
         ImoNote* pPrevNote = m_pAnalyser->get_last_note();
@@ -4569,9 +4569,9 @@ protected:
     }
 
     //----------------------------------------------------------------------------------
-    void add_to_spanners(ImoNote* pNote)
+    void add_to_spanners(ImoNoteRest* pNR)
     {
-        m_pAnalyser->add_to_open_octave_shifts(pNote);
+        m_pAnalyser->add_to_open_octave_shifts(pNR);
     }
 
     //----------------------------------------------------------------------------------
@@ -8327,7 +8327,7 @@ void MxlWedgesBuilder::add_relation_to_staffobjs(ImoWedgeDto* pEndDto)
 void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto)
 {
     ImoOctaveShiftDto* pStartDto = m_matches.front();
-    ImoNote* pStartNote = pStartDto->get_staffobj();
+    ImoNoteRest* pStartNR = pStartDto->get_staffobj();
     m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
@@ -8348,22 +8348,22 @@ void MxlOctaveShiftBuilder::add_relation_to_staffobjs(ImoOctaveShiftDto* pEndDto
     std::list<ImoOctaveShiftDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
-        ImoNote* pNote = (*it)->get_staffobj();
-        if ((*it)->is_end_of_relation() && pNote==nullptr)
+        ImoNoteRest* pNR = (*it)->get_staffobj();
+        if ((*it)->is_end_of_relation() && pNR==nullptr)
         {
             int iStaff = (*it)->get_staff();
-            pNote = m_pAnalyser->get_last_note_for(iStaff);
-            (*it)->set_staffobj(pNote);
-            if (pStartNote != pNote)
-                pNote->include_in_relation(pDoc, pOctave, nullptr);
+            pNR = m_pAnalyser->get_last_note_for(iStaff);
+            (*it)->set_staffobj(pNR);
+            if (pStartNR != pNR)
+                pNR->include_in_relation(pDoc, pOctave, nullptr);
         }
         else
-            pNote->include_in_relation(pDoc, pOctave, nullptr);
+            pNR->include_in_relation(pDoc, pOctave, nullptr);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void MxlOctaveShiftBuilder::add_to_open_octave_shifts(ImoNote* pNote)
+void MxlOctaveShiftBuilder::add_to_open_octave_shifts(ImoNoteRest* pNR)
 {
     if (m_pendingItems.size() > 0)
     {
@@ -8373,10 +8373,10 @@ void MxlOctaveShiftBuilder::add_to_open_octave_shifts(ImoNote* pNote)
             ImoOctaveShiftDto* pInfo = *it;
             if (pInfo->is_start_of_relation()
                 && pInfo->get_staffobj() == nullptr
-                && pInfo->get_staff() == pNote->get_staff()
+                && pInfo->get_staff() == pNR->get_staff()
                )
             {
-                pInfo->set_staffobj(pNote);
+                pInfo->set_staffobj(pNR);
             }
         }
     }

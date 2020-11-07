@@ -83,7 +83,7 @@ void StaffObjsCursor::move_next()
         save_time_signature();
     else if (pSO->is_barline())
         save_barline();
-    else if (pSO->is_note())
+    else if (pSO->is_note_rest())
         save_octave_shift_at_end( static_cast<ImoStaffObj*>(pSO) );
 
     ++m_scoreIt;
@@ -91,7 +91,7 @@ void StaffObjsCursor::move_next()
     if (!is_end())
     {
         pSO = imo_object();
-        if (pSO && pSO->is_note())
+        if (pSO && pSO->is_note_rest())
             save_octave_shift_at_start( static_cast<ImoStaffObj*>(pSO) );
     }
 }
