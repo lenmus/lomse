@@ -262,6 +262,9 @@ option(LOMSE_BUILD_MONOLITHIC
 option(LOMSE_BUILD_TESTS
     "Build the unit tests runner program 'testlib'"
     ON)
+option(LOMSE_RUN_TESTS
+    "Run unit tests after building"
+    ON)
 option(LOMSE_BUILD_EXAMPLE
     "Build the tutorial_1 program"
     OFF)
@@ -328,6 +331,7 @@ message(STATUS "Build monolithic library = ${LOMSE_BUILD_MONOLITHIC}")
 message(STATUS "Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
 message(STATUS "Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
 message(STATUS "Build testlib program = ${LOMSE_BUILD_TESTS}")
+message(STATUS "Run tests after building = ${LOMSE_RUN_TESTS}")
 message(STATUS "Build tutorial_1 program = ${LOMSE_BUILD_EXAMPLE}")
 message(STATUS "Create Debug build = ${LOMSE_DEBUG}")
 message(STATUS "Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
@@ -799,17 +803,19 @@ if(LOMSE_BUILD_TESTS)
     message("${TESTLIB} target properties=" ${VAR})
 
     # once generated, run tests
-    if(WIN32)
-        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB}.exe )
-    else()
-        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
-    endif()
+    if (LOMSE_RUN_TESTS)
+        if(WIN32)
+            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB}.exe )
+        else()
+            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
+        endif()
 
-    add_custom_command(
-        TARGET ${TESTLIB} POST_BUILD
-        COMMAND ${TESTLIB_EXECUTABLE}
-        WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-    )
+        add_custom_command(
+            TARGET ${TESTLIB} POST_BUILD
+            COMMAND ${TESTLIB_EXECUTABLE}
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+        )
+    endif(LOMSE_RUN_TESTS)
 
 endif(LOMSE_BUILD_TESTS)
 
