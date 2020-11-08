@@ -207,6 +207,7 @@ enum EGlyphIndex
     k_glyph_f_clef_ottava_alta,
     k_glyph_f_clef_quindicesima_bassa,
     k_glyph_f_clef_quindicesima_alta,
+    k_glyph_TAB_clef,
 
     //Numbers for time signatures
     k_glyph_number_0,

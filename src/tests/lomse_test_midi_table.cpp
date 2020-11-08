@@ -1021,6 +1021,35 @@ SUITE(MidiTableTest)
         CHECK( events[8]->NotePitch == 60);
     }
 
+    TEST_FIXTURE(MidiTableTestFixture, transpose_03)
+    {
+        //03. Transpose example with octave change
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "transpose/002-transpose-octave-change.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_im_root()->get_content_item(0) );
+        SoundEventsTable* pTable = pScore->get_midi_table();
+
+//        cout << test_name() << ". Num.events = " << pTable->num_events() << endl;
+//        cout << pTable->dump_midi_events() << endl;
+        CHECK( pTable && pTable->num_events() == 17 );
+        CHECK( pTable && is_equal_time(pTable->get_anacruxis_missing_time(), 0.0) );
+        std::vector<SoundEvent*>& events = pTable->get_events();
+        CHECK( events[8]->EventType == SoundEvent::k_note_on );
+        CHECK( events[8]->DeltaTime == 0L );
+        CHECK( events[8]->NotePitch == 72);
+        CHECK( events[9]->EventType == SoundEvent::k_note_on );
+        CHECK( events[9]->DeltaTime == 0L );
+        CHECK( events[9]->NotePitch == 72);
+        CHECK( events[10]->EventType == SoundEvent::k_note_on );
+        CHECK( events[10]->DeltaTime == 0L );
+        CHECK( events[10]->NotePitch == 72);
+        CHECK( events[11]->EventType == SoundEvent::k_note_on );
+        CHECK( events[11]->DeltaTime == 0L );
+        CHECK( events[11]->NotePitch == 72);
+    }
+
 
     //@ Measures jumps table ------------------------------------------------------------
 

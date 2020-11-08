@@ -184,6 +184,7 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE065),  // F clef ottava alta
     GlyphData(0xE063),  // F clef quindicesima_bassa,
     GlyphData(0xE066),  // F clef quindicesima_alta,
+    GlyphData(0xE06D),  // 6-string TAB clef
 
 //time signatures (U+E080 - U+E09F)
     GlyphData(0xE080),  // Number 0
