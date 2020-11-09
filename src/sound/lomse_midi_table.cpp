@@ -826,7 +826,7 @@ void SoundEventsTable::save_transposition_information(StaffObjsCursor& cursor,
     int numStaves = pInstr->get_num_staves();
 
     //determine semitones to substract
-    int semitones = pTrp->get_chromatic();
+    int semitones = pTrp->get_chromatic() + pTrp->get_octave_change() * 12;
 
     //save semitones
     int iStaff = pTrp->get_applicable_staff();

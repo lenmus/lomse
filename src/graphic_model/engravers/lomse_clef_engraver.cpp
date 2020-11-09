@@ -140,6 +140,8 @@ int ClefEngraver::find_glyph(int clefType)
         case k_clef_15_F4: return k_glyph_f_clef_quindicesima_alta;
         case k_clef_F4_15: return k_glyph_f_clef_quindicesima_bassa;
         case k_clef_percussion: return k_glyph_percussion_clef_block;
+        case k_clef_TAB: return k_glyph_TAB_clef;
+        case k_clef_none: return k_glyph_g_clef;
         default:
         {
             LOMSE_LOG_ERROR("No glyph defined for clef type %d.", clefType);
@@ -203,8 +205,13 @@ Tenths ClefEngraver::get_glyph_offset()
             case k_clef_C5:     return yOffset - 1.0f;
 
             case k_clef_percussion:     return yOffset + 20.0f;
+            case k_clef_TAB:            return yOffset + 20.0f;
+            case k_clef_none:           return yOffset + 30.0f;
             default:
+            {
+                LOMSE_LOG_ERROR("No offset defined for clef type %d.", m_nClefType);
                 return yOffset;
+            }
         }
     }
     else
@@ -233,9 +240,14 @@ Tenths ClefEngraver::get_glyph_offset()
             case k_clef_C5:     return yOffset;
 
             case k_clef_percussion:     return yOffset + 20.0f;
+            case k_clef_TAB:            return yOffset + 20.0f;
+            case k_clef_none:           return yOffset + 30.0f;
 
             default:
+            {
+                LOMSE_LOG_ERROR("No offset defined for clef type %d.", m_nClefType);
                 return yOffset;
+            }
         }
     }
 }

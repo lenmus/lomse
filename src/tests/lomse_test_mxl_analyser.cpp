@@ -1418,7 +1418,8 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_01)
     {
-        //@01 minimum content parsed ok
+        //@01. minimum content parsed ok
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1445,7 +1446,8 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_02)
     {
-        //@02 error in clef sign
+        //@02. error in clef sign
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1472,7 +1474,8 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_03)
     {
-        //@03 staff num parsed ok
+        //@03. staff num parsed ok
+
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -1491,6 +1494,181 @@ SUITE(MxlAnalyserTest)
         ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
         CHECK( pClef != nullptr );
         CHECK( pClef && pClef->get_clef_type() == k_clef_F4 );
+        CHECK( pClef && pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, clef_04)
+    {
+        //@04. clef with octave change
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<clef number='2'>"
+                "<sign>G</sign>"
+                "<line>2</line>"
+                "<clef-octave-change>-1</clef-octave-change>"
+            "</clef>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        CHECK( pClef != nullptr );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_G2_8 );
+        CHECK( pClef && pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, clef_05)
+    {
+        //@05. clef with invalid octave change
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Warning: <clef-octave-change> only supported for up to two octaves. Ignored."
+            << endl;
+        parser.parse_text(
+            "<clef number='2'>"
+                "<sign>F</sign>"
+                "<line>4</line>"
+                "<clef-octave-change>-3</clef-octave-change>"
+            "</clef>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        CHECK( pClef != nullptr );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_F4 );
+        CHECK( pClef && pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, clef_06)
+    {
+        //@06. G clef on invalid line
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Warning: G clef only supported in lines 1 or 2. Clef G3 changed to G2."
+            << endl;
+        parser.parse_text(
+            "<clef number='2'>"
+                "<sign>G</sign>"
+                "<line>3</line>"
+            "</clef>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        CHECK( pClef != nullptr );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_G2 );
+        CHECK( pClef && pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, clef_07)
+    {
+        //@07. F clef on invalid line
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Warning: F clef only supported in lines 3, 4 or 5. Clef F2 changed to F4."
+            << endl;
+        parser.parse_text(
+            "<clef number='2'>"
+                "<sign>F</sign>"
+                "<line>2</line>"
+            "</clef>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        CHECK( pClef != nullptr );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_F4 );
+        CHECK( pClef && pClef->get_staff() == 1 );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, clef_08)
+    {
+        //@08. C clef on invalid line
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Warning: C clef only supported in lines 1 to 5. Clef C6 changed to C1."
+            << endl;
+        parser.parse_text(
+            "<clef number='2'>"
+                "<sign>C</sign>"
+                "<line>6</line>"
+            "</clef>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_clef() == true );
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pRoot );
+        CHECK( pClef != nullptr );
+        CHECK( pClef && pClef->get_clef_type() == k_clef_C1 );
         CHECK( pClef && pClef->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();

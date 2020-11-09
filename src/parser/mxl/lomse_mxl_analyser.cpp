@@ -2368,44 +2368,69 @@ protected:
 
     int determine_clef_type()
     {
-        if (m_octaveChange==1 && !(m_sign == "F" || m_sign == "G"))
+        if (m_octaveChange != 0 && !(m_sign == "F" || m_sign == "G"))
         {
             error_msg("Warning: <clef-octave-change> only implemented for F and G keys. Ignored.");
             m_octaveChange=0;
         }
 
-        if (m_line < 1 || m_line > 5)
+        if (m_octaveChange > 2 || m_octaveChange < -2)
         {
-            //TODO
-            //error_msg("Warning: F clef only supported in lines 3, 4 or 5. Clef F in m_line " + m_line + "changed to F in m_line 4.");
-            m_line = 1;
+            error_msg("Warning: <clef-octave-change> only supported for up to two octaves. Ignored.");
+            m_octaveChange=0;
         }
 
         if (m_sign == "G")
         {
-            if (m_line==2)
-                return k_clef_G2;
-            else if (m_line==1)
+            if (m_line==1)
                 return k_clef_G1;
+            else if (m_line==2)
+            {
+                if (m_octaveChange==0)
+                    return k_clef_G2;
+                else if (m_octaveChange==1)
+                    return k_clef_8_G2;     //G2, 8ve. above
+                else if (m_octaveChange==2)
+                    return k_clef_15_G2;    //G2, 15 above
+                else if (m_octaveChange==-1)
+                    return k_clef_G2_8;     //G2, 8ve. below
+                else // must be m_octaveChange==-2
+                    return k_clef_G2_15;    //G2, 15 below
+            }
             else
             {
-                //TODO
-                //error_msg("Warning: G clef only supported in lines 1 or 2. Clef G in line " + m_line + "changed to G in line 2.");
+                stringstream msg;
+                msg << "Warning: G clef only supported in lines 1 or 2. Clef G"
+                    << m_line << " changed to G2.";
+                error_msg(msg.str());
                 return k_clef_G2;
             }
         }
         else if (m_sign == "F")
         {
             if (m_line==4)
-                return k_clef_F4;
+            {
+                if (m_octaveChange==0)
+                    return k_clef_F4;
+                else if (m_octaveChange==1)
+                    return k_clef_8_F4;     //F4 clef, 8ve. above
+                else if (m_octaveChange==2)
+                    return k_clef_15_F4;    //F4 clef, 15 above
+                else if (m_octaveChange==-1)
+                    return k_clef_F4_8;     //F4 clef, 8ve. below
+                else    //must be m_octaveChange==-2
+                    return k_clef_F4_15;    //F4 clef, 15 below
+            }
             else if (m_line==3)
                 return k_clef_F3;
             else if (m_line==5)
                 return k_clef_F5;
             else
             {
-                //TODO
-                //error_msg("Warning: F clef only supported in lines 3, 4 or 5. Clef F in line " + m_line + "changed to F in line 4.");
+                stringstream msg;
+                msg << "Warning: F clef only supported in lines 3, 4 or 5. Clef F"
+                    << m_line << " changed to F4.";
+                error_msg(msg.str());
                 return k_clef_F4;
             }
         }
@@ -2419,29 +2444,25 @@ protected:
                 return k_clef_C3;
             else if (m_line==4)
                 return k_clef_C4;
-            else
+            else if (m_line==5)
                 return k_clef_C5;
+            else
+            {
+                stringstream msg;
+                msg << "Warning: C clef only supported in lines 1 to 5. Clef C"
+                    << m_line << " changed to C1.";
+                error_msg(msg.str());
+                return k_clef_C1;
+            }
         }
 
-        //TODO
         else if (m_sign == "percussion")
             return k_clef_percussion;
-        else if (m_sign == "8_G")
-            return k_clef_8_G2;
-        else if (m_sign == "G_8")
-            return k_clef_G2_8;
-        else if (m_sign == "8_F4")
-            return k_clef_8_F4;
-        else if (m_sign == "F4_8")
-            return k_clef_F4_8;
-        else if (m_sign == "15_G")
-            return k_clef_15_G2;
-        else if (m_sign == "G_15")
-            return k_clef_G2_15;
-        else if (m_sign == "15_F4")
-            return k_clef_15_F4;
-        else if (m_sign == "F4_15")
-            return k_clef_F4_15;
+        else if (m_sign == "TAB")
+            return k_clef_TAB;
+        else if (m_sign == "none")
+            return k_clef_none;
+        //TODO: Other values: jianpu
         else
             return k_clef_undefined;
     }

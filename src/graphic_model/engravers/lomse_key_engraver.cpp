@@ -73,12 +73,14 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint 
     else if (numAccidentals > 0)
     {
         compute_positions_for_sharps(clefType);
-        add_accidentals(numAccidentals, k_glyph_sharp_accidental, uPos);
+        if (m_nKeyType != k_key_C)      //for TAB clef
+            add_accidentals(numAccidentals, k_glyph_sharp_accidental, uPos);
     }
     else
     {
         compute_positions_for_flats(clefType);
-        add_accidentals(-numAccidentals, k_glyph_flat_accidental, uPos);
+        if (m_nKeyType != k_key_C)      //for TAB clef
+            add_accidentals(-numAccidentals, k_glyph_flat_accidental, uPos);
     }
     return m_pKeyShape;
 }
@@ -213,6 +215,8 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             break;
 
         case k_clef_percussion:
+        case k_clef_TAB:
+        case k_clef_none:
         case k_clef_undefined:
             m_nKeyType = k_key_C;    //force not to draw any accidentals
             break;
@@ -340,6 +344,8 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             break;
 
         case k_clef_percussion:
+        case k_clef_TAB:
+        case k_clef_none:
         case k_clef_undefined:
             m_nKeyType = k_key_C;    //force not to draw any accidentals
             break;

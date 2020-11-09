@@ -436,10 +436,27 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octave
     switch (clefType)
     {
         case k_clef_undefined:
+        case k_clef_none:
         case k_clef_G2:
             return dpitch - C4_DPITCH;
+        case k_clef_8_G2:        //8 above
+            return dpitch - C4_DPITCH - 7;
+        case k_clef_G2_8:        //8 below
+            return dpitch - C4_DPITCH + 7;
+        case k_clef_15_G2:       //15 above
+            return dpitch - C4_DPITCH - 14;
+        case k_clef_G2_15:       //15 below
+            return dpitch - C4_DPITCH + 14;
         case k_clef_F4:
             return dpitch - C4_DPITCH + 12;
+        case k_clef_8_F4:        //8 above
+            return dpitch - C4_DPITCH + 5;
+        case k_clef_F4_8:        //8 below
+            return dpitch - C4_DPITCH + 19;
+        case k_clef_15_F4:       //15 above
+            return dpitch - C4_DPITCH - 2;
+        case k_clef_F4_15:       //15 below
+            return dpitch - C4_DPITCH + 26;
         case k_clef_F3:
             return dpitch - C4_DPITCH + 10;
         case k_clef_C1:
@@ -451,26 +468,21 @@ int NoteEngraver::pitch_to_pos_on_staff(ImoNote* pNote, int clefType, int octave
         case k_clef_C4:
             return dpitch - C4_DPITCH + 8;
         case k_clef_percussion:
-            return 5;       //on 2nd space
+            return 6;       //on 3rd line
         case k_clef_C5:
             return dpitch - C4_DPITCH + 10;
         case k_clef_F5:
             return dpitch - C4_DPITCH + 14;
         case k_clef_G1:
             return dpitch - C4_DPITCH - 2;
-        case k_clef_8_G2:        //8 above
-        case k_clef_G2_8:        //8 below
-        case k_clef_8_F4:        //8 above
-        case k_clef_F4_8:        //8 below
-        case k_clef_15_G2:       //15 above
-        case k_clef_G2_15:       //15 below
-        case k_clef_15_F4:       //15 above
-        case k_clef_F4_15:       //15 below
-            //TODO: NoteEngraver::pitch_to_pos_on_staff. clefs with 8ve
-            return 2;
+        case k_clef_TAB:
+            return dpitch - C4_DPITCH - 2;
         default:
-            //LogMessage("NoteEngraver::pitch_to_pos_on_staff", "Case %d not treated in switch statement", nClef);
+        {
+            LOMSE_LOG_ERROR("Program maintenance error: No pos.on staff defined for clef type %d",
+                            clefType);
             return dpitch - C4_DPITCH;     //assume G clef
+        }
     }
 }
 

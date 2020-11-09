@@ -795,8 +795,13 @@ DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
         case k_clef_G2_15:        return DiatonicPitch(k_step_E, k_octave_2);  //15 below
         case k_clef_15_F4:        return DiatonicPitch(k_step_G, k_octave_4);  //15 above
         case k_clef_F4_15:        return DiatonicPitch(k_step_G, k_octave_0);  //15 below
+
         case k_clef_undefined:
-        case k_clef_percussion:   return NO_DPITCH;
+        case k_clef_percussion:
+        case k_clef_TAB:
+        case k_clef_none:
+            return NO_DPITCH;
+
         default:
         {
             stringstream ss;

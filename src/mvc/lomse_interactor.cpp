@@ -473,7 +473,8 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
             ImoScore* pScore = pInstr->get_score();
             EClef clef = EClef(
                 ScoreAlgorithms::get_applicable_clef_for(pScore, instr, staff, time) );
-            if (clef == k_clef_undefined || clef == k_clef_percussion)
+            if (clef == k_clef_undefined || clef == k_clef_percussion ||
+                clef == k_clef_TAB)
                 return DiatonicPitch(k_no_pitch);
 
             //determine pitch

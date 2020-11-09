@@ -266,7 +266,9 @@ enum EClef
     k_clef_G2_15,           ///< G clef on second line, 15 below
     k_clef_15_F4,           ///< F clef on fourth line, 15 above
     k_clef_F4_15,           ///< F clef on fourth line, 15 below
-
+    //clefs for supporting MusicXML
+    k_clef_TAB,             ///< Tablature scores
+    k_clef_none,            ///< none displayed, but behave as G2
     k_max_clef,             ///< Last element, for loops and checks
 };
 
