@@ -563,6 +563,34 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n d4 q v1 p1)" );
     }
 
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_12)
+    {
+        //@12. R11. Clefs must go before barlines at the same timepos
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/colstaffobjs/07-clef-change.lms");
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 7 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_quarter)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 h v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1,   128,   0, "(clef F4 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   128,   0, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1,   128,   0, "(n c3 q v1 p1)" );
+    }
+
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
     {
         //@200. One grace. From previous 10%

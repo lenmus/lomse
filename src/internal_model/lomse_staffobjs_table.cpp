@@ -260,6 +260,11 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
         return true;    //move clef/key/time before 'A' object
     }
 
+    //R11. Clefs must go before barlines at the same timepos
+    if (pB->is_clef() && pA->is_barline())
+        return true;   //move B after A
+
+
     //R999. Both have equal time. If no other rule triggers preserve definition order
     return false;   //insert B after A
 }
