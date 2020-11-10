@@ -73,11 +73,18 @@
 # LOMSE_BUILD_SHARED_LIB (Default: ON for Unix, OFF for Windows)
 #   Build the shared library
 #
-# LOMSE_ENABLE_UNIT_TESTS (Default: ON)
-#   By default the unit tests runner program 'testlib' is also built and the
-#   the tests are automatically run after building the library. You can disable
+# LOMSE_BUILD_TESTS (Default: ON)
+#   By default the unit tests runner program 'testlib' is also built.
+#   You can disable building the tests with this option:
+#       cmake -DLOMSE_BUILD_TESTS:BOOL=OFF [...]
+#
+# LOMSE_RUN_TESTS (Default: ON)
+#   When unit test runner program 'testlib' is built (enabled by default and
+#   controlled by option LOMSE_BUILD_TESTS) the tests will be automatically run
+#   after building the library. You can disable running the tests with
 #   this option:
-#       cmake -DLOMSE_ENABLE_UNIT_TESTS:BOOL=OFF [...]
+#       cmake -DLOMSE_RUN_TESTS:BOOL=OFF [...]
+#   But LOMSE_RUN_TESTS is useless when LOMSE_BUILD_TESTS == OFF
 #
 # LOMSE_BUILD_EXAMPLE (Default: OFF)
 #   Build the tutorial_1 program that uses the library, to test it.
