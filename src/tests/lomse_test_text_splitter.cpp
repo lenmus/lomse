@@ -295,9 +295,7 @@ public:
         ImoStyle* pStyle = doc.create_style("chinese");
         pStyle->font_name("Noto Sans CJK SC");  //WenQuanYi Zen Hei");
         ImoParagraph* pPara = doc.add_paragraph();
-        ImoTextItem* pText = pPara->add_text_item(data, pStyle);
-        pText->set_language("zh_CN");
-        return pText;
+        return pPara->add_text_item(data, pStyle);
     }
 
     bool is_valid_font(WordEngrouter* pEngrouter)

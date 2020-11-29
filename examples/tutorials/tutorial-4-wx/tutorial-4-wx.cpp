@@ -449,11 +449,6 @@ void MyFrame::initialize_lomse()
     //Now, initialize the library with these values
     m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
 
-#ifdef __APPLE__
-    // Set fonts path manually on OSX, not using fontconfig
-    m_lomse.set_default_fonts_path("../../../fonts/");
-#endif
-
     //set required callbacks
     m_lomse.set_notify_callback(this, wrapper_lomse_event);
 }

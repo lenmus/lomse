@@ -145,10 +145,10 @@
 #       zlib            https://github.com/madler/zlib
 #       UnitTest++      https://github.com/unittest-cpp/unittest-cpp
 #
-#   b) additional, for Linux platforms (but not for Android or macOS):
+#   b) additional, for Linux & macOS platforms (but not for Android):
 #       fontconfig      https://gitlab.freedesktop.org/fontconfig/fontconfig
 #
-# It also uses (included as part of the source tree):
+# It also uses (included as part of the surce tree):
 #   utfcpp
 #   agg
 #   pugixml
@@ -635,7 +635,7 @@ if( LOMSE_ENABLE_PNG )
 endif(LOMSE_ENABLE_PNG)
 
 # Check for fontconfig
-if (UNIX AND NOT APPLE)  #Linux & Android - not macOS
+if (UNIX)  #Linux, macOS & Android
     find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
     find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
     if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
