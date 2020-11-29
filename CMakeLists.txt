@@ -198,7 +198,9 @@ cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
 cmake_policy(SET CMP0054 NEW)   # quoted arguments will not be further dereferenced
 
 #OSX complains 
-cmake_policy(SET CMP0087 NEW)   # evaluate generator expressions for install(CODE) and install(SCRIPT)
+if (${CMAKE_VERSION} GREATER "3.12")
+    cmake_policy(SET CMP0078 NEW)   # evaluate generator expressions for install(CODE) and install(SCRIPT)
+endif()
 
 #prevent in-source builds
   # make sure the user doesn't play dirty with symlinks
