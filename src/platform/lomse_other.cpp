@@ -126,8 +126,12 @@ std::string FontSelector::find_font(const std::string& language,
 
     //Other fonts: ask user program
     else
-        fullpath = m_pLibScope->get_font(name, fBold, fItalic);
+    {
+        std::cout << "in find_font() other fonts" << std::endl;
+        std::cout << "language = " << language << ", name = " << name << ", fontFile = " << fontFile << std::endl;
 
+        fullpath = m_pLibScope->get_font(name, fBold, fItalic);
+    }
     
     LOMSE_LOG_INFO("key=%s, Path=%s", key.c_str(), fullpath.c_str());
     m_cache.insert(make_pair(key, fullpath));
