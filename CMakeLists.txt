@@ -145,10 +145,10 @@
 #       zlib            https://github.com/madler/zlib
 #       UnitTest++      https://github.com/unittest-cpp/unittest-cpp
 #
-#   b) additional, for Linux & macOS platforms (but not for Android):
+#   b) additional, for Linux platforms (but not for Android or macOS):
 #       fontconfig      https://gitlab.freedesktop.org/fontconfig/fontconfig
 #
-# It also uses (included as part of the surce tree):
+# It also uses (included as part of the source tree):
 #   utfcpp
 #   agg
 #   pugixml
@@ -196,6 +196,9 @@ cmake_policy(SET CMP0042 NEW)   #MACOSX_RPATH is enabled by default
 
 #Windows 10 camplains 
 cmake_policy(SET CMP0054 NEW)   # quoted arguments will not be further dereferenced
+
+#OSX complains 
+cmake_policy(SET CMP0087 NEW)   # evaluate generator expressions for install(CODE) and install(SCRIPT)
 
 #prevent in-source builds
   # make sure the user doesn't play dirty with symlinks
@@ -632,7 +635,7 @@ if( LOMSE_ENABLE_PNG )
 endif(LOMSE_ENABLE_PNG)
 
 # Check for fontconfig
-if (UNIX)  #Linux, macOS & Android
+if (UNIX AND NOT APPLE)  #Linux & Android - not macOS
     find_path(FONTCONFIG_INCLUDE_DIR fontconfig/fontconfig.h)
     find_library(FONTCONFIG_LIBRARIES NAMES fontconfig)
     if (("${FONTCONFIG_INCLUDE_DIR}" STREQUAL "FONTCONFIG_INCLUDE_DIR-NOTFOUND")
@@ -875,12 +878,12 @@ endif(LOMSE_BUILD_EXAMPLE)
 
 if( UNIX )
     # copy generated libraries
-    install( TARGETS ${LOMSE} DESTINATION ${LOMSE_LIBDIR} )
+    install( TARGETS ${LOMSE_STATIC} DESTINATION ${LOMSE_LIBDIR} )
     install( TARGETS ${LOMSE_SHARED} LIBRARY DESTINATION ${LOMSE_LIBDIR} )
 
     #create symlink to library
 	install( CODE
-        "EXECUTE_PROCESS(COMMAND ln -fs ${CMAKE_INSTALL_PREFIX}/lib/${LOMSE_SHARED} 
+        "EXECUTE_PROCESS(COMMAND ln -fs ${CMAKE_INSTALL_PREFIX}/lib/$<TARGET_FILE_NAME:lomse-shared> 
                                         ${CMAKE_INSTALL_PREFIX}/lib/liblomse.so )" 
     )
 
@@ -889,7 +892,7 @@ elseif( WIN32 )
     set(INSTALL_BRAVURA_FONT 1)
 
     # copy generated libraries
-    install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE_STATIC} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
     install( TARGETS ${LOMSE_SHARED} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
 
 endif()
