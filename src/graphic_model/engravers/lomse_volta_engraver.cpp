@@ -165,6 +165,13 @@ GmoShape* VoltaBracketEngraver::create_first_shape()
 {
     //first shape when there are more than one
 
+    if (!m_fFirstShapeAtSystemStart && m_pStartBarlineShape->get_x_right_line() - m_uStaffRight > -1.0f)
+    {
+        //start barline is at the end of a system, create first shape at next system start instead
+        m_fFirstShapeAtSystemStart = true;
+        return nullptr;
+    }
+
     GmoShapeVoltaBracket* pShape = LOMSE_NEW GmoShapeVoltaBracket(m_pVolta, m_numShapes, m_color);
     pShape->enable_final_jog(false);
 
@@ -212,23 +219,14 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
     LUnits xStart = m_uStaffLeft;
     LUnits xEnd = m_uStaffRight;
 
-    if (shapeType == k_single_shape)
+    if (!m_fFirstShapeAtSystemStart && (shapeType == k_single_shape || shapeType == k_first_shape))
     {
         xStart = m_pStartBarlineShape->get_x_right_line();
         if (m_pStartBarlineShape->get_width() < 40.0f)
             xStart += 30.0f;
+    }
 
-        xEnd = m_pStopBarlineShape->get_x_left_line();
-        if (m_pStopBarlineShape->get_width() < 40.0f)
-            xEnd -= 30.0f;
-    }
-    else if (shapeType == k_first_shape)
-    {
-        xStart = m_pStartBarlineShape->get_x_right_line();
-        if (m_pStartBarlineShape->get_width() < 40.0f)
-            xStart += 30.0f;
-    }
-    else if (shapeType == k_final_shape)
+    if (shapeType == k_single_shape || shapeType == k_final_shape)
     {
         xEnd = m_pStopBarlineShape->get_x_left_line();
         if (m_pStopBarlineShape->get_width() < 40.0f)

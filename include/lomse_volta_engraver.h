@@ -51,6 +51,7 @@ class VoltaBracketEngraver : public RelObjEngraver
 {
 protected:
     int m_numShapes;
+    bool m_fFirstShapeAtSystemStart = false;
     ImoVoltaBracket* m_pVolta;
     LUnits m_uStaffTop;             //top line of current staff
     LUnits m_uStaffLeft;
