@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -135,7 +135,12 @@ public:
                                   int idxStaff, VerticalProfile* pVProfile) = 0;
 
     virtual void set_prolog_width(LUnits UNUSED(width)) {}
-    virtual GmoShape* create_first_or_intermediate_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
+    virtual GmoShape* create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
+                                            LUnits UNUSED(xStaffRight),
+                                            LUnits UNUSED(yStaffTop),
+                                            LUnits UNUSED(prologWidth),
+                                            VerticalProfile* UNUSED(pVProfile),
+                                            Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
     virtual GmoShape* create_last_shape(Color UNUSED(color)=Color(0,0,0)) { return nullptr; }
 };
 

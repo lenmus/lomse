@@ -98,14 +98,6 @@ protected:
     bool m_fFirstColumnInSystem;
     int m_barlinesInfo;     //info about barlines at end of this system
 
-    //RelObjs that continue in next system
-    typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
-    std::list<PendingRelObj> m_notFinishedRelObj;
-
-    //Lyrics that continue in next system
-    typedef std::pair<std::string, PendingAuxObjs*> PendingLyrics;
-    std::list<PendingLyrics> m_notFinishedLyrics;
-
     //prolog shapes waiting to be added to slice staff box
     std::list< std::tuple<GmoShape*, int, int> > m_prologShapes;
 

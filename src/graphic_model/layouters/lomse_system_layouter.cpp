@@ -768,6 +768,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
     }
 
     //engrave the AuxObjs/RelObjs in this system
+    //systemAuxObjs is traversed several times to engrave objects by priority order
     for (size_t i = 0; i < k_num_auxobjs; ++i)
     {
         int type = m_order[i];
@@ -789,15 +790,18 @@ void SystemLayouter::engrave_system_details(int iSystem)
 
     //engrave RelObjs that continue in next system
     list<PendingRelObj>::iterator itR;
-    for (itR = m_notFinishedRelObj.begin(); itR != m_notFinishedRelObj.end(); ++itR)
+    for (itR = m_pScoreLyt->m_notFinishedRelObj.begin();
+         itR != m_pScoreLyt->m_notFinishedRelObj.end(); ++itR)
     {
         engrave_not_finished_relobj((*itR).first, (*itR).second, iSystem);
     }
 
     //engrave Lyrics that continue in next system
-    list<PendingLyrics>::iterator itAR;
-    for (itAR = m_notFinishedLyrics.begin(); itAR != m_notFinishedLyrics.end(); ++itAR)
+    list<PendingLyricsObj>::iterator itAR;
+    for (itAR = m_pScoreLyt->m_notFinishedLyrics.begin();
+         itAR != m_pScoreLyt->m_notFinishedLyrics.end(); ++itAR)
     {
+        //exclude objects
         engrave_not_finished_lyrics((*itAR).first, (*itAR).second, iSystem);
     }
 
@@ -865,7 +869,8 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                      iInstr, iStaff, iSystem, iCol,
                                                      iLine, pInstr, idxStaff,
                                                      m_pVProfile);
-            m_notFinishedRelObj.push_back(make_pair(pRO, pPAO));
+            PendingAuxObjs* pData = LOMSE_NEW PendingAuxObjs(*pPAO);
+            m_pScoreLyt->m_notFinishedRelObj.push_back(make_pair(pRO, pData) );
         }
         else if (pSO == pRO->get_end_object())
         {
@@ -883,11 +888,13 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 
             //remove from pending RelObjs
             list<PendingRelObj>::iterator itR;
-            for (itR = m_notFinishedRelObj.begin(); itR != m_notFinishedRelObj.end(); ++itR)
+            for (itR = m_pScoreLyt->m_notFinishedRelObj.begin();
+                 itR != m_pScoreLyt->m_notFinishedRelObj.end(); ++itR)
             {
                 if ((*itR).first == pRO)
                 {
-                    m_notFinishedRelObj.erase(itR);
+                    delete (*itR).second;
+                    m_pScoreLyt->m_notFinishedRelObj.erase(itR);
                     break;
                 }
             }
@@ -925,7 +932,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                     m_pShapesCreator->start_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
                                                 iCol, iLine, pInstr, idxStaff, m_pVProfile);
-                    m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                    m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
                 }
                 else if (pLyric->is_end_of_relation())
                 {
@@ -941,12 +948,13 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                true, iStaff, idxStaff);
 
                     //remove from pending AuxRelObjs
-                    list<PendingLyrics>::iterator itAR;
-                    for (itAR = m_notFinishedLyrics.begin(); itAR != m_notFinishedLyrics.end(); ++itAR)
+                    list<PendingLyricsObj>::iterator itAR;
+                    for (itAR = m_pScoreLyt->m_notFinishedLyrics.begin();
+                         itAR != m_pScoreLyt->m_notFinishedLyrics.end(); ++itAR)
                     {
                         if ((*itAR).first == tag.str())
                         {
-                            m_notFinishedLyrics.erase(itAR);
+                            m_pScoreLyt->m_notFinishedLyrics.erase(itAR);
                             break;
                         }
                     }
@@ -961,15 +969,16 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                     //when the start of the relation was in a previous system, it is
                     //necessary to add the auxrelobj to the list of pending auxobjs if
                     //not yet included.
-                    list<PendingLyrics>::iterator it;
-                    for (it = m_notFinishedLyrics.begin(); it != m_notFinishedLyrics.end(); ++it)
+                    list<PendingLyricsObj>::iterator it;
+                    for (it = m_pScoreLyt->m_notFinishedLyrics.begin();
+                         it != m_pScoreLyt->m_notFinishedLyrics.end(); ++it)
                     {
                         if ((*it).first == tag.str())
                             break;
                     }
-                    if (it == m_notFinishedLyrics.end())
+                    if (it == m_pScoreLyt->m_notFinishedLyrics.end())
                     {
-                        m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                        m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
                     }
                 }
             }
@@ -999,7 +1008,9 @@ void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs*
     int iStaff = pPAO->m_iStaff;
     int idxStaff = pPAO->m_idxStaff;
 
-    GmoShape* pAuxShape = m_pShapesCreator->create_first_or_intermediate_shape(pRO);
+    GmoShape* pAuxShape =
+        m_pShapesCreator->create_first_or_intermediate_shape(pRO, iInstr, iStaff,
+                                                             m_uPrologWidth, m_pVProfile);
     if (pAuxShape)
         add_aux_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iCol, iInstr,
                                iStaff, idxStaff);

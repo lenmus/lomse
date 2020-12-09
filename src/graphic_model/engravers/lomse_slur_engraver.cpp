@@ -122,7 +122,10 @@ void SlurEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* SlurEngraver::create_first_or_intermediate_shape(Color color)
+GmoShape* SlurEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
+                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                    LUnits UNUSED(prologWidth),
+                                    VerticalProfile* UNUSED(pVProfile), Color color)
 {
     m_color = color;
     if (m_numShapes == 0)
