@@ -52,6 +52,8 @@ class OctaveShiftEngraver : public RelObjEngraver
 protected:
     InstrumentEngraver* m_pInstrEngrv;
     LUnits m_uStaffTop;         //top line of current system
+    LUnits m_uStaffLeft;
+    LUnits m_uStaffRight;
 
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
@@ -108,6 +110,7 @@ protected:
 
     void compute_first_shape_position();
     void compute_second_shape_position();
+    void compute_intermediate_shape_position();
     //void add_user_displacements(int iOctaveShift, UPoint* points);
     LUnits determine_top_line_of_shape();
 

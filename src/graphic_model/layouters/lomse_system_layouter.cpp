@@ -69,7 +69,7 @@ namespace lomse
 // Some variables to control engraving ordering for AuxObjs/RelObjs
 //=======================================================================================
 
-typedef std::pair<ImoObj*, PendingAuxObjs*> PendingPair;
+typedef std::pair<ImoObj*, PendingAuxObj*> PendingPair;
 
 #define k_num_auxobjs (k_imo_auxobj_last - k_imo_auxobj - 1) + (k_imo_relobj_last - k_imo_relobj -1)
 static int m_order[k_num_auxobjs];
@@ -728,7 +728,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
     std::bitset<k_imo_last> used;
     used.reset();
 
-    std::list<PendingAuxObjs*>::iterator it;
+    std::list<PendingAuxObj*>::iterator it;
     for (it = m_pScoreLyt->m_pendingAuxObjs.begin(); it != m_pScoreLyt->m_pendingAuxObjs.end(); ++it)
     {
         int iCol = (*it)->m_iCol;
@@ -737,7 +737,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
             break;
         if (objSystem == iSystem)
         {
-            PendingAuxObjs* pParent = *it;
+            PendingAuxObj* pParent = *it;
 
             //add its AuxObjs/RelObjs to the system list
             ImoStaffObj* pSO = (*it)->m_pSO;
@@ -801,7 +801,6 @@ void SystemLayouter::engrave_system_details(int iSystem)
     for (itAR = m_pScoreLyt->m_notFinishedLyrics.begin();
          itAR != m_pScoreLyt->m_notFinishedLyrics.end(); ++itAR)
     {
-        //exclude objects
         engrave_not_finished_lyrics((*itAR).first, (*itAR).second, iSystem);
     }
 
@@ -814,7 +813,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
             break;
         if (objSystem == iSystem)
         {
-            PendingAuxObjs* pPAO = *it;
+            PendingAuxObj* pPAO = *it;
 		    it = m_pScoreLyt->m_pendingAuxObjs.erase(it);
             delete pPAO;
         }
@@ -824,7 +823,7 @@ void SystemLayouter::engrave_system_details(int iSystem)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
+void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObj* pPAO,
                                              int iSystem)
 {
     ImoStaffObj* pSO = pPAO->m_pSO;
@@ -869,7 +868,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                                                      iInstr, iStaff, iSystem, iCol,
                                                      iLine, pInstr, idxStaff,
                                                      m_pVProfile);
-            PendingAuxObjs* pData = LOMSE_NEW PendingAuxObjs(*pPAO);
+            PendingAuxObj* pData = LOMSE_NEW PendingAuxObj(*pPAO);
             m_pScoreLyt->m_notFinishedRelObj.push_back(make_pair(pRO, pData) );
         }
         else if (pSO == pRO->get_end_object())
@@ -932,7 +931,8 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                     m_pShapesCreator->start_engraving_auxrelobj(pLyric, pSO, tag.str(),
                                                 pNoteShape, iInstr, iStaff, iSystem,
                                                 iCol, iLine, pInstr, idxStaff, m_pVProfile);
-                    m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                    PendingAuxObj* pData = LOMSE_NEW PendingAuxObj(*pPAO);
+                    m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pData));
                 }
                 else if (pLyric->is_end_of_relation())
                 {
@@ -954,6 +954,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                     {
                         if ((*itAR).first == tag.str())
                         {
+                            delete (*itAR).second;
                             m_pScoreLyt->m_notFinishedLyrics.erase(itAR);
                             break;
                         }
@@ -978,7 +979,8 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
                     }
                     if (it == m_pScoreLyt->m_notFinishedLyrics.end())
                     {
-                        m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pPAO));
+                        PendingAuxObj* pData = LOMSE_NEW PendingAuxObj(*pPAO);
+                        m_pScoreLyt->m_notFinishedLyrics.push_back(make_pair(tag.str(), pData));
                     }
                 }
             }
@@ -1000,7 +1002,7 @@ void SystemLayouter::engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO,
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO,
+void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObj* pPAO,
                                                  int UNUSED(iSystem))
 {
     int iInstr = pPAO->m_iInstr;
@@ -1017,7 +1019,7 @@ void SystemLayouter::engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs*
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::engrave_not_finished_lyrics(const string& tag, PendingAuxObjs* pPAO,
+void SystemLayouter::engrave_not_finished_lyrics(const string& tag, PendingAuxObj* pPAO,
                                                  int UNUSED(iSystem))
 {
     add_lyrics_shapes_to_model(tag, GmoShape::k_layer_aux_objs, false, pPAO->m_iStaff,

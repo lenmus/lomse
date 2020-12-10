@@ -112,21 +112,17 @@ GmoShape* WedgeEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaff
                                     Color color)
 {
     m_color = color;
+    m_uStaffTop = yStaffTop;
+    m_pVProfile = pVProfile;
+    m_uPrologWidth = prologWidth;
+
     if (m_numShapes == 0)
     {
         decide_placement();
         return create_first_shape();
     }
     else
-    {
-        m_uStaffTop = yStaffTop;
-        m_pVProfile = pVProfile;
-        LUnits save = m_uPrologWidth;
-        m_uPrologWidth = prologWidth;
-        GmoShape* pShape = create_intermediate_shape();
-        m_uPrologWidth = save;
-        return pShape;
-    }
+        return create_intermediate_shape();
 }
 
 //---------------------------------------------------------------------------------------
@@ -344,7 +340,7 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::set_prolog_width(LUnits width)
 {
-    m_uPrologWidth += width;
+    m_uPrologWidth = width;
 }
 
 

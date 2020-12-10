@@ -102,12 +102,18 @@ void OctaveShiftEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* 
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                    LUnits UNUSED(prologWidth),
-                                    VerticalProfile* UNUSED(pVProfile), Color color)
+GmoShape* OctaveShiftEngraver::create_first_or_intermediate_shape(LUnits xStaffLeft,
+                                    LUnits xStaffRight, LUnits yStaffTop,
+                                    LUnits prologWidth, VerticalProfile* pVProfile,
+                                    Color color)
 {
     m_color = color;
+    m_uStaffLeft = xStaffLeft;
+    m_uStaffRight = xStaffRight;
+    m_uStaffTop = yStaffTop;
+    m_pVProfile = pVProfile;
+    m_uPrologWidth = prologWidth;
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -134,9 +140,13 @@ GmoShape* OctaveShiftEngraver::create_intermediate_shape()
 {
     //intermediate shape spanning the whole system
 
+    compute_intermediate_shape_position();
+    //add_user_displacements(0, &m_points[0]);
+    create_main_container_shape();
+    add_line_info();
+
     ++m_numShapes;
-    //TODO
-    return nullptr;
+    return m_pMainShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -280,6 +290,20 @@ void OctaveShiftEngraver::compute_second_shape_position()
 }
 
 //---------------------------------------------------------------------------------------
+void OctaveShiftEngraver::compute_intermediate_shape_position()
+{
+    //compute xLeft and xRight positions
+    m_points[0].x = m_uStaffLeft + m_uPrologWidth - m_pShapeNumeral->get_width()
+                    - tenths_to_logical(LOMSE_OCTAVE_SHIFT_SPACE_TO_LINE);
+;
+    m_points[1].x = m_pInstrEngrv->get_staves_right();     //xRight at end of staff
+
+    //determine yTop
+    m_points[0].y = determine_top_line_of_shape();
+    m_points[1].y = m_points[0].y;
+}
+
+//---------------------------------------------------------------------------------------
 LUnits OctaveShiftEngraver::determine_top_line_of_shape()
 {
     LUnits yRef = m_uStaffTop;
@@ -326,7 +350,7 @@ void OctaveShiftEngraver::decide_placement()
 //---------------------------------------------------------------------------------------
 void OctaveShiftEngraver::set_prolog_width(LUnits width)
 {
-    m_uPrologWidth += width;
+    m_uPrologWidth = width;
 }
 
 

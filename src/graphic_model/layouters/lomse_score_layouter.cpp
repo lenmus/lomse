@@ -724,7 +724,7 @@ void ScoreLayouter::delete_pendig_aux_objects()
     //in other places
 
     //AuxObjs and RelObjs pending to be engraved
-    std::list<PendingAuxObjs*>::iterator itPAO;
+    std::list<PendingAuxObj*>::iterator itPAO;
     for (itPAO = m_pendingAuxObjs.begin(); itPAO != m_pendingAuxObjs.end(); ++itPAO)
         delete *itPAO;
     m_pendingAuxObjs.clear();
@@ -736,6 +736,9 @@ void ScoreLayouter::delete_pendig_aux_objects()
     m_notFinishedRelObj.clear();
 
     //Lyrics that continue in next system
+    std::list<PendingLyricsObj>::iterator itPLO;
+    for (itPLO = m_notFinishedLyrics.begin(); itPLO != m_notFinishedLyrics.end(); ++itPLO)
+        delete (*itPLO).second;
     m_notFinishedLyrics.clear();
 }
 

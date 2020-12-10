@@ -75,7 +75,7 @@ class GmoShapeNote;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about aux objs to be engraved when the system is ready
-struct PendingAuxObjs
+struct PendingAuxObj
 {
     ImoStaffObj* m_pSO;
     GmoShape* m_pMainShape;
@@ -86,7 +86,7 @@ struct PendingAuxObjs
     int m_iLine;
     int m_idxStaff;
 
-    PendingAuxObjs(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
+    PendingAuxObj(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
                    int iCol, int iLine, ImoInstrument* pInstr, int idxStaff)
         : m_pSO(pSO)
         , m_pMainShape(pMainShape)
@@ -128,8 +128,8 @@ struct PendingLyrics
 };
 
 // some helper typedefs
-typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
-typedef std::pair<std::string, PendingAuxObjs*> PendingLyricsObj;
+typedef std::pair<ImoRelObj*, PendingAuxObj*> PendingRelObj;
+typedef std::pair<std::string, PendingAuxObj*> PendingLyricsObj;
 
 
 //---------------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ protected:
     LUnits distance_to_top_of_system(int iSystem, bool fFirstInPage);
 
     //AuxObjs and RelObjs pending to be engraved
-    std::list<PendingAuxObjs*> m_pendingAuxObjs;
+    std::list<PendingAuxObj*> m_pendingAuxObjs;
 
     //RelObjs that continue in next system
     std::list<PendingRelObj> m_notFinishedRelObj;
