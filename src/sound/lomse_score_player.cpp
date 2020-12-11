@@ -991,12 +991,12 @@ void ScorePlayer::set_new_beat_information(SoundEvent* pEvent)
 
         if (m_beatType == k_beat_implied)
         {
-            m_nCurMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+            m_nCurMeasureDuration = long(pEvent->TopNumber) * long(pEvent->BeatDuration);
             m_nCurNumPulses = pEvent->NumPulses;
         }
         else if (m_beatType == k_beat_bottom_ts)
         {
-            m_nCurMeasureDuration = pEvent->TopNumber * pEvent->BeatDuration;
+            m_nCurMeasureDuration = long(pEvent->TopNumber) * long(pEvent->BeatDuration);
             m_nCurNumPulses = pEvent->TopNumber;
         }
 
