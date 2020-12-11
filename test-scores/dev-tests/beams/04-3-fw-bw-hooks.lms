@@ -1,0 +1,16 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (staves 2)(musicData
+        (clef G p1 (visible no))(clef F4 p2 (visible no))
+
+        (n c5 s p1 (stem down)(beam 1 ++))
+        (n b4 s p1 (stem down)(beam 1 =-))
+        (n a3 s p2 (stem up)(beam 1 =f))
+        (n e3 e p2 (stem up)(beam 1 =))
+        (n c3 s p2 (stem up)(beam 1 =b))
+        (n e4 t p1 (stem down)(beam 1 =++))
+        (n c4 t p1 (stem down)(beam 1 ---))
+    ))
+)

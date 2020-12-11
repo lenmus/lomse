@@ -1,0 +1,39 @@
+(score (vers 2.0) (instrument (staves 2)(musicData
+    (clef G p1)(clef F4 p2)(key C)
+
+    //both chords stem up and both flag notes imply stem up
+    (chord (n g4 e p1 (beam 1 +))
+        (n e4 e)
+        (n e3 e p2))
+    (chord (n g4 e p1 (beam 1 -))
+        (n e4 e)
+        (n e3 e p2))
+
+    //both chords stem down but both flag notes imply stem up
+    (chord (n e3 e p2 (beam 2 +))
+        (n g3 e)
+        (n e4 e p1))
+    (chord (n e3 e p2 (beam 2 -))
+        (n g3 e)
+        (n e4 e p1))
+
+    //first chord stem down, second stem up and both flag notes imply stem up
+    (chord (n e3 e p2 (beam 3 +))
+        (n g3 e)
+        (n e4 e p1))
+    (chord (n g4 e p1 (beam 3 -))
+        (n e4 e)
+        (n e3 e p2))
+    (barline)
+
+    //measure 2
+
+    //chords 1,2 & 3 stem down, 4 stem up. Flag notes 1,2 &3 imply stem down, last one stem up
+    //flag notes majority rule forces beam down but for last chord it is attached to bad note
+    (chord (n c5 s p1 (beam 4 ++))(n e5 s)(n g5 s))
+    (chord (n c5 s (beam 4 ==))(n f5 s)(n a5 s))
+    (chord (n d5 s (beam 4 ==))(n g5 s)(n b5 s))
+    (chord (n g4 s (beam 4 --))(n e4 s)(n c4 s))
+
+    (barline end)
+)))

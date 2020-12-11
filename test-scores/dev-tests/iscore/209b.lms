@@ -1,0 +1,1 @@
+(lenmusdoc (vers 0.0)(content (score (vers 2.0)(parts(instrIds P1 P3 P2)(group P1 P2 (name"Group1")(symbol bracket)(joinBarlines yes)))(instrument P1 (name "P1")(staves 1)(musicData (clef G p1)))(instrument P3 (name "P3")(staves 1)(infoMIDI 0 2)(musicData (clef G p1)))(instrument P2 (name "P2")(staves 1)(infoMIDI 0 1)(musicData (clef F4 p1))))))

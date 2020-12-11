@@ -1,0 +1,44 @@
+(score (vers 2.1)
+    (opt Render.SpacingMethod 1)    //fixed
+    (opt Render.SpacingValue 30)
+    (opt Staff.DrawLeftBarline false)
+    (instrument (staves 2)(musicData
+        (clef G p1)(clef F4 p2)
+        (time 17 16)
+
+        (n c5 s p1 (stem down)(beam 1 ++))
+        (n a3 s p2 (stem up)(beam 1 =-))
+        (n d3 e p2 (stem up)(beam 1 -))
+
+        (n b4 s p1 (stem down)(beam 2 ++))
+        (n g4 s p1 (stem down)(beam 2 ==))
+        (n g3 s p2 (stem up)(beam 2 =-))
+        (n e3 e p2 (stem up)(beam 2 -))
+
+        (n d3 s p2 (stem up)(beam 3 ++))
+        (n a4 s p1 (stem down)(beam 3 =-))
+        (n g3 e p2 (stem up)(beam 3 -))
+
+        (n g3 s p2 (stem up)(beam 4 ++))
+        (n d5 s p1 (stem down)(beam 4 =-))
+        (n e4 e p1 (stem down)(beam 4 -))
+
+        (barline)
+
+        (n d3 e p2 (stem up)(beam 5 +))
+        (n b4 s p1 (stem down)(beam 5 =+))
+        (n b4 s p1 (stem down)(beam 5 --))
+
+        (n d3 s p2 (stem up)(beam 6 ++))
+        (n d3 s p2 (stem up)(beam 6 =-))
+        (n b4 e p1 (stem down)(beam 6 -))
+
+        (n b4 t p1 (stem down)(beam 7 +++))
+        (n b4 t p1 (stem down)(beam 7 ===))
+        (n b4 t p1 (stem down)(beam 7 =--))
+        (n d3 t p2 (stem up)(beam 7 =++))
+        (n d3 t p2 (stem up)(beam 7 ===))
+        (n d3 t p2 (stem up)(beam 7 ---))
+
+    ))
+)
