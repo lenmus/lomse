@@ -118,7 +118,10 @@ void TupletEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TupletEngraver::create_first_or_intermediate_shape(Color color)
+GmoShape* TupletEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
+                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                    LUnits UNUSED(prologWidth),
+                                    VerticalProfile* UNUSED(pVProfile), Color color)
 {
     //TODO: It has been assumed that a tuplet cannot be split. This has to be revised
     m_color = color;

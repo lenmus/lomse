@@ -68,7 +68,7 @@ class SpacingAlgorithm;
 class SystemLayouter;
 class TypeMeasureInfo;
 class VerticalProfile;
-struct PendingAuxObjs;
+struct PendingAuxObj;
 
 //---------------------------------------------------------------------------------------
 // SystemLayouter: algorithm to layout a system
@@ -97,14 +97,6 @@ protected:
     UPoint m_pagePos;
     bool m_fFirstColumnInSystem;
     int m_barlinesInfo;     //info about barlines at end of this system
-
-    //RelObjs that continue in next system
-    typedef std::pair<ImoRelObj*, PendingAuxObjs*> PendingRelObj;
-    std::list<PendingRelObj> m_notFinishedRelObj;
-
-    //Lyrics that continue in next system
-    typedef std::pair<std::string, PendingAuxObjs*> PendingLyrics;
-    std::list<PendingLyrics> m_notFinishedLyrics;
 
     //prolog shapes waiting to be added to slice staff box
     std::list< std::tuple<GmoShape*, int, int> > m_prologShapes;
@@ -176,9 +168,9 @@ protected:
     bool measure_number_must_be_displayed(int policy, TypeMeasureInfo* pInfo,
                                           bool fFirstNumberInSystem);
 
-    void engrave_attached_object(ImoObj* pAR, PendingAuxObjs* pPAO, int iSystem);
-    void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObjs* pPAO, int iSystem);
-    void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObjs* pPAO, int iSystem);
+    void engrave_attached_object(ImoObj* pAR, PendingAuxObj* pPAO, int iSystem);
+    void engrave_not_finished_relobj(ImoRelObj* pRO, PendingAuxObj* pPAO, int iSystem);
+    void engrave_not_finished_lyrics(const std::string& tag, PendingAuxObj* pPAO, int iSystem);
 
     void add_last_rel_shape_to_model(GmoShape* pShape, ImoRelObj* pRO, int layer,
                                      int iCol, int iInstr, int iStaff, int idxStaff);

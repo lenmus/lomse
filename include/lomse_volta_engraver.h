@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2017. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,6 +63,8 @@ protected:
     GmoShapeBarline* m_pStartBarlineShape;
     GmoShapeBarline* m_pStopBarlineShape;
 
+    LUnits m_uPrologWidth = 0.0f;
+
 public:
     VoltaBracketEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~VoltaBracketEngraver() {}
@@ -80,7 +82,10 @@ public:
 
     //RelObjEngraver mandatory overrides
     void set_prolog_width(LUnits width) override { m_uStaffLeft += width; }
-    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
+                                                 LUnits yStaffTop, LUnits prologWidth,
+                                                 VerticalProfile* pVProfile,
+                                                 Color color=Color(0,0,0)) override;
     GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 protected:

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -106,9 +106,16 @@ void WedgeEngraver::decide_placement()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* WedgeEngraver::create_first_or_intermediate_shape(Color color)
+GmoShape* WedgeEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
+                                    LUnits UNUSED(xStaffRight), LUnits yStaffTop,
+                                    LUnits prologWidth, VerticalProfile* pVProfile,
+                                    Color color)
 {
     m_color = color;
+    m_uStaffTop = yStaffTop;
+    m_pVProfile = pVProfile;
+    m_uPrologWidth = prologWidth;
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -333,7 +340,7 @@ LUnits WedgeEngraver::determine_center_line_of_shape(LUnits startSpread, LUnits 
 //---------------------------------------------------------------------------------------
 void WedgeEngraver::set_prolog_width(LUnits width)
 {
-    m_uPrologWidth += width;
+    m_uPrologWidth = width;
 }
 
 

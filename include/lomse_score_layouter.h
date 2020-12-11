@@ -75,7 +75,7 @@ class GmoShapeNote;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about aux objs to be engraved when the system is ready
-struct PendingAuxObjs
+struct PendingAuxObj
 {
     ImoStaffObj* m_pSO;
     GmoShape* m_pMainShape;
@@ -86,7 +86,7 @@ struct PendingAuxObjs
     int m_iLine;
     int m_idxStaff;
 
-    PendingAuxObjs(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
+    PendingAuxObj(ImoStaffObj* pSO, GmoShape* pMainShape, int iInstr, int iStaff,
                    int iCol, int iLine, ImoInstrument* pInstr, int idxStaff)
         : m_pSO(pSO)
         , m_pMainShape(pMainShape)
@@ -127,8 +127,14 @@ struct PendingLyrics
 
 };
 
+// some helper typedefs
+typedef std::pair<ImoRelObj*, PendingAuxObj*> PendingRelObj;
+typedef std::pair<std::string, PendingAuxObj*> PendingLyricsObj;
+
 
 //---------------------------------------------------------------------------------------
+// Algorithm to layout an score
+//
 class ScoreLayouter : public Layouter
 {
 protected:
@@ -274,7 +280,14 @@ protected:
     LUnits space_used_by_prolog(int iSystem);
     LUnits distance_to_top_of_system(int iSystem, bool fFirstInPage);
 
-    std::list<PendingAuxObjs*> m_pendingAuxObjs;
+    //AuxObjs and RelObjs pending to be engraved
+    std::list<PendingAuxObj*> m_pendingAuxObjs;
+
+    //RelObjs that continue in next system
+    std::list<PendingRelObj> m_notFinishedRelObj;
+
+    //Lyrics that continue in next system
+    std::list<PendingLyricsObj> m_notFinishedLyrics;
 
 
     //---------------------------------------------------------------
@@ -372,7 +385,9 @@ public:
                                  int iSystem, int iCol, int iLine, LUnits prologWidth,
                                  ImoInstrument* pInstr, int idxStaff,
                                  VerticalProfile* pVProfile);
-    GmoShape* create_first_or_intermediate_shape(ImoRelObj* pRO);
+    GmoShape* create_first_or_intermediate_shape(ImoRelObj* pRO, int iInstr, int iStaff,
+                                                 LUnits prologWidth,
+                                                 VerticalProfile* pVProfile);
     GmoShape* create_last_shape(ImoRelObj* pRO);
 
     //AuxRelObj shapes

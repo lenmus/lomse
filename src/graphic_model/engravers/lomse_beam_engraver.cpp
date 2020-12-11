@@ -134,7 +134,10 @@ void BeamEngraver::add_note_rest(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* BeamEngraver::create_first_or_intermediate_shape(Color color)
+GmoShape* BeamEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
+                                LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
+                                LUnits UNUSED(prologWidth),
+                                VerticalProfile* UNUSED(pVProfile), Color color)
 {
     //TODO: It has been assumed that a beam cannot be split. This has to be revised
     m_color = color;

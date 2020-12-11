@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -52,6 +52,8 @@ class OctaveShiftEngraver : public RelObjEngraver
 protected:
     InstrumentEngraver* m_pInstrEngrv;
     LUnits m_uStaffTop;         //top line of current system
+    LUnits m_uStaffLeft;
+    LUnits m_uStaffRight;
 
     int m_numShapes;
     ImoOctaveShift* m_pOctaveShift;
@@ -85,7 +87,10 @@ public:
 
     //RelObjEngraver mandatory overrides
     void set_prolog_width(LUnits width) override;
-    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
+                                                 LUnits yStaffTop, LUnits prologWidth,
+                                                 VerticalProfile* pVProfile,
+                                                 Color color=Color(0,0,0)) override;
     GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
 protected:
@@ -105,6 +110,7 @@ protected:
 
     void compute_first_shape_position();
     void compute_second_shape_position();
+    void compute_intermediate_shape_position();
     //void add_user_displacements(int iOctaveShift, UPoint* points);
     LUnits determine_top_line_of_shape();
 

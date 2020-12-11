@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -105,9 +105,18 @@ void VoltaBracketEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj*
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* VoltaBracketEngraver::create_first_or_intermediate_shape(Color color)
+GmoShape* VoltaBracketEngraver::create_first_or_intermediate_shape(LUnits xStaffLeft,
+                                    LUnits xStaffRight, LUnits yStaffTop,
+                                    LUnits prologWidth, VerticalProfile* pVProfile,
+                                    Color color)
 {
     m_color = color;
+    m_uStaffLeft = xStaffLeft;
+    m_uStaffRight = xStaffRight;
+    m_uStaffTop = yStaffTop;
+    m_pVProfile = pVProfile;
+    m_uPrologWidth = prologWidth;
+
     if (m_numShapes == 0)
         return create_first_shape();
     else
@@ -231,6 +240,12 @@ void VoltaBracketEngraver::set_shape_details(GmoShapeVoltaBracket* pShape,
         xEnd = m_pStopBarlineShape->get_x_left_line();
         if (m_pStopBarlineShape->get_width() < 40.0f)
             xEnd -= 30.0f;
+    }
+
+    if (shapeType == k_intermediate_shape
+        || (m_fFirstShapeAtSystemStart && (shapeType == k_first_shape )) )
+    {
+        xStart += m_uPrologWidth;
     }
 
     //determine yPos

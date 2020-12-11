@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2019. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -723,10 +723,23 @@ void ScoreLayouter::delete_pendig_aux_objects()
     //it is necessary to delete objects that, in normal processing, will be deleted
     //in other places
 
-    std::list<PendingAuxObjs*>::iterator itPAO;
+    //AuxObjs and RelObjs pending to be engraved
+    std::list<PendingAuxObj*>::iterator itPAO;
     for (itPAO = m_pendingAuxObjs.begin(); itPAO != m_pendingAuxObjs.end(); ++itPAO)
         delete *itPAO;
     m_pendingAuxObjs.clear();
+
+    //RelObjs that continue in next system
+    std::list<PendingRelObj>::iterator itPRO;
+    for (itPRO = m_notFinishedRelObj.begin(); itPRO != m_notFinishedRelObj.end(); ++itPRO)
+        delete (*itPRO).second;
+    m_notFinishedRelObj.clear();
+
+    //Lyrics that continue in next system
+    std::list<PendingLyricsObj>::iterator itPLO;
+    for (itPLO = m_notFinishedLyrics.begin(); itPLO != m_notFinishedLyrics.end(); ++itPLO)
+        delete (*itPLO).second;
+    m_notFinishedLyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1405,11 +1418,24 @@ GmoShape* ShapesCreator::create_last_shape(ImoRelObj* pRO)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* ShapesCreator::create_first_or_intermediate_shape(ImoRelObj* pRO)
+GmoShape* ShapesCreator::create_first_or_intermediate_shape(ImoRelObj* pRO, int iInstr,
+                                                            int iStaff, LUnits prologWidth,
+                                                            VerticalProfile* pVProfile)
 {
     RelObjEngraver* pEngrv
         = static_cast<RelObjEngraver*>(m_engravers.get_engraver(pRO));
-    return pEngrv->create_first_or_intermediate_shape(pRO->get_color());
+
+    if (pEngrv)
+    {
+        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+        LUnits xRight = pInstrEngrv->get_staves_right();
+        LUnits xLeft = pInstrEngrv->get_staves_left();
+        LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
+        return pEngrv->create_first_or_intermediate_shape(xLeft, xRight, yTop,
+                                                          prologWidth, pVProfile,
+                                                          pRO->get_color());
+    }
+    return nullptr;
 }
 
 //---------------------------------------------------------------------------------------

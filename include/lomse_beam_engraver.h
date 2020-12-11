@@ -131,7 +131,10 @@ public:
 
     //RelObjEngraver mandatory overrides
     void set_prolog_width(LUnits UNUSED(width)) override {}
-    GmoShape* create_first_or_intermediate_shape(Color color=Color(0,0,0)) override;
+    GmoShape* create_first_or_intermediate_shape(LUnits xStaffLeft, LUnits xStaffRight,
+                                                 LUnits yStaffTop, LUnits prologWidth,
+                                                 VerticalProfile* pVProfile,
+                                                 Color color=Color(0,0,0)) override;
     GmoShape* create_last_shape(Color color=Color(0,0,0)) override;
 
     //During layout, when more space is added between two staves, all shapes are shifted
