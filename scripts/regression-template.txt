@@ -1,0 +1,22 @@
+<html>
+<!-- $Updated: ${today} -->
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>Lomse visual regression tests</title>
+<!--<link rel="stylesheet" media="all" href="singledoc.css" type="text/css" />-->
+</head>
+<body>
+
+
+<h1>Lomse visual regression tests</h1>
+<!--====================================================-->
+
+<p>Be aware a <b>'test passed' does not mean that the rendered image is correct</b>. It only means
+that the rendered image is not different from the results obtained using the previous version of
+Lomse library or, being different, it has been accepted as correct, by a human reviewer.
+</p>
+<ul>
+<li>Lomse version used: ${lomse-version}</li>
+<li>Test date: ${date-time}</li>
+

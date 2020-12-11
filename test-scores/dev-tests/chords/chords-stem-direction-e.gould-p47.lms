@@ -1,0 +1,22 @@
+(score (vers 2.1)
+    (opt StaffLines.Truncate 3)
+    (opt Staff.DrawLeftBarline no)
+    (instrument (musicData
+        (clef G p1 (visible no))
+        (key C)
+        (chord (n g4 q)(n c5 q))
+        (chord (n a4 q)(n d5 q))
+        (chord (n f4 q)(n d5 q))
+        (chord (n g4 q)(n e5 q))
+        (chord (n e4 q)(n e5 q))
+        (chord (n f4 q)(n f5 q))
+        (chord (n d4 q)(n f5 q))
+        (chord (n f3 q)(n a5 q))
+
+        (chord (n a4 e (beam 1 +))(n f4 e))
+        (chord (n d5 e (beam 1 -))(n f5 e))
+
+        (chord (n c4 e (beam 2 +))(n g4 e))
+        (chord (n e5 e (beam 2 -))(n g5 e))
+
+)))

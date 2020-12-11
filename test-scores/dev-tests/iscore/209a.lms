@@ -1,0 +1,9 @@
+(score (vers 2.0)
+    (parts  (instrIds P1 P2 P3)
+            (group P1 P3 (name "Group1")(symbol bracket))
+    )
+    (instrument#300 P1 (name "P1")(musicData (clef G)) )
+    (instrument#400 P2 (name "P2")(musicData (clef F4)) )
+    (instrument#500 P3 (name "P3")(musicData (clef G)) )
+)
+

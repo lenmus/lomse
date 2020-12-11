@@ -1,0 +1,17 @@
+(score (vers 2.0)
+    (parts
+        (instrIds P1 P2 P3 P4 P5 P6 P7 P8)
+        (group P2 P4 (name "Group1")(symbol bracket))
+        (group P5 P7 (name "Group2")(symbol bracket))
+        (group P1 P6 (name "Group3")(symbol brace))
+    )
+    (instrument#300 P1 (name "P1")(musicData (clef G)) )
+    (instrument#400 P2 (name "P2")(musicData (clef F4)) )
+    (instrument#500 P3 (name "P3")(musicData (clef G)) )
+    (instrument#600 P4 (name "P4")(musicData (clef C1)) )
+    (instrument#700 P5 (name "P5")(musicData (clef C2)) )
+    (instrument#750 P6 (name "P6")(musicData (clef C3)) )
+    (instrument#800 P7 (name "P7")(musicData (clef C4)) )
+    (instrument#850 P8 (name "P8")(musicData (clef G)) )
+)
+
