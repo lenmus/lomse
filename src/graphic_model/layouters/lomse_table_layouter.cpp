@@ -637,7 +637,7 @@ LUnits TableCellSizer::get_total_height()
 //---------------------------------------------------------------------------------------
 void TableCellSizer::create_rowspan_table()
 {
-    m_rowspan.assign(m_numRows * m_numColumns, 0);
+    m_rowspan.assign(size_t(m_numRows) * size_t(m_numColumns), 0);
     for (int iRow=0; iRow < m_numRows; ++iRow)
     {
         int iCell = (m_iFirstRow + iRow) * m_numColumns;

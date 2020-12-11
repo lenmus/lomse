@@ -240,7 +240,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     //Now allocate a buffer for the full bitmap
     unsigned char* imgbuf = nullptr;
     int stride = int(width) * 4;
-    if ((imgbuf = (unsigned char*)malloc(height * stride)) == nullptr)
+    if ((imgbuf = (unsigned char*)malloc(size_t(height) * size_t(stride)) ) == nullptr)
     {
         pImage->set_error_msg("[PngImageDecoder::decode_file] error allocating memory for image");
         png_destroy_read_struct(&pReadStruct, &pInfoStruct, nullptr);
