@@ -57,6 +57,7 @@ protected:
     int m_numShapes;
     ImoWedge* m_pWedge;
     bool m_fWedgeAbove;
+    bool m_fFirstShapeAtSystemStart = false;
     LUnits m_uPrologWidth;
 
     ImoDirection* m_pStartDirection;
