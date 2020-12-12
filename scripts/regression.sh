@@ -267,7 +267,7 @@ cd "${scripts_path}"
 sed -e "s/\${today}/`date +%Y-%m-%d`/"                  \
     -e "s/\${lomse-version}/${lomse}/"                  \
     -e "s/\${date-time}/`date +%Y-%m-%d_%H:%M:%S`/"     \
-    regression-template-2.txt > "${html_page}"
+    regression-template.txt > "${html_page}"
 
 #add results statistics
 tests="test"
