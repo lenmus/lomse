@@ -3,12 +3,6 @@ AUTHORS
 
 Lomse was started and is maintained by [Cecilio Salmerón](https://github.com/cecilios)
 
-The following people —listed in alphabetical order— contributed
-code to Lomse:
-
-- [Uwe Koloska](https://github.com/kolewu)
-
-
 For a complete list of all code contributors see the [Contributor Graph][] or
 `git shortlog --summary`.
 
@@ -29,7 +23,7 @@ We would also like to thank the following people:
 
 
 **Copyright** is held by the original contributor according to the 
-versioning history; see [LICENSE][]
+versioning history; see [LICENSE](LICENSE).
 
 
 [Contributor Graph]: https://github.com/lenmus/lomse/graphs/contributors
