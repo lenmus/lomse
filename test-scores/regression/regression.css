@@ -1,0 +1,137 @@
+/**********************************************************/
+/* ccs for regression tests page                          */
+/**********************************************************/
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0 auto;
+  padding: 0;
+  height: 100%;
+  font-size: 100%;
+  font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
+  line-height: 1.125;
+  color: #000;
+  background-color: #fff;
+}
+
+/***********************************************************/
+/* links                                                   */
+/***********************************************************/
+
+a:link, a:visited { 
+	text-decoration: none;
+	color: #7f8adc;
+	border-bottom: 1px solid #7f8adc;
+}
+a:hover {
+    color: #ff0000;
+	border-bottom: 1px solid #ff0000;
+}
+
+a.gotop {
+    margin-left: 2em;
+	font-weight: normal;
+}
+
+
+/***********************************************************/
+/* main content                                            */
+/***********************************************************/
+
+div#main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 27%;
+  padding: 0;
+  margin: 0;
+  margin-left: 2em;
+  overflow: auto;
+}
+
+div#main li {
+  padding: 0 1em 0.5em 0;
+}
+
+div#main ul {
+  margin: 0;
+  padding-left: 3em;
+}
+
+h1, h2, h3, h4, h5 {
+  margin-right: 2em;
+  color: #616FDC;
+}
+
+/* more space before lower level headers */
+h2, h3, h4, h5, h6 {
+  margin-top: 2.5em;
+}
+
+h2 {
+  background: #f4f4ff;    
+}
+
+h3 {
+  border-bottom: 1px solid #7f8adc;    
+}
+
+p {
+  margin: 1em 0;
+  margin-right: 3em;
+}
+
+
+/***********************************************************/
+/* TOC sidebar                                             */
+/***********************************************************/
+
+div#tocframe {
+  position: absolute;
+  top: 0;
+  right: 73%;
+  bottom: 0;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  padding-left: 1em;
+  overflow: auto;
+  background: #fff;
+  z-index: 100;
+  list-style-type: none;
+  line-height: 1.7;
+}
+
+@media screen {
+  body > div#tocframe {
+    position: fixed
+  }
+}
+
+div#tocframe h4 {
+  font-size: 1em;
+  line-height: 1.125;
+  font-weight: bold;
+  padding: 0.75em 0.5em 0 0.5em;
+  margin: 0;
+  margin-top: 1em;
+}
+
+/* links in toc */
+div#tocframe a:link,
+div#tocframe a:visited {
+  color: #000;
+  text-decoration: none;
+	border-bottom: none;
+}
+
+div#tocframe a:hover {
+    color: #ff0000;
+	border-bottom: 1px dotted #ff0000;
+    background: #f8f8f8;
+}
+

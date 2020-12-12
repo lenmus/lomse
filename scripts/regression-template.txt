@@ -4,10 +4,76 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <title>Lomse visual regression tests</title>
-<!--<link rel="stylesheet" media="all" href="singledoc.css" type="text/css" />-->
+<link rel="stylesheet" media="all" href="regression.css" type="text/css" />
 </head>
 <body>
 
+
+<div id="tocframe">
+    <h4 class="toc_header">TABLE OF CONTENTS</h4>
+        <ul class="toc">
+          <li><a href="#00000">Scores. Basic layout</a>
+          <ul class="toc">
+            <li><a href="#0001x">Empty scores</a></li>
+            <li><a href="#0002x">Prolog</a></li>
+            <li><a href="#0003x">Notes</a></li>
+            <li><a href="#0005x">Accidentals</a></li>
+            <li><a href="#0006x">Rests</a></li>
+            <li><a href="#0007x">Chords</a></li>
+            <li><a href="#0009x">Spacing non-timed objs.</a></li>
+            <li><a href="#0010x">Clefs</a></li>
+            <li><a href="#0011x">Key signatures</a></li>
+            <li><a href="#0012x">Time signatures</a></li>
+            <li><a href="#0013x">Vertical alignment</a></li>
+            <li><a href="#0018x">Instructions</a></li>
+            <li><a href="#0019x">Barlines / measures</a></li>
+            <li><a href="#0020x">Systems justification</a></li>
+            <li><a href="#0021x">Instruments</a></li>
+            <li><a href="#0023x">Staves spacing</a></li>
+            <li><a href="#0024x">justification/truncation</a></li>
+            <li><a href="#006xx">Spacing algorithm</a></li>
+          </ul></li>
+          <li><a href="#01xxx">Relations</a>
+          <ul class="toc">
+            <li><a href="#0101x">Tuplets</a></li>
+            <li><a href="#0102x">Beams</a></li>
+            <li><a href="#0103x">Ties</a></li>
+            <li><a href="#0104x">Slurs</a></li>
+          </ul></li>
+          <li><a href="#02xxx">Attachments</a>
+          <ul class="toc">
+            <li><a href="#0201x">Lines</a></li>
+            <li><a href="#0202x">Fermatas</a></li>
+            <li><a href="#0203x">Metronome marks</a></li>
+            <li><a href="#0204x">Attached texts</a></li>
+           <!-- <li><a href="#0205x">Text boxes</a></li> -->
+           <!-- <li><a href="#0206x">Figured bass</a></li> -->
+            <li><a href="#0207x">Dynamics</a></li>
+            <li><a href="#0208x">Articulations</a></li>
+            <li><a href="#0209x">Lyrics</a></li>
+          </ul></li>
+          <li><a href="#070xx">TimeGrid</a>
+          <li><a href="#080xx">Other top level objects</a>
+          <ul class="toc">
+            <li><a href="#0801x">Paragraphs</a></li>
+            <li><a href="#0802x">Tables</a></li>
+            <li><a href="#0803x">Widgets</a></li>
+            <li><a href="#0804x">Images</a></li>
+          </ul></li>      
+          <li><a href="#090xx">Full documents</a>
+          <li><a href="#5xxxx">MusicXML importer</a>
+          <ul class="toc">
+            <li><a href="#lomse">Lomse tests</a></li>
+            <li><a href="#lilypond">Lilypond tests</a></li>
+            <li><a href="#recordare">Recordare tests</a></li>           
+          </ul></li>      
+          <li><a href="#mnx">MNX importer</a></li>
+        </ul>
+</div> <!-- tocframe -->
+
+
+<div id="main">
+<a name='top'> </a>
 
 <h1>Lomse visual regression tests</h1>
 <!--====================================================-->
