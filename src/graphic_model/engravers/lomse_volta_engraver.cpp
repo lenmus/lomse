@@ -176,7 +176,7 @@ GmoShape* VoltaBracketEngraver::create_first_shape()
 
     LUnits minLength = tenths_to_logical(10.0f);
     if (!m_fFirstShapeAtSystemStart
-        && abs(m_uStaffRight - m_pStartBarlineShape->get_x_right_line()) < minLength)
+        && m_uStaffRight - m_pStartBarlineShape->get_x_right_line() < minLength)
     {
         //start barline is at the end of a system, create first shape at next system start instead
         m_fFirstShapeAtSystemStart = true;
