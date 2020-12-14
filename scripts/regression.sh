@@ -1,7 +1,24 @@
 #! /bin/bash
 #------------------------------------------------------------------------------
 # Lomse library visual regression test
-# This script MUST BE RUN from lomse/scripts/ folder
+# This script MUST BE RUN from 'lomse/scripts/' folder
+# It creates a folder 'lomse/zz_regression/' with the following content:
+#
+#   lomse/
+#     ├── src/
+#     ├── scripts/
+#     ┆
+#     └── zz_regression/
+#              ├── generated/
+#              ├── failures/
+#              ├── regression.htm
+#              └── regression.css
+#
+# - Folder 'generated' contains the images for the rendered scores
+# - Folder 'failures' contains the GIF images for the test failures
+# - File 'regression.htm' is the report
+# - File 'regression.css' is a style sheet for the report.
+#
 #
 # usage: ./regression.sh [options]
 #------------------------------------------------------------------------------
@@ -113,16 +130,18 @@ fi
 
 #paths
 scores_path="${trunk_path}/test-scores/"
-generated_path="${trunk_path}/test-scores/regression/generated/"
+css_path="${trunk_path}/test-scores/regression"
 target_path="${trunk_path}/test-scores/regression/target/"
-results_path="${trunk_path}/test-scores/regression/failures/"
+outpath="${trunk_path}/zz_regression"
+generated_path="${outpath}/generated/"
+results_path="${outpath}/failures/"
 
 #paths for local website
 #website_regression_images="content/lenmus/lomse/images/regression/"
 #website_images_prefix="content/lomse/images/regression/"
 #website_root="/datos/cecilio/WebSite/mws"
 #website_pages="${website_root}/content/lenmus/lomse/html/lomse_en"
-website_pages="${trunk_path}/test-scores/regression/"
+website_pages="${outpath}/"
 
 fDisplayMessages=0
 fGenerateForWeb=1
@@ -167,6 +186,18 @@ declare -a failures=()
 lomse=$(lclt -vers)
 lomse="${lomse##*library v}"
 echo "Using lomse ${lomse}"
+
+#create folders if they do not exist
+if [ ! -d "${outpath}" ]; then
+  mkdir -p "${outpath}"
+fi
+if [ ! -d "${generated_path}" ]; then
+  mkdir -p "${generated_path}"
+fi
+if [ ! -d "${results_path}" ]; then
+  mkdir -p "${results_path}"
+fi
+
 
 # clear results from previous tests
 cd "${results_path}" || exit $E_BADPATH
@@ -444,6 +475,9 @@ echo "</div>  <!-- main -->" >> "${html_page}"
 echo "</body>" >> "${html_page}"
 echo "</html>" >> "${html_page}"
 
+
+#copy the css file
+cp "${css_path}/regression.css" "${outpath}/regression.css"
 
 # upload the html page and the folder with the images to the server
 #echo "Uploading results to local server"

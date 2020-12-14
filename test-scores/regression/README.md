@@ -4,10 +4,10 @@ Lomse has an extensive set of unit tests to make sure each core component of Lom
 
 The goal of this system is to detect regressions in the rendered output without having to rely on human visual review. The tests go as follows:
 
-* First, Lomse loads a test score and renders it. The result is saved as a JPG image in folder `lomse/test-scores/regression/generated`.
+* First, Lomse loads a test score and renders it.
 * Then the generated image is compared with the expected blessed image that is in folder `lomse/test-scores/regression/target`.
-* If there are differences, the test script generates a GIF image, which flips between the two images, so that any differences are easily spotted. The GIF image is placed in folder `lomse/test-scores/regression/failures`. 
-* Finally, an html page is automatically created with the results, in `lomse/test-scores/regression/results.html`.
+* If there are differences, the test script generates a GIF image, which flips between the two images, so that any differences are easily spotted.
+* Finally, an html page is automatically created with the results, in `lomse/zz_regression/results.html`.
 
 
 ## Running the visual tests
@@ -58,8 +58,34 @@ $ ./build-lclt.sh       #builds the test program and links it with the new versi
 $ ./regression.sh       #runs the visual regression tests
 ```
 
-The `regression.sh` script will generate a lot of error messages. **It is normal!**
+The `regression.sh` script will generate a lot of error messages. **It is normal!**. It creates a folder `lomse/zz_regression/` with the following content:
+```
+   lomse/
+     ├── src/
+     ├── scripts/
+     ┆
+     ├── zz_build_area/
+     └── zz_regression/
+              ├── generated/
+              ├── failures/
+              ├── regression.htm
+              └── regression.css
+```
 
-Now, open the results page, in `lomse/test-scores/regression/regression.html`, with your favorite browser. And visually inspect the failures (there are links at page top). If you're happy with the new output you should copy the new blessed image from `lomse/test-scores/regression/generated` to `lomse/test-scores/regression/target`.
+- Folder `zz_build_area/` is created by `build-lomse.sh` script and used by all other scripts.
+- Folder `zz_regression` is created by `regression.sh` script and contains results:
+    - Subfolder `generated` contains the images for the rendered scores
+    - Subfolder `failures` contains the GIF images for the test failures
+    - File `regression.htm` is an HTML page the test report.
+    - File `regression.css` is a style sheet for the report.
+
+> **Important** Please add a line to your `.gitignore` file:
+
+>    zz_*
+
+> to avoid inadvertently uploading the build and regression folders to the repo in a commit. Thank you!
+
+Now, open the results page, in `lomse/zz_regression/regression.html`, with your favorite browser. And visually inspect the failures (there are links at page top). If you're happy with the new output you should copy the new blessed image from `lomse/zz_regression/generated` to `lomse/test-scores/regression/target` and commit it.
+
 
 
