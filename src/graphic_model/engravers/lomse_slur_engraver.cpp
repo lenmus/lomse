@@ -83,7 +83,7 @@ void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_pStartNote = static_cast<ImoNote*>(pSO);
     m_pStartNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_uStaffTop = yTop - m_pStartNoteShape->get_top();     //relative to note top
+    m_uStaffTop = yTop;
 }
 
 //---------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ void SlurEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
     m_pEndNote = static_cast<ImoNote*>(pSO);
     m_pEndNoteShape = static_cast<GmoShapeNote*>(pStaffObjShape);
 
-    m_uStaffTop = yTop - m_pEndNoteShape->get_top();     //relative to note top;
+    m_uStaffTop = yTop;
 
     m_fSlurForGraces = m_pStartNote->is_grace_note() || m_pEndNote->is_grace_note();
 
@@ -123,11 +123,15 @@ void SlurEngraver::decide_placement()
 
 //---------------------------------------------------------------------------------------
 GmoShape* SlurEngraver::create_first_or_intermediate_shape(LUnits UNUSED(xStaffLeft),
-                                    LUnits UNUSED(xStaffRight), LUnits UNUSED(yStaffTop),
-                                    LUnits UNUSED(prologWidth),
-                                    VerticalProfile* UNUSED(pVProfile), Color color)
+                                    LUnits UNUSED(xStaffRight), LUnits yStaffTop,
+                                    LUnits prologWidth, VerticalProfile* pVProfile,
+                                    Color color)
 {
     m_color = color;
+    m_uStaffTop = yStaffTop;
+    m_pVProfile = pVProfile;
+    m_uPrologWidth = prologWidth;
+
     if (m_numShapes == 0)
     {
         decide_placement();
@@ -195,9 +199,11 @@ GmoShape* SlurEngraver::create_intermediate_shape()
 {
     //intermediate shape spanning the whole system
 
-    ++m_numShapes;
-    //TODO
-    return nullptr;
+    compute_start_of_staff_point();
+    compute_end_of_staff_point();
+    compute_default_control_points(&m_points[0]);
+    //add_user_displacements(1, &m_points[0]);
+    return LOMSE_NEW GmoShapeSlur(m_pSlur, m_numShapes++, &m_points[0], m_thickness);
 }
 
 //---------------------------------------------------------------------------------------
@@ -418,23 +424,20 @@ void SlurEngraver::compute_start_of_staff_point()
                                           + m_uPrologWidth - tenths_to_logical(10.0f);
 
     if (m_fSlurBelow)
-        m_points[ImoBezierInfo::k_start].y =
-            m_uStaffTop + m_pEndNoteShape->get_top() + tenths_to_logical(60.0f);
+        m_points[ImoBezierInfo::k_start].y = m_uStaffTop + tenths_to_logical(60.0f);
     else
-        m_points[ImoBezierInfo::k_start].y =
-            m_uStaffTop + m_pEndNoteShape->get_top() - tenths_to_logical(20.0f);
+        m_points[ImoBezierInfo::k_start].y = m_uStaffTop - tenths_to_logical(20.0f);
 }
 
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_end_of_staff_point()
 {
     m_points[ImoBezierInfo::k_end].x = m_pInstrEngrv->get_staves_right();
-    LUnits yTop = m_uStaffTop + m_pStartNoteShape->get_top();
 
     if (m_fSlurBelow)
-        m_points[ImoBezierInfo::k_end].y = yTop + tenths_to_logical(60.0f);
+        m_points[ImoBezierInfo::k_end].y = m_uStaffTop + tenths_to_logical(60.0f);
     else
-        m_points[ImoBezierInfo::k_end].y = yTop - tenths_to_logical(20.0f);
+        m_points[ImoBezierInfo::k_end].y = m_uStaffTop - tenths_to_logical(20.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -566,7 +569,7 @@ vector<UPoint> SlurEngraver::find_contour_reference_points()
 //---------------------------------------------------------------------------------------
 void SlurEngraver::set_prolog_width(LUnits width)
 {
-    m_uPrologWidth += width;
+    m_uPrologWidth = width;
 }
 
 
