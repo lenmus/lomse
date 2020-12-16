@@ -2154,6 +2154,13 @@ void ImoContentObj::remove_attachment(ImoAuxObj* pAO)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoContentObj::remove_but_not_delete_attachment(ImoAuxObj* pAO)
+{
+    ImoAttachments* pAuxObjs = get_attachments();
+    pAuxObjs->remove(pAO);
+}
+
+//---------------------------------------------------------------------------------------
 ImoAuxObj* ImoContentObj::find_attachment(int type)
 {
     ImoAttachments* pAuxObjs = get_attachments();

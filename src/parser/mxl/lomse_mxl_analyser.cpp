@@ -2806,6 +2806,10 @@ public:
         error_if_more_elements();
 
         pSO->add_attachment(pDoc, pImo);
+
+        if (!pSO->is_note_rest())
+            m_pAnalyser->add_pending_dynamics_mark(pImo);
+
         return pImo;
     }
 
@@ -4233,6 +4237,7 @@ public:
 
         pNR->set_visible(fVisible);
         add_to_model(pNR);
+        attach_pending_dynamics_marks(pNR);
         add_to_spanners(pNR);
 
         //deal with grace notes
@@ -4568,6 +4573,12 @@ protected:
             m_pBeamInfo->set_note_rest(pNR);
             m_pAnalyser->add_relation_info(m_pBeamInfo);
         }
+    }
+
+    //----------------------------------------------------------------------------------
+    void attach_pending_dynamics_marks(ImoNoteRest* pNR)
+    {
+        m_pAnalyser->attach_pending_dynamics_marks(pNR);
     }
 
     //----------------------------------------------------------------------------------
@@ -7741,6 +7752,23 @@ void MxlAnalyser::clear_pending_relations()
 
     m_lyrics.clear();
     m_lyricIndex.clear();
+    m_pendingDynamicsMarks.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::attach_pending_dynamics_marks(ImoNoteRest* pNR)
+{
+    for (ImoDynamicsMark* pDynamics : m_pendingDynamicsMarks)
+    {
+        ImoContentObj* pOldParent = pDynamics->get_contentobj_parent();
+
+        if (pOldParent)
+            pOldParent->remove_but_not_delete_attachment(pDynamics);
+
+        pNR->add_attachment(m_pDoc, pDynamics);
+    }
+
+    m_pendingDynamicsMarks.clear();
 }
 
 //---------------------------------------------------------------------------------------
