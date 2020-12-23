@@ -1680,7 +1680,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_direction_01)
     {
-        //@01 minimum content parsed ok
+        //@01. direction: minimum content parsed ok
 
         stringstream errormsg;
         Document doc(m_libraryScope);
@@ -1995,8 +1995,117 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    //@ key ------------------------------------------------------------------------------
+    //@ dynamics ------------------------------------------------------------------------
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_dynamics_01)
+    {
+        //@01. minimum content parsed ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pSO != nullptr );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+            CHECK( pDM && pDM != nullptr );
+            CHECK( pDM && pDM->get_mark_type() == "fp" );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_dynamics_02)
+    {
+        //@02. placement imported ok
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction>"
+            "<direction-type><dynamics placement='below'><fp/></dynamics></direction-type>"
+            "</direction>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pSO != nullptr );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+            CHECK( pDM && pDM != nullptr );
+            CHECK( pDM && pDM->get_mark_type() == "fp" );
+            CHECK( pDM && pDM->get_placement() == k_placement_below );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_dynamics_03)
+    {
+        //@03. placement inherited from parent
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text("<direction placement='below'>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        CHECK( pRoot && pRoot->is_direction() == true );
+        ImoDirection* pSO = dynamic_cast<ImoDirection*>( pRoot );
+        CHECK( pSO != nullptr );
+        if (pSO)
+        {
+            CHECK( pSO->get_num_attachments() == 1 );
+            ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pSO->get_attachment(0) );
+            CHECK( pDM && pDM != nullptr );
+            CHECK( pDM && pDM->get_mark_type() == "fp" );
+            CHECK( pDM && pDM->get_placement() == k_placement_below );
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+
+    //@ key ------------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_01)
     {
