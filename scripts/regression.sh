@@ -122,17 +122,17 @@ E_BADPATH=66        # not running from lomse/trunk/scripts
 
 #get current directory and check we are running from lomse/trunk/scripts
 scripts_path="${PWD}"
-trunk_path=$(dirname "${PWD}")
-if [ $(basename "$trunk_path") != "trunk" ]; then
-    echo "Error: not running from lomse/trunk/scripts"
+root_path=$(dirname "${PWD}")
+if [[ ! -e "${root_path}/src" ]]; then
+    echo "Error: not running from <root>/scripts"
     exit $E_BADPATH
 fi
 
 #paths
-scores_path="${trunk_path}/test-scores/"
-css_path="${trunk_path}/test-scores/regression"
-target_path="${trunk_path}/test-scores/regression/target/"
-outpath="${trunk_path}/zz_regression"
+scores_path="${root_path}/test-scores/"
+css_path="${root_path}/test-scores/regression"
+target_path="${root_path}/test-scores/regression/target/"
+outpath="${root_path}/zz_regression"
 generated_path="${outpath}/generated/"
 results_path="${outpath}/failures/"
 

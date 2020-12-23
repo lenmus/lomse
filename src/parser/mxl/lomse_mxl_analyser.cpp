@@ -2779,9 +2779,12 @@ public:
         ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(
                                 ImFactory::inject(k_imo_dynamics_mark, pDoc) );
 
-        // attrib: placement
-        if (has_attribute("placement"))
-            set_placement(pImo);
+        // attrib: %placement;
+        pImo->set_placement(get_attribute_placement());
+
+        //inherit placement from parent <direction> if not set in this <dynamics>
+        if (pImo->get_placement() == k_placement_default && m_pAnchor->is_direction())
+            pImo->set_placement( (static_cast<ImoDirection*>(m_pAnchor))->get_placement() );
 
         //content
         while (more_children_to_analyse())
@@ -2807,21 +2810,6 @@ public:
     }
 
 protected:
-
-    //-----------------------------------------------------------------------------------
-    void set_placement(ImoDynamicsMark* pImo)
-    {
-        string value = get_attribute(&m_childToAnalyse, "placement");
-        if (value == "above")
-            pImo->set_placement(k_placement_above);
-        else if (value == "below")
-            pImo->set_placement(k_placement_below);
-        else
-        {
-            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
-                "Unknown placement attrib. '" + value + "'. Ignored.");
-        }
-    }
 
 };
 
@@ -3021,24 +3009,12 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <fermata> = (fermata <placement>[<componentOptions>*])
-//@ <placement> = { above | below }
-//<!--
-//    Fermata and wavy-line elements can be applied both to
-//    notes and to measures. Wavy
-//    lines are one way to indicate trills; when used with a
-//    measure element, they should always have type="continue"
-//    set. The fermata text content represents the shape of the
-//    fermata sign and may be normal, angled, or square.
-//    An empty fermata element represents a normal fermata.
-//    The fermata type is upright if not specified.
-//-->
-//<!ELEMENT fermata  (#PCDATA)>
-//<!ATTLIST fermata
-//    type (upright | inverted) #IMPLIED
-//    %print-style;
-//>
-
+//@<!ELEMENT fermata  (#PCDATA)>
+//@<!ATTLIST fermata
+//@    type (upright | inverted) #IMPLIED
+//@    %print-style;
+//@    %optional-unique-id;
+//@>
 class FermataMxlAnalyser : public MxlElementAnalyser
 {
 public:
