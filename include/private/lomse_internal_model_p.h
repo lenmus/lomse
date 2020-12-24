@@ -2356,6 +2356,7 @@ public:
     ImoAuxObj* get_attachment(int i);
     void add_attachment(Document* pDoc, ImoAuxObj* pAO);
     void remove_attachment(ImoAuxObj* pAO);
+    void remove_but_not_delete_attachment(ImoAuxObj* pAO);
     ImoAuxObj* find_attachment(int type);
 
     //overrides for Observable children

@@ -250,6 +250,7 @@ protected:
     MxlVoltasBuilder*   m_pVoltasBuilder;
     MxlWedgesBuilder*   m_pWedgesBuilder;
     MxlOctaveShiftBuilder*  m_pOctaveShiftBuilder;
+    vector<ImoDynamicsMark*> m_pendingDynamicsMarks;
     map<string, int>    m_lyricIndex;
     vector<ImoLyric*>   m_lyrics;
     map<string, int>    m_soundIdToIdx;     //conversion sound-instrument id to index
@@ -407,6 +408,10 @@ public:
 
     //interface for building beams
     inline bool fix_beams() { return m_libraryScope.get_musicxml_options()->fix_beams(); }
+
+    //interface for building dynamics marks
+    void add_pending_dynamics_mark(ImoDynamicsMark* pObj) { m_pendingDynamicsMarks.push_back(pObj); }
+    void attach_pending_dynamics_marks(ImoNoteRest* pNR);
 
     //interface for building lyric lines
     void add_lyrics_data(ImoNote* pNote, ImoLyric* pData);
