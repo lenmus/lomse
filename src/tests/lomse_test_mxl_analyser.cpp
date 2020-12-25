@@ -2104,6 +2104,148 @@ SUITE(MxlAnalyserTest)
         delete pRoot;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_dynamics_04)
+    {
+        //@04. dynamics in direction transferred to next note
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'><measure number='1'>"
+            "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>quarter</type></note>"
+            "<direction placement='below'>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>"
+            "<note><pitch><step>E</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>quarter</type></note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                CHECK( pMD->get_num_children() == 4 );
+                ImoObj::children_iterator it = pMD->begin();    //note a4
+                CHECK( (*it)->is_note() );
+                ++it;   //empty ImoDirection
+                CHECK( (*it)->is_direction() );
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->get_num_attachments() == 0 );
+                    CHECK( pDir->has_relations() == false );
+                }
+                ++it;   //note e4
+                CHECK( (*it)->is_note() );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    CHECK( pNote->get_num_attachments() == 1 );
+                    ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pNote->get_attachment(0) );
+                    CHECK( pDM && pDM != nullptr );
+                    CHECK( pDM && pDM->get_mark_type() == "fp" );
+                    CHECK( pDM && pDM->get_placement() == k_placement_below );
+                }
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_dynamics_05)
+    {
+        //@05. dynamics in direction not transferred when no notes after it
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'><measure number='1'>"
+            "<note><pitch><step>A</step><octave>3</octave></pitch>"
+                "<duration>4</duration><type>quarter</type></note>"
+            "<direction placement='below'>"
+            "<direction-type><dynamics><fp/></dynamics></direction-type>"
+            "</direction>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                CHECK( pMD->get_num_children() == 3 );
+                ImoObj::children_iterator it = pMD->begin();    //note a4
+                CHECK( (*it)->is_note() );
+                ++it;   //ImoDirection with the dynamics
+                CHECK( (*it)->is_direction() );
+                ImoDirection* pDir = dynamic_cast<ImoDirection*>( *it );
+                CHECK( pDir != nullptr );
+                if (pDir)
+                {
+                    CHECK( pDir->has_relations() == false );
+                    CHECK( pDir->get_num_attachments() == 1 );
+                    ImoDynamicsMark* pDM = dynamic_cast<ImoDynamicsMark*>( pDir->get_attachment(0) );
+                    CHECK( pDM && pDM != nullptr );
+                    CHECK( pDM && pDM->get_mark_type() == "fp" );
+                    CHECK( pDM && pDM->get_placement() == k_placement_below );
+                }
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+            }
+        }
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
 
     //@ key ------------------------------------------------------------------------------
 
