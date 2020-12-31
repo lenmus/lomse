@@ -201,7 +201,7 @@ public:
 ///@cond INTERNALS
 //excluded from public API because the View methods are managed from Interactor
 
-    virtual ~GraphicView();
+    ~GraphicView() override;
 
     /// @name View settings
     ///@{
@@ -526,7 +526,7 @@ class LOMSE_EXPORT SimpleView : public GraphicView
 public:
 
     SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~SimpleView() {}
+    ~SimpleView() override {}
 
     int page_at_screen_point(double x, double y) override;
     void set_viewport_for_page_fit_full(Pixels screenWidth) override;
@@ -552,7 +552,7 @@ public:
 //excluded from public API because the View methods are managed from Interactor
 
     VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~VerticalBookView() {}
+    ~VerticalBookView() override {}
 
     void set_viewport_for_page_fit_full(Pixels screenWidth) override;
     void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
@@ -580,7 +580,7 @@ public:
 //excluded from public API because the View methods are managed from Interactor
 
     HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~HorizontalBookView() {}
+    ~HorizontalBookView() override {}
 
     void set_viewport_for_page_fit_full(Pixels screenWidth) override;
     void get_view_size(Pixels* xWidth, Pixels* yHeight) override;
@@ -648,7 +648,7 @@ public:
 //excluded from public API because the View methods are managed from Interactor
 
     SingleSystemView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~SingleSystemView() {}
+    ~SingleSystemView() override {}
 
     int page_at_screen_point(double x, double y) override;
     void set_viewport_for_page_fit_full(Pixels screenWidth) override;
@@ -699,7 +699,7 @@ public:
 //excluded from public API because the View methods are managed from Interactor
 
     SinglePageView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~SinglePageView() {}
+    ~SinglePageView() override {}
 
     int page_at_screen_point(double x, double y) override;
     void set_viewport_for_page_fit_full(Pixels screenWidth) override;
@@ -750,7 +750,7 @@ public:
 //excluded from public API because the View methods are managed from Interactor
 
     FreeFlowView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
-    virtual ~FreeFlowView() {}
+    ~FreeFlowView() override {}
 
     //overrides for SinglePageView
     int get_layout_constrains() override { return k_use_viewport_width | k_infinite_height; }

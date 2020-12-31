@@ -80,7 +80,7 @@ private:
 
 public:
     LdpFileReader(const std::string& locator);
-    virtual ~LdpFileReader();
+    ~LdpFileReader() override;
 
     char get_next_char() override;
     void repeat_last_char() override;
@@ -98,7 +98,7 @@ class LdpTextReader : public LdpReader
 {
 public:
     LdpTextReader(const std::string& sourceText);
-    virtual ~LdpTextReader() {}
+    ~LdpTextReader() override {}
 
     char get_next_char() override;
     void repeat_last_char() override;

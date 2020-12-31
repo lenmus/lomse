@@ -146,7 +146,7 @@ protected:
     bool m_fLocked;                     //constituent shapes cannot be moved
 
 public:
-    virtual ~GmoCompositeShape();
+    ~GmoCompositeShape() override;
 
     virtual int add(GmoShape* pShape);
     inline bool is_locked() { return m_fLocked; }

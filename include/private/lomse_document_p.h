@@ -147,7 +147,7 @@ protected:
 public:
     /// Constructor
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
-    virtual ~Document();
+    ~Document() override;
 
     ///Values for flags
     enum EDocumentFlags {

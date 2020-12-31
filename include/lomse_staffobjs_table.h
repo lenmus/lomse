@@ -368,7 +368,7 @@ public:
         , m_rCurAlignTime(0.0)
     {
     }
-    virtual ~ColStaffObjsBuilderEngine1x() {}
+    ~ColStaffObjsBuilderEngine1x() override {}
 
 private:
     TimeUnits   m_rCurTime;
@@ -409,7 +409,7 @@ public:
         , m_curVoice(0)
     {
     }
-    virtual ~ColStaffObjsBuilderEngine2x() {}
+    ~ColStaffObjsBuilderEngine2x() override {}
 
 private:
 
