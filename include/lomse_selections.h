@@ -155,7 +155,7 @@ public:
     inline ColStaffObjs* get_staffobjs_collection() { ensure_set_is_valid(); return m_pCollection; }
     inline list<ImoObj*>& get_all_objects() { ensure_set_is_valid(); return m_imos; }
     inline list<GmoObj*>& get_all_gmo_objects() { ensure_set_is_valid(); return m_gmos; }
-    inline SelectionState get_state() { return SelectionState(m_ids); };
+    inline SelectionState get_state() { return SelectionState(m_ids); }
     string dump_selection();
 
 protected:

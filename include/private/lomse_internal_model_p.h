@@ -5027,7 +5027,7 @@ public:
     virtual ~ImoInstrument();
 
     //methods for accessing ImoSounds child
-    LOMSE_DECLARE_IMOSOUNDS_INTERFACE;
+    LOMSE_DECLARE_IMOSOUNDS_INTERFACE
 
     //getters
     inline int get_num_staves() const { return static_cast<int>(m_staves.size()); }
@@ -5585,7 +5585,7 @@ protected:
     }
 
 public:
-    virtual ~ImoHeading() {};
+    virtual ~ImoHeading() {}
 
     //level
     inline int get_level()
@@ -6909,7 +6909,7 @@ public:
     int get_line_number()
     {
         return m_lineNum;
-    };
+    }
     inline bool is_only_graphical()
     {
         return m_fOnlyGraphical;
@@ -7474,7 +7474,7 @@ public:
     int get_line_number()
     {
         return m_lineNum;
-    };
+    }
     inline vector<int>& get_repetitions()
     {
         return m_repetitions;

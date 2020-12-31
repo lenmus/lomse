@@ -299,8 +299,8 @@ public:
     inline ImoObj* get_creator_imo() { return m_pCreatorImo; }
 
     //parent
-    inline void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; };
-    inline GmoBox* get_owner_box() { return m_pParentBox; };
+    inline void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; }
+    inline GmoBox* get_owner_box() { return m_pParentBox; }
     GmoBoxDocPage* get_page_box();
 
     //support for handlers
