@@ -63,7 +63,7 @@ namespace agg
             class const_iterator
             {
             public:
-                const_iterator() : m_storage(0) {}
+                const_iterator() : m_storage(nullptr) {}
                 const_iterator(const embedded_scanline* sl) :
                     m_storage(sl->m_storage),
                     m_span_idx(sl->m_scanline.start_span)
@@ -361,7 +361,7 @@ namespace agg
                     int32 len;
                 };
 
-                const_iterator() : m_ptr(0) {}
+                const_iterator() : m_ptr(nullptr) {}
                 const_iterator(const embedded_scanline* sl) :
                     m_ptr(sl->m_ptr),
                     m_dx(sl->m_dx)
@@ -399,7 +399,7 @@ namespace agg
 
 
             //----------------------------------------------------------------
-            embedded_scanline() : m_ptr(0), m_y(0), m_num_spans(0) {}
+            embedded_scanline() : m_ptr(nullptr), m_y(0), m_num_spans(0) {}
 
             //----------------------------------------------------------------
             void     reset(int, int)     {}
@@ -442,9 +442,9 @@ namespace agg
     public:
         //--------------------------------------------------------------------
         serialized_scanlines_adaptor_bin() :
-            m_data(0),
-            m_end(0),
-            m_ptr(0),
+            m_data(nullptr),
+            m_end(nullptr),
+            m_ptr(nullptr),
             m_dx(0),
             m_dy(0),
             m_min_x(0x7FFFFFFF),

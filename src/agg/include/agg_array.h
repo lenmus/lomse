@@ -110,7 +110,7 @@ namespace agg
         typedef pod_array<T> self_type;
 
         ~pod_array() { pod_allocator<T>::deallocate(m_array, m_size); }
-        pod_array() : m_array(0), m_size(0) {}
+        pod_array() : m_array(nullptr), m_size(0) {}
 
         pod_array(unsigned size) : 
             m_array(pod_allocator<T>::allocate(size)), 
@@ -553,7 +553,7 @@ namespace agg
         m_size(0),
         m_num_blocks(0),
         m_max_blocks(0),
-        m_blocks(0),
+        m_blocks(nullptr),
         m_block_ptr_inc(block_size)
     {
     }
@@ -565,7 +565,7 @@ namespace agg
         m_size(0),
         m_num_blocks(0),
         m_max_blocks(0),
-        m_blocks(0),
+        m_blocks(nullptr),
         m_block_ptr_inc(block_ptr_inc)
     {
     }
@@ -801,8 +801,8 @@ namespace agg
             }
             m_num_blocks = 0;
             m_max_blocks = 0;
-            m_blocks = 0;
-            m_buf_ptr = 0;
+            m_blocks = nullptr;
+            m_buf_ptr = nullptr;
             m_rest = 0;
         }
 
@@ -816,8 +816,8 @@ namespace agg
             m_block_ptr_inc(block_ptr_inc),
             m_num_blocks(0),
             m_max_blocks(0),
-            m_blocks(0),
-            m_buf_ptr(0),
+            m_blocks(nullptr),
+            m_buf_ptr(nullptr),
             m_rest(0)
         {
         }
@@ -825,7 +825,7 @@ namespace agg
 
         int8u* allocate(unsigned size, unsigned alignment=1)
         {
-            if(size == 0) return 0;
+            if(size == 0) return nullptr;
             if(size <= m_rest)
             {
                 int8u* ptr = m_buf_ptr;

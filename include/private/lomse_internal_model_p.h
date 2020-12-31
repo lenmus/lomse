@@ -4234,7 +4234,7 @@ public:
 
     //cursor
     //TODO: method add_cursor_info
-    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
 
 protected:
     void add_private_style(ImoStyle* pStyle);

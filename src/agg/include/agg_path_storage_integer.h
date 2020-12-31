@@ -204,9 +204,9 @@ namespace agg
 
         //--------------------------------------------------------------------
         serialized_integer_path_adaptor() :
-            m_data(0),
-            m_end(0),
-            m_ptr(0),
+            m_data(nullptr),
+            m_end(nullptr),
+            m_ptr(nullptr),
             m_dx(0.0),
             m_dy(0.0),
             m_scale(1.0),

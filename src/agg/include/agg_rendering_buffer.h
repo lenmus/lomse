@@ -33,8 +33,8 @@ namespace agg
 
         //-------------------------------------------------------------------
         row_accessor() :
-            m_buf(0),
-            m_start(0),
+            m_buf(nullptr),
+            m_start(nullptr),
             m_width(0),
             m_height(0),
             m_stride(0)
