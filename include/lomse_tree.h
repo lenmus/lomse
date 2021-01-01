@@ -188,7 +188,7 @@ protected:
     int m_nModified;
 
     TreeNode() : m_parent(nullptr), m_firstChild(nullptr), m_lastChild(nullptr),
-                   m_prevSibling(nullptr), m_nextSibling(nullptr), m_nModified(0) {};
+                   m_prevSibling(nullptr), m_nextSibling(nullptr), m_nModified(0) {}
 
 public:
     virtual ~TreeNode() {}

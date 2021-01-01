@@ -174,7 +174,7 @@ public:
     {
         set_at_end_of_score();
     }
-    ~ScoreCursorState() {}
+    ~ScoreCursorState() override {}
 
     //mandatory overrides
     ImoId pointee_id() override { return id(); }
@@ -402,7 +402,7 @@ protected:
 
 public:
     ScoreCursor(Document* pDoc, ImoScore* pScore);
-    virtual ~ScoreCursor();
+    ~ScoreCursor() override;
 
     //mandatory overrides from ElementCursor
         //positioning

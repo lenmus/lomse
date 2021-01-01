@@ -119,7 +119,7 @@ namespace agg
         m_total_blocks(0),
         m_max_blocks(0),
         m_coord_blocks(0),
-        m_cmd_blocks(0)
+        m_cmd_blocks(nullptr)
     {
     }
 
@@ -130,7 +130,7 @@ namespace agg
         m_total_blocks(0),
         m_max_blocks(0),
         m_coord_blocks(0),
-        m_cmd_blocks(0)
+        m_cmd_blocks(nullptr)
     {
         *this = v;
     }

@@ -116,7 +116,7 @@ struct glyph_cache
         //--------------------------------------------------------------------
         font_cache()
             : m_allocator(block_size)
-            , m_font_signature(0)
+            , m_font_signature(nullptr)
         {
         }
 
@@ -143,7 +143,7 @@ struct glyph_cache
             {
                 return m_glyphs[msb][glyph_code & 0xFF];
             }
-            return 0;
+            return nullptr;
         }
 
         //--------------------------------------------------------------------
@@ -156,7 +156,7 @@ struct glyph_cache
                                  double          advance_y)
         {
             unsigned msb = (glyph_code >> 8) & 0xFF;
-            if(m_glyphs[msb] == 0)
+            if(m_glyphs[msb] == nullptr)
             {
                 m_glyphs[msb] =
                     (glyph_cache**)m_allocator.allocate(sizeof(glyph_cache*) * 256,
@@ -165,7 +165,7 @@ struct glyph_cache
             }
 
             unsigned lsb = glyph_code & 0xFF;
-            if(m_glyphs[msb][lsb]) return 0; // Already exists, do not overwrite
+            if(m_glyphs[msb][lsb]) return nullptr; // Already exists, do not overwrite
 
             glyph_cache* glyph =
                 (glyph_cache*)m_allocator.allocate(sizeof(glyph_cache),
@@ -215,7 +215,7 @@ public:
         m_fonts(pod_allocator<font_cache*>::allocate(max_fonts)),
         m_max_fonts(max_fonts),
         m_num_fonts(0),
-        m_cur_font(0)
+        m_cur_font(nullptr)
     {}
 
 
@@ -260,7 +260,7 @@ public:
     const glyph_cache* find_glyph(unsigned glyph_code) const
     {
         if(m_cur_font) return m_cur_font->find_glyph(glyph_code);
-        return 0;
+        return nullptr;
     }
 
     //--------------------------------------------------------------------
@@ -282,7 +282,7 @@ public:
                                             advance_x,
                                             advance_y);
         }
-        return 0;
+        return nullptr;
     }
 
 
@@ -350,8 +350,8 @@ public:
         m_change_stamp(-1),
         m_dx(0.0),
         m_dy(0.0),
-        m_prev_glyph(0),
-        m_last_glyph(0)
+        m_prev_glyph(nullptr),
+        m_last_glyph(nullptr)
     {}
 
     //--------------------------------------------------------------------
@@ -386,7 +386,7 @@ public:
                 return m_last_glyph;
             }
         }
-        return 0;
+        return nullptr;
     }
 
     //--------------------------------------------------------------------

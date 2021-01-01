@@ -144,7 +144,7 @@ protected:
 
 public:
     DocIterator(Document* pDoc);
-    virtual ~DocIterator();
+    ~DocIterator() override;
 
     //positioning
     void start_of_content();

@@ -306,7 +306,7 @@ protected:
     LdpElement();
 
 public:
-    virtual ~LdpElement();
+    ~LdpElement() override;
 
     //overrides to Visitable class members
 	virtual void accept_visitor(BaseVisitor& v) override;

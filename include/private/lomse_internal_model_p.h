@@ -1268,7 +1268,7 @@ protected:
     virtual void initialize_object(Document* pDoc);
 
 public:
-    virtual ~ImoObj();
+    ~ImoObj() override;
 
     //flag values
     enum
@@ -2333,7 +2333,7 @@ protected:
     ImoContentObj(ImoId id, int objtype);
 
 public:
-    virtual ~ImoContentObj();
+    ~ImoContentObj() override;
 
     //getters
     inline Tenths get_user_location_x() { return m_txUserLocation; }
@@ -2440,7 +2440,7 @@ protected:
     ImoRelations() : ImoSimpleObj(k_imo_relations) {}
 
 public:
-    virtual ~ImoRelations();
+    ~ImoRelations() override;
 
     //overrides, to traverse this special node
     void accept_visitor(BaseVisitor& v) override;
@@ -2699,7 +2699,7 @@ protected:
     ImoScoreObj(int objtype) : ImoContentObj(objtype), m_color(0,0,0) {}
 
 public:
-    virtual ~ImoScoreObj() {}
+    ~ImoScoreObj() override {}
 
     //getters
     inline Color& get_color() { return m_color; }
@@ -2732,7 +2732,7 @@ protected:
         : ImoScoreObj(id, objtype), m_staff(0), m_time(0.0), m_pEntry(nullptr) {}
 
 public:
-    virtual ~ImoStaffObj();
+    ~ImoStaffObj() override;
 
     //relations
     void include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
@@ -3119,7 +3119,7 @@ protected:
     }
 
 public:
-    virtual ~ImoChord() {}
+    ~ImoChord() override {}
 
     inline bool is_cross_staff() { return m_fCrossStaff; }
     void update_cross_staff_data();
@@ -3522,7 +3522,7 @@ protected:
     void initialize_object(Document* pDoc) override;
 
 public:
-    virtual ~ImoSoundInfo() {}
+    ~ImoSoundInfo() override {}
 
     //getters
     inline std::string& get_score_instr_id() { return m_soundId; }
@@ -3664,7 +3664,7 @@ protected:
     ImoAnonymousBlock() : ImoInlinesContainer(k_imo_anonymous_block) {}
 
 public:
-    virtual ~ImoAnonymousBlock() {}
+    ~ImoAnonymousBlock() override {}
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
@@ -3704,7 +3704,7 @@ protected:
     }
 
 public:
-    virtual ~ImoBarline();
+    ~ImoBarline() override;
 
     //getters
     inline int get_type() { return m_barlineType; }
@@ -3744,7 +3744,7 @@ protected:
     ImoBeam() : ImoRelObj(k_imo_beam), m_pStemsDir(nullptr) {}
 
 public:
-    virtual ~ImoBeam() { delete m_pStemsDir; }
+    ~ImoBeam() override { delete m_pStemsDir; }
 
     //type of beam
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
@@ -3947,7 +3947,7 @@ protected:
     }
 
 public:
-    virtual ~ImoClef() {}
+    ~ImoClef() override {}
 
     //getters and setters
     inline int get_clef_type()
@@ -4235,7 +4235,7 @@ public:
 
     //cursor
     //TODO: method add_cursor_info
-    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
 
 protected:
     void add_private_style(ImoStyle* pStyle);
@@ -4654,7 +4654,7 @@ protected:
     }
 
 public:
-    virtual ~ImoGraceRelObj() {}
+    ~ImoGraceRelObj() override {}
 
     // grace notes behaviour
     enum EGraceType
@@ -5028,7 +5028,7 @@ public:
     virtual ~ImoInstrument();
 
     //methods for accessing ImoSounds child
-    LOMSE_DECLARE_IMOSOUNDS_INTERFACE;
+    LOMSE_DECLARE_IMOSOUNDS_INTERFACE
 
     //getters
     inline int get_num_staves() const { return static_cast<int>(m_staves.size()); }
@@ -5190,7 +5190,7 @@ protected:
     }
 
 public:
-    virtual ~ImoKeySignature() {}
+    ~ImoKeySignature() override {}
 
     //getters and setters
     int get_key_type();
@@ -5529,7 +5529,7 @@ protected:
     }
 
 public:
-    virtual ~ImoParagraph() {}
+    ~ImoParagraph() override {}
 
     //required by Visitable parent class
     virtual void accept_visitor(BaseVisitor& v) override;
@@ -5586,7 +5586,7 @@ protected:
     }
 
 public:
-    virtual ~ImoHeading() {};
+    ~ImoHeading() override {}
 
     //level
     inline int get_level()
@@ -5924,7 +5924,7 @@ protected:
 
 
 public:
-    virtual ~ImoScore();
+    ~ImoScore() override;
 
     //getters and setters
     std::string get_version_string();
@@ -6033,7 +6033,7 @@ protected:
     {}
 
 public:
-    virtual ~ImoSlur() {}
+    ~ImoSlur() override {}
 
     //getters
     inline int get_slur_number()
@@ -6330,7 +6330,7 @@ protected:
     ImoStyles(Document* pDoc);
 
 public:
-    virtual ~ImoStyles();
+    ~ImoStyles() override;
 
     //overrides, to traverse this special node
     void accept_visitor(BaseVisitor& v) override;
@@ -6439,7 +6439,7 @@ protected:
     ImoTableRow(Document* pDoc);
 
 public:
-    virtual ~ImoTableRow() {}
+    ~ImoTableRow() override {}
 
     //contents
     inline int get_num_cells()
@@ -6597,7 +6597,7 @@ protected:
     {}
 
 public:
-    virtual ~ImoTie() {}
+    ~ImoTie() override {}
 
     //getters
     inline int get_tie_number()
@@ -6786,7 +6786,7 @@ protected:
     }
 
 public:
-    virtual ~ImoTimeSignature() {}
+    ~ImoTimeSignature() override {}
 
     //getters and setters
     inline int get_top_number()
@@ -6910,7 +6910,7 @@ public:
     int get_line_number()
     {
         return m_lineNum;
-    };
+    }
     inline bool is_only_graphical()
     {
         return m_fOnlyGraphical;
@@ -6997,7 +6997,7 @@ protected:
     ImoTuplet(ImoTupletDto* dto);
 
 public:
-    virtual ~ImoTuplet() {}
+    ~ImoTuplet() override {}
 
     enum { k_straight = 0, k_curved, k_slurred, };
     enum { k_number_actual=0, k_number_both, k_number_none, };
@@ -7259,7 +7259,7 @@ protected:
     }
 
 public:
-    virtual ~ImoOctaveShift() {}
+    ~ImoOctaveShift() override {}
 
     //setters
     inline void set_shift_steps(int value) { m_steps = value; }
@@ -7355,7 +7355,7 @@ protected:
     }
 
 public:
-    virtual ~ImoVoltaBracket() {}
+    ~ImoVoltaBracket() override {}
 
     //getters
     inline bool has_final_jog()
@@ -7475,7 +7475,7 @@ public:
     int get_line_number()
     {
         return m_lineNum;
-    };
+    }
     inline vector<int>& get_repetitions()
     {
         return m_repetitions;
@@ -7557,7 +7557,7 @@ protected:
     }
 
 public:
-    virtual ~ImoWedge() {}
+    ~ImoWedge() override {}
 
     //setters
     inline void set_start_spread(Tenths value) { m_startSpread = value; }

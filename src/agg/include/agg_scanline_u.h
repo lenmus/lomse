@@ -128,7 +128,7 @@ namespace agg
         scanline_u8() :
             m_min_x(0),
             m_last_x(0x7FFFFFF0),
-            m_cur_span(0)
+            m_cur_span(nullptr)
         {}
 
         //--------------------------------------------------------------------

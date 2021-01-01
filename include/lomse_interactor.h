@@ -1561,7 +1561,7 @@ public:
 	//excluded from public API. Only for internal use.
     Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
                DocCommandExecuter* pExec);
-    virtual ~Interactor();
+    ~Interactor() override;
 
     inline std::shared_ptr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
 

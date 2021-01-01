@@ -147,7 +147,7 @@ protected:
 public:
     /// Constructor
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
-    virtual ~Document();
+    ~Document() override;
 
     ///Values for flags
     enum EDocumentFlags {
@@ -623,7 +623,7 @@ public:
     string to_string(bool fWithIds = false);
 
     //inherited from LenMos 3.0. Not yet used
-    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {}
 
 
 

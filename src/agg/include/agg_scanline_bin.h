@@ -57,7 +57,7 @@ namespace agg
         scanline_bin() :
             m_last_x(0x7FFFFFF0),
             m_spans(),
-            m_cur_span(0)
+            m_cur_span(nullptr)
         {
         }
 

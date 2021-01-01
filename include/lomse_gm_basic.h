@@ -299,8 +299,8 @@ public:
     inline ImoObj* get_creator_imo() { return m_pCreatorImo; }
 
     //parent
-    inline void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; };
-    inline GmoBox* get_owner_box() { return m_pParentBox; };
+    inline void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; }
+    inline GmoBox* get_owner_box() { return m_pParentBox; }
     GmoBoxDocPage* get_page_box();
 
     //support for handlers
@@ -331,7 +331,7 @@ protected:
     std::list<GmoShape*>* m_pRelatedShapes;
 
 public:
-    virtual ~GmoShape();
+    ~GmoShape() override;
 
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
@@ -413,7 +413,7 @@ protected:
     LUnits m_uRightMargin;
 
 public:
-    virtual ~GmoBox();
+    ~GmoBox() override;
 
     //child boxes
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
@@ -504,7 +504,7 @@ protected:
 
 public:
     GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo);
-    virtual ~GmoBoxDocument() {}
+    ~GmoBoxDocument() override {}
 
     //doc pages
     GmoBoxDocPage* add_new_page();
@@ -527,7 +527,7 @@ protected:
 
 public:
     GmoBoxDocPage(ImoObj* pCreatorImo);
-    virtual ~GmoBoxDocPage() {}
+    ~GmoBoxDocPage() override {}
 
     //page number
     inline void set_number(int num) { m_numPage = num; }
@@ -646,7 +646,7 @@ public:
     GmoBoxControl(Control* ctrl, const UPoint& origin, LUnits width, LUnits height,
                   ImoStyle* style=nullptr);
 
-    virtual ~GmoBoxControl() {}
+    ~GmoBoxControl() override {}
 
     inline void set_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
     void notify_event(SpEventInfo pEvent);

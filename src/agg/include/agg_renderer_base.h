@@ -463,7 +463,7 @@ namespace agg
         //--------------------------------------------------------------------
         template<class RenBuf>
         void copy_from(const RenBuf& src, 
-                       const rect_i* rect_src_ptr = 0, 
+                       const rect_i* rect_src_ptr = nullptr,
                        int dx = 0, 
                        int dy = 0)
         {
@@ -509,7 +509,7 @@ namespace agg
         //--------------------------------------------------------------------
         template<class SrcPixelFormatRenderer>
         void blend_from(const SrcPixelFormatRenderer& src, 
-                        const rect_i* rect_src_ptr = 0, 
+                        const rect_i* rect_src_ptr = nullptr, 
                         int dx = 0, 
                         int dy = 0,
                         cover_type cover = agg::cover_full)
@@ -580,7 +580,7 @@ namespace agg
         template<class SrcPixelFormatRenderer>
         void blend_from_color(const SrcPixelFormatRenderer& src, 
                               const color_type& color,
-                              const rect_i* rect_src_ptr = 0, 
+                              const rect_i* rect_src_ptr = nullptr,
                               int dx = 0, 
                               int dy = 0,
                               cover_type cover = agg::cover_full)
@@ -652,7 +652,7 @@ namespace agg
         template<class SrcPixelFormatRenderer>
         void blend_from_lut(const SrcPixelFormatRenderer& src, 
                             const color_type* color_lut,
-                            const rect_i* rect_src_ptr = 0, 
+                            const rect_i* rect_src_ptr = nullptr, 
                             int dx = 0, 
                             int dy = 0,
                             cover_type cover = agg::cover_full)
