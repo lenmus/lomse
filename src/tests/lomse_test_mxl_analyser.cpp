@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -4513,6 +4513,137 @@ SUITE(MxlAnalyserTest)
         CHECK( pRoot && pRoot->is_note() == true );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pRoot );
         CHECK( pNote != nullptr );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pRoot;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_slur_02)
+    {
+        //@02. valid slur, with end before start
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser(errormsg);
+        stringstream expected;
+        parser.parse_text(
+            "<score-partwise version='3.1'><part-list>"
+            "<score-part id='P1'><part-name/></score-part></part-list>"
+            "<part id='P1'><measure number='1'><attributes>"
+            "<divisions>8</divisions><staves>2</staves>"
+            "<clef number='1'><sign>G</sign><line>2</line></clef>"
+            "<clef number='2'><sign>F</sign><line>4</line></clef>"
+            "</attributes>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>8</duration><voice>1</voice><type>quarter</type>"
+                "<stem>up</stem><staff>1</staff></note>"
+            "<note><pitch><step>C</step><octave>5</octave></pitch>"
+                "<duration>8</duration><voice>1</voice><type>quarter</type>"
+                "<stem>up</stem><staff>1</staff></note>"
+            "<backup><duration>16</duration></backup>"
+            "<forward><duration>8</duration><voice>2</voice><staff>1</staff></forward>"
+            "<note><pitch><step>F</step><octave>4</octave></pitch>"
+                "<duration>8</duration><voice>2</voice><type>quarter</type>"
+                "<stem>down</stem><staff>1</staff>"
+                "<notations><slur number='2' type='stop'/></notations></note>"
+            "<backup><duration>16</duration></backup>"
+            "<note><pitch><step>D</step><octave>3</octave></pitch>"
+                "<duration>8</duration><voice>3</voice><type>quarter</type>"
+                "<stem>up</stem><staff>2</staff>"
+                "<notations><slur number='2' placement='above' type='start'/>"
+                "</notations></note>"
+            "<note><pitch><step>D</step><octave>4</octave></pitch>"
+            "<duration>8</duration><voice>3</voice><type>quarter</type>"
+            "<stem>down</stem><staff>2</staff></note>"
+            "</measure>"
+            "</part></score-partwise>"
+        );
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        ImoObj* pRoot =  a.analyse_tree(tree, "string:");
+
+//        cout << test_name() << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pRoot != nullptr);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pRoot );
+        if (pDoc)
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+            if (pScore)
+            {
+                ImoInstrument* pInstr = pScore->get_instrument(0);
+                TypeMeasureInfo* pInfo = pInstr->get_last_measure_info();
+                CHECK( pInfo == nullptr );
+                ImoMusicData* pMD = pInstr->get_musicdata();
+                CHECK( pMD != nullptr );
+
+                CHECK( pMD->get_num_children() == 11 );
+
+                ImoObj::children_iterator it = pMD->begin();    //clef G2
+                CHECK( (*it)->is_clef() );
+                ++it;   //clef F4
+                CHECK( (*it)->is_clef() );
+                ++it;   //note C5
+                CHECK( (*it)->is_note() );
+                ++it;   //note C5
+                CHECK( (*it)->is_note() );
+                ++it;   //goback-fwd
+                CHECK( (*it)->is_go_back_fwd() );
+                ++it;   //rest
+                CHECK( (*it)->is_rest() );
+
+                ++it;   //note F4. End of slur
+                CHECK( (*it)->is_note() );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    CHECK( pNote->get_num_relations() == 1 );
+                    if (pNote->get_num_relations() > 0)
+                    {
+                        ImoRelations* pRelObjs = pNote->get_relations();
+                        CHECK( pRelObjs->get_num_items() == 1);
+                        ImoRelObj* pRO = pRelObjs->get_item(0);
+                        if (pRO)
+                        {
+                            CHECK( pRO->is_slur() );
+                            ImoNote* pN1 = (static_cast<ImoSlur*>(pRO))->get_end_note();
+                            CHECK( pN1 == pNote );
+                        }
+                    }
+                }
+
+                ++it;   //goback-fwd
+                CHECK( (*it)->is_go_back_fwd() );
+
+                ++it;   //note D3. Start of slur
+                CHECK( (*it)->is_note() );
+                pNote = dynamic_cast<ImoNote*>( *it );
+                CHECK( pNote != nullptr );
+                if (pNote)
+                {
+                    CHECK( pNote->get_num_relations() == 1 );
+                    if (pNote->get_num_relations() > 0)
+                    {
+                        ImoRelations* pRelObjs = pNote->get_relations();
+                        CHECK( pRelObjs->get_num_items() == 1);
+                        ImoRelObj* pRO = pRelObjs->get_item(0);
+                        if (pRO)
+                        {
+                            CHECK( pRO->is_slur() );
+                            ImoNote* pN2 = (static_cast<ImoSlur*>(pRO))->get_start_note();
+                            CHECK( pN2 == pNote );
+                        }
+                    }
+                }
+                ++it;   //note D4
+                CHECK( (*it)->is_note() );
+                ++it;   //barline
+                CHECK( (*it)->is_barline() );
+            }
+        }
 
         a.do_not_delete_instruments_in_destructor();
         delete pRoot;
