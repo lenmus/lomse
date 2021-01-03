@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -6199,9 +6199,24 @@ public:
 //        if (get_mandatory(k_number))
 //            pInfo->set_slur_number( get_child_value_integer(0) );
 
-//        // attrib: %placement;
-//        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_child_value_integer(0) );
+        // attrib: %placement;
+        //TODO: Clarify contradictions between placement and orientation
+        //m_pInfo1->set_placement(get_attribute_placement());
+        if (has_attribute("placement"))
+        {
+            string value = get_attribute("placement");
+
+            //AWARE: must be type == "start"
+            if (value == "above")
+                m_pInfo1->set_orientation(k_orientation_over);
+            else if (value == "below")
+                m_pInfo1->set_orientation(k_orientation_under);
+            else
+            {
+                error_msg("Invalid placement attribute. Value '" +
+                          value + "' ignored.");
+            }
+        }
 
         // attrib: %orientation;
         if (has_attribute("orientation"))
@@ -6211,8 +6226,13 @@ public:
             //AWARE: must be type == "start"
             if (orientation == "over")
                 m_pInfo1->set_orientation(k_orientation_over);
-            else
+            else if (orientation == "under")
                 m_pInfo1->set_orientation(k_orientation_under);
+            else
+            {
+                error_msg("Invalid orientation attribute. Value '" +
+                          orientation + "' ignored.");
+            }
         }
 
 //        // attrib: %bezier;
@@ -6246,13 +6266,21 @@ protected:
         if (value == "start")
         {
             m_pInfo1->set_start(true);
-            int slurId =  m_pAnalyser->new_slur_id(num);
+            int slurId =  m_pAnalyser->get_slur_id(num);
+            if (slurId != 0)    //not 0 when stop found before start
+                slurId =  m_pAnalyser->get_slur_id_and_close(num);
+            else
+                slurId =  m_pAnalyser->new_slur_id(num);
             m_pInfo1->set_slur_number(slurId);
         }
         else if (value == "stop")
         {
             m_pInfo1->set_start(false);
-            int slurId =  m_pAnalyser->get_slur_id_and_close(num);
+            int slurId =  m_pAnalyser->get_slur_id(num);
+            if (slurId == 0)    //stop found before start
+                slurId =  m_pAnalyser->new_slur_id(num);
+            else
+                slurId =  m_pAnalyser->get_slur_id_and_close(num);
             m_pInfo1->set_slur_number(slurId);
         }
         else if (value == "continue")
@@ -7728,7 +7756,7 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
     else if (pDto->is_tie_dto())
         m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
     else if (pDto->is_slur_dto())
-        m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
+        m_pSlursBuilder->add_item_info_reversed_valid(static_cast<ImoSlurDto*>(pDto));
     else if (pDto->is_tuplet_dto())
         m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
     else if (pDto->is_volta_bracket_dto())
@@ -7943,7 +7971,7 @@ int MxlAnalyser::new_wedge_id(int numWedge)
 //---------------------------------------------------------------------------------------
 bool MxlAnalyser::wedge_id_exists(int numWedge)
 {
-    return numWedge <= m_wedgeNum && m_wedgeIds[numWedge] != -1;
+    return m_wedgeIds[numWedge] > 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -7970,7 +7998,7 @@ int MxlAnalyser::new_octave_shift_id(int num)
 //---------------------------------------------------------------------------------------
 bool MxlAnalyser::octave_shift_id_exists(int num)
 {
-    return num <= m_octaveShiftNum && m_octaveShiftIds[num] != -1;
+    return m_octaveShiftIds[num] > 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -8198,21 +8226,32 @@ void MxlTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 //=======================================================================================
 // MxlSlursBuilder implementation
 //=======================================================================================
-void MxlSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndInfo)
+void MxlSlursBuilder::add_relation_to_staffobjs(ImoSlurDto* pEndDto)
 {
-    m_matches.push_back(pEndInfo);
+    //start and end coud be reversed if end was defined before start
+    m_matches.push_back(pEndDto);
+    ImoSlurDto* pStartDto = m_matches.front();
+    if (pEndDto->is_start_of_relation())
+    {
+        ImoSlurDto* pSave = pStartDto;
+        pStartDto = pEndDto;
+        pEndDto = pSave;
+    }
+
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoSlur* pSlur = static_cast<ImoSlur*>(ImFactory::inject(k_imo_slur, pDoc));
-    pSlur->set_slur_number( pEndInfo->get_slur_number() );
+    pSlur->set_slur_number( pEndDto->get_slur_number() );
+    if (pStartDto->get_orientation() != k_orientation_default)
+        pSlur->set_orientation( pStartDto->get_orientation() );
 
-    std::list<ImoSlurDto*>::iterator it;
-    for (it = m_matches.begin(); it != m_matches.end(); ++it)
-    {
-        ImoNote* pNote = (*it)->get_note();
-        ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
-        pNote->include_in_relation(pDoc, pSlur, pData);
-    }
+    ImoNote* pNote = pStartDto->get_note();
+    ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, pStartDto);
+    pNote->include_in_relation(pDoc, pSlur, pData);
+
+    pNote = pEndDto->get_note();
+    pData = ImFactory::inject_slur_data(pDoc, pEndDto);
+    pNote->include_in_relation(pDoc, pSlur, pData);
 }
 
 
