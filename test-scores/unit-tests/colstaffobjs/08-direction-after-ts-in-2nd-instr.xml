@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P1">
+      <part-name/>
+    </score-part>
+    <score-part id="P2">
+      <part-name/>
+    </score-part>
+  </part-list>
+  <!--=========================================================-->
+  <part id="P1">
+    <measure number="1">
+      <attributes>
+        <divisions>8</divisions>
+        <key>
+          <fifths>0</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+        </clef>
+        <staff-details>
+          <staff-size>108</staff-size>
+        </staff-details>
+      </attributes>
+      <direction placement="below">
+        <direction-type>
+          <dynamics halign="center">
+            <p/>
+          </dynamics>
+        </direction-type>
+        <sound dynamics="67"/>
+      </direction>
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>24</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <dot/>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="2">
+      <attributes>
+        <time>
+          <beats>2</beats>
+          <beat-type>4</beat-type>
+        </time>
+      </attributes>
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>16</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="3">
+      <attributes>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <staff-details>
+          <staff-size>100</staff-size>
+        </staff-details>
+      </attributes>
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>32</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
+    </measure>
+  </part>
+  <!--=========================================================-->
+  <part id="P2">
+    <measure number="1">
+      <attributes>
+        <divisions>8</divisions>
+        <key>
+          <fifths>0</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+        </clef>
+        <staff-details>
+          <staff-size>108</staff-size>
+        </staff-details>
+      </attributes>
+      <direction placement="below">
+        <direction-type>
+          <dynamics halign="center">
+            <p/>
+          </dynamics>
+        </direction-type>
+        <sound dynamics="67"/>
+      </direction>
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>24</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <dot/>
+        <stem>down</stem>
+      </note>
+      <direction placement="below">
+        <direction-type>
+          <wedge type="crescendo"/>
+        </direction-type>
+        <offset>-21</offset>
+      </direction>
+    </measure>
+    <!--=======================================================-->
+    <measure number="2">
+      <attributes>
+        <time>
+          <beats>2</beats>
+          <beat-type>4</beat-type>
+        </time>
+      </attributes>
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>16</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <direction>
+        <direction-type>
+          <wedge spread="16" type="stop"/>
+        </direction-type>
+        <offset>-1</offset>
+      </direction>
+    </measure>
+    <!--=======================================================-->
+    <measure number="3">
+      <attributes>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <staff-details>
+          <staff-size>100</staff-size>
+        </staff-details>
+      </attributes>
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>32</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <accidental>sharp</accidental>
+      </note>
+      <direction placement="below">
+        <direction-type>
+          <wedge spread="15" type="diminuendo"/>
+        </direction-type>
+        <offset>-30</offset>
+      </direction>
+      <direction>
+        <direction-type>
+          <wedge type="stop"/>
+        </direction-type>
+        <offset>-1</offset>
+      </direction>
+    </measure>
+  </part>
+  <!--=========================================================-->
+</score-partwise>

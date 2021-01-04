@@ -365,8 +365,8 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 1,	    0,	  0,	0,	  1,	"(r q v1 p1)" );
         CHECK_ENTRY0(it, 0,	    0,	  0,	64,	  0,	"(barline simple)" );
         CHECK_ENTRY0(it, 1,	    0,	  0,	64,	  1,	"(barline simple)" );
-        CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(dir unknown)" );
-        CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(dir unknown)" );
+        CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(dir empty)" );
+        CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(dir empty)" );
         CHECK_ENTRY0(it, 0,	    0,	  1,	64,	  0,	"(n a4 q v1 p1)" );
         CHECK_ENTRY0(it, 1,	    0,	  1,	64,	  1,	"(n e4 q v1 p1)" );
         CHECK_ENTRY0(it, 0,	    0,	  1,	128,  0,	"(barline simple)" );
@@ -590,6 +590,56 @@ SUITE(ColStaffObjsBuilderTest)
         CHECK_ENTRY0(it, 0,    0,      0,   128,   0, "(barline simple)" );
         CHECK_ENTRY0(it, 0,    0,      1,   128,   0, "(n c3 q v1 p1)" );
     }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, lower_entry_13)
+    {
+        //@13. R4. Direction in previous measure, 2nd instr, cannot go after barline
+        //@        at the same timepos in 1st instr.
+
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "unit-tests/colstaffobjs/08-direction-after-ts-in-2nd-instr.xml",
+                      Document::k_format_mxl);
+        ImoScore* pScore = dynamic_cast<ImoScore*>( doc.get_content_item(0) );
+        CHECK( pScore != nullptr );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+
+//        cout << test_name() << endl;
+//        cout << pTable->dump();
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 28 );
+        CHECK( is_equal_time(pTable->min_note_duration(), TimeUnits(k_duration_half)));
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 3 4)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(clef G p1)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(key C)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(time 3 4)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(dir empty)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(dir empty)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,	   0, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
+        CHECK_ENTRY0(it, 1,    0,      0,   0,     1, "(n b5 h. v1 p1 (stem down)(dyn \"p\" below))" );
+        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=102, id=68) p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   192,   0, "(barline simple)" );
+        CHECK_ENTRY0(it, 1,    0,      0,   192,   1, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(time 2 4)" );
+        CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    0,      1,   192,   0, "(n b5 h v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 1,    0,      1,   192,   1, "(n b5 h v1 p1 (stem down))" );
+        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=102, id=68) p1)" );
+        CHECK_ENTRY0(it, 0,    0,      1,   320,   0, "(barline simple)" );
+        CHECK_ENTRY0(it, 1,    0,      1,   320,   1, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(time 4 4)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(time 4 4)" );
+        CHECK_ENTRY0(it, 0,    0,      2,   320,   0, "(n b5 w v1 p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   320,   1, "(n a5 w v1 p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=102, id=76) p1)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(dir 0 (TODO:  No LdpGenerator for Imo. Imo name=wedge, Imo type=102, id=76) p1)" );
+        CHECK_ENTRY0(it, 0,    0,      2,   576,   0, "(barline simple)" );
+        CHECK_ENTRY0(it, 1,    0,      2,   576,   1, "(barline simple)" );    }
 
     TEST_FIXTURE(ColStaffObjsBuilderTestFixture, playback_time_200)
     {

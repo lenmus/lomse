@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -228,10 +228,10 @@ bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
        )
         return false;   //preserve definition order: insert barline B after grace A
 
-    //R4. barlines must go before all other objects  at same timepos having
+    //R4. Any object must go before all other objects at same timepos having
     //    high measure number
-    if (pB->is_barline() && (b->measure() < a->measure()) )
-        return true;    //B (barline) cannot go after A, Try with A-1
+    if (b->measure() < a->measure())
+        return true;    //B (high measure number) cannot go after A, Try with A-1
 
     //R6. Graces in the same timepos must go before note/rest in that timepos
     if (pB->is_grace_note() && (pA->is_rest() || pA->is_regular_note() || pA->is_cue_note()) )
