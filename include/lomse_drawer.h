@@ -92,6 +92,7 @@ struct RenderOptions
     bool draw_shape_bounds;     //draw bounds around selected shapes
     bool draw_slur_points;      //draw control and reference points in slurs and ties
     bool draw_vertical_profile;     //draw vertical profile
+    bool draw_chords_coloured;  //dbg: draw flag, link and start chord notes in colors
     //bool g_fShowMargins;    //draw margins in scores, so user can change them
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
 
@@ -132,6 +133,7 @@ struct RenderOptions
         , draw_shape_bounds(false)
         , draw_slur_points(false)
         , draw_vertical_profile(false)
+        , draw_chords_coloured(false)
         , scale(1.0)
         , background_color(127, 127, 127)       //grey
         , highlighted_color(255,0,0)            //red

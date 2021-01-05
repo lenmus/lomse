@@ -272,12 +272,30 @@ void TupletEngraver::compute_y_coordinates()
                     {
                         GmoShapeBeam* pBeamShape = static_cast<GmoShapeBeam*>(
                                           pNoteShape->find_related_shape(GmoObj::k_shape_beam) );
+                        //TODO bug bypass when tuplet in chord ?
+                        if (pBeamShape == nullptr)
+                        {
+                            //not beamed note
+                            if (m_fAbove)
+                            {
+                                yMax = max(yMax, pNoteShape->get_top());
+                                yMin = min(yMin, pNoteShape->get_top());
+                            }
+                            else
+                            {
+                                yMax = max(yMax, pNoteShape->get_bottom());
+                                yMin = min(yMin, pNoteShape->get_bottom());
+                            }
+                        }
+                        else
+                        {
                         UPoint pos = pBeamShape->get_outer_right_reference_point();
                         yMax = max(yMax, pos.y);
                         yMin = min(yMin, pos.y);
                         pos = pBeamShape->get_outer_left_reference_point();
                         yMax = max(yMax, pos.y);
                         yMin = min(yMin, pos.y);
+                        }
                     }
                 }
                 else

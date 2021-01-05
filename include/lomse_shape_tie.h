@@ -98,20 +98,28 @@ public:
 class GmoShapeSlur : public GmoShapeSlurTie
 {
 protected:
-    std::vector<UPoint> m_dataPoints;
+    std::vector<UPoint> m_dataPoints;       //only for debug: to draw reference points
+    Color m_dbgColor;                       //debug: color for the points
+    UPoint m_dbgPeak;                       //debug: bezier point at peak point
+    LUnits m_xc, m_yc, m_r;                 //debug: arc approximating the bezier
 
 public:
     GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits thickness,
                  Color color = Color(0,0,0));
     virtual ~GmoShapeSlur() {}
 
-    void add_data_points(const std::vector<UPoint>& data);
     void on_draw(Drawer* pDrawer, RenderOptions& opt) override;
 
-protected:
-    void draw_control_points(Drawer* pDrawer);
-    void draw_reference_points(Drawer* pDrawer);
+    //methods used only during development, to draw references and points
+    void add_data_points(const std::vector<UPoint>& data, UPoint peak,
+                         Color color=Color(255,0,0));       //only for debug
+    void add_approx_arc(LUnits xc, LUnits yc, LUnits r);    //only for debug
 
+
+protected:
+    void draw_control_points(Drawer* pDrawer);      //only for debug: to draw control points
+    void draw_reference_points(Drawer* pDrawer);    //only for debug: to draw reference points
+    void draw_approximate_arc(Drawer* pDrawer);     //only for debug: to draw approx. arc
 };
 
 

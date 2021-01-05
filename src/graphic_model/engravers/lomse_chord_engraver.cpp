@@ -229,6 +229,7 @@ void ChordEngraver::find_reference_notes()
     GmoShapeChordBaseNote* pBaseNoteShape =
                     static_cast<GmoShapeChordBaseNote*>(m_pBaseNoteData->pNoteShape);
     pBaseNoteShape->set_flag_note(m_pFlagNoteData->pNoteShape);
+
     if (m_pLinkNoteData)
         pBaseNoteShape->set_link_note(m_pLinkNoteData->pNoteShape);
     if (m_pStartNoteData)

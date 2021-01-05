@@ -388,11 +388,11 @@ public:
     //test and debug
     void dump(ostream& outStream, int level) override;
     void set_color(Color color) { m_color = color; }
+    virtual Color get_normal_color() { return m_color; }
 
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
     virtual Color determine_color_to_use(RenderOptions& opt);
-    virtual Color get_normal_color() { return m_color; }
 
 };
 
