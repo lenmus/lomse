@@ -3129,7 +3129,7 @@ public:
             int voice = get_child_value_integer( m_pAnalyser->get_current_voice() );
 
             // staff?
-            int staff = 1;
+            int staff = 0;
             if (get_optional("staff"))
                 staff = get_child_value_integer(1) - 1;
 
@@ -4066,6 +4066,19 @@ protected:
 //@ - Grace notes do not have a duration element.
 //@ - Cue notes have a duration element, as do forward elements, but no tie elements.
 //@
+//@ <!ATTLIST note
+//@     %print-style;
+//@     %printout;
+//@     print-leger %yes-no; #IMPLIED
+//@     dynamics CDATA #IMPLIED
+//@     end-dynamics CDATA #IMPLIED
+//@     attack CDATA #IMPLIED
+//@     release CDATA #IMPLIED
+//@     %time-only;
+//@     pizzicato %yes-no; #IMPLIED
+//@     %optional-unique-id;
+//@ >
+//@
 
 class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
@@ -4094,13 +4107,19 @@ public:
         //attrb: print-object
         bool fVisible = get_optional_yes_no_attribute("print-object", "yes");
 
+        //attrb: print-spacing
+        bool fTakesSpace = get_optional_yes_no_attribute("print-spacing", "yes");
+
+        if (!fTakesSpace)
+            return nullptr;     //ignore
+
             //elements
 
         // [<cue>]
         bool fIsCue = get_optional("cue");
-        //for now, ignore cue notes
-        if (fIsCue)
-            return nullptr;
+//        //for now, ignore cue notes
+//        if (fIsCue)
+//            return nullptr;
 
         // [<grace>]
         bool fIsGrace = get_optional("grace");

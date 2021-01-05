@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -419,7 +419,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pImo);
         //cout << test_name() << endl << "\"" << source << "\"" << endl;
-        CHECK( source == "(dir unknown)" );
+        CHECK( source == "(dir empty)" );
     }
 
 
