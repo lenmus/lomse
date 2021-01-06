@@ -114,6 +114,7 @@ protected:
 
     void compute_start_point();
     void compute_end_point();
+    void compute_end_point_for_graces();
     void compute_start_of_staff_point();
     void compute_end_of_staff_point();
     GmoShapeNote* get_relevant_note_for_chords(GmoShapeNote* pNoteShape);

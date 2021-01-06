@@ -272,7 +272,8 @@ void TupletEngraver::compute_y_coordinates()
                     {
                         GmoShapeBeam* pBeamShape = static_cast<GmoShapeBeam*>(
                                           pNoteShape->find_related_shape(GmoObj::k_shape_beam) );
-                        //TODO bug bypass when tuplet in chord ?
+                        //TODO bug bypass: forget about the beam if beam is nullptr.
+                        //Why is nullptr? tuplet in chord ? Is pNote a chord base note?
                         if (pBeamShape == nullptr)
                         {
                             //not beamed note

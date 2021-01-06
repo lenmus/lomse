@@ -179,14 +179,16 @@ GmoShape* SlurEngraver::create_shape(int type)
     pShape->add_data_points(m_dataPoints, m_dbgPeak, m_dbgColor);  //only for debug
 
 
+    //dbg: add approximate circle to the shape, to display for debug
     if (type == k_single_shape)
-    {
         pShape->add_approx_arc(xc, yc, r);  //only for debug
 
-        //if cross-staff slur do not add it to VProfile
-        if (m_pStartNote->get_staff() != m_pEndNote->get_staff())
-            pShape->set_add_to_vprofile(false);
-    }
+
+    //adding slurs to VProfile is problematic as very height slurs or slurs with
+    //big baseline angle takes unreasonable space. Tentatively, slurs with height
+    //greater than 4 lines will not be added.
+    if (pShape->get_bounds().get_height() > tenths_to_logical(40.0f))
+        pShape->set_add_to_vprofile(false);
 
     return pShape;
 }
@@ -338,11 +340,16 @@ void SlurEngraver::compute_start_point()
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_end_point()
 {
+    if (m_fSlurForGraces)
+    {
+        compute_end_point_for_graces();
+        return;
+    }
+
     //if end note has stem and stem is on the same position than slur, place slur
     //over stem. Otherwise, place slur over note-head
-    //
     m_fEndOverStem = false;
-    if (m_pEndNote->has_stem() && !m_fSlurForGraces)
+    if (m_pEndNote->has_stem())
     {
         m_fEndOverStem = (m_fSlurBelow && !m_pEndNoteShape->is_up())
                          || (!m_fSlurBelow && m_pEndNoteShape->is_up());
@@ -380,8 +387,52 @@ void SlurEngraver::compute_end_point()
                                : pNoteShape->get_top() - space );
     }
     else
+    {
         y3 = (m_fSlurBelow ? pNoteShape->get_notehead_bottom() + space
                            : pNoteShape->get_notehead_top() - space );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SlurEngraver::compute_end_point_for_graces()
+{
+    m_fEndOverStem = false;
+
+    //for chords, the received end note is the base note, but computations
+    //it is necessary to use the top or the bottom note, not the base note
+    GmoShapeNote* pNoteShape = get_relevant_note_for_chords(m_pEndNoteShape);
+
+
+    //x pos: when the end note has stem, the slur position has to be
+    //moved to the left of the notehead. Otherwise, centered on the on the nothead
+    bool fLeftCenter = (m_pEndNote->has_stem()
+                        && ((m_fSlurBelow && !m_pEndNoteShape->is_up())
+                             || (!m_fSlurBelow && m_pEndNoteShape->is_up()) ));
+    if (fLeftCenter)
+    {
+        //x pos: at left of notehead, centered
+        x3 = pNoteShape->get_notehead_left() - tenths_to_logical(3.0f);
+    }
+    else
+    {
+        //x pos: center on notehead
+        x3 = (pNoteShape->get_notehead_right() + pNoteShape->get_notehead_left()) / 2.0f;
+    }
+
+    //y pos
+    if (fLeftCenter)
+    {
+        //y pos: aligned with notehead top/bottom
+        y3 = (m_fSlurBelow ? pNoteShape->get_notehead_bottom()
+                           : pNoteShape->get_notehead_top());
+    }
+    else
+    {
+        //y pos: 5 tenths appart from notehead
+        LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
+        y3 = (m_fSlurBelow ? pNoteShape->get_notehead_bottom() + space
+                           : pNoteShape->get_notehead_top() - space );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -400,10 +451,22 @@ void SlurEngraver::compute_end_of_staff_point()
 {
     x3 = m_pInstrEngrv->get_staves_right();
 
+    //if current instrument has more than one staff it is necessary to place the end
+    //of the slur at the same staff than slur end note
+    int iStaff = m_idxStaffStart;
+    if (m_idxStaffEnd != m_idxStaffStart)
+        iStaff = m_pSlur->get_end_note()->get_staff();
+
     if (m_fSlurBelow)
-        y3 = m_uStaffTop + tenths_to_logical(60.0f);
+        y3 = m_pInstrEngrv->get_bottom_line_of_staff(iStaff) + tenths_to_logical(60.0f);
     else
-        y3 = m_uStaffTop - tenths_to_logical(20.0f);
+        y3 = m_pInstrEngrv->get_top_line_of_staff(iStaff) - tenths_to_logical(20.0f);
+
+
+//    if (m_fSlurBelow)
+//        y3 = m_uStaffTop + tenths_to_logical(60.0f);
+//    else
+//        y3 = m_uStaffTop - tenths_to_logical(20.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -421,10 +484,10 @@ GmoShapeNote* SlurEngraver::get_relevant_note_for_chords(GmoShapeNote* pNoteShap
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_control_points(int type)
 {
-    dbgLogger << "Slur " << (m_fSlurBelow ? "below" : "above")
-        << ", num.data points=" << m_dataPoints.size();
+//    dbgLogger << "Slur " << (m_fSlurBelow ? "below" : "above")
+//        << ", num.data points=" << m_dataPoints.size();
 
-    if (m_dataPoints.size() <= 2)
+    if (m_dataPoints.size() <= 2 || m_fSlurForGraces)
         compute_two_points_slur(type);      //one point in case of system start/end
     else
         compute_many_points_slur(type);
@@ -559,7 +622,7 @@ void SlurEngraver::method_asymmetrical_slur(LUnits height)
     //Method: Compute angles to intermediate points, keep the greatest angles and
     //double them
 
-    dbgLogger << ". Asymmetrical slur method." << endl;
+//    dbgLogger << ". Asymmetrical slur method." << endl;
     m_dbgColor = Color(127,0,255);  //dbg: violet
     r = 0.0f;   //dbg: to avoid drawing the approx. circle
 
@@ -582,14 +645,14 @@ void SlurEngraver::method_asymmetrical_slur(LUnits height)
         LUnits dy = abs(y0 - m_dataPoints[i].y);
         LUnits a = atan2(dy, dx);               //get angle
 
-        dbgLogger << "     Selecting start angle: i=" << i
-            << ", a=" << a << " (" << a*180.0f/PI << "º)"
-            << ", a1=" << a1 << " (" << a1*180.0f/PI << "º)" << endl;
+//        dbgLogger << "     Selecting start angle: i=" << i
+//            << ", a=" << a << " (" << a*180.0f/PI << "º)"
+//            << ", a1=" << a1 << " (" << a1*180.0f/PI << "º)" << endl;
 
         if (a > a1)     //save data for greatest angle
             a1 = a;
     }
-    dbgLogger << "     Maximum a1= " << a1 << " (" << a1*180.0f/PI << "º)" << endl;
+//    dbgLogger << "     Maximum a1= " << a1 << " (" << a1*180.0f/PI << "º)" << endl;
 
     //get max angle from the end point
     for(size_t i=1; i <= numPoints; ++i)
@@ -599,14 +662,14 @@ void SlurEngraver::method_asymmetrical_slur(LUnits height)
         //LUnits tana = dy/dx;
         LUnits a = atan2(dy, dx);               //get angle
 
-        dbgLogger << "     Selecting end angle: i=" << i
-            << ", a=" << a << " (" << a*180.0f/PI << "º)"
-            << ", a2=" << a2 << " (" << a2*180.0f/PI << "º)" << endl;
+//        dbgLogger << "     Selecting end angle: i=" << i
+//            << ", a=" << a << " (" << a*180.0f/PI << "º)"
+//            << ", a2=" << a2 << " (" << a2*180.0f/PI << "º)" << endl;
 
         if (a2 < a)     //save data for greatest angle
             a2 = a;
     }
-    dbgLogger << "     Maximum a2= " << a2 << " (" << a2*180.0f/PI << "º)" << endl;
+//    dbgLogger << "     Maximum a2= " << a2 << " (" << a2*180.0f/PI << "º)" << endl;
 
     //------------------------------------------------------------------------
     //double the angles
@@ -618,8 +681,8 @@ void SlurEngraver::method_asymmetrical_slur(LUnits height)
         a1 = a90;
     if (a2 > a90)
         a2 = a90;
-    dbgLogger << "     After limiting angles: a1=" << a1 << " (" << a1*180.0f/PI << "º)"
-        << ", a2=" << a2 << " (" << a2*180.0f/PI << "º)" << endl;
+//    dbgLogger << "     After limiting angles: a1=" << a1 << " (" << a1*180.0f/PI << "º)"
+//        << ", a2=" << a2 << " (" << a2*180.0f/PI << "º)" << endl;
 
     //------------------------------------------------------------------------
     //Compute slur (p0, p3, a1, a2, height) a1,a2 referred to the horizontal
@@ -629,12 +692,12 @@ void SlurEngraver::method_asymmetrical_slur(LUnits height)
     LUnits t1 = height / sin(a1+b);
     LUnits t2 = height / sin(a2+b);
 
-    dbgLogger << "     "
-        << ", cos(a1)=" << cos(a1) << ", cos(a2)=" << cos(a2)
-        << ", sin(a1)=" << sin(a1) << ", sin(a2)=" << sin(a2) << endl;
-
-    dbgLogger << "     t1=" << t1 << ", a1=" << a1
-        << ", t2=" << t2 << ", a2=" << a2 << endl << endl;
+//    dbgLogger << "     "
+//        << ", cos(a1)=" << cos(a1) << ", cos(a2)=" << cos(a2)
+//        << ", sin(a1)=" << sin(a1) << ", sin(a2)=" << sin(a2) << endl;
+//
+//    dbgLogger << "     t1=" << t1 << ", a1=" << a1
+//        << ", t2=" << t2 << ", a2=" << a2 << endl << endl;
 
 
     //calculate the control points
@@ -760,7 +823,6 @@ void SlurEngraver::compute_two_points_slur(int type)
 void SlurEngraver::find_contour_reference_points()
 {
     //invoked from create_single_shape() to determine the curve profile.
-    //bezier start & end points are already set, pointing to ?
 
     //get profile points between bezier start and end points
     int idxStaff = (m_fSlurBelow ? max(m_idxStaffEnd, m_idxStaffStart)
@@ -918,8 +980,8 @@ void SlurEngraver::method_for_two_points()
     const float a45 = PI/4.0f;
     const float a90 = PI/2.0f;
 
-    dbgLogger << ". Two points case. angle b=" << b << " (" << (b*180.0f/PI) << "º), D=" << D;
-    m_dbgColor = (Color(255,0,0));    //red
+//    dbgLogger << ". Two points case. angle b=" << b << " (" << (b*180.0f/PI) << "º), D=" << D;
+//    m_dbgColor = (Color(255,0,0));    //red
 
     //For short slurs or slurs with small angles use the default slur.
     //it has low height, is symmetrical, and requires less computations
@@ -1004,19 +1066,19 @@ void SlurEngraver::method_for_two_points()
             y2 = y3 - t2 * sin(a2);  //y axis reversed
         }
 
-        dbgLogger << ", a1=" << a1 << " (" << (a1*180.0f/PI) << "º)"
-            << ", a2=" << a2 << " (" << (a2*180.0f/PI) << "º)"
-            << ", q=" << q << ", t1=" << t1 << ", t2=" << t2 << endl
-            << "     angle b1=" << b1 << " (" << (b1*180.0f/PI) << "º)"
-            << ", angle b2=" << b2 << " (" << (b2*180.0f/PI) << "º)" << endl
-            << "     d=" << d << ", d/3=" << d*0.33f
-            << ", 15T=" << tenths_to_logical(15.0f)
-            << ", 30T=" << tenths_to_logical(30.0f)
-            << ", q=" << q << endl;
+//        dbgLogger << ", a1=" << a1 << " (" << (a1*180.0f/PI) << "º)"
+//            << ", a2=" << a2 << " (" << (a2*180.0f/PI) << "º)"
+//            << ", q=" << q << ", t1=" << t1 << ", t2=" << t2 << endl
+//            << "     angle b1=" << b1 << " (" << (b1*180.0f/PI) << "º)"
+//            << ", angle b2=" << b2 << " (" << (b2*180.0f/PI) << "º)" << endl
+//            << "     d=" << d << ", d/3=" << d*0.33f
+//            << ", 15T=" << tenths_to_logical(15.0f)
+//            << ", 30T=" << tenths_to_logical(30.0f)
+//            << ", q=" << q << endl;
 
     }
 
-    dbgLogger << endl;
+//    dbgLogger << endl;
 }
 
 ////======================================================================================

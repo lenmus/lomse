@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <part-list>
+    <score-part id="P16">
+      <part-name>2</part-name>
+      <part-abbreviation>2</part-abbreviation>
+      <score-instrument id="P16-X3">
+        <instrument-name>Bass Drum</instrument-name>
+        <instrument-sound>drum.bass-drum</instrument-sound>
+      </score-instrument>
+      <midi-instrument id="P16-X3">
+        <midi-channel>10</midi-channel>
+        <midi-program>1</midi-program>
+        <midi-unpitched>36</midi-unpitched>
+        <volume>80</volume>
+        <pan>0</pan>
+      </midi-instrument>
+    </score-part>
+  </part-list>
+  <!--=========================================================-->
+  <part id="P16">
+    <measure number="1" width="324">
+      <attributes>
+        <divisions>1024</divisions>
+        <key print-object="no">
+          <fifths>0</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>4</beat-type>
+        </time>
+        <clef>
+          <sign>percussion</sign>
+        </clef>
+        <staff-details>
+          <staff-size>108</staff-size>
+        </staff-details>
+      </attributes>
+      <note>
+        <rest measure="yes"/>
+        <duration>3072</duration>
+        <voice>1</voice>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="33" width="371">
+      <direction placement="below">
+        <direction-type>
+          <dynamics default-x="32" default-y="-73" halign="center">
+            <p/>
+          </dynamics>
+        </direction-type>
+        <sound dynamics="67"/>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <words default-x="14" default-y="8" font-size="7.1">B.D.</words>
+        </direction-type>
+      </direction>
+      <note default-x="25">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>3072</duration>
+        <instrument id="P16-X3"/>
+        <voice>1</voice>
+        <type>half</type>
+        <dot/>
+        <stem default-y="0.5">up</stem>
+        <notations>
+          <ornaments>
+            <tremolo default-x="6" default-y="-29" type="single">3</tremolo>
+          </ornaments>
+        </notations>
+      </note>
+      <backup>
+        <duration>3072</duration>
+      </backup>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+      <note print-object="no" print-spacing="no">
+        <unpitched>
+          <display-step>F</display-step>
+          <display-octave>4</display-octave>
+        </unpitched>
+        <duration>102</duration>
+        <instrument id="P16-X3"/>
+        <voice>2</voice>
+        <stem>up</stem>
+      </note>
+       <forward>
+        <duration>12</duration>
+        <voice>2</voice>
+      </forward>
+    </measure>
+  </part>
+  <!--=========================================================-->
+</score-partwise>
