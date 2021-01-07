@@ -84,7 +84,38 @@ void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
     }
 
     draw_leger_lines(pDrawer);
-    GmoCompositeShape::on_draw(pDrawer, opt);
+
+    if (opt.draw_chords_coloured)
+    {
+        Color save = m_pNoteheadShape->get_normal_color();
+        Color dbgColor = save;
+        if (m_chordNoteType == k_chord_note_flag)
+            dbgColor = Color(51,153,51);    //green
+        else if (m_chordNoteType == k_chord_note_link)
+            dbgColor = Color(255,105,180);  //magenta
+        else if (m_chordNoteType == k_chord_note_start)
+            dbgColor = Color(150,200,250);  //cyan
+
+        m_pNoteheadShape->set_color(dbgColor);
+        if (m_pStemShape)
+            m_pStemShape->set_color(dbgColor);
+        if (m_pAccidentalsShape)
+            m_pAccidentalsShape->set_color(dbgColor);
+        if (m_pFlagShape)
+            m_pFlagShape->set_color(dbgColor);
+
+        GmoCompositeShape::on_draw(pDrawer, opt);
+
+        m_pNoteheadShape->set_color(save);
+        if (m_pStemShape)
+            m_pStemShape->set_color(save);
+        if (m_pAccidentalsShape)
+            m_pAccidentalsShape->set_color(save);
+        if (m_pFlagShape)
+            m_pFlagShape->set_color(save);
+    }
+    else
+        GmoCompositeShape::on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -271,6 +302,12 @@ LUnits GmoShapeNote::get_stem_left() const
 }
 
 //---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_right() const
+{
+    return (m_pStemShape ? m_pStemShape->get_right() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
 LUnits GmoShapeNote::get_stem_y_flag() const
 {
     return (m_pStemShape ? m_pStemShape->get_y_flag() : 0.0f);
@@ -359,6 +396,40 @@ void GmoShapeChordBaseNote::set_start_note(GmoShapeNote* pNote)
     m_pStartNote = pNote;
     pNote->set_chord_note_type(k_chord_note_start);
     pNote->set_base_note_shape(this);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeNote* GmoShapeChordBaseNote::get_top_note()
+{
+    //stem up: flag note
+    //stem down: link note (single staff chords) or start note (cross-staff chords)
+    //no stem: find, based on position
+
+    if (has_stem())
+        return is_up() ? m_pFlagNote
+                       : (m_pStartNote != nullptr ? m_pStartNote : m_pLinkNote);
+
+    //notes without stem: decide based on noteheads position (AWARE: y axis is reversed)
+    GmoShapeNote* pNonFlagNote = (m_pStartNote != nullptr ? m_pStartNote : m_pLinkNote);
+    return pNonFlagNote->m_pNoteheadShape->get_top() <  m_pFlagNote->m_pNoteheadShape->get_top() ?
+                    pNonFlagNote : m_pFlagNote;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeNote* GmoShapeChordBaseNote::get_bottom_note()
+{
+    //stem up: link note (single staff chords) or start note (cross-staff chords)
+    //stem down: flag note
+    //no stem: find, based on position
+
+    if (has_stem())
+        return is_up() ? (m_pStartNote != nullptr ? m_pStartNote : m_pLinkNote)
+                       : m_pFlagNote;
+
+    //notes without stem: decide based on noteheads position (AWARE: y axis is reversed)
+    GmoShapeNote* pNonFlagNote = (m_pStartNote != nullptr ? m_pStartNote : m_pLinkNote);
+    return pNonFlagNote->m_pNoteheadShape->get_top() <  m_pFlagNote->m_pNoteheadShape->get_top() ?
+                    m_pFlagNote : pNonFlagNote;
 }
 
 

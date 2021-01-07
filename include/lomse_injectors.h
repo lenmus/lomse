@@ -125,6 +125,7 @@ protected:
     bool m_fShowShapeBounds;        //draw a box around each shape
     bool m_fDrawSlurCtrolPoints;    //draw ctrol.points in slurs and ties
     bool m_fDrawVerticalProfile;    //draw vertical profile
+    bool m_fDrawChordsColoured = false; //draw flag, link and start chord notes in colors
     bool m_fUnitTests;              //library is running for Unit Tests
     int m_traceLinesBreaker;        //trace level for lines breaker algorithm
 
@@ -224,10 +225,12 @@ public:
     inline bool draw_anchor_lines() { return m_fDrawAnchorLines; }
     inline void set_draw_shape_bounds(bool value) { m_fShowShapeBounds = value; }
     inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
-    inline bool draw_slur_ctrol_points() { return m_fDrawSlurCtrolPoints; }
     inline void set_draw_slur_ctrol_points(bool value) { m_fDrawSlurCtrolPoints = value; }
-    inline bool draw_vertical_profile() { return m_fDrawVerticalProfile; }
+    inline bool draw_slur_ctrol_points() { return m_fDrawSlurCtrolPoints; }
     inline void set_draw_vertical_profile(bool value) { m_fDrawVerticalProfile = value; }
+    inline bool draw_vertical_profile() { return m_fDrawVerticalProfile; }
+    inline void set_draw_chords_coloured(bool value) { m_fDrawChordsColoured = value; }
+    inline bool draw_chords_coloured() { return m_fDrawChordsColoured; }
     inline void set_unit_test(bool value) { m_fUnitTests = value; }
     inline bool is_unit_test() { return m_fUnitTests; }
     inline void set_trace_level_for_lines_breaker(int level) {

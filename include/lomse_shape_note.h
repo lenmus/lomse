@@ -119,6 +119,7 @@ public:
     LUnits get_stem_height() const;
     LUnits get_stem_width() const;
     LUnits get_stem_left() const;
+    LUnits get_stem_right() const;
     LUnits get_stem_y_flag() const;
     LUnits get_stem_y_note() const;
 
@@ -137,6 +138,7 @@ public:
     inline bool is_chord_link_note() { return m_chordNoteType == k_chord_note_link; }
     inline bool is_chord_start_note() { return m_chordNoteType == k_chord_note_start; }
     inline bool is_chord_note() { return m_chordNoteType != k_chord_note_no; }
+    inline bool has_stem() { return m_pStemShape != nullptr; }
 
     //info from parent ImoNote
     bool has_beam();
@@ -158,7 +160,6 @@ protected:
     friend class GmoShapeChordBaseNote;
     inline void set_chord_note_type(int type) { m_chordNoteType = type; }
     inline void set_base_note_shape(GmoShapeChordBaseNote* pShape) { m_pBaseNoteShape = pShape; }
-
 
 };
 
@@ -184,6 +185,8 @@ public:
     inline GmoShapeNote* get_flag_note() { return m_pFlagNote; }
     inline GmoShapeNote* get_link_note() { return m_pLinkNote; }
     inline GmoShapeNote* get_start_note() { return m_pStartNote; }
+    GmoShapeNote* get_top_note();
+    GmoShapeNote* get_bottom_note();
 
 protected:
     friend class ChordEngraver;

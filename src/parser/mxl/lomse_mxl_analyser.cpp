@@ -6304,17 +6304,12 @@ protected:
         }
         else if (value == "continue")
         {
-            m_pInfo1->set_start(false);
-            int slurId =  m_pAnalyser->get_slur_id_and_close(num);
-            m_pInfo1->set_slur_number(slurId);
-
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            m_pInfo2 = static_cast<ImoSlurDto*>(
-                                ImFactory::inject(k_imo_slur_dto, pDoc));
-            m_pInfo2->set_start(true);
-            m_pInfo2->set_line_number( m_pAnalyser->get_line_number(&m_analysedNode) );
-            slurId =  m_pAnalyser->new_slur_id(num);
-            m_pInfo2->set_slur_number(slurId);
+            //"continue" slurs are just intermediate points (e.g. to add a second
+            //bezier curve or to mark system start and system end). As layout
+            //is done by Lomse (required for free flow) all "continue" elements
+            //will be ignored
+            delete m_pInfo1;
+            m_pInfo1 = nullptr;
         }
         else
         {
