@@ -33,7 +33,6 @@ function DisplayHelp()
     echo "Options:"
     echo "    -h --help        Print this help text."
     echo "    -m --messages    Print message for each test file."
-    echo "       --noweb       Do not generate the html page."
     echo ""
 }
 
@@ -88,18 +87,6 @@ function AddTargetImagesFor()
         # determine full path for image in webpage
         expected_img="${target_path}${f}"
         flicker_img="${results_path}${imagename}.gif"
-        #if [ ${fGenerateForWeb} -eq 1 ]; then
-        #    expected_img="${website_images_prefix}${imagename}.jpg"
-        #    flicker_img="${website_images_prefix}${imagename}.gif"
-        #fi
-
-        # if generating for local web, copy images to server
-        #if [ ${fGenerateForWeb} -eq 1 ]; then
-        #    cp "${target_path}${f}" "${website_root}/${website_regression_images}"
-        #    if [ ${fTestFailed} -eq 1 ]; then
-        #        cp "${results_path}${imagename}.gif" "${website_root}/${website_regression_images}"
-        #    fi
-        #fi
 
         # add images to webpage
         if [ ${fTestFailed} -eq 1 ]; then
@@ -144,7 +131,6 @@ results_path="${outpath}/failures/"
 website_pages="${outpath}/"
 
 fDisplayMessages=0
-fGenerateForWeb=1
 
 
 #parse command line parameters
@@ -161,9 +147,6 @@ do
         ;;
         -m|--messages)
         fDisplayMessages=1
-        ;;
-        --noweb)
-        fGenerateForWeb=0
         ;;
         *) # unknown option
         DisplayHelp
@@ -204,10 +187,6 @@ cd "${results_path}" || exit $E_BADPATH
 rm * -f
 cd "${generated_path}" || exit $E_BADPATH
 rm * -f
-#if [ ${fGenerateForWeb} -eq 1 ]; then
-#    cd "${website_root}/${website_regression_images}" || exit $E_BADPATH
-#    rm * -f
-#fi
 
 # generate images
 shopt -s nullglob
@@ -289,9 +268,6 @@ done
 
 #set output page filename
 html_page="${scripts_path}/regression.htm"
-if [ ${fGenerateForWeb} -eq 1 ]; then
-    html_page="${website_pages}/regression.htm"
-fi
 
 #create page from template
 cd "${scripts_path}"

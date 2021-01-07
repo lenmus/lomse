@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2016. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -40,7 +40,9 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_renderer.h"
+#include "lomse_logger.h"
 
+#include <sstream>
 using namespace std;
 
 namespace lomse
@@ -136,7 +138,13 @@ Renderer* RendererFactory::create_renderer(LibraryScope& libraryScope,
         //    return LOMSE_NEW RendererTemplate<PixFormat_bgra64>(libraryScope.get_screen_ppi(),
         //                                                 attr_storage, path);
         default:
-            return nullptr;
+        {
+            stringstream s;
+            s << "[RendererFactory::create_renderer] Pixel format '" << pixelFmt
+              << "' not yet supported. Aborting.";
+            LOMSE_LOG_ERROR(s.str());
+            throw runtime_error(s.str());
+        }
     }
 }
 
