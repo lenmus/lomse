@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,6 +31,7 @@
 #define __LOMSE_SCORE_PLAYER_H__
 
 #include "lomse_basic.h"
+#include "lomse_internal_model.h"
 
 
 #include <vector>
@@ -204,7 +205,7 @@ public:
 
     /** Load the score to play and set some options. Playback does not start until you
         invoke any of the play methods: play(), play_measure(), etc.
-        @param pScore A pointer to the score to play.
+        @param score The score to play.
         @param pPlayerGui
         @param metronomeChannel Midi channel (0..15) to use for metronome clicks.
             Default value is channel 9, normally used for percussion.
@@ -217,9 +218,17 @@ public:
             Default value is 77. When using channel 9 this value corresponds to the
             'Low Wood Block' sound.
     */
+    void load_score(AScore score, PlayerGui* pPlayerGui,
+                    int metronomeChannel=9, int metronomeInstr=0,
+                    int tone1=60, int tone2=77);
+
+    //TODO: Not possible to deprecate for now. Events still passes a ptr to the score
+    //instead of a AScore object
+    //LOMSE_DEPRECATED_MSG("use method receiving AScore instead of ptr.to score");
     void load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
                     int metronomeChannel=9, int metronomeInstr=0,
                     int tone1=60, int tone2=77);
+
 
     // methods to start playback
     /** @name Methods to start playback   */

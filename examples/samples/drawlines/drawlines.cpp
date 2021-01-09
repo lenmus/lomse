@@ -380,14 +380,9 @@ void MyCanvas::open_test_document()
         Document::k_format_ldp
     );
 
-    //get the pointer to the interactor, set the rendering buffer and 
-    //register for receiving desired events
+    //get the pointer to the interactor and register to receive desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //register to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
 }
@@ -451,19 +446,23 @@ void MyCanvas::delete_rendering_buffer()
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
     //allocate memory for the Lomse rendering buffer.
-    //Any existing buffer is automatically deleted by Lomse.
 
     #define BYTES_PER_PIXEL 4   //the chosen format is RGBA, 32 bits
 
-    // allocate a new rendering buffer
+    //delete current buffer
     delete_rendering_buffer();
+
+    // allocate a new rendering buffer
     m_nBufWidth = width;
     m_nBufHeight = height;
     m_pdata = (unsigned char*)malloc(m_nBufWidth * m_nBufHeight * BYTES_PER_PIXEL);
 
-    //Attach this memory to be used as Lomse rendering buffer
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this memory as Lomse rendering buffer
+    if (m_pPresenter)
+    {
+        if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            spInteractor->set_rendering_buffer(m_pdata, m_nBufWidth, m_nBufHeight);
+    }
 
     m_view_needs_redraw = true;
 }

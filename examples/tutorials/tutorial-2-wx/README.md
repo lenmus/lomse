@@ -289,7 +289,7 @@ Object::method()
 
 Therefore, to use a method as call back it is necessary to pass two parameters, a pointer to the object instance, and a pointer to the method. But as the Lomse callback is a C callback, only one parameter is passed: the pointer to the method. As a consequence, only static methods can be invoked. But this is a very strong limitation as static members can only access static variables.
 
-This problem has no simple solution. The simplest one I have found, that works for both C and C++ programs, is to add another parameter to the function that sets up the callback. This parameter is a pointer to the object instance (for C++) or NULL (for C programs). The callback is still an static method but it will receive the object instance pointer as parameter and, thus, non-static members can be invoked from inside the static method.
+This problem has no simple solution. The simplest one I have found, that works for both C and C++ programs, is to add another parameter to the function that sets up the callback. This parameter is a pointer to the object instance (for C++) or nullptr (for C programs). The callback is still an static method but it will receive the object instance pointer as parameter and, thus, non-static members can be invoked from inside the static method.
 
 This is the solution for our update window callback:
 
@@ -356,7 +356,7 @@ The rationale for this design decision is to allow for certain window repaint op
 
 ## <a name="loading" />Loading scores from files
 
-o finish our modifications we have to add code for loading scores from a file and rendering them. We learn in first tutorial how to load an score from a text string. Loading it from a file is equally simple. But instead of passing the string to Lomse, it is just passing the full filename and Lomse will take care of all details. In <tt>MyFrame</tt> we opened an auxiliary window for selecting the file to open, and delegated the load operation om a new method, <tt>MyCanvas::open_file(fullname)</tt>. The code for it is practically identical to the existing `open_test_document` method. Here is the code:
+To finish our modifications we have to add code for loading scores from a file and rendering them. We learn in first tutorial how to load an score from a text string. Loading it from a file is equally simple. But instead of passing the string to Lomse, it is just passing the full filename and Lomse will take care of all details. In <tt>MyFrame</tt> we opened an auxiliary window for selecting the file to open, and delegated the load operation om a new method, <tt>MyCanvas::open_file(fullname)</tt>. The code for it is practically identical to the existing `open_test_document` method. Here is the code:
 
 ```c++
 void MyCanvas::open_file(const wxString& fullname)
@@ -367,13 +367,9 @@ void MyCanvas::open_file(const wxString& fullname)
     m_pPresenter = m_lomse.open_document(k_view_vertical_book,
                                          filename);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }

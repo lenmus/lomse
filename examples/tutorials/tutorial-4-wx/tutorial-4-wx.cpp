@@ -121,7 +121,7 @@ typedef void (wxEvtHandler::*VisualTrackingEventFunction)(MyVisualTrackingEvent&
 #define MY_EVT_VISUAL_TRACKING(fn) \
     DECLARE_EVENT_TABLE_ENTRY( MY_EVT_VISUAL_TRACKING_TYPE, wxID_ANY, -1, \
     (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
-    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) NULL ),
+    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) nullptr ),
 
 
 
@@ -224,14 +224,7 @@ protected:
     Presenter*      m_pPresenter;
 
     //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated bitmap to be
-    //used by the previously defined View.
-    RenderingBuffer     m_rbuf_window;
     wxImage*            m_buffer;		//the image to serve as buffer
-	unsigned char*      m_pdata;		//ptr to the bitmap
-    int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
 
     // for score playback
     ScorePlayer* m_pPlayer;
@@ -348,10 +341,10 @@ END_EVENT_TABLE()
 
 //---------------------------------------------------------------------------------------
 MyFrame::MyFrame()
-	: wxFrame(NULL, wxID_ANY, _T("Lomse sample for wxWidgets"),
+	: wxFrame(nullptr, wxID_ANY, _T("Lomse sample for wxWidgets"),
 			  wxDefaultPosition, wxSize(850, 600))
-    , m_pMidi(NULL)
-    , m_pPlayer(NULL)
+    , m_pMidi(nullptr)
+    , m_pPlayer(nullptr)
 {
     create_menu();
     initialize_lomse();
@@ -632,8 +625,8 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     : wxWindow(frame, wxID_ANY)
     , PlayerNoGui(60L /*tempo 60 MM*/, false /*no count off*/, false /*no metronome clicks*/)
     , m_lomse(lomse)
-	, m_pPresenter(NULL)
-	, m_buffer(NULL)
+	, m_pPresenter(nullptr)
+	, m_buffer(nullptr)
 	, m_pPlayer(pPlayer)
 	, m_view_needs_redraw(true)
 {
@@ -658,14 +651,9 @@ void MyCanvas::open_file(const wxString& fullname)
     m_pPresenter = m_lomse.open_document(k_view_vertical_book,
                                          filename);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
 
@@ -714,22 +702,22 @@ void MyCanvas::delete_rendering_buffer()
 //---------------------------------------------------------------------------------------
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
-    //buffer for the view. Any existing buffer is automatically deleted
+    //creates a bitmap of specified size and defines it s the rendering
+    //buffer for the view.
+
+    delete_rendering_buffer();
 
     // allocate a new rendering buffer
-	delete_rendering_buffer();
-    m_nBufWidth = width;
-    m_nBufHeight = height;
     m_buffer = new wxImage(width, height);
 
     //get pointer to wxImage internal bitmap
-    m_pdata = m_buffer->GetData();
+    unsigned char* pdata = m_buffer->GetData();
 
-    //Attach this bitmap to Lomse rendering buffer
-    #define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this bitmap as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(pdata, width, height);
+    }
 
     m_view_needs_redraw = true;
 }
@@ -773,14 +761,9 @@ void MyCanvas::open_test_document()
         ")))",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register for receiving desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
 }
@@ -978,17 +961,14 @@ void MyCanvas::play_start()
 {
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        Document* pDoc = m_pPresenter->get_document_raw_ptr();
-
-        //AWARE: Then next line of code is just an example, in which it is assumed that
-        //the score to play is the first element in the document.
-        //In a real application, as the document could contain texts, images and many
-        //scores, you shoud get the pointer to the score to play in a suitable way.
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_im_root()->get_content_item(0) );
-
-        if (pScore)
+        //AWARE: It is assumed that the score to play is the first score in
+        //the document. For a real application, as the document could contain
+        //texts, images and many scores, you shoud get the right score to play.
+        ADocument doc = m_pPresenter->get_document();
+        AScore score = doc.first_score();
+        if (score.is_valid())
         {
-            m_pPlayer->load_score(pScore, this);
+            m_pPlayer->load_score(score, this);
             m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
         }
     }
@@ -1021,7 +1001,7 @@ void MyCanvas::on_visual_tracking(MyVisualTrackingEvent& event)
 //=======================================================================================
 MidiServer::MidiServer()
     : m_pMidiSystem( wxMidiSystem::GetInstance() )
-    , m_pMidiOut(NULL)
+    , m_pMidiOut(nullptr)
     , m_nOutDevId(-1)
     , m_nVoiceChannel(0)    // 0 based. So this is channel 1
 {
@@ -1050,7 +1030,7 @@ void MidiServer::set_out_device(int nOutDevId)
          {
             nErr = m_pMidiOut->Close();
             delete m_pMidiOut;
-            m_pMidiOut = NULL;
+            m_pMidiOut = nullptr;
             if (nErr)
             {
                 wxMessageBox( wxString::Format(
@@ -1067,7 +1047,7 @@ void MidiServer::set_out_device(int nOutDevId)
             try
             {
                 m_pMidiOut = new wxMidiOutDevice(m_nOutDevId);
-                nErr = m_pMidiOut->Open(0, NULL);        // 0 latency, no driver user info
+                nErr = m_pMidiOut->Open(0, nullptr);        // 0 latency, no driver user info
             }
             catch(...)      //handle all exceptions
             {

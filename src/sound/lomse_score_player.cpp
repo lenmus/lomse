@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2020. All rights reserved.
+// Lomse is copyrighted work (c) 2010-2021. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -107,6 +107,16 @@ void ScorePlayer::load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
     m_pMtr = m_pPlayerGui->get_metronome();
 
     m_pTable = m_pScore->get_midi_table();
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::load_score(AScore score, PlayerGui* pPlayerGui,
+                             int metronomeChannel, int metronomeInstr,
+                             int tone1, int tone2)
+{
+    if (score.is_valid())
+        load_score(score.internal_object(), pPlayerGui, metronomeChannel,
+                   metronomeInstr, tone1, tone2);
 }
 
 //---------------------------------------------------------------------------------------

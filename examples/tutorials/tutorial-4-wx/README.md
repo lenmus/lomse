@@ -126,7 +126,7 @@ typedef void (wxEvtHandler::*VisualTrackingEventFunction)(MyVisualTrackingEvent&
 #define MY_EVT_VISUAL_TRACKING(fn) \
     DECLARE_EVENT_TABLE_ENTRY( MY_EVT_VISUAL_TRACKING_TYPE, wxID_ANY, -1, \
     (wxObjectEventFunction) (wxEventFunction) (wxCommandEventFunction) (wxNotifyEventFunction) \
-    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) NULL ),
+    wxStaticCastEvent( VisualTrackingEventFunction, & fn ), (wxObject *) nullptr ),
 ```
 
 And the definition:

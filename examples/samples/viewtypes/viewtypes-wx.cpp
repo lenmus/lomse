@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Lomse is copyrighted work (c) 2010-2018. All rights reserved.
+// Lomse is copyrighted work (c) 2010-20218. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -294,15 +294,9 @@ protected:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
 
-    //the Lomse View renders its content on a bitmap. To manage it, Lomse
-    //associates the bitmap to a RenderingBuffer object.
-    //It is your responsibility to render the bitmap on a window.
-    //Here you define the rendering buffer and its associated bitmap to be
-    //used by the previously defined View.
-    RenderingBuffer     m_rbuf_window;
+    //the Lomse View renders its content on a bitmap.
+    //Here we define the wxImage to be used as rendering buffer
     wxImage*            m_buffer;		//the image to serve as buffer
-	unsigned char*      m_pdata;		//ptr to the bitmap
-    int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
 
     // for score playback
     ScorePlayer* m_pPlayer;
@@ -879,14 +873,9 @@ void MyCanvas::open_file(const wxString& fullname, int viewType)
     delete m_pPresenter;
     m_pPresenter = m_lomse.open_document(viewType, filename);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register to receive desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
 //        //TEST: set infinite page width
@@ -944,22 +933,22 @@ void MyCanvas::delete_rendering_buffer()
 //---------------------------------------------------------------------------------------
 void MyCanvas::create_rendering_buffer(int width, int height)
 {
-    //creates a bitmap of specified size and associates it to the rendering
-    //buffer for the view. Any existing buffer is automatically deleted
+    //creates a bitmap of specified size and defines it s the rendering
+    //buffer for the view.
+
+    delete_rendering_buffer();
 
     // allocate a new rendering buffer
-	delete_rendering_buffer();
-    m_nBufWidth = width;
-    m_nBufHeight = height;
     m_buffer = new wxImage(width, height);
 
     //get pointer to wxImage internal bitmap
-    m_pdata = m_buffer->GetData();
+    unsigned char* pdata = m_buffer->GetData();
 
-    //Attach this bitmap to Lomse rendering buffer
-    #define BYTES_PER_PIXEL 3   //wxImage  has RGB, 24 bits format
-    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
-    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+    //use this bitmap as Lomse rendering buffer
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        spInteractor->set_rendering_buffer(pdata, width, height);
+    }
 
     m_view_needs_redraw = true;
 }
@@ -1023,14 +1012,9 @@ void MyCanvas::open_test_document(int viewType)
         ")))",
         Document::k_format_ldp);
 
-    //get the pointer to the interactor, set the rendering buffer and register for
-    //receiving desired events
+    //get the pointer to the interactor and register to receive desired events
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        //connect the View with the window buffer
-        spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
     }
 
@@ -1239,8 +1223,7 @@ void MyCanvas::play_start(int effects)
         if (score.is_valid())
         {
             spInteractor->set_visual_tracking_mode(effects);
-            ImoScore* pScore = score.internal_object();
-            m_pPlayer->load_score(pScore, this);
+            m_pPlayer->load_score(score, this);
             m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
         }
     }
