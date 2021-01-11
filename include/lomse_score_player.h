@@ -222,12 +222,14 @@ public:
                     int metronomeChannel=9, int metronomeInstr=0,
                     int tone1=60, int tone2=77);
 
+///@cond INTERNAL
     //TODO: Not possible to deprecate for now. Events still passes a ptr to the score
     //instead of a AScore object
     //LOMSE_DEPRECATED_MSG("use method receiving AScore instead of ptr.to score");
     void load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
                     int metronomeChannel=9, int metronomeInstr=0,
                     int tone1=60, int tone2=77);
+///@endcond
 
 
     // methods to start playback

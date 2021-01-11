@@ -106,6 +106,14 @@ typedef std::shared_ptr<GmoShape>  SpGmoShape;
         a single page having the required height to contain the full document. Is a kind
         of %k_view_vertical_book but without gaps in the content for separting pages.
         As with %k_view_vertical_book the user will have to scroll down for advancing.
+    - @b k_view_free_flow is for rendering documents in a single page as high
+        as necessary. It is similar to how an HTML page with unconstrained body width
+        is displayed in a browser.
+    - @b k_view_half_page is a view that has a double behaviour. In normal mode
+        (no playback) it behaves as SinglePageView, that is the score is rendered on
+        a single page as high as necessary to contain all the score. But when in
+        playback mode, the bitmap to be rendered in the application window is
+        split horizontally in two halves. See HalfPageView for detail.
 
     @#include <lomse_graphic_view.h>
 */

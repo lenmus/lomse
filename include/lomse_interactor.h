@@ -461,8 +461,10 @@ public:
     */
     virtual void set_rendering_buffer(unsigned char* buf, unsigned width, unsigned height);
 
+///@cond INTERNAL
     LOMSE_DEPRECATED_MSG("use instead overloaded version taking bitmap ptr, width and height")
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
+///@endcond
 
 
     /** Define a sub-region of the rendering bitmap for the View. This
