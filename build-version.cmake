@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------------
 
 set( LOMSE_VERSION_MAJOR 0 )
-set( LOMSE_VERSION_MINOR 27 )
+set( LOMSE_VERSION_MINOR 28 )
 set( LOMSE_VERSION_PATCH 0 )
 
 # build version string for installer name

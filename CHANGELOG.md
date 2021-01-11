@@ -1,16 +1,55 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.27.0
+[Since last version] 0.28.0
 =============================
 
-##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.26.0
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.27.0
 
 - None.
 
 ##### COMPATIBLE CHANGES
 
 - None.
+
+
+
+Version [0.28.0] (11/Jan/2021)
+==============================
+
+#### Features
+
+- Three new Views have been implemented: `HalfPage`, `FreeFlow` and `SinglePage` Views.
+- Transposing instruments are now correctly taken into account for playback.
+- Auto-scaling has been implemented. Now, when the paper height is too small to render just one system, instead of rendering an error message, the scale is automatically adjusted so that the score can fit on the available space.
+- Pitch computation when clefs with octave numbers has been fixed.
+- The quality of scores renderization has been greatly improved in several areas: full support for grace notes, layout of slurs, beams, correct engraving of wedges and volta-brackets when at start and end of system, intermediate shapes in volta-brackets, octave shifts, slur, and other spanners are now rendered, clef change is now correctly  laid out, and some other minor fixes.
+
+
+#### MusicXML support
+
+- Compressed MusicXML files are now supported (thanks, Dmitri Ovodok).
+- MusicXML importer now processes `<transpose>` elements and this information is now taken into account for playback
+- Cue notes are now imported, although for now they are displayed as normal notes.
+- Clefs 'TAB' and 'none' are now supported
+- MusicXML importer now properly deals with `<clef-octave-change>`
+
+
+#### Technical changes
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.27.0
+
+- `RenderingBuffer` is no longer an object that the user app. should know about. Therefore, methods `Interactor::set_rendering_buffer()` and `Interactor::set_print_buffer()` accepting a ptr. to the `RenderingBuffer` have been deprecated and replaced by two new methods that receive the necessary data `(unsigned char* buf, unsigned width, unsigned height)`. Deprecated methods can still be used but will be removed in the future. Please update your code.
+
+##### COMPATIBLE CHANGES
+
+- A new method `Interactor::set_view_area()` has been defined. Its usage is optional and it is oriented to define a sub-region of the rendering bitmap.
+- Transposition is now fully supported in the internal model and playback
+- The logger output destination is now customizable.
+- The definition and creation of a proper user API for accessing and managing the internal model has been started and the root elements have been defined.
+- A debug option for coloring the relevant chord notes has been added.
+- Scores, scripts and instructions for visual regression tests have been added, so that any one can now run the regression tests.
+
 
 
 
@@ -792,7 +831,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.27.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.28.0...HEAD
+[0.28.0]: https://github.com/lenmus/lomse/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/lenmus/lomse/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/lenmus/lomse/compare/0.25.0...0.26.0
 [0.25.0]: https://github.com/lenmus/lomse/compare/0.24.0...0.25.0

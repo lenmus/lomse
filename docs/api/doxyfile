@@ -19,7 +19,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Lomse library. API documentation"
-PROJECT_NUMBER         = 0.27.1
+PROJECT_NUMBER         = 0.28.0
 PROJECT_BRIEF          =
 PROJECT_LOGO           = ./images/logo_100x195.png
 OUTPUT_DIRECTORY       = ../../zz_build-api
