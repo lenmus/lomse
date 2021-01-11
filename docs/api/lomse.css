@@ -1,9 +1,49 @@
 /* extra CSS for lomse. doxygen 1.8.6 */
 
+/* size */
+div.header
+{
+    background: none;
+    border: 0;
+
+    margin-top: 2em;
+    margin-left: auto;
+    margin-right: auto;
+    width: 700px;
+}
+
+/* Wrapper of all the body contents on the page. */
+div.contents {
+    margin-left: auto;
+    margin-right: auto;
+    width: 760px;
+    background-color: white;
+    padding: 10px 20px;
+}
+
+/* change text size */
+body, table, div, p, dl {
+	font: 16px/1.5 Helvetica,Arial,sans-serif;
+}
+
+p.reference, p.definition {
+	font: 16px/1.5 Helvetica,Arial,sans-serif;
+}
+
+div.toc li {
+    font: 14px/1.2 Verdana,DejaVu Sans,Geneva,sans-serif;
+    font-weight: normal;
+}
+
+div.toc h3 {
+    font: bold 14px/1.2 Arial,FreeSans,sans-serif;
+    color: #000;
+}
+
 /* change style of header titles */
 h1, h2, h3, h4, h5, h6 
 {
-    color: #616FDC;
+    color: #000;    /*616FDC;*/
     font-weight: normal;
     margin-top: 2em;
     margin-bottom: 0.5em;
@@ -22,7 +62,8 @@ h2, h3, h4, h5, h6
 /* doxygen headers also with the same color */
 h1.groupheader, h2.groupheader, h3.groupheader, h4.groupheader, h5.groupheader, h6.groupheader
 {
-    color: #616FDC;
+    color: #000;    /*616FDC;*/
+    font-weight: bold;
 }
 
 /* background for page banner */
@@ -33,65 +74,70 @@ div#titlearea
     border: none;
 }
 
-/* links in orange */
-a.el:link, a.el:visited { 
+/* links color, to follow w3c recommendations 
+   https://www.w3.org/TR/2008/NOTE-WCAG20-TECHS-20081211/working-examples/G183/link-contrast.html
+*/
+a, a.el:link, div.textblock a:link, a.visited, a.el:visited, div.textblock a:visited {
 	text-decoration: none;
-	color: #ff6000;
+	color: #0070c9; /*#0066cc;*/
 }
-a.el:hover {
-    color: #ff0000;
-	border-bottom: 1px dotted #ff0000;
+a:hover, a.el:hover, div.textblock a:hover {
+    color: #cc0000;
+	border-bottom: 1px dotted #cc0000;
+}
+
+/* links in TOC in black, for better visibility */
+div.toc a:link {
+	text-decoration: none;
+	color: #000;
+}
+div.toc a:hover {
+	text-decoration: none;
+	color: #cc0000;
 }
 
 /*----------------------------------------------------------------------*/
 
-.memtitle                       /* el título con el nombre de la función */
+/* title with the member/function name */
+.memtitle                       
 {
-	padding: 0px;
-	padding-top: 15px;
-	border-top: 1px solid #B4B4B4;
-	border-left: 0px;
-	border-right: 0px;
-	border-top-right-radius: 0px;
-	border-top-left-radius: 0px;
-	margin-bottom: 0px;
+    padding: 3em 0px 15px 0px;   /* top, right, bottom, left */
+    margin: 0px 0px 10px 0px;     /* top, right, bottom, left */
+	border: 0px;
+	border-bottom: 1px solid #B4B4B4;
 	background-image: none;
-	background-repeat: repeat-x;
-	background-color: #ffffff;
+	background-color: #fff;
 	line-height: 1.0;
 	font-weight: 600;
 	float:left;
-    color: #7f8adc;
+    color: #000;
+    font-size: 1.25em;
     font-family: "Source Sans Pro", Helvetica, Arial, sans-serif;
-    font-weight: 300;
-    line-height: 1.15em;
-    font-size: 2.25em;
-	/*font-style: italic;*/
+    font-weight: bold;
+    line-height: 1.15em;   
 }
 
-.permalink                      /* el rombo delante del título */
-{
+/* the 'diamond' before the title */
+.permalink {
     font-size: 65%;
     display: inline-block;
     vertical-align: middle;
     padding-right: 10px;
 }
-.permalink a                    /* el rombo delante del título */
-{
+/*.permalink a {
     color: #ff8020;
-}
+}*/
 
-.memproto, dl.reflist dt        /* el bloque del prototipo de la función*/
+/* block for prototype function */
+.memproto, dl.reflist dt        
 {
-    margin: 20px;
-	border-top: 0px;
-    border-left: 0px;
-    border-right: 0px;
-    padding: 0px 0px 6px 20px;      /* top, right, bottom, left */
-    color: #2B2B2B;
+    margin: 0px;
+	border: 0px;
+    padding: 0px 0px 6px 6px;   /* top, right, bottom, left */
+    color: #000;
     font-weight: bold;
     text-shadow: none;
-    background-color: #ffffff;
+    background-color: #fff;
     /* opera specific markup */
     box-shadow: none;
     border-top-right-radius: 0px;
@@ -103,18 +149,19 @@ a.el:hover {
     -webkit-border-top-right-radius: 0px;
 }
 
-table.memname               /* el recuadro del prototipo */
+table.memname   /* the box for the prototype */
 {
 	padding: 0.5em;
     background-color: #f7f7f7;
 }
 
-.memname td                 /* el texto del prototipo */
+.memname td     /* prototype text */
 {
     font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
     line-height: 100%;
-    font-weight: 600;
-    font-size: 110%;
+    font-weight: normal;
+    /*font-size: 110%;*/
+    /*color: #444;*/
 }
 
 .memitem                /* ??? */
@@ -131,28 +178,28 @@ table.memname               /* el recuadro del prototipo */
     border-left: 0px;
     border-right: 0px;
     border-bottom: 0px;
-        padding: 0px 10px 2px 10px;     /* top, right, bottom, left */
-        background-color: #FCFCFC;
-        border-top-width: 0;
-        background-image: none;
-        background-repeat:repeat-x;
-        background-color: #FFFFFF;
-        /* opera specific markup */
-        border-bottom-left-radius: 0px;
-        border-bottom-right-radius: 0px;
-        box-shadow: none;
-        /* firefox specific markup */
-        -moz-border-radius-bottomleft: 0px;
-        -moz-border-radius-bottomright: 0px;
-        -moz-box-shadow: none;
-        /* webkit specific markup */
-        -webkit-border-bottom-left-radius: 0px;
-        -webkit-border-bottom-right-radius: 0px;
-        -webkit-box-shadow: none;
+    padding: 0px 10px 2px 10px;     /* top, right, bottom, left */
+    background-color: #FCFCFC;
+    border-top-width: 0;
+    background-image: none;
+    background-repeat:repeat-x;
+    background-color: #FFFFFF;
+    /* opera specific markup */
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    box-shadow: none;
+    /* firefox specific markup */
+    -moz-border-radius-bottomleft: 0px;
+    -moz-border-radius-bottomright: 0px;
+    -moz-box-shadow: none;
+    /* webkit specific markup */
+    -webkit-border-bottom-left-radius: 0px;
+    -webkit-border-bottom-right-radius: 0px;
+    -webkit-box-shadow: none;
 }
 
 .paramname {
-	color: #7f8adc;
+	color: #000;
 	white-space: nowrap;
     font-style: italic;
 }
@@ -166,8 +213,8 @@ td.paramname
     font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
     font-style: italic;
     font-weight: 600;
-    font-size: 110%;
-    padding-right: 20px;
+    padding-right: 1em;
+    margin-left: 0px;
 }
 
 dl.warning, dl.attention
@@ -236,15 +283,17 @@ span.label a:hover {
 {
 	background-image: none;
 	background-repeat: no-repeat;
-	background-color: #ffffff;
+	background-color: #f7f7f7;
     border: none;
+}
+
+#nav-tree .label {
+	font: 16px/1.5 Helvetica,Arial,sans-serif;
 }
 
 #nav-tree-contents      /* lines in left navigation menu */
 {
-	background-image: none;
-	background-repeat: no-repeat;
-	background-color: #ffffff;
+	background: none;
     border: none;
 }
 
@@ -325,27 +374,17 @@ div.textblock ul li, div.textblock ol li
 	margin-top:10px;
 }
 
-
-/* links in orange when inside text */
-div.textblock a:link, div.textblock a:visited { 
-	text-decoration: none;
-	color: #ff6000;
-}
-div.textblock a:hover {
-    color: #ff0000;
-	border-bottom: 1px dotted #ff0000;
-}
-
 /* lomse defined literals */
 span.literal {
     text-decoration: none;
-    font-weight: bold;
+    font-weight: normal;
     font-family: Courier,Courier New,Lucida Sans Typewriter,Lucida Typewriter,monospace;
-    line-height: 100%;
-    font-weight: 600;
-    font-size: 110%;
+    /*line-height: 100%;*/
+    /*font-weight: 600;*/
+    font-size: 100%;
 	padding: 0.5em;
     background-color: #f7f7f7;
+    color: #703daa;
 }
 
 /* border around images */
@@ -361,11 +400,32 @@ div.image img {
     margin-bottom: 3em;
 }
 
+/* fontsize in code blocks */
+div.line {
+	font-family: monospace, fixed;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+/* code blocks */
+div.fragment {
+	padding: 1em;
+    margin: 4px 8px 4px 1em;    /* top, right, bottom, left */
+    background-color: #f7f7f7;
+    border: 1px solid #f7f7f7;
+    border-radius: 7px;
+}
+
 code {
     font-family: monospace, fixed;
-    font-size: 110%;
+    font-size: 100%;
     color: #444444;
 }
+
+pre.fragment {
+    font-size:  15px;
+}
+
 
 div.summary {
   margin: 20px;
@@ -393,18 +453,15 @@ div.summary a {
   margin: 10px 2px;
 }
 
-div.header {
-  background: none;
-  border: 0;
-}
-
 a.el {
   font-weight: normal;
 }
 
-div.fragment {
-	padding: 1em;
+/* headers for tables */
+table.doxtable th {
+	background-color: #888;
 }
+
 
 /*----------------------------------------------------------------------------
 CSS selectors summary:
