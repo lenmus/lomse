@@ -9,7 +9,7 @@ var searchData=
   ['is_5fanonymous_5fblock',['is_anonymous_block',['../classAObject.html#aec60a7b5a9b5b79e168d3bb07ce2702a',1,'AObject']]],
   ['is_5fascending',['is_ascending',['../classFIntval.html#aee43cd4b0f3860aaa1cd53a386353229',1,'FIntval']]],
   ['is_5fbutton',['is_button',['../classAObject.html#a96e6e3f93992bf8ad1741b3613f44987',1,'AObject']]],
-  ['is_5fcomposite',['is_composite',['../classDocCommand.html#ab5d4341275844b9a597064effc09442b',1,'DocCommand::is_composite()'],['../classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd',1,'DocCmdSimple::is_composite()'],['../classDocCmdComposite.html#a3a91a0c793395377a4ec95e9d3273ba4',1,'DocCmdComposite::is_composite()']]],
+  ['is_5fcomposite',['is_composite',['../classDocCommand.html#ab5d4341275844b9a597064effc09442b',1,'DocCommand::is_composite()'],['../classDocCmdSimple.html#a76ec351676ea7583855bbca627e691d4',1,'DocCmdSimple::is_composite()'],['../classDocCmdComposite.html#a3a91a0c793395377a4ec95e9d3273ba4',1,'DocCmdComposite::is_composite()']]],
   ['is_5fcontent',['is_content',['../classAObject.html#a32ed172980172d1637fa59f8a4d64025',1,'AObject']]],
   ['is_5fcontrol',['is_control',['../classAObject.html#a115c98cbc1462f80c3ac00c70e9c0589',1,'AObject']]],
   ['is_5fdescending',['is_descending',['../classFIntval.html#ac58cb6b9e44e7347369dfa6134f325c6',1,'FIntval']]],

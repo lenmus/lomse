@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.1</span>
+   &#160;<span id="projectnumber">0.28.0</span>
    </div>
   </td>
  </tr>
@@ -96,12 +96,12 @@ $(document).ready(function(){initNavTree('classCmdClearSelection.html','');});
   <tr class="even"><td class="entry"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> enum name</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">ECmdUndoPolicy</a> enum name</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec">ESelectionAction</a> enum name</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classCmdSelection.html#ab3762e6c702bf6a856155c3b1f63b3d9">get_cursor_update_policy</a>()</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classCmdSelection.html#aad70ce8afa1356665221d25de22e61ef">get_cursor_update_policy</a>() override</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a>()</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr><td class="entry"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a>()</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classCmdSelection.html#a10fc43547716eab76836ee701868296e">get_selection_update_policy</a>()</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classCmdSelection.html#a803b22f82ca8949e7445837d6be7e25f">get_undo_policy</a>()</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classDocCmdSimple.html#ac016a50407fb24cd87e3a361e4fa31fd">is_composite</a>()</td><td class="entry"><a class="el" href="classDocCmdSimple.html">DocCmdSimple</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classCmdSelection.html#a89160be89bc782d1bac00eaf2e21d4c9">get_selection_update_policy</a>() override</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classCmdSelection.html#a99db2ad87e4f005b94705cde615e0812">get_undo_policy</a>() override</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classDocCmdSimple.html#a76ec351676ea7583855bbca627e691d4">is_composite</a>() override</td><td class="entry"><a class="el" href="classDocCmdSimple.html">DocCmdSimple</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">is_recordable</a>()</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible</a>()</td><td class="entry"><a class="el" href="classDocCommand.html">DocCommand</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr><td class="entry"><a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4eca0e2a1b6af0b16a8664193a63e06543f7">k_add</a> enum value</td><td class="entry"><a class="el" href="classCmdSelection.html">CmdSelection</a></td><td class="entry"></td></tr>
@@ -127,7 +127,7 @@ $(document).ready(function(){initNavTree('classCmdClearSelection.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 11 2021 13:51:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

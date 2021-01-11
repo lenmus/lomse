@@ -1,6 +1,14 @@
 var NAVTREEINDEX1 =
 {
-"page-sound-generation.html#sound-generation-external-player":[0,4,6],
+"page-render-overview.html#rendering-display":[0,1,4],
+"page-sound-generation.html":[0,4],
+"page-sound-generation.html#page-sound-generation-events":[0,4,2],
+"page-sound-generation.html#page-sound-generation-external-player":[0,4,6],
+"page-sound-generation.html#page-sound-generation-overview":[0,4,0],
+"page-sound-generation.html#page-sound-generation-play-score":[0,4,3],
+"page-sound-generation.html#page-sound-generation-player-gui":[0,4,5],
+"page-sound-generation.html#page-sound-generation-summary":[0,4,1],
+"page-sound-generation.html#page-sound-generation-tracking":[0,4,4],
 "page-tasks.html":[0,5],
 "page-tasks.html#gui-interaction":[0,5,0],
 "page-tasks.html#task-data-entry":[0,5,1,6],

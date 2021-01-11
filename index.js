@@ -2,7 +2,7 @@ var index =
 [
     [ "Introduction", "page-introduction.html", [
       [ "Lomse philosophy", "page-introduction.html#lomse-philosophy", null ],
-      [ "Class LomseDoorway", "page-introduction.html#overview-doorway", null ],
+      [ "Initializing the Lomse library", "page-introduction.html#overview-doorway", null ],
       [ "The Document and related classes", "page-introduction.html#overview-mvc", null ],
       [ "Displaying documents", "page-introduction.html#overview-rendering", null ],
       [ "Printing documents", "page-introduction.html#overview-print", null ],
@@ -13,13 +13,22 @@ var index =
       [ "How to render a document", "page-render-overview.html#mvc-rendering", null ],
       [ "The Lomse Model-View-Controller", "page-render-overview.html#mvc-overview", null ],
       [ "The rendering buffer for the View", "page-render-overview.html#rendering-buffer", null ],
-      [ "Initializing the Lomse library", "page-render-overview.html#init-lomse", null ],
-      [ "Displaying the document", "page-render-overview.html#rendering-display", null ]
+      [ "Lomse library initialization", "page-render-overview.html#page-render-overview-init-lomse", null ],
+      [ "Displaying the document", "page-render-overview.html#rendering-display", null ],
+      [ "View types", "page-render-overview.html#page-render-overview-viewtypes", null ],
+      [ "Controlling what is displayed", "page-render-overview.html#page-render-overview-control", null ],
+      [ "Tips for several OSs/frameworks", "page-render-overview.html#page-render-overview-tips", [
+        [ "Using Lomse in Qt", "page-render-overview.html#page-render-overview-qt", null ],
+        [ "Using Lomse in wxWidgets", "page-render-overview.html#page-render-overview-wxwidgets", null ],
+        [ "Using Lomse in JUCE", "page-render-overview.html#page-render-overview-juce", null ],
+        [ "Using Lomse in X11", "page-render-overview.html#page-render-overview-x11", null ],
+        [ "Using Lomse in MS Windows", "page-render-overview.html#page-render-overview-windows", null ]
+      ] ]
     ] ],
     [ "Printing documents overview", "page-printing.html", [
-      [ "The print API", "page-printing.html#print-overview", null ],
-      [ "Determining print buffer size", "page-printing.html#print-buffer-size", null ],
-      [ "Save memory by tiling", "page-printing.html#print-tiles", null ]
+      [ "The print API", "page-printing.html#page-printing-overview", null ],
+      [ "Determining print buffer size", "page-printing.html#page-printing-buffer-size", null ],
+      [ "Save memory by tiling", "page-printing.html#page-printing-tiles", null ]
     ] ],
     [ "Editing documents overview", "page-edit-overview.html", [
       [ "How to modify a document", "page-edit-overview.html#edit-overview", null ],
@@ -32,12 +41,12 @@ var index =
     ] ],
     [ "Scores playback overview", "page-sound-generation.html", [
       [ "How Lomse playback works", "page-sound-generation.html#page-sound-generation-overview", null ],
-      [ "Your application set-up: summary", "page-sound-generation.html#playback-summary", null ],
-      [ "How to handle sound events", "page-sound-generation.html#handling-sound-events", null ],
-      [ "How to play an score", "page-sound-generation.html#how-to-play-score", null ],
-      [ "Handling visual tracking events", "page-sound-generation.html#handling-visual-tracking-events", null ],
-      [ "The PlayerGui object", "page-sound-generation.html#implementing-player-gui", null ],
-      [ "Using an external player", "page-sound-generation.html#sound-generation-external-player", null ]
+      [ "Your application set-up: summary", "page-sound-generation.html#page-sound-generation-summary", null ],
+      [ "How to handle sound events", "page-sound-generation.html#page-sound-generation-events", null ],
+      [ "How to play an score", "page-sound-generation.html#page-sound-generation-play-score", null ],
+      [ "Handling visual tracking events", "page-sound-generation.html#page-sound-generation-tracking", null ],
+      [ "The PlayerGui object", "page-sound-generation.html#page-sound-generation-player-gui", null ],
+      [ "Using an external player", "page-sound-generation.html#page-sound-generation-external-player", null ]
     ] ],
     [ "Interaction with your application GUI", "page-tasks.html", [
       [ "Interactors and Tasks", "page-tasks.html#gui-interaction", null ],

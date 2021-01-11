@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.1</span>
+   &#160;<span id="projectnumber">0.28.0</span>
    </div>
   </td>
  </tr>
@@ -96,7 +96,7 @@ $(document).ready(function(){initNavTree('classScorePlayer.html','');});
 <div class="textblock"><p>ScorePlayer class is responsible for managing score playback. It provides the necessary methods for controlling all playback (start, stop, pause, etc.).</p>
 <p>The ScorePlayer constructor method is protected. To create an ScorePlayer object your application will have to request it to Lomse by invoking <a class="el" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">LomseDoorway::create_score_player()</a> method and passing it the MidiServer object to use (a class, in your application, derived from <a class="el" href="classMidiServerBase.html">MidiServerBase</a>):</p>
 <div class="fragment"><div class="line">MyAppMidiServer* pMidi = <span class="keyword">new</span> MyAppMidiServer();</div><div class="line"><a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer = pLomse-&gt;<a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(pMidi);</div></div><!-- fragment --><p>This can be done only once if your application saves the ScorePlayer instance in a global variable and ensures the appropriate life scope for your <code>MyAppMidiServer</code> object.</p>
-<p>Once you have the <a class="el" href="classScorePlayer.html">ScorePlayer</a> instance, playback is just loading the score to play (by invoking <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">ScorePlayer::load_score()</a> method) and invoking the appropriate methods, such as <a class="el" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">ScorePlayer::play()</a> or <a class="el" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">ScorePlayer::stop()</a> or <a class="el" href="classScorePlayer.html#ae619442884736eafe2734dcf0301875b">ScorePlayer::pause()</a>;</p>
+<p>Once you have the <a class="el" href="classScorePlayer.html">ScorePlayer</a> instance, playback is just loading the score to play (by invoking <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">ScorePlayer::load_score()</a> method) and invoking the appropriate methods, such as <a class="el" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">ScorePlayer::play()</a> or <a class="el" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">ScorePlayer::stop()</a> or <a class="el" href="classScorePlayer.html#ae619442884736eafe2734dcf0301875b">ScorePlayer::pause()</a>;</p>
 <p>See:</p><ul>
 <li><a class="el" href="page-sound-generation.html">Scores playback overview</a>. </li>
 </ul>
@@ -105,8 +105,8 @@ $(document).ready(function(){initNavTree('classScorePlayer.html','');});
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af49944a8a16d360b82e01d39e571bc2a"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScorePlayer.html#af49944a8a16d360b82e01d39e571bc2a">~ScorePlayer</a> ()</td></tr>
 <tr class="separator:af49944a8a16d360b82e01d39e571bc2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3183094d82bb23a399e51b05048899fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a> (ImoScore *pScore, PlayerGui *pPlayerGui, int metronomeChannel=9, int metronomeInstr=0, int tone1=60, int tone2=77)</td></tr>
-<tr class="separator:a3183094d82bb23a399e51b05048899fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ee554a559a4b48a40d75543529310b6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score</a> (<a class="el" href="classAScore.html">AScore</a> score, PlayerGui *pPlayerGui, int metronomeChannel=9, int metronomeInstr=0, int tone1=60, int tone2=77)</td></tr>
+<tr class="separator:a4ee554a559a4b48a40d75543529310b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a483c27df7c046f56517f6b610576636d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">stop</a> ()</td></tr>
 <tr class="separator:a483c27df7c046f56517f6b610576636d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae619442884736eafe2734dcf0301875b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classScorePlayer.html#ae619442884736eafe2734dcf0301875b">pause</a> ()</td></tr>
@@ -186,8 +186,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
 
 </div>
 </div>
-<a id="a3183094d82bb23a399e51b05048899fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3183094d82bb23a399e51b05048899fb">&#9670;&nbsp;</a></span>load_score()</h2>
+<a id="a4ee554a559a4b48a40d75543529310b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ee554a559a4b48a40d75543529310b6">&#9670;&nbsp;</a></span>load_score()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -195,8 +195,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
         <tr>
           <td class="memname">void ScorePlayer::load_score </td>
           <td>(</td>
-          <td class="paramtype">ImoScore *&#160;</td>
-          <td class="paramname"><em>pScore</em>, </td>
+          <td class="paramtype"><a class="el" href="classAScore.html">AScore</a>&#160;</td>
+          <td class="paramname"><em>score</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -237,7 +237,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
 </div><div class="memdoc">
 <p>Load the score to play and set some options. Playback does not start until you invoke any of the play methods: <a class="el" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play()</a>, <a class="el" href="classScorePlayer.html#a2926281a3853a0daca442395073981e5">play_measure()</a>, etc. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pScore</td><td>A pointer to the score to play. </td></tr>
+    <tr><td class="paramname">score</td><td>The score to play. </td></tr>
     <tr><td class="paramname">pPlayerGui</td><td></td></tr>
     <tr><td class="paramname">metronomeChannel</td><td>Midi channel (0..15) to use for metronome clicks. Default value is channel 9, normally used for percussion. </td></tr>
     <tr><td class="paramname">metronomeInstr</td><td>Midi program number (0..127) to use for metronome clicks. Default value is program number 0. </td></tr>
@@ -298,11 +298,11 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start the playback and play until the end of the score. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a> method.</p>
+<p>Start the playback and play until the end of the score. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fVisualTracking</td><td>Flag to signal if visual tracking effects are desired. Default value is <span class="literal">false</span> (k_no_visual_tracking). </td></tr>
-    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
+    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
     <tr><td class="paramname">pInteractor</td><td>Pointer to the <a class="el" href="classInteractor.html">Interactor</a> associated to the View in which the score is displayed or <span class="literal">nullptr</span> in case the score is not displayed. </td></tr>
   </table>
   </dd>
@@ -347,12 +347,12 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start the playback on the indicated measure and play until the end of the score. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a> method.</p>
+<p>Start the playback on the indicated measure and play until the end of the score. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">nMeasure</td><td>Number of measure to play (1..n). </td></tr>
     <tr><td class="paramname">fVisualTracking</td><td>Flag to signal if visual tracking effects are desired. Default value is <span class="literal">false</span> (k_no_visual_tracking). </td></tr>
-    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
+    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
     <tr><td class="paramname">pInteractor</td><td>Pointer to the <a class="el" href="classInteractor.html">Interactor</a> associated to the View in which the score is displayed or <span class="literal">nullptr</span> in case the score is not displayed. </td></tr>
   </table>
   </dd>
@@ -397,12 +397,12 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start the playback on the indicated measure and play only that measure. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a> method.</p>
+<p>Start the playback on the indicated measure and play only that measure. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">nMeasure</td><td>Number of measure to play (1..n). </td></tr>
     <tr><td class="paramname">fVisualTracking</td><td>Flag to signal if visual tracking effects are desired. Default value is <span class="literal">false</span> (k_no_visual_tracking). </td></tr>
-    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
+    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
     <tr><td class="paramname">pInteractor</td><td>Pointer to the <a class="el" href="classInteractor.html">Interactor</a> associated to the View in which the score is displayed or <span class="literal">nullptr</span> in case the score is not displayed. </td></tr>
   </table>
   </dd>
@@ -453,13 +453,13 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Start the playback on the indicated measure and play only for a certain number of measures. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a> method.</p>
+<p>Start the playback on the indicated measure and play only for a certain number of measures. Before invoking this method, an score must have been loaded in the player by invoking the <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">startMeasure</td><td>Number of measure to start playback (1..n). </td></tr>
     <tr><td class="paramname">numMeasures</td><td>Number of measures to play. </td></tr>
     <tr><td class="paramname">fVisualTracking</td><td>Flag to signal if visual tracking effects are desired. Default value is <span class="literal">false</span> (k_no_visual_tracking). </td></tr>
-    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
+    <tr><td class="paramname">nMM</td><td>Tempo speed for playback. Value 0 (default) means that tempo will be controlled by the metronome control (in PlayerGui object) that was specified in method <a class="el" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score()</a>. A non-zero value for <code>nMM</code> forces to use that metronome speed. It is expressed in BPM (beats per minute). </td></tr>
     <tr><td class="paramname">pInteractor</td><td>Pointer to the <a class="el" href="classInteractor.html">Interactor</a> associated to the View in which the score is displayed or <span class="literal">nullptr</span> in case the score is not displayed. </td></tr>
   </table>
   </dd>
@@ -509,7 +509,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>Injector</b></td></t
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classScorePlayer.html">ScorePlayer</a></li>
-    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 11 2021 13:51:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.1</span>
+   &#160;<span id="projectnumber">0.28.0</span>
    </div>
   </td>
  </tr>
@@ -154,8 +154,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5d45c58e82e2de3c3bb31e414984923b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates</a> (bool value)</td></tr>
 <tr class="separator:a5d45c58e82e2de3c3bb31e414984923b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Rendering</div></td></tr>
-<tr class="memitem:a2494425c26d19946921e4b4e97f189f3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a2494425c26d19946921e4b4e97f189f3">set_rendering_buffer</a> (RenderingBuffer *rbuf)</td></tr>
-<tr class="separator:a2494425c26d19946921e4b4e97f189f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e2248e98ba2601a55a03a914d7c533a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a0e2248e98ba2601a55a03a914d7c533a">set_rendering_buffer</a> (unsigned char *buf, unsigned width, unsigned height)</td></tr>
+<tr class="separator:a0e2248e98ba2601a55a03a914d7c533a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02d56322c7d65b7faf7bb3be1d2bde4b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a02d56322c7d65b7faf7bb3be1d2bde4b">set_view_area</a> (unsigned width, unsigned height, unsigned xShift=0, unsigned yShift=0)</td></tr>
+<tr class="separator:a02d56322c7d65b7faf7bb3be1d2bde4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab802d6e8a3fc482aa7f0fdf9029aecae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">set_rendering_option</a> (int option, bool value)</td></tr>
 <tr class="separator:ab802d6e8a3fc482aa7f0fdf9029aecae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa52bbd85b6670116c72876787e825159"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aa52bbd85b6670116c72876787e825159">set_view_background</a> (Color color)</td></tr>
@@ -243,6 +245,8 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selectio
 <tr class="memitem:a25f951a55f2a66e66aef7575507a4593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a25f951a55f2a66e66aef7575507a4593">remove_mark</a> (<a class="el" href="classApplicationMark.html">ApplicationMark</a> *mark)</td></tr>
 <tr class="separator:a25f951a55f2a66e66aef7575507a4593"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Print related</div></td></tr>
+<tr class="memitem:a36d4801019bbf55a77b616d53680f7a2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a36d4801019bbf55a77b616d53680f7a2">set_print_buffer</a> (unsigned char *buf, unsigned width, unsigned height)</td></tr>
+<tr class="separator:a36d4801019bbf55a77b616d53680f7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">set_print_buffer</a> (RenderingBuffer *rbuf)</td></tr>
 <tr class="separator:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56006a47ef6164ad139c2d5bb1e17c3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">set_print_ppi</a> (double ppi)</td></tr>
@@ -2521,11 +2525,56 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </div><div class="memdoc">
 <p>Set current operation mode. An operation mode defines valid actions and commands on the Document. For instance, in 'read only' mode all actions that could alter Document content will be ignored. Valid operation modes are defined by enum <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a>. Look there for an explanation of the different operating modes.</p>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a3183094d82bb23a399e51b05048899fb">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(<a class="code" href="group__typedefs.html#ga4150a238b3c170bd2466bab5355fafca">SpEventInfo</a> pEvent)</div><div class="line">{</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        spInteractor-&gt;set_operating_mode(<a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8a57a8a18395ac6f064cc8a6bfedba0d55">Interactor::k_mode_playback</a>);</div><div class="line"></div><div class="line">        <a class="code" href="group__typedefs.html#gae4c4e75f3102cfb9d6ff7df6c85841a7">SpEventPlayCtrl</a> pEv = static_pointer_cast&lt;<a class="code" href="classEventPlayCtrl.html">EventPlayCtrl</a>&gt;(pEvent);</div><div class="line">        ImoScore* pScore = pEv-&gt;<a class="code" href="classEventPlayCtrl.html#a1bcf7842fc0a118954661d82ae108579">get_score</a>();</div><div class="line">        <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">        PlayerGui* pPlayerGui = pEv-&gt;get_player();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a4ee554a559a4b48a40d75543529310b6">load_score</a>(pScore, pEv-&gt;get_player());</div><div class="line"></div><div class="line">        <span class="comment">//initialize with default options</span></div><div class="line">        <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;</div><div class="line">        <span class="keywordtype">long</span> nMM = pPlayerGui-&gt;get_metronome_mm();</div><div class="line"></div><div class="line">        pPlayer-&gt;<a class="code" href="classScorePlayer.html#a949fe188fdbbe0007cb91e1f8630c89f">play</a>(fVisualTracking, nMM, spInteractor.get());</div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+</div>
+</div>
+<a id="a36d4801019bbf55a77b616d53680f7a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d4801019bbf55a77b616d53680f7a2">&#9670;&nbsp;</a></span>set_print_buffer() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::set_print_buffer </td>
+          <td>(</td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sets the memory area to be used as buffer for printing operations.</p>
+<p>In order to not interfere with screen display, a different rendering buffer is used for printing.</p>
+<p>See <a class="el" href="page-printing.html">Printing documents overview</a> </p>
+
 </div>
 </div>
 <a id="ab5402ba5556ee21c50bfab7a097cc5eb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5402ba5556ee21c50bfab7a097cc5eb">&#9670;&nbsp;</a></span>set_print_buffer()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5402ba5556ee21c50bfab7a097cc5eb">&#9670;&nbsp;</a></span>set_print_buffer() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2581,8 +2630,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 
 </div>
 </div>
-<a id="a2494425c26d19946921e4b4e97f189f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2494425c26d19946921e4b4e97f189f3">&#9670;&nbsp;</a></span>set_rendering_buffer()</h2>
+<a id="a0e2248e98ba2601a55a03a914d7c533a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e2248e98ba2601a55a03a914d7c533a">&#9670;&nbsp;</a></span>set_rendering_buffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2593,9 +2642,25 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
         <tr>
           <td class="memname">virtual void Interactor::set_rendering_buffer </td>
           <td>(</td>
-          <td class="paramtype">RenderingBuffer *&#160;</td>
-          <td class="paramname"><em>rbuf</em></td><td>)</td>
+          <td class="paramtype">unsigned char *&#160;</td>
+          <td class="paramname"><em>buf</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -2604,14 +2669,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Associate a rendering buffer to the View related to this Interactor. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Associate a rendering buffer to the View related to this Interactor. This function takes three parameters: </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">rbuf</td><td>A ptr to the memory to be used as rendering buffer.</td></tr>
+    <tr><td class="paramname">buf</td><td>A ptr to the memory to be used as rendering buffer. </td></tr>
+    <tr><td class="paramname">width</td><td>The width of the buffer in pixels. </td></tr>
+    <tr><td class="paramname">height</td><td>The height of the buffer in pixels.</td></tr>
   </table>
   </dd>
 </dl>
-<p>Invoking this method is mandatory before doing any operation that would require to render the view. Normally this method is invoked when creating a new view. Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::display_document(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; filename, <span class="keywordtype">int</span> viewType)</div><div class="line">{</div><div class="line">    <span class="comment">//stop playback (just in case an score is being played in another window)</span></div><div class="line">    <a class="code" href="classScorePlayer.html">ScorePlayer</a>* pPlayer  = m_appScope.get_score_player();</div><div class="line">    pPlayer-&gt;<a class="code" href="classScorePlayer.html#a483c27df7c046f56517f6b610576636d">stop</a>();</div><div class="line"></div><div class="line">    <span class="comment">//get lomse reporter</span></div><div class="line">    ostringstream&amp; reporter = m_appScope.get_lomse_reporter();</div><div class="line">    reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    <span class="comment">//delete current document, view, etc. associated to this window</span></div><div class="line">    <span class="keyword">delete</span> m_pPresenter;</div><div class="line">    <span class="comment">//and load file</span></div><div class="line">    m_pPresenter = m_lomse.<a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(viewType, filename, reporter);</div><div class="line"></div><div class="line">    set_zoom_mode(k_zoom_fit_width);</div><div class="line">    <span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">    {</div><div class="line">        <span class="comment">//connect the View with the window buffer</span></div><div class="line">        spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div><div class="line"></div><div class="line">        <span class="comment">//register to receive the desired events</span></div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daf6c7408c96763e94fd2df7d6235f7a49">k_update_window_event</a>, <span class="keyword">this</span>, wrapper_update_window);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da57b1f32291d0c7d644177111f483a398">k_do_play_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da144a5f912218153c12ac8f00c1fb938a">k_pause_score_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da70fda4ac3bd78865b2b5c69b98806ffa">k_stop_playback_event</a>, <span class="keyword">this</span>, wrapper_play_score);</div><div class="line">        spInteractor-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656da3dcb2ed46dd797f573e3bcb6c58935d1">k_control_point_moved_event</a>, <span class="keyword">this</span>, wrapper_on_command_event);</div><div class="line">        Document* pDoc = m_pPresenter-&gt;<a class="code" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a>();</div><div class="line">        pDoc-&gt;add_event_handler(<a class="code" href="group__enumerations.html#ggabfcf510bafec7c6429906a6ecaac656daff42cd14f9055ff12fc1465b2b5488e4">k_on_click_event</a>, <span class="keyword">this</span>, wrapper_on_click_event);</div><div class="line"></div><div class="line">        <span class="comment">// display any errors</span></div><div class="line">        <span class="keywordflow">if</span> (!reporter.str().empty())</div><div class="line">        {</div><div class="line">            <span class="keywordtype">string</span> errorMsg = reporter.str();</div><div class="line">            ...</div><div class="line">            ErrorDlg dlg(<span class="keyword">this</span>, errorMsg, ...);</div><div class="line">            dlg.ShowModal();</div><div class="line">        }</div><div class="line">        reporter.str(std::string());      <span class="comment">//remove any previous content</span></div><div class="line"></div><div class="line">    }</div><div class="line">}</div></div><!-- fragment --> 
+<p>Invoking this method is mandatory before doing any operation that would require to render the view, and the view area will be the whole rendering bitmap.</p>
+<p>Once invoked, it is not necessary to allocate a new buffer and invoke again this method, unless the application window is resized. So, normally, the creation of the rendering buffer is done in the window resize event handler. Example:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    wxImage* buffer = <span class="keyword">new</span> wxImage(width, height);</div><div class="line">    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>* pdata = buffer-&gt;GetData();       <span class="comment">//ptr to the real bytes buffer</span></div><div class="line">    spInteractor-&gt;set_print_buffer(pdata, width, height);</div><div class="line">}</div></div><!-- fragment --><p>For applications having special requirements, it is possible to restrict Lomse to use only a sub-area of the rendering buffer. See <a class="el" href="classInteractor.html#a02d56322c7d65b7faf7bb3be1d2bde4b">set_view_area()</a> method. </p>
+
 </div>
 </div>
 <a id="ab802d6e8a3fc482aa7f0fdf9029aecae"></a>
@@ -2715,6 +2784,67 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <p>See <a class="el" href="page-coordinates-viewport.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
 
+</div>
+</div>
+<a id="a02d56322c7d65b7faf7bb3be1d2bde4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02d56322c7d65b7faf7bb3be1d2bde4b">&#9670;&nbsp;</a></span>set_view_area()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::set_view_area </td>
+          <td>(</td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>xShift</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>yShift</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Define a sub-region of the rendering bitmap for the View. This function takes four parameters: </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">width</td><td>The width of the view area in pixels. </td></tr>
+    <tr><td class="paramname">height</td><td>The height of the view area in pixels. </td></tr>
+    <tr><td class="paramname">xShift</td><td>Horizontal shift, in pixels, for view area origin. </td></tr>
+    <tr><td class="paramname">yShift</td><td>Vertical shift, in pixels, for view area origin.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Invoking this method is optional. If not invoked, the view area will be the whole rendering bitmap.</p>
+<p>The view area cannot be redefined, so once this method is invoked, if your application would like to use a different sub-region, it is necessary to invoke again the <a class="el" href="classInteractor.html#a0e2248e98ba2601a55a03a914d7c533a">set_rendering_buffer()</a> method.</p>
+<p>For instance, if you have a 200x100 bitmap and you want to draw only on the 80x50 top-right corner:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    wxImage* buffer = LENMUS_NEW wxImage(200, 100);</div><div class="line">    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>* pdata = buffer-&gt;GetData();       <span class="comment">//ptr to the real bytes buffer</span></div><div class="line">    spInteractor-&gt;set_rendering_buffer(pdata, 200, 100);</div><div class="line">    spInteractor-&gt;set_view_area(80, 50);</div><div class="line">}</div></div><!-- fragment --><p>Parameters <em>xShift</em> and <em>yShift</em> allows to change the origin of the view area. For example, if you have a 200x100 bitmap and you want to draw only an area of 100x50 pixels in the center, you can shift the view area top corner:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (SpInteractor spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div><div class="line">{</div><div class="line">    wxImage* buffer = LENMUS_NEW wxImage(200, 100);</div><div class="line">    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>* pdata = buffer-&gt;GetData();       <span class="comment">//ptr to the real bytes buffer</span></div><div class="line">    spInteractor-&gt;set_rendering_buffer(pdata, 200, 100);</div><div class="line">    spInteractor-&gt;set_view_area(100, 50, 50, 25);</div><div class="line">}</div></div><!-- fragment --> 
 </div>
 </div>
 <a id="aa52bbd85b6670116c72876787e825159"></a>
@@ -3109,7 +3239,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 11 2021 13:51:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

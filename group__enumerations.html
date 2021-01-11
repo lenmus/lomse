@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.1</span>
+   &#160;<span id="projectnumber">0.28.0</span>
    </div>
   </td>
  </tr>
@@ -732,6 +732,8 @@ Enumerations</h2></td></tr>
 <li><b>k_view_horizontal_book</b> means that the document will be displayed as book pages, one page after the other in a horizontal layout. The user will have to scroll right for advancing.</li>
 <li><b>k_view_single_system</b> is for rendering documents that only contain one score (e.g. LDP files, LMD files with just one score, and score files imported from other formats such as MusicXML). It will display the score in a single system, as if the paper had infinite width. And for viewing the end of the score the user will have to scroll to the right. See <a class="el" href="classSingleSystemView.html">SingleSystemView</a>.</li>
 <li><b>k_view_single_page</b> is similar to an HTML page. All the document is rendered in a single page having the required height to contain the full document. Is a kind of k_view_vertical_book but without gaps in the content for separting pages. As with k_view_vertical_book the user will have to scroll down for advancing.</li>
+<li><b>k_view_free_flow</b> is for rendering documents in a single page as high as necessary. It is similar to how an HTML page with unconstrained body width is displayed in a browser.</li>
+<li><b>k_view_half_page</b> is a view that has a double behaviour. In normal mode (no playback) it behaves as <a class="el" href="classSinglePageView.html">SinglePageView</a>, that is the score is rendered on a single page as high as necessary to contain all the score. But when in playback mode, the bitmap to be rendered in the application window is split horizontally in two halves. See <a class="el" href="classHalfPageView.html">HalfPageView</a> for detail.</li>
 </ul>
 <p>#include &lt;<a class="el" href="lomse__graphic__view_8h_source.html">lomse_graphic_view.h</a>&gt; </p>
 
@@ -766,7 +768,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 11 2021 13:51:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>

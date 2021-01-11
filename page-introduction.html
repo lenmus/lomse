@@ -31,7 +31,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.27.1</span>
+   &#160;<span id="projectnumber">0.28.0</span>
    </div>
   </td>
  </tr>
@@ -88,7 +88,7 @@ $(document).ready(function(){initNavTree('page-introduction.html','');});
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
 <ul><li class="level1"><a href="#lomse-philosophy">Lomse philosophy</a></li>
-<li class="level1"><a href="#overview-doorway">Class LomseDoorway</a></li>
+<li class="level1"><a href="#overview-doorway">Initializing the Lomse library</a></li>
 <li class="level1"><a href="#overview-mvc">The Document and related classes</a></li>
 <li class="level1"><a href="#overview-rendering">Displaying documents</a></li>
 <li class="level1"><a href="#overview-print">Printing documents</a></li>
@@ -106,17 +106,17 @@ Lomse philosophy</h1>
 <p>Lomse aims at not constraining your application. Lomse provides all the necessary services (i.e. for reading documents, rendering and editing them, and for playing back scores). But the interface with the user (i.e. the window on which the document is going to be rendered, or the sound engine for producing the sounds) must be provided by your application. Your application is responsible for the presentation and interaction layer. You can use Lomse in any context: interactive programs with a GUI, batch scripts for processing music scores, etc.</p>
 <p>For understanding Lomse API you should know about a very few important classes and components described in the following sections.</p>
 <h1><a class="anchor" id="overview-doorway"></a>
-Class LomseDoorway</h1>
-<p>It is the access point to the Lomse library. It must be used by your application at two points:</p>
+Initializing the Lomse library</h1>
+<p><a class="el" href="classLomseDoorway.html">LomseDoorway</a> is the access point to the Lomse library and the main interface with the library. It must be used by your application at two points:</p>
 <ol type="1">
-<li>Before using the Lomse library it is necessary to initialize it. This means setting up certain options about rendering and event handling.</li>
+<li>Before using the Lomse library it is necessary to initialize it. This means setting up certain global options about rendering and events handling.</li>
 <li>Later, your application has to use it for:<ul>
 <li>Opening and creating Document objects.</li>
 <li>Accessing global objects and variables in Lomse library.</li>
 </ul>
 </li>
 </ol>
-<p>See description and usage in documentation for class <a class="el" href="classLomseDoorway.html">LomseDoorway</a>.</p>
+<p>Details about Lomse initialization can be found in <a class="el" href="page-render-overview.html#page-render-overview-init-lomse">Lomse library initialization</a>.</p>
 <h1><a class="anchor" id="overview-mvc"></a>
 The Document and related classes</h1>
 <p>Class Document represents a document with any kind of content: music scores, texts, paragraphs, images, tables, lists, etc. Documents are created by invoking <a class="el" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">LomseDoorway::new_document()</a> and <a class="el" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">LomseDoorway::open_document()</a> methods.</p>
@@ -161,7 +161,7 @@ The sound engine</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Wed Nov 4 2020 09:41:24 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Jan 11 2021 13:51:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.13 </li>
   </ul>
