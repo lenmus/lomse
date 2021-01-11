@@ -9,9 +9,9 @@
 
 <p>&nbsp;</p>
 
-Lomse is a free open source library for adding capabilities to any program for rendering, editing and playing back music scores. It is written in C++ and it is platform independent. Lomse stands for *"LenMus Open Music Score Edition Library"*.
+Lomse is a free open source library for adding capabilities to any program for rendering, editing and playing back music scores. It is written in C++ and it is platform independent. Lomse stands for <b>"LenMus Open Music Score Edition Library"</b>.
 
-Please be aware that Lomse is a work in progress, not having yet reached version 1.0. This means that the library is operative but with limitations. In particular, support for music scores is currently limited. You are welcome to join this non-commercial project and collaborate in its development.
+Please be aware that Lomse is a work in progress, not having yet reached version 1.0. This means that the library is operative but hava some limitations.  You are welcome to join this non-commercial project and collaborate in its development.
 
 ## License
 

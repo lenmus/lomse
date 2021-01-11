@@ -19,31 +19,31 @@ From Lomse internal point of view, playing back an score involves, basically, tw
 
 It is responsibility of your application to handle these events and do whatever is necessary. But for visual effects, lose provides an implementation for generating them so, if desired, your application can delegate in lose for this task.
 
-Alternatively, your application could do playback by other mechanisms (e.g., using an external player) and to provide visual feedback by synchronizing the performance with the displayed score by using Lomse methods for this. See @ref sound-generation-external-player.
+Alternatively, your application could do playback by other mechanisms (e.g., using an external player) and to provide visual feedback by synchronizing the performance with the displayed score by using Lomse methods for this. See @ref page-sound-generation-external-player.
 
 
 
 
-@section playback-summary Your application set-up: summary
+@section page-sound-generation-summary Your application set-up: summary
 
 For playing back an score your application has to:
 
-- Define a class, derived from ``MidiServerBase``. This class will receive the sound events and will have the responsibility for generating the sounds. See @ref handling-sound-events.
+- Define a class, derived from ``MidiServerBase``. This class will receive the sound events and will have the responsibility for generating the sounds. See @ref page-sound-generation-events.
 
 - Create an instance of class ``ScorePlayer``. This class takes care of most of the work to do. By using it, playing an score is just two tasks:
   -# Load the score to play in the ``ScorePlayer`` instance.
   -# Ask ``ScorePlayer`` to play it, specifying the desired options (i.e. visual tracking, metronome settings, count-off, etc).
 
-  See @ref how-to-play-score.
+  See @ref page-sound-generation-play-score.
 
-- Deal with @a visual @a tracking events. All @a visual @a tracking events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_visual_tracking_event(). See @ref handling-visual-tracking-events.
+- Deal with @a visual @a tracking events. All @a visual @a tracking events will be sent to the standard callback for events. For processing them, your application could delegate in Lomse by invoking method Interactor::on_visual_tracking_event(). See @ref page-sound-generation-tracking.
 
-- Optionally, you should create a class derived from "PlayerGui". This will allow you to link your application playback controls to lomse, so that lomse can collect current settings when needed. See @ref implementing-player-gui.
+- Optionally, you should create a class derived from "PlayerGui". This will allow you to link your application playback controls to lomse, so that lomse can collect current settings when needed. See @ref page-sound-generation-player-gui.
 
 As you can see, implementing score playback in an application is not complex, and the only burden for your application is coding a @c MidiServer class for generating the sounds.
 
 
-@section handling-sound-events How to handle sound events
+@section page-sound-generation-events How to handle sound events
 
 For playing back an score your application has just to define a class, derived from MidiServerBase. This class defines the interface for processing sound events. Your application has to define a derived class (i.e. @c MyMidiServer) and implement the following virtual methods: 
 
@@ -63,7 +63,7 @@ Lomse does not impose any restriction about how to generate sounds other than lo
 
 
 
-@section how-to-play-score How to play an score
+@section page-sound-generation-play-score How to play an score
 
 Class ScorePlayer provides the necessary methods for controlling all playback (start, stop, pause, etc.). Your application will have to request lomse the instance of ScorePlayer by invoking LomseDoorway::create_score_player() method and passing the @c MidiServer to use:
 
@@ -76,51 +76,39 @@ This can be done only once if your application saves the ScorePlayer instance in
 
 Once you have the ScorePlayer instance, playback is just loading the score to play (by invoking ScorePlayer::load_score() method) and invoking the appropriate methods, such as ScorePlayer::play() or ScorePlayer::stop() or ScorePlayer::pause();
 
-The only tricky issue, when starting to learn how to use lomse, is that method ScorePlayer::load_score() requires a pointer to the score to play. How to get this pointer depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. One of these methods is Document::get_content_item() that takes as argument the index to the desired content item. For instance:
+Method ScorePlayer::load_score() requires the score to play. How to get it depends on your application, but a simple way of doing it is by using the Document methods for traversing the document and accessing its components. For instance:
 
 
 @code
     //get the score player you have set up for your application
     ScorePlayer* pPlayer  = myAppGlobals->get_score_player();
 
-    //get the first score
-    ImoScore* pScore = NULL;
-    int i = 0;
-    while (true)
+    //get the first score, load it in the player and start playback
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        ImoObj* pObj = pDocument->get_content_item(i);
-        if (pObj == NULL)   //end of document!
-            break;
-        if (pObj->is_score())
+        ADocument doc = m_pPresenter->get_document();
+        AScore score = doc.first_score();
+        if (score.is_valid())
         {
-            pScore = static_cast<ImoScore*>(pObj);
-            break;
+            //load the score in the player
+            pPlayer->load_score(score, nullptr);
+
+		    //optional: select desired visual tracking effect
+            spInteractor->set_visual_tracking_mode(k_tracking_tempo_line);
+
+            //get settings for playback, probably from GUI controls
+            bool fVisualTracking = true;    //generate visual tracking effects
+            long nMM = 60;                  //beats per minute
+
+            //start playback
+            pPlayer->play(fVisualTracking, nMM, spInteractor.get());
         }
-        ++i;
     }
-    
-    //load the score and start playback
-    if (pScore)
-    {
-        pPlayer->load_score(pScore, NULL);
-
-        //settings for playback. Probably you would get settings from GUI controls
-        bool fVisualTracking = true;    //generate visual tracking effects
-        long nMM = 60;                  //beats per minute
-        Interactor* pInteractor = ...   //get the interactor for this document
-
-		//select desired visual tracking effect
-        pInteractor->set_visual_tracking_mode(k_tracking_tempo_line);
-
-        //start playback
-        pPlayer->play(fVisualTracking, nMM, pInteractor);
-    }
-
 @endcode
 
 
 
-@section handling-visual-tracking-events Handling visual tracking events
+@section page-sound-generation-tracking Handling visual tracking events
 
 Apart from generating sound events, lomse also generates @a visual @a tracking events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.
 
@@ -138,7 +126,7 @@ spInteractor->set_visual_tracking_mode(k_tracking_tempo_line | k_tracking_highli
 @a Visual @a tracking events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a @a visual @a tracking event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:
 
 @code
-    pInteractor->handle_event(pEvent);
+    spInteractor->handle_event(pEvent);
 @endcode
 
 Lomse will handle the event and will send an <i>update window</i> event to your application, for updating the display.
@@ -157,7 +145,7 @@ if (pVE)
 @todo Advanced topic: direct modification of the graphic model.
 
 
-@section implementing-player-gui The PlayerGui object
+@section page-sound-generation-player-gui The PlayerGui object
 
 For controlling playback some GUI controls (buttons, menu items, etc. to trigger start, stop, pause actions, sliders or other for setting tempo speed, etc.) are normally required.
 
@@ -187,31 +175,31 @@ PlayerGui is also the object that will receive <i>end of playback events</i>. Th
 - Via the event handling callback, set up at Lomse initialization, and
 - by invoking method PlayerGui::on_end_of_play_back() if a PlayerGui was set when loading the score.
 
-If you look at example code in section @ref how-to-play-score (relevant lines duplicated here):
+If you look at example code in section @ref page-sound-generation-play-score (relevant lines duplicated here):
 
 @code
     //load the score and start playback
-    if (pScore)
+    if (score.is_valid())
     {
-        pPlayer->load_score(pScore, NULL);
+        pPlayer->load_score(score, nullptr);
 @endcode
 
-the second parameter for load_score is NULL, meaning that no PlayerGui is used. As you can deduce, the way of informing lomse of the GUI proxy to use is by passing a pointer to the PlayerGui in this method:
+the second parameter for load_score is nullptr, meaning that no PlayerGui is used. As you can deduce, the way of informing lomse of the GUI proxy to use is by passing a pointer to the PlayerGui in this method:
 
 @code
     //get your PlayerGui object
     MyPlayerGui* pGui = ... 
 
     //load the score and link playback options to your MyPlayerGui object
-    pPlayer->load_score(pScore, pGui);
+    pPlayer->load_score(score, pGui);
 
     //setting tempo to 0 forces lomse to use the tempo returned by your MyPlayerGui object.
     //a value different from 0 forces lomse to use that tempo
-    pPlayer->play(fVisualTracking, 0, pInteractor);
+    pPlayer->play(fVisualTracking, 0, spInteractor.get());
 @endcode
 
 
-@section sound-generation-external-player Using an external player
+@section page-sound-generation-external-player Using an external player
 
 If your application would like to use an external player and to provide visual feedback by synchronizing the performance with the displayed score, Lomse can not do this automatically as it doesn't control the playback, but Lomse provides some methods that can help your application to achieve the sound/display synchronization.
 
